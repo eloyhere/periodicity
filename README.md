@@ -67,7 +67,8 @@
 ├── 周期数学·核心理念与应用前景.docx              # 核心理念概述
 ├── 个人简历-周期数学独立研究者.docx              # 作者简历
 ├── CITATION.cff                                # 引用信息
-└── LICENSE                                     # CC BY-NC-SA 4.0（字体除外）
+├── LICENSE                                     # CC BY-NC-SA 4.0 法律文本
+└── LICENSE-SCOPE.md                            # 适用范围与字体例外说明
 ```
 
 ---
@@ -110,7 +111,9 @@ clean.bat            :: 清除 .aux/.log/.out/.toc/.lof/.lot/.synctex.gz 等中�
 
 📧 商业授权洽谈 / Commercial licensing enquiries: **`eloy.kim@outlook.com`**
 
-完整法律文本见 [`LICENSE`](LICENSE)。其中包含范围说明（第 A 节：作品；第 B 节：字体例外）。
+完整法律文本见 [`LICENSE`](LICENSE)；**适用范围与字体例外的详细说明见
+[`LICENSE-SCOPE.md`](LICENSE-SCOPE.md)**（第 A 节：作品；第 B 节：商业使用；
+第 C 节：字体例外；第 D 节：无担保）。
 
 ---
 

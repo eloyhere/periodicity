@@ -1,0 +1,896 @@
+\chapter{电磁系统之周期结构}
+\markboth{电磁系统之周期结构}{电磁系统之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:em_ps_hook}
+本章判定研究目标是否具有周期性、确定其周期类型、以及查找最小正周期时，一律引用「周期系统」章：
+周期性判据见 \cref{thm:ps_periodicity_decision}，
+周期类型判别见 \cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}，
+最小正周期查找见 \cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}，
+由数据构建周期级数与周转圆组见 \cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}。
+\end{remark}
+
+\begin{remark}[本章定位：按「周期系统」章五步接口展开]\label{rem:em_five_steps_positioning}
+电磁系统之周期结构研究电磁场中周期性、准周期性和波动传播的数学表征。本章不另立周期性判据，而是把电磁系统接入「周期系统」章规定的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把电磁振荡、平面波、回旋运动、推迟势等目标化为离散或连续动力系统，引用 \cref{thm:ps_periodicity_decision} 判定是否具有周期性，并确定周期类型；
+    \item \textbf{构建}：由电磁场的时间序列、频谱、相位数据构建振幅级数、频率级数、相位级数，组装为电磁周转圆组；
+    \item \textbf{调节}：用残差能量下降、电荷守恒、能量守恒与动量守恒约束动态调节电磁周转圆组；
+    \item \textbf{卷积}：在电磁周转圆组上引入振幅卷积、相位卷积、频率卷积，并与坡印廷矢量、互相关、推迟势衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成电磁周期诊断流程。
+\end{enumerate}
+本章使用的数学工具包括：矢量分析、麦克斯韦方程组、波动方程、傅里叶分解、周期卷积、周转圆组、相位算子、推迟势。
+\end{remark}
+
+\begin{remark}[本章七主题导引]\label{rem:em_seven_themes}
+\textbf{平移}——电磁波以光速 $c$ 传播的传播时延 $\tau = r/c$ 与推迟势（见定理 \ref{thm:retarded_potential}）；\textbf{缩放}——库仑定律与毕奥-萨伐尔定律的平方反比标度 $\sim 1/r^2$（见定理 \ref{thm:gauss_electric_derivation}）；\textbf{旋转}——安培环路定律 $\nabla\times\mathbf{B}=\mu_0\mathbf{J}$ 与洛伦兹力驱动的电荷圆周运动（见命题 \ref{prop:cyclotron_motion}）；\textbf{平衡}——电荷守恒与坡印廷能量守恒（见定理 \ref{thm:electromagnetic_conservation}）；\textbf{对称}——规范对称与麦克斯韦方程组的结构（见定理 \ref{thm:maxwell_equations}）；\textbf{闭合}——安培环路与法拉第环路的闭合积分（见定理 \ref{thm:ampere_law} 与 \ref{thm:faraday_law}）；\textbf{周期}——电磁振荡与电磁波周期（见命题 \ref{prop:plane_wave_periodic}）。
+\end{remark}
+
+\section{接入「周期系统」章的五步接口}
+\label{sec:em_five_steps}
+
+\subsection{第一步：电磁目标的周期性判定}
+
+\begin{definition}[电磁目标与判定输入]\label{def:em_target}
+一个\textbf{电磁目标}是指下列对象之一：
+\begin{enumerate}[label=(\roman*)]
+    \item 一个电磁振荡系统，其状态空间为 $(q,p)$ 相空间或 $(\mathbf E,\mathbf B)$ 场空间；
+    \item 一个单色平面波，其状态空间为相位 $\theta=\mathbf k\cdot\mathbf r-\omega t$；
+    \item 一个带电粒子在均匀磁场中的回旋运动，其状态空间为速度空间；
+    \item 一个由推迟势描述的辐射场，其状态空间为源分布与观察点场值的联合空间。
+\end{enumerate}
+电磁目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal D_{\mathrm{EM}}=(\mathcal S,\Phi),
+\]
+其中 $\mathcal S$ 是状态空间，$\Phi:\mathcal S\to\mathcal S$ 是时间平移、相位旋转或回旋演化所诱导的映射。若 $\mathcal S$ 为有限集，称目标为\textbf{有限电磁目标}；若 $\mathcal S$ 为无限集，称目标为\textbf{无限电磁目标}。
+\end{definition}
+
+\begin{definition}[电磁判定映射]\label{def:em_periodization}
+设电磁目标由判定输入 $\mathcal D_{\mathrm{EM}}=(\mathcal S,\Phi)$ 给出。若目标的状态由 $\Phi$ 生成，即存在 $x_0\in\mathcal S$ 使
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+当 $t\in\mathbb Z$ 时 $x_t$ 由 $\Phi$ 迭代生成；当 $t\in\mathbb R$ 时，以单参数演化族 $\{\Phi_t\}_{t\in\mathbb R}$（其中每个 $\Phi_t:\mathcal S\to\mathcal S$，且 $\Phi_0=\operatorname{id}$、$\Phi_{s+t}=\Phi_s\circ\Phi_t$ 对一切 $s,t\in\mathbb R$ 成立、$(t,x)\mapsto\Phi_t(x)$ 连续）记之。
+则称 $\Phi$ 为目标的\textbf{电磁判定映射}。此时当 $t\in\mathbb Z$ 时电磁目标化为离散动力系统 $(\mathcal S,\Phi)$，当 $t\in\mathbb R$ 时化为连续动力系统 $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$，两种情形均可直接套用「周期基础」章与「周期系统」章的判据。
+\end{definition}
+
+\begin{theorem}[电磁周期性判定定理]\label{thm:em_periodicity_decision}
+设电磁目标的判定映射为 $\Phi$，且 $(\mathcal S,\Phi)$ 为离散动力系统。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 $m\in\mathbb N^+$ 使 $\Phi^m=\mathrm{id}$，则目标为一致周期电磁系统；每条轨道闭合，且轨道长度整除 $m$。
+    \item \textbf{判定等价}：目标为一致周期电磁系统当且仅当 $\operatorname{ord}(\Phi)<\infty$。
+    \item \textbf{逐点判据}：目标在状态 $x_0$ 处的轨道闭合当且仅当 $x_0$ 为周期点；此时轨道长度即该点处的周期。
+    \item \textbf{不可省略性}：守恒量与对称群的合取不能替代 $\operatorname{ord}(\Phi)<\infty$；准周期电磁目标不属于周期电磁系统。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:em_periodicity_decision} 是「周期系统」章 \cref{thm:ps_periodicity_decision} 的领域实例化：
+只需把判定映射 $f$ 与演化群替换为本章的 $\Phi$，(A) 充分判定、(B) 判定等价、(C) 逐点判据、
+(D) 不可省略性四条即逐条成立。依 \cref{rem:ps_applications_hook} 的约定，此处不再重复展开。
+\end{proof}
+
+\begin{corollary}[电磁周期类型]\label{cor:em_period_type}
+经 \cref{thm:em_periodicity_decision} 判定后，电磁目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 $m_0=1$，状态为不动点；
+    \item \textbf{严格周期型}：$1<m_0<\infty$，状态严格周期；
+    \item \textbf{一致周期型}：$\operatorname{ord}(\Phi)=m<\infty$，所有轨道长度整除 $m$；
+    \item \textbf{准周期型}：$\operatorname{ord}(\Phi)=\infty$，轨道不闭合但在紧致承载结构上稠密；
+    \item \textbf{最终周期型}：存在 $N$，使 $t\ge N$ 后目标为周期；
+    \item \textbf{离散周期型}：承载结构为 $\mathbb Z$，且归一化周期比 $\rho=T_x/\Delta x\in\mathbb Q$。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，残差按 $e^{-\kappa t}$ 衰减（见 \cref{def:ps_period_type}(vii)）。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于周期电磁系统；(iv) 不属于周期电磁系统，但可用有界逼近工具处理；(v) 只在稳定阶段是周期电磁系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期电磁系统，只在稳定阶段可用有界逼近工具处理。
+\end{corollary}
+
+\begin{proof}
+逐条由 \cref{thm:em_periodicity_decision} 与「周期系统」章 \cref{def:ps_period_type} 代入电磁目标即得。
+\end{proof}
+
+\begin{lemma}[LC 振荡的周期判定]\label{lem:lc_periodic}
+理想 LC 振荡回路由电感 $L$ 与电容 $C$ 构成，电荷 $q(t)$ 满足
+\[
+\ddot q+\omega_0^2q=0,\qquad \omega_0=\frac{1}{\sqrt{LC}}.
+\]
+则 LC 振荡为一致周期系统，其最小正周期为
+\[
+T_0=2\pi\sqrt{LC}.
+\]
+\end{lemma}
+
+\begin{proof}
+方程的通解为 $q(t)=A\cos(\omega_0t+\phi)$。时间平移 $T_0=2\pi/\omega_0=2\pi\sqrt{LC}$ 使 $q(t+T_0)=q(t)$，且 $T_0$ 为最小正周期。故判定映射 $\Phi$ 满足 $\Phi^{T_0}=\mathrm{id}$，为一致周期系统。
+\end{proof}
+
+\begin{lemma}[单色平面波的周期判定]\label{lem:plane_wave_periodic_decision}
+设单色平面波为
+\[
+\mathbf E(\mathbf r,t)=\mathbf E_0e^{i(\mathbf k\cdot\mathbf r-\omega t)}.
+\]
+则其时间周期为
+\[
+T=\frac{2\pi}{\omega},
+\]
+空间周期为
+\[
+\lambda=\frac{2\pi}{|\mathbf k|},
+\]
+且二者由色散关系 $\omega=c|\mathbf k|$ 耦合为 $\lambda=cT$。
+\end{lemma}
+
+\begin{proof}
+由 $e^{-i\omega(t+T)}=e^{-i\omega t}e^{-i\omega T}=e^{-i\omega t}$ 得时间周期 $T=2\pi/\omega$。由 $e^{i\mathbf k\cdot(\mathbf r+\lambda\hat{\mathbf k})}=e^{i\mathbf k\cdot\mathbf r}e^{i|\mathbf k|\lambda}=e^{i\mathbf k\cdot\mathbf r}$ 得空间周期 $\lambda=2\pi/|\mathbf k|$。色散关系由定理 \ref{thm:electromagnetic_wave_equation} 与命题 \ref{prop:plane_wave_periodic} 给出。
+\end{proof}
+
+\begin{lemma}[回旋运动的周期判定]\label{lem:cyclotron_periodic}
+设带电粒子 $q$ 在均匀磁场 $\mathbf B$ 中运动，速度垂直于磁场。则回旋周期为
+\[
+T_c=\frac{2\pi m}{|q|B},
+\]
+且 $T_c$ 与速度大小无关，回旋运动为一致周期系统。
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:cyclotron_motion}，回旋角频率 $\omega_c=|q|B/m$，故 $T_c=2\pi/\omega_c=2\pi m/(|q|B)$。速度解为周期函数，且周期与速度无关。
+\end{proof}
+
+\begin{lemma}[推迟势保持源的周期]\label{lem:retarded_period_preserved}
+设源 $\rho(\mathbf r,t)$、$\mathbf J(\mathbf r,t)$ 均以 $T$ 为时间周期。则推迟势
+\[
+\phi(\mathbf r,t)=\frac{1}{4\pi\varepsilon_0}\int\frac{\rho(\mathbf r',t-|\mathbf r-\mathbf r'|/c)}{|\mathbf r-\mathbf r'|}\,dV'
+\]
+也以 $T$ 为时间周期：
+\[
+\phi(\mathbf r,t+T)=\phi(\mathbf r,t).
+\]
+矢量势 $\mathbf A$ 同理。
+\end{lemma}
+
+\begin{proof}
+由源的周期性 $\rho(\mathbf r',t+T-|\mathbf r-\mathbf r'|/c)=\rho(\mathbf r',t-|\mathbf r-\mathbf r'|/c)$，代入积分即得 $\phi(\mathbf r,t+T)=\phi(\mathbf r,t)$。对 $\mathbf A$ 逐分量同理。
+\end{proof}
+
+\begin{definition}[电磁最小正周期算法]\label{def:em_minimal_period_algorithm}
+本定义与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{def:ps_minimal_period_algorithm} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处的差别仅为术语（电磁目标 / 电磁样本），算法步骤与结论完全相同。
+\end{definition}
+
+\begin{theorem}[电磁最小正周期算法的正确性]\label{thm:em_minimal_period_correctness}
+本定理与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{thm:ps_minimal_period_correctness} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。本处的差别仅为术语（电磁目标 / 电磁样本），算法步骤与结论完全相同。
+\end{theorem}
+
+\begin{example}[电磁周期判定实例]\label{ex:em_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item LC 振荡：$T_0=2\pi\sqrt{LC}$，一致周期型；
+    \item 单色平面波：时间周期 $T=2\pi/\omega$，空间周期 $\lambda=2\pi/|\mathbf k|$；
+    \item 回旋运动：$T_c=2\pi m/(|q|B)$，一致周期型；
+    \item 周期源推迟势：源周期 $T$ 传递给势与场，一致周期型。
+\end{enumerate}
+\end{example}
+
+\begin{remark}[守恒量不保证周期]\label{rem:em_invariant_not_period}
+电磁系统中的电荷守恒、能量守恒与动量守恒是周期结构的辅助条件，但不构成充分条件。例如双曲轨道具有能量守恒和角动量守恒，但轨道开放不闭合。电磁周期结构必须由 \cref{thm:em_periodicity_decision} 或上述引理判定。
+\end{remark}
+
+\subsection{第二步：电磁周期级数与周转圆组的构建}
+
+\begin{definition}[电磁振幅级数、频率级数、相位级数]\label{def:em_series}
+设电磁目标的状态或输出序列为 $\{z_t\}$。若其可写为
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+则称
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+分别为电磁目标的\textbf{振幅级数}、\textbf{频率级数}与\textbf{相位级数}。三者与「级数与卷积」章 \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} 一致。
+\end{definition}
+
+\begin{definition}[电磁周转圆组]\label{def:em_epicycle_group}
+设电磁目标的周期级数由振幅级数 $\{A_k\}$、频率级数 $\{\omega_k\}$ 与相位级数 $\{\phi_k\}$ 给出。对每个 $k$ 定义周转圆
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+其集合
+\[
+\mathfrak E_{\mathrm{EM}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+称为电磁目标的\textbf{周转圆组}。其叠加即电磁周期级数
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[由电磁数据构建周期级数]\label{thm:em_series_reconstruction}
+设电磁目标的输出为有限周期序列，周期为 $N$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 输出可展开为离散傅里叶级数
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item 振幅级数由 $|c_k|$ 给出，相位级数由 $\arg c_k$ 给出，频率级数由 $2\pi k/N$ 给出；
+    \item 若输出为单色平面波，则傅里叶分解只有一根谱线；若输出为多频叠加，则各级谐波对应不同频率分量。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 有限周期序列的离散傅里叶级数是标准结论：基函数 $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ 构成 $\mathbb C^N$ 的正交基。
+(ii) 由 $c_k=A_k e^{i\phi_k}$ 直接读出。
+(iii) 单色平面波的时间部分为 $e^{-i\omega t}$，在周期 $T=2\pi/\omega$ 上只有基频分量；多频叠加按傅里叶级数展开。
+\end{proof}
+
+\begin{proposition}[三参数对应：半径、相位与转速]\label{prop:em_epicycle_correspondence}
+电磁周转圆组 $\mathfrak E_{\mathrm{EM}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ 的三个参数与三个几何—物理量一一对应：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{半径对应振幅}：$E_k$ 的半径 $|E_k|=A_k$ 即电场或磁场分量的振幅；
+    \item \textbf{相位对应旋转时延}：初相 $\phi_k$ 对应时间平移 $\tau_k=\phi_k/\omega_k$；$\phi_k>0$ 时该分量相对基准\textbf{超前} $\tau_k$（等价于把基准延后 $\tau_k$ 后二者重合）；
+    \item \textbf{频率对应旋转速度}：$\omega_k$ 即该分量的角频率。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:em_epicycle_correspondence} 与「周期系统」章 \cref{prop:ps_epicycle_correspondence} 完全对应，
+三条对应——半径对应振幅、相位对应旋转时延、频率对应旋转速度——逐条平移至本章的周转圆组即得。
+证明见该处：(i) 由 $|E_k|=A_k$ 与能量分解，(ii) 由相位平移定理，(iii) 由频率级数定义。
+\end{proof}
+
+\begin{example}[平面波周期级数]\label{ex:em_plane_wave_series}
+单色平面波 $\mathbf E=\mathbf E_0e^{i(\mathbf k\cdot\mathbf r-\omega t)}$ 的时间部分在固定空间点退化为单频周期级数，其周转圆组为 $\{(|\mathbf E_0|,\omega,\phi_0)\}$。
+\end{example}
+
+\begin{remark}[周期级数即复变函数]\label{rem:em_series_complex}
+设 $z=e^{i\omega_0t}$，则电磁周期级数
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+当所有分量与 $\omega_0$ 可公度（即 $\omega_k=k\omega_0$，$k\in\mathbb Z$）时可写为洛朗级数 $\sum_k c_k z^k$，其中 $c_k=A_k e^{i\phi_k}$：此时电磁周期级数即单位圆上的复变函数，否则为环面上的函数。
+\end{remark}
+
+\subsection{第三步：电磁周转圆组的动态调节}
+
+\begin{definition}[电磁周转圆组的动态调节]\label{def:em_adaptive_adjustment}
+设当前电磁周转圆组为 $\mathfrak E^{(j)}$，部分和
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+残差 $r^{(j)}=z-z^{(j)}$。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 $\|r^{(j)}\|^2>\delta$，则依残差周期图峰值新增一个周转圆；
+    \item \textbf{参数调节}：对已有周转圆参数按正则化最小二乘或守恒约束更新。
+\end{enumerate}
+在电磁系统中，数量调节对应增加频率分量或空间谐波；参数调节对应调整振幅、相位与频率，使电荷、能量与动量约束满足。
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:em_adaptive_growth}
+按 \cref{def:em_adaptive_adjustment}(i) 加入残差主频分量后，残差能量单调不增：
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+等号成立当且仅当残差在被选频率上无能量。
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:em_adaptive_growth} 与「周期系统」章 \cref{def:ps_adaptive_adjustment} 的动态调节机制一致：
+新增周转圆即把 $r^{(j)}$ 沿 $\hat\omega$ 的分量从残差中移出，由正交分解
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{被移出的分量}\|^2$ 即得不等式，
+等号当且仅当被移出分量的范数为零。完整论证见该处。
+\end{proof}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:em_adaptive_convergence}
+设电磁目标为周期 $T_0$ 的有限周期序列且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得电磁周转圆组即目标的精确傅里叶数据。
+\end{theorem}
+
+\begin{proof}
+周期 $T_0$ 的序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波上完备。每步按 \cref{prop:em_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。
+\end{proof}
+
+\begin{definition}[结构指标调节]\label{def:em_structure_metric_adjustment}
+设电磁目标的结构指标为
+\[
+\mathcal I=(\mathcal I_{\text{电荷}},\mathcal I_{\text{能量}},\mathcal I_{\text{动量}})
+=(\text{电荷守恒度},\ \text{能量守恒度},\ \text{动量守恒度}).
+\]
+\textbf{结构指标调节}为：在参数空间 $\Theta$ 中选取 $\theta$，每步取使 $\mathcal I(\theta)$ 按字典序\textbf{严格递减}（极小化）的邻近参数；若不存在则停止，此时为局部最优。
+\end{definition}
+
+\begin{proposition}[结构指标调节的有限收敛]\label{prop:em_structure_metric_convergence}
+设参数空间 $\Theta$ 有限，且每次调节使 $\mathcal I$ 按字典序严格递减。则调节在有限步内终止于局部最优参数。
+\end{proposition}
+
+\begin{proof}
+$\Theta$ 有限，故 $\mathcal I$ 只取有限多个值，而字典序是有限集上的全序；按字典序严格递减的序列不能无限延续，故调节在有限步终止。终止时不存在使 $\mathcal I$ 按字典序严格递减的邻近参数，即局部最优。
+\end{proof}
+
+\begin{remark}[动态调节的边界]\label{rem:em_adaptive_boundary}
+\cref{thm:em_adaptive_convergence} 依赖有限周期序列。对连续谱或准周期电磁目标，不存在有限周转圆组精确表示，只能作有界逼近。结构指标调节不保证全局最优。
+\end{remark}
+
+\subsection{第四步：电磁卷积}
+
+\begin{definition}[电磁振幅卷积、相位卷积与频率卷积]\label{def:em_convolution_types}
+设两个电磁周转圆组为
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+定义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅卷积}：$\mathbb A_{mn}=A_nB_m$；
+    \item \textbf{相位卷积}：$\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$；
+    \item \textbf{频率卷积}：$\mathbb F_{mn}=\omega_n\nu_m$；
+    \item \textbf{趋势卷积}：$\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$。
+\end{enumerate}
+这与「级数与卷积」章 \cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution}、\cref{def:tendency_convolution} 一致。
+\end{definition}
+
+\begin{theorem}[三类卷积在电磁周转圆组上的作用]\label{thm:em_convolution_action}
+设两个电磁目标的周转圆组分别为 $\mathfrak E$ 与 $\mathfrak E'$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 振幅卷积只作用于半径；
+    \item 相位卷积只作用于相位；
+    \item 频率卷积只作用于转速；
+    \item 趋势卷积同时保留振幅与相位。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:em_convolution_types} 直接读出。
+\end{proof}
+
+\begin{proposition}[自相关与趋势卷积]\label{prop:em_autocorr_phase_convolution}
+设 $\{z_t\}$ 为电磁周期序列，其自相关函数为
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+在电磁周转圆组语言中，自相关函数是趋势卷积在对角线上的投影：
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:em_autocorr_phase_convolution} 是「周期系统」章 \cref{thm:ps_convolution_action} 的卷积作用结论在本领域的实现：
+将 $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ 代入自相关定义，由正交性消去全部非对角交叉项，只保留趋势卷积的对角线项
+（三类卷积的因式分解，\cref{prop:ps_convolution_factorization}），即得 $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$。
+完整展开见该处。
+\end{proof}
+
+\begin{remark}[电磁卷积与周期卷积的关系]\label{rem:em_convolution_relation}
+电磁卷积不是新的卷积运算，而是「级数与卷积」章周期卷积在电磁周转圆组上的实例。自相关是趋势卷积在对角线上的投影，坡印廷矢量、互相关分别是振幅卷积和趋势卷积在电磁学中的具体表现。
+\end{remark}
+
+\subsection{第五步：与离散采样、调和分析、时序分析的整合}
+
+\begin{definition}[电磁周期诊断流程]\label{def:em_periodic_diagnosis}
+对于给定电磁系统，使用周期数学框架进行诊断：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{周期判定}：验证电磁目标的周期类型（\cref{thm:em_periodicity_decision}）；
+    \item \textbf{级数构建}：由电磁场数据构建振幅、频率、相位级数与周转圆组（\cref{thm:em_series_reconstruction}）；
+    \item \textbf{守恒诊断}：验证电荷、能量与动量守恒（\cref{thm:electromagnetic_conservation}）；
+    \item \textbf{卷积诊断}：计算自相关（趋势卷积的对角线投影，\cref{prop:em_autocorr_phase_convolution}）与相位卷积；
+    \item \textbf{整合诊断}：接入离散采样、调和分析、时序分析工具链。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[电磁周期诊断流程与三章接口]\label{thm:em_diagnosis_integration}
+\cref{def:em_periodic_diagnosis} 的五个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}、\cref{thm:intercalation_leakage_suppression}；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}、\cref{prop:twelve_to_six}；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}、\cref{def:ts_window_validation}。
+\end{enumerate}
+因此电磁周期诊断不是独立方法，而是周期数学统一工具链在电磁系统上的应用。
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:em_diagnosis_integration} 是「周期系统」章五步接口（\cref{tab:ps_five_steps}）在本领域的落地：
+周期判定用采样与谱估计，频率分解与相位核用「调和分析」章，周期图峰值、Fisher 检验与
+窗函数验证用「时序分析」章。故诊断流程由三章工具链合成，证明见该处。
+\end{proof}
+
+\begin{remark}[整合后的操作顺序]\label{rem:em_integration_order}
+实际诊断建议顺序为：先判定电磁目标是否周期（\cref{thm:em_periodicity_decision}）；再构建电磁数据的傅里叶数据与周转圆组（\cref{thm:em_series_reconstruction}）；再用守恒约束与动态调节优化参数（\cref{thm:em_adaptive_convergence}、\cref{prop:em_structure_metric_convergence}）；再作电磁卷积与自相关分析（\cref{prop:em_autocorr_phase_convolution}）；最后按 \cref{def:em_periodic_diagnosis} 输出诊断。
+\end{remark}
+
+\section{电磁场的数学基础}
+
+\begin{definition}[电磁场的基本量]\label{def:electromagnetic_fields}
+电磁系统由四个基本矢量场描述：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{电场强度} $\mathbf{E}(\mathbf{r}, t)$（单位：V/m）
+    \item \textbf{磁感应强度} $\mathbf{B}(\mathbf{r}, t)$（单位：T）
+    \item \textbf{电位移矢量} $\mathbf{D}(\mathbf{r}, t)$（单位：C/m$^2$），真空中 $\mathbf{D} = \varepsilon_0 \mathbf{E}$
+    \item \textbf{磁场强度} $\mathbf{H}(\mathbf{r}, t)$（单位：A/m），真空中 $\mathbf{H} = \mathbf{B}/\mu_0$
+\end{enumerate}
+光速 $c = 1/\sqrt{\varepsilon_0 \mu_0}$。源项为电荷密度 $\rho$ 和电流密度 $\mathbf{J}$。
+\end{definition}
+
+\begin{property}[真空本构关系的直接后果]\label{ch21_vacuum_props}
+由真空本构关系 $\mathbf{D}=\varepsilon_0\mathbf{E}$、$\mathbf{H}=\mathbf{B}/\mu_0$ 直接得到：
+\begin{enumerate}[label=(\roman*)]
+    \item 光速 $c = 1/\sqrt{\varepsilon_0\mu_0}$ 仅由真空的两个基本常数决定，与波的频率无关（真空无色散）；
+    \item $\mathbf{E}$ 与 $\mathbf{D}$ 平行同向、$\mathbf{B}$ 与 $\mathbf{H}$ 平行同向，真空是各向同性、线性的介质。
+\end{enumerate}
+\end{property}
+
+\begin{remark}[三个矢量微分算子]\label{rem:three_operators}
+本章反复使用矢量分析的三个基本算子：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{梯度} $\nabla f$：将标量场 $f$ 映为向量场，指向 $f$ 增长最快的方向。
+    \item \textbf{散度} $\nabla \cdot \mathbf{F}$：将向量场 $\mathbf{F}$ 映为标量场，度量每一点的源或汇的强度。
+    \item \textbf{旋度} $\nabla \times \mathbf{F}$：将向量场 $\mathbf{F}$ 映为向量场，度量每一点的环流趋势。
+\end{enumerate}
+三者满足恒等式 $\nabla \times (\nabla f) = \mathbf{0}$ 与 $\nabla \cdot (\nabla \times \mathbf{F}) = 0$。这两条恒等式在麦克斯韦方程组的自洽性检验中起关键作用。
+\end{remark}
+
+\section{静磁学与安培环路定律}
+
+\begin{lemma}[毕奥-萨伐尔定律]\label{ch21_biot_savart}
+稳恒电流密度 $\mathbf{J}(\mathbf{r}')$ 在观察点 $\mathbf{r}$ 处产生的磁感应强度为
+\[
+\mathbf{B}(\mathbf{r}) = \frac{\mu_0}{4\pi} \int \frac{\mathbf{J}(\mathbf{r}') \times (\mathbf{r}-\mathbf{r}')}{|\mathbf{r}-\mathbf{r}'|^3}\, dV'.
+\]
+\end{lemma}
+
+\begin{proof}
+毕奥-萨伐尔定律是静磁学的基本实验定律，与库仑定律地位平行，在此作为本章静磁部分的公理输入；其微分形式（安培环路定律）由下一定理给出。
+\end{proof}
+
+\begin{theorem}[安培环路定律]\label{thm:ampere_law}
+在稳恒电流产生的静磁场中，磁感应强度满足
+\[
+\boxed{\nabla \times \mathbf{B} = \mu_0 \mathbf{J}}.
+\]
+即电流是磁感应强度旋度的源——电流所在的每一点，磁感应强度具有非零旋度。
+\end{theorem}
+
+\begin{proof}
+对引理 \ref{ch21_biot_savart} 的积分关于观察点 $\mathbf{r}$ 取旋度，令 $\mathbf{R}=\mathbf{r}-\mathbf{r}'$。因 $\mathbf{J}(\mathbf{r}')$ 与 $\mathbf{r}$ 无关，由矢量恒等式
+\[
+\nabla\times\left(\mathbf{J}\times\frac{\mathbf{R}}{R^3}\right)
+= \mathbf{J}\left(\nabla\cdot\frac{\mathbf{R}}{R^3}\right)
+- (\mathbf{J}\cdot\nabla)\frac{\mathbf{R}}{R^3}.
+\]
+第一项用到点源散度恒等式
+\[
+\nabla\cdot\frac{\mathbf{R}}{R^3} = 4\pi\,\delta^{(3)}(\mathbf{R}),
+\]
+积分后给出 $\mu_0\,\mathbf{J}(\mathbf{r})$。第二项中，因 $\partial/\partial r_i = -\partial/\partial r_i'$，有 $(\mathbf{J}\cdot\nabla)\frac{\mathbf{R}}{R^3} = -(\mathbf{J}\cdot\nabla')\frac{\mathbf{R}}{R^3}$；对该项分部积分
+\[
+\int (\mathbf{J}\cdot\nabla')\frac{\mathbf{R}}{R^3}\,dV'
+= \int\Big[\nabla'\cdot\Big(\frac{\mathbf{R}}{R^3}\,\mathbf{J}\Big) - \frac{\mathbf{R}}{R^3}(\nabla'\cdot\mathbf{J})\Big]dV'
+= 0,
+\]
+其中第一项经散度定理化为无穷远边界项而为零，第二项因稳恒电流 $\nabla'\cdot\mathbf{J}=0$ 为零。故 $\nabla\times\mathbf{B} = \mu_0\mathbf{J}$。
+\end{proof}
+
+\begin{theorem}[静磁场的矢势表示]\label{thm:magnetic_vector_potential}
+在稳恒电流分布下，存在向量场 $\mathbf{A}(\mathbf{r})$（称为\textbf{磁矢势}）使得
+\[
+\boxed{\mathbf{B} = \nabla \times \mathbf{A}}.
+\]
+矢势 $\mathbf{A}$ 满足库仑规范 $\nabla \cdot \mathbf{A} = 0$ 时，由安培环路定律可得泊松方程
+\[
+\nabla^2 \mathbf{A} = -\mu_0 \mathbf{J},
+\]
+其解为
+\[
+\mathbf{A}(\mathbf{r}) = \frac{\mu_0}{4\pi} \int \frac{\mathbf{J}(\mathbf{r}')}{|\mathbf{r}-\mathbf{r}'|}\, dV'.
+\]
+\end{theorem}
+
+\begin{proof}
+$\nabla \cdot \mathbf{B} = 0$（此式在定理 \ref{thm:gauss_magnetic_derivation} 中独立导出）是静磁场的普遍性质。散度为零的向量场必有矢势：$\mathbf{B} = \nabla \times \mathbf{A}$。代入安培环路定律并利用恒等式 $\nabla\times(\nabla\times\mathbf{A}) = \nabla(\nabla\cdot\mathbf{A}) - \nabla^2\mathbf{A}$，在库仑规范 $\nabla\cdot\mathbf{A} = 0$ 下化为 $\nabla^2\mathbf{A} = -\mu_0\mathbf{J}$。该泊松方程的解即上述积分表达式，可由格林函数方法验证。
+\end{proof}
+
+\section{法拉第电磁感应定律}
+
+\begin{theorem}[法拉第电磁感应定律]\label{thm:faraday_law}
+\[
+\boxed{\nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t}}.
+\]
+即磁感应强度的时间变化是电场强度旋度的源。
+\end{theorem}
+
+\begin{proof}
+法拉第实验定律的积分形式为
+\[
+\mathcal{E} = \oint_{\partial S} \mathbf{E}\cdot d\mathbf{l} = -\frac{d}{dt}\int_S \mathbf{B}\cdot d\mathbf{S}.
+\]
+对固定回路 $S$，时间导数移入积分号得 $\oint_{\partial S}\mathbf{E}\cdot d\mathbf{l} = -\int_S \frac{\partial\mathbf{B}}{\partial t}\cdot d\mathbf{S}$。由斯托克斯定理，左端 $=\int_S(\nabla\times\mathbf{E})\cdot d\mathbf{S}$，故
+\[
+\int_S \Big(\nabla\times\mathbf{E} + \frac{\partial\mathbf{B}}{\partial t}\Big)\cdot d\mathbf{S} = 0.
+\]
+由曲面 $S$ 的任意性得微分形式 $\nabla\times\mathbf{E} = -\partial\mathbf{B}/\partial t$（其完整推导见定理 \ref{thm:faraday_derivation}）。
+\end{proof}
+
+\begin{example}[交流发电机中的周期电动势]\label{ex:ac_generator}
+面积为 $A$ 的线圈在均匀磁场 $B$ 中以角速度 $\omega$ 旋转，穿过线圈的磁通量为
+\[
+\Phi(t) = BA\cos(\omega t).
+\]
+由法拉第定律（定理 \ref{thm:faraday_law}），感应电动势为
+\[
+\mathcal{E}(t) = -\frac{d\Phi}{dt} = BA\omega\sin(\omega t),
+\]
+周期 $T = 2\pi/\omega$。\textbf{数值算例}：取 $A = 0.01\,\text{m}^2$、$B = 0.5\,\text{T}$、$\omega = 100\pi\,\text{rad/s}$（工频 $50\,\text{Hz}$），峰值电动势
+\[
+\mathcal{E}_{\max} = BA\omega = 0.5\times 0.01\times 100\pi = \frac{\pi}{2}\,\text{V} \approx 1.57\,\text{V},
+\]
+每秒完成 $50$ 个完整周期，这是“旋转$\to$闭合环路磁通量$\to$周期电动势”的周期结构原型。
+\end{example}
+
+\begin{theorem}[时变场的标势与矢势表示]\label{thm:scalar_vector_potential}
+在一般时变场中，引入标势 $\phi(\mathbf{r}, t)$ 和矢势 $\mathbf{A}(\mathbf{r}, t)$，使得
+\[
+\boxed{\mathbf{B} = \nabla \times \mathbf{A}}, \qquad
+\boxed{\mathbf{E} = -\nabla \phi - \frac{\partial \mathbf{A}}{\partial t}}.
+\]
+电场 $\mathbf{E}$ 由两部分组成：标势的负梯度 $-\nabla \phi$ 与矢势的时间导数 $-\partial\mathbf{A}/\partial t$。
+\end{theorem}
+
+\begin{proof}
+由定理 \ref{thm:gauss_magnetic_derivation}，$\nabla \cdot \mathbf{B} = 0$ 对时变场同样成立（磁单极子不存在），故 $\mathbf{B}$ 仍可表示为某矢势 $\mathbf{A}$ 的旋度：$\mathbf{B} = \nabla \times \mathbf{A}$。代入法拉第定律 $\nabla\times\mathbf{E} = -\partial\mathbf{B}/\partial t = -\partial(\nabla\times\mathbf{A})/\partial t$，得 $\nabla\times(\mathbf{E} + \partial\mathbf{A}/\partial t) = \mathbf{0}$。旋度为零的向量场可表示为某标量场的梯度，故存在标势 $\phi$ 使 $\mathbf{E} + \partial\mathbf{A}/\partial t = -\nabla\phi$，即 $\mathbf{E} = -\nabla\phi - \partial\mathbf{A}/\partial t$。
+\end{proof}
+
+\begin{property}[规范自由度]\label{prop:gauge_freedom}
+标势 $\phi$ 与矢势 $\mathbf{A}$ 的定义不唯一。对任意光滑函数 $\chi(\mathbf{r}, t)$，变换
+\[
+\mathbf{A}' = \mathbf{A} + \nabla \chi, \qquad \phi' = \phi - \frac{\partial \chi}{\partial t}
+\]
+保持 $\mathbf{E}$ 与 $\mathbf{B}$ 不变。这一自由度称为\textbf{规范自由度}。
+\end{property}
+
+\begin{proof}
+直接代入验证：$\mathbf{B}' = \nabla\times\mathbf{A}' = \nabla\times\mathbf{A} + \nabla\times(\nabla\chi) = \mathbf{B} + \mathbf{0} = \mathbf{B}$（用了 $\nabla\times(\nabla\chi) = \mathbf{0}$）；$\mathbf{E}' = -\nabla\phi' - \partial\mathbf{A}'/\partial t = -\nabla\phi + \nabla(\partial\chi/\partial t) - \partial\mathbf{A}/\partial t - \partial(\nabla\chi)/\partial t = -\nabla\phi - \partial\mathbf{A}/\partial t = \mathbf{E}$（交换 $\nabla$ 与 $\partial_t$ 的次序）。
+\end{proof}
+
+\begin{remark}[洛伦兹规范]\label{rem:lorentz_gauge}
+在时变场问题中，常采用\textbf{洛伦兹规范}
+\[
+\nabla \cdot \mathbf{A} + \frac{1}{c^2}\frac{\partial \phi}{\partial t} = 0.
+\]
+这一规范的优越性在于它将 $\phi$ 与 $\mathbf{A}$ 的方程解耦为两个独立的非齐次波动方程：
+\[
+\Box \phi = -\frac{\rho}{\varepsilon_0}, \qquad \Box \mathbf{A} = -\mu_0 \mathbf{J}, \qquad \Box \equiv \nabla^2 - \frac{1}{c^2}\frac{\partial^2}{\partial t^2}.
+\]
+这使得推迟势（定理 \ref{thm:retarded_potential}）的推导成为可能。
+\end{remark}
+
+\section{洛伦兹力}
+
+\begin{axiom}[洛伦兹力定律]\label{axm:lorentz_force}
+\[
+\boxed{\mathbf{F} = q(\mathbf{E} + \mathbf{v} \times \mathbf{B})}.
+\]
+\end{axiom}
+
+\begin{remark}[实验定律的地位与两种力的性质]
+洛伦兹力定律是经典电动力学的基本实验定律（与库仑定律、毕奥-萨伐尔定律并列），无法由本章其余假设演绎导出，故此处作为公理输入。其电场部分 $\mathbf{F}_E = q\mathbf{E}$ 沿电场方向作用于电荷，可以对电荷做功（改变动能）；磁场部分 $\mathbf{F}_B = q\mathbf{v}\times\mathbf{B}$ 垂直于电荷速度，只改变运动方向而不改变速率——由 $\mathbf{v}\cdot(q\mathbf{v}\times\mathbf{B}) = 0$ 直接得出磁场力不做功。这是电场与磁场在力学作用上的根本区别。
+\end{remark}
+
+\begin{proposition}[均匀磁场中电荷的圆周运动]\label{prop:cyclotron_motion}
+回旋频率 $\omega_c = |q|B/m$，回旋周期 $T_c = 2\pi/\omega_c$ 与速度无关。
+\end{proposition}
+
+\begin{proof}
+取 $\mathbf{v}\perp\mathbf{B}$，由洛伦兹力提供向心力（公理~\ref{axm:lorentz_force}）得
+\[
+|q|vB = m\frac{v^2}{r}
+\quad\Longrightarrow\quad
+r = \frac{mv}{|q|B}.
+\]
+回旋角频率为
+\[
+\omega_c = \frac{v}{r} = \frac{|q|B}{m},
+\]
+对应的回旋周期为
+\[
+T_c = \frac{2\pi}{\omega_c} = \frac{2\pi m}{|q|B},
+\]
+确与速度 $v$ 无关（相对论修正除外）。
+运动方程
+\[
+\dot{\mathbf{v}} = \frac{q}{m}\,\mathbf{v}\times\mathbf{B}
+\]
+的解为
+\[
+\mathbf{v}(t)
+= v_0\bigl(\cos\omega_c t,\, -\sin\omega_c t,\, 0\bigr),
+\]
+这是一个周期为 $T_c$ 的周期函数，正是回旋加速器共振原理的数学表述。
+\end{proof}
+
+\section{麦克斯韦方程组的导出}
+
+\begin{theorem}[高斯电场定律的导出]\label{thm:gauss_electric_derivation}
+从库仑定律出发导出高斯电场定律。点电荷 $q$ 位于原点，在距离 $r$ 处产生的电场为
+\[
+\mathbf{E}(\mathbf{r}) = \frac{q}{4\pi\varepsilon_0} \frac{\hat{\mathbf{r}}}{r^2}.
+\]
+对任意闭合曲面 $S$ 包围该电荷，电通量为
+\[
+\oint_S \mathbf{E} \cdot d\mathbf{S} = \frac{q}{\varepsilon_0}.
+\]
+应用散度定理，对连续电荷分布 $\rho(\mathbf{r})$：
+\[
+\int_V \nabla \cdot \mathbf{E} \, dV = \oint_S \mathbf{E} \cdot d\mathbf{S} = \frac{1}{\varepsilon_0} \int_V \rho \, dV.
+\]
+由体积 $V$ 的任意性，得
+\[
+\boxed{\nabla \cdot \mathbf{D} = \rho}, \quad \mathbf{D} = \varepsilon_0 \mathbf{E}.
+\]
+散度 $\nabla\cdot\mathbf{D}$ 与电荷密度 $\rho$ 直接对应——电荷是电位移矢量散度的源。
+\end{theorem}
+
+\begin{proof}
+点电荷的电场由库仑定律给出。对闭合曲面 $S$ 的电通量：利用立体角积分 $\oint_S \hat{\mathbf{r}}\cdot d\mathbf{S}/r^2 = 4\pi$（若 $S$ 包围电荷）或 $0$（若 $S$ 不包围电荷）。对连续分布 $\rho$，线性叠加给出 $\oint_S \mathbf{E}\cdot d\mathbf{S} = Q_{\text{enc}}/\varepsilon_0 = \frac{1}{\varepsilon_0}\int_V \rho dV$。散度定理转化后由 $V$ 的任意性得微分形式。
+\end{proof}
+
+\begin{theorem}[高斯磁场定律的导出]\label{thm:gauss_magnetic_derivation}
+从磁单极子不存在的事实出发导出高斯磁场定律。所有磁感应线是闭合曲线，穿入任意闭合曲面的磁通量等于穿出的磁通量：
+\[
+\oint_S \mathbf{B} \cdot d\mathbf{S} = 0.
+\]
+应用散度定理：
+\[
+\int_V \nabla \cdot \mathbf{B} \, dV = 0.
+\]
+由 $V$ 的任意性：
+\[
+\boxed{\nabla \cdot \mathbf{B} = 0}.
+\]
+即磁感应强度是无散场——磁场没有散度源。
+\end{theorem}
+
+\begin{proof}
+磁单极子不存在意味着磁场线无起点无终点。任何闭合曲面内的净磁通量为零。散度定理和 $V$ 的任意性直接给出微分形式。
+\end{proof}
+
+\begin{theorem}[法拉第定律的导出]\label{thm:faraday_derivation}
+法拉第电磁感应定律是实验定律，其微分形式为
+\[
+\boxed{\nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t}}.
+\]
+从磁通量变化率的积分形式导出。
+\end{theorem}
+
+\begin{proof}
+法拉第的实验定律（积分形式）：$\mathcal{E} = \oint_C \mathbf{E}\cdot d\mathbf{l} = -\frac{d}{dt}\int_S \mathbf{B}\cdot d\mathbf{S}$。应用斯托克斯定理，$\oint_C \mathbf{E}\cdot d\mathbf{l} = \int_S (\nabla\times\mathbf{E})\cdot d\mathbf{S}$。由 $S$ 的任意性得微分形式。
+\end{proof}
+
+\begin{theorem}[安培-麦克斯韦定律的导出与位移电流]\label{thm:ampere_maxwell_derivation}
+从安培静磁学定律出发，通过电荷守恒律的约束导出位移电流项。
+
+\textbf{矛盾}：安培静磁学定律 $\nabla \times \mathbf{B} = \mu_0 \mathbf{J}$ 在时变场中存在内在矛盾。对两边取散度：
+\[
+\nabla \cdot (\nabla \times \mathbf{B}) = 0 = \mu_0 \nabla \cdot \mathbf{J}.
+\]
+这要求 $\nabla \cdot \mathbf{J} = 0$ 在所有时刻成立。但电荷守恒律要求
+\[
+\frac{\partial \rho}{\partial t} + \nabla \cdot \mathbf{J} = 0.
+\]
+当 $\partial\rho/\partial t \neq 0$（电荷密度随时间变化）时，$\nabla \cdot \mathbf{J} \neq 0$，与安培静磁学定律矛盾。
+
+\textbf{修正}：麦克斯韦引入\textbf{位移电流}项 $\partial\mathbf{D}/\partial t$，将安培定律推广为
+\[
+\boxed{\nabla \times \mathbf{H} = \mathbf{J} + \frac{\partial \mathbf{D}}{\partial t}}.
+\]
+验证自洽性：对修正后的方程取散度：
+\[
+\nabla \cdot (\nabla \times \mathbf{H}) = 0 = \nabla \cdot \mathbf{J} + \frac{\partial}{\partial t}(\nabla \cdot \mathbf{D}) = \nabla \cdot \mathbf{J} + \frac{\partial\rho}{\partial t}.
+\]
+与电荷守恒律完全自洽。位移电流 $\partial\mathbf{D}/\partial t$ 将电场的时间变化率转换为磁场的旋度源——这是电场与磁场在时变情形下的耦合。
+\end{theorem}
+
+\begin{proof}
+\textbf{步骤一（矛盾）}：$\nabla \cdot (\nabla \times \mathbf{B}) = 0$ 是恒等式。代入 $\nabla \times \mathbf{B} = \mu_0 \mathbf{J}$ 得 $\nabla \cdot \mathbf{J} = 0$。但电流的连续性要求 $\nabla \cdot \mathbf{J} = -\partial\rho/\partial t$，在 $\partial\rho/\partial t \neq 0$ 时矛盾。
+
+\textbf{步骤二（位移电流引入）}：为消除矛盾，在安培定律右边加入一项 $\mathbf{J}_d$ 使得 $\nabla \cdot (\mathbf{J} + \mathbf{J}_d) = 0$。由电荷守恒，$\nabla \cdot \mathbf{J} = -\partial\rho/\partial t = -\partial(\nabla\cdot\mathbf{D})/\partial t = -\nabla \cdot (\partial\mathbf{D}/\partial t)$。因此 $\mathbf{J}_d = \partial\mathbf{D}/\partial t$ 恰好满足要求。
+
+\textbf{步骤三（自洽性）}：修正后的方程取散度为零，与电荷守恒律自洽。
+\end{proof}
+
+\begin{corollary}[电荷守恒律的自动满足]\label{cor:charge_conservation}
+对安培-麦克斯韦定律两边取散度：
+\[
+\nabla \cdot (\nabla \times \mathbf{H}) = 0 = \nabla \cdot \mathbf{J} + \frac{\partial}{\partial t}(\nabla \cdot \mathbf{D}).
+\]
+代入高斯定律 $\nabla \cdot \mathbf{D} = \rho$，得
+\[
+\boxed{\frac{\partial \rho}{\partial t} + \nabla \cdot \mathbf{J} = 0}.
+\]
+电荷守恒律是麦克斯韦方程组的自洽性条件。
+\end{corollary}
+
+\begin{theorem}[麦克斯韦方程组（完整形式）]\label{thm:maxwell_equations}
+\[
+\boxed{\nabla \cdot \mathbf{D} = \rho}, \quad \boxed{\nabla \cdot \mathbf{B} = 0},
+\]
+\[
+\boxed{\nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t}}, \quad \boxed{\nabla \times \mathbf{H} = \mathbf{J} + \frac{\partial \mathbf{D}}{\partial t}}.
+\]
+四个方程分别对应四个矢量微分算子的作用：两个散度方程（高斯定律）描述场与源之间的关系；两个旋度方程（法拉第定律和安培-麦克斯韦定律）描述场的环流与其源（时变场、电流）之间的关系。
+\end{theorem}
+
+\begin{proof}
+这是定理 \ref{thm:gauss_electric_derivation}、\ref{thm:gauss_magnetic_derivation}、\ref{thm:faraday_derivation}、\ref{thm:ampere_maxwell_derivation} 四式的汇总。四个方程中，两个为散度方程，两个为旋度方程，各自独立导出，此处按算子类型归类陈述。
+\end{proof}
+
+\section{电磁波的周期结构与传播时延}
+
+\begin{theorem}[电磁波方程]\label{thm:electromagnetic_wave_equation}
+在无源区域（$\rho = 0, \mathbf{J} = 0$），麦克斯韦方程组退化为电磁波方程：
+\[
+\boxed{\nabla^2 \mathbf{E} - \frac{1}{c^2} \frac{\partial^2 \mathbf{E}}{\partial t^2} = \mathbf{0}}, \quad c = \frac{1}{\sqrt{\mu_0 \varepsilon_0}}.
+\]
+\end{theorem}
+
+\begin{proof}
+对法拉第定律取旋度：$\nabla\times(\nabla\times\mathbf{E}) = -\frac{\partial}{\partial t}(\nabla\times\mathbf{B})$。代入安培-麦克斯韦定律（无源）和本构关系，使用矢量恒等式 $\nabla\times(\nabla\times\mathbf{E}) = \nabla(\nabla\cdot\mathbf{E}) - \nabla^2\mathbf{E}$ 和高斯定律（无源：$\nabla\cdot\mathbf{E}=0$），得波动方程。
+\end{proof}
+
+\begin{definition}[传播时延]\label{def:propagation_delay}
+电磁波从源点 $\mathbf{r}'$ 到观察点 $\mathbf{r}$ 的\textbf{传播时延}为
+\[
+\tau_{\text{prop}} = \frac{|\mathbf{r} - \mathbf{r}'|}{c}.
+\]
+传播时延将空间距离转换为时间偏移——距离越远，时延越大。
+\end{definition}
+
+\begin{definition}[相位时延]\label{def:phase_delay}
+单色平面波中空间相位对应的\textbf{相位时延}为
+\[
+\tau_{\text{phase}} = \frac{\mathbf{k}\cdot\mathbf{r}}{\omega} = \frac{|\mathbf{r}|\cos\theta}{c}.
+\]
+沿传播方向（$\theta=0$），$\tau_{\text{phase}} = r/c = \tau_{\text{prop}}$。相位时延将相位延迟 $\phi = \omega\tau$ 转换为时间偏移。
+\end{definition}
+
+\begin{proposition}[时延与相位的统一]\label{prop:delay_phase_unity}
+沿传播方向，空间相位每增加 $2\pi$，对应时间偏移增加一个周期：
+\[
+\tau = \frac{\lambda}{c} = \frac{2\pi}{\omega} = T.
+\]
+时延将空间周期（波长）与时间周期通过光速耦合。
+\end{proposition}
+
+\begin{proof}
+沿传播方向（$\theta=0$），由定义 \ref{def:phase_delay} 相位时延 $\tau_{\text{phase}} = |\mathbf{r}|/c$。空间相位每增加 $2\pi$ 对应位移一个波长 $\lambda$，所需时间即传播时延 $\tau = \lambda/c$。又由色散关系 $\omega = c|\mathbf{k}|$ 与波长 $\lambda = 2\pi/|\mathbf{k}|$，
+\[
+\tau = \frac{\lambda}{c} = \frac{2\pi}{|\mathbf{k}|\,c} = \frac{2\pi}{\omega} = T.
+\]
+故空间周期（波长）与时间周期由光速精确耦合：$\lambda = cT$。
+\end{proof}
+
+\begin{proposition}[平面电磁波的周期结构]\label{prop:plane_wave_periodic}
+\[
+\mathbf{E}(\mathbf{r}, t) = \mathbf{E}_0 e^{i(\mathbf{k} \cdot \mathbf{r} - \omega t)}, \quad \mathbf{B}(\mathbf{r}, t) = \mathbf{B}_0 e^{i(\mathbf{k} \cdot \mathbf{r} - \omega t)}.
+\]
+空间周期 $\lambda = 2\pi/|\mathbf{k}|$，时间周期 $T = 2\pi/\omega$，相位速度 $v_p = c$，传播时延 $\tau = r/c$。
+\end{proposition}
+
+\begin{proof}
+将平面波代入电磁波方程（定理 \ref{thm:electromagnetic_wave_equation}）：
+\[
+\nabla^2\mathbf{E} = -|\mathbf{k}|^2\mathbf{E}, \qquad \frac{1}{c^2}\frac{\partial^2\mathbf{E}}{\partial t^2} = -\frac{\omega^2}{c^2}\mathbf{E}.
+\]
+两式相等要求 $|\mathbf{k}|^2 = \omega^2/c^2$，即色散关系 $\omega = c|\mathbf{k}|$，故相位速度 $v_p = \omega/|\mathbf{k}| = c$。\textbf{空间周期性}：因 $|\mathbf{k}|\lambda = 2\pi$，对任意整数 $n$ 有 $e^{i\mathbf{k}\cdot(\mathbf{r}+n\lambda\hat{\mathbf{k}})} = e^{i\mathbf{k}\cdot\mathbf{r}}e^{i n|\mathbf{k}|\lambda} = e^{i\mathbf{k}\cdot\mathbf{r}}$，故空间周期 $\lambda = 2\pi/|\mathbf{k}|$。\textbf{时间周期性}：因 $\omega T = 2\pi$，$e^{-i\omega(t+nT)} = e^{-i\omega t}e^{-i n\omega T} = e^{-i\omega t}$，故时间周期 $T = 2\pi/\omega$。传播时延 $\tau = r/c$ 由定义 \ref{def:propagation_delay} 给出。
+\end{proof}
+
+\section{推迟势：时延的电磁学实现}
+
+\begin{lemma}[推迟势满足非齐次波动方程]\label{ch21_retarded_green}
+标量推迟解
+\[
+\phi(\mathbf{r},t) = \frac{1}{4\pi\varepsilon_0}\int \frac{\rho(\mathbf{r}', t-|\mathbf{r}-\mathbf{r}'|/c)}{|\mathbf{r}-\mathbf{r}'|}\,dV'
+\]
+满足非齐次波动方程
+\[
+\Box\,\phi \equiv \left(\nabla^2 - \frac{1}{c^2}\frac{\partial^2}{\partial t^2}\right)\phi = -\frac{\rho}{\varepsilon_0}.
+\]
+\end{lemma}
+
+\begin{proof}
+推迟格林函数
+\[
+G(\mathbf{r},t;\mathbf{r}',t') = \frac{\delta(t'-t+|\mathbf{r}-\mathbf{r}'|/c)}{4\pi|\mathbf{r}-\mathbf{r}'|}
+\]
+满足 $\Box G = -\delta^{(3)}(\mathbf{r}-\mathbf{r}')\,\delta(t-t')$。其验证分两步：静态部分由 $\nabla^2\bigl(\frac{1}{4\pi|\mathbf{r}-\mathbf{r}'|}\bigr) = -\delta^{(3)}(\mathbf{r}-\mathbf{r}')$ 给出；时延部分由复合函数求导，令 $R=|\mathbf{r}-\mathbf{r}'|$、$t_{\text{ret}} = t - R/c$，波动算子中 $\nabla^2\delta(t_{\text{ret}}-t')$ 与 $\frac{1}{c^2}\partial_t^2\delta(t_{\text{ret}}-t')$ 的主项在推迟球面上相消，仅余点源项 $-\delta^{(3)}\delta$。将 $\phi = \frac{1}{\varepsilon_0}\iint G\,\rho(\mathbf{r}',t')\,dV'dt'$ 代入，利用 $\delta$ 的筛选性即得 $\Box\phi = -\rho/\varepsilon_0$。
+\end{proof}
+
+\begin{theorem}[推迟势]\label{thm:retarded_potential}
+在洛伦兹规范（注释 \ref{rem:lorentz_gauge}）下，电磁场的标势与矢势为
+\[
+\phi(\mathbf{r}, t) = \frac{1}{4\pi\varepsilon_0} \int \frac{\rho(\mathbf{r}', t - |\mathbf{r}-\mathbf{r}'|/c)}{|\mathbf{r}-\mathbf{r}'|} dV',
+\]
+\[
+\mathbf{A}(\mathbf{r}, t) = \frac{\mu_0}{4\pi} \int \frac{\mathbf{J}(\mathbf{r}', t - |\mathbf{r}-\mathbf{r}'|/c)}{|\mathbf{r}-\mathbf{r}'|} dV'.
+\]
+推迟时刻 $t_{\text{ret}} = t - |\mathbf{r}-\mathbf{r}'|/c$ 编码了传播时延。
+\end{theorem}
+
+\begin{proof}
+在洛伦兹规范 $\nabla\cdot\mathbf{A} + \frac{1}{c^2}\frac{\partial\phi}{\partial t} = 0$ 下，麦克斯韦方程组退化为两个非齐次波动方程 $\Box\phi = -\rho/\varepsilon_0$、$\Box\mathbf{A} = -\mu_0\mathbf{J}$。由引理 \ref{ch21_retarded_green}，标量势的解即上述 $\phi$；矢量势 $\mathbf{A}$ 的解由标量解逐分量应用同一引理得到。推迟时刻 $t_{\text{ret}} = t - |\mathbf{r}-\mathbf{r}'|/c$ 编码传播时延：源在 $\mathbf{r}'$ 处 $t_{\text{ret}}$ 时刻的状态，需经时延 $|\mathbf{r}-\mathbf{r}'|/c$ 才抵达观察点 $\mathbf{r}$，即观察者“看到”的是源的过去状态。
+\end{proof}
+
+\begin{property}[推迟势中三种运算的体现]\label{prop:retarded_delay_grammar}
+在推迟势的表达式中，可以识别出三种矢量微分运算及相应的几何效应：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{时间平移}：$\tau = r/c$ 将空间距离转换为时间偏移，将源的过去状态与观察点的当前场值关联。
+    \item \textbf{相位关系}：$\phi = \omega\tau$ 将时延转换为相位延迟，是电磁波相干性的来源。
+    \item \textbf{平方反比标度}：$1/|\mathbf{r}-\mathbf{r}'|$ 因子是点源场在三维空间中扩散导致的振幅衰减。
+\end{enumerate}
+\end{property}
+
+\section{电磁系统的守恒律}
+
+\begin{theorem}[电磁系统的三种守恒律]\label{thm:electromagnetic_conservation}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{电荷守恒}：$\partial\rho/\partial t + \nabla \cdot \mathbf{J} = 0$。
+    \item \textbf{能量守恒}：$\frac{\partial u}{\partial t} + \nabla \cdot \mathbf{S} = -\mathbf{J} \cdot \mathbf{E}$。
+    \item \textbf{动量守恒}：$\mathbf{g} = \varepsilon_0 \mathbf{E} \times \mathbf{B}$ 满足动量守恒律。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\textbf{(i) 电荷守恒}：对安培-麦克斯韦定律取散度即得（推论 \ref{cor:charge_conservation}），故 $\partial\rho/\partial t + \nabla\cdot\mathbf{J}=0$。
+
+\textbf{(ii) 能量守恒（坡印廷定理）}：能量密度 $u = \frac12(\mathbf{E}\cdot\mathbf{D} + \mathbf{B}\cdot\mathbf{H})$，坡印廷矢量 $\mathbf{S} = \mathbf{E}\times\mathbf{H}$。计算
+\[
+\frac{\partial u}{\partial t} = \mathbf{E}\cdot\frac{\partial\mathbf{D}}{\partial t} + \mathbf{H}\cdot\frac{\partial\mathbf{B}}{\partial t}.
+\]
+代入安培-麦克斯韦定律 $\partial\mathbf{D}/\partial t = \nabla\times\mathbf{H} - \mathbf{J}$ 与法拉第定律 $\partial\mathbf{B}/\partial t = -\nabla\times\mathbf{E}$：
+\[
+\frac{\partial u}{\partial t} = \mathbf{E}\cdot(\nabla\times\mathbf{H}) - \mathbf{H}\cdot(\nabla\times\mathbf{E}) - \mathbf{J}\cdot\mathbf{E}.
+\]
+由矢量恒等式 $\nabla\cdot(\mathbf{E}\times\mathbf{H}) = \mathbf{H}\cdot(\nabla\times\mathbf{E}) - \mathbf{E}\cdot(\nabla\times\mathbf{H})$，得
+\[
+\frac{\partial u}{\partial t} + \nabla\cdot\mathbf{S} = -\mathbf{J}\cdot\mathbf{E}.
+\]
+右端是场对电流所做功的功率密度，能量在电磁场与电荷之间转换。
+
+\textbf{(iii) 动量守恒}：电磁动量密度 $\mathbf{g} = \varepsilon_0\mathbf{E}\times\mathbf{B}$。由麦克斯韦方程联立洛伦兹力密度 $\mathbf{f} = \rho\mathbf{E} + \mathbf{J}\times\mathbf{B}$，经矢量恒等式化简得动量守恒的微分形式 $\partial g_i/\partial t + \partial_j T_{ij} = -f_i$，其中 $T_{ij}$ 为麦克斯韦应力张量；$\mathbf{g}$ 与应力张量共同构成电磁场的动量-应力守恒结构。
+\end{proof}
+
+\begin{remark}[与全书的统一]
+本章建立的电磁系统周期结构理论是周期数学在经典电动力学中的应用。麦克斯韦方程组的导出揭示了矢量微分算子（梯度、散度、旋度）在场论中的协同作用：位移电流的引入保证了电荷守恒律在时变场中的自洽性。标势与矢势的引入将 $\mathbf{E}$、$\mathbf{B}$ 表示为势的梯度、旋度与时间导数的组合，规范自由度则体现了两组势表示同一物理场的不可区分性。电磁波是电场与磁场在无源区域中自持传播的周期结构，时延概念将空间周期（波长）与时间周期（频率）通过光速耦合。推迟势是时延的电磁学实现——它将源的过去状态与观察者的当前观测关联。电荷守恒、能量守恒和动量守恒分别是三个矢量微分算子在电磁学中对应的守恒律。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{9.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 电磁波传播时延 $\tau=r/c$ 与推迟势（定义 \ref{def:propagation_delay}、定理 \ref{thm:retarded_potential}） \\
+缩放 & 库仑/安培定律的平方反比标度 $\sim 1/r^2$（定理 \ref{thm:gauss_electric_derivation}） \\
+旋转 & 磁场旋度 $\nabla\times\mathbf{B}$ 与洛伦兹力的回旋运动（定理 \ref{thm:ampere_law}、命题 \ref{prop:cyclotron_motion}） \\
+平衡 & 电荷守恒、坡印廷能量守恒、电磁动量守恒（定理 \ref{thm:electromagnetic_conservation}） \\
+对称 & 规范自由度与麦克斯韦方程组的结构对称（命题 \ref{prop:gauge_freedom}、定理 \ref{thm:maxwell_equations}） \\
+闭合 & 安培环路、法拉第环路的闭合积分（定理 \ref{thm:ampere_law}、\ref{thm:faraday_law}） \\
+周期 & 电磁振荡周期与电磁波时空周期（命题 \ref{prop:plane_wave_periodic}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{电磁周期性判定定理}（\ref{thm:em_periodicity_decision}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 验证\textbf{单色平面波的周期判定}（\ref{lem:plane_wave_periodic_decision}）的前提在本章领域对象上成立，并给出一个不满足前提的反例。
+
+    \item 考察\textbf{数量调节的单调性}（\ref{prop:em_adaptive_growth}）在参数退化时的行为，说明结论如何随之退化。
+
+    \item 说明\textbf{三参数对应：半径、相位与转速}（\ref{prop:em_epicycle_correspondence}）与「周期系统」章相应通用结论的关系（是一致、特例还是需要附加条件）。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{thm:em_periodicity_decision}、\ref{lem:plane_wave_periodic_decision}、\ref{prop:em_adaptive_growth}、\ref{prop:em_epicycle_correspondence}。
+\end{enumerate}
+
+

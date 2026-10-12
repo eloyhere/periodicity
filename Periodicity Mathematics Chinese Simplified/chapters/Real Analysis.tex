@@ -1,0 +1,2138 @@
+\chapter{实数分析}
+\label{chap:real_analysis}
+\markboth{实数分析}{实数分析}
+
+\begin{remark}[本章定位]\label{rem:real_analysis_positioning}
+本章在「数系」章与「函数与极限」章的基础上，建立欧氏空间中的拓扑、连续、微分、积分与一致收敛理论，为后续「级数与卷积」「概率论与分布」「矢量分析」等章提供严格的解析前提。本章不重复「数系」章中实数完备性的构造细节，也不重复「函数与极限」章中单变量极限、连续、导数、积分的基本定义与初等性质；本章的重点是：\textbf{把单变量分析提升到欧氏空间与度量空间}，建立\textbf{多变量微分学}、\textbf{重积分与曲线曲面积分}、\textbf{函数列与函数项级数的一致收敛}、\textbf{含参积分与积分号下求导}，以及\textbf{零测集与分片光滑边界}等工具。这些工具是「矢量分析」章中梯度、散度、旋度、Green 公式、Stokes 定理、Gauss 定理严格陈述的必要前提，也是「级数与卷积」章中函数项级数、幂级数、Fourier 级数一致收敛论证的基础。
+
+\textbf{七主题导引}：平移——欧氏空间中的平移与极限的平移不变性；缩放——度量空间中的球邻域、覆盖与标度；旋转——欧氏空间的正交变换与拓扑不变性；守恒——紧致性、完备性、连通性等拓扑不变量的守恒；对称——开集、闭集、紧集在连续映射下的对称保持；闭合——闭包、闭集、闭区间套与极限的闭合性；周期——为后续周期级数、周期卷积、Fourier 分析预备的一致收敛与含参积分工具。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{fittikz}
+\begin{tikzpicture}[
+  >=Stealth, thick,
+  node distance=0.8cm and 1.0cm,
+  box/.style={draw, rounded corners, align=center, minimum width=2.6cm, minimum height=0.8cm, font=\small, fill=blue!8},
+  arr/.style={-{Stealth[length=2.2mm]}, very thick}
+]
+\node[box, fill=blue!12]  (topo) {欧氏空间拓扑\\开集/闭集/紧集};
+\node[box, fill=cyan!12, right=of topo] (cont) {连续映射\\紧致性与连通性};
+\node[box, fill=green!12, right=of cont] (diff) {多变量微分学\\全微分/隐函数/秩定理};
+\node[box, fill=orange!12, right=of diff] (int) {重积分与线面积分\\Fubini/变量代换};
+\node[box, fill=red!12, below=of topo] (conv) {一致收敛\\函数列与函数项级数};
+\node[box, fill=purple!12, right=of conv] (param) {含参积分\\积分号下求导};
+\node[box, fill=magenta!12, right=of param] (null) {零测集\\分片光滑边界};
+\node[box, fill=yellow!16, right=of null] (vec) {矢量分析\\Green/Stokes/Gauss};
+\draw[arr] (topo) -- (cont);
+\draw[arr] (cont) -- (diff);
+\draw[arr] (diff) -- (int);
+\draw[arr] (topo) -- (conv);
+\draw[arr] (conv) -- (param);
+\draw[arr] (param) -- (null);
+\draw[arr] (null) -- (vec);
+\draw[arr, dashed] (int) -- (vec);
+\end{tikzpicture}
+\end{fittikz}
+\caption{本章结构总览：欧氏空间拓扑 $\to$ 连续映射 $\to$ 多变量微分学 $\to$ 重积分与线面积分；下方并行建立一致收敛、含参积分、零测集与分片光滑边界；最终汇入矢量分析。}
+\label{fig:real_analysis_overview}
+\end{figure}
+
+\section{欧氏空间与度量空间}
+
+\subsection{欧氏空间}
+
+\begin{definition}[欧氏空间]\label{def:euclidean_space}
+设 $n \in \mathbb{N}^+$。\textbf{$n$ 维欧氏空间} $\mathbb{R}^n$ 是集合
+\[
+\mathbb{R}^n := \{(x_1, \dots, x_n) : x_i \in \mathbb{R},\ i = 1, \dots, n\},
+\]
+配备\textbf{内积}
+\[
+\langle x, y \rangle := \sum_{i=1}^{n} x_i y_i, \qquad x = (x_1, \dots, x_n),\ y = (y_1, \dots, y_n),
+\]
+以及由内积诱导的\textbf{范数}
+\[
+\|x\| := \sqrt{\langle x, x \rangle} = \left( \sum_{i=1}^{n} x_i^2 \right)^{1/2},
+\]
+和\textbf{距离}
+\[
+d(x, y) := \|x - y\|, \qquad x, y \in \mathbb{R}^n.
+\]
+\end{definition}
+
+\begin{proposition}[内积与范数的基本性质]\label{prop:inner_norm_properties}
+设 $x, y, z \in \mathbb{R}^n$，$\alpha \in \mathbb{R}$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{内积对称性}：$\langle x, y \rangle = \langle y, x \rangle$；
+    \item \textbf{内积双线性}：$\langle \alpha x + \beta y, z \rangle = \alpha \langle x, z \rangle + \beta \langle y, z \rangle$；
+    \item \textbf{内积正定性}：$\langle x, x \rangle \ge 0$，且 $\langle x, x \rangle = 0 \iff x = \mathbf{0}$；
+    \item \textbf{Cauchy--Schwarz 不等式}：$|\langle x, y \rangle| \le \|x\| \|y\|$；
+    \item \textbf{三角不等式}：$\|x + y\| \le \|x\| + \|y\|$；
+    \item \textbf{齐次性}：$\|\alpha x\| = |\alpha| \|x\|$；
+    \item \textbf{正定性}：$\|x\| \ge 0$，且 $\|x\| = 0 \iff x = \mathbf{0}$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\langle x, y \rangle = \sum_i x_i y_i = \sum_i y_i x_i = \langle y, x \rangle$。
+
+(ii) 由内积定义逐分量验证：
+\[
+\langle \alpha x + \beta y, z \rangle = \sum_i (\alpha x_i + \beta y_i) z_i = \alpha \sum_i x_i z_i + \beta \sum_i y_i z_i = \alpha \langle x, z \rangle + \beta \langle y, z \rangle.
+\]
+
+(iii) $\langle x, x \rangle = \sum_i x_i^2 \ge 0$，且等于零当且仅当每个 $x_i = 0$。
+
+(iv) 若 $y = \mathbf{0}$，不等式两端均为 $0$，取等号。设 $y \neq \mathbf{0}$。对任意实数 $t$，由正定性，
+\[
+0 \le \langle x + t y, x + t y \rangle = \langle x, x \rangle + 2t \langle x, y \rangle + t^2 \langle y, y \rangle.
+\]
+右端是关于 $t$ 的二次多项式，恒非负，故判别式非正：
+\[
+(2 \langle x, y \rangle)^2 - 4 \langle x, x \rangle \langle y, y \rangle \le 0,
+\]
+即 $|\langle x, y \rangle| \le \|x\| \|y\|$。
+
+(v) 由 Cauchy--Schwarz 不等式，
+\[
+\|x + y\|^2 = \|x\|^2 + 2\langle x, y \rangle + \|y\|^2 \le \|x\|^2 + 2\|x\| \|y\| + \|y\|^2 = (\|x\| + \|y\|)^2.
+\]
+两端开方即得。
+
+(vi) $\|\alpha x\|^2 = \langle \alpha x, \alpha x \rangle = \alpha^2 \langle x, x \rangle = \alpha^2 \|x\|^2$，开方得 $\|\alpha x\| = |\alpha| \|x\|$。
+
+(vii) 由内积正定性直接推出。
+\end{proof}
+
+\begin{corollary}[距离的三条公理]\label{cor:metric_axioms}
+设 $x, y, z \in \mathbb{R}^n$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{正定性}：$d(x, y) \ge 0$，且 $d(x, y) = 0 \iff x = y$；
+    \item \textbf{对称性}：$d(x, y) = d(y, x)$；
+    \item \textbf{三角不等式}：$d(x, z) \le d(x, y) + d(y, z)$。
+\end{enumerate}
+因此 $(\mathbb{R}^n, d)$ 是一个度量空间。
+\end{corollary}
+
+\begin{proof}
+(i) $d(x, y) = \|x - y\| \ge 0$；$d(x, y) = 0 \iff \|x - y\| = 0 \iff x - y = \mathbf{0} \iff x = y$。
+
+(ii) $\|x - y\| = \|-(y - x)\| = |-1| \|y - x\| = \|y - x\|$。
+
+(iii) $d(x, z) = \|x - z\| = \|(x - y) + (y - z)\| \le \|x - y\| + \|y - z\| = d(x, y) + d(y, z)$。
+\end{proof}
+
+\begin{example}[$\mathbb{R}$、$\mathbb{R}^2$、$\mathbb{R}^3$]\label{ex:euclidean_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item $n = 1$：$\mathbb{R}$ 上的距离为 $d(x, y) = |x - y|$。
+    \item $n = 2$：$\mathbb{R}^2$ 上的距离为 $d(x, y) = \sqrt{(x_1 - y_1)^2 + (x_2 - y_2)^2}$，即平面上的欧氏距离。
+    \item $n = 3$：$\mathbb{R}^3$ 上的距离为三维空间中的欧氏距离。
+    \item $n$ 维球面 $S^{n-1} = \{x \in \mathbb{R}^n : \|x\| = 1\}$ 配备诱导距离，是 $\mathbb{R}^n$ 的子度量空间。
+\end{enumerate}
+\end{example}
+
+\subsection{开集、闭集与基本拓扑概念}
+
+\begin{definition}[开球与球邻域]\label{def:open_ball}
+设 $x_0 \in \mathbb{R}^n$，$r > 0$。
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{开球}：$B(x_0, r) := \{x \in \mathbb{R}^n : \|x - x_0\| < r\}$。
+    \item \textbf{闭球}：$\overline{B}(x_0, r) := \{x \in \mathbb{R}^n : \|x - x_0\| \le r\}$。
+    \item \textbf{球面}：$S(x_0, r) := \{x \in \mathbb{R}^n : \|x - x_0\| = r\}$。
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[开集与闭集]\label{def:open_closed_set}
+设 $E \subseteq \mathbb{R}^n$。
+\begin{enumerate}[label=(\roman*)]
+    \item $E$ 称为\textbf{开集}，若对每个 $x \in E$，存在 $r > 0$ 使 $B(x, r) \subseteq E$。
+    \item $E$ 称为\textbf{闭集}，若其补集 $\mathbb{R}^n \setminus E$ 是开集。
+    \item $E$ 的\textbf{内部}定义为 $\operatorname{int}(E) := \bigcup \{U : U \subseteq E,\ U \text{ 开}\}$。
+    \item $E$ 的\textbf{闭包}定义为 $\overline{E} := \bigcap \{F : F \supseteq E,\ F \text{ 闭}\}$。
+    \item $E$ 的\textbf{边界}定义为 $\partial E := \overline{E} \setminus \operatorname{int}(E)$。
+    \item $E$ 的\textbf{导集}定义为 $E' := \{x \in \mathbb{R}^n : \text{每个 } B(x, r) \text{ 都含有 } E \text{ 中异于 } x \text{ 的点}\}$。$E'$ 中的点称为 $E$ 的\textbf{聚点}或\textbf{极限点}。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[开集与闭集的基本性质]\label{prop:open_closed_properties}
+设 $\{U_\alpha\}_{\alpha \in A}$ 为一族开集，$\{F_\alpha\}_{\alpha \in A}$ 为一族闭集，$U, V$ 为开集，$F, G$ 为闭集。则：
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathbb{R}^n$ 与 $\emptyset$ 既开又闭；
+    \item 任意并 $\bigcup_{\alpha \in A} U_\alpha$ 是开集；
+    \item 有限交 $U \cap V$ 是开集；
+    \item 任意交 $\bigcap_{\alpha \in A} F_\alpha$ 是闭集；
+    \item 有限并 $F \cup G$ 是闭集；
+    \item $E$ 是闭集 $\iff$ $E = \overline{E}$ $\iff$ $E' \subseteq E$；
+    \item $\operatorname{int}(E)$ 是包含在 $E$ 中的最大开集；$\overline{E}$ 是包含 $E$ 的最小闭集；
+    \item $\overline{E} = E \cup E'$，且 $\partial E$ 是闭集。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\mathbb{R}^n$ 是开集：对任意 $x \in \mathbb{R}^n$，取 $r = 1$，则 $B(x, 1) \subseteq \mathbb{R}^n$。$\mathbb{R}^n$ 是闭集：其补集为 $\emptyset$，$\emptyset$ 是开集（“对每个 $x \in \emptyset$”是空真命题）。同理 $\emptyset$ 既开又闭。
+
+(ii) 设 $x \in \bigcup_\alpha U_\alpha$。则存在 $\alpha_0$ 使 $x \in U_{\alpha_0}$。因 $U_{\alpha_0}$ 开，存在 $r > 0$ 使 $B(x, r) \subseteq U_{\alpha_0} \subseteq \bigcup_\alpha U_\alpha$。故并是开集。
+
+(iii) 设 $x \in U \cap V$。则 $x \in U$ 且 $x \in V$。存在 $r_1, r_2 > 0$ 使 $B(x, r_1) \subseteq U$，$B(x, r_2) \subseteq V$。取 $r = \min(r_1, r_2) > 0$，则 $B(x, r) \subseteq U \cap V$。故有限交是开集。
+
+(iv) 由 De Morgan 律，$\bigcap_\alpha F_\alpha$ 的补集为 $\bigcup_\alpha (\mathbb{R}^n \setminus F_\alpha)$，是开集的并，故为开集；从而 $\bigcap_\alpha F_\alpha$ 是闭集。
+
+(v) 由 De Morgan 律，$F \cup G$ 的补集为 $(\mathbb{R}^n \setminus F) \cap (\mathbb{R}^n \setminus G)$，是两个开集的交，故为开集；从而 $F \cup G$ 是闭集。
+
+(vi) 若 $E$ 闭，则 $\mathbb{R}^n \setminus E$ 开。由 (i) 与定义，$\overline{E}$ 是包含 $E$ 的最小闭集，故 $\overline{E} \subseteq E$；又 $E \subseteq \overline{E}$，故 $E = \overline{E}$。反之若 $E = \overline{E}$，由闭包定义，$E$ 是闭集。$E' \subseteq E$ 等价于：若 $x \notin E$，则 $x$ 不是聚点，即存在 $r > 0$ 使 $B(x, r) \cap E = \emptyset$（注意 $x \notin E$，故 $B(x, r)$ 中不含 $E$ 的点即可），这等价于 $\mathbb{R}^n \setminus E$ 是开集。
+
+(vii) 由定义，$\operatorname{int}(E)$ 是开集的并，故为开集；它是 $E$ 的子集，且任何包含在 $E$ 中的开集都包含在并中，故为最大。$\overline{E}$ 是闭集的交，故为闭集；它包含 $E$，且任何包含 $E$ 的闭集都包含在交中，故为最小。
+
+(viii) 先证 $\overline{E} \subseteq E \cup E'$：设 $x \notin E \cup E'$，则 $x \notin E$ 且 $x \notin E'$。由 $x \notin E'$，存在 $r > 0$ 使 $B(x, r) \cap E \subseteq \{x\}$。因 $x \notin E$，故 $B(x, r) \cap E = \emptyset$，即 $B(x, r) \subseteq \mathbb{R}^n \setminus E$。这说明 $\mathbb{R}^n \setminus E$ 是开集，即 $E$ 是闭集，故 $\overline{E} = E \subseteq E \cup E'$，矛盾。故 $\overline{E} \subseteq E \cup E'$。再证 $E \cup E' \subseteq \overline{E}$：$E \subseteq \overline{E}$ 由闭包含 $E$ 直接得到。若 $x \in E'$ 且 $x \notin \overline{E}$，则 $\mathbb{R}^n \setminus \overline{E}$ 是开集且包含 $x$，存在 $r > 0$ 使 $B(x, r) \subseteq \mathbb{R}^n \setminus \overline{E} \subseteq \mathbb{R}^n \setminus E$，与 $x$ 是聚点矛盾。故 $x \in \overline{E}$。综上 $\overline{E} = E \cup E'$。$\partial E = \overline{E} \setminus \operatorname{int}(E)$ 是闭集与开集之差，闭集减开集是闭集（因为 $\overline{E}$ 闭，$\operatorname{int}(E)$ 开，$\overline{E} \setminus \operatorname{int}(E) = \overline{E} \cap (\mathbb{R}^n \setminus \operatorname{int}(E))$，是闭集与闭集的交）。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0,>=Stealth,thick]
+  \draw[fill=blue!10] (0,0) ellipse (3.0 and 2.0);
+  \draw[thick, blue!70!black] (0,0) ellipse (3.0 and 2.0);
+  \node[blue!70!black, font=\small] at (0,2.3) {$E$};
+  \draw[fill=green!15, opacity=0.7] (0,0) ellipse (2.0 and 1.3);
+  \draw[thick, green!60!black] (0,0) ellipse (2.0 and 1.3);
+  \node[green!60!black, font=\small] at (0,0) {$\operatorname{int}(E)$};
+  \draw[thick, red!70!black, dashed] (0,0) ellipse (2.6 and 1.7);
+  \node[red!70!black, font=\small] at (0,1.9) {$\partial E$};
+  \filldraw[black] (1.6,1.0) circle (1.5pt);
+  \node[font=\footnotesize, right=2pt] at (1.6,1.0) {聚点};
+\end{tikzpicture}
+\caption{开集 $E$、内部 $\operatorname{int}(E)$ 与边界 $\partial E$ 的示意图。}
+\label{fig:open_set_interior_boundary}
+\end{figure}
+
+\begin{example}[开集与闭集的实例]\label{ex:open_closed_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item 开球 $B(x_0, r)$ 是开集。验证：对任意 $x \in B(x_0, r)$，令 $\rho = r - \|x - x_0\| > 0$。若 $\|y - x\| < \rho$，则 $\|y - x_0\| \le \|y - x\| + \|x - x_0\| < \rho + \|x - x_0\| = r$，故 $B(x, \rho) \subseteq B(x_0, r)$。
+    \item 闭球 $\overline{B}(x_0, r)$ 是闭集。其补集 $\{x : \|x - x_0\| > r\}$ 是开集（类似验证）。
+    \item 半开区间 $(0, 1]$ 在 $\mathbb{R}$ 中既非开也非闭。
+    \item $\mathbb{Q}$ 在 $\mathbb{R}$ 中既非开也非闭，且 $\operatorname{int}(\mathbb{Q}) = \emptyset$，$\overline{\mathbb{Q}} = \mathbb{R}$，$\partial \mathbb{Q} = \mathbb{R}$。
+    \item 康托尔集 $C \subseteq [0,1]$ 是闭集，且 $\operatorname{int}(C) = \emptyset$，$\partial C = C$。
+\end{enumerate}
+\end{example}
+
+\begin{definition}[子空间拓扑]\label{def:subspace_topology}
+设 $E \subseteq \mathbb{R}^n$。$E$ 的\textbf{子空间拓扑}定义为
+\[
+\mathcal{T}_E := \{E \cap U : U \text{ 是 } \mathbb{R}^n \text{ 中的开集}\}.
+\]
+$\mathcal{T}_E$ 中的集合称为 $E$ 的\textbf{相对开集}。若 $E \cap F$ 是 $E$ 的相对开集的补集，则称 $E \cap F$ 为 $E$ 的\textbf{相对闭集}。
+\end{definition}
+
+\begin{proposition}[相对开集与相对闭集的刻画]\label{prop:relative_open_closed}
+设 $E \subseteq \mathbb{R}^n$，$A \subseteq E$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item $A$ 是 $E$ 的相对开集 $\iff$ 存在 $\mathbb{R}^n$ 中的开集 $U$ 使 $A = E \cap U$；
+    \item $A$ 是 $E$ 的相对闭集 $\iff$ 存在 $\mathbb{R}^n$ 中的闭集 $F$ 使 $A = E \cap F$；
+    \item 若 $E$ 是 $\mathbb{R}^n$ 中的开集，则 $A$ 是 $E$ 的相对开集 $\iff$ $A$ 是 $\mathbb{R}^n$ 中的开集；
+    \item 若 $E$ 是 $\mathbb{R}^n$ 中的闭集，则 $A$ 是 $E$ 的相对闭集 $\iff$ $A$ 是 $\mathbb{R}^n$ 中的闭集。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由定义直接得到。
+
+(ii) $A$ 是 $E$ 的相对闭集 $\iff$ $E \setminus A$ 是 $E$ 的相对开集 $\iff$ 存在开集 $U$ 使 $E \setminus A = E \cap U$ $\iff$ $A = E \setminus (E \cap U) = E \cap (\mathbb{R}^n \setminus U)$，其中 $\mathbb{R}^n \setminus U$ 是闭集。
+
+(iii) 若 $E$ 开且 $A = E \cap U$（$U$ 开），则 $A$ 是两开集之交，故开。反之若 $A$ 开且 $A \subseteq E$，则 $A = E \cap A$，是相对开集。
+
+(iv) 类似 (iii)。
+\end{proof}
+
+\subsection{紧致性与连通性}
+
+\begin{definition}[开覆盖与紧致性]\label{def:compactness}
+设 $K \subseteq \mathbb{R}^n$。
+\begin{enumerate}[label=(\roman*)]
+    \item $K$ 的\textbf{开覆盖}是一族开集 $\{U_\alpha\}_{\alpha \in A}$ 使 $K \subseteq \bigcup_{\alpha \in A} U_\alpha$。
+    \item $K$ 称为\textbf{紧致}的，若 $K$ 的每个开覆盖都有有限子覆盖，即存在 $\alpha_1, \dots, \alpha_m$ 使 $K \subseteq \bigcup_{i=1}^{m} U_{\alpha_i}$。
+    \item $K$ 称为\textbf{序列紧致}的，若 $K$ 中每个序列都有收敛于 $K$ 中点的子序列。
+    \item $K$ 称为\textbf{有界}的，若存在 $R > 0$ 使 $K \subseteq B(\mathbf{0}, R)$。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[Heine--Borel 定理]\label{thm:heine_borel}
+设 $K \subseteq \mathbb{R}^n$。则 $K$ 紧致当且仅当 $K$ 有界且闭。
+\end{theorem}
+
+\begin{proof}
+\textbf{必要性}。
+
+先证 $K$ 有界。开球族 $\{B(\mathbf{0}, m)\}_{m \in \mathbb{N}^+}$ 是 $K$ 的开覆盖。由紧致性，存在有限子覆盖，即存在 $m_1 < \dots < m_k$ 使 $K \subseteq \bigcup_{i=1}^{k} B(\mathbf{0}, m_i) = B(\mathbf{0}, m_k)$。故 $K$ 有界。
+
+再证 $K$ 闭。只需证 $\mathbb{R}^n \setminus K$ 开。设 $x \in \mathbb{R}^n \setminus K$。对每个 $y \in K$，令 $r_y = \|x - y\| / 2 > 0$。开球族 $\{B(y, r_y)\}_{y \in K}$ 是 $K$ 的开覆盖。由紧致性，存在 $y_1, \dots, y_m \in K$ 使 $K \subseteq \bigcup_{i=1}^{m} B(y_i, r_{y_i})$。令 $r = \min_{1 \le i \le m} r_{y_i} > 0$。断言 $B(x, r) \cap K = \emptyset$。若不然，存在 $z \in B(x, r) \cap K$，则 $z \in B(y_i, r_{y_i})$ 对某 $i$ 成立，故
+\[
+\|x - y_i\| \le \|x - z\| + \|z - y_i\| < r + r_{y_i} \le 2 r_{y_i} = \|x - y_i\|,
+\]
+矛盾。故 $B(x, r) \subseteq \mathbb{R}^n \setminus K$，即补集开，$K$ 闭。
+
+\textbf{充分性}。设 $K$ 有界且闭。因 $K$ 有界，存在 $R > 0$ 使 $K \subseteq [-R, R]^n$。先证 $[-R, R]^n$ 紧致。
+
+\textbf{步骤 1}：$[-R, R]$ 紧致。设 $\{U_\alpha\}$ 是 $[-R, R]$ 的开覆盖。反设无有限子覆盖。将 $[-R, R]$ 等分为两个长度 $R$ 的闭区间，至少一个无有限子覆盖，记为 $I_1$。将 $I_1$ 等分，至少一个无有限子覆盖，记为 $I_2$。如此递推得闭区间套 $I_1 \supseteq I_2 \supseteq \cdots$，长度 $|I_k| = 2R / 2^k \to 0$。由闭区间套定理，存在唯一 $x_0 \in \bigcap_{k=1}^{\infty} I_k$。因 $\{U_\alpha\}$ 覆盖 $[-R, R]$，存在 $\alpha_0$ 使 $x_0 \in U_{\alpha_0}$。$U_{\alpha_0}$ 开，存在 $r > 0$ 使 $B(x_0, r) \subseteq U_{\alpha_0}$。取 $k$ 充分大使 $|I_k| < r$。因 $x_0 \in I_k$，有 $I_k \subseteq B(x_0, r) \subseteq U_{\alpha_0}$，即 $I_k$ 被单个 $U_{\alpha_0}$ 覆盖，与 $I_k$ 无有限子覆盖矛盾。故 $[-R, R]$ 紧致。
+
+\textbf{步骤 2}：$[-R, R]^n$ 紧致。对 $n$ 归纳。$n = 1$ 已证。设 $[-R, R]^{n-1}$ 紧致。设 $\{U_\alpha\}$ 是 $[-R, R]^n = [-R, R]^{n-1} \times [-R, R]$ 的开覆盖。对每个 $x \in [-R, R]^{n-1}$，截面 $\{x\} \times [-R, R]$ 紧致（同胚于 $[-R, R]$），故存在有限个 $U_\alpha$ 覆盖它。由管状邻域引理（见下），存在 $x$ 的开邻域 $V_x \subseteq [-R, R]^{n-1}$ 使 $V_x \times [-R, R]$ 被同样的有限个 $U_\alpha$ 覆盖。族 $\{V_x\}_{x}$ 是 $[-R, R]^{n-1}$ 的开覆盖。由归纳假设，存在有限个 $x_1, \dots, x_m$ 使 $[-R, R]^{n-1} = \bigcup_{i=1}^{m} V_{x_i}$。于是 $[-R, R]^n = \bigcup_{i=1}^{m} (V_{x_i} \times [-R, R])$，被有限个 $U_\alpha$ 覆盖。故 $[-R, R]^n$ 紧致。
+
+\textbf{步骤 3}：$K$ 紧致。设 $\{U_\alpha\}$ 是 $K$ 的开覆盖。则 $\{U_\alpha\} \cup \{\mathbb{R}^n \setminus K\}$ 是 $[-R, R]^n$ 的开覆盖（因 $K \subseteq [-R, R]^n$ 且 $\mathbb{R}^n \setminus K$ 开）。由 $[-R, R]^n$ 紧致，存在有限子覆盖。若 $\mathbb{R}^n \setminus K$ 不在其中，则有限个 $U_\alpha$ 已覆盖 $[-R, R]^n \supseteq K$；若在其中，则有限个 $U_\alpha$ 覆盖 $[-R, R]^n \setminus (\mathbb{R}^n \setminus K) = K$。两种情形下 $K$ 都有有限子覆盖。
+\end{proof}
+
+\begin{lemma}[管状邻域引理]\label{lem:tube_neighbourhood}
+设 $X$ 为紧致度量空间，$Y$ 为度量空间，$\{U_\alpha\}_{\alpha \in A}$ 为 $X \times Y$ 的开覆盖。若对每个 $x \in X$，$\{x\} \times Y$ 被有限个 $U_\alpha$ 覆盖，且 $Y$ 紧致，则存在 $x$ 的开邻域 $V_x$ 使 $V_x \times Y$ 被同样的有限个 $U_\alpha$ 覆盖。
+\end{lemma}
+
+\begin{proof}
+固定 $x \in X$。设 $\{x\} \times Y \subseteq \bigcup_{i=1}^{m} U_{\alpha_i}$。因 $Y$ 紧致，对每个 $y \in Y$，存在 $i(y)$ 与 $x$ 的开邻域 $V_y$、$y$ 的开邻域 $W_y$ 使 $V_y \times W_y \subseteq U_{\alpha_{i(y)}}$（因 $U_{\alpha_{i(y)}}$ 开且含 $(x, y)$）。族 $\{W_y\}_{y \in Y}$ 是 $Y$ 的开覆盖。由 $Y$ 紧致，存在有限子覆盖 $W_{y_1}, \dots, W_{y_k}$。令 $V_x = \bigcap_{j=1}^{k} V_{y_j}$，则 $V_x$ 是 $x$ 的开邻域。对任意 $(x', y') \in V_x \times Y$，存在 $j$ 使 $y' \in W_{y_j}$，故 $(x', y') \in V_{y_j} \times W_{y_j} \subseteq U_{\alpha_{i(y_j)}}$。故 $V_x \times Y \subseteq \bigcup_{j=1}^{k} U_{\alpha_{i(y_j)}}$。
+\end{proof}
+
+\begin{theorem}[Bolzano--Weierstrass 定理]\label{thm:bolzano_weierstrass}
+设 $K \subseteq \mathbb{R}^n$。则 $K$ 序列紧致当且仅当 $K$ 有界且闭。
+\end{theorem}
+
+\begin{proof}
+由 Heine--Borel 定理（定理 \ref{thm:heine_borel}），只需证：$K$ 紧致 $\iff$ $K$ 序列紧致。
+
+\textbf{紧致 $\Rightarrow$ 序列紧致}。设 $K$ 紧致，$\{x_k\}$ 是 $K$ 中的序列。若 $\{x_k\}$ 无收敛子序列，则对每个 $x \in K$，存在 $r_x > 0$ 使 $B(x, r_x)$ 中只含有限个 $x_k$（否则可构造收敛于 $x$ 的子序列）。族 $\{B(x, r_x)\}_{x \in K}$ 是 $K$ 的开覆盖。由紧致性，存在有限子覆盖 $B(x_1, r_{x_1}), \dots, B(x_m, r_{x_m})$。每个球中只含有限个 $x_k$，故 $K$ 中只含有限个 $x_k$，与 $\{x_k\}$ 是无限序列矛盾。
+
+\textbf{序列紧致 $\Rightarrow$ 紧致}。设 $K$ 序列紧致。先证 $K$ 有界。若 $K$ 无界，则对每个 $k$ 存在 $x_k \in K$ 使 $\|x_k\| > k$。序列 $\{x_k\}$ 无收敛子序列（任何收敛子序列必有界），与序列紧致矛盾。故 $K$ 有界。再证 $K$ 闭。设 $x \in \overline{K}$。则存在 $x_k \in K$ 使 $x_k \to x$。由序列紧致，$\{x_k\}$ 有子序列收敛于 $K$ 中某点 $y$。但收敛序列的子序列收敛于同一极限，故 $y = x \in K$。因此 $\overline{K} \subseteq K$，$K$ 闭。由 Heine--Borel 定理，$K$ 紧致。
+\end{proof}
+
+\begin{definition}[连通性]\label{def:connectedness}
+设 $E \subseteq \mathbb{R}^n$。
+\begin{enumerate}[label=(\roman*)]
+    \item $E$ 称为\textbf{不连通}的，若存在两个非空相对开集 $A, B \subseteq E$ 使 $E = A \cup B$ 且 $A \cap B = \emptyset$。这样的分解称为 $E$ 的\textbf{分离}。
+    \item $E$ 称为\textbf{连通}的，若 $E$ 不是不连通的。
+    \item $E$ 称为\textbf{道路连通}的，若对任意 $x, y \in E$，存在连续映射 $\gamma: [0, 1] \to E$ 使 $\gamma(0) = x$，$\gamma(1) = y$。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[连通集的基本性质]\label{prop:connected_properties}
+\begin{enumerate}[label=(\roman*)]
+    \item $E$ 连通 $\iff$ 不存在非空相对闭集 $A, B \subseteq E$ 使 $E = A \cup B$ 且 $A \cap B = \emptyset$。
+    \item 道路连通 $\Rightarrow$ 连通。
+    \item 连续映射保持连通性：若 $E$ 连通，$f: E \to \mathbb{R}^m$ 连续，则 $f(E)$ 连通。
+    \item $\mathbb{R}$ 中的连通子集恰为区间。
+    \item 若 $\{E_\alpha\}$ 是一族连通集且 $\bigcap_\alpha E_\alpha \neq \emptyset$，则 $\bigcup_\alpha E_\alpha$ 连通。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $A \subseteq E$ 是相对开集 $\iff$ $E \setminus A$ 是相对闭集。故分离的定义可等价地表述为相对闭集的分离。
+
+(ii) 设 $E$ 道路连通。若 $E = A \cup B$ 是分离（$A, B$ 非空相对开）。取 $x \in A$，$y \in B$。存在连续 $\gamma: [0, 1] \to E$ 使 $\gamma(0) = x$，$\gamma(1) = y$。令 $A' = \gamma^{-1}(A)$，$B' = \gamma^{-1}(B)$。因 $\gamma$ 连续且 $A, B$ 是 $E$ 的相对开集，$A', B'$ 是 $[0, 1]$ 的相对开集。$A' \cup B' = [0, 1]$，$A' \cap B' = \emptyset$，$0 \in A'$，$1 \in B'$。但 $[0, 1]$ 连通（由 (iv)），矛盾。
+
+(iii) 设 $f(E) = A \cup B$ 是分离（$A, B$ 非空相对开）。则 $E = f^{-1}(A) \cup f^{-1}(B)$，且 $f^{-1}(A), f^{-1}(B)$ 是 $E$ 的非空相对开集（因 $f$ 连续），交集为空，与 $E$ 连通矛盾。
+
+(iv) 设 $E \subseteq \mathbb{R}$ 连通。若 $E$ 不是区间，则存在 $a < b < c$ 使 $a, c \in E$ 而 $b \notin E$。令 $A = E \cap (-\infty, b)$，$B = E \cap (b, \infty)$。$A, B$ 是 $E$ 的非空相对开集，$E = A \cup B$，$A \cap B = \emptyset$，与 $E$ 连通矛盾。反之若 $E$ 是区间，设 $E = A \cup B$ 是分离。取 $a \in A$，$b \in B$，不妨 $a < b$。令 $c = \sup(A \cap [a, b])$。因 $A$ 相对闭且 $a \in A$，$c \in A$。若 $c < b$，则 $c \in A$ 且 $(c, b] \subseteq B$（否则有 $A$ 中的点 $> c$），故 $c$ 是 $B$ 的聚点。但 $B$ 相对闭，$c \in B$，与 $A \cap B = \emptyset$ 矛盾。故 $c = b$，即 $b \in A$，与 $b \in B$ 矛盾。
+
+(v) 设 $E = \bigcup_\alpha E_\alpha$，$x_0 \in \bigcap_\alpha E_\alpha$。若 $E = A \cup B$ 是分离，不妨 $x_0 \in A$。对每个 $\alpha$，$E_\alpha$ 连通且 $x_0 \in E_\alpha$，故 $E_\alpha \subseteq A$（否则 $E_\alpha \cap A$ 与 $E_\alpha \cap B$ 构成 $E_\alpha$ 的分离）。于是 $E \subseteq A$，即 $B = \emptyset$，矛盾。
+\end{proof}
+
+\begin{definition}[单连通性]\label{def:simply_connected}
+设 $\Omega \subseteq \mathbb{R}^n$ 为开集。$\Omega$ 称为\textbf{单连通}的，若对任意连续闭曲线 $\gamma: S^1 \to \Omega$，存在连续映射 $H: S^1 \times [0, 1] \to \Omega$ 使 $H(\theta, 0) = \gamma(\theta)$ 且 $H(\theta, 1) = p$（$p \in \Omega$ 固定），即 $\gamma$ 可在 $\Omega$ 内连续收缩到一点。
+\end{definition}
+
+\begin{proposition}[$\mathbb{R}^n$ 中的凸集单连通]\label{prop:convex_simply_connected}
+$\mathbb{R}^n$ 中的凸开集是单连通的。
+\end{proposition}
+
+\begin{proof}
+设 $\Omega$ 凸且开，$\gamma: S^1 \to \Omega$ 是连续闭曲线。取 $p \in \Omega$（若 $\Omega = \emptyset$ 则命题平凡）。定义 $H: S^1 \times [0, 1] \to \Omega$ 为
+\[
+H(\theta, t) = (1 - t) \gamma(\theta) + t p.
+\]
+由凸性，$H(\theta, t) \in \Omega$ 对所有 $(\theta, t)$ 成立。$H$ 连续（因线性组合连续），$H(\theta, 0) = \gamma(\theta)$，$H(\theta, 1) = p$。故 $\Omega$ 单连通。
+\end{proof}
+
+\begin{example}[连通性与单连通性的对照]\label{ex:connected_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathbb{R}^n$ 连通、道路连通、单连通。
+    \item 开球 $B(x_0, r)$ 连通、道路连通、单连通（凸集）。
+    \item 圆周 $S^1$ 连通、道路连通，但不单连通（闭曲线绕圆心一周不可收缩）。
+    \item 带缝平面 $\mathbb{R}^2 \setminus \{(x, 0) : x \geq 0\}$ 连通、道路连通，但不单连通。
+    \item $[0, 1] \cup [2, 3]$ 不连通。
+    \item 拓扑学家的正弦曲线 $\{(x, \sin(1/x)) : x > 0\} \cup \{(0, y) : -1 \le y \le 1\}$ 连通但不道路连通。
+\end{enumerate}
+\end{example}
+
+\section{序列、极限与完备性}
+
+\subsection{欧氏空间中的序列}
+
+\begin{definition}[序列收敛]\label{def:sequence_convergence}
+设 $\{x_k\}$ 是 $\mathbb{R}^n$ 中的序列，$x \in \mathbb{R}^n$。称 $\{x_k\}$ \textbf{收敛}于 $x$，记作 $x_k \to x$ 或 $\lim_{k \to \infty} x_k = x$，若
+\[
+\forall \varepsilon > 0,\ \exists K \in \mathbb{N}^+,\ \forall k \ge K,\quad \|x_k - x\| < \varepsilon.
+\]
+$x$ 称为 $\{x_k\}$ 的\textbf{极限}。
+\end{definition}
+
+\begin{proposition}[收敛的坐标刻画]\label{prop:coordinate_convergence}
+设 $x_k = (x_{k,1}, \dots, x_{k,n})$，$x = (x_1, \dots, x_n)$。则
+\[
+x_k \to x \iff x_{k,i} \to x_i,\quad i = 1, \dots, n.
+\]
+\end{proposition}
+
+\begin{proof}
+（$\Rightarrow$）对每个 $i$，$|x_{k,i} - x_i| \le \|x_k - x\| \to 0$，故 $x_{k,i} \to x_i$。
+
+（$\Leftarrow$）对每个 $i$，$x_{k,i} \to x_i$。给定 $\varepsilon > 0$，对每个 $i$ 存在 $K_i$ 使 $k \ge K_i$ 时 $|x_{k,i} - x_i| < \varepsilon/\sqrt{n}$。取 $K = \max_i K_i$，则 $k \ge K$ 时
+\[
+\|x_k - x\| = \left( \sum_{i=1}^{n} |x_{k,i} - x_i|^2 \right)^{1/2} < \left( n \cdot \frac{\varepsilon^2}{n} \right)^{1/2} = \varepsilon.
+\]
+\end{proof}
+
+\begin{proposition}[极限的运算性质]\label{prop:limit_operations_ra}
+设 $x_k \to x$，$y_k \to y$（$\mathbb{R}^n$），$\alpha_k \to \alpha$（$\mathbb{R}$）。则：
+\begin{enumerate}[label=(\roman*)]
+    \item $x_k + y_k \to x + y$；
+    \item $\alpha_k x_k \to \alpha x$；
+    \item $\langle x_k, y_k \rangle \to \langle x, y \rangle$；
+    \item $\|x_k\| \to \|x\|$；
+    \item 极限唯一：若 $x_k \to x$ 且 $x_k \to y$，则 $x = y$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\|(x_k + y_k) - (x + y)\| \le \|x_k - x\| + \|y_k - y\| \to 0$。
+
+(ii)
+\[
+\|\alpha_k x_k - \alpha x\| \le \|\alpha_k x_k - \alpha_k x\| + \|\alpha_k x - \alpha x\| = |\alpha_k| \|x_k - x\| + |\alpha_k - \alpha| \|x\|.
+\]
+因 $\{\alpha_k\}$ 收敛故有界，设 $|\alpha_k| \le M$。则 $\|\alpha_k x_k - \alpha x\| \le M \|x_k - x\| + |\alpha_k - \alpha| \|x\| \to 0$。
+
+(iii) 由 Cauchy--Schwarz 不等式，
+\[
+|\langle x_k, y_k \rangle - \langle x, y \rangle| \le |\langle x_k - x, y_k \rangle| + |\langle x, y_k - y \rangle| \le \|x_k - x\| \|y_k\| + \|x\| \|y_k - y\| \to 0.
+\]
+
+(iv) 由反向三角不等式 $| \|x_k\| - \|x\| | \le \|x_k - x\| \to 0$。
+
+(v) 若 $x \neq y$，取 $\varepsilon = \|x - y\|/2 > 0$。存在 $K_1$ 使 $k \ge K_1$ 时 $\|x_k - x\| < \varepsilon$，$K_2$ 使 $k \ge K_2$ 时 $\|x_k - y\| < \varepsilon$。取 $k \ge \max(K_1, K_2)$，则
+\[
+\|x - y\| \le \|x - x_k\| + \|x_k - y\| < 2\varepsilon = \|x - y\|,
+\]
+矛盾。
+\end{proof}
+
+\begin{definition}[Cauchy 序列]\label{def:cauchy_sequence}
+序列 $\{x_k\}$ 称为 \textbf{Cauchy 序列}，若
+\[
+\forall \varepsilon > 0,\ \exists K \in \mathbb{N}^+,\ \forall m, k \ge K,\quad \|x_m - x_k\| < \varepsilon.
+\]
+\end{definition}
+
+\begin{proposition}[收敛序列是 Cauchy 序列]\label{prop:convergent_cauchy_ra}
+若 $\{x_k\}$ 收敛，则 $\{x_k\}$ 是 Cauchy 序列。
+\end{proposition}
+
+\begin{proof}
+设 $x_k \to x$。给定 $\varepsilon > 0$，存在 $K$ 使 $k \ge K$ 时 $\|x_k - x\| < \varepsilon/2$。则 $m, k \ge K$ 时
+\[
+\|x_m - x_k\| \le \|x_m - x\| + \|x - x_k\| < \varepsilon/2 + \varepsilon/2 = \varepsilon.
+\]
+\end{proof}
+
+\begin{theorem}[$\mathbb{R}^n$ 的完备性]\label{thm:rn_completeness}
+$\mathbb{R}^n$ 中每个 Cauchy 序列都收敛。
+\end{theorem}
+
+\begin{proof}
+设 $\{x_k\}$ 是 $\mathbb{R}^n$ 中的 Cauchy 序列。由坐标刻画，对每个 $i$，$\{x_{k,i}\}$ 是 $\mathbb{R}$ 中的 Cauchy 序列（因 $|x_{m,i} - x_{k,i}| \le \|x_m - x_k\|$）。由 $\mathbb{R}$ 的完备性（「数系」章），$x_{k,i} \to x_i$ 对某 $x_i \in \mathbb{R}$ 成立。令 $x = (x_1, \dots, x_n)$。由命题 \ref{prop:coordinate_convergence}，$x_k \to x$。
+\end{proof}
+
+\begin{definition}[聚点与上下极限]\label{def:cluster_upper_lower_limit}
+设 $\{x_k\}$ 是 $\mathbb{R}^n$ 中的序列。
+\begin{enumerate}[label=(\roman*)]
+    \item $x \in \mathbb{R}^n$ 称为 $\{x_k\}$ 的\textbf{聚点}，若 $\{x_k\}$ 有子序列收敛于 $x$。
+    \item 对实数列 $\{a_k\}$，定义
+    \[
+    \limsup_{k \to \infty} a_k := \lim_{k \to \infty} \left( \sup_{j \ge k} a_j \right), \qquad \liminf_{k \to \infty} a_k := \lim_{k \to \infty} \left( \inf_{j \ge k} a_j \right).
+    \]
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[Bolzano--Weierstrass 序列形式]\label{thm:bolzano_weierstrass_seq}
+$\mathbb{R}^n$ 中每个有界序列都有收敛子序列。
+\end{theorem}
+
+\begin{proof}
+由 Heine--Borel 定理（定理 \ref{thm:heine_borel}），有界闭集紧致；由定理 \ref{thm:bolzano_weierstrass}，紧致集序列紧致。具体地，设 $\{x_k\}$ 有界，则存在 $R > 0$ 使 $\{x_k\} \subseteq \overline{B}(\mathbf{0}, R)$。由定理 \ref{thm:bolzano_weierstrass} 的“紧致 $\Rightarrow$ 序列紧致”部分（$\overline{B}(\mathbf{0}, R)$ 有界闭，故紧致），$\{x_k\}$ 有收敛子序列。
+\end{proof}
+
+\begin{proposition}[上下极限与聚点的关系]\label{prop:limsup_cluster}
+设 $\{a_k\}$ 是实数列。则 $\limsup_{k \to \infty} a_k$ 是 $\{a_k\}$ 的最大聚点，$\liminf_{k \to \infty} a_k$ 是最小聚点。特别地，$\{a_k\}$ 收敛 $\iff$ $\limsup a_k = \liminf a_k$。
+\end{proposition}
+
+\begin{proof}
+设 $s_k = \sup_{j \ge k} a_j$。$\{s_k\}$ 单调不增，故 $\lim s_k = \inf_k s_k =: L$ 存在（可能为 $\pm\infty$）。
+
+先证 $L$ 是聚点。若 $L = -\infty$，则 $s_k \to -\infty$，$\{a_k\}$ 无下界，可构造子序列趋于 $-\infty$，$L$ 是聚点。若 $L \in \mathbb{R}$，对每个 $k$，由 $s_k = \sup_{j \ge k} a_j$，存在 $j_k \ge k$ 使 $a_{j_k} > s_k - 1/k$。又 $a_{j_k} \le s_k$。故 $|a_{j_k} - s_k| \le 1/k$。因 $s_k \to L$，$a_{j_k} \to L$。子序列 $\{a_{j_k}\}$ 收敛于 $L$，$L$ 是聚点。
+
+再证 $L$ 是最大聚点。设 $M$ 是任一聚点，即有子序列 $a_{k_j} \to M$。对每个 $j$，$a_{k_j} \le s_{k_j}$。因 $s_k \to L$ 且 $s_k$ 单调不增，$\lim_{j \to \infty} s_{k_j} = L$。故 $M = \lim a_{k_j} \le \lim s_{k_j} = L$。
+
+类似地，$\liminf$ 是最小聚点。
+
+最后，$\{a_k\}$ 收敛于 $L$ $\iff$ 所有子序列收敛于 $L$ $\iff$ 最大聚点 = 最小聚点 = $L$ $\iff$ $\limsup = \liminf$。
+\end{proof}
+
+\begin{example}[上下极限的计算]\label{ex:limsup_example}
+\begin{enumerate}[label=(\roman*)]
+    \item $a_k = (-1)^k$：$\limsup = 1$，$\liminf = -1$，序列不收敛。
+    \item $a_k = 1/k$：$\limsup = \liminf = 0$，序列收敛于 $0$。
+    \item $a_k = \sin(k)$：$\limsup = 1$，$\liminf = -1$（因 $\{k \bmod 2\pi\}$ 在 $[0, 2\pi)$ 上稠密）。
+\end{enumerate}
+\end{example}
+
+\subsection{压缩映射原理}
+
+\begin{definition}[压缩映射]\label{def:contraction_mapping}
+设 $(X, d)$ 为度量空间。映射 $T: X \to X$ 称为\textbf{压缩映射}，若存在常数 $0 \le q < 1$ 使
+\[
+d(T(x), T(y)) \le q \, d(x, y), \qquad \forall x, y \in X.
+\]
+$q$ 称为 $T$ 的\textbf{压缩常数}。
+\end{definition}
+
+\begin{theorem}[Banach 压缩映射原理]\label{thm:banach_fixed_point}
+设 $(X, d)$ 为完备度量空间，$T: X \to X$ 为压缩映射。则 $T$ 有唯一不动点 $x^* \in X$，即 $T(x^*) = x^*$。且对任意 $x_0 \in X$，迭代序列 $x_{k+1} = T(x_k)$ 收敛于 $x^*$，并有误差估计
+\[
+d(x_k, x^*) \le \frac{q^k}{1 - q} d(x_1, x_0).
+\]
+\end{theorem}
+
+\begin{proof}
+\textbf{存在性}。任取 $x_0 \in X$，定义 $x_{k+1} = T(x_k)$。先证 $\{x_k\}$ 是 Cauchy 序列。对任意 $k \ge 1$，
+\[
+d(x_{k+1}, x_k) = d(T(x_k), T(x_{k-1})) \le q \, d(x_k, x_{k-1}) \le \cdots \le q^k d(x_1, x_0).
+\]
+故对 $m > k$，
+\[
+d(x_m, x_k) \le \sum_{j=k}^{m-1} d(x_{j+1}, x_j) \le \sum_{j=k}^{m-1} q^j d(x_1, x_0) \le \frac{q^k}{1 - q} d(x_1, x_0).
+\]
+因 $q < 1$，$q^k \to 0$，故 $\{x_k\}$ 是 Cauchy 序列。由 $X$ 完备，$x_k \to x^*$ 对某 $x^* \in X$ 成立。
+
+由 $T$ 的连续性（压缩映射必连续：$d(T(x), T(y)) \le q \, d(x, y) \to 0$ 当 $x \to y$），
+\[
+T(x^*) = T\left( \lim_{k \to \infty} x_k \right) = \lim_{k \to \infty} T(x_k) = \lim_{k \to \infty} x_{k+1} = x^*.
+\]
+故 $x^*$ 是不动点。
+
+\textbf{唯一性}。设 $x^*, y^*$ 都是不动点。则
+\[
+d(x^*, y^*) = d(T(x^*), T(y^*)) \le q \, d(x^*, y^*).
+\]
+因 $q < 1$，得 $d(x^*, y^*) = 0$，即 $x^* = y^*$。
+
+\textbf{误差估计}。对 $k \ge 1$ 与 $m > k$，由上述估计令 $m \to \infty$（固定 $k$），得
+\[
+d(x_k, x^*) = \lim_{m \to \infty} d(x_k, x_m) \le \frac{q^k}{1 - q} d(x_1, x_0).
+\]
+\end{proof}
+
+\begin{corollary}[压缩映射原理的局部形式]\label{cor:banach_local}
+设 $(X, d)$ 为完备度量空间，$T: X \to X$ 满足：存在 $q \in [0, 1)$ 与某个闭球 $\overline{B}(x_0, r)$ 使
+\begin{enumerate}[label=(\roman*)]
+    \item $T(\overline{B}(x_0, r)) \subseteq \overline{B}(x_0, r)$；
+    \item $d(T(x), T(y)) \le q \, d(x, y)$ 对所有 $x, y \in \overline{B}(x_0, r)$ 成立。
+\end{enumerate}
+则 $T$ 在 $\overline{B}(x_0, r)$ 中有唯一不动点。
+\end{corollary}
+
+\begin{proof}
+闭球 $\overline{B}(x_0, r)$ 作为完备度量空间的闭子集是完备的。将定理 \ref{thm:banach_fixed_point} 应用于 $T|_{\overline{B}(x_0, r)}$。
+\end{proof}
+
+\begin{example}[压缩映射原理的应用]\label{ex:contraction_applications}
+\begin{enumerate}[label=(\roman*)]
+    \item 解方程 $x = \cos x$。$T(x) = \cos x$ 在 $[0, 1]$ 上是压缩映射（$|T'(x)| = |\sin x| \le \sin 1 < 1$），故有唯一解。
+    \item 常微分方程初值问题解的存在唯一性（Picard--Lindelöf 定理）：在适当条件下，积分算子 $T(y)(t) = y_0 + \int_{t_0}^t F(s, y(s)) \, ds$ 是压缩映射。
+    \item 隐函数定理的证明：构造压缩映射迭代求解。
+\end{enumerate}
+\end{example}
+
+\section{连续映射与紧致性}
+
+\subsection{连续映射}
+
+\begin{definition}[连续映射]\label{def:continuous_map}
+设 $E \subseteq \mathbb{R}^n$，$f: E \to \mathbb{R}^m$，$x_0 \in E$。
+\begin{enumerate}[label=(\roman*)]
+    \item $f$ 在 $x_0$ 处\textbf{连续}，若
+    \[
+    \forall \varepsilon > 0,\ \exists \delta > 0,\ \forall x \in E,\quad \|x - x_0\| < \delta \implies \|f(x) - f(x_0)\| < \varepsilon.
+    \]
+    \item $f$ 在 $E$ 上连续，若 $f$ 在 $E$ 的每一点处连续。
+    \item $f$ 在 $E$ 上\textbf{一致连续}，若
+    \[
+    \forall \varepsilon > 0,\ \exists \delta > 0,\ \forall x, y \in E,\quad \|x - y\| < \delta \implies \|f(x) - f(y)\| < \varepsilon.
+    \]
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[连续性的等价刻画]\label{prop:continuity_equivalent}
+设 $E \subseteq \mathbb{R}^n$，$f: E \to \mathbb{R}^m$，$x_0 \in E$。则以下条件等价：
+\begin{enumerate}[label=(\roman*)]
+    \item $f$ 在 $x_0$ 处连续；
+    \item 对 $E$ 中任意序列 $x_k \to x_0$，有 $f(x_k) \to f(x_0)$；
+    \item 对 $f(x_0)$ 的任意开邻域 $V$，存在 $x_0$ 的开邻域 $U$ 使 $f(E \cap U) \subseteq V$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\Rightarrow$ (ii)：给定 $\varepsilon > 0$，由连续性存在 $\delta > 0$ 使 $\|x - x_0\| < \delta$ 时 $\|f(x) - f(x_0)\| < \varepsilon$。由 $x_k \to x_0$，存在 $K$ 使 $k \ge K$ 时 $\|x_k - x_0\| < \delta$，从而 $\|f(x_k) - f(x_0)\| < \varepsilon$。故 $f(x_k) \to f(x_0)$。
+
+(ii) $\Rightarrow$ (i)：反设 $f$ 在 $x_0$ 处不连续。则存在 $\varepsilon_0 > 0$ 使对每个 $k$ 存在 $x_k \in E$ 满足 $\|x_k - x_0\| < 1/k$ 但 $\|f(x_k) - f(x_0)\| \ge \varepsilon_0$。则 $x_k \to x_0$，但 $f(x_k) \not\to f(x_0)$，矛盾。
+
+(i) $\Rightarrow$ (iii)：设 $V$ 是 $f(x_0)$ 的开邻域，存在 $\varepsilon > 0$ 使 $B(f(x_0), \varepsilon) \subseteq V$。由连续性存在 $\delta > 0$ 使 $\|x - x_0\| < \delta$ 时 $\|f(x) - f(x_0)\| < \varepsilon$。取 $U = B(x_0, \delta)$，则 $f(E \cap U) \subseteq B(f(x_0), \varepsilon) \subseteq V$。
+
+(iii) $\Rightarrow$ (i)：给定 $\varepsilon > 0$，取 $V = B(f(x_0), \varepsilon)$。存在 $x_0$ 的开邻域 $U$ 使 $f(E \cap U) \subseteq V$。存在 $\delta > 0$ 使 $B(x_0, \delta) \subseteq U$。则 $\|x - x_0\| < \delta$ 时 $x \in E \cap U$，故 $f(x) \in V$，即 $\|f(x) - f(x_0)\| < \varepsilon$。
+\end{proof}
+
+\begin{theorem}[连续映射的全局刻画]\label{thm:continuity_global}
+设 $E \subseteq \mathbb{R}^n$，$f: E \to \mathbb{R}^m$。则以下条件等价：
+\begin{enumerate}[label=(\roman*)]
+    \item $f$ 在 $E$ 上连续；
+    \item 对 $\mathbb{R}^m$ 中任意开集 $V$，$f^{-1}(V)$ 是 $E$ 的相对开集；
+    \item 对 $\mathbb{R}^m$ 中任意闭集 $F$，$f^{-1}(F)$ 是 $E$ 的相对闭集。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) $\Rightarrow$ (ii)：设 $V$ 是 $\mathbb{R}^m$ 中的开集，$x_0 \in f^{-1}(V)$。则 $f(x_0) \in V$。由命题 \ref{prop:continuity_equivalent} (iii)，存在 $x_0$ 在 $\mathbb{R}^n$ 中的开邻域 $U$ 使 $f(E \cap U) \subseteq V$。故 $E \cap U \subseteq f^{-1}(V)$，即 $f^{-1}(V)$ 是 $E$ 的相对开集。
+
+(ii) $\Rightarrow$ (i)：设 $x_0 \in E$。对 $f(x_0)$ 的任意开邻域 $V$，$f^{-1}(V)$ 是 $E$ 的相对开集且含 $x_0$。故存在开集 $U$ 使 $x_0 \in E \cap U \subseteq f^{-1}(V)$，即 $f(E \cap U) \subseteq V$。由命题 \ref{prop:continuity_equivalent} (iii)，$f$ 在 $x_0$ 处连续。
+
+(ii) $\iff$ (iii)：由 $f^{-1}(\mathbb{R}^m \setminus F) = E \setminus f^{-1}(F)$ 与 De Morgan 律直接得到。
+\end{proof}
+
+\begin{theorem}[紧集上连续映射的性质]\label{thm:continuous_compact}
+设 $K \subseteq \mathbb{R}^n$ 紧致，$f: K \to \mathbb{R}^m$ 连续。则：
+\begin{enumerate}[label=(\roman*)]
+    \item $f(K)$ 紧致；
+    \item $f$ 在 $K$ 上有界；
+    \item 若 $m = 1$，$f$ 在 $K$ 上取得最大值与最小值；
+    \item $f$ 在 $K$ 上一致连续。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 设 $\{V_\alpha\}$ 是 $f(K)$ 的开覆盖。则 $\{f^{-1}(V_\alpha)\}$ 是 $K$ 的开覆盖（因 $f$ 连续，$f^{-1}(V_\alpha)$ 是 $K$ 的相对开集）。由 $K$ 紧致，存在有限子覆盖 $f^{-1}(V_{\alpha_1}), \dots, f^{-1}(V_{\alpha_k})$。则 $V_{\alpha_1}, \dots, V_{\alpha_k}$ 覆盖 $f(K)$。故 $f(K)$ 紧致。
+
+(ii) 由 (i)，$f(K)$ 紧致。由 Heine--Borel 定理（定理 \ref{thm:heine_borel}），$f(K)$ 有界，即存在 $R > 0$ 使 $f(K) \subseteq B(\mathbf{0}, R)$。故 $\|f(x)\| \le R$ 对所有 $x \in K$ 成立。
+
+(iii) 由 (i)，$f(K)$ 是 $\mathbb{R}$ 中的紧致集。由 Heine--Borel 定理，$f(K)$ 有界闭。故 $\sup f(K)$ 与 $\inf f(K)$ 均属于 $f(K)$，即 $f$ 取得最大值与最小值。
+
+(iv) 反设 $f$ 不一致连续。则存在 $\varepsilon_0 > 0$，对每个 $k$ 存在 $x_k, y_k \in K$ 使 $\|x_k - y_k\| < 1/k$ 但 $\|f(x_k) - f(y_k)\| \ge \varepsilon_0$。由 $K$ 序列紧致（定理 \ref{thm:bolzano_weierstrass}），$\{x_k\}$ 有子序列 $x_{k_j} \to x_0 \in K$。因 $\|x_{k_j} - y_{k_j}\| < 1/k_j \to 0$，$y_{k_j} \to x_0$。由 $f$ 连续，$f(x_{k_j}) \to f(x_0)$ 且 $f(y_{k_j}) \to f(x_0)$。但 $\|f(x_{k_j}) - f(y_{k_j})\| \ge \varepsilon_0$，与收敛矛盾。
+\end{proof}
+
+\begin{corollary}[Heine--Cantor 定理]\label{cor:heine_cantor}
+设 $K \subseteq \mathbb{R}^n$ 紧致，$f: K \to \mathbb{R}^m$ 连续。则 $f$ 在 $K$ 上一致连续。
+\end{corollary}
+
+\begin{proof}
+即定理 \ref{thm:continuous_compact} (iv)。
+\end{proof}
+
+\begin{theorem}[介值定理的推广]\label{thm:intermediate_value_general}
+设 $E \subseteq \mathbb{R}^n$ 连通，$f: E \to \mathbb{R}$ 连续。若 $x, y \in E$ 且 $f(x) < c < f(y)$，则存在 $z \in E$ 使 $f(z) = c$。
+\end{theorem}
+
+\begin{proof}
+由命题 \ref{prop:connected_properties} (iii)，$f(E)$ 连通。由命题 \ref{prop:connected_properties} (iv)，$f(E)$ 是 $\mathbb{R}$ 中的区间。因 $f(x), f(y) \in f(E)$，$c$ 介于二者之间，故 $c \in f(E)$，即存在 $z \in E$ 使 $f(z) = c$。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0,>=Stealth,thick]
+  \draw[->] (-0.3,0) -- (7.5,0) node[right] {$E$};
+  \draw[->] (0,-0.3) -- (0,3.5) node[above] {$f$};
+  \draw[thick, blue!70!black, fill=blue!10] (0.5,0.3) .. controls (2.0,2.8) and (4.5,2.8) .. (6.8,0.5) .. controls (5.0,-0.5) and (2.0,-0.5) .. cycle;
+  \node[blue!70!black] at (3.6,2.0) {$E$ 连通};
+  \filldraw[red] (1.5,1.0) circle (2pt) node[below left,font=\footnotesize] {$x$};
+  \filldraw[red] (5.5,1.0) circle (2pt) node[below right,font=\footnotesize] {$y$};
+  \draw[dashed, orange] (1.5,1.0) -- (1.5,2.5) -- (5.5,2.5) -- (5.5,1.0);
+  \filldraw[green!60!black] (3.5,2.5) circle (2pt) node[above,font=\footnotesize] {$z$};
+  \node[orange, font=\footnotesize] at (3.5,2.1) {$f(z)=c$};
+\end{tikzpicture}
+\caption{连通集上连续函数取得中间值：$f(x) < c < f(y)$ 时存在 $z$ 使 $f(z)=c$。}
+\label{fig:intermediate_value}
+\end{figure}
+
+\begin{example}[连续映射的实例与反例]\label{ex:continuous_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item 多项式映射 $f: \mathbb{R}^n \to \mathbb{R}$，$f(x) = \sum_{|\alpha| \le d} c_\alpha x^\alpha$，连续。
+    \item 线性映射 $f(x) = Ax$（$A$ 为 $m \times n$ 矩阵），连续。
+    \item 范数映射 $f(x) = \|x\|$，连续（由反向三角不等式）。
+    \item 内积映射 $f(x, y) = \langle x, y \rangle$，连续。
+    \item $f: (0, 1] \to \mathbb{R}$，$f(x) = 1/x$，连续但不一致连续（当 $x \to 0^+$ 时无界）。
+    \item $f: [0, 1] \to \mathbb{R}$，$f(x) = 1/x$（$x > 0$），$f(0) = 0$，在 $0$ 处不连续。
+\end{enumerate}
+\end{example}
+
+\section{多变量微分学}
+
+\subsection{方向导数与偏导数}
+
+\begin{definition}[方向导数]\label{def:directional_derivative}
+设 $f: \Omega \to \mathbb{R}$，$\Omega \subseteq \mathbb{R}^n$ 开，$x_0 \in \Omega$，$v \in \mathbb{R}^n$ 为单位向量。$f$ 在 $x_0$ 处沿方向 $v$ 的\textbf{方向导数}定义为
+\[
+D_v f(x_0) := \lim_{t \to 0} \frac{f(x_0 + t v) - f(x_0)}{t},
+\]
+若该极限存在。
+\end{definition}
+
+\begin{definition}[偏导数]\label{def:partial_derivative_ra}
+设 $f: \Omega \to \mathbb{R}$，$\Omega \subseteq \mathbb{R}^n$ 开，$x_0 \in \Omega$。$f$ 在 $x_0$ 处关于第 $i$ 个坐标的\textbf{偏导数}定义为
+\[
+\frac{\partial f}{\partial x_i}(x_0) := \lim_{t \to 0} \frac{f(x_0 + t e_i) - f(x_0)}{t},
+\]
+其中 $e_i$ 是第 $i$ 个标准基向量。即 $\partial f/\partial x_i(x_0) = D_{e_i} f(x_0)$。
+\end{definition}
+
+\begin{proposition}[偏导数存在不蕴含连续]\label{prop:partial_not_continuous}
+存在函数 $f: \mathbb{R}^2 \to \mathbb{R}$ 使 $f$ 在原点处两个偏导数都存在，但 $f$ 在原点处不连续。
+\end{proposition}
+
+\begin{proof}
+定义
+\[
+f(x, y) = \begin{cases} \frac{xy}{x^2 + y^2}, & (x, y) \neq (0, 0), \\ 0, & (x, y) = (0, 0). \end{cases}
+\]
+偏导数：
+\[
+\frac{\partial f}{\partial x}(0, 0) = \lim_{t \to 0} \frac{f(t, 0) - f(0, 0)}{t} = \lim_{t \to 0} \frac{0 - 0}{t} = 0,
+\]
+同理 $\partial f/\partial y(0, 0) = 0$。但不连续：沿直线 $y = kx$，
+\[
+\lim_{x \to 0} f(x, kx) = \lim_{x \to 0} \frac{k x^2}{x^2 + k^2 x^2} = \frac{k}{1 + k^2},
+\]
+随 $k$ 变化，故 $\lim_{(x, y) \to (0, 0)} f(x, y)$ 不存在。
+\end{proof}
+
+\begin{definition}[梯度]\label{def:gradient_ra}
+设 $f: \Omega \to \mathbb{R}$，$\Omega \subseteq \mathbb{R}^n$ 开，$f$ 在 $x_0$ 处所有偏导数存在。$f$ 在 $x_0$ 处的\textbf{梯度}为
+\[
+\nabla f(x_0) := \left( \frac{\partial f}{\partial x_1}(x_0), \dots, \frac{\partial f}{\partial x_n}(x_0) \right) \in \mathbb{R}^n.
+\]
+\end{definition}
+
+\subsection{全微分}
+
+\begin{definition}[全微分与可微性]\label{def:total_differential_ra}
+设 $f: \Omega \to \mathbb{R}^m$，$\Omega \subseteq \mathbb{R}^n$ 开，$x_0 \in \Omega$。$f$ 在 $x_0$ 处\textbf{可微}，若存在线性映射 $L: \mathbb{R}^n \to \mathbb{R}^m$ 使
+\[
+f(x_0 + h) = f(x_0) + L(h) + o(\|h\|), \qquad \|h\| \to 0,
+\]
+即
+\[
+\lim_{h \to 0} \frac{\|f(x_0 + h) - f(x_0) - L(h)\|}{\|h\|} = 0.
+\]
+线性映射 $L$ 称为 $f$ 在 $x_0$ 处的\textbf{全微分}或\textbf{导数}，记作 $Df(x_0)$ 或 $f'(x_0)$。
+\end{definition}
+
+\begin{proposition}[全微分的唯一性]\label{prop:differential_uniqueness}
+若 $f$ 在 $x_0$ 处可微，则全微分 $L = Df(x_0)$ 唯一。
+\end{proposition}
+
+\begin{proof}
+设 $L_1, L_2$ 都满足定义。则
+\[
+L_1(h) - L_2(h) = o(\|h\|), \qquad \|h\| \to 0.
+\]
+对任意 $v \neq 0$，取 $h = t v$（$t > 0$），则
+\[
+\frac{\|L_1(t v) - L_2(t v)\|}{t \|v\|} = \frac{\|t (L_1(v) - L_2(v))\|}{t \|v\|} = \frac{\|L_1(v) - L_2(v)\|}{\|v\|} \to 0.
+\]
+故 $L_1(v) = L_2(v)$ 对任意 $v$ 成立，$L_1 = L_2$。
+\end{proof}
+
+\begin{theorem}[可微蕴含偏导数存在且 $L$ 由 Jacobi 矩阵给出]\label{thm:differentiable_jacobian}
+设 $f: \Omega \to \mathbb{R}^m$，$\Omega \subseteq \mathbb{R}^n$ 开，$f$ 在 $x_0 \in \Omega$ 处可微。则所有偏导数 $\partial f_i/\partial x_j(x_0)$ 存在，且
+\[
+Df(x_0)(h) = J_f(x_0) h, \qquad h \in \mathbb{R}^n,
+\]
+其中
+\[
+J_f(x_0) = \begin{pmatrix} \frac{\partial f_1}{\partial x_1}(x_0) & \cdots & \frac{\partial f_1}{\partial x_n}(x_0) \\ \vdots & \ddots & \vdots \\ \frac{\partial f_m}{\partial x_1}(x_0) & \cdots & \frac{\partial f_m}{\partial x_n}(x_0) \end{pmatrix}
+\]
+是 $f$ 在 $x_0$ 处的 \textbf{Jacobi 矩阵}。
+\end{theorem}
+
+\begin{proof}
+取 $h = t e_j$（$t \neq 0$），由可微性，
+\[
+f(x_0 + t e_j) = f(x_0) + t L(e_j) + o(|t|).
+\]
+故
+\[
+\frac{f(x_0 + t e_j) - f(x_0)}{t} = L(e_j) + \frac{o(|t|)}{t} \to L(e_j), \qquad t \to 0.
+\]
+即 $\partial f/\partial x_j(x_0) = L(e_j)$。因 $L$ 线性，$L(h) = L(\sum_j h_j e_j) = \sum_j h_j L(e_j) = J_f(x_0) h$。
+\end{proof}
+
+\begin{theorem}[连续偏导数蕴含可微]\label{thm:continuous_partial_implies_differentiable}
+设 $f: \Omega \to \mathbb{R}$，$\Omega \subseteq \mathbb{R}^n$ 开。若 $f$ 在 $x_0$ 的某邻域内所有偏导数存在且在 $x_0$ 处连续，则 $f$ 在 $x_0$ 处可微。
+\end{theorem}
+
+\begin{proof}
+只需证 $n$ 维情形。设 $h = (h_1, \dots, h_n)$。写
+\[
+f(x_0 + h) - f(x_0) = \sum_{j=1}^{n} [f(x_0 + h_1 e_1 + \cdots + h_j e_j) - f(x_0 + h_1 e_1 + \cdots + h_{j-1} e_{j-1})].
+\]
+对第 $j$ 项，固定其他坐标，由一元中值定理，
+\[
+f(x_0 + h_1 e_1 + \cdots + h_j e_j) - f(x_0 + h_1 e_1 + \cdots + h_{j-1} e_{j-1}) = h_j \frac{\partial f}{\partial x_j}(\xi_j),
+\]
+其中 $\xi_j$ 位于 $x_0 + h_1 e_1 + \cdots + h_{j-1} e_{j-1}$ 与 $x_0 + h_1 e_1 + \cdots + h_j e_j$ 之间。故
+\[
+f(x_0 + h) - f(x_0) = \sum_{j=1}^{n} h_j \frac{\partial f}{\partial x_j}(\xi_j).
+\]
+因偏导数在 $x_0$ 处连续，$\partial f/\partial x_j(\xi_j) = \partial f/\partial x_j(x_0) + o(1)$（当 $h \to 0$ 时 $\xi_j \to x_0$）。故
+\[
+f(x_0 + h) - f(x_0) = \sum_{j=1}^{n} h_j \frac{\partial f}{\partial x_j}(x_0) + \sum_{j=1}^{n} h_j \cdot o(1) = \nabla f(x_0) \cdot h + o(\|h\|).
+\]
+即 $f$ 在 $x_0$ 处可微，$Df(x_0)(h) = \nabla f(x_0) \cdot h$。
+\end{proof}
+
+\begin{corollary}[$C^1$ 函数可微]\label{cor:c1_differentiable}
+若 $f$ 在 $\Omega$ 上所有偏导数存在且连续（记 $f \in C^1(\Omega)$），则 $f$ 在 $\Omega$ 上可微。
+\end{corollary}
+
+\begin{proof}
+对每一点 $x_0 \in \Omega$ 应用定理 \ref{thm:continuous_partial_implies_differentiable}。
+\end{proof}
+
+\begin{theorem}[链式法则]\label{thm:chain_rule_ra}
+设 $\Omega \subseteq \mathbb{R}^n$ 开，$\Omega' \subseteq \mathbb{R}^m$ 开，$g: \Omega \to \Omega'$ 在 $x_0$ 处可微，$f: \Omega' \to \mathbb{R}^p$ 在 $y_0 = g(x_0)$ 处可微。则 $f \circ g$ 在 $x_0$ 处可微，且
+\[
+D(f \circ g)(x_0) = Df(y_0) \circ Dg(x_0),
+\]
+即
+\[
+J_{f \circ g}(x_0) = J_f(y_0) \cdot J_g(x_0).
+\]
+\end{theorem}
+
+\begin{proof}
+由可微性，
+\[
+g(x_0 + h) = g(x_0) + Dg(x_0)(h) + o(\|h\|) = y_0 + k + o(\|h\|),
+\]
+其中 $k = Dg(x_0)(h)$，$\|k\| \le \|Dg(x_0)\| \|h\| + o(\|h\|) = O(\|h\|)$。又
+\[
+f(y_0 + k) = f(y_0) + Df(y_0)(k) + o(\|k\|).
+\]
+故
+\[
+(f \circ g)(x_0 + h) = f(y_0 + k + o(\|h\|)) = f(y_0) + Df(y_0)(k + o(\|h\|)) + o(\|k + o(\|h\|)\|).
+\]
+由 $Df(y_0)$ 线性，
+\[
+Df(y_0)(k + o(\|h\|)) = Df(y_0)(k) + Df(y_0)(o(\|h\|)) = Df(y_0)(Dg(x_0)(h)) + o(\|h\|).
+\]
+又 $o(\|k + o(\|h\|)\|) = o(\|h\|)$。故
+\[
+(f \circ g)(x_0 + h) = (f \circ g)(x_0) + (Df(y_0) \circ Dg(x_0))(h) + o(\|h\|).
+\]
+即 $D(f \circ g)(x_0) = Df(y_0) \circ Dg(x_0)$。
+\end{proof}
+
+\begin{definition}[$C^k$ 映射]\label{def:ck_mapping}
+设 $\Omega \subseteq \mathbb{R}^n$ 开，$f: \Omega \to \mathbb{R}^m$。称 $f \in C^k(\Omega)$，若 $f$ 的所有不超过 $k$ 阶的偏导数存在且连续。$C^\infty(\Omega) := \bigcap_{k=0}^{\infty} C^k(\Omega)$ 称为\textbf{光滑映射}的集合。
+\end{definition}
+
+\begin{theorem}[混合偏导数交换——Clairaut 定理]\label{thm:clairaut_ra}
+设 $f: \Omega \to \mathbb{R}$，$\Omega \subseteq \mathbb{R}^n$ 开，$f \in C^2(\Omega)$。则对所有 $i, j$，
+\[
+\frac{\partial^2 f}{\partial x_i \partial x_j} = \frac{\partial^2 f}{\partial x_j \partial x_i}.
+\]
+\end{theorem}
+
+\begin{proof}
+只需证 $n = 2$ 的情形。设 $(x_0, y_0) \in \Omega$。取 $h, k$ 充分小使矩形 $[x_0, x_0 + h] \times [y_0, y_0 + k] \subseteq \Omega$。定义
+\[
+\Delta(h, k) = f(x_0 + h, y_0 + k) - f(x_0 + h, y_0) - f(x_0, y_0 + k) + f(x_0, y_0).
+\]
+令 $\varphi(x) = f(x, y_0 + k) - f(x, y_0)$。则 $\Delta(h, k) = \varphi(x_0 + h) - \varphi(x_0)$。由一元中值定理，存在 $\xi \in (x_0, x_0 + h)$ 使
+\[
+\Delta(h, k) = h \varphi'(\xi) = h \left[ \frac{\partial f}{\partial x}(\xi, y_0 + k) - \frac{\partial f}{\partial x}(\xi, y_0) \right].
+\]
+再对 $y$ 应用中值定理，存在 $\eta \in (y_0, y_0 + k)$ 使
+\[
+\Delta(h, k) = hk \frac{\partial^2 f}{\partial y \partial x}(\xi, \eta).
+\]
+类似地，令 $\psi(y) = f(x_0 + h, y) - f(x_0, y)$，则 $\Delta(h, k) = \psi(y_0 + k) - \psi(y_0)$。由中值定理，
+\[
+\Delta(h, k) = hk \frac{\partial^2 f}{\partial x \partial y}(\xi', \eta').
+\]
+故
+\[
+\frac{\partial^2 f}{\partial y \partial x}(\xi, \eta) = \frac{\partial^2 f}{\partial x \partial y}(\xi', \eta').
+\]
+令 $(h, k) \to (0, 0)$，则 $(\xi, \eta) \to (x_0, y_0)$，$(\xi', \eta') \to (x_0, y_0)$。由二阶偏导数连续性，
+\[
+\frac{\partial^2 f}{\partial y \partial x}(x_0, y_0) = \frac{\partial^2 f}{\partial x \partial y}(x_0, y_0).
+\]
+\end{proof}
+
+\begin{example}[混合偏导数不连续时交换失效]\label{ex:clairaut_failure_ra}
+定义
+\[
+f(x, y) = \begin{cases} \frac{xy(x^2 - y^2)}{x^2 + y^2}, & (x, y) \neq (0, 0), \\ 0, & (x, y) = (0, 0). \end{cases}
+\]
+则 $f \in C^1(\mathbb{R}^2)$，但在 $(0, 0)$ 处
+\[
+\frac{\partial^2 f}{\partial x \partial y}(0, 0) = 1, \qquad \frac{\partial^2 f}{\partial y \partial x}(0, 0) = -1.
+\]
+故 $C^2$ 假设不可省略。
+\end{example}
+
+\subsection{中值定理与 Taylor 公式}
+
+\begin{theorem}[多变量中值定理]\label{thm:multivariable_mean_value}
+设 $f: \Omega \to \mathbb{R}$，$\Omega \subseteq \mathbb{R}^n$ 开，$f \in C^1(\Omega)$。若 $x, y \in \Omega$ 且线段 $[x, y] \subseteq \Omega$，则存在 $\xi \in (x, y)$ 使
+\[
+f(y) - f(x) = \nabla f(\xi) \cdot (y - x).
+\]
+\end{theorem}
+
+\begin{proof}
+定义 $g: [0, 1] \to \mathbb{R}$，$g(t) = f(x + t(y - x))$。由链式法则，$g \in C^1([0, 1])$ 且
+\[
+g'(t) = \nabla f(x + t(y - x)) \cdot (y - x).
+\]
+由一元中值定理，存在 $t_0 \in (0, 1)$ 使 $g(1) - g(0) = g'(t_0)$。令 $\xi = x + t_0(y - x)$，则
+\[
+f(y) - f(x) = \nabla f(\xi) \cdot (y - x).
+\]
+\end{proof}
+
+\begin{theorem}[二阶 Taylor 公式]\label{thm:taylor_second_order}
+设 $f: \Omega \to \mathbb{R}$，$\Omega \subseteq \mathbb{R}^n$ 开，$f \in C^2(\Omega)$。若 $x \in \Omega$，$h \in \mathbb{R}^n$ 使 $x + t h \in \Omega$ 对 $t \in [0, 1]$ 成立，则存在 $\xi \in (x, x + h)$ 使
+\[
+f(x + h) = f(x) + \nabla f(x) \cdot h + \frac{1}{2} h^{\mathsf T} H_f(\xi) h,
+\]
+其中 $H_f(\xi) = \left( \frac{\partial^2 f}{\partial x_i \partial x_j}(\xi) \right)_{i,j}$ 是 $f$ 在 $\xi$ 处的 \textbf{Hesse 矩阵}。
+\end{theorem}
+
+\begin{proof}
+令 $g(t) = f(x + t h)$。则 $g \in C^2([0, 1])$。由链式法则，
+\[
+g'(t) = \nabla f(x + t h) \cdot h, \qquad g''(t) = h^{\mathsf T} H_f(x + t h) h.
+\]
+由一元二阶 Taylor 公式，存在 $t_0 \in (0, 1)$ 使
+\[
+g(1) = g(0) + g'(0) + \frac{1}{2} g''(t_0).
+\]
+代入 $g(1) = f(x + h)$，$g(0) = f(x)$，$g'(0) = \nabla f(x) \cdot h$，$g''(t_0) = h^{\mathsf T} H_f(x + t_0 h) h$。令 $\xi = x + t_0 h$ 即得。
+\end{proof}
+
+\begin{corollary}[极值的二阶条件]\label{cor:extremum_second_order}
+设 $f: \Omega \to \mathbb{R}$，$\Omega \subseteq \mathbb{R}^n$ 开，$f \in C^2(\Omega)$，$x_0 \in \Omega$ 且 $\nabla f(x_0) = \mathbf{0}$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $H_f(x_0)$ 正定，$x_0$ 是局部极小值点；
+    \item 若 $H_f(x_0)$ 负定，$x_0$ 是局部极大值点；
+    \item 若 $H_f(x_0)$ 不定，$x_0$ 是鞍点。
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+由 Taylor 公式，$f(x_0 + h) - f(x_0) = \frac{1}{2} h^{\mathsf T} H_f(x_0) h + o(\|h\|^2)$。
+
+(i) 若 $H_f(x_0)$ 正定，存在 $\lambda > 0$ 使 $h^{\mathsf T} H_f(x_0) h \ge \lambda \|h\|^2$。取 $\delta > 0$ 使 $\|h\| < \delta$ 时 $|o(\|h\|^2)| < \frac{\lambda}{4} \|h\|^2$。则 $\|h\| < \delta$ 时 $f(x_0 + h) - f(x_0) \ge \frac{\lambda}{4} \|h\|^2 > 0$，$x_0$ 是局部极小值点。
+
+(ii) 类似。
+
+(iii) 若 $H_f(x_0)$ 不定，存在 $h_+, h_-$ 使 $h_+^{\mathsf T} H_f(x_0) h_+ > 0$，$h_-^{\mathsf T} H_f(x_0) h_- < 0$。取 $h = t h_+$（$t$ 充分小）得 $f(x_0 + h) > f(x_0)$；取 $h = t h_-$ 得 $f(x_0 + h) < f(x_0)$。故 $x_0$ 是鞍点。
+\end{proof}
+
+\begin{theorem}[Lagrange 乘子法]\label{thm:lagrange_multiplier_ra}
+设 $f, g_1, \dots, g_m: \Omega \to \mathbb{R}$，$\Omega \subseteq \mathbb{R}^n$ 开，$f, g_i \in C^1(\Omega)$。设 $x_0 \in \Omega$ 是 $f$ 在约束 $g_1(x) = \dots = g_m(x) = 0$ 下的局部极值点，且 $\nabla g_1(x_0), \dots, \nabla g_m(x_0)$ 线性无关。则存在 $\lambda_1, \dots, \lambda_m \in \mathbb{R}$ 使
+\[
+\nabla f(x_0) = \sum_{i=1}^{m} \lambda_i \nabla g_i(x_0).
+\]
+\end{theorem}
+
+\begin{proof}
+由隐函数定理（定理 \ref{thm:implicit_function}），约束集 $M = \{x : g_1(x) = \dots = g_m(x) = 0\}$ 在 $x_0$ 附近是 $n - m$ 维子流形。$x_0$ 是 $f|_M$ 的局部极值点，故对任意 $v \in T_{x_0} M$，$Df(x_0)(v) = 0$。而 $T_{x_0} M = \bigcap_{i=1}^{m} \ker Dg_i(x_0)$。故 $\nabla f(x_0)$ 正交于 $\bigcap_i \ker \nabla g_i(x_0)$，即 $\nabla f(x_0)$ 属于 $\operatorname{span}\{\nabla g_1(x_0), \dots, \nabla g_m(x_0)\}$。故存在 $\lambda_i$ 使 $\nabla f(x_0) = \sum_i \lambda_i \nabla g_i(x_0)$。
+\end{proof}
+
+\section{反函数定理、隐函数定理与秩定理}
+
+\subsection{反函数定理}
+
+\begin{theorem}[反函数定理]\label{thm:inverse_function}
+设 $\Omega \subseteq \mathbb{R}^n$ 开，$f: \Omega \to \mathbb{R}^n$ 是 $C^1$ 映射，$x_0 \in \Omega$。若 $Df(x_0)$ 可逆（即 $\det J_f(x_0) \neq 0$），则存在 $x_0$ 的开邻域 $U \subseteq \Omega$ 与 $f(x_0)$ 的开邻域 $V$，使 $f: U \to V$ 是双射，且逆映射 $f^{-1}: V \to U$ 是 $C^1$ 的，满足
+\[
+D(f^{-1})(y) = [Df(f^{-1}(y))]^{-1}, \qquad y \in V.
+\]
+\end{theorem}
+
+\begin{proof}
+\textbf{步骤 1：简化}。通过平移与线性变换，不妨设 $x_0 = \mathbf{0}$，$f(x_0) = \mathbf{0}$，$Df(\mathbf{0}) = I$（单位矩阵）。一般情形：令 $\tilde{f}(x) = [Df(x_0)]^{-1} (f(x_0 + x) - f(x_0))$，则 $\tilde{f}(\mathbf{0}) = \mathbf{0}$，$D\tilde{f}(\mathbf{0}) = I$。若 $\tilde{f}$ 有局部 $C^1$ 逆，则 $f$ 也有。
+
+\textbf{步骤 2：构造压缩映射}。定义 $g(x) = x - f(x)$。则 $Dg(\mathbf{0}) = I - Df(\mathbf{0}) = \mathbf{0}$。由 $Dg$ 连续，存在 $r > 0$ 使 $\|x\| \le r$ 时 $\|Dg(x)\| \le 1/2$。由中值定理，$\|g(x) - g(y)\| \le \frac{1}{2} \|x - y\|$ 对 $\|x\|, \|y\| \le r$ 成立。
+
+对固定的 $y \in \mathbb{R}^n$，解 $f(x) = y$ 等价于解 $x = y + g(x)$。定义 $T_y(x) = y + g(x)$。若 $\|y\| \le r/2$ 且 $\|x\| \le r$，则
+\[
+\|T_y(x)\| \le \|y\| + \|g(x)\| \le \frac{r}{2} + \frac{1}{2} \|x\| \le \frac{r}{2} + \frac{r}{2} = r.
+\]
+且 $\|T_y(x) - T_y(x')\| = \|g(x) - g(x')\| \le \frac{1}{2} \|x - x'\|$。故 $T_y$ 是 $\overline{B}(\mathbf{0}, r)$ 上的压缩映射。由 Banach 压缩映射原理（定理 \ref{thm:banach_fixed_point}），$T_y$ 有唯一不动点 $x = T_y(x)$，即 $f(x) = y$。故对每个 $y \in B(\mathbf{0}, r/2)$，存在唯一 $x \in \overline{B}(\mathbf{0}, r)$ 使 $f(x) = y$。
+
+\textbf{步骤 3：逆映射连续}。设 $f(x) = y$，$f(x') = y'$。则
+\[
+\|x - x'\| = \|(y + g(x)) - (y' + g(x'))\| \le \|y - y'\| + \frac{1}{2} \|x - x'\|.
+\]
+故 $\|x - x'\| \le 2 \|y - y'\|$。即 $\|f^{-1}(y) - f^{-1}(y')\| \le 2 \|y - y'\|$，$f^{-1}$ 连续（事实上 Lipschitz 连续）。
+
+\textbf{步骤 4：逆映射可微}。设 $f(x) = y$，$f(x + h) = y + k$。则
+\[
+k = f(x + h) - f(x) = Df(x) h + o(\|h\|).
+\]
+因 $Df(x)$ 可逆（由 $Df$ 连续且 $Df(\mathbf{0}) = I$，取 $r$ 更小可使 $\|Df(x) - I\| < 1/2$，故 $Df(x)$ 可逆），
+\[
+h = [Df(x)]^{-1} k + o(\|k\|).
+\]
+故
+\[
+f^{-1}(y + k) = f^{-1}(y) + [Df(f^{-1}(y))]^{-1} k + o(\|k\|).
+\]
+即 $f^{-1}$ 在 $y$ 处可微，$D(f^{-1})(y) = [Df(f^{-1}(y))]^{-1}$。
+
+\textbf{步骤 5：逆映射 $C^1$}。$D(f^{-1})(y) = [Df(f^{-1}(y))]^{-1}$。右端是 $y$ 的连续函数（$Df$ 连续，$f^{-1}$ 连续，矩阵求逆连续），故 $D(f^{-1})$ 连续，$f^{-1} \in C^1$。
+\end{proof}
+
+\begin{example}[极坐标变换]\label{ex:polar_coordinates}
+极坐标变换 $f(r, \theta) = (r \cos\theta, r \sin\theta)$（$r > 0$）。Jacobi 矩阵
+\[
+J_f(r, \theta) = \begin{pmatrix} \cos\theta & -r \sin\theta \\ \sin\theta & r \cos\theta \end{pmatrix}, \qquad \det J_f = r > 0.
+\]
+故 $f$ 在每一点 $(r, \theta)$（$r > 0$）处局部可逆。但 $f$ 不是全局可逆的（$(\theta + 2\pi k)$ 给出同一点）。
+\end{example}
+
+\subsection{隐函数定理}
+
+\begin{theorem}[隐函数定理]\label{thm:implicit_function}
+设 $\Omega \subseteq \mathbb{R}^{n+m}$ 开，$F: \Omega \to \mathbb{R}^m$ 是 $C^1$ 映射，$(x_0, y_0) \in \Omega$ 满足 $F(x_0, y_0) = \mathbf{0}$。若 $D_y F(x_0, y_0)$（$F$ 关于 $y$ 的 $m \times m$ 偏导数矩阵）可逆，则存在 $x_0$ 的开邻域 $U \subseteq \mathbb{R}^n$ 与 $y_0$ 的开邻域 $V \subseteq \mathbb{R}^m$，以及唯一的 $C^1$ 映射 $g: U \to V$ 使 $g(x_0) = y_0$ 且
+\[
+F(x, g(x)) = \mathbf{0}, \qquad \forall x \in U.
+\]
+且
+\[
+Dg(x) = -[D_y F(x, g(x))]^{-1} D_x F(x, g(x)).
+\]
+\end{theorem}
+
+\begin{proof}
+定义 $\Phi: \Omega \to \mathbb{R}^{n+m}$ 为 $\Phi(x, y) = (x, F(x, y))$。则
+\[
+D\Phi(x_0, y_0) = \begin{pmatrix} I_n & \mathbf{0} \\ D_x F(x_0, y_0) & D_y F(x_0, y_0) \end{pmatrix}.
+\]
+$\det D\Phi(x_0, y_0) = \det D_y F(x_0, y_0) \neq 0$。由反函数定理（定理 \ref{thm:inverse_function}），存在 $(x_0, y_0)$ 的开邻域 $W$ 与 $\Phi(x_0, y_0) = (x_0, \mathbf{0})$ 的开邻域 $W'$，使 $\Phi: W \to W'$ 是 $C^1$ 双射。设 $\Phi^{-1}(x, z) = (x, h(x, z))$（因 $\Phi$ 的第一分量是 $x$ 本身）。则 $F(x, h(x, z)) = z$。令 $g(x) = h(x, \mathbf{0})$，则 $F(x, g(x)) = \mathbf{0}$。$g$ 是 $C^1$ 的（因 $\Phi^{-1}$ 是 $C^1$）。
+
+求导公式：对 $F(x, g(x)) = \mathbf{0}$ 两边求导，
+\[
+D_x F(x, g(x)) + D_y F(x, g(x)) Dg(x) = \mathbf{0}.
+\]
+由 $D_y F(x_0, y_0)$ 可逆且 $D_y F$ 连续，在 $x_0$ 的某邻域内 $D_y F(x, g(x))$ 可逆。故
+\[
+Dg(x) = -[D_y F(x, g(x))]^{-1} D_x F(x, g(x)).
+\]
+\end{proof}
+
+\begin{corollary}[正则水平集是子流形]\label{cor:regular_level_set_ra}
+设 $F: \Omega \to \mathbb{R}^m$，$\Omega \subseteq \mathbb{R}^{n+m}$ 开，$F \in C^1(\Omega)$。若 $c \in \mathbb{R}^m$ 且对每个 $x \in F^{-1}(c)$，$DF(x)$ 满射（即 $m$ 个行向量线性无关），则 $F^{-1}(c)$ 是 $n$ 维 $C^1$ 子流形。
+\end{corollary}
+
+\begin{proof}
+对任意 $p \in F^{-1}(c)$，$DF(p)$ 满射意味着存在 $m$ 个列线性无关，即存在 $m$ 个变量使对应的 $m \times m$ 子矩阵可逆。不妨设关于最后 $m$ 个变量的偏导数矩阵可逆。由隐函数定理（定理 \ref{thm:implicit_function}），存在 $p$ 的邻域 $U$ 与 $C^1$ 映射 $g$ 使 $F^{-1}(c) \cap U = \{(x, g(x)) : x \in U'\}$，其中 $U' \subseteq \mathbb{R}^n$ 开。这是 $n$ 维 $C^1$ 子流形的局部坐标表示。
+\end{proof}
+
+\begin{example}[隐函数定理的应用]\label{ex:implicit_function_application}
+\begin{enumerate}[label=(\roman*)]
+    \item 单位圆 $x^2 + y^2 = 1$。$F(x, y) = x^2 + y^2 - 1$。$\partial F/\partial y = 2y$。在 $(x_0, y_0)$ 且 $y_0 \neq 0$ 处，可局部解出 $y = g(x) = \pm\sqrt{1 - x^2}$。
+    \item 曲面 $z = f(x, y)$ 是 $F(x, y, z) = z - f(x, y) = 0$ 的水平集。$\partial F/\partial z = 1 \neq 0$，故局部可解出 $z = f(x, y)$。
+    \item 方程组 $F_1(x, y, z) = 0$，$F_2(x, y, z) = 0$ 在 $\det \partial(F_1, F_2)/\partial(y, z) \neq 0$ 处局部可解出 $y = g_1(x)$，$z = g_2(x)$。
+\end{enumerate}
+\end{example}
+
+\subsection{秩定理}
+
+\begin{theorem}[秩定理]\label{thm:rank_theorem}
+设 $\Omega \subseteq \mathbb{R}^n$ 开，$f: \Omega \to \mathbb{R}^m$ 是 $C^k$ 映射（$k \ge 1$），$x_0 \in \Omega$，且 $Df(x_0)$ 的秩为 $r$（$r \le \min(n, m)$）。则存在 $x_0$ 的开邻域 $U$ 与 $C^k$ 微分同胚 $\varphi: U \to \varphi(U) \subseteq \mathbb{R}^n$（$\varphi(x_0) = \mathbf{0}$），以及 $f(x_0)$ 的开邻域 $V$ 与 $C^k$ 微分同胚 $\psi: V \to \psi(V) \subseteq \mathbb{R}^m$（$\psi(f(x_0)) = \mathbf{0}$），使
+\[
+(\psi \circ f \circ \varphi^{-1})(x_1, \dots, x_n) = (x_1, \dots, x_r, 0, \dots, 0).
+\]
+即 $f$ 在 $x_0$ 附近等价于标准投影。
+\end{theorem}
+
+\begin{proof}
+\textbf{步骤 1：简化}。通过平移与线性变换，不妨设 $x_0 = \mathbf{0}$，$f(x_0) = \mathbf{0}$，且 $Df(\mathbf{0})$ 的前 $r$ 行与前 $r$ 列构成的子矩阵可逆。
+
+\textbf{步骤 2：构造辅助映射}。写 $f = (f^1, f^2)$，其中 $f^1: \Omega \to \mathbb{R}^r$ 由前 $r$ 个分量组成。定义 $\Phi: \Omega \to \mathbb{R}^n$ 为
+\[
+\Phi(x) = (f^1(x), x_{r+1}, \dots, x_n).
+\]
+则
+\[
+D\Phi(\mathbf{0}) = \begin{pmatrix} D_{x^1} f^1(\mathbf{0}) & D_{x^2} f^1(\mathbf{0}) \\ \mathbf{0} & I_{n-r} \end{pmatrix},
+\]
+其中 $D_{x^1} f^1(\mathbf{0})$ 是 $r \times r$ 可逆矩阵。故 $\det D\Phi(\mathbf{0}) \neq 0$。由反函数定理（定理 \ref{thm:inverse_function}），存在 $\mathbf{0}$ 的开邻域 $U$ 使 $\Phi: U \to \Phi(U)$ 是 $C^k$ 微分同胚。
+
+\textbf{步骤 3：复合}。令 $\varphi = \Phi$。则 $\varphi(x) = (y^1, y^2)$，其中 $y^1 = f^1(x) \in \mathbb{R}^r$，$y^2 = x^2 \in \mathbb{R}^{n-r}$。由反函数定理，$x = \varphi^{-1}(y^1, y^2)$。
+
+在 $U$ 上，$f(x) = (f^1(x), f^2(x)) = (y^1, f^2(\varphi^{-1}(y^1, y^2)))$。因 $y^1 = f^1(x)$ 且 $x = \varphi^{-1}(y^1, y^2)$，故 $f^2(\varphi^{-1}(y^1, y^2))$ 是 $(y^1, y^2)$ 的函数。但 $Df$ 在 $\mathbf{0}$ 处的秩为 $r$，且 $Df^1(\mathbf{0})$ 的前 $r$ 列可逆，故 $Df^2(\mathbf{0})$ 的每一行是 $Df^1(\mathbf{0})$ 的线性组合。由连续性，在 $\mathbf{0}$ 附近 $Df^2$ 的每一行仍是 $Df^1$ 的线性组合，即 $f^2$ 在 $U$ 上局部是 $f^1$ 的函数：存在 $C^k$ 映射 $h: \mathbb{R}^r \to \mathbb{R}^{m-r}$ 使 $f^2(x) = h(f^1(x))$ 在 $U$ 上成立。
+
+\textbf{步骤 4：构造 $\psi$}。定义 $\psi: \mathbb{R}^m \to \mathbb{R}^m$ 为
+\[
+\psi(z^1, z^2) = (z^1, z^2 - h(z^1)), \qquad z^1 \in \mathbb{R}^r,\ z^2 \in \mathbb{R}^{m-r}.
+\]
+则 $\psi$ 是 $C^k$ 微分同胚（其逆为 $(z^1, z^2) \mapsto (z^1, z^2 + h(z^1))$），$\psi(\mathbf{0}) = \mathbf{0}$。则
+\[
+(\psi \circ f)(x) = \psi(f^1(x), f^2(x)) = (f^1(x), f^2(x) - h(f^1(x))) = (f^1(x), \mathbf{0}).
+\]
+故
+\[
+(\psi \circ f \circ \varphi^{-1})(y^1, y^2) = (y^1, \mathbf{0}).
+\]
+即 $(\psi \circ f \circ \varphi^{-1})(x_1, \dots, x_n) = (x_1, \dots, x_r, 0, \dots, 0)$。
+\end{proof}
+
+\section{重积分}
+
+\subsection{Riemann 积分回顾与推广}
+
+\begin{definition}[矩形上的 Riemann 积分]\label{def:riemann_integral_rectangle}
+设 $R = [a_1, b_1] \times \cdots \times [a_n, b_n] \subseteq \mathbb{R}^n$ 为闭矩形。$f: R \to \mathbb{R}$ 有界。
+\begin{enumerate}[label=(\roman*)]
+    \item $R$ 的\textbf{分割}是将每个 $[a_i, b_i]$ 分为有限个小区间，从而将 $R$ 分为有限个闭子矩形 $R_1, \dots, R_N$。
+    \item 分割的\textbf{模}为 $\|\mathcal{P}\| := \max_j \operatorname{diam}(R_j)$。
+    \item 在每个 $R_j$ 上取点 $\xi_j$，构造 \textbf{Riemann 和}
+    \[
+    S(f, \mathcal{P}, \{\xi_j\}) := \sum_{j=1}^{N} f(\xi_j) |R_j|,
+    \]
+    其中 $|R_j|$ 是 $R_j$ 的体积。
+    \item $f$ 在 $R$ 上\textbf{Riemann 可积}，若存在 $I \in \mathbb{R}$ 使对任意 $\varepsilon > 0$，存在 $\delta > 0$，使对任意分割 $\mathcal{P}$ 满足 $\|\mathcal{P}\| < \delta$ 与任意取点 $\{\xi_j\}$，都有
+    \[
+    |S(f, \mathcal{P}, \{\xi_j\}) - I| < \varepsilon.
+    \]
+    此时记 $I = \int_R f$。
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Darboux 上下和]\label{def:darboux_sums}
+设 $f: R \to \mathbb{R}$ 有界，$\mathcal{P}$ 为分割。定义
+\[
+M_j := \sup_{x \in R_j} f(x), \qquad m_j := \inf_{x \in R_j} f(x),
+\]
+\[
+U(f, \mathcal{P}) := \sum_{j=1}^{N} M_j |R_j| \quad (\text{上和}), \qquad
+L(f, \mathcal{P}) := \sum_{j=1}^{N} m_j |R_j| \quad (\text{下和}).
+\]
+$f$ 的\textbf{上积分}与\textbf{下积分}分别为
+\[
+\overline{\int_R} f := \inf_{\mathcal{P}} U(f, \mathcal{P}), \qquad
+\underline{\int_R} f := \sup_{\mathcal{P}} L(f, \mathcal{P}).
+\]
+\end{definition}
+
+\begin{theorem}[Riemann 可积的充要条件]\label{thm:riemann_integrable_criterion}
+设 $f: R \to \mathbb{R}$ 有界。则以下条件等价：
+\begin{enumerate}[label=(\roman*)]
+    \item $f$ 在 $R$ 上 Riemann 可积；
+    \item $\overline{\int_R} f = \underline{\int_R} f$；
+    \item 对任意 $\varepsilon > 0$，存在分割 $\mathcal{P}$ 使 $U(f, \mathcal{P}) - L(f, \mathcal{P}) < \varepsilon$。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) $\Rightarrow$ (ii)：设 $f$ 可积，积分值为 $I$。对任意 $\varepsilon > 0$，存在 $\delta > 0$ 使 $\|\mathcal{P}\| < \delta$ 时 $|S(f, \mathcal{P}, \{\xi_j\}) - I| < \varepsilon$。固定这样的 $\mathcal{P}$，对 $\xi_j$ 取上确界得 $U(f, \mathcal{P}) \le I + \varepsilon$；取下确界得 $L(f, \mathcal{P}) \ge I - \varepsilon$。故 $\overline{\int_R} f \le I + \varepsilon$，$\underline{\int_R} f \ge I - \varepsilon$。由 $\varepsilon$ 任意，$\overline{\int_R} f = \underline{\int_R} f = I$。
+
+(ii) $\Rightarrow$ (iii)：由上下积分的定义，存在分割 $\mathcal{P}_1, \mathcal{P}_2$ 使 $U(f, \mathcal{P}_1) < \overline{\int_R} f + \varepsilon/2$，$L(f, \mathcal{P}_2) > \underline{\int_R} f - \varepsilon/2$。取公共加细 $\mathcal{P}$，则 $U(f, \mathcal{P}) - L(f, \mathcal{P}) \le U(f, \mathcal{P}_1) - L(f, \mathcal{P}_2) < \varepsilon$。
+
+(iii) $\Rightarrow$ (i)：令 $I = \overline{\int_R} f = \underline{\int_R} f$。对任意 $\varepsilon > 0$，存在分割 $\mathcal{P}_0$ 使 $U(f, \mathcal{P}_0) - L(f, \mathcal{P}_0) < \varepsilon$。设 $\mathcal{P}_0$ 的模为 $\delta_0$。对任意分割 $\mathcal{P}$ 满足 $\|\mathcal{P}\| < \delta_0$，有 $L(f, \mathcal{P}) \le I \le U(f, \mathcal{P})$ 且 $U(f, \mathcal{P}) - L(f, \mathcal{P}) < \varepsilon$（由 $\mathcal{P}$ 与 $\mathcal{P}_0$ 的公共加细）。故 $|S(f, \mathcal{P}, \{\xi_j\}) - I| < \varepsilon$，$f$ 可积。
+\end{proof}
+
+\begin{theorem}[连续函数可积]\label{thm:continuous_integrable}
+设 $R \subseteq \mathbb{R}^n$ 为闭矩形，$f: R \to \mathbb{R}$ 连续。则 $f$ 在 $R$ 上 Riemann 可积。
+\end{theorem}
+
+\begin{proof}
+由 $R$ 紧致与 $f$ 连续，$f$ 在 $R$ 上一致连续（定理 \ref{thm:continuous_compact} (iv)）。给定 $\varepsilon > 0$，存在 $\delta > 0$ 使 $\|x - y\| < \delta$ 时 $|f(x) - f(y)| < \varepsilon / |R|$。取分割 $\mathcal{P}$ 满足 $\|\mathcal{P}\| < \delta$。则对每个 $R_j$，$\sup_{R_j} f - \inf_{R_j} f < \varepsilon / |R|$。故
+\[
+U(f, \mathcal{P}) - L(f, \mathcal{P}) = \sum_{j=1}^{N} \left( \sup_{R_j} f - \inf_{R_j} f \right) |R_j| < \frac{\varepsilon}{|R|} \sum_{j=1}^{N} |R_j| = \varepsilon.
+\]
+由定理 \ref{thm:riemann_integrable_criterion}，$f$ 可积。
+\end{proof}
+
+\begin{theorem}[Fubini 定理]\label{thm:fubini_ra}
+设 $R = [a_1, b_1] \times \cdots \times [a_n, b_n]$，$f: R \to \mathbb{R}$ 连续。则
+\[
+\int_R f = \int_{a_1}^{b_1} \left( \cdots \left( \int_{a_n}^{b_n} f(x_1, \dots, x_n) \, dx_n \right) \cdots \right) dx_1.
+\]
+即重积分可化为累次积分，且积分次序可任意交换。
+\end{theorem}
+
+\begin{proof}
+对 $n = 2$ 证明。设 $R = [a, b] \times [c, d]$。定义 $F(x) = \int_c^d f(x, y) \, dy$。由 $f$ 在 $R$ 上一致连续，$F$ 在 $[a, b]$ 上连续。对 $[a, b]$ 与 $[c, d]$ 的分割 $\mathcal{P}_x, \mathcal{P}_y$，构造 $R$ 的分割。对每个子矩形 $R_{ij} = [x_{i-1}, x_i] \times [y_{j-1}, y_j]$，由一元积分中值定理，存在 $\eta_{ij} \in [y_{j-1}, y_j]$ 使 $\int_{y_{j-1}}^{y_j} f(x_i, y) \, dy = f(x_i, \eta_{ij}) \Delta y_j$。故
+\[
+\sum_j \int_{y_{j-1}}^{y_j} f(x_i, y) \, dy = \sum_j f(x_i, \eta_{ij}) \Delta y_j.
+\]
+令 $\Delta y_j \to 0$，右端趋于 $\int_c^d f(x_i, y) \, dy = F(x_i)$。故
+\[
+\int_a^b F(x) \, dx = \lim_{\|\mathcal{P}_x\| \to 0} \sum_i F(x_i) \Delta x_i = \lim_{\|\mathcal{P}\| \to 0} \sum_{i,j} f(x_i, \eta_{ij}) \Delta x_i \Delta y_j.
+\]
+右端是 $f$ 的 Riemann 和，极限为 $\int_R f$。故 $\int_R f = \int_a^b \left( \int_c^d f(x, y) \, dy \right) dx$。对称地，$\int_R f = \int_c^d \left( \int_a^b f(x, y) \, dx \right) dy$。
+
+$n$ 维情形由归纳得到。
+\end{proof}
+
+\begin{theorem}[变量代换公式]\label{thm:change_of_variables_ra}
+设 $\Omega, \Omega' \subseteq \mathbb{R}^n$ 开，$\Phi: \Omega \to \Omega'$ 是 $C^1$ 微分同胚。则对任意连续函数 $f: \Omega' \to \mathbb{R}$，
+\[
+\int_{\Omega'} f(y) \, dy = \int_{\Omega} f(\Phi(x)) \, |\det J_\Phi(x)| \, dx.
+\]
+\end{theorem}
+
+\begin{proof}
+\textbf{步骤 1：局部线性化}。由连续性，对任意 $\varepsilon > 0$ 与 $x_0 \in \Omega$，存在 $r > 0$ 使 $B(x_0, r) \subseteq \Omega$ 且对 $x \in B(x_0, r)$，$\|J_\Phi(x) - J_\Phi(x_0)\| < \varepsilon$。由中值定理，$\Phi(x) = \Phi(x_0) + J_\Phi(x_0)(x - x_0) + o(\|x - x_0\|)$。
+
+\textbf{步骤 2：线性变换的体积缩放}。对线性映射 $A$，
+\[
+\operatorname{vol}(A(B(x_0, r))) = |\det A| \operatorname{vol}(B(x_0, r)).
+\]
+对一般的 $C^1$ 微分同胚，局部上 $\Phi$ 近似于 $J_\Phi(x_0)$，故
+\[
+\operatorname{vol}(\Phi(B(x_0, r))) \approx |\det J_\Phi(x_0)| \operatorname{vol}(B(x_0, r)).
+\]
+严格的误差估计为 $o(r^n)$。
+
+\textbf{步骤 3：Riemann 和}。将 $\Omega$ 分割为小的可测集，在每个小集上近似 $\Phi$ 为线性映射。Riemann 和
+\[
+\sum_j f(\Phi(x_j)) |\det J_\Phi(x_j)| |E_j| \to \int_\Omega f(\Phi(x)) |\det J_\Phi(x)| \, dx.
+\]
+另一方面，右端是 $\int_{\Omega'} f(y) \, dy$ 的 Riemann 和（经由 $\Phi$ 的像）。故等式成立。
+\end{proof}
+
+\begin{example}[极坐标下的重积分]\label{ex:polar_integral}
+$\Phi(r, \theta) = (r \cos\theta, r \sin\theta)$，$\det J_\Phi = r$。故
+\[
+\int_{\Omega'} f(x, y) \, dx \, dy = \int_{\Omega} f(r \cos\theta, r \sin\theta) \, r \, dr \, d\theta.
+\]
+例如单位圆盘上的积分：
+\[
+\int_{x^2 + y^2 \le 1} f(x, y) \, dx \, dy = \int_0^{2\pi} \int_0^1 f(r \cos\theta, r \sin\theta) \, r \, dr \, d\theta.
+\]
+\end{example}
+
+\section{曲线积分与曲面积分}
+
+\subsection{曲线积分}
+
+\begin{definition}[曲线与参数化]\label{def:curve_parameterization}
+设 $[a, b] \subseteq \mathbb{R}$。
+\begin{enumerate}[label=(\roman*)]
+    \item 一条 $C^1$ \textbf{曲线}是 $C^1$ 映射 $\gamma: [a, b] \to \mathbb{R}^n$。
+    \item $\gamma$ 称为\textbf{正则}的，若 $\gamma'(t) \neq \mathbf{0}$ 对所有 $t \in [a, b]$ 成立。
+    \item $\gamma$ 称为\textbf{简单}的，若 $\gamma$ 在 $(a, b)$ 上单射。
+    \item $\gamma$ 称为\textbf{闭}的，若 $\gamma(a) = \gamma(b)$。
+    \item 两条曲线 $\gamma_1, \gamma_2$ 称为\textbf{等价}的，若存在 $C^1$ 双射 $\varphi: [a_1, b_1] \to [a_2, b_2]$ 使 $\gamma_2 = \gamma_1 \circ \varphi$。
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[第一类曲线积分（弧长积分）]\label{def:line_integral_first_kind}
+设 $\gamma: [a, b] \to \mathbb{R}^n$ 是 $C^1$ 曲线，$f: \mathbb{R}^n \to \mathbb{R}$ 连续。$f$ 沿 $\gamma$ 的\textbf{第一类曲线积分}定义为
+\[
+\int_\gamma f \, ds := \int_a^b f(\gamma(t)) \, \|\gamma'(t)\| \, dt.
+\]
+若 $f \equiv 1$，则 $\int_\gamma ds$ 是 $\gamma$ 的弧长。
+\end{definition}
+
+\begin{proposition}[第一类曲线积分与参数化无关]\label{prop:line_integral_first_kind_invariance}
+第一类曲线积分与曲线的正则参数化无关。
+\end{proposition}
+
+\begin{proof}
+设 $\gamma_2 = \gamma_1 \circ \varphi$，其中 $\varphi$ 是 $C^1$ 双射。则 $\gamma_2'(t) = \gamma_1'(\varphi(t)) \varphi'(t)$。故
+\[
+\int_{a_2}^{b_2} f(\gamma_2(t)) \|\gamma_2'(t)\| \, dt = \int_{a_2}^{b_2} f(\gamma_1(\varphi(t))) \|\gamma_1'(\varphi(t))\| |\varphi'(t)| \, dt.
+\]
+令 $s = \varphi(t)$，$ds = \varphi'(t) dt$，得
+\[
+= \int_{a_1}^{b_1} f(\gamma_1(s)) \|\gamma_1'(s)\| \, ds.
+\]
+\end{proof}
+
+\begin{definition}[第二类曲线积分（向量场沿曲线的积分）]\label{def:line_integral_second_kind}
+设 $\gamma: [a, b] \to \mathbb{R}^n$ 是 $C^1$ 曲线，$\mathbf{F}: \mathbb{R}^n \to \mathbb{R}^n$ 连续。$\mathbf{F}$ 沿 $\gamma$ 的\textbf{第二类曲线积分}定义为
+\[
+\int_\gamma \mathbf{F} \cdot d\mathbf{r} := \int_a^b \mathbf{F}(\gamma(t)) \cdot \gamma'(t) \, dt.
+\]
+\end{definition}
+
+\begin{proposition}[第二类曲线积分的可加性与反向性]\label{prop:line_integral_second_kind_properties}
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $\gamma = \gamma_1 \cup \gamma_2$（首尾相接），则
+    \[
+    \int_\gamma \mathbf{F} \cdot d\mathbf{r} = \int_{\gamma_1} \mathbf{F} \cdot d\mathbf{r} + \int_{\gamma_2} \mathbf{F} \cdot d\mathbf{r}.
+    \]
+    \item 若 $\gamma^-$ 是 $\gamma$ 的反向曲线，则
+    \[
+    \int_{\gamma^-} \mathbf{F} \cdot d\mathbf{r} = -\int_\gamma \mathbf{F} \cdot d\mathbf{r}.
+    \]
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由 Riemann 积分的区间可加性直接得到。
+
+(ii) 设 $\gamma^-(t) = \gamma(a + b - t)$。则 $(\gamma^-)'(t) = -\gamma'(a + b - t)$。故
+\[
+\int_{\gamma^-} \mathbf{F} \cdot d\mathbf{r} = \int_a^b \mathbf{F}(\gamma(a + b - t)) \cdot (-\gamma'(a + b - t)) \, dt.
+\]
+令 $s = a + b - t$，$ds = -dt$，得
+\[
+= \int_b^a \mathbf{F}(\gamma(s)) \cdot \gamma'(s) \, ds = -\int_a^b \mathbf{F}(\gamma(s)) \cdot \gamma'(s) \, ds = -\int_\gamma \mathbf{F} \cdot d\mathbf{r}.
+\]
+\end{proof}
+
+\subsection{曲面积分}
+
+\begin{definition}[曲面与参数化]\label{def:surface_parameterization}
+设 $D \subseteq \mathbb{R}^2$ 为有界闭区域。
+\begin{enumerate}[label=(\roman*)]
+    \item 一张 $C^1$ \textbf{曲面}是 $C^1$ 映射 $\mathbf{r}: D \to \mathbb{R}^3$。
+    \item $\mathbf{r}$ 称为\textbf{正则}的，若 $\mathbf{r}_u \times \mathbf{r}_v \neq \mathbf{0}$ 对所有 $(u, v) \in D$ 成立，其中 $\mathbf{r}_u = \partial \mathbf{r}/\partial u$，$\mathbf{r}_v = \partial \mathbf{r}/\partial v$。
+    \item $\mathbf{r}$ 称为\textbf{简单}的，若 $\mathbf{r}$ 在 $D$ 的内部单射。
+    \item \textbf{面积元}为 $dS := \|\mathbf{r}_u \times \mathbf{r}_v\| \, du \, dv$。
+    \item \textbf{单位法向量}为 $\mathbf{n} := \frac{\mathbf{r}_u \times \mathbf{r}_v}{\|\mathbf{r}_u \times \mathbf{r}_v\|}$。
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[第一类曲面积分（面积分）]\label{def:surface_integral_first_kind}
+设 $\mathbf{r}: D \to \mathbb{R}^3$ 是 $C^1$ 正则曲面，$f: \mathbb{R}^3 \to \mathbb{R}$ 连续。$f$ 在曲面 $S = \mathbf{r}(D)$ 上的\textbf{第一类曲面积分}定义为
+\[
+\int_S f \, dS := \int_D f(\mathbf{r}(u, v)) \, \|\mathbf{r}_u \times \mathbf{r}_v\| \, du \, dv.
+\]
+若 $f \equiv 1$，则 $\int_S dS$ 是曲面的面积。
+\end{definition}
+
+\begin{definition}[第二类曲面积分（通量积分）]\label{def:surface_integral_second_kind}
+设 $\mathbf{r}: D \to \mathbb{R}^3$ 是 $C^1$ 正则曲面，$\mathbf{F}: \mathbb{R}^3 \to \mathbb{R}^3$ 连续。$\mathbf{F}$ 在曲面 $S$ 上的\textbf{第二类曲面积分}（通量）定义为
+\[
+\int_S \mathbf{F} \cdot d\mathbf{S} := \int_D \mathbf{F}(\mathbf{r}(u, v)) \cdot (\mathbf{r}_u \times \mathbf{r}_v) \, du \, dv.
+\]
+\end{definition}
+
+\begin{definition}[曲面的定向]\label{def:surface_orientation}
+曲面 $S$ 称为\textbf{可定向}的，若存在连续单位法向量场 $\mathbf{n}: S \to S^2$。两个定向 $\mathbf{n}_1, \mathbf{n}_2$ 称为相同，若 $\mathbf{n}_1 = \mathbf{n}_2$；称为相反，若 $\mathbf{n}_1 = -\mathbf{n}_2$。选定定向的曲面称为\textbf{有向曲面}。
+\end{definition}
+
+\begin{proposition}[通量积分与定向的关系]\label{prop:flux_orientation}
+若 $S^-$ 表示 $S$ 的反向定向，则
+\[
+\int_{S^-} \mathbf{F} \cdot d\mathbf{S} = -\int_S \mathbf{F} \cdot d\mathbf{S}.
+\]
+\end{proposition}
+
+\begin{proof}
+反向定向对应交换参数化中的 $u, v$ 或改变参数化的符号。$\mathbf{r}_u \times \mathbf{r}_v$ 反号，故积分反号。
+\end{proof}
+
+\begin{example}[球面的面积与通量]\label{ex:sphere_surface}
+球面 $S^2$ 的参数化 $\mathbf{r}(\theta, \varphi) = (\sin\theta \cos\varphi, \sin\theta \sin\varphi, \cos\theta)$，$\theta \in [0, \pi]$，$\varphi \in [0, 2\pi]$。计算
+\[
+\mathbf{r}_\theta \times \mathbf{r}_\varphi = \sin\theta \, (\sin\theta \cos\varphi, \sin\theta \sin\varphi, \cos\theta),
+\]
+$\|\mathbf{r}_\theta \times \mathbf{r}_\varphi\| = \sin\theta$。故球面面积
+\[
+\int_{S^2} dS = \int_0^{2\pi} \int_0^{\pi} \sin\theta \, d\theta \, d\varphi = 4\pi.
+\]
+对径向场 $\mathbf{F}(x, y, z) = (x, y, z)$，通量
+\[
+\int_{S^2} \mathbf{F} \cdot d\mathbf{S} = \int_0^{2\pi} \int_0^{\pi} \sin\theta \, d\theta \, d\varphi = 4\pi.
+\]
+\end{example}
+
+\section{函数列与函数项级数的一致收敛}
+
+\subsection{一致收敛}
+
+\begin{definition}[函数列的一致收敛]\label{def:uniform_convergence}
+设 $E \subseteq \mathbb{R}^n$，$f_k: E \to \mathbb{R}^m$（$k = 1, 2, \dots$），$f: E \to \mathbb{R}^m$。
+\begin{enumerate}[label=(\roman*)]
+    \item $\{f_k\}$ \textbf{逐点收敛}于 $f$，若对每个 $x \in E$，$f_k(x) \to f(x)$。
+    \item $\{f_k\}$ \textbf{一致收敛}于 $f$，若
+    \[
+    \lim_{k \to \infty} \sup_{x \in E} \|f_k(x) - f(x)\| = 0,
+    \]
+    即
+    \[
+    \forall \varepsilon > 0,\ \exists K \in \mathbb{N}^+,\ \forall k \ge K,\ \forall x \in E,\quad \|f_k(x) - f(x)\| < \varepsilon.
+    \]
+\end{enumerate}
+记作 $f_k \rightrightarrows f$。
+\end{definition}
+
+\begin{proposition}[一致收敛蕴含逐点收敛]\label{prop:uniform_implies_pointwise}
+一致收敛蕴含逐点收敛。
+\end{proposition}
+
+\begin{proof}
+设 $f_k \rightrightarrows f$。对固定 $x \in E$，$\|f_k(x) - f(x)\| \le \sup_{y \in E} \|f_k(y) - f(y)\| \to 0$。故 $f_k(x) \to f(x)$。
+\end{proof}
+
+\begin{proposition}[一致收敛与逐点收敛的区别]\label{prop:uniform_vs_pointwise}
+存在逐点收敛但不一致收敛的函数列。
+\end{proposition}
+
+\begin{proof}
+取 $E = [0, 1]$，$f_k(x) = x^k$。逐点极限为
+\[
+f(x) = \begin{cases} 0, & x \in [0, 1), \\ 1, & x = 1. \end{cases}
+\]
+逐点收敛。但 $\sup_{x \in [0,1]} |x^k - f(x)| = 1$（取 $x \to 1^-$），故不一致收敛。
+\end{proof}
+
+\begin{theorem}[一致收敛保持连续性]\label{thm:uniform_continuity_preservation}
+设 $E \subseteq \mathbb{R}^n$，$f_k: E \to \mathbb{R}^m$ 连续，$f_k \rightrightarrows f$。则 $f$ 连续。
+\end{theorem}
+
+\begin{proof}
+设 $x_0 \in E$。给定 $\varepsilon > 0$，取 $K$ 使 $k \ge K$ 时 $\|f_k(x) - f(x)\| < \varepsilon/3$ 对所有 $x \in E$ 成立。固定 $k = K$，由 $f_K$ 在 $x_0$ 处连续，存在 $\delta > 0$ 使 $\|x - x_0\| < \delta$ 时 $\|f_K(x) - f_K(x_0)\| < \varepsilon/3$。则
+\[
+\begin{aligned}
+\|f(x) - f(x_0)\| &\le \|f(x) - f_K(x)\| + \|f_K(x) - f_K(x_0)\| + \|f_K(x_0) - f(x_0)\|\\
+&< \varepsilon/3 + \varepsilon/3 + \varepsilon/3 = \varepsilon.
+\end{aligned}
+\]
+故 $f$ 在 $x_0$ 处连续。
+\end{proof}
+
+\begin{theorem}[一致收敛保持积分]\label{thm:uniform_continuity_integral}
+设 $E = [a, b] \subseteq \mathbb{R}$，$f_k: [a, b] \to \mathbb{R}$ 连续，$f_k \rightrightarrows f$。则
+\[
+\lim_{k \to \infty} \int_a^b f_k(x) \, dx = \int_a^b f(x) \, dx.
+\]
+即积分与极限可交换。
+\end{theorem}
+
+\begin{proof}
+由一致收敛，$\sup_{x \in [a, b]} |f_k(x) - f(x)| \to 0$。故
+\[
+\left| \int_a^b f_k(x) \, dx - \int_a^b f(x) \, dx \right| \le \int_a^b |f_k(x) - f(x)| \, dx \le (b - a) \sup_{x \in [a, b]} |f_k(x) - f(x)| \to 0.
+\]
+\end{proof}
+
+\begin{theorem}[一致收敛保持导数]\label{thm:uniform_continuity_derivative}
+设 $f_k: (a, b) \to \mathbb{R}$ 是 $C^1$ 的，$f_k \rightrightarrows f$ 在 $(a, b)$ 上，且 $f_k' \rightrightarrows g$ 在 $(a, b)$ 上。则 $f \in C^1(a, b)$ 且 $f' = g$。
+\end{theorem}
+
+\begin{proof}
+固定 $x_0 \in (a, b)$。对任意 $x \in (a, b)$，由微积分基本定理，
+\[
+f_k(x) - f_k(x_0) = \int_{x_0}^{x} f_k'(t) \, dt.
+\]
+由 $f_k \rightrightarrows f$ 与 $f_k' \rightrightarrows g$，取极限得
+\[
+f(x) - f(x_0) = \int_{x_0}^{x} g(t) \, dt.
+\]
+由微积分基本定理，右端关于 $x$ 可导，导数为 $g(x)$。故 $f'(x) = g(x)$ 对所有 $x \in (a, b)$ 成立。由定理 \ref{thm:uniform_continuity_preservation}，$g$ 连续，故 $f \in C^1(a, b)$。
+\end{proof}
+
+\begin{theorem}[Weierstrass M-判别法]\label{thm:weierstrass_m_test_ra}
+设 $E \subseteq \mathbb{R}^n$，$u_k: E \to \mathbb{R}^m$，且存在常数 $M_k \ge 0$ 使 $\|u_k(x)\| \le M_k$ 对所有 $x \in E$ 成立。若 $\sum_{k=1}^{\infty} M_k < \infty$，则 $\sum_{k=1}^{\infty} u_k(x)$ 在 $E$ 上一致收敛。
+\end{theorem}
+
+\begin{proof}
+由 $\sum_k M_k$ 收敛，对任意 $\varepsilon > 0$，存在 $K$ 使 $\sum_{k=K}^{\infty} M_k < \varepsilon$。对任意 $m > k \ge K$ 与任意 $x \in E$，
+\[
+\left\| \sum_{j=k+1}^{m} u_j(x) \right\| \le \sum_{j=k+1}^{m} \|u_j(x)\| \le \sum_{j=k+1}^{m} M_j < \varepsilon.
+\]
+故部分和函数列在 $E$ 上一致满足 Cauchy 准则，即一致收敛。
+\end{proof}
+
+\begin{example}[一致收敛的实例]\label{ex:uniform_convergence_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item $f_k(x) = x^k$ 在 $[0, a]$（$a < 1$）上一致收敛于 $0$；但在 $[0, 1]$ 上不一致收敛。
+    \item $f_k(x) = \sin(kx)/k$ 在 $\mathbb{R}$ 上一致收敛于 $0$。
+    \item $\sum_{k=1}^{\infty} x^k / k^2$ 在 $[-1, 1]$ 上一致收敛（由 M-判别法，$M_k = 1/k^2$）。
+    \item $\sum_{k=1}^{\infty} x^k / k$ 在 $[-1, 1)$ 上逐点收敛但不一致收敛（在 $x = 1$ 处发散，$x \to 1^-$ 时收敛速度变慢）。
+\end{enumerate}
+\end{example}
+
+\subsection{幂级数}
+
+\begin{definition}[幂级数]\label{def:power_series_ra}
+设 $x_0 \in \mathbb{R}$，$\{a_k\}$ 为实数列。\textbf{幂级数}为
+\[
+\sum_{k=0}^{\infty} a_k (x - x_0)^k.
+\]
+\end{definition}
+
+\begin{theorem}[Cauchy--Hadamard 收敛半径公式]\label{thm:cauchy_hadamard_ra}
+设 $\sum_{k=0}^{\infty} a_k (x - x_0)^k$ 为幂级数。定义
+\[
+R := \frac{1}{\limsup_{k \to \infty} |a_k|^{1/k}},
+\]
+约定 $1/0 = \infty$，$1/\infty = 0$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item $|x - x_0| < R$ 时幂级数绝对收敛；
+    \item $|x - x_0| > R$ 时幂级数发散；
+    \item 在 $|x - x_0| \le r < R$ 上一致收敛。
+\end{enumerate}
+$R$ 称为\textbf{收敛半径}。
+\end{theorem}
+
+\begin{proof}
+设 $L = \limsup_{k \to \infty} |a_k|^{1/k}$，$R = 1/L$。
+
+(i) 若 $|x - x_0| < R$，则 $L |x - x_0| < 1$。由根值判别法，
+\[
+\limsup_{k \to \infty} |a_k (x - x_0)^k|^{1/k} = L |x - x_0| < 1,
+\]
+故级数绝对收敛。
+
+(ii) 若 $|x - x_0| > R$，则 $L |x - x_0| > 1$。由根值判别法，级数发散（通项不趋于零）。
+
+(iii) 设 $|x - x_0| \le r < R$。则 $|a_k (x - x_0)^k| \le |a_k| r^k$。取 $r' \in (r, R)$，则 $L r' < 1$，故 $\sum_k |a_k| (r')^k$ 收敛。由比较判别法，$\sum_k |a_k| r^k \le \sum_k |a_k| (r')^k < \infty$。由 Weierstrass M-判别法（定理 \ref{thm:weierstrass_m_test_ra}），幂级数在 $|x - x_0| \le r$ 上一致收敛。
+\end{proof}
+
+\begin{theorem}[幂级数的逐项求导与逐项积分]\label{thm:power_series_termwise}
+设 $\sum_{k=0}^{\infty} a_k (x - x_0)^k$ 的收敛半径为 $R > 0$，和函数为 $f(x)$。则 $f \in C^\infty(|x - x_0| < R)$，且
+\[
+f'(x) = \sum_{k=1}^{\infty} k a_k (x - x_0)^{k-1}, \qquad
+\int_{x_0}^{x} f(t) \, dt = \sum_{k=0}^{\infty} \frac{a_k}{k+1} (x - x_0)^{k+1},
+\]
+收敛半径均为 $R$。
+\end{theorem}
+
+\begin{proof}
+由 Cauchy--Hadamard 公式，$\sum_k k a_k (x - x_0)^{k-1}$ 的收敛半径为
+\[
+\frac{1}{\limsup_k |k a_k|^{1/(k-1)}} = \frac{1}{\limsup_k |a_k|^{1/k}} = R.
+\]
+故在 $|x - x_0| \le r < R$ 上，$\sum_k k a_k (x - x_0)^{k-1}$ 一致收敛。由定理 \ref{thm:uniform_continuity_derivative}，$f$ 可导且 $f'(x) = \sum_k k a_k (x - x_0)^{k-1}$。归纳得 $f \in C^\infty$。
+
+积分类似：$\sum_k a_k/(k+1) \cdot (x - x_0)^{k+1}$ 的收敛半径也为 $R$，故由一致收敛保持积分（定理 \ref{thm:uniform_continuity_integral}），逐项积分成立。
+\end{proof}
+
+\begin{example}[常见幂级数]\label{ex:power_series_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item $e^x = \sum_{k=0}^{\infty} x^k / k!$，$R = \infty$。
+    \item $\sin x = \sum_{k=0}^{\infty} (-1)^k x^{2k+1} / (2k+1)!$，$R = \infty$。
+    \item $\cos x = \sum_{k=0}^{\infty} (-1)^k x^{2k} / (2k)!$，$R = \infty$。
+    \item $1/(1-x) = \sum_{k=0}^{\infty} x^k$，$R = 1$。
+    \item $\ln(1+x) = \sum_{k=1}^{\infty} (-1)^{k+1} x^k / k$，$R = 1$。
+    \item $(1+x)^\alpha = \sum_{k=0}^{\infty} \binom{\alpha}{k} x^k$，$R = 1$（$\alpha \notin \mathbb{N}$）。
+\end{enumerate}
+\end{example}
+
+\section{含参积分与积分号下求导}
+
+\subsection{含参正常积分}
+
+\begin{definition}[含参积分]\label{def:parametric_integral}
+设 $D \subseteq \mathbb{R}^n$ 为参数集，$f: D \times [a, b] \to \mathbb{R}$。定义
+\[
+F(t) := \int_a^b f(t, x) \, dx, \qquad t \in D.
+\]
+$F$ 称为\textbf{含参积分}，$t$ 为参数。
+\end{definition}
+
+\begin{theorem}[含参积分的连续性]\label{thm:parametric_integral_continuity}
+设 $f: D \times [a, b] \to \mathbb{R}$ 连续，$D \subseteq \mathbb{R}^n$ 为紧致。则 $F(t) = \int_a^b f(t, x) \, dx$ 在 $D$ 上连续。
+\end{theorem}
+
+\begin{proof}
+由 $f$ 在紧致集 $D \times [a, b]$ 上连续与 Heine--Cantor 定理，$f$ 一致连续。给定 $\varepsilon > 0$，存在 $\delta > 0$ 使 $\|t - t_0\| < \delta$ 时 $|f(t, x) - f(t_0, x)| < \varepsilon / (b - a)$ 对所有 $x \in [a, b]$ 成立。则
+\[
+|F(t) - F(t_0)| \le \int_a^b |f(t, x) - f(t_0, x)| \, dx < \varepsilon.
+\]
+\end{proof}
+
+\begin{theorem}[Leibniz 规则——积分号下求导]\label{thm:leibniz_rule}
+设 $f: D \times [a, b] \to \mathbb{R}$ 连续，$\partial f/\partial t$ 存在且连续。则 $F(t) = \int_a^b f(t, x) \, dx$ 在 $D$ 上可导，且
+\[
+F'(t) = \int_a^b \frac{\partial f}{\partial t}(t, x) \, dx.
+\]
+\end{theorem}
+
+\begin{proof}
+固定 $t_0 \in D$。对 $h \neq 0$，
+\[
+\frac{F(t_0 + h) - F(t_0)}{h} = \int_a^b \frac{f(t_0 + h, x) - f(t_0, x)}{h} \, dx.
+\]
+由一元中值定理，对每个 $x$ 存在 $\xi_x$ 介于 $t_0$ 与 $t_0 + h$ 之间使
+\[
+\frac{f(t_0 + h, x) - f(t_0, x)}{h} = \frac{\partial f}{\partial t}(\xi_x, x).
+\]
+由 $\partial f/\partial t$ 在 $D \times [a, b]$ 上连续与 Heine--Cantor 定理，$\partial f/\partial t$ 一致连续。给定 $\varepsilon > 0$，存在 $\delta > 0$ 使 $|h| < \delta$ 时 $|\partial f/\partial t(\xi_x, x) - \partial f/\partial t(t_0, x)| < \varepsilon/(b - a)$ 对所有 $x$ 成立。则
+\[
+\left| \frac{F(t_0 + h) - F(t_0)}{h} - \int_a^b \frac{\partial f}{\partial t}(t_0, x) \, dx \right| \le \int_a^b \left| \frac{\partial f}{\partial t}(\xi_x, x) - \frac{\partial f}{\partial t}(t_0, x) \right| \, dx < \varepsilon.
+\]
+故 $F'(t_0) = \int_a^b \partial f/\partial t(t_0, x) \, dx$。
+\end{proof}
+
+\begin{corollary}[变限含参积分的 Leibniz 公式]\label{cor:leibniz_variable_limits}
+设 $f(t, x)$ 与 $\partial f/\partial t$ 连续，$a(t), b(t)$ 可导。则
+\[
+\frac{d}{dt} \int_{a(t)}^{b(t)} f(t, x) \, dx = f(t, b(t)) b'(t) - f(t, a(t)) a'(t) + \int_{a(t)}^{b(t)} \frac{\partial f}{\partial t}(t, x) \, dx.
+\]
+\end{corollary}
+
+\begin{proof}
+定义 $G(t, u, v) = \int_u^v f(t, x) \, dx$。由链式法则，
+\[
+\frac{d}{dt} G(t, a(t), b(t)) = \frac{\partial G}{\partial t} + \frac{\partial G}{\partial u} a'(t) + \frac{\partial G}{\partial v} b'(t).
+\]
+$\partial G/\partial t = \int_u^v \partial f/\partial t \, dx$（由定理 \ref{thm:leibniz_rule}）；$\partial G/\partial v = f(t, v)$；$\partial G/\partial u = -f(t, u)$。代入 $u = a(t)$，$v = b(t)$ 即得。
+\end{proof}
+
+\subsection{含参反常积分}
+
+\begin{definition}[含参反常积分的一致收敛]\label{def:uniform_improper_integral}
+设 $f: D \times [a, \infty) \to \mathbb{R}$。称含参反常积分
+\[
+F(t) = \int_a^{\infty} f(t, x) \, dx
+\]
+在 $D$ 上\textbf{一致收敛}，若
+\[
+\lim_{M \to \infty} \sup_{t \in D} \left| \int_M^{\infty} f(t, x) \, dx \right| = 0.
+\]
+\end{definition}
+
+\begin{theorem}[含参反常积分的 Weierstrass M-判别法]\label{thm:improper_m_test}
+设 $f: D \times [a, \infty) \to \mathbb{R}$ 满足 $|f(t, x)| \le g(x)$ 对所有 $t \in D$ 成立，且 $\int_a^{\infty} g(x) \, dx < \infty$。则 $\int_a^{\infty} f(t, x) \, dx$ 在 $D$ 上一致收敛。
+\end{theorem}
+
+\begin{proof}
+给定 $\varepsilon > 0$。由 $\int_a^{\infty} g(x) \, dx$ 收敛，存在 $M_0$ 使 $M > M_0$ 时 $\int_M^{\infty} g(x) \, dx < \varepsilon$。则对任意 $t \in D$，
+\[
+\left| \int_M^{\infty} f(t, x) \, dx \right| \le \int_M^{\infty} |f(t, x)| \, dx \le \int_M^{\infty} g(x) \, dx < \varepsilon.
+\]
+故 $\sup_{t \in D} |\int_M^{\infty} f(t, x) \, dx| \to 0$。
+\end{proof}
+
+\begin{theorem}[含参反常积分的连续性]\label{thm:improper_integral_continuity}
+设 $f: D \times [a, \infty) \to \mathbb{R}$ 连续，$D$ 紧致。若 $\int_a^{\infty} f(t, x) \, dx$ 在 $D$ 上一致收敛，则 $F(t) = \int_a^{\infty} f(t, x) \, dx$ 在 $D$ 上连续。
+\end{theorem}
+
+\begin{proof}
+对每个 $M > a$，定义 $F_M(t) = \int_a^M f(t, x) \, dx$。由定理 \ref{thm:parametric_integral_continuity}，$F_M$ 在 $D$ 上连续。由一致收敛，$F_M \rightrightarrows F$。由定理 \ref{thm:uniform_continuity_preservation}，$F$ 连续。
+\end{proof}
+
+\begin{theorem}[含参反常积分的积分号下求导]\label{thm:improper_leibniz_rule}
+设 $f: D \times [a, \infty) \to \mathbb{R}$ 与 $\partial f/\partial t$ 连续。若
+\begin{enumerate}[label=(\roman*)]
+    \item $F(t) = \int_a^{\infty} f(t, x) \, dx$ 在 $D$ 上收敛；
+    \item $\int_a^{\infty} \partial f/\partial t(t, x) \, dx$ 在 $D$ 上一致收敛，
+\end{enumerate}
+则 $F$ 在 $D$ 上可导，且
+\[
+F'(t) = \int_a^{\infty} \frac{\partial f}{\partial t}(t, x) \, dx.
+\]
+\end{theorem}
+
+\begin{proof}
+对每个 $M > a$，定义
+\[
+F_M(t) = \int_a^M f(t, x) \, dx.
+\]
+由定理 \ref{thm:leibniz_rule}，
+\[
+F_M'(t) = \int_a^M \partial f/\partial t(t, x) \, dx.
+\]由 $\int_a^{\infty} \partial f/\partial t(t, x) \, dx$ 一致收敛，$F_M' \rightrightarrows G$，其中 $G(t) = \int_a^{\infty} \partial f/\partial t(t, x) \, dx$。由 $F_M \rightrightarrows F$（一致收敛）与 $F_M' \rightrightarrows G$，由定理 \ref{thm:uniform_continuity_derivative}，$F' = G$。
+\end{proof}
+
+\begin{example}[含参积分的经典例子]\label{ex:parametric_integral_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item $\int_0^{\infty} e^{-tx} \, dx = 1/t$（$t > 0$）。对 $t$ 求导得 $\int_0^{\infty} -x e^{-tx} \, dx = -1/t^2$，即 $\int_0^{\infty} x e^{-tx} \, dx = 1/t^2$。
+    \item $\int_0^{\infty} \frac{\sin x}{x} \, dx = \frac{\pi}{2}$。考虑 $F(t) = \int_0^{\infty} e^{-tx} \frac{\sin x}{x} \, dx$（$t > 0$）。由 Leibniz 规则，$F'(t) = -\int_0^{\infty} e^{-tx} \sin x \, dx = -1/(1 + t^2)$。故 $F(t) = C - \arctan t$。由 $F(\infty) = 0$，$C = \pi/2$。令 $t \to 0^+$ 得 $\int_0^{\infty} \sin x / x \, dx = \pi/2$。
+    \item $\int_0^{\infty} x^{s-1} e^{-x} \, dx = \Gamma(s)$（$s > 0$），即 Gamma 函数。
+\end{enumerate}
+\end{example}
+
+\section{零测集与分片光滑边界}
+
+\subsection{零测集}
+
+\begin{definition}[零测集]\label{def:null_set}
+设 $E \subseteq \mathbb{R}^n$。$E$ 称为\textbf{零测集}（或\textbf{测度为零}），若对任意 $\varepsilon > 0$，存在至多可数个闭矩形 $R_1, R_2, \dots$ 使
+\[
+E \subseteq \bigcup_{j=1}^{\infty} R_j, \qquad \sum_{j=1}^{\infty} |R_j| < \varepsilon.
+\]
+\end{definition}
+
+\begin{proposition}[零测集的基本性质]\label{prop:null_set_properties}
+\begin{enumerate}[label=(\roman*)]
+    \item 零测集的子集是零测集；
+    \item 可数个零测集的并是零测集；
+    \item 单点集与可数集是零测集；
+    \item $\mathbb{R}^n$ 中的 $k$ 维超平面（$k < n$）是零测集；
+    \item 若 $E$ 是零测集，$f: E \to \mathbb{R}^m$ 是 Lipschitz 映射，则 $f(E)$ 是零测集。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由定义直接得到。
+
+(ii) 设 $E_1, E_2, \dots$ 是零测集。给定 $\varepsilon > 0$，对每个 $j$ 存在矩形族 $\{R_{j,k}\}_k$ 覆盖 $E_j$ 且 $\sum_k |R_{j,k}| < \varepsilon / 2^j$。则 $\{R_{j,k}\}_{j,k}$ 覆盖 $\bigcup_j E_j$ 且 $\sum_{j,k} |R_{j,k}| < \sum_j \varepsilon / 2^j = \varepsilon$。
+
+(iii) 单点集 $\{x\}$ 可被任意小的球覆盖，故是零测集。可数集是可数个单点集的并，由 (ii) 是零测集。
+
+(iv) 设 $H$ 是超平面 $\{x : x_n = 0\}$。对任意 $\varepsilon > 0$，取矩形 $R_j = [-j, j]^{n-1} \times [-\delta_j, \delta_j]$，其中 $\delta_j$ 待定。$\bigcup_j R_j$ 覆盖 $H$（若 $\delta_j \to 0$ 但覆盖整个 $H$ 需要 $j \to \infty$，注意 $H$ 无界）。更精确地：$H \cap [-j, j]^n \subseteq [-j, j]^{n-1} \times [-\varepsilon/(2^j \cdot 2j), \varepsilon/(2^j \cdot 2j)]$，体积为 $(2j)^{n-1} \cdot \varepsilon/(2^j \cdot j) = 2^{n-1} \varepsilon / 2^j$。求和得 $\le 2^{n-1} \varepsilon$。由 $\varepsilon$ 任意，$H$ 是零测集。一般超平面经正交变换化为此情形。
+
+(v) 设 $f$ 是 Lipschitz 的，Lipschitz 常数为 $L$。给定 $\varepsilon > 0$，存在矩形族 $\{R_j\}$ 覆盖 $E$ 且 $\sum_j |R_j| < \varepsilon$。$f(R_j)$ 可被一个边长放大约 $L$ 倍的矩形 $\tilde{R}_j$ 覆盖，故 $|\tilde{R}_j| \le C_n L^n |R_j|$（$C_n$ 为常数）。则 $f(E) \subseteq \bigcup_j \tilde{R}_j$ 且 $\sum_j |\tilde{R}_j| \le C_n L^n \varepsilon$。由 $\varepsilon$ 任意，$f(E)$ 是零测集。
+\end{proof}
+
+\begin{theorem}[Riemann 可积的 Lebesgue 判据]\label{thm:riemann_lebesgue_criterion}
+设 $f: R \to \mathbb{R}$ 是闭矩形 $R$ 上的有界函数。则 $f$ 在 $R$ 上 Riemann 可积当且仅当 $f$ 的不连续点集是零测集。
+\end{theorem}
+
+\begin{proof}
+\textbf{必要性}。设 $f$ 可积。对每个 $k$，由定理 \ref{thm:riemann_integrable_criterion}，存在分割 $\mathcal{P}_k$ 使 $U(f, \mathcal{P}_k) - L(f, \mathcal{P}_k) < 1/k$。令 $D_k$ 为 $\mathcal{P}_k$ 中所有子矩形的并集，其振幅 $\sup_{R_j} f - \inf_{R_j} f \ge 1/k$。则 $\sum_{j \in D_k} |R_j| \le k \cdot 1/k = 1$（粗略估计）。令 $D = \bigcap_k D_k$。$D$ 是零测集（由 $|D_k| \to 0$）。$f$ 在 $D$ 外连续（若 $x \notin D$，存在 $k$ 使 $x \notin D_k$，则在 $x$ 的某邻域内 $f$ 的振幅 $< 1/k$，故 $f$ 在 $x$ 处连续）。故不连续点集 $\subseteq D$ 是零测集。
+
+\textbf{充分性}。设 $f$ 的不连续点集 $D$ 是零测集。$f$ 有界，设 $|f| \le M$。给定 $\varepsilon > 0$，$D$ 可被矩形族 $\{R_j\}$ 覆盖且 $\sum_j |R_j| < \varepsilon / (4M)$。在每个 $R_j$ 上，$f$ 的振幅 $\le 2M$。在 $R \setminus \bigcup_j R_j$ 的紧致子集上，$f$ 连续，故一致连续。存在分割 $\mathcal{P}$ 使在 $R \setminus \bigcup_j R_j$ 内的子矩形上振幅 $< \varepsilon / (2|R|)$。合并得
+\[
+U(f, \mathcal{P}) - L(f, \mathcal{P}) \le 2M \sum_j |R_j| + \frac{\varepsilon}{2|R|} |R| < \frac{\varepsilon}{2} + \frac{\varepsilon}{2} = \varepsilon.
+\]
+由定理 \ref{thm:riemann_integrable_criterion}，$f$ 可积。
+\end{proof}
+
+\begin{example}[零测集的实例]\label{ex:null_set_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathbb{Q} \cap [0, 1]$ 是零测集（可数集）。
+    \item 康托尔三分集是零测集（总长度 $\sum_k 2^k \cdot 3^{-k} = 1$ 不收敛……实际上康托尔集测度为 $0$：第 $k$ 步剩余 $2^k$ 个长度 $3^{-k}$ 的区间，总长 $(2/3)^k \to 0$）。
+    \item $\mathbb{R}^2$ 中的直线是零测集。
+    \item 光滑曲线在 $\mathbb{R}^2$ 中是零测集（Lipschitz 像）。
+\end{enumerate}
+\end{example}
+
+\subsection{分片光滑边界}
+
+\begin{definition}[$C^k$ 分片光滑边界]\label{def:piecewise_smooth_boundary}
+设 $\Omega \subseteq \mathbb{R}^n$ 为有界开集。$\Omega$ 的边界 $\partial \Omega$ 称为 \textbf{$C^k$ 分片光滑}，若存在有限个 $C^k$ 嵌入子流形 $S_1, \dots, S_m$（每个维数为 $n-1$）使
+\[
+\partial \Omega = \bigcup_{i=1}^{m} S_i,
+\]
+且每个 $S_i$ 可被有限个坐标卡覆盖，$\partial \Omega$ 的“棱”是零测集。
+\end{definition}
+
+\begin{definition}[正则区域]\label{def:regular_domain}
+设 $\Omega \subseteq \mathbb{R}^n$ 为有界开集。$\Omega$ 称为\textbf{正则区域}，若：
+\begin{enumerate}[label=(\roman*)]
+    \item $\overline{\Omega}$ 紧致；
+    \item $\partial \Omega$ 是 $C^1$ 分片光滑的；
+    \item $\Omega$ 单连通；
+    \item $\partial \Omega$ 的“棱”（子流形相交处）是零测集，且其上外法向量 $\mathbf{n}$ 的取值对面积分不产生影响。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[正则区域的外法向量几乎处处存在]\label{prop:regular_domain_normal}
+设 $\Omega \subseteq \mathbb{R}^n$ 为正则区域。则外法向量 $\mathbf{n}: \partial \Omega \to S^{n-1}$ 几乎处处存在（除零测集外处处存在），且 $\mathbf{n}$ 在 $\partial \Omega$ 上几乎处处连续。
+\end{proposition}
+
+\begin{proof}
+由定义 \ref{def:piecewise_smooth_boundary}，$\partial \Omega = \bigcup_i S_i$，每个 $S_i$ 是 $C^1$ 嵌入子流形。在 $S_i$ 上，外法向量存在且连续（由 $C^1$ 结构）。在 $S_i$ 的相交处（棱），法向量可能不连续。由定义 \ref{def:regular_domain}(iv)，棱是零测集。故 $\mathbf{n}$ 在 $\partial \Omega$ 上除零测集外处处存在且连续。
+\end{proof}
+
+\begin{theorem}[Gauss 散度定理的正则性前提]\label{thm:gauss_regularity}
+设 $\Omega \subseteq \mathbb{R}^3$ 为正则区域，$\mathbf{F}: \overline{\Omega} \to \mathbb{R}^3$ 是 $C^1$ 向量场。则
+\[
+\int_\Omega (\nabla \cdot \mathbf{F}) \, dV = \oint_{\partial \Omega} \mathbf{F} \cdot \mathbf{n} \, dS,
+\]
+其中 $\mathbf{n}$ 是 $\partial \Omega$ 的单位外法向量，$dS$ 是面积元。
+\end{theorem}
+
+\begin{proof}
+证明分三步。
+
+\textbf{步骤 1：长方体}。设 $\Omega = [a_1, b_1] \times [a_2, b_2] \times [a_3, b_3]$。以 $\mathbf{F} = (F_1, F_2, F_3)$ 为例，只需证 $\int_\Omega \partial F_1/\partial x \, dV = \oint_{\partial \Omega} F_1 n_1 \, dS$（其余分量同理）。由 Fubini 定理，
+\[
+\int_\Omega \frac{\partial F_1}{\partial x} \, dV = \int_{a_2}^{b_2} \int_{a_3}^{b_3} \left( \int_{a_1}^{b_1} \frac{\partial F_1}{\partial x} \, dx \right) dy \, dz = \int_{a_2}^{b_2} \int_{a_3}^{b_3} [F_1(b_1, y, z) - F_1(a_1, y, z)] \, dy \, dz.
+\]
+右端正是 $\oint_{\partial \Omega} F_1 n_1 \, dS$（$n_1 = +1$ 在 $x = b_1$ 上，$n_1 = -1$ 在 $x = a_1$ 上，其余面 $n_1 = 0$）。
+
+\textbf{步骤 2：$z$-简单区域}。设 $\Omega = \{(x, y, z) : (x, y) \in D,\ \varphi_1(x, y) \le z \le \varphi_2(x, y)\}$。对 $F_3$ 分量，
+\[
+\int_\Omega \frac{\partial F_3}{\partial z} \, dV = \int_D \left( \int_{\varphi_1}^{\varphi_2} \frac{\partial F_3}{\partial z} \, dz \right) dx \, dy = \int_D [F_3(x, y, \varphi_2) - F_3(x, y, \varphi_1)] \, dx \, dy.
+\]
+右端是 $\oint_{\partial \Omega} F_3 n_3 \, dS$。对 $F_1, F_2$ 分量，将 $\Omega$ 表示为 $x$-简单或 $y$-简单区域后同理。
+
+\textbf{步骤 3：一般正则区域}。用有限个平行于坐标面的平面将 $\Omega$ 分割为有限个 $z$-简单子区域。对每个子区域应用步骤 2 并求和。内部公共面上的通量两两相消（法向量相反），只剩外部边界上的通量。
+\end{proof}
+
+\begin{remark}[Stokes 定理与 Green 公式的正则性前提]\label{rem:stokes_green_regularity}
+Stokes 定理与 Green 公式的严格陈述同样需要 $\partial S$ 分片光滑、$S$ 可定向等前提。这些前提的精确表述见「矢量分析」章。本节提供的零测集与分片光滑概念是这些前提的解析基础：\textbf{棱是零测集}保证法向量几乎处处存在、面积分不受棱的取值影响；\textbf{分片光滑}保证参数化局部存在、Jacobi 行列式几乎处处有定义。
+\end{remark}
+
+\section{与后续章节的接口}
+
+\begin{remark}[与「级数与卷积」章的接口]\label{rem:ra_to_series}
+本章的一致收敛理论（定理 \ref{thm:uniform_continuity_preservation}、\ref{thm:uniform_continuity_integral}、\ref{thm:uniform_continuity_derivative}）与 Weierstrass M-判别法（定理 \ref{thm:weierstrass_m_test_ra}）为「级数与卷积」章中函数项级数、幂级数、Taylor 级数、Fourier 级数的严格收敛性论证提供基础。该章中 Taylor 公式的余项估计（带 Lagrange 余项）可以引用本章的多变量中值定理（定理 \ref{thm:multivariable_mean_value}）与 Taylor 公式（定理 \ref{thm:taylor_second_order}）的思想。
+\end{remark}
+
+\begin{remark}[与「矢量分析」章的接口]\label{rem:ra_to_vector_analysis}
+本章为「矢量分析」章提供：
+\begin{enumerate}[label=(\roman*)]
+    \item 开集、闭集、紧集、连通、单连通等拓扑概念（定义 \ref{def:open_closed_set}、\ref{def:compactness}、\ref{def:connectedness}、\ref{def:simply_connected}）；
+    \item 正则区域与分片光滑边界（定义 \ref{def:piecewise_smooth_boundary}、\ref{def:regular_domain}）；
+    \item $C^k$ 可微性、Jacobi 矩阵、链式法则（定义 \ref{def:total_differential_ra}、定理 \ref{thm:differentiable_jacobian}、定理 \ref{thm:chain_rule_ra}）；
+    \item 方向导数与梯度（定义 \ref{def:directional_derivative}、\ref{def:gradient_ra}）；
+    \item 隐函数定理、反函数定理、秩定理（定理 \ref{thm:inverse_function}、\ref{thm:implicit_function}、\ref{thm:rank_theorem}）；
+    \item 重积分、Fubini、变量代换（定理 \ref{thm:fubini_ra}、\ref{thm:change_of_variables_ra}）；
+    \item 第一、二类曲线积分与曲面积分（定义 \ref{def:line_integral_first_kind}、\ref{def:line_integral_second_kind}、\ref{def:surface_integral_first_kind}、\ref{def:surface_integral_second_kind}）；
+    \item 零测集与分片光滑边界（定义 \ref{def:null_set}、\ref{def:piecewise_smooth_boundary}）。
+\end{enumerate}
+「矢量分析」章中 Green 公式、Stokes 定理、Gauss 散度定理的严格陈述可以引用本章的正则性前提，而不必在矢量分析内部重复。
+\end{remark}
+
+\begin{remark}[与「概率论与分布」章的接口]\label{rem:ra_to_probability}
+若后续修订计划包含 Lebesgue 测度与积分，则「概率论与分布」章可以引用本章的测度、可测函数、积分等概念。本章目前已建立零测集（定义 \ref{def:null_set}）与 Riemann 可积的 Lebesgue 判据（定理 \ref{thm:riemann_lebesgue_criterion}），为「概率论与分布」章提供零测集与几乎处处的初步工具。若需更完整的测度论，可在本章基础上增加「测度与 Lebesgue 积分初步」一节，或将测度论独立成章。
+\end{remark}
+
+\begin{remark}[本章开放问题]\label{rem:ra_open}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Lebesgue 测度与积分}：本章只建立了零测集与 Riemann 可积的 Lebesgue 判据，未展开 Lebesgue 测度与积分。若后续概率论、调和分析、$L^p$ 空间需要，可另立章节。
+    \item \textbf{Sobolev 空间}：本章只处理 $C^k$ 映射，未涉及弱导数与 Sobolev 空间。这对偏微分方程的现代理论是必要的，但超出本章范围。
+    \item \textbf{流形上的分析}：本章只在欧氏空间上建立分析，流形上的微分与积分（de Rham 上同调、Stokes 定理的一般形式）见「流形基础与纤维丛」章。
+    \item \textbf{一致收敛与交换极限的精细条件}：本章的定理 \ref{thm:uniform_continuity_derivative} 要求 $f_k' \rightrightarrows g$，这是一个较强的条件。在「调和分析」章中，Fourier 级数的逐项求导需要更精细的条件（如绝对收敛、系数衰减率等）。
+\end{enumerate}
+\end{remark}
+
+\section{周期函数在实数分析框架下的两条基本性质}
+\label{sec:periodic_functions_in_real_analysis}
+
+本章建立的完备性、一致收敛与含参积分理论，使「周期」这一概念第一次获得严格的分析载体。本节给出两条基本性质，它们分别以本章的一致收敛与含参积分理论为工具，并为后续各章处理傅里叶级数提供解析前提。
+
+\begin{proposition}[周期函数的积分与起点无关]\label{prop:period_integral_shift_invariant}
+设 $f:\mathbb R\to\mathbb R$ 以 $T>0$ 为周期、在 $[0,T]$ 上连续。则对一切 $a\in\mathbb R$，
+\[
+\int_a^{a+T}f(x)\,dx=\int_0^{T}f(x)\,dx .
+\]
+即\textbf{积分值只依赖周期的长度，不依赖积分区间的起点}。
+\end{proposition}
+
+\begin{proof}
+定义含参积分 $F(a):=\int_a^{a+T}f(x)\,dx$。由本章的含参积分求导法则（定理 \ref{thm:leibniz_rule}），
+\[
+F'(a)=f(a+T)-f(a).
+\]
+由 $f$ 的 $T$-周期性，$f(a+T)=f(a)$，故 $F'(a)\equiv0$，即 $F$ 为常函数；取 $a=0$ 得 $F(a)=F(0)=\int_0^{T}f$。
+\end{proof}
+
+\begin{corollary}[零均值与周期的等价]\label{cor:periodic_zero_mean}
+设 $f$ 如命题 \ref{prop:period_integral_shift_invariant}，记一个周期上的\textbf{均值} $m:=\frac1T\int_0^{T}f(x)\,dx$。则
+\[
+g(x):=\int_0^{x}\bigl(f(t)-m\bigr)\,dt
+\]
+以 $T$ 为周期，且 $g$ 是 $f$ 的周期为 $T$ 的原函数当且仅当 $m=0$。
+\end{corollary}
+
+\begin{proof}
+由命题 \ref{prop:period_integral_shift_invariant}（分别对 $f$ 与常函数 $m$ 使用），
+\[
+g(x+T)-g(x)=\int_x^{x+T}\bigl(f-m\bigr)=\int_0^{T}f-mT=0,
+\]
+故 $g$ 以 $T$ 为周期。又 $g'=f-m$，故 $g$ 是 $f$ 的原函数当且仅当 $m=0$。
+\end{proof}
+
+\begin{remark}[与「周期」主题的接口]\label{rem:ra_period_interface}
+这两条性质的共同结构是：\textbf{周期性把一个「与起点有关」的积分量化为「与起点无关」的量}——这正是「周期基础」章「平移对称 $\Rightarrow$ 守恒」在本章分析层面的实现。该结构在后续各章反复出现：傅里叶系数之所以良定义，依赖命题 \ref{prop:period_integral_shift_invariant} 的起点无关性；「调和分析」章中零均值条件与原函数周期性的关系是推论 \ref{cor:periodic_zero_mean} 的连续版本；「离散采样逼近、同余角与置闰」章处理离散情形时把积分换成求和，结论形式不变。本章由此在「周期」这一主题上取得入口：\textbf{周期性的分析后果，是积分不变量}。
+\end{remark}
+
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 欧氏空间中的平移与极限的平移不变性（定义 \ref{def:euclidean_space}）；函数列的一致收敛（定义 \ref{def:uniform_convergence}）；含参积分（定义 \ref{def:parametric_integral}） \\
+缩放 & 度量空间中的球邻域、覆盖与标度（定义 \ref{def:open_ball}、\ref{def:compactness}）；变量代换的体积缩放（定理 \ref{thm:change_of_variables_ra}） \\
+旋转 & 欧氏空间的正交变换与拓扑不变性；曲线积分与曲面积分的参数化（定义 \ref{def:curve_parameterization}、\ref{def:surface_parameterization}） \\
+守恒 & 紧致性、完备性、连通性等拓扑不变量的守恒（定理 \ref{thm:heine_borel}、\ref{thm:rn_completeness}、\ref{prop:connected_properties}） \\
+对称 & 开集、闭集、紧集在连续映射下的对称保持（定理 \ref{thm:continuity_global}、\ref{thm:continuous_compact}） \\
+闭合 & 闭包、闭集、闭区间套与极限的闭合性（定义 \ref{def:open_closed_set}、定理 \ref{thm:bolzano_weierstrass}）；Riemann 可积的充要条件（定理 \ref{thm:riemann_integrable_criterion}） \\
+周期 & 为后续周期级数、周期卷积、Fourier 分析预备的一致收敛与含参积分工具（定理 \ref{thm:weierstrass_m_test_ra}、\ref{thm:leibniz_rule}、\ref{thm:improper_leibniz_rule}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\clearpage
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+
+    \item 根据定义 \ref{def:open_ball} 与定义 \ref{def:open_closed_set}，证明：
+    \begin{enumerate}[label=(\roman*)]
+        \item 开球 $B(x_0,r)$ 是开集；
+        \item 闭球 $\overline{B}(x_0,r)$ 是闭集；
+        \item 球面 $S(x_0,r)$ 是闭集且内部为空。
+    \end{enumerate}
+    请写出完整的 $\varepsilon$-$\delta$ 式验证，并说明为什么开球与闭球的证明不能互相替代。
+
+    \item 证明命题 \ref{prop:open_closed_properties} 中的以下各款：
+    \begin{enumerate}[label=(\roman*)]
+        \item 任意个开集之并是开集；
+        \item 有限个开集之交是开集；
+        \item 任意个闭集之交是闭集；
+        \item 有限个闭集之并是闭集。
+    \end{enumerate}
+    并各举一个反例说明：无限个开集之交不一定开，无限个闭集之并不一定闭。
+
+    \item 证明定理 \ref{thm:heine_borel} 的“必要性”部分：
+    若 $K \subseteq \mathbb{R}^n$ 紧致，则 $K$ 有界且闭。
+    请按“先证有界、再证闭”的顺序写出完整证明，
+    并说明开球族 $\{B(\mathbf{0},m)\}_{m\in\mathbb{N}^+}$ 在证明有界性时的作用。
+
+    \item 证明定理 \ref{thm:bolzano_weierstrass}：
+    设 $K \subseteq \mathbb{R}^n$。则 $K$ 序列紧致当且仅当 $K$ 有界且闭。
+    请分别证明“紧致 $\Rightarrow$ 序列紧致”与“序列紧致 $\Rightarrow$ 紧致”，
+    并说明为什么序列紧致性可以推出闭性。
+
+    \item 证明命题 \ref{prop:connected_properties} 中的以下各款：
+    \begin{enumerate}[label=(\roman*)]
+        \item 道路连通 $\Rightarrow$ 连通；
+        \item 连续映射保持连通性；
+        \item $\mathbb{R}$ 中的连通子集恰为区间；
+        \item 若一族连通集有公共点，则其并连通。
+    \end{enumerate}
+    请用反证法完成 (i)，用相对开集的原像完成 (ii)，
+    并用区间的序结构完成 (iii)。
+
+    \item 证明定理 \ref{thm:banach_fixed_point}（Banach 压缩映射原理）：
+    完备度量空间上的压缩映射有唯一不动点，且迭代序列收敛于该不动点。
+    请写出存在性、唯一性与误差估计的完整证明，
+    并应用该定理证明方程 $x=\cos x$ 在 $[0,1]$ 上有唯一解。
+
+    \item 证明命题 \ref{prop:differential_uniqueness}：
+    若 $f$ 在 $x_0$ 处可微，则全微分 $L=Df(x_0)$ 唯一。
+    并说明：偏导数存在为什么不能保证可微？
+    请用命题 \ref{prop:partial_not_continuous} 中的函数
+    \[
+    f(x,y)=\begin{cases}
+    \dfrac{xy}{x^2+y^2}, & (x,y)\neq(0,0),\\
+    0, & (x,y)=(0,0)
+    \end{cases}
+    \]
+    验证在原点处两个偏导数存在但不连续，从而不可微。
+
+    \item 证明定理 \ref{thm:chain_rule_ra}（链式法则）：
+    若 $g$ 在 $x_0$ 处可微，$f$ 在 $y_0=g(x_0)$ 处可微，
+    则 $f\circ g$ 在 $x_0$ 处可微，且
+    \[
+    D(f\circ g)(x_0)=Df(y_0)\circ Dg(x_0).
+    \]
+    请用“可微 = 线性主部 + $o(\|h\|)$”的定义完成证明，
+    并写出 Jacobi 矩阵形式的链式法则。
+
+    \item 证明定理 \ref{thm:clairaut_ra}（混合偏导数交换定理）：
+    若 $f\in C^2(\Omega)$，则
+    \[
+    \frac{\partial^2 f}{\partial x_i\partial x_j}
+    =
+    \frac{\partial^2 f}{\partial x_j\partial x_i}.
+    \]
+    请以 $n=2$ 为例写出二阶差分与两次中值定理的完整证明，
+    并说明为什么 $C^2$ 条件不可省略。
+    进一步验证：函数
+    \[
+    f(x,y)=\begin{cases}
+    \dfrac{xy(x^2-y^2)}{x^2+y^2}, & (x,y)\neq(0,0),\\
+    0, & (x,y)=(0,0)
+    \end{cases}
+    \]
+    在原点处两个混合偏导数存在但不相等。
+
+    \item 证明定理 \ref{thm:multivariable_mean_value}（多变量中值定理）：
+    若 $f\in C^1(\Omega)$，$x,y\in\Omega$ 且线段 $[x,y]\subseteq\Omega$，
+    则存在 $\xi\in(x,y)$ 使
+    \[
+    f(y)-f(x)=\nabla f(\xi)\cdot(y-x).
+    \]
+    请通过构造一元函数 $g(t)=f(x+t(y-x))$ 完成证明。
+
+    \item 证明定理 \ref{thm:taylor_second_order}（二阶 Taylor 公式）：
+    若 $f\in C^2(\Omega)$，则
+    \[
+    f(x+h)=f(x)+\nabla f(x)\cdot h
+    +\frac12 h^{\mathsf T}H_f(\xi)h
+    \]
+    对某 $\xi\in(x,x+h)$ 成立。
+    请写出一元二阶 Taylor 公式的代入过程，
+    并证明推论 \ref{cor:extremum_second_order} 中极值的二阶条件。
+
+    \item 证明定理 \ref{thm:lagrange_multiplier_ra}（Lagrange 乘子法）：
+    设 $x_0$ 是 $f$ 在约束 $g_1=\cdots=g_m=0$ 下的局部极值点，
+    且 $\nabla g_1(x_0),\dots,\nabla g_m(x_0)$ 线性无关。
+    则存在 $\lambda_1,\dots,\lambda_m$ 使
+    \[
+    \nabla f(x_0)=\sum_{i=1}^m\lambda_i\nabla g_i(x_0).
+    \]
+    请用隐函数定理将约束集参数化，
+    并说明为什么 $\nabla f(x_0)$ 必须属于法空间
+    $\operatorname{span}\{\nabla g_1(x_0),\dots,\nabla g_m(x_0)\}$。
+
+    \item 证明定理 \ref{thm:inverse_function}（反函数定理）：
+    若 $f:\Omega\to\mathbb{R}^n$ 是 $C^1$ 映射，
+    $Df(x_0)$ 可逆，则 $f$ 在 $x_0$ 附近有 $C^1$ 逆映射。
+    请按“平移与线性变换简化、构造压缩映射、证明连续、证明可微、
+    证明 $C^1$”五个步骤写出完整证明，
+    并说明压缩常数为什么可以取 $1/2$。
+
+    \item 证明定理 \ref{thm:implicit_function}（隐函数定理）：
+    若 $F(x_0,y_0)=0$ 且 $D_yF(x_0,y_0)$ 可逆，
+    则存在 $C^1$ 映射 $g$ 使 $F(x,g(x))=0$。
+    请通过构造 $\Phi(x,y)=(x,F(x,y))$ 并应用反函数定理完成证明，
+    并推导公式
+    \[
+    Dg(x)=-[D_yF(x,g(x))]^{-1}D_xF(x,g(x)).
+    \]
+
+    \item 证明定理 \ref{thm:rank_theorem}（秩定理）：
+    若 $Df(x_0)$ 的秩为 $r$，则存在局部微分同胚 $\varphi,\psi$ 使
+    \[
+    (\psi\circ f\circ\varphi^{-1})(x_1,\dots,x_n)
+    =(x_1,\dots,x_r,0,\dots,0).
+    \]
+    请写出构造 $\Phi(x)=(f^1(x),x_{r+1},\dots,x_n)$
+    并利用反函数定理与隐函数定理的完整过程。
+
+    \item 证明定理 \ref{thm:riemann_integrable_criterion}：
+    有界函数 $f:R\to\mathbb{R}$ Riemann 可积，
+    当且仅当上积分等于下积分，
+    当且仅当对任意 $\varepsilon>0$ 存在分割使 $U-L<\varepsilon$。
+    请写出三个条件循环等价的完整证明，
+    并说明 Darboux 上下和与 Riemann 和的关系。
+
+    \item 证明定理 \ref{thm:continuous_integrable}：
+    闭矩形上的连续函数 Riemann 可积。
+    请用一致连续性证明 $U(f,\mathcal{P})-L(f,\mathcal{P})<\varepsilon$，
+    并说明为什么紧致性在证明中不可缺少。
+
+    \item 证明定理 \ref{thm:fubini_ra}（Fubini 定理）：
+    闭矩形上的连续函数可化为累次积分，且积分次序可交换。
+    请以 $n=2$ 为例，用分割与一元积分中值定理完成证明，
+    并说明为什么连续性是保证累次积分相等的重要条件。
+
+    \item 证明定理 \ref{thm:change_of_variables_ra}（变量代换公式）：
+    若 $\Phi:\Omega\to\Omega'$ 是 $C^1$ 微分同胚，则
+    \[
+    \int_{\Omega'}f(y)\,dy
+    =
+    \int_{\Omega}f(\Phi(x))\,|\det J_\Phi(x)|\,dx.
+    \]
+    请说明局部线性化与体积缩放因子的来源，
+    并计算极坐标变换
+    $\Phi(r,\theta)=(r\cos\theta,r\sin\theta)$ 下的重积分公式。
+
+    \item 计算下列曲线积分与曲面积分，并写出完整过程：
+    \begin{enumerate}[label=(\roman*)]
+        \item $\displaystyle\int_{\gamma}(x^2+y^2)\,ds$，
+        其中 $\gamma$ 是单位圆周；
+        \item $\displaystyle\int_{\gamma}\mathbf{F}\cdot d\mathbf{r}$，
+        其中 $\mathbf{F}(x,y)=(-y,x)$，$\gamma$ 是单位圆周逆时针一周；
+        \item 计算球面 $S^2$ 的面积与径向场
+        $\mathbf{F}(x,y,z)=(x,y,z)$ 穿过 $S^2$ 的通量。
+    \end{enumerate}
+    请说明第一类积分与参数化无关，
+    第二类积分与定向有关。
+
+    \item 证明定理 \ref{thm:uniform_continuity_preservation}、
+    \ref{thm:uniform_continuity_integral}、
+    \ref{thm:uniform_continuity_derivative}：
+    一致收敛分别保持连续性、积分与导数。
+    请分别写出三个证明，
+    并说明在“保持导数”的证明中，
+    为什么需要假设 $f_k'\rightrightarrows g$，
+    而仅假设 $f_k\rightrightarrows f$ 是不够的。
+
+    \item 证明定理 \ref{thm:weierstrass_m_test_ra}（Weierstrass M-判别法）：
+    若 $\|u_k(x)\|\le M_k$ 且 $\sum_k M_k<\infty$，
+    则 $\sum_k u_k(x)$ 一致收敛。
+    请用 Cauchy 一致收敛准则完成证明，
+    并举例说明一致收敛与逐点收敛的区别。
+
+    \item 证明定理 \ref{thm:cauchy_hadamard_ra}（Cauchy--Hadamard 收敛半径公式）：
+    幂级数 $\sum_{k=0}^\infty a_k(x-x_0)^k$ 的收敛半径为
+    \[
+    R=\frac{1}{\limsup_{k\to\infty}|a_k|^{1/k}}.
+    \]
+    请用根值判别法证明 $|x-x_0|<R$ 时绝对收敛、
+    $|x-x_0|>R$ 时发散，
+    并证明在 $|x-x_0|\le r<R$ 上一致收敛。
+
+    \item 证明定理 \ref{thm:leibniz_rule}（Leibniz 规则）：
+    若 $f$ 与 $\partial f/\partial t$ 连续，则
+    \[
+    \frac{d}{dt}\int_a^b f(t,x)\,dx
+    =
+    \int_a^b\frac{\partial f}{\partial t}(t,x)\,dx.
+    \]
+    请用中值定理与一致连续性完成证明，
+    并推导推论 \ref{cor:leibniz_variable_limits}
+    中变限含参积分的 Leibniz 公式。
+
+    \item 证明定理 \ref{thm:improper_m_test} 与
+    定理 \ref{thm:improper_leibniz_rule}：
+    含参反常积分一致收敛的 M-判别法，
+    以及一致收敛条件下积分号下求导的合法性。
+    请以
+    \[
+    F(t)=\int_0^\infty e^{-tx}\frac{\sin x}{x}\,dx
+    \]
+    为例，验证 $F'(t)=-\dfrac{1}{1+t^2}$，
+    并由此计算 $\displaystyle\int_0^\infty\frac{\sin x}{x}\,dx=\frac{\pi}{2}$。
+
+    \item 证明命题 \ref{prop:null_set_properties}：
+    \begin{enumerate}[label=(\roman*)]
+        \item 零测集的子集是零测集；
+        \item 可数个零测集的并是零测集；
+        \item 可数集是零测集；
+        \item $\mathbb{R}^n$ 中的 $k$ 维超平面是零测集；
+        \item Lipschitz 映射保持零测集。
+    \end{enumerate}
+    请分别写出证明，并说明康托尔三分集为什么是零测集。
+
+    \item 证明定理 \ref{thm:riemann_lebesgue_criterion}
+    （Riemann 可积的 Lebesgue 判据）：
+    有界函数 $f:R\to\mathbb{R}$ Riemann 可积，
+    当且仅当其不连续点集是零测集。
+    请写出必要性中构造零测集 $D=\bigcap_k D_k$ 的过程，
+    以及充分性中利用零测集覆盖与一致连续性的论证。
+
+    \item 说明定理 \ref{thm:gauss_regularity}（Gauss 散度定理）
+    的证明中，为什么需要“$\Omega$ 为正则区域”这一前提。
+    请指出：
+    \begin{enumerate}[label=(\roman*)]
+        \item 分片光滑边界在哪里被使用；
+        \item 外法向量几乎处处存在在哪里被使用；
+        \item 棱是零测集在哪里被使用；
+        \item 单连通性在哪里被使用。
+    \end{enumerate}
+    并构造一个边界不光滑的区域，说明散度定理的直接陈述为什么会失效。
+
+    \item 综合题：结合本章的欧氏空间拓扑、多变量微分学、
+    重积分与线面积分、一致收敛与含参积分、零测集与分片光滑边界，
+    说明本章如何为「矢量分析」章中的
+    \begin{enumerate}[label=(\roman*)]
+        \item 梯度、散度、旋度的可微性前提；
+        \item Green 公式、Stokes 定理、Gauss 散度定理的正则性前提；
+        \item 势函数存在性中的单连通条件；
+        \item 通量与环量积分中的定向与边界条件
+    \end{enumerate}
+    提供严格的解析基础。请分别指出本章中对应的定义、定理或命题。
+
+\end{enumerate}
+

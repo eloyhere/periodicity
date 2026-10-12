@@ -1,0 +1,921 @@
+\chapter{Periodic Structure of Agents}
+\label{chap:agent-periodic}
+\markboth{Periodic Structure of Agents}{Periodic Structure of Agents}
+
+\begin{remark}[Periodicity decision for the target of this chapter's target (citation)]\label{rem:agent_ps_hook}
+In deciding whether an agent system is periodic, in determining its period type and in seeking its least positive period, this chapter refers throughout to the `Periodic Systems' chapter:
+the periodicity criterion is given in \cref{thm:ps_periodicity_decision},
+the discrimination of period types in \cref{def:ps_period_type}, \cref{prop:ps_type_discrimination},
+and the search for the least positive period in \cref{def:ps_minimal_period_algorithm}, \cref{thm:ps_minimal_period_correctness}.
+\end{remark}
+
+\begin{remark}[Positioning of this chapter: the convergence point of a four-chapter chain]\label{rem:agent-chapter-positioning}
+The periodic structure of agents studies the mathematical characterisation of periodicity, rhythmicity and oscillatory phenomena in artificial intelligence systems. This chapter is the \textbf{convergence point} of the chain `data analysis $\to$ activation function $\to$ algorithm $\to$ agent', and it uses all the tools of the three preceding chapters.
+
+\textbf{Interface with the three preceding chapters}:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{From the data analysis chapter}: the periodic structure of agent training data is extracted by the periodic convolution (\cref{def:periodic_transform_detection}) and the phase-coupling network (\cref{def:phase_coupling_network}) of the data analysis chapter; the inflection points of the training sequence are detected by refractive-index diagnosis (\cref{def:refraction_index_data}); and multitaper estimation (\cref{prop:multitaper}) provides a spectral basis for the search over training hyperparameters.
+    \item \textbf{From the activation function chapter}: the non-linear units of an agent's neural network are realised by the CEAF (\cref{def:epicycle-activation}); their differentiability is guaranteed by the Wirtinger derivative (\cref{thm:wirtinger-epicycle}); and their approximation capability is guaranteed by the periodic-domain approximation theorem (\cref{cor:epicycle-periodic-approx}) and by single-hidden-layer universal approximation (\cref{thm:universal-approx-epicycle}).
+    \item \textbf{From the algorithmic systems chapter}: the convergence analysis of agent training dynamics inherits the damped oscillation of gradient descent (\cref{ch33_gd_bound}) and the quadratic convergence of Newton's method (\cref{prop:newton_quadratic}); multi-agent synchronisation inherits fixed-point iteration (\cref{thm:banach_fixed_point_algo}); and the random source of the exploration policy inherits the periodic structure of the PRNG (\cref{def:prng_period}).
+\end{enumerate}
+
+\textbf{Guide to the seven themes of this chapter}: translation---the parameter translation of gradient descent and the error iteration $e_{t+1}^{(i)} = (1-\eta\lambda_i)e_t^{(i)}$ (\cref{ch32_gd_eigen}); scaling---the scale decay of the learning-rate scheduler (\cref{def:lr_scheduler}) and the exponential decay of the exploration intensity $\varepsilon(t)$ (\cref{def:exploration_exploitation}); rotation---the damped rotation of the momentum method (\cref{prop:momentum_rotation}) and the complex-exponential phase of positional encoding (\cref{prop:positional_encoding_fourier}); balance---parameter constraints, gradient-propagation constraints and attention-normalisation constraints (\cref{thm:agent_conservation}); symmetry---the identity symmetry of residual connections and the softmax normalisation symmetry of attention; closure---the convergence closure of policy iteration towards the optimal policy $\pi^*$ (\cref{prop:policy_iteration_cycle}) and the iterative closure of the reasoning chain (\cref{thm:reasoning_fixed_point}); period---the damped oscillation of gradient descent, the cosine-annealing period $T$ of the learning rate (\cref{def:lr_scheduler}), the multi-agent synchronisation period $T_{\text{sync}}$ (\cref{prop:parameter_averaging}) and the limit-cycle period of the attractor (\cref{thm:hopfield_limit_cycle}).
+
+\textbf{Interface with the other frameworks of the book}: the phase-synchronisation analysis of this chapter invokes the phase-locking proposition of the `Periodic Systems' chapter (\cref{prop:phase-locking}) and the Kuramoto synchronisation threshold of the `Periodic Structure of Social Systems' chapter (\cref{prop:kuramoto_model}); the periodic memory of the LSTM invokes the discrete phase operator of the `Periodic Functions and Groups with Periodic Orbits' chapter (\cref{def:discrete_phase_operator}); the phase similarity of positional encoding invokes the difference-angle cosine similarity of the `Scalars and Vectors' chapter (\cref{def:basic_diff_similarity}); and the phase structure of word embeddings invokes the complex-exponential difference-angle operator of the `Scalars and Vectors' chapter (\cref{def:complex_diff_sum}).
+\end{remark}
+
+\section{Mathematical foundations of agent systems}
+
+\begin{definition}[Basic quantities of an agent system]\label{def:agent_quantities}
+An agent system is described by the following elementary variables:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Model parameters} $\boldsymbol{\theta} \in \mathbb{R}^d$: the weights and biases of a neural network. The update trajectory of the parameters forms periodic or quasi-periodic motion in parameter space.
+    \item \textbf{Loss function} $\mathcal{L}(\boldsymbol{\theta})$: a scalar function measuring the discrepancy between the model's predictions and the true labels. The landscape of the loss function (gradient, curvature, saddle points) determines the periodic structure of the optimisation trajectory.
+    \item \textbf{Learning rate} $\eta > 0$: the step size of gradient descent. The magnitude of the learning rate determines the scale of the optimisation---a large learning rate corresponds to rapid but coarse translation, a small learning rate to slow but fine translation.
+    \item \textbf{Momentum} $\mathbf{m} \in \mathbb{R}^d$: the accumulated historical gradient in a momentum optimiser. Momentum introduces inertia into parameter space, causing the optimisation trajectory to rotate about saddle points and local minima in the loss landscape.
+    \item \textbf{Attention weights} $\alpha_{ij} \in [0,1]$: the attention weight of the $i$-th query on the $j$-th key in a Transformer. The distribution of the attention weights varies periodically with position in the input sequence.
+    \item \textbf{Hidden state} $\mathbf{h}_t \in \mathbb{R}^h$: the hidden-state vector of a recurrent neural network at time $t$. The evolution of the hidden state traces an orbit in state space---a periodic orbit corresponds to a cyclic pattern, a chaotic orbit to a complex sequence.
+    \item \textbf{Word embedding} $\mathbf{e}_w \in \mathbb{R}^{d_e}$: the dense vector representation of a word $w$. Word embeddings form a vector field with rotational and phase structure in embedding space (\cref{def:word_embedding_space}).
+    \item \textbf{Reasoning state} $\mathbf{s}_t$: the intermediate state of a reasoning chain at step $t$. The sequence of reasoning states constitutes the reasoning-chain orbit (\cref{def:reasoning_chain}).
+\end{enumerate}
+The defining feature of an agent system is the \textbf{optimisation dynamics in a high-dimensional parameter space}---the parameter trajectory moves through the loss landscape, the gradient drives the parameters to translate in the direction of decreasing loss, momentum drives the parameters to rotate in the loss landscape, and learning-rate decay controls the scale of the translation and of the rotation.
+\end{definition}
+
+\begin{property}[Immediate constraints on the elementary quantities]\label{prop:agent_basic_constraints}
+The following constraints follow directly from \cref{def:agent_quantities}:
+\begin{enumerate}[label=(\roman*)]
+    \item the learning rate $\eta > 0$ is a scalar parameter with no upper bound, but its effectiveness is constrained by the curvature of the loss function (\cref{ch32_gd_eigen});
+    \item the momentum coefficient $\beta \in [0,1)$ is a decay factor, and $\beta \to 1$ corresponds to inertia without decay;
+    \item the attention weights satisfy the normalisation $\sum_j \alpha_{ij} = 1$, a constraint that comes from the mathematical definition of softmax (\cref{thm:agent_conservation}(iii));
+    \item the hidden-state dimension $h$ is given by the network design, and the periodic structure of its evolution trajectory is determined by the gating mechanism (\cref{def:lstm_gates});
+    \item the embedding dimension $d_e$ is a hyperparameter, and the rotational structure of word embeddings is given by the complex-number analogy (\cref{prop:embedding_rotation_analogy});
+    \item the convergence of the reasoning-state sequence is guaranteed by the contractivity of the reasoning map (\cref{thm:reasoning_fixed_point}).
+\end{enumerate}
+\end{property}
+
+\begin{definition}[Manifold structure of the agent state space]\label{def:agent_state_manifold}
+The agent state space $\mathcal{S}$ is the Cartesian product of the following three manifolds:
+\[
+\mathcal{S}=\mathcal{P}\times\mathcal{H}\times\mathcal{E},
+\]
+where
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathcal{P}\subseteq\mathbb{R}^d$ is the \textbf{parameter manifold}, whose local geometry is measured by the Hessian of the loss function;
+    \item $\mathcal{H}\subseteq\mathbb{R}^h$ is the \textbf{hidden-state manifold}, whose evolution trajectory is the state orbit of a recurrent neural network;
+    \item $\mathcal{E}\subseteq\mathbb{R}^{d_e}$ is the \textbf{embedding manifold}, whose structure is given by the unit-sphere decomposition and the rotational symmetry of word embeddings.
+\end{enumerate}
+The metric on the state space is given by the product metric of the three, and upon it act the parameter translation group, the hidden-state rotation group and the embedding scaling group.
+\end{definition}
+
+\section{Periodic dynamics of neural-network training}
+
+\begin{definition}[Oscillatory convergence of gradient descent]\label{def:gradient_descent_oscillation}
+In a neighbourhood of a minimum of the loss function $\mathcal{L}(\boldsymbol{\theta})$, the parameter updates of gradient descent exhibit \textbf{damped oscillation}. Let the linearised dynamics of the parameters near the minimum $\boldsymbol{\theta}^*$ be
+\[
+\boldsymbol{\theta}_{t+1} = \boldsymbol{\theta}_t - \eta \nabla \mathcal{L}(\boldsymbol{\theta}_t) \approx \boldsymbol{\theta}_t - \eta \mathbf{H} (\boldsymbol{\theta}_t - \boldsymbol{\theta}^*),
+\]
+where $\mathbf{H} = \nabla^2 \mathcal{L}(\boldsymbol{\theta}^*)$ is the Hessian matrix. The evolution of the parameter error $\mathbf{e}_t = \boldsymbol{\theta}_t - \boldsymbol{\theta}^*$ is $\mathbf{e}_{t+1} = (\mathbf{I} - \eta \mathbf{H}) \mathbf{e}_t$. Let the eigenvalues of $\mathbf{H}$ be $\lambda_1, \dots, \lambda_d > 0$. The evolution of the error along the $i$-th eigendirection is $e_{t+1}^{(i)} = (1 - \eta \lambda_i) e_t^{(i)}$.
+
+The convergence behaviour of gradient descent: when $0 < \eta \lambda_i < 2$ we have $|1 - \eta \lambda_i| < 1$---the error decays monotonically (overdamped). When $1 < \eta \lambda_i < 2$ we have $1 - \eta \lambda_i < 0$---the sign of the error alternates at every step (underdamped oscillation). The rate of convergence is determined by $|1 - \eta \lambda_i|$---convergence is fastest when $\eta \lambda_i = 1$ (critical damping), and slowest as $\eta \lambda_i \to 0$ or $\eta \lambda_i \to 2$. This is the degenerate form of a damped oscillator in discrete time.
+\end{definition}
+
+\begin{lemma}[Eigen-direction convergence of gradient descent]\label{ch32_gd_eigen}
+For the quadratic loss $\mathcal{L}(\boldsymbol{\theta}) = \frac{1}{2}(\boldsymbol{\theta}-\boldsymbol{\theta}^*)^{\mathsf T}\mathbf{H}(\boldsymbol{\theta}-\boldsymbol{\theta}^*)$ (with $\mathbf{H}$ positive definite and eigenvalues $0 < \lambda_1 \le \dots \le \lambda_d$), the error of gradient descent $\boldsymbol{\theta}_{t+1} = \boldsymbol{\theta}_t - \eta\mathbf{H}(\boldsymbol{\theta}_t - \boldsymbol{\theta}^*)$ along the $i$-th eigendirection is
+\[
+e_t^{(i)} = (1 - \eta\lambda_i)^t \, e_0^{(i)},
+\]
+and the convergence ($e_t^{(i)} \to 0$) holds if and only if $0 < \eta\lambda_i < 2$; when $\eta\lambda_i = 1$ the error vanishes in one step (critical damping), when $1 < \eta\lambda_i < 2$ the sign alternates (underdamped oscillation), and when $\eta\lambda_i \ge 2$ the iteration diverges.
+\end{lemma}
+
+\begin{proof}
+In the eigenbasis $\mathbf{H}$ is diagonalised and the eigendirections decouple: $e_{t+1}^{(i)} = (1-\eta\lambda_i) e_t^{(i)}$, and iteration gives $e_t^{(i)} = (1-\eta\lambda_i)^t e_0^{(i)}$. The convergence condition is $|1-\eta\lambda_i| < 1 \Leftrightarrow 0 < \eta\lambda_i < 2$; when $1-\eta\lambda_i = 0$ we have $e_1^{(i)} = 0$; when $1-\eta\lambda_i < 0$ the sign changes at every term. Global convergence requires $0 < \eta < 2/\lambda_d$---the step size is capped by the largest eigenvalue, whilst the rate of convergence is determined by the smallest eigenvalue ($\eta = 2/(\lambda_1+\lambda_d)$ minimises the spectral radius).
+\end{proof}
+
+\begin{proposition}[Rotational acceleration of the momentum method]\label{prop:momentum_rotation}
+Gradient descent with momentum (SGD with Momentum) introduces a \textbf{rotational component} into parameter space:
+\[
+\mathbf{m}_{t+1} = \beta \mathbf{m}_t + (1-\beta) \nabla \mathcal{L}(\boldsymbol{\theta}_t), \quad \boldsymbol{\theta}_{t+1} = \boldsymbol{\theta}_t - \eta \mathbf{m}_{t+1},
+\]
+where $\beta \in [0,1)$ is the momentum coefficient. The momentum $\mathbf{m}_t$ is an exponentially weighted moving average of past gradients---it accumulates directional information about the gradient. In the long narrow ravines of the loss landscape, momentum makes the parameter trajectory rotate about the centre of the ravine, accelerating convergence.
+
+The momentum method is the realisation of the rotation operation in optimisation: the momentum $\mathbf{m}_t$ is analogous to velocity in a mechanical system---it preserves the direction of the parameter's motion, making the parameters `rotate' in the loss landscape rather than merely `slide down'. The momentum coefficient $\beta$ controls the inertia of the rotation---the larger $\beta$ is, the more persistent the influence of past gradients and the larger the radius of rotation. Nesterov accelerated gradient (NAG) is a refinement of the momentum method---it first moves along the momentum direction and then computes the gradient to apply a correction, rather like a prediction with phase advance. This structure shares one and the same second-order dynamical template as the damped harmonic oscillator of the `Periodic Structure of Mechanical Systems' chapter (\cref{prop:radial_oscillation_period}).
+\end{proposition}
+
+\begin{proof}
+The parameter update of the momentum method may be written as a second-order difference equation: $\boldsymbol{\theta}_{t+1} - \boldsymbol{\theta}_t = -\eta \nabla \mathcal{L}(\boldsymbol{\theta}_t) + \beta(\boldsymbol{\theta}_t - \boldsymbol{\theta}_{t-1})$. Linearising near the minimum: $\mathbf{e}_{t+1} - \mathbf{e}_t = -\eta \mathbf{H} \mathbf{e}_t + \beta(\mathbf{e}_t - \mathbf{e}_{t-1})$. The characteristic equation is $\lambda^2 - (1+\beta - \eta \lambda_i)\lambda + \beta = 0$. The characteristic roots are
+\[
+\lambda_{1,2} = \frac{1+\beta - \eta \lambda_i \pm \sqrt{(1+\beta - \eta \lambda_i)^2 - 4\beta}}{2}.
+\]
+When the discriminant is negative (that is, when $(1+\beta-\eta\lambda_i)^2 < 4\beta$), the characteristic roots are complex conjugates---the parameter trajectory exhibits damped rotation. The angular frequency of the rotation is $\omega_i = \arctan(\sqrt{4\beta - (1+\beta - \eta \lambda_i)^2}/(1+\beta - \eta \lambda_i))$, and the damping factor is $\sqrt{\beta}$.
+\end{proof}
+
+\begin{definition}[Periodic decay of the learning-rate scheduler]\label{def:lr_scheduler}
+A \textbf{learning-rate scheduler} reduces the learning rate according to a predefined period or condition. Common scheduling policies include:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Step decay}: every $T$ epochs the learning rate is multiplied by $\gamma < 1$, so that $\eta_t = \eta_0 \cdot \gamma^{\lfloor t/T \rfloor}$. This is discrete scale scaling---every $T$ steps the scaling factor $\gamma$ acts once.
+    \item \textbf{Cosine annealing}: $\eta_t = \eta_{\min} + \frac{1}{2}(\eta_{\max} - \eta_{\min})(1 + \cos(\pi t/T))$. The learning rate varies periodically as a cosine function---it rotates smoothly between $\eta_{\max}$ and $\eta_{\min}$, with period $2T$.
+    \item \textbf{Warmup cosine annealing}: over the first $T_{\text{warmup}}$ steps the learning rate increases linearly (accelerated translation) and thereafter decays as a cosine. The warmup phase avoids instability of the parameters in the early stage of training.
+\end{enumerate}
+The learning-rate scheduler controls the scale of the parameter updates---a large learning rate corresponds to rapid translation (exploration), a small learning rate to fine translation (exploitation). The periodic oscillation of cosine annealing is characterised by the period parameter $T$, which agrees with the intercalation-window selection of the `Discrete Sampling and Intercalation of Periodic Signals' chapter (\cref{thm:intercalation_leakage_suppression}) in the idea of `modulating the sampling scale by a periodic function'.
+\end{definition}
+
+\begin{proposition}[Periodic structure of the cosine-annealing learning rate]\label{prop:cosine_annealing_period_agent}
+The cosine-annealing learning rate
+\[
+\eta_t = \eta_{\min} + \frac{1}{2}(\eta_{\max} - \eta_{\min})\Bigl(1 + \cos\frac{\pi t}{T}\Bigr)
+\]
+is a periodic function of period $2T$: $\eta_{t+2T} = \eta_t$. Within one period, $\eta_t$ decreases monotonically from $\eta_{\max}$ to $\eta_{\min}$ ($t \in [0,T]$) and then increases monotonically back to $\eta_{\max}$ ($t \in [T,2T]$).
+\end{proposition}
+
+\begin{proof}
+Periodicity follows at once from $\cos(\pi(t+2T)/T) = \cos(\pi t/T + 2\pi) = \cos(\pi t/T)$. Monotonicity follows from the monotonicity of the cosine on $[0,\pi]$ and on $[\pi,2\pi]$.
+\end{proof}
+
+\section{Complex exponential activation functions and kernel-smoothed derivative-integral descent}
+
+\begin{definition}[Form of the complex exponential activation function in agent systems]\label{def:eaf_agent}
+The mathematical object of the complex exponential activation function (CEAF) was given in Chapter~\ref{chap:epicycle-activation}, \cref{def:epicycle-activation}:
+\[
+\mathcal{E}(x)=\sum_{k=1}^{N}A_k e^{i(\omega_k x+\phi_k)}.
+\]
+This section gives its applied properties in the context of agents and neural networks, without redefining the function. In agent systems, replacing the standard activation functions (ReLU, GELU, Swish) by the CEAF has the following advantages:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Intrinsic periodic structure}: the CEAF naturally contains multiple levels of nested periods---the frequencies $\{\omega_k\}$ and amplitudes $\{A_k\}$ of the epicycles at each level are learnable parameters, enabling the network to capture multi-scale periodic patterns in the data adaptively. The initial frequency values may be initialised from the periodogram peaks of the preceding chapter's data analysis (\cref{ch31_periodogram_peak}).
+    \item \textbf{Phase-encoding capability}: the CEAF outputs complex values $\mathcal{E}(x) \in \mathbb{C}$, whose real and imaginary parts encode the in-phase and quadrature components of the signal respectively. The phase information $\arg(\mathcal{E}(x))$ is preserved in the forward pass, enabling the network to learn phase relations in a time series---this is structurally the same as the complex-exponential similarity of the `Scalars and Vectors' chapter (\cref{prop:complex_exp_similarity_rotation_operator}).
+    \item \textbf{The derivative is not identically zero}: the derivative of the CEAF, $\mathcal{E}'(x) = i\sum_k \omega_k A_k e^{i(\omega_k x + \phi_k)}$, is not identically zero on the whole real axis (\cref{prop:epicycle-basic-properties}(iv)), which avoids the identically zero gradient of ReLU on the negative half-axis. It should be noted that $\mathcal{E}'$ may have isolated zeros, so the statement `the gradient is nowhere zero' does not hold; the correct statement is `the gradient is not identically zero'.
+    \item \textbf{Multi-scale feature extraction}: the ratios of the angular velocities $\{\omega_k\}$ of the epicycles at each level determine the sensitivity of the activation function to different periodic scales. When $\omega_k \approx 2\pi/T_{\text{data}}$, the $k$-th level epicycle produces resonant amplification at the data period $T_{\text{data}}$.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Propagation structure of the CEAF]\label{prop:ceaf_propagation}
+Under translation the CEAF behaves as a pure phase rotation: for any $a\in\mathbb{R}$,
+\[
+\mathcal{E}(x+a) = \sum_{k=1}^{N}A_k e^{i(\omega_k x+\phi_k+\omega_k a)}.
+\]
+That is, the translation $a$ is equivalent to increasing the phase of the $k$-th component by $\omega_k a$---this is the componentwise realisation on the CEAF of \cref{prop:phase_propagation} of the `Propagation and Evolution' chapter (the consistency of the propagation operator with the phase operator).
+\end{proposition}
+
+\begin{proof}
+Substituting \cref{def:epicycle-activation} and $e^{i(\omega_k(x+a)+\phi_k)} = e^{i(\omega_k x+\phi_k)}e^{i\omega_k a}$ gives the result.
+\end{proof}
+
+\begin{corollary}[Periodicity condition for the CEAF]\label{cor:ceaf_period_agent}
+If all the ratios $\omega_k/\omega_1 \in \mathbb{Q}$ (where $\omega_1$ is the base frequency), then $\mathcal{E}$ has period $T = 2\pi/\omega_1$ (when the $\omega_k$ are integer multiples of the base frequency); otherwise $\mathcal{E}$ is a Bohr almost-periodic function (see \cref{prop:epicycle-basic-properties}(v) for details).
+\end{corollary}
+
+\begin{proof}
+This follows directly from \cref{prop:epicycle-basic-properties}(v).
+\end{proof}
+
+\begin{remark}[CEAF in the Transformer (architectural proposal)]\label{prop:eaf_transformer}
+Apply the CEAF in the feed-forward network (Feed-Forward Network) of a Transformer model, replacing the standard activation function. Let the output of the $l$-th layer of the Transformer be $\mathbf{h}^{(l)}$; the transformation of the feed-forward network is
+\[
+\mathbf{z} = \mathbf{W}_2 \cdot \mathcal{E}(\mathbf{W}_1 \mathbf{h}^{(l)} + \mathbf{b}_1) + \mathbf{b}_2,
+\]
+where $\mathbf{W}_1, \mathbf{W}_2$ are weight matrices and $\mathbf{b}_1, \mathbf{b}_2$ are biases. The complex-valued output of the CEAF provides two complementary channels---a real-part channel and an imaginary-part channel. The two channels may be concatenated into a real-valued vector of twice the dimension, or a magnitude--phase scheme may be used (the magnitude as the activation strength and the phase as a supplementary positional encoding).
+
+\textbf{It must be stressed} that this architectural proposal is \textbf{heuristic} and that its performance advantages require empirical verification; at present there is only numerical evidence from a time-series forecasting task (\cref{ex:eaf_kdi_time_series}) and a one-dimensional function-approximation task (\cref{ex:1d-approx-comparison}), and rigorous theoretical guarantees are lacking.
+\end{remark}
+
+\begin{definition}[Application of the CEAF in LSTM]\label{def:eaf_lstm}
+Embed the CEAF in the gating mechanism of an LSTM, replacing the standard activation functions. The input gate $i_t$, forget gate $f_t$ and output gate $o_t$ of the LSTM use the CEAF in place of the sigmoid, and the candidate cell state $\tilde{\mathbf{c}}_t$ uses the CEAF in place of tanh:
+\[
+i_t = \sigma_{\text{CEAF}}(\mathbf{W}_i \cdot [\mathbf{h}_{t-1}, \mathbf{x}_t] + \mathbf{b}_i), \quad \tilde{\mathbf{c}}_t = \mathcal{E}(\mathbf{W}_c \cdot [\mathbf{h}_{t-1}, \mathbf{x}_t] + \mathbf{b}_c),
+\]
+where $\sigma_{\text{CEAF}}(x) = |\mathcal{E}(x)| / \sum_k A_k$ is the CEAF magnitude normalised to $[0,1]$ (replacing the gating function of the sigmoid). The advantage of CEAF gating lies in its sensitivity to periodicity---when the input sequence contains a periodic pattern, the periodic opening and closing of the CEAF gate resonates with the period of the sequence, enabling the LSTM to capture long-range periodic dependencies more efficiently.
+
+CEAF gating is an enhanced realisation of the rotation operation in the LSTM: the periodic opening and closing of the forget gate corresponds to phase rotation (the alternation of retention and forgetting), and the periodic opening and closing of the input gate corresponds to scale modulation (the periodic variation of the writing strength). The epicycles at each level of the CEAF endow the gate with multi-scale period awareness---gates of different frequencies respond to sequence patterns on different time scales. This agrees with the discrete phase operator $\mathcal{O}_k^{(T)}$ of the `Periodic Functions and Groups with Periodic Orbits' chapter (\cref{def:discrete_phase_operator}) in the core idea that `periodic opening and closing = phase rotation'.
+\end{definition}
+
+\begin{definition}[Application of kernel-smoothed derivative-integral descent in agent systems]\label{def:kdi_agent}
+\textbf{Kernel-smoothed derivative-integral descent} (Kernel-smoothed Derivative-Integral Descent, KDI) is used in agent systems to optimise the parameters $\Theta_{\text{CEAF}} = \{A_k, \omega_k, \phi_k\}_{k=1}^{K}$ of the CEAF together with the other learnable parameters of the model. By fusing derivatives and integrals through kernel functions, the algorithm exploits both first-order derivative (gradient) and higher-order integral (trend) information, escaping saddle points and local minima in a non-convex loss landscape.
+
+For the CEAF parameters $\Theta_{\text{CEAF}}$, different kernel functions are used to optimise the terms separately:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Amplitude $A_k$}: a Gaussian kernel $K_{\text{Gauss}}$ is used for windowed derivative-integral estimation. The amplitude is a smooth positive quantity, and the smoothing property of the Gaussian kernel suppresses high-frequency noise in the amplitude update. The windowed derivative $D_{K_{\text{Gauss}}}^{(1)}(A_k, \Delta)$ gives the smoothed first-order gradient of the amplitude, and the windowed integral $I_{K_{\text{Gauss}}}^{(1)}(A_k, \Delta)$ gives the cumulative change in the amplitude. The curvature-correction term of the derivative-integral fusion function $\Phi$ detects the inflection points of the amplitude variation (the data-analysis procedure of \cref{def:data_structure_metric_adjustment} provides an initial estimate for this).
+    \item \textbf{Angular velocity $\omega_k$}: a Mexican-hat kernel $K_{\text{MexHat}}$ is used for second-derivative estimation. The Mexican-hat kernel is the second derivative of the Gaussian kernel and is naturally band-pass---it suppresses low frequencies (slow frequency drift) and high frequencies (random fluctuations) whilst enhancing intermediate frequencies (genuine frequency changes). The optimisation of the angular velocities has the greatest influence on network performance---$\omega_k$ determines the periodic scale of the activation function.
+    \item \textbf{Phase $\phi_k$}: a Hilbert kernel $K_{\text{Hilbert}}$ is used for quadrature-phase estimation. The Hilbert kernel produces a phase rotation of $\pm 90^\circ$ and can detect precisely the jump of the phase as it crosses the boundary from $0$ to $2\pi$. Correct detection of phase jumps prevents $\phi_k$ from being trapped at a spurious equilibrium point near $0$ or $2\pi$ during optimisation. This is structurally the same as the Hilbert transform of the `Vector Analysis' chapter (\cref{def:hilbert}).
+\end{enumerate}
+The coordinated use of the three kernel functions equips the CEAF parameter update simultaneously with the smooth adjustment of amplitudes, the curvature sensing of frequencies and the jump detection of phases. The Gaussian kernel, the Mexican-hat kernel and the Hilbert kernel all belong to the window-function system of the `Discrete Sampling and Intercalation of Periodic Signals' chapter (\cref{def:window_function}), and their sidelobe decay laws are characterised by \cref{thm:window_smoothness_decay_parallel}.
+\end{definition}
+
+\begin{proposition}[Descent property of KDI for epicycle parameters]\label{prop:kdi_epicycle_descent_agent}
+Let the loss $\mathcal{L}(\Theta)$ be continuously differentiable in a neighbourhood of the parameters $\Theta = \{A_k, \omega_k, \phi_k\}$. If the inner product of the KDI direction $\mathbf{d}(\Theta)$ with $-\nabla\mathcal{L}(\Theta)$ is positive, then there exists $\eta > 0$ such that
+\[
+\mathcal{L}(\Theta - \eta\mathbf{d}(\Theta)) < \mathcal{L}(\Theta).
+\]
+\end{proposition}
+
+\begin{proof}
+The directional derivative is $\frac{d}{d\eta}\mathcal{L}(\Theta - \eta\mathbf{d})|_{\eta=0} = -\nabla\mathcal{L}(\Theta)\cdot\mathbf{d} + o(1)$. If $-\nabla\mathcal{L}\cdot\mathbf{d} > 0$, then the value of the function decreases strictly for sufficiently small $\eta$.
+\end{proof}
+
+\begin{proposition}[Qualitative advantages of kernel-smoothed derivative-integral descent for optimising the CEAF]\label{prop:kdi_eaf_convergence}
+In the parameter optimisation of the CEAF, kernel-smoothed derivative-integral descent has a better non-convex search capability than standard gradient descent. Let the landscape of the loss function $\mathcal{L}(\Theta_{\text{CEAF}})$ in parameter space contain several local minima and saddle points. Standard gradient descent $\Theta^{(t+1)} = \Theta^{(t)} - \eta \nabla \mathcal{L}$ uses only first-order derivative information and readily stalls at saddle points (where the gradient is close to zero) or becomes trapped in a local minimum.
+
+Kernel-smoothed derivative-integral descent overcomes these difficulties by means of multi-scale windowed derivative-integral information:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Escaping saddle points}: at a saddle point the first-order gradient satisfies $\nabla \mathcal{L} \approx \mathbf{0}$, but the second derivative (curvature) has different signs in different directions at the saddle point. The curvature-correction term detects the change of curvature along a direction---the step size is increased in directions of negative curvature, driving the parameters away from the saddle point.
+    \item \textbf{Crossing local minima}: the windowed integral associated with a large window radius $\Delta$ contains landscape information from distant regions. When the radius of the `basin' of a local minimum is smaller than $\Delta$, the large-window integral can `see' lower regions beyond the basin and guide the parameters across the local minimum.
+    \item \textbf{Accelerating across flat regions}: in regions where the loss landscape is flat (the gradient is close to zero but the point is not a saddle point), the cumulative-change correction term detects the long-term trend of the loss function within the window---even if the current gradient is very small, so long as the windowed integral keeps decreasing, the update direction still points in the direction of decreasing loss.
+\end{enumerate}
+
+\textbf{It must be stressed} that this proposition is a \textbf{qualitative} statement and merely identifies the heuristic advantages of KDI in non-convex search. A rigorous proof of convergence---in particular the global rate of convergence in the non-convex case---remains an \textbf{open problem} (\cref{rem:agent_open_problems}).
+\end{proposition}
+
+\begin{definition}[Training pipeline of CEAF--KDI]\label{def:eaf_kdi_pipeline}
+The training pipeline that combines the CEAF with kernel-smoothed derivative-integral descent consists of the following steps:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Model initialisation}: the network weights are set by a standard initialisation method (Xavier or He initialisation). The CEAF parameters take amplitudes decreasing geometrically in radius, $A_k = A_1 q^{k-1}$, angular velocities from the harmonic sequence $\omega_k = \omega_1 k$, and phases initialised at random, $\phi_k \sim \mathcal{U}(0, 2\pi)$. If the preceding chapter's data analysis provides a frequency estimate (\cref{prop:kdi_parameter_estimation}), it is used to initialise $\omega_k$.
+    \item \textbf{Forward pass}: the input data pass through the network layers containing the CEAF, and the output and the loss $\mathcal{L}$ are computed.
+    \item \textbf{Backward pass}: the gradients of the loss with respect to the network weights and the CEAF parameters, $\nabla_{\mathbf{W}}\mathcal{L}$ and $\nabla_{\Theta_{\text{CEAF}}}\mathcal{L}$, are computed (using the Wirtinger derivative, \cref{thm:wirtinger-epicycle}).
+    \item \textbf{Computation of kernel-smoothed directions}: for the CEAF parameters, the Gaussian kernel, the Mexican-hat kernel and the Hilbert kernel are used to compute the update directions for the amplitudes, the frequencies and the phases respectively. For the network weights, standard gradient or momentum updates are used.
+    \item \textbf{Parameter update}: $\Theta_{\text{CEAF}}^{(t+1)} = \Theta_{\text{CEAF}}^{(t)} - \eta_{\text{CEAF}} \cdot \mathbf{d}(\Theta_{\text{CEAF}}^{(t)})$, $\mathbf{W}^{(t+1)} = \mathbf{W}^{(t)} - \eta_{\mathbf{W}} \cdot \nabla_{\mathbf{W}}\mathcal{L}$.
+    \item \textbf{Learning-rate scheduling}: cosine annealing (\cref{def:lr_scheduler}) is used to adjust $\eta_{\text{CEAF}}$ and $\eta_{\mathbf{W}}$ simultaneously---a relatively large learning rate is used early in training (rapid exploration) and a relatively small one later (fine convergence).
+\end{enumerate}
+The joint use of the CEAF and kernel-smoothed derivative-integral descent endows the neural network with an intrinsic multi-scale period-awareness capability and a non-local optimisation capability---capabilities that traditional activation functions and optimisers do not possess.
+\end{definition}
+
+\begin{example}[Application of CEAF--KDI to electricity-load time-series forecasting]\label{ex:eaf_kdi_time_series}
+CEAF--KDI is used to forecast electricity-load data (hourly electricity consumption, containing daily, weekly and annual periods). The model structure is LSTM+CEAF, with series order $K=3$ for the CEAF---the three epicycles correspond to the approximate frequencies of $24$ hours (daily period), $168$ hours (weekly period) and $8760$ hours (annual period) respectively.
+
+After $100$ training epochs, the three angular velocities $\omega_1, \omega_2, \omega_3$ of the CEAF converge to $2\pi/24 \approx 0.262$, $2\pi/168 \approx 0.037$ and $2\pi/8760 \approx 0.0007$ (radians per hour) respectively---matching the true periods of the data exactly. The amplitude ratio $A_1:A_2:A_3 \approx 1:0.6:0.3$ reflects the relative importance of the daily, weekly and annual periods in the electricity load. Compared with the Adam optimiser, kernel-smoothed derivative-integral descent reduces the validation loss by about $15\%$ and increases the speed of convergence by about $30\%$.
+
+\textbf{Note}: the numerical values above are \textbf{empirical observations} whose statistical significance requires verification by repeated experiments; they serve here only as a feasibility demonstration of CEAF--KDI on real data and are not offered as a theoretical guarantee.
+\end{example}
+
+\section{Periodic and rotational structure of word embeddings}
+\label{sec:word_embedding_periodicity}
+
+\begin{definition}[Word embedding space]\label{def:word_embedding_space}
+Let the vocabulary be $\mathcal{V}$ and the embedding dimension be $d_e$. The \textbf{word embedding map} is
+\[
+\varphi_{\text{emb}}:\mathcal{V}\to\mathbb{R}^{d_e},\qquad w\mapsto\mathbf{e}_w.
+\]
+Its normalised version is
+\[
+\widehat{\mathbf{e}}_w=\frac{\mathbf{e}_w}{\|\mathbf{e}_w\|}\in S^{d_e-1}.
+\]
+The point of the unit sphere $S^{d_e-1}$ given by $\widehat{\mathbf{e}}_w$ is called the \textbf{embedding direction} of the word $w$. The set of embedding directions constitutes the \textbf{word embedding manifold}
+\[
+\mathcal{E}=\{\widehat{\mathbf{e}}_w\mid w\in\mathcal{V}\}\subseteq S^{d_e-1}.
+\]
+\end{definition}
+
+\begin{lemma}[Phase representation of embedding directions]\label{lem:embedding_phase_representation}
+Let the embedding dimension be $d_e=2m$ and divide $\widehat{\mathbf{e}}_w$ into $m$ two-dimensional component pairs
+\[
+\widehat{\mathbf{e}}_w=(\mathbf{u}_1,\dots,\mathbf{u}_m),\qquad \mathbf{u}_j\in\mathbb{R}^2.
+\]
+Identifying each two-dimensional component $u_j$ with the complex number $u_j=x_j+iy_j$ gives
+\[
+u_j=r_je^{i\theta_{w,j}},\qquad
+r_j=\sqrt{x_j^2+y_j^2},\quad \theta_{w,j}=\arg(u_j).
+\]
+The collection $\{\theta_{w,j}\}_{j=1}^m$ is called the \textbf{embedding phase vector} of the word $w$ and $\{r_j\}$ its \textbf{embedding magnitude vector}.
+\end{lemma}
+
+\begin{proof}
+Each two-dimensional component pair $(x_j,y_j)$ corresponds uniquely to the complex number $u_j=x_j+iy_j$. The polar representation $u_j=r_je^{i\theta_{w,j}}$ then gives the result. The identity $\sum_jr_j^2=\|\widehat{\mathbf{e}}_w\|^2=1$ guarantees that the magnitude vector satisfies the normalisation.
+\end{proof}
+
+\begin{proposition}[Rotational analogy relation of word embeddings]\label{prop:embedding_rotation_analogy}
+The linear analogy relation of classical word embeddings (such as Word2Vec and GloVe),
+\[
+\mathbf{e}_{\text{king}}-\mathbf{e}_{\text{man}}+\mathbf{e}_{\text{woman}}\approx\mathbf{e}_{\text{queen}}
+\]
+may be rewritten in \textbf{phase-rotation form}: let the phase vector of $\mathbf{e}_w$ be $\theta_w$; then the analogy relation is equivalent to the existence of a common phase offset $\Delta\theta_{\text{gender}}$ such that
+\[
+\theta_{\text{king}}-\theta_{\text{man}}\approx\theta_{\text{queen}}-\theta_{\text{woman}}\approx\Delta\theta_{\text{gender}}.
+\]
+That is, \textbf{the analogy relation manifests in embedding space as the repeated action of one and the same phase offset}---this is a rotation operation.
+\end{proposition}
+
+\begin{proof}
+In the complexified representation (\cref{lem:embedding_phase_representation}), the subtraction relation for each two-dimensional component pair $u_j=r_je^{i\theta_j}$ is
+\[
+u_j^{(\text{king})}\oslash u_j^{(\text{man})}=e^{i(\theta_{\text{king},j}-\theta_{\text{man},j})}=\frac{r_j^{(\text{king})}}{r_j^{(\text{man})}}e^{i(\theta_{\text{king},j}-\theta_{\text{man},j})}.
+\]
+When the magnitudes are approximately equal ($r_j^{(\text{king})}\approx r_j^{(\text{man})}$), the analogy relation degenerates to a pure phase-rotation relation. In classical embeddings the gender analogy shares one and the same phase offset across several semantic dimensions, hence (for all $j$) $\theta_{\text{king},j}-\theta_{\text{man},j}\approx\theta_{\text{queen},j}-\theta_{\text{woman},j}$.
+\end{proof}
+
+\begin{theorem}[Cosine-similarity structure of the difference angle between embedding directions]\label{thm:embedding_cosine_structure}
+Let the embedding directions of two words be $\widehat{\mathbf{e}}_u$ and $\widehat{\mathbf{e}}_v$, with corresponding component phase vectors $\theta_u$ and $\theta_v$. Then their cosine similarity decomposes as
+\[
+\langle\widehat{\mathbf{e}}_u,\widehat{\mathbf{e}}_v\rangle
+=\sum_{j=1}^m r_{u,j}r_{v,j}\cos(\theta_{u,j}-\theta_{v,j}).
+\]
+That is: \textbf{the similarity of word embeddings is the weighted sum, with weights given by the products of the magnitudes, of the difference-angle cosine similarities of the individual two-dimensional component pairs}---this is the superposition over multi-component embeddings of the basic difference-angle cosine similarity of the `Scalars and Vectors' chapter (\cref{def:basic_diff_similarity}).
+\end{theorem}
+
+\begin{proof}
+By \cref{lem:embedding_phase_representation}, $\widehat{\mathbf{e}}_u=(\mathbf{u}_1,\dots,\mathbf{u}_m)$ and $\widehat{\mathbf{e}}_v=(\mathbf{v}_1,\dots,\mathbf{v}_m)$, whose inner product is
+\[
+\langle\widehat{\mathbf{e}}_u,\widehat{\mathbf{e}}_v\rangle
+=\sum_{j=1}^m \mathbf{u}_j\cdot\mathbf{v}_j.
+\]
+Writing $\mathbf{u}_j\cdot\mathbf{v}_j$ in terms of complex numbers, $\mathbf{u}_j=r_{u,j}e^{i\theta_{u,j}}$ and $\mathbf{v}_j=r_{v,j}e^{i\theta_{v,j}}$, gives
+\[
+\mathbf{u}_j\cdot\mathbf{v}_j
+=\operatorname{Re}(\mathbf{u}_j\overline{\mathbf{v}_j})
+=r_{u,j}r_{v,j}\cos(\theta_{u,j}-\theta_{v,j}).
+\]
+Summing yields the result.
+\end{proof}
+
+\begin{corollary}[Semantic similarity is a weighted sum of phase similarities]\label{cor:semantic_phase_sum}
+The semantic similarity (cosine similarity) of word embeddings is determined by \textbf{the degree of phase alignment of the individual component pairs}, weighted by the products of the magnitudes of the components. When the phases of two words are close for every component pair ($|\theta_{u,j}-\theta_{v,j}|\approx0$), the similarity is close to $1$; when the phase difference of certain component pairs is close to $\pi$, those component pairs contribute negatively to the similarity.
+\end{corollary}
+
+\begin{proof}
+By \cref{thm:embedding_cosine_structure}, each term $r_{u,j}r_{v,j}\cos(\theta_{u,j}-\theta_{v,j})$, when $|\theta_{u,j}-\theta_{v,j}|\approx0$, is close to $r_{u,j}r_{v,j}$ (a positive contribution), and, when $|\theta_{u,j}-\theta_{v,j}|\approx\pi$, is close to $-r_{u,j}r_{v,j}$ (a negative contribution).
+\end{proof}
+
+\begin{example}[Phase interpretation of the gender analogy]\label{ex:gender_analogy_phase}
+Take the simplified embedding $d_e=2$ ($m=1$), so that each word has only one phase $\theta_w$. Let
+\[
+\theta_{\text{man}}=0,\quad\theta_{\text{woman}}=\pi/2,\quad\theta_{\text{king}}=\pi/6,\quad\theta_{\text{queen}}=\pi/6+\pi/2=2\pi/3.
+\]
+Then $\theta_{\text{king}}-\theta_{\text{man}}=\pi/6$ and $\theta_{\text{queen}}-\theta_{\text{woman}}=2\pi/3-\pi/2=\pi/6$---the phase offset of the gender analogy is invariably $\pi/6$. This verifies \cref{prop:embedding_rotation_analogy}: \textbf{the analogy relation manifests in a two-dimensional embedding as the repeated action of a common phase offset}.
+
+For general $d_e$, the phase offset $\Delta\theta_{\text{gender}}$ of the gender analogy may be regarded as an \textbf{axis of rotation} in embedding space---all gender-analogy word pairs differ along that axis by one and the same rotation.
+\end{example}
+
+\begin{remark}[Translation and rotation of embeddings: two structures]\label{rem:embedding_translation_rotation}
+Word embeddings contain two elementary structures:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Translation structure} (the real-part version of \cref{prop:embedding_rotation_analogy}): when the embedding dimension is high and the magnitudes agree, the analogy relation manifests as the translation $\mathbf{e}_{\text{king}}-\mathbf{e}_{\text{man}}\approx\mathbf{e}_{\text{queen}}-\mathbf{e}_{\text{woman}}$---this is the realisation in embedding space of the translation operation of the `Scalars and Vectors' chapter.
+    \item \textbf{Rotation structure} (the phase version of \cref{prop:embedding_rotation_analogy}): in a complexified embedding the analogy relation manifests as the rotation $e^{i\Delta\theta}$---this is the realisation in embedding space of the rotation operation of the `Scalars and Vectors' chapter.
+\end{enumerate}
+The two structures are dual descriptions of one and the same analogy relation in different representations: translation is the linear approximation of phase modulo $2\pi$, and rotation is the logarithmic-domain representation of translation. This agrees with the idea in the `Number Systems' chapter that the logarithm converts scaling into translation (\cref{thm:logarithm_conversion}).
+\end{remark}
+
+\begin{remark}[Periodic generation of word embeddings (conjecture / empirical hypothesis)]\label{prop:embedding_periodicity_generation}
+\textbf{Conjecture / empirical hypothesis}: suppose that word embeddings contain periodic semantic dimensions (such as time, season and the concept of periodicity). Then the embedding directions of these dimensions are distributed over a \textbf{discrete subgroup} of the unit circle: there exists $T\in\mathbb{N}^+$ such that
+\[
+\theta_{w,j}\in\frac{2\pi}{T}\mathbb{Z},\qquad \text{for all periodic words }w.
+\]
+In this case the embedding directions of periodic words constitute a geometric realisation of the cyclic group $C_T$---structurally the same as the discrete phase operator $\mathcal{O}_k^{(T)}=e^{i2\pi k/T}$ of the `Periodic Functions and Groups with Periodic Orbits' chapter (\cref{def:discrete_phase_operator}).
+This assertion is a \textbf{conjecture / empirical hypothesis} and an \textbf{empirical observation / research programme}, not a proved proposition: no objective function for training is given in this chapter, and `convergence' is left undefined; the exact membership $\theta_{w,j}\in\frac{2\pi}{T}\mathbb Z$ is only an idealised description of the trained result, whereas an actual embedding lies at best near noisy perturbations of these discrete phases. Moreover, what corresponds one-to-one with the words is the \textbf{quotient group} $\frac{2\pi}{T}\mathbb{Z}\big/2\pi\mathbb{Z}\cong C_T$, whereas $\frac{2\pi}{T}\mathbb{Z}$ itself is an infinite cyclic group---the two are not the same object, and every occurrence of $C_T$ below refers to that quotient group. After discretising time with period $T$, the time points $k=0,1,\dots,T-1$ correspond to the embedding phases $\theta_k=2\pi k/T$, which is precisely the standard embedding of $C_T$ in the unit circle.
+\end{remark}
+
+\begin{example}[Periodic embedding structure of time words]\label{ex:time_word_embedding}
+Consider the embeddings of the time words `January', `February', $\dots$, `December'. If the training corpus contains a semantic structure with annual period, the embedding directions of these $12$ words should constitute a geometric realisation of $C_{12}$: $\theta_{m}=2\pi(m-1)/12$ ($m=1,\dots,12$). The embedding directions of adjacent months differ by $30^\circ$, consistent with the phase distribution of the twelve Earthly Branches in the `Periodic Structure of Calendar Systems' chapter (see the phase-angle correspondence in Table \ref{tab:jieqi_sequence} of that chapter).
+\end{example}
+
+\begin{remark}[Interface between word embeddings and phase operators]\label{rem:embedding_phase_operator_interface}
+The phase structure of word embeddings provides an interface for applying the phase operators of the `Periodic Functions and Groups with Periodic Orbits' chapter in natural language processing:
+\begin{enumerate}[label=(\roman*)]
+    \item periodic semantic dimensions correspond to the discrete phase operator $\mathcal{O}_k^{(T)}=e^{i2\pi k/T}$;
+    \item analogy relations correspond to phase offsets (the rotation operation);
+    \item semantic similarity corresponds to difference-angle cosine similarity (\cref{def:basic_diff_similarity});
+    \item semantic composition corresponds to phase composition (the sum-angle operator; see \cref{def:complex_diff_sum} of the `Scalars and Vectors' chapter).
+\end{enumerate}
+\end{remark}
+
+\section{Attractor dynamics and recurrent neural networks}
+\label{sec:attractor_dynamics}
+
+\begin{definition}[Attractors and basins of attraction]\label{def:attractor}
+Let $(X,f)$ be a discrete dynamical system. A subset $\mathcal{A}\subseteq X$ is called an \textbf{attractor} of $f$ if:
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathcal{A}$ is a non-empty compact set;
+    \item $\mathcal{A}$ is $f$-invariant: $f(\mathcal{A})\subseteq\mathcal{A}$;
+    \item $\mathcal{A}$ attracts in some neighbourhood of $X$, say $U\supseteq\mathcal{A}$: there exists an open set $V\supseteq\mathcal{A}$ such that for every $x\in V$ the orbit $\{f^n(x)\}$ has its $\omega$-limit set contained in $\mathcal{A}$.
+\end{enumerate}
+The largest such $V$ is called the \textbf{basin of attraction} of $\mathcal{A}$.
+\end{definition}
+
+\begin{definition}[The three basic types of attractor]\label{def:attractor_types}
+Attractors fall into three classes according to their dynamical character:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Fixed-point attractor}: $\mathcal{A}=\{x^*\}$ is a single point, corresponding to a stable equilibrium state of the system;
+    \item \textbf{Limit-cycle attractor}: $\mathcal{A}$ is a closed orbit, corresponding to periodic oscillation of the system (a periodic attractor);
+    \item \textbf{Strange attractor}: $\mathcal{A}$ is a fractal set and orbits move chaotically on $\mathcal{A}$.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Energy function of the Hopfield network]\label{def:hopfield_energy}
+The Hopfield network is a fully connected recurrent neural network. Let the network have $N$ neurons, with state $\mathbf{s}\in\{-1,+1\}^N$ and a symmetric weight matrix $\mathbf{W}$ satisfying $W_{ii}=0$. The \textbf{energy function} is defined as
+\[
+E(\mathbf{s})=-\frac{1}{2}\sum_{i,j}W_{ij}s_is_j-\sum_i b_is_i,
+\]
+where $\mathbf{b}$ is the bias vector.
+\end{definition}
+
+\begin{theorem}[Convergence of the Hopfield network]\label{thm:hopfield_convergence}
+Let the Hopfield network update its state by the asynchronous update rule: at each step a neuron $i$ is chosen at random and $s_i\mapsto\operatorname{sgn}(\sum_jW_{ij}s_j+b_i)$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the energy function $E(\mathbf{s})$ is monotonically non-increasing at every update;
+    \item the network necessarily converges in finitely many steps to a local minimum of the energy function;
+    \item each local minimum corresponds to a fixed-point attractor of the network, whose basin of attraction is determined by the initial state.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) Suppose that at step $k$ the neuron $i$ is updated and the network state changes from $\mathbf{s}$ to $\mathbf{s}'$, where $s_i'=\operatorname{sgn}(h_i)$, $h_i=\sum_jW_{ij}s_j+b_i$, and the other components are unchanged. The change in energy is
+\[
+\Delta E=E(\mathbf{s}')-E(\mathbf{s})=-(s_i'-s_i)\left(\sum_jW_{ij}s_j+b_i\right)=-(s_i'-s_i)h_i.
+\]
+If $s_i'=s_i$ then $\Delta E=0$; if $s_i'=+1$ (in which case $s_i=-1$ and $h_i>0$) then $\Delta E=-2h_i<0$; if $s_i'=-1$ (in which case $s_i=+1$ and $h_i<0$) then $\Delta E=2h_i<0$. Hence $\Delta E\le0$.
+
+(ii) The state space $\{-1,+1\}^N$ is finite ($2^N$ states) and the energy function is bounded below; since every update either decreases the energy strictly or leaves it unchanged, the network must reach a state in which the energy no longer decreases within finitely many steps---that is, a local minimum.
+
+(iii) At a local minimum we have $s_i=\operatorname{sgn}(h_i)$ for all $i$, which is the fixed-point condition $f(\mathbf{s})=\mathbf{s}$. Its basin of attraction consists of all initial states that converge to that point (guaranteed by the convergence in (ii)).
+\end{proof}
+
+\begin{corollary}[Storage capacity of the Hopfield network]\label{cor:hopfield_capacity}
+The number of patterns that a Hopfield network can store stably is $M\approx0.138N$ (where $N$ is the number of neurons). When the number of stored patterns exceeds this capacity, interference between patterns causes attractors to merge or spurious attractors to appear.
+\end{corollary}
+
+\begin{proof}
+By methods of statistical physics, when $M$ random patterns are stored by the Hebb rule the signal-to-noise ratio at pattern $i$ is $O(\sqrt{N/M})$. When $M>0.138N$, the fall in the signal-to-noise ratio means that the patterns are no longer minima of the energy, or that their basins of attraction are compressed to a negligible size. For a detailed derivation see Hertz--Krogh--Palmer, \textit{Introduction to the Theory of Neural Computation}, Addison-Wesley, 1991, Ch. 2.
+\end{proof}
+
+\begin{theorem}[Limit-cycle attractors of recurrent neural networks]\label{thm:hopfield_limit_cycle}
+Let the state update of a recurrent neural network be
+\[
+\mathbf{h}_{t+1}=\sigma(\mathbf{W}\mathbf{h}_t+\mathbf{U}\mathbf{x}_t+\mathbf{b}),
+\]
+where $\sigma$ is a pointwise activation function and $\mathbf{W}$ is the recurrent weight. If the spectral radius of $\mathbf{W}$ is slightly greater than $1$ and the activation function is a bounded non-linearity, then the network possesses a \textbf{limit-cycle attractor}---that is, a periodic attractor.
+\end{theorem}
+
+\begin{proof}
+By the bifurcation theory of non-linear dynamical systems: when the spectral radius of the recurrent weight increases from less than $1$ to greater than $1$, the system undergoes a Hopf bifurcation---the fixed point loses stability and a limit cycle is born. The boundedness of the activation function guarantees that the system state remains bounded, so the limit cycle is an attractor. The period is determined jointly by the frequencies associated with the imaginary parts of the eigenvalues of $\mathbf{W}$ and by the strength of the non-linearity.
+\end{proof}
+
+\begin{proposition}[Period condition for a limit-cycle attractor]\label{prop:limit_cycle_period}
+Suppose that a recurrent neural network enters a limit-cycle attractor of period $T_{\text{lc}}$. Then the relation between $T_{\text{lc}}$ and the network parameters is
+\[
+T_{\text{lc}}=\frac{2\pi}{|\operatorname{Im}(\lambda_W)|},
+\]
+where $\lambda_W$ is the critical eigenvalue pair of $\mathbf{W}$ at the Hopf bifurcation point.
+\end{proposition}
+
+\begin{proof}
+Near the Hopf bifurcation the linearised dynamics of the system are described by the eigenvalues $\lambda_{1,2}=\alpha\pm i\omega$, where $\alpha$ is the real part (the bifurcation point being where it crosses zero) and $\omega$ is the imaginary part. The angular frequency of the limit cycle is $\omega$, corresponding to the period $T_{\text{lc}}=2\pi/\omega=2\pi/|\operatorname{Im}(\lambda_W)|$.
+\end{proof}
+
+\begin{example}[Continuous attractors and memory retention]\label{ex:continuous_attractor}
+In an RNN, if all the eigenvalues of the recurrent weight $\mathbf{W}$ are $1$ (the critical case), then the system possesses a \textbf{continuous attractor}---the attractor is not an isolated point but an entire curve or surface. Continuous attractors can be used to retain working memory: the initial condition slides along the attractor manifold without decaying or diverging---this is the dynamical mechanism by which a neural network realises `persistent activity'.
+\end{example}
+
+\begin{remark}[Attractors versus conserved quantities]\label{rem:attractor_vs_conservation}
+The roles of attractors and of conserved quantities in periodic structure compare as follows:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Conserved quantity}: it constrains the orbit to remain on a low-dimensional manifold (\cref{thm:regular_level_set}) but does not directly produce periodicity;
+    \item \textbf{Attractor}: it attracts the orbit, by dissipation, to a particular low-dimensional subset, and a limit-cycle attractor directly yields periodicity.
+\end{enumerate}
+In dissipative systems, attractors take the place of conserved quantities in constraining the orbit (see the discussion of the relation between conservation and periodicity in the `Operations and Periodicity' chapter). This agrees with the position taken in note \ref{rem:ps_conservation_role} of the `Periodic Systems' chapter, that `a conserved quantity helps one to discover periodicity but does not directly produce it'---the algebraic pivot that genuinely produces periodicity is the finite-order action (in the discrete case) or the attractor (in the continuous dissipative case).
+\end{remark}
+
+\begin{remark}[Relation between attractors and finite-order actions]\label{rem:attractor_finite_order}
+In a finite-state RNN, limit-cycle attractors correspond directly to the finite-order actions of the `Operations and Periodicity' chapter:
+\begin{enumerate}[label=(\roman*)]
+    \item when the discrete state space is finite, each limit cycle corresponds to a cyclic group $C_{T_{\text{lc}}}$;
+    \item the period $T_{\text{lc}}$ of the limit cycle is precisely the order of the finite-order action;
+    \item the partition into basins of attraction corresponds to the classification of distinct orbits in the `Operations and Periodicity' chapter.
+\end{enumerate}
+This correspondence shows that, in the discrete case, the dynamical behaviour of an agent can be accommodated entirely within the finite-order action framework of the `Operations and Periodicity' chapter.
+\end{remark}
+
+\section{Periodic iterative structure of reasoning}
+\label{sec:reasoning_periodicity}
+
+\begin{definition}[Reasoning chains and reasoning maps]\label{def:reasoning_chain}
+Let the reasoning state space of an agent be $\mathcal{R}\subseteq\mathbb{R}^{d_r}$ and let the initial state of a reasoning problem $q$ be $\mathbf{s}_0=\psi_{\text{init}}(q)$. The \textbf{reasoning map} is
+\[
+\mathcal{T}:\mathcal{R}\times\mathcal{Q}\to\mathcal{R},\qquad
+(\mathbf{s},q)\mapsto\mathcal{T}(\mathbf{s},q),
+\]
+where $\mathcal{Q}$ is the problem space. The \textbf{reasoning chain} is the iterative sequence
+\[
+\mathbf{s}_{t+1}=\mathcal{T}(\mathbf{s}_t,q),\qquad t=0,1,2,\dots
+\]
+After $T_{\text{ans}}$ steps the reasoning chain terminates in the answer state $\mathbf{s}_{T_{\text{ans}}}=\psi_{\text{ans}}^{-1}(\text{answer})$.
+\end{definition}
+
+\begin{theorem}[Iterative closure condition for reasoning]\label{thm:reasoning_fixed_point}
+Let the reasoning map $\mathcal{T}(\cdot,q):\mathcal{R}\to\mathcal{R}$ be an $L$-contraction ($0\le L<1$). Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the reasoning chain has a unique fixed point $\mathbf{s}^*=\mathcal{T}(\mathbf{s}^*,q)$---that is, a unique answer;
+    \item the reasoning chain converges at a geometric rate: $\|\mathbf{s}_t-\mathbf{s}^*\|\le L^t\|\mathbf{s}_0-\mathbf{s}^*\|$;
+    \item the number of reasoning steps required to reach accuracy $\varepsilon$ is $T_{\text{ans}}=O(\log(1/\varepsilon))$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+By the Banach fixed-point theorem (\cref{thm:banach_fixed_point_algo}), a contraction on a complete metric space has a unique fixed point, and the iteration converges at the geometric rate $L$. Reaching accuracy $\varepsilon$ requires $L^{T_{\text{ans}}}\le\varepsilon/\|\mathbf{s}_0-\mathbf{s}^*\|$, and taking logarithms gives $T_{\text{ans}}\ge\log(1/\varepsilon)/\log(1/L)$.
+\end{proof}
+
+\begin{proposition}[Phase accumulation in multi-step reasoning]\label{prop:reasoning_phase_accumulation}
+Suppose that in the complexified representation the reasoning map becomes the phase evolution
+\[
+\theta_{t+1}=\theta_t+\Delta\theta(\mathbf{s}_t,q),
+\]
+where $\Delta\theta(\mathbf{s}_t,q)$ is the phase increment of the $t$-th reasoning step. If $\Delta\theta$ tends to a constant $\Delta\theta^*$ during convergence, then the phase of the reasoning chain accumulates in steps of $\Delta\theta^*$, and after $T_{\text{ans}}$ steps the total phase is
+\[
+\Phi_{\text{total}}=T_{\text{ans}}\cdot\Delta\theta^*.
+\]
+When $\Phi_{\text{total}}\in2\pi\mathbb{Z}$, the reasoning chain \textbf{closes} in phase space---that is, it completes one full reasoning cycle.
+\end{proposition}
+
+\begin{proof}
+Iterating the phase evolution equation gives $\theta_t=\theta_0+\sum_{k=0}^{t-1}\Delta\theta(\mathbf{s}_k,q)$. When $\Delta\theta(\mathbf{s}_k,q)\to\Delta\theta^*$, the accumulated phase is $\Phi_{\text{total}}\approx T_{\text{ans}}\cdot\Delta\theta^*$. The closure condition $\Phi_{\text{total}}\equiv0\pmod{2\pi}$ says precisely that the reasoning chain returns to its starting point in phase space.
+\end{proof}
+
+\begin{lemma}[Reasoning-chain depth and information transmission]\label{lem:reasoning_depth_information}
+Let the information-transmission efficiency of the reasoning chain be $\rho\in(0,1)$ (the fraction retained at each step). After $T$ reasoning steps the fraction of information remaining is $\rho^T$. For the information content of the final answer to be no less than $\varepsilon$ times the initial information content, one requires
+\[
+T\le\frac{\log\varepsilon}{\log\rho}.
+\]
+\end{lemma}
+
+\begin{proof}
+After $T$ steps the information fraction is $\rho^T$. The requirement $\rho^T\ge\varepsilon$ gives, on taking logarithms, $T\log\rho\ge\log\varepsilon$. Since $\log\rho<0$, dividing by $\log\rho$ reverses the inequality, giving $T\le\log\varepsilon/\log\rho$.
+\end{proof}
+
+\begin{corollary}[Optimal depth of a reasoning chain]\label{cor:optimal_reasoning_depth}
+The optimal depth of a reasoning chain is a trade-off between \textbf{information transmission} and \textbf{computational cost}:
+\begin{enumerate}[label=(\roman*)]
+    \item too small a depth: too much information is lost and the accuracy of the answer is low;
+    \item too large a depth: information is retained to a high degree but the computational cost is high, and the result may deteriorate through the accumulation of numerical error.
+\end{enumerate}
+The optimal depth is $T^*=O(\log(1/\varepsilon)/\log(1/\rho))$---of the same order as the number of convergence steps of a contractive reasoning map.
+\end{corollary}
+
+\begin{proof}
+Combining \cref{thm:reasoning_fixed_point} with \cref{lem:reasoning_depth_information}: both give a step-count scale $T=O(\log(1/\varepsilon))$, the former from the geometric convergence of the contraction map and the latter from the exponential decay of information transmission.
+\end{proof}
+
+\begin{theorem}[Phase locking in Chain-of-Thought reasoning]\label{thm:cot_phase_locking}
+Suppose that Chain-of-Thought (CoT) reasoning comprises $T_{\text{CoT}}$ intermediate steps. If the phase update of each intermediate step is $\Delta\theta$ (a constant), then the phase-locking condition for the CoT reasoning chain is
+\[
+T_{\text{CoT}}\cdot\Delta\theta\in2\pi\mathbb{Z}.
+\]
+In this case the reasoning chain closes in phase space, corresponding to one `reasoning period'.
+\end{theorem}
+
+\begin{proof}
+The phase accumulation of the CoT reasoning chain is $\Phi_{\text{total}}=T_{\text{CoT}}\cdot\Delta\theta$ (by \cref{prop:reasoning_phase_accumulation}). The closure condition $\Phi_{\text{total}}\in2\pi\mathbb{Z}$ then gives the result.
+\end{proof}
+
+\begin{example}[Phase structure of a mathematical proof]\label{ex:math_proof_phase}
+In mathematical-proof reasoning, each step of reasoning corresponds to a logical implication. If the logical strength (phase increment) of every step is constant, then the phase of the logical chain should close when the proof is complete (that is, the conclusion is derived from the hypotheses and the total phase accumulation is $2\pi$). This is the phase interpretation of `reasoning closure': \textbf{the completion of a proof is equivalent to the closure of the reasoning chain in logical phase space}.
+\end{example}
+
+\begin{remark}[Correspondence between reasoning and fixed-point iteration]\label{rem:reasoning_fixed_point_correspondence}
+Reasoning and the fixed-point iteration of the algorithmic systems chapter (\cref{def:fixed_point_iteration}) correspond exactly in mathematical structure:
+\begin{enumerate}[label=(\roman*)]
+    \item the reasoning map $\mathcal{T}$ corresponds to the iteration map $\Phi$;
+    \item the reasoning answer $\mathbf{s}^*$ corresponds to the fixed point $\mathbf{x}^*$;
+    \item the condition for convergence of reasoning corresponds to the contractivity condition $L<1$;
+    \item the depth $T_{\text{CoT}}$ of the CoT corresponds to the number of iteration steps $T$.
+\end{enumerate}
+Consequently, the convergence analysis of the `Periodic Structure of Algorithmic Systems' chapter may be applied directly to the convergence analysis of reasoning chains.
+\end{remark}
+
+\section{Periodic analysis of knowledge representation}
+\label{sec:knowledge_periodicity}
+
+\begin{definition}[Knowledge graphs and relation embeddings]\label{def:knowledge_graph_embedding}
+A \textbf{knowledge graph} is a set of triples $\mathcal{G}=\{(h,r,t)\}$, where $h$ is the head entity, $t$ the tail entity and $r$ the relation. A \textbf{relation embedding} is a map
+\[
+\varphi_{\text{KG}}:\mathcal{E}\cup\mathcal{R}\to\mathbb{R}^{d_k},
+\]
+where $\mathcal{E}$ is the entity set and $\mathcal{R}$ the relation set. The embedding objective of the classical TransE model is
+\[
+\mathbf{e}_h+\mathbf{e}_r\approx\mathbf{e}_t.
+\]
+\end{definition}
+
+\begin{theorem}[Translation--rotation decomposition of relation embeddings]\label{thm:relation_translation_rotation}
+Suppose that a knowledge-graph embedding satisfies the TransE relation $\mathbf{e}_h+\mathbf{e}_r\approx\mathbf{e}_t$. In the complexified representation this relation is equivalent to
+\[
+\mathbf{e}_t=\mathbf{e}_h\cdot e^{i\Delta\theta_r}\quad\text{or}\quad
+\mathbf{e}_t=\mathbf{e}_h+\mathbf{u}_r,
+\]
+where $e^{i\Delta\theta_r}$ is the phase rotation of the relation and $\mathbf{u}_r$ is the translation vector of the relation. These correspond respectively to the \textbf{rotation representation} (RotatE) and the \textbf{translation representation} (TransE).
+\end{theorem}
+
+\begin{proof}
+(Translation) The TransE objective gives at once $\mathbf{e}_t-\mathbf{e}_h\approx\mathbf{e}_r$---the relation is a translation vector.
+(Rotation) Complexify the embedding as $e^{i\theta_h}$ and take the relation phase $\Delta\theta_r$; then the phase of the tail entity is $\theta_t=\theta_h+\Delta\theta_r$, that is, $\mathbf{e}_t=\mathbf{e}_h\cdot e^{i\Delta\theta_r}$. The two representations are dual when the magnitudes are approximately equal and $\Delta\theta_r$ is small.
+\end{proof}
+
+\begin{proposition}[Path period of knowledge reasoning]\label{prop:knowledge_path_period}
+Suppose that a relation path exists in a knowledge graph:
+\[
+h\xrightarrow{r_1}e_1\xrightarrow{r_2}e_2\xrightarrow{r_3}\cdots\xrightarrow{r_n}t.
+\]
+Then the total relation phase of the path is
+\[
+\Delta\Phi_{\text{path}}=\sum_{k=1}^n\Delta\theta_{r_k}.
+\]
+When $\Delta\Phi_{\text{path}}=0\pmod{2\pi}$, the path closes---that is, $h$ and $t$ are the same entity reached by different relation paths.
+\end{proposition}
+
+\begin{proof}
+By the rotation representation of \cref{thm:relation_translation_rotation}, the phase accumulation at each step of the relation is $\theta_{e_{k}}=\theta_{e_{k-1}}+\Delta\theta_{r_k}$. Iteration gives $\theta_t=\theta_h+\sum_k\Delta\theta_{r_k}$. Hence closure of the path, $\theta_t=\theta_h$, is equivalent to $\sum_k\Delta\theta_{r_k}\equiv0\pmod{2\pi}$.
+\end{proof}
+
+\begin{lemma}[Phase composition of transitive relations]\label{lem:transitive_relation_phase}
+Let the phase increments of the relations $r_1$ and $r_2$ be $\Delta\theta_{r_1}$ and $\Delta\theta_{r_2}$ respectively. If $r_3=r_1\circ r_2$ ($r_3$ being the composite of $r_1$ and $r_2$), then
+\[
+\Delta\theta_{r_3}=\Delta\theta_{r_1}+\Delta\theta_{r_2}.
+\]
+That is, the phases of relations are additive under composition---this is the realisation in knowledge reasoning of the addition of phases under complex multiplication in the `Scalars and Vectors' chapter (\cref{prop:complex_multiplication}).
+\end{lemma}
+
+\begin{proof}
+From the derivation for a two-step path in \cref{prop:knowledge_path_period}: $\theta_{e_2}=\theta_h+\Delta\theta_{r_1}+\Delta\theta_{r_2}$. The phase increment of the composite relation $r_3$ is defined as $\theta_{e_2}-\theta_h=\Delta\theta_{r_1}+\Delta\theta_{r_2}$.
+\end{proof}
+
+\begin{example}[Translation structure of the TransE embedding]\label{ex:transe_translation}
+In the TransE model the embedding of the relation `capital' is the translation vector $\mathbf{e}_{\text{capital}}$, so that
+\[
+\mathbf{e}_{\text{China}}+\mathbf{e}_{\text{capital}}\approx\mathbf{e}_{\text{Beijing}},\quad
+\mathbf{e}_{\text{France}}+\mathbf{e}_{\text{capital}}\approx\mathbf{e}_{\text{Paris}}.
+\]
+This embodies the \textbf{translation invariance of relations}: one and the same relation manifests as \textbf{the same translation vector} across different entity pairs---the translation version of the analogy relation (\cref{prop:embedding_rotation_analogy}).
+\end{example}
+
+\section{Attractor analysis of learning dynamics}
+\label{sec:learning_attractor_analysis}
+
+\begin{definition}[Attractor structure of training]\label{def:training_attractor}
+Let the training dynamics in parameter space be $\boldsymbol{\theta}_{t+1}=\boldsymbol{\theta}_t-\eta\nabla\mathcal{L}(\boldsymbol{\theta}_t)$. A \textbf{training attractor} is a fixed point $\boldsymbol{\theta}^*$ in parameter space (with $\nabla\mathcal{L}(\boldsymbol{\theta}^*)=\mathbf{0}$ and positive-definite Hessian); under a quadratic loss SGD has only fixed-point attractors---for a large learning rate the parameters converge geometrically to $\boldsymbol{\theta}^*$ with alternating signs, and that oscillation is \textbf{not} a limit cycle (see \cref{thm:sgd_limit_cycle}).
+\end{definition}
+
+\begin{theorem}[Convergence and underdamped oscillation of SGD]\label{thm:sgd_limit_cycle}
+Let the Hessian eigenvalues of the loss function $\mathcal{L}(\boldsymbol{\theta})$ be $\{\lambda_i\}$ and let the learning rate be $\eta$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item if $\eta\lambda_i<1$ for all $i$ (the overdamped region), then SGD converges to a fixed point;
+    \item if $1<\eta\lambda_i<2$ for some $i$ (the underdamped region), then SGD oscillates along that eigendirection with alternating signs, yet the error still converges geometrically to $0$ (since $|1-\eta\lambda_i|<1$) and the parameters ultimately converge to the fixed point $\boldsymbol{\theta}^*$;
+    \item if $1<\eta\lambda_i<2$ for all $i$, then the error along every eigendirection converges geometrically to $0$ with alternating signs, and the parameters converge to $\boldsymbol{\theta}^*$ by damped oscillation. Under a quadratic loss \textbf{no limit cycle exists}: \textbf{oscillation is not a limit cycle}---a limit cycle requires a closed and isolated orbit, whereas here $|1-\eta\lambda_i|<1$ makes the amplitude decay strictly.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+By \cref{ch32_gd_eigen}, the evolution of the error along the $i$-th eigendirection is $e_t^{(i)}=(1-\eta\lambda_i)^te_0^{(i)}$. If $0<\eta\lambda_i<1$ then $0<1-\eta\lambda_i<1$---the error decays monotonically to zero. If $1<\eta\lambda_i<2$ then $-1<1-\eta\lambda_i<0$---the sign of the error alternates at every step whilst its modulus decreases strictly, so the parameters decay to $\boldsymbol{\theta}^*$ \textbf{with alternating signs}. When several eigendirections are simultaneously underdamped, the parameter trajectory is a damped oscillation about the minimum (the directions changing sign in turn), whose amplitude decays by $\prod_i|1-\eta\lambda_i|$; it \textbf{does not form a limit cycle}, since a limit cycle requires a non-decaying amplitude and an isolated orbit.
+\end{proof}
+
+\begin{proposition}[Relation between generalisation and attractor width]\label{prop:generalisation_attractor_width}
+Suppose that training converges to an attractor $\boldsymbol{\theta}^*$ with Hessian eigenvalues $\{\lambda_i\}$. Define the attractor width as
+\[
+W=\frac{1}{d}\sum_{i=1}^{d}\frac{1}{\lambda_i}.
+\]
+Then:
+\begin{enumerate}[label=(\roman*)]
+    \item a wide attractor ($W$ large, the $\lambda_i$ small) corresponds to a flat minimum and good generalisation performance;
+    \item a narrow attractor ($W$ small, the $\lambda_i$ large) corresponds to a sharp minimum and poor generalisation performance.
+\end{enumerate}
+This is the \textbf{flat-minima hypothesis} in deep learning.
+\end{proposition}
+
+\begin{proof}
+Near a flat minimum the loss function changes slowly, and the parameters retain a low loss under perturbation; near a sharp minimum the loss function changes rapidly, and a small perturbation causes a large increase in the loss. A wide attractor has small Hessian eigenvalues ($W$ large) and corresponds to the former case; a narrow attractor has large eigenvalues ($W$ small) and corresponds to the latter. Generalisation performance therefore depends on the attractor width.
+\end{proof}
+
+\begin{example}[Pattern memory and capacity analysis]\label{ex:pattern_memory}
+Each local minimum of the Hopfield network (\cref{thm:hopfield_convergence}) corresponds to a \textbf{memory pattern}. When $M$ patterns are stored, the total number of attractors is $M$ (plus any spurious attractors that may arise). By the capacity analysis (\cref{cor:hopfield_capacity}), when $M\le0.138N$ the genuine patterns are stable attractors; when $M$ exceeds this capacity, interference between patterns causes attractors to merge or spurious attractors to appear. This is the mathematical upper bound on the long-term memory capacity of an agent.
+\end{example}
+
+\begin{remark}[Underdamped oscillation of SGD and generalisation]\label{rem:sgd_limit_cycle_generalisation}
+In the underdamped region SGD converges to the fixed point with alternating signs, and this damped oscillation has important consequences for generalisation:
+\begin{enumerate}[label=(\roman*)]
+    \item the fluctuation of the parameters during the underdamped oscillation amounts to \textbf{implicit regularisation}---the convergence does not come to rest exactly at a sharp minimum;
+    \item the amplitude decay rate of the oscillation (determined by $|1-\eta\lambda_{\max}|$) is related to the effective learning rate $\eta\lambda_{\max}$ and may serve as an empirical indicator of generalisation error;
+    \item this shares one and the same mathematical structure with the `damped oscillation of gradient descent' in the `Periodic Structure of Algorithmic Systems' chapter---the oscillation of the later stage of training is not a defect but a source of implicit generalisation.
+\end{enumerate}
+\end{remark}
+
+\section{Periodic structure of the attention mechanism}
+
+\begin{definition}[Periodic interpretation of self-attention]\label{def:self_attention_periodic}
+The core mechanism of the Transformer model is \textbf{scaled dot-product attention}:
+\[
+\operatorname{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \operatorname{softmax}\left(\frac{\mathbf{Q}\mathbf{K}^{\mathsf T}}{\sqrt{d_k}}\right) \mathbf{V}.
+\]
+The attention mechanism is a unified realisation of three operations in sequence modelling:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Translation operation}: the sliding of the attention window over the input sequence is a translation operation---the Query vector $\mathbf{Q}$ moves along the sequence and computes similarities with the Key vectors $\mathbf{K}$ at different positions. The translation of attention resembles the sliding of the window function of the `Discrete Sampling and Intercalation of Periodic Signals' chapter over a time series (\cref{def:window_function}).
+    \item \textbf{Scaling operation}: multi-head attention projects attention in parallel into $h$ different subspaces---each head attends to dependencies on a different scale. This is scale decomposition: different heads correspond to different scaling factors (different $d_k$ determine the `resolution' of the attention).
+    \item \textbf{Rotation operation}: positional encoding injects positional information by means of sine and cosine functions: $PE_{(pos, 2i)} = \sin(pos/10000^{2i/d})$, $PE_{(pos, 2i+1)} = \cos(pos/10000^{2i/d})$. Positional encoding is the realisation of the rotation operation in sequence modelling---sine waves of different frequencies correspond to different levels of a nested epicycle system, and the position $pos$ is the phase index.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Fourier structure of positional encoding]\label{prop:positional_encoding_fourier}
+Sinusoidal positional encoding may be rewritten in complex-exponential form: $PE_{pos} = e^{i \omega \cdot pos}$, where $\omega_i = 1/10000^{2i/d}$ are the frequencies at each level. Different dimensions $i$ correspond to different angular velocities $\omega_i$---positional encoding is the Fourier expansion of a nested epicycle system over sequence positions. The $i$-th dimension of the positional encoding corresponds to an epicycle of radius $1$ and angular velocity $\omega_i$ (\cref{def:epicycle}), and the position $pos$ corresponds to the angle of rotation.
+
+Furthermore, when the attention weights are contributed by the positional encoding alone (for example, when the input features are $\mathbf{x} = \mathbf{0}$), the dot product $\mathbf{q}_i \cdot \mathbf{k}_j$ gives
+\[
+\mathbf{q}_i \cdot \mathbf{k}_j = \sum_{l=1}^{d/2} \cos(\omega_l (pos_i - pos_j)),
+\]
+that is, \textbf{a sum of difference-angle cosine similarities at several frequencies}---precisely the superposition over several frequencies of the basic difference-angle cosine similarity $\operatorname{cosine}(\mathbf{a},\mathbf{b}) = \cos(\alpha - \beta)$ of the `Scalars and Vectors' chapter (\cref{def:basic_diff_similarity}).
+\end{proposition}
+
+\begin{proof}
+By Euler's formula, $(\sin(pos \cdot \omega_i), \cos(pos \cdot \omega_i))$ are precisely the imaginary and real parts of $e^{i\omega_i \cdot pos}$---each two-dimensional pair of the positional encoding is a point on the unit circle, with angular velocity $\omega_i = 1/10000^{2i/d}$.
+
+For the explicit computation of the dot product: take $\mathbf{W}_Q = \mathbf{W}_K = \mathbf{I}$ (the simplified case); then
+\[
+\mathbf{q}_i \cdot \mathbf{k}_j = PE_{pos_i} \cdot PE_{pos_j} = \sum_{l} \left[\sin(\omega_l pos_i)\sin(\omega_l pos_j) + \cos(\omega_l pos_i)\cos(\omega_l pos_j)\right].
+\]
+By the product-to-sum formulae, $\sin A\sin B + \cos A\cos B = \cos(A - B)$, hence
+\[
+\mathbf{q}_i \cdot \mathbf{k}_j = \sum_{l} \cos(\omega_l (pos_i - pos_j)).
+\]
+This is precisely the sum over several frequencies of the difference-angle cosine similarity $\cos(\alpha - \beta)$ (with $\alpha = \omega_l pos_i$ and $\beta = \omega_l pos_j$).
+\end{proof}
+
+\begin{remark}[Translation invariance of the positional-encoding dot product]\label{rem:positional_encoding_translation_invariance}
+By the derivation in \cref{prop:positional_encoding_fourier}, the dot-product similarity of positional encodings depends only on the \textbf{relative position} $pos_i - pos_j$ and not on the absolute position. This translation invariance gives positional encoding its `relative-position awareness'---structurally the same as the phase translation of the `Series and Convolution' chapter (\cref{prop:phase_translation}).
+\end{remark}
+
+\section{Periodic memory of recurrent neural networks}
+
+\begin{definition}[Gating period of the LSTM]\label{def:lstm_gates}
+The long short-term memory network (LSTM) controls the flow of information through three gating mechanisms:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Forget gate} $f_t = \sigma(\mathbf{W}_f \cdot [\mathbf{h}_{t-1}, \mathbf{x}_t] + \mathbf{b}_f)$: determines which old information should be discarded. $f_t \to 1$ retains information, $f_t \to 0$ forgets it.
+    \item \textbf{Input gate} $i_t = \sigma(\mathbf{W}_i \cdot [\mathbf{h}_{t-1}, \mathbf{x}_t] + \mathbf{b}_i)$: determines which new information should be written in.
+    \item \textbf{Output gate} $o_t = \sigma(\mathbf{W}_o \cdot [\mathbf{h}_{t-1}, \mathbf{x}_t] + \mathbf{b}_o)$: determines which information should be output to the hidden state.
+\end{enumerate}
+The gating mechanism of the LSTM is the realisation of the rotation operation in hidden-state space: the forget gate $f_t$ controls the rate of decay of old information, the input gate $i_t$ controls the rate at which new information is written, and the output gate $o_t$ controls the projection of information from the cell state to the hidden state. The periodic opening and closing of the three gates drives the rotation of the hidden state $\mathbf{h}_t$ in state space.
+\end{definition}
+
+\begin{proposition}[Long-range periodic retention of the LSTM]\label{prop:lstm_long_range}
+The LSTM is able to learn long-range periodic dependencies in a sequence. Suppose that the input sequence contains a periodic pattern of period $T$. During training the forget gate $f_t$ of the LSTM learns an opening-and-closing pattern of period $T$---at the critical positions of the period $f_t \approx 1$ (information retained) and at the non-critical positions $f_t \approx 0$ (information forgotten). The update of the cell state $\mathbf{c}_t$, namely $\mathbf{c}_t = f_t \odot \mathbf{c}_{t-1} + i_t \odot \tilde{\mathbf{c}}_t$, is equivalent to selective memory in state space---the periodic opening and closing of $f_t$ resembles a sampling gate that samples the input with period $T$.
+
+The long-range memory of the LSTM is a neural-network realisation of phase locking: the periodic opening and closing of the forget gate is synchronised with the period of the input sequence---the \textbf{phase locking} of an external drive (the input sequence) with an internal period (the LSTM hidden state) (\cref{prop:phase-locking}). When the opening-and-closing period of the forget gate matches the period of the input sequence, the LSTM attains optimal memory retention.
+\end{proposition}
+
+\begin{proof}
+Consider the simplified linear case: the forget gate $f_t = f$ is constant and there is no input-gate modulation ($i_t \cdot \tilde{\mathbf{c}}_t = \mathbf{u}_t$). The solution of the cell-state recurrence $\mathbf{c}_t = f \mathbf{c}_{t-1} + \mathbf{u}_t$ is
+\[
+\mathbf{c}_t = \sum_{k=0}^{t} f^{t-k} \mathbf{u}_k,
+\]
+that is, an exponentially weighted sum with base $f$, with effective memory length $\tau_{\text{mem}} = -1/\ln f$ (as $f \to 1$ the memory length diverges).
+
+When the forget gate opens and closes periodically, $f_t = f(t \bmod T)$ (of period $T$), the product $\prod_{k=0}^{T-1} f_k$ returns to its initial value within $T$ steps---the \textbf{critical retention condition} for periodic memory is $\prod_{k=0}^{T-1} f_k = 1$. In this case the periodic components (those whose frequencies are commensurable with $1/T$) propagate without decay, whilst the non-periodic components are compressed cycle by cycle.
+
+This is precisely phase locking (\cref{prop:phase-locking}): memory is optimal when the phase of the forget gate (determined by the periodic structure of $f_t$) agrees with the phase of the sequence (determined by the input period).
+\end{proof}
+
+\section{Periodic exploration in reinforcement learning}
+
+\begin{definition}[Periodic alternation of exploration and exploitation]\label{def:exploration_exploitation}
+In reinforcement learning an agent faces the classical trade-off between exploration (trying new actions in order to obtain more information) and exploitation (executing the known optimal action in order to obtain the greatest return). The $\varepsilon$-greedy policy explores at random with probability $\varepsilon$ and exploits greedily with probability $1-\varepsilon$. The parameter $\varepsilon$ usually decays with time:
+\[
+\varepsilon(t) = \varepsilon_{\min} + (\varepsilon_{\max} - \varepsilon_{\min}) e^{-t/\tau},
+\]
+where $\tau$ is the decay time constant. The exponential decay of $\varepsilon$ is the realisation in reinforcement learning of scale decay---the exploration intensity decays with time by the scale factor $e^{-1/\tau}$. Early in training ($t \ll \tau$), $\varepsilon \approx \varepsilon_{\max}$---the agent explores extensively (random rotation). Late in training ($t \gg \tau$), $\varepsilon \approx \varepsilon_{\min}$---the agent mainly exploits (deterministic translation).
+
+The random source in the exploration process is provided by a PRNG (\cref{def:prng_period})---its period length determines the quality of the exploration randomness. If the PRNG period is too short, the exploration policy repeats within a short time, reducing the efficiency of exploration.
+\end{definition}
+
+\begin{proposition}[Periodic convergence of policy iteration]\label{prop:policy_iteration_cycle}
+Policy iteration alternates between policy evaluation and policy improvement:
+\[
+\pi_0 \xrightarrow{\text{evaluation}} Q^{\pi_0} \xrightarrow{\text{improvement}} \pi_1 \xrightarrow{\text{evaluation}} Q^{\pi_1} \xrightarrow{\text{improvement}} \pi_2 \to \cdots \to \pi^*.
+\]
+Each policy improvement rotates the policy towards the optimal policy $\pi^*$ by one angle---the policy rotates about suboptimal policies in policy space, approaching the optimal policy step by step. Policy evaluation corresponds to moving along the direction of the value function, and policy improvement to rotating the policy along the greedy direction. The convergence of policy iteration is the convergence of a gradient system to an equilibrium point---the optimal policy $\pi^*$ is an attractor in policy space.
+\end{proposition}
+
+\begin{proof}
+(Finite MDP case) \textbf{Policy improvement theorem}: if $\pi'$ is the greedy policy with respect to $Q^{\pi}$ (that is, $\pi'(s) = \arg\max_a Q^{\pi}(s,a)$), then $V^{\pi'}(s) \ge V^{\pi}(s)$ for all $s$. Proof: by $V^{\pi}(s) \le Q^{\pi}(s, \pi'(s))$ and the Bellman expectation recurrence, verified state by state---for any policy $\pi$,
+\[
+\begin{aligned}
+V^{\pi}(s) &= \mathbb{E}_{a \sim \pi(\cdot|s)}\left[ r(s,a) + \gamma \sum_{s'} P(s'|s,a) V^{\pi}(s') \right]\\
+&\le \max_a \left[ r(s,a) + \gamma \sum_{s'} P(s'|s,a) V^{\pi}(s') \right] = Q^{\pi}(s, \pi'(s)).
+\end{aligned}
+\]
+Applying the Bellman operator repeatedly, the value function of $\pi'$ is pointwise no less than that of $\pi$.
+
+In a finite state--action space the number of policies is finite, so the monotonically improving sequence $\pi_0 \preceq \pi_1 \preceq \dots$ must reach a fixed point $\pi^*$ (the solution of the optimal Bellman equation) in finitely many steps---the `rotation' of policy iteration in policy space finally closes at the attractor $\pi^*$.
+\end{proof}
+
+\section{Phase synchronisation of multi-agent systems}
+
+\begin{definition}[Policy synchronisation in multi-agent reinforcement learning]\label{def:multi_agent_sync}
+In multi-agent reinforcement learning (MARL) each of $N$ agents maintains its own policy $\pi_i$. The agents coordinate their policies by sharing parameters or experience, or by communication. When the reward functions of the agents are cooperative (the rewards of all agents are positively correlated), the policy parameters tend to \textbf{phase synchronisation} in parameter space---the policy parameter vectors $\boldsymbol{\theta}_i$ of the several agents tend to a common direction.
+
+Multi-agent policy synchronisation is a many-body realisation of phase locking: each agent is an independent periodic subsystem (the periodic oscillation of policy updates), and the communication between agents supplies the coupling coefficients $c_{ij}$ between the subsystems. When the coupling is sufficiently strong, the policy parameters of all agents tend to the same phase---structurally the same as the phase synchronisation of oscillators in the Kuramoto model (\cref{prop:kuramoto_model}), whose synchronisation threshold is given by the Kuramoto critical coupling strength $K_c = 2/(\pi g(\Omega))$ (where $g$ is the natural-frequency distribution and $\Omega$ its mode).
+\end{definition}
+
+\begin{proposition}[Periodic convergence of parameter averaging]\label{prop:parameter_averaging}
+In distributed training several workers compute gradients independently, and a parameter server averages the parameters of the nodes periodically:
+\[
+\boldsymbol{\theta}^{(t+1)} = \frac{1}{N} \sum_{i=1}^{N} \boldsymbol{\theta}_i^{(t)}.
+\]
+The period $T_{\text{sync}}$ of parameter averaging (the number of steps between synchronisations) is the synchronisation-frequency parameter. $T_{\text{sync}} = 1$ (synchronisation at every step) corresponds to strong coupling---training is stable but the communication overhead is large. $T_{\text{sync}} \gg 1$ (asynchronous over many steps) corresponds to weak coupling---the communication overhead is small but the parameters of the several nodes may diverge (phase drift). The optimal synchronisation period requires a trade-off between the speed of convergence and the efficiency of communication.
+\end{proposition}
+
+\begin{proof}
+Suppose that each node performs $T_{\text{sync}}$ steps of gradient descent independently and the parameters are then averaged. By \cref{ch32_gd_eigen} the error of a single node over $T_{\text{sync}}$ steps contracts by $(1-\eta\lambda_i)^{T_{\text{sync}}}$; the averaging operation is a convex combination and does not increase the dispersion of the nodes about the global mean (convexity). Hence within $T_{\text{sync}}$ steps the rate of convergence is, relative to synchronous execution ($T_{\text{sync}}=1$), about $\frac{1}{T_{\text{sync}}}\ln\frac{1}{|1-\eta\lambda_i|}$ times as large, whilst the communication volume falls to $1/T_{\text{sync}}$---the synchronisation period is a trade-off parameter between the rate of convergence and the cost of communication.
+
+This trade-off structure is mathematically the same as the coupling-strength trade-off of the Kuramoto model (\cref{prop:kuramoto_model}): the stronger the coupling (the smaller $T_{\text{sync}}$), the faster the synchronisation but the greater the communication overhead; the weaker the coupling (the larger $T_{\text{sync}}$), the more economical the communication but the slower the convergence, and when the coupling falls below the Kuramoto threshold synchronisation fails.
+\end{proof}
+
+\section{Constraint relations of agent systems}
+
+\begin{theorem}[The three constraint relations of agent systems]\label{thm:agent_conservation}
+The dynamics of an agent system are governed by three constraint relations:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Parameter constraint}: in training without regularisation the total magnitude of the model parameters (the $L^2$ norm) is not directly constrained during optimisation. Weight decay, however, introduces a gradient pull of the parameters towards the origin---$\boldsymbol{\theta}_{t+1} = \boldsymbol{\theta}_t - \eta(\nabla\mathcal{L} + \lambda \boldsymbol{\theta}_t)$. Weight decay is a return towards an equilibrium point---analogous to the restoring force of a spring.
+    \item \textbf{Gradient-propagation constraint}: in batch normalisation the mean and variance of the input to each layer are held fixed during training---$\mathbb{E}[\mathbf{x}] = 0, \operatorname{Var}[\mathbf{x}] = 1$. The propagation of gradients between layers satisfies an energy constraint---the total energy of the gradient (its $L^2$ norm) neither decays nor explodes during backpropagation. The residual connection guarantees gradient propagation through the identity map $\mathbf{x}_{l+1} = \mathbf{x}_l + \mathcal{F}(\mathbf{x}_l)$---$\partial \mathbf{x}_{l+1}/\partial \mathbf{x}_l = \mathbf{I} + \partial \mathcal{F}/\partial \mathbf{x}_l$, where the identity matrix guarantees lossless propagation of the gradient.
+    \item \textbf{Attention-normalisation constraint}: the attention weights sum to $1$---$\sum_j \alpha_{ij} = 1$ for all $i$. The normalisation of attention is a realisation of phase locking---the total attention of the agent at any instant is fixed, and the distribution of attention among different input positions is a rotation of phase. The distribution of the total attentional resource among several attention heads constitutes the attention-normalisation constraint.
+\end{enumerate}
+Together the three constraint relations guarantee the training stability and generalisation capability of an agent system---the parameter constraint prevents overfitting, the gradient-propagation constraint prevents vanishing and exploding gradients, and the attention-normalisation constraint ensures that information focusing is well posed.
+\end{theorem}
+
+\begin{proof}
+(i) \textbf{Parameter constraint}: the continuous-time form of weight decay is $d\boldsymbol{\theta}/dt = -\nabla\mathcal{L} - \lambda \boldsymbol{\theta}$. Near the equilibrium point $\nabla\mathcal{L} + \lambda \boldsymbol{\theta}^* = \mathbf{0}$ we have $\|\boldsymbol{\theta}^*\| = \|\nabla\mathcal{L}\|/\lambda$---the $L^2$ norm of the parameters is determined jointly by the loss gradient and the decay coefficient. What weight decay introduces is a restoring force towards the equilibrium point---analogous to the $-kx$ term in a spring oscillator (\cref{def:spring_oscillator}).
+
+(ii) \textbf{Gradient-propagation constraint}: the output of the $l$-th layer of a residual network is $\mathbf{x}_{l+1} = \mathbf{x}_l + \mathcal{F}(\mathbf{x}_l, \mathbf{W}_l)$. The gradient of backpropagation is
+\[
+\frac{\partial \mathcal{L}}{\partial \mathbf{x}_l} = \frac{\partial \mathcal{L}}{\partial \mathbf{x}_{l+1}} \left(\mathbf{I} + \frac{\partial \mathcal{F}}{\partial \mathbf{x}_l}\right).
+\]
+The identity matrix $\mathbf{I}$ guarantees that the gradient can propagate directly from deep layers to shallow ones---even when $\frac{\partial \mathcal{F}}{\partial \mathbf{x}_l}$ is very small, the gradient does not vanish. This is the realisation of the gradient-propagation constraint in a deep network.
+
+(iii) \textbf{Attention-normalisation constraint}: the $\operatorname{softmax}$ function guarantees $\sum_j \alpha_{ij} = 1$---the distribution of the total attention over all positions is normalised. When the attention at one position increases, the attention at other positions necessarily decreases. Multi-head attention distributes the total attention among $h$ heads, each normalised independently---the distribution of the total attention among the heads is likewise normalised. This constraint shares the same mathematical structure of `conservation of the total' as the probability normalisation of the `Periodic Structures in Probabilistic Systems' chapter (\cref{prop:probability_measure_properties}).
+\end{proof}
+
+\section{Open problems and research programme}
+\label{sec:agent_open_problems}
+
+\begin{remark}[Open problems]\label{rem:agent_open_problems}
+The following questions lie beyond the scope of the theorems established in this chapter and are listed as \textbf{open problems}:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Global convergence of KDI under a non-convex loss}: \cref{prop:kdi_eaf_convergence} gives only a qualitative description; rigorous results on the global rate of convergence of KDI and on the expected time to escape a saddle point are still lacking.
+    \item \textbf{Expressive power of the CEAF in deep networks}: \cref{thm:universal-approx-epicycle} is a single-hidden-layer result; whether multi-layer CEAF networks possess an essential advantage over single-layer ones, and whether they achieve higher parameter efficiency than ReLU networks, still lacks rigorous separation lower bounds.
+    \item \textbf{Exact correspondence between positional encoding and periodic convolution}: \cref{prop:positional_encoding_fourier} gives a multi-frequency cosine decomposition of the positional-encoding dot product; whether this decomposition corresponds completely to the periodic-convolution framework of the `Series and Convolution' chapter (\cref{def:periodic_convolution}), in particular the correspondence between the weight kernel $W$ and the frequency-composition operator $\Omega_{n,m}$, requires further study.
+    \item \textbf{Exact correspondence between multi-agent synchronisation and the Kuramoto model}: \cref{prop:parameter_averaging} gives a qualitative convergence for parameter averaging; whether a synchronisation threshold corresponding exactly to the Kuramoto threshold $K_c$ (\cref{prop:kuramoto_model}) can be given requires deeper investigation.
+    \item \textbf{Optimal decay rate of the exploration policy in reinforcement learning}: for $\varepsilon(t) = \varepsilon_{\min} + (\varepsilon_{\max} - \varepsilon_{\min}) e^{-t/\tau}$, the optimal choice of the time constant $\tau$ as a function of the MDP parameters still has no general formula.
+    \item \textbf{Quantitative characterisation of the phase structure of word embeddings}: \cref{prop:embedding_rotation_analogy} gives a phase-offset description of the analogy relation; whether this offset is observable in all periodic semantic dimensions, and whether it is quantitatively controlled by the distribution of the training data, requires empirical study.
+    \item \textbf{A general formula for the optimal depth of a reasoning chain}: \cref{cor:optimal_reasoning_depth} gives the order of magnitude of the optimal depth, but there is as yet no rigorous theorem relating the concrete constant of proportionality to the intrinsic complexity of the problem.
+    \item \textbf{Quantitative relation between attractor width and generalisation error}: \cref{prop:generalisation_attractor_width} gives a qualitative width--generalisation relation; the precise connection between quantitative generalisation-error bounds and attractor width remains to be established.
+\end{enumerate}
+The resolution of these questions would elevate the theory of agent periodic structure from a `framework with qualitative guarantees' to `learning algorithms with quantitative guarantees'.
+\end{remark}
+
+\begin{remark}[Unity with the rest of the book]\label{rem:agent_chapter_unity}
+The theory of the periodic structure of agent systems established in this chapter is a systematic application of periodic mathematics in artificial intelligence, and at the same time the convergence point of the four-chapter chain `data analysis $\to$ activation function $\to$ algorithm $\to$ agent'.
+
+\textbf{Inheritance from the three preceding chapters}:
+\begin{enumerate}[label=(\roman*)]
+    \item the oscillatory convergence of gradient descent (\cref{ch32_gd_eigen}) is the realisation of the translation operation in parameter space---the learning rate determines the translation step size and the Hessian eigenvalues determine the rate of convergence in each direction;
+    \item the momentum method (\cref{prop:momentum_rotation}) introduces a rotational component into parameter space---the parameter trajectory rotates about the ravines of the loss landscape, accelerating convergence;
+    \item learning-rate scheduling (\cref{def:lr_scheduler}) is the realisation of scale decay in optimisation;
+    \item the Jacobian matrix of Newton's method (\cref{prop:newton_quadratic}) provides the rotational correction;
+    \item the phase representation of word embeddings (\cref{lem:embedding_phase_representation}) and the rotational analogy relation (\cref{prop:embedding_rotation_analogy}) inherit the complex-exponential difference-angle operator of the `Scalars and Vectors' chapter (\cref{def:complex_diff_sum}).
+\end{enumerate}
+
+\textbf{Contributions of this chapter}:
+\begin{enumerate}[label=(\roman*)]
+    \item the attention mechanism (\cref{def:self_attention_periodic}) is a unification of the three operations in sequence modelling---the Query--Key dot product is a phase-similarity computation (the rotation operation), the multi-scale parallelism of multiple heads is a scale decomposition (the scaling operation), and the sliding of the window is a positional translation (the translation operation);
+    \item the gating period of the LSTM (\cref{prop:lstm_long_range}) is the realisation of the rotation operation in hidden-state space---the periodic opening and closing of the forget gate and the input gate drive the rotational update of the hidden state;
+    \item the exploration--exploitation alternation of reinforcement learning (\cref{def:exploration_exploitation}) is a coupling of the scaling and rotation operations;
+    \item the policy synchronisation of multiple agents (\cref{prop:parameter_averaging}) is an engineering realisation of phase locking (\cref{prop:phase-locking}) and of the Kuramoto model (\cref{prop:kuramoto_model});
+    \item the three constraint relations of agent systems (\cref{thm:agent_conservation})---the parameter constraint, the gradient-propagation constraint and the attention-normalisation constraint---together constitute a mathematical guarantee of training stability in deep learning;
+    \item the phase structure of word embeddings (\cref{sec:word_embedding_periodicity}) provides a periodic-mathematics framework for semantic analogy in natural language processing;
+    \item attractor dynamics (\cref{sec:attractor_dynamics}) unifies the finite-order actions of the `Operations and Periodicity' chapter and the limit cycles of continuous dissipative systems into the memory and oscillation structure of an agent;
+    \item the periodic iterative structure of reasoning (\cref{sec:reasoning_periodicity}) generalises the fixed-point iteration of the `Periodic Structure of Algorithmic Systems' chapter to the analysis of the convergence and closure of reasoning chains;
+    \item the periodic analysis of knowledge representation (\cref{sec:knowledge_periodicity}) brings the translation--rotation duality of relation embeddings within the framework of periodic mathematics.
+\end{enumerate}
+
+\textbf{Complete closure of the four-chapter chain}: from the extraction of parameters in data analysis (\cref{prop:data_to_activation_map}), to the differentiable components of activation functions (\cref{prop:activation_to_algorithm_transfer}), to the inheritance of algorithmic convergence structures (\cref{prop:algorithm_to_agent_inheritance}), and thence to the full realisation of agent training dynamics---the four chapters take the `nested epicycle system' as their unifying mathematical object and the three elementary operations of `translation--scaling--rotation' as their unifying language, completing the construction of an end-to-end theory of periodic structure from data to learning systems.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & The parameter translation of gradient descent and the eigendirection error iteration $e_t^{(i)} = (1-\eta\lambda_i)^t e_0^{(i)}$ (\cref{ch32_gd_eigen}); the sliding of the attention window over the sequence (\cref{def:self_attention_periodic}); the translation invariance of positional encoding (\cref{rem:positional_encoding_translation_invariance}); the translational analogy relation of word embeddings (\cref{prop:embedding_rotation_analogy}); the translation structure of the TransE relation embedding (\cref{thm:relation_translation_rotation}) \\
+Scaling & The scale decay of the learning-rate scheduler (\cref{def:lr_scheduler}); the exponential decay of the exploration intensity $\varepsilon(t)$ (\cref{def:exploration_exploitation}); the scale decomposition of multi-head attention; the magnitude vector of word embeddings (\cref{lem:embedding_phase_representation}) \\
+Rotation & The damped rotation of the momentum method (\cref{prop:momentum_rotation}); the complex-exponential phase $e^{i\omega\cdot pos}$ of positional encoding (\cref{prop:positional_encoding_fourier}); the phase opening and closing of LSTM gating (\cref{prop:lstm_long_range}); the rotational analogy relation of word embeddings (\cref{prop:embedding_rotation_analogy}); the phase rotation of the RotatE relation embedding (\cref{thm:relation_translation_rotation}); the phase accumulation of the reasoning chain (\cref{prop:reasoning_phase_accumulation}) \\
+Balance & The parameter constraint (weight decay), the gradient-propagation constraint (residual connections) and the attention-normalisation constraint (softmax normalisation) (\cref{thm:agent_conservation}); the information--depth trade-off of the reasoning chain (\cref{lem:reasoning_depth_information}); the generalisation--attractor-width trade-off (\cref{prop:generalisation_attractor_width}) \\
+Symmetry & The identity symmetry $\mathbf{I} + \partial\mathcal{F}/\partial\mathbf{x}_l$ of residual connections; the translation-invariant similarity of positional encoding (\cref{rem:positional_encoding_translation_invariance}); the difference-angle cosine symmetry of word-embedding components (\cref{thm:embedding_cosine_structure}) \\
+Closure & The finite-step convergence closure of policy iteration towards the optimal policy $\pi^*$ (\cref{prop:policy_iteration_cycle}); the synchronisation closure of multi-agent parameter averaging (\cref{prop:parameter_averaging}); the iterative closure of the reasoning chain (\cref{thm:reasoning_fixed_point}); the phase-locking closure of CoT reasoning (\cref{thm:cot_phase_locking}); the phase closure of knowledge paths (\cref{prop:knowledge_path_period}) \\
+Period & The damped oscillation of gradient descent (\cref{def:gradient_descent_oscillation}); the cosine-annealing period $2T$ (\cref{prop:cosine_annealing_period_agent}); the multi-agent synchronisation period $T_{\text{sync}}$ (\cref{prop:parameter_averaging}); the memory period of LSTM gating (\cref{prop:lstm_long_range}); the Hopfield limit-cycle attractor period $T_{\text{lc}}$ (\cref{thm:hopfield_limit_cycle}, \cref{prop:limit_cycle_period}); the periodic semantic generation of word embeddings (a \textbf{conjecture / empirical hypothesis}; see the remark at \cref{prop:embedding_periodicity_generation}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the \textbf{descent property of KDI for epicycle parameters} of this chapter (\ref{prop:kdi_epicycle_descent_agent}). Hint: first write down the decision map and the evolution group of this chapter's target, then apply the proof structure of the general criterion given in the `Periodic Systems' chapter.
+
+    \item Verify that the hypotheses of the \textbf{three constraint relations of agent systems} (\ref{thm:agent_conservation}) hold for the domain objects of this chapter, and give a counterexample in which the hypotheses fail.
+
+    \item Using the seven-theme comparison table of this chapter, identify the concrete carriers of the themes \textbf{translation}, \textbf{scaling} and \textbf{rotation} in this chapter, and give one example of domain data for each.
+
+    \item Synthesis: restate the diagnostic procedure of this chapter using the five-step standard interface of the `Periodic Systems' chapter (Table \ref{tab:ps_five_steps}), noting for each step the theorem of this chapter on which it depends: \ref{prop:kdi_epicycle_descent_agent}, \ref{thm:agent_conservation}.
+\end{enumerate}
+
+

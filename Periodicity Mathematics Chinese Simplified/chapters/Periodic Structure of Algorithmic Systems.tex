@@ -1,0 +1,346 @@
+\chapter{算法系统之周期结构}
+\label{chap:algorithm-periodic}
+\markboth{算法系统之周期结构}{算法系统之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:algorithm_ps_hook}
+全书各应用章共用同一份引用清单，其完整表述见第~\ref{chap:probability-periodic}~章「概率系统之周期结构」开篇的 \cref{rem:prob_ps_hook}；本处不再重复罗列，统一指向该处。
+\end{remark}
+
+\begin{definition}[本章定位：从激活函数到算法组件]\label{def:algorithm_positioning}
+算法系统之周期结构研究计算机算法中周期性、迭代收敛和计算节律的数学表征。本章将周期数学的基本工具——三种基本操作（平移、缩放、旋转）以及相应的界限与权衡关系——应用于算法系统的周期结构分析。
+
+\textbf{与前章的接口}：前一章「周转圆激活函数与函数逼近」定义的 CEAF（\cref{def:epicycle-activation}）与 KDI 优化器（引用第~\ref{chap:agent-periodic}~章 \cref{def:kdi_agent}）是本章算法的\textbf{核心可微组件}。具体地：
+\begin{enumerate}[label=(\arabic*)]
+    \item 不动点迭代与梯度下降（\cref{def:fixed_point_iteration}、\cref{def:gd_convergence_cycle}）的参数平移，其目标函数可由 CEAF 参数化；
+    \item 递归算法的标度结构（\cref{def:recursion}）与激活函数的多级周转圆嵌套（\cref{def:epicycle-activation} 的级数 $N$）共享同一“缩放 $1/b$、倍增 $a$”的层级逻辑；
+    \item 密码算法中的 PRNG 周期（\cref{def:prng_period}）与激活函数的周期条件（\cref{prop:epicycle-basic-properties}(v)）由同一有理/无理频率比判据刻画。
+\end{enumerate}
+
+本章的核心内容在于：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{迭代算法的周期收敛}：牛顿法、梯度下降、不动点迭代的收敛轨迹在相空间中构成螺线；
+    \item \textbf{递归算法的周期结构}：递归深度对应周期数，递归展开对应嵌套结构；
+    \item \textbf{循环结构的周期优化}：循环展开和向量化是周期优化的经典技术；
+    \item \textbf{排序算法的周期比较}：比较排序算法的信息论下界；
+    \item \textbf{密码算法的周期安全性}：PRNG 的周期长度决定密码强度。
+\end{enumerate}
+
+\textbf{本章七主题导引}：平移——不动点迭代与梯度下降的逐步平移收敛（\cref{def:fixed_point_iteration}）；缩放——递归的规模缩放（$a$ 个子问题、规模 $1/b$，\cref{def:recursion}）与复杂度标度 $O(\cdot)$；旋转——牛顿法雅可比的旋转修正与快速排序的枢轴旋转；平衡——复杂度下界（排序下界 $\Omega(n\log n)$，\cref{thm:sorting_lower_bound}）、精度权衡、资源权衡（\cref{thm:algorithm_conservation}）；对称——分治递归的左右对称；闭合——循环检测的闭合轨道（\cref{ch33_floyd_cycle}）与哈希雪崩的逐轮扩散（\textbf{经验观察／研究纲领}，注 \cref{prop:avalanche_effect}）；周期——迭代收敛螺线、递归树层数 $\log_b n$、PRNG 周期（\cref{def:prng_period}）。
+
+\textbf{与下一章的接口}：本章的算法收敛结构（\cref{ch33_gd_bound}、\cref{prop:newton_quadratic}）与算法节律（\cref{def:lr_scheduler}、\cref{ch33_floyd_cycle}）将成为下一章「智能体之周期结构」中训练动力学与多体同步的直接工具。
+\end{definition}
+
+\section{算法系统的数学基础}
+
+\begin{definition}[算法系统的基本量]\label{def:algorithm_quantities}
+算法系统由以下基本变量描述：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{迭代步数} $t \in \mathbb{N}$：迭代算法从初始状态到终止状态所需的循环次数。迭代步数度量了算法收敛的“时间”，对应相位索引$k$。
+    \item \textbf{迭代映射} $\Phi: \mathbb{R}^d \to \mathbb{R}^d$：迭代算法在相空间中的演化规则。$\mathbf{x}_{t+1} = \Phi(\mathbf{x}_t)$。不动点$\mathbf{x}^*$满足$\Phi(\mathbf{x}^*) = \mathbf{x}^*$。
+    \item \textbf{递归深度} $d$：递归函数调用自身的嵌套层数。递归深度对应嵌套周转系统的层数$K$。
+    \item \textbf{时间复杂度} $T(n)$：算法执行的基本操作次数作为输入规模$n$的函数。$T(n) = O(g(n))$描述了算法的渐近标度行为。
+    \item \textbf{空间复杂度} $S(n)$：算法执行所需的存储空间作为输入规模$n$的函数。空间复杂度度量了算法在相空间中的“体积”。
+\end{enumerate}
+算法系统的核心特征是\textbf{状态在迭代映射下的演化}——每一次迭代将状态从当前位置平移到下一个位置，迭代映射的动力学决定了算法的收敛性、收敛速率和稳定性。
+\end{definition}
+
+\section{迭代算法的周期收敛}
+
+\subsection{不动点迭代}
+
+\begin{definition}[不动点迭代]\label{def:fixed_point_iteration}
+求解方程$\mathbf{x} = \Phi(\mathbf{x})$的不动点迭代从初始猜测$\mathbf{x}_0$出发，重复应用迭代映射：
+\[
+\mathbf{x}_{t+1} = \Phi(\mathbf{x}_t), \quad t = 0, 1, 2, \dots.
+\]
+若$\Phi$在不动点$\mathbf{x}^*$附近是压缩映射——存在$0 \le L < 1$使得$\|\Phi(\mathbf{x}) - \Phi(\mathbf{y})\| \le L \|\mathbf{x} - \mathbf{y}\|$——则迭代从任意初始点出发收敛到$\mathbf{x}^*$。
+
+不动点迭代的收敛机制：每一步迭代将状态向不动点平移$L$倍的距离。收敛速率$L$度量了压缩程度——$L$越小，收敛越快。线性收敛$\|\mathbf{x}_t - \mathbf{x}^*\| \le L^t \|\mathbf{x}_0 - \mathbf{x}^*\|$是指数衰减。
+\end{definition}
+
+\begin{theorem}[Banach 不动点定理]\label{thm:banach_fixed_point_algo}
+设 $(X, d)$ 为完备度量空间，$\Phi: X \to X$ 为压缩映射（$L < 1$）。则 $\Phi$ 在 $X$ 上有唯一不动点 $\mathbf{x}^*$，且对任意 $\mathbf{x}_0 \in X$，迭代 $\mathbf{x}_{t+1} = \Phi(\mathbf{x}_t)$ 收敛到 $\mathbf{x}^*$，收敛速率 $\|\mathbf{x}_t - \mathbf{x}^*\| \le L^t \|\mathbf{x}_0 - \mathbf{x}^*\|$。
+\end{theorem}
+
+\begin{proof}
+（唯一性）设 $\mathbf{x}^*, \mathbf{y}^*$ 为两个不动点，则 $d(\mathbf{x}^*, \mathbf{y}^*) = d(\Phi(\mathbf{x}^*), \Phi(\mathbf{y}^*)) \le L\, d(\mathbf{x}^*, \mathbf{y}^*)$，因 $L < 1$ 必有 $d(\mathbf{x}^*, \mathbf{y}^*) = 0$，故唯一。
+
+（存在性）对序列 $\{\mathbf{x}_t\}$，由压缩性 $d(\mathbf{x}_{t+1}, \mathbf{x}_t) \le L\, d(\mathbf{x}_t, \mathbf{x}_{t-1}) \le \dots \le L^t d(\mathbf{x}_1, \mathbf{x}_0)$。对 $m > n$，
+\[
+d(\mathbf{x}_m, \mathbf{x}_n) \le \sum_{k=n}^{m-1} d(\mathbf{x}_{k+1}, \mathbf{x}_k) \le d(\mathbf{x}_1, \mathbf{x}_0) \sum_{k=n}^{m-1} L^k \le \frac{L^n}{1-L} d(\mathbf{x}_1, \mathbf{x}_0) \to 0.
+\]
+故 $\{\mathbf{x}_t\}$ 为 Cauchy 序列，由完备性收敛到某 $\mathbf{x}^* \in X$。由 $\Phi$ 的连续性，$\Phi(\mathbf{x}^*) = \mathbf{x}^*$。
+
+（收敛速率）$d(\mathbf{x}_t, \mathbf{x}^*) = d(\Phi(\mathbf{x}_{t-1}), \Phi(\mathbf{x}^*)) \le L\, d(\mathbf{x}_{t-1}, \mathbf{x}^*)$，递推即得。
+\end{proof}
+
+\begin{proposition}[牛顿法的二次收敛]\label{prop:newton_quadratic}
+牛顿法求解$F(\mathbf{x}) = \mathbf{0}$的迭代为
+\[
+\mathbf{x}_{t+1} = \mathbf{x}_t - [J_F(\mathbf{x}_t)]^{-1} F(\mathbf{x}_t),
+\]
+其中$J_F$是$F$的雅可比矩阵。若 $F$ 在不动点 $\mathbf{x}^*$ 附近二阶连续可微且 $J_F(\mathbf{x}^*)$ 非奇异，则存在 $\mathbf{x}^*$ 的邻域 $U$ 使对任意 $\mathbf{x}_0 \in U$，迭代满足\textbf{二次收敛}：
+\[
+\|\mathbf{x}_{t+1} - \mathbf{x}^*\| \le C \|\mathbf{x}_t - \mathbf{x}^*\|^2.
+\]
+牛顿法的二次收敛是平移修正和雅可比矩阵的旋转修正耦合的结果：$[J_F]^{-1}F$ 将误差向量从原空间旋转到修正方向，使得每次迭代的误差平方衰减。二次收敛是所有迭代算法中收敛最快的一类。
+\end{proposition}
+
+\begin{proof}
+设 $\mathbf{x}^*$ 满足 $F(\mathbf{x}^*) = \mathbf{0}$。将 $F(\mathbf{x}_t)$ 在 $\mathbf{x}^*$ 处做一阶泰勒展开：$F(\mathbf{x}_t) = J_F(\mathbf{x}^*)(\mathbf{x}_t - \mathbf{x}^*) + O(\|\mathbf{x}_t - \mathbf{x}^*\|^2)$。迭代公式给出
+\[
+\mathbf{x}_{t+1} - \mathbf{x}^* = \mathbf{x}_t - \mathbf{x}^* - [J_F(\mathbf{x}_t)]^{-1} F(\mathbf{x}_t).
+\]
+代入 $F(\mathbf{x}_t)$ 的展开并利用 $[J_F(\mathbf{x}_t)]^{-1} J_F(\mathbf{x}^*) = \mathbf{I} + O(\|\mathbf{x}_t - \mathbf{x}^*\|)$（由 $J_F$ 的可逆性及连续性），可得
+\[
+\mathbf{x}_{t+1} - \mathbf{x}^* = [J_F(\mathbf{x}_t)]^{-1} \left( J_F(\mathbf{x}_t) - J_F(\mathbf{x}^*) \right)(\mathbf{x}_t - \mathbf{x}^*) + O(\|\mathbf{x}_t - \mathbf{x}^*\|^2).
+\]
+由 $J_F$ 的 Lipschitz 连续性，$J_F(\mathbf{x}_t) - J_F(\mathbf{x}^*) = O(\|\mathbf{x}_t - \mathbf{x}^*\|)$，故 $\|\mathbf{x}_{t+1} - \mathbf{x}^*\| = O(\|\mathbf{x}_t - \mathbf{x}^*\|^2)$。
+\end{proof}
+
+\subsection{梯度下降的迭代周期}
+
+\begin{definition}[梯度下降的收敛周期]\label{def:gd_convergence_cycle}
+梯度下降求解 $\min_{\mathbf{x}} f(\mathbf{x})$ 的迭代为 $\mathbf{x}_{t+1} = \mathbf{x}_t - \eta \nabla f(\mathbf{x}_t)$。在凸函数上，梯度下降的收敛速率为 $O(1/t)$——见命题 \cref{ch33_gd_bound}。
+
+梯度下降的线性收敛是平移衰减的体现：每一步沿梯度方向平移 $\eta \|\nabla f\|$ 的距离。步长 $\eta$ 和曲率（Hessian 特征值）共同决定了平移的效率——大曲率方向需要小步长（否则振荡），小曲率方向可用大步长。
+\end{definition}
+
+\begin{proposition}[梯度下降的收敛界]\label{ch33_gd_bound}
+设 $f$ 为凸函数且 $\nabla f$ 为 $L$-利普希茨连续。取步长 $\eta = 1/L$，则迭代 $t$ 步后
+\[
+f(\mathbf{x}_t) - f(\mathbf{x}^*) \le \frac{L \|\mathbf{x}_0 - \mathbf{x}^*\|^2}{2t}.
+\]
+达到精度 $\varepsilon$ 所需的迭代步数为 $T = O(L\|\mathbf{x}_0-\mathbf{x}^*\|^2/\varepsilon) = O(1/\varepsilon)$。
+\end{proposition}
+
+\begin{proof}
+由 $\nabla f$ 的利普希茨性（下降引理），
+\[
+f(\mathbf{x}_{k+1}) \le f(\mathbf{x}_k) + \langle \nabla f(\mathbf{x}_k), \mathbf{x}_{k+1}-\mathbf{x}_k\rangle + \frac{L}{2}\|\mathbf{x}_{k+1}-\mathbf{x}_k\|^2.
+\]
+代入 $\mathbf{x}_{k+1} = \mathbf{x}_k - \frac{1}{L}\nabla f(\mathbf{x}_k)$：$f(\mathbf{x}_{k+1}) \le f(\mathbf{x}_k) - \frac{1}{2L}\|\nabla f(\mathbf{x}_k)\|^2$。由凸性 $f(\mathbf{x}_k) - f(\mathbf{x}^*) \le \langle \nabla f(\mathbf{x}_k), \mathbf{x}_k - \mathbf{x}^*\rangle \le \|\nabla f(\mathbf{x}_k)\|\|\mathbf{x}_k - \mathbf{x}^*\|$，记 $\delta_k = f(\mathbf{x}_k) - f(\mathbf{x}^*)$，得
+\[
+\delta_{k+1} \le \delta_k - \frac{\delta_k^2}{2L\|\mathbf{x}_k - \mathbf{x}^*\|^2} \le \delta_k - \frac{\delta_k^2}{2L\|\mathbf{x}_0 - \mathbf{x}^*\|^2},
+\]
+其中用了 $\|\mathbf{x}_k - \mathbf{x}^*\| \le \|\mathbf{x}_0 - \mathbf{x}^*\|$（凸函数梯度下降的距离单调性）。对倒数 $u_k = 1/\delta_k$：$u_{k+1} \ge u_k + \frac{1}{2L\|\mathbf{x}_0-\mathbf{x}^*\|^2}$，归纳得 $1/\delta_t \ge \frac{t}{2L\|\mathbf{x}_0-\mathbf{x}^*\|^2}$，即 $\delta_t \le \frac{L\|\mathbf{x}_0-\mathbf{x}^*\|^2}{2t}$。
+\end{proof}
+
+\section{递归算法的周期结构}
+
+\begin{definition}[递归的数学定义]\label{def:recursion}
+递归函数 $f$ 通过调用自身将规模为 $n$ 的问题分解为规模为 $n/b$ 的子问题。递归的通用形式为
+\[
+T(n) = a \cdot T\left(\frac{n}{b}\right) + f(n),
+\]
+其中 $a$ 是子问题个数，$b$ 是子问题规模缩小因子，$f(n)$ 是分解和合并的代价。递归展开的递归树有 $\log_b n$ 层，第 $k$ 层有 $a^k$ 个规模为 $n/b^k$ 的子问题。
+
+递归是标度操作在算法结构中的实现：每一层递归将问题规模缩小 $b$ 倍（缩放因子 $1/b$），子问题个数增加 $a$ 倍（缩放因子 $a$）。递归树的层数 $\log_b n$ 是嵌套层数——类似于嵌套周转系统的级数 $K$（对比 \cref{def:epicycle-activation}）。
+\end{definition}
+
+\begin{theorem}[主定理]\label{thm:master_theorem}
+设 $T(n) = a T(n/b) + f(n)$（$a \ge 1$，$b > 1$，$f(n)$ 非负）。令 $c^* = \log_b a$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $f(n) = O(n^{c^*-\varepsilon})$ 对某 $\varepsilon > 0$ 成立，则 $T(n) = \Theta(n^{c^*})$。
+    \item 若 $f(n) = \Theta(n^{c^*})$，则 $T(n) = \Theta(n^{c^*} \log n)$。
+    \item 若 $f(n) = \Omega(n^{c^*+\varepsilon})$ 对某 $\varepsilon > 0$ 成立，且 $a f(n/b) \le c f(n)$ 对某 $c < 1$ 成立（正则性条件），则 $T(n) = \Theta(f(n))$。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+（递归树展开）$T(n) = \sum_{k=0}^{\log_b n} a^k f(n/b^k)$。
+
+(i) 设 $f(n) = O(n^{c^*-\varepsilon})$，则 $a^k f(n/b^k) = O(a^k (n/b^k)^{c^*-\varepsilon}) = O(n^{c^*-\varepsilon} (a b^{-(c^*-\varepsilon)})^k) = O(n^{c^*-\varepsilon} b^{\varepsilon k})$。求和 $\sum_k b^{\varepsilon k} = \Theta(b^{\varepsilon \log_b n}) = \Theta(n^\varepsilon)$，故 $T(n) = O(n^{c^*})$。下界由 $f \ge 0$ 及 $k = \log_b n$ 项可得 $T(n) = \Omega(n^{c^*})$。
+
+(ii) 设 $f(n) = \Theta(n^{c^*})$，则 $a^k f(n/b^k) = a^k (n/b^k)^{c^*} = n^{c^*}$，求和 $(\log_b n + 1) n^{c^*} = \Theta(n^{c^*} \log n)$。
+
+(iii) 由正则性条件，$\sum_k a^k f(n/b^k) \le \sum_k c^k f(n) \le \frac{f(n)}{1-c}$，故 $T(n) = O(f(n))$。下界 $T(n)\ge f(n)$ 由各项非负直接得到。
+\end{proof}
+
+\begin{proposition}[归并排序的递归周期]\label{prop:mergesort_cycle}
+归并排序（Merge Sort）将数组均匀分为两半（$a=2, b=2$），递归排序每一半，然后合并两个有序子数组（$f(n) = O(n)$）。递归深度为 $\log_2 n$ 层，总时间复杂度 $T(n) = O(n \log n)$。
+
+归并排序的递归树是嵌套周转系统的算法实现：递归的每一层对应一个周转圆——外层周转圆处理大规模数据（低频大振幅），内层周转圆处理小规模数据（高频小振幅）。$\log_2 n$ 层递归对应 $\log_2 n$ 级嵌套周转——每深入一层，数据规模减半（带宽减半），子问题个数翻倍（位宽翻倍）。
+\end{proposition}
+
+\begin{proof}
+归并排序满足主定理条件：$a = 2$，$b = 2$，$f(n) = O(n)$。因 $\log_b a = \log_2 2 = 1$ 且 $f(n) = \Theta(n^{\log_b a})$，由主定理第二种情形得 $T(n) = \Theta(n^{\log_b a}\log n) = \Theta(n\log n)$。递归深度 $\log_2 n$ 由 $n/2^d = 1$ 解出 $d = \log_2 n$；第 $k$ 层有 $2^k$ 个子数组、每层合并代价 $\Theta(n)$，总代价 $\sum_{k=0}^{\log_2 n} 2^k \cdot \Theta(n/2^k) = \Theta(n\log n)$。
+\end{proof}
+
+\section{循环结构的周期优化}
+
+\begin{definition}[循环展开]\label{def:loop_unrolling}
+循环展开（Loop Unrolling）将循环体重复 $k$ 次以减少循环控制开销。原循环
+\[
+\text{for } i = 0 \text{ to } n-1: \; A[i] = B[i] + C[i]
+\]
+展开 $4$ 倍后变为
+\[
+\begin{aligned}
+&\text{for } i = 0 \text{ to } n-1 \text{ step } 4: \\
+&\quad A[i] = B[i] + C[i]; \quad A[i+1] = B[i+1] + C[i+1]; \\
+&\quad A[i+2] = B[i+2] + C[i+2]; \quad A[i+3] = B[i+3] + C[i+3].
+\end{aligned}
+\]
+循环展开是平移操作的步长放大——循环索引 $i$ 的步长从 $1$ 增大到 $4$，每次平移覆盖 $4$ 个元素。展开因子 $k$ 度量了平移步长与原始步长的比值。循环展开减少了循环控制指令的周期数（平移步数），但增加了每次平移的处理量（平移的“振幅”）。
+\end{definition}
+
+\begin{definition}[向量化]\label{def:vectorization}
+向量化将标量运算转换为向量运算，利用 SIMD（单指令多数据）指令集一次处理多个数据。向量化后的循环从逐元素处理变为逐向量处理——向量长度 $L$（如 AVX-512 的 $16$ 个 $32$ 位浮点数）是一次处理的元素个数。
+
+向量化是位宽的放大——位宽从 $1$（标量）增大到 $L$（向量），每个周期处理 $L$ 个数据。带宽（单个数据处理的时间）缩小为原来的 $1/L$。位宽-带宽对偶关系在向量化中精确成立：位宽 $W = L$，带宽 $\Delta t = T/L$（$T$ 是处理一个向量的时间），$W \cdot \Delta t = T$。这一对偶与前一章数据分析中“Slepian 窗时域集中 vs. 频域集中”的对偶（\cref{prop:multitaper}）以及本章递归树的“深度 vs. 宽度”对偶在结构上一致。
+\end{definition}
+
+\section{排序算法的周期比较}
+
+\begin{theorem}[比较排序的周期下界]\label{thm:sorting_lower_bound}
+任何基于比较的排序算法在最坏情况下至少需要 $\log_2(n!) \approx n \log_2 n$ 次比较。
+\end{theorem}
+
+\begin{proof}
+$n$ 个元素的排列共有 $n!$ 种。每次比较将可能排列的集合划分为两个子集（“小于”和“大于”），至多排除一半的可能。经过 $k$ 次比较，至多将可能排列缩减到 $n!/2^k$。要唯一确定排序结果，需要 $n!/2^k \le 1$，即 $k \ge \log_2(n!)$。由斯特林公式 $\log_2(n!) = n \log_2 n - n \log_2 e + O(\log n) = \Omega(n \log n)$。
+\end{proof}
+
+\begin{proposition}[快速排序的递归周期]\label{prop:quicksort_cycle}
+快速排序（Quick Sort）选择一个枢轴（pivot）元素，将数组划分为小于枢轴和大于枢轴的两部分，然后递归排序两个子数组。快速排序的递归树是不平衡的二叉树——最坏情况下退化为深度 $n$ 的链表（$O(n^2)$ 复杂度），平均情况下深度为 $\log_2 n$（$O(n \log n)$ 复杂度）。
+
+快速排序的递归树是旋转操作在排序中的实现：枢轴的选择相当于在相空间中旋转数组——将数组绕枢轴旋转，使小于枢轴的元素移到左侧，大于枢轴的元素移到右侧。枢轴的选择策略（随机、三数取中）决定了旋转的平衡性。
+\end{proposition}
+
+\begin{proof}
+设 $T(n)$ 为规模 $n$ 的期望比较次数。随机枢轴等概率落在 $n$ 个位置，递归方程为
+\[
+T(n) = (n-1) + \frac{1}{n}\sum_{k=1}^{n}\big( T(k-1) + T(n-k) \big)
+= (n-1) + \frac{2}{n}\sum_{k=0}^{n-1} T(k).
+\]
+乘以 $n$ 并与 $n-1$ 版本相减消去求和：$nT(n) - (n-1)T(n-1) = 2(n-1) + 2T(n-1)$，即 $T(n)/(n+1) = T(n-1)/n + 2(n-1)/(n(n+1))$。记 $S_n = T(n)/(n+1)$，得 $S_n = S_{n-1} + \frac{2(n-1)}{n(n+1)} \approx S_{n-1} + 2/n$，故 $S_n = 2\sum_{k=1}^{n} \frac{1}{k} + O(1) = 2\ln n + O(1)$——$T(n) = O(n\log n)$。最坏情形（枢轴恒为最小元）递归树深度为 $n$，$T(n) = \sum_{k=1}^{n}(k-1) = O(n^2)$。
+\end{proof}
+
+\section{密码算法的周期安全性}
+
+\begin{definition}[伪随机数生成器的周期]\label{def:prng_period}
+伪随机数生成器（PRNG）通过确定性算法生成看似随机的序列。PRNG 的\textbf{周期}是指序列开始重复之前的长度。线性同余生成器（LCG）的递推公式为
+\[
+X_{n+1} = (a X_n + c) \bmod m,
+\]
+其周期最大为 $m$（当参数满足 Hull–Dobell 条件时）。梅森旋转算法（Mersenne Twister）的周期为 $2^{19937}-1$。
+
+PRNG 的周期是平移周期在有限状态空间中的实现：状态 $X_n$ 在 $\{0,1,\dots,m-1\}$ 上按递推式平移。
+
+周期的长度 $m$ 是位宽——$m$ 越大，周期越长，安全性越高。
+\end{definition}
+
+\begin{lemma}[Hull–Dobell 定理]\label{lem:hull_dobell}
+LCG $X_{n+1} = (a X_n + c) \bmod m$ 有周期 $m$ 当且仅当：
+\begin{enumerate}[label=(\roman*)]
+    \item $\gcd(c, m) = 1$；
+    \item $a - 1$ 被 $m$ 的每个素因子整除；
+    \item 若 $4 \mid m$，则 $4 \mid (a - 1)$。
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+（充分性）在条件 (i)–(iii) 下，映射 $X \mapsto aX + c \bmod m$ 是 $\mathbb Z/m\mathbb Z$ 上的置换，且由 (ii)(iii) 该置换在 $\mathbb Z/m\mathbb Z$ 上只有一个轨道（详细证明见 Knuth, \textit{TAOCP} Vol. 2, \S{}3.2.1.2, Theorem A）。
+
+（必要性）若 $X \mapsto aX+c$ 在 $\mathbb Z/m\mathbb Z$ 上有周期 $m$，则它必须是一个 $m$-循环置换。由置换分析，条件 (i)–(iii) 均为必要。
+\end{proof}
+
+\begin{lemma}[弗洛伊德判圈算法的正确性]\label{ch33_floyd_cycle}
+设迭代映射 $\Phi$ 的轨道从 $x_0$ 出发，经 $\mu$ 步进入长度为 $\lambda$ 的循环（即 $x_{\mu+\lambda} = x_\mu$ 且 $\mu, \lambda$ 为最小者）。弗洛伊德算法以慢指针 $x_s$（每步 1 格）与快指针 $x_f$（每步 2 格）同时前进，则：
+\begin{enumerate}[label=(\roman*)]
+    \item 两指针必在有限步内相遇，且相遇发生在循环内；
+    \item 相遇后，从 $x_0$ 与相遇点同步前进，首次重合点即循环入口，由此可得 $\mu$ 与 $\lambda$。
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(i) 在循环内（下标 $\ge \mu$），快指针相对慢指针每步追近 1 格；因初始距离有限（$\le \lambda$），必在 $\le \lambda$ 步内追上。
+
+(ii) 设相遇时两指针已走 $t$ 步，则 $t \equiv 2t \pmod \lambda$（相遇于循环内同一点），即 $t \equiv 0 \pmod{\lambda}$——相遇点距循环入口为 $\lambda - (t - \mu)$，而循环入口距 $x_0$ 为 $\mu$。从 $x_0$ 出发的新指针走 $\mu$ 步到达入口；相遇点指针再走 $\mu$ 步到达距相遇点 $\mu$ 处——因 $t \equiv 0 \pmod \lambda$，该位置恰为入口。故两指针在入口重合，读回步数即 $\mu$；此后绕圈一周的步数即 $\lambda$。
+\end{proof}
+
+\begin{remark}[密码哈希的雪崩效应（经验观察／研究纲领）]\label{prop:avalanche_effect}
+设理想化的一轮压缩函数 $f: \{0,1\}^m \to \{0,1\}^m$ 在随机置换模型下工作。翻转输入的一个比特 $x_i$，则每个输出比特 $y_j$ 翻转的概率为 $1/2$——故一轮后受影响的输出比特期望为 $m/2$；这一步是理想模型下的直接计算。
+进一步的断言——经 $r$ 轮迭代后初始 $1$ 比特与任意输出比特的\textbf{相关性}以 $O(2^{-r})$ 速率衰减，$r$ 足够大（如 SHA-256 的 $64$ 轮）时低于任意可区分性阈值——是\textbf{经验观察／研究纲领}，不是已证定理：(1) 「相关性」在此未给出定义；(2) 在随机置换模型下，翻转一个输入比特后 $f(X)$ 与该比特的期望相关性一轮之后即为 $0$（而非 $2^{-r}$），由「受影响比特集合扩张」也推不出 $2^{-r}$；(3) 对 SHA-256 的断言是把理想模型的速率外推到具体算法，与 \cref{rem:avalanche_rigor} 所声明的经验性质一致，应一并按经验断言理解。
+\end{remark}
+
+\begin{remark}[雪崩效应的严格性]\label{rem:avalanche_rigor}
+上述证明在\textbf{理想随机置换模型}下成立。实际哈希函数使用固定布尔函数，雪崩效应通过精心设计的非线性 S 盒与线性扩散层实现（参见 Daemen–Rijmen, \textit{The Design of Rijndael}, Springer, 2002），其证明依赖于差分/线性密码分析下的活性 S 盒计数。故“雪崩效应”在严格意义上是一个\textbf{经验性质}，只有理想化模型下的概率证明。
+\end{remark}
+
+\section{算法系统的界限与权衡}
+
+\begin{theorem}[算法系统的三种界限与权衡]\label{thm:algorithm_conservation}
+算法系统的性能由三种界限与权衡支配：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{复杂度下界}：在决策树或代数决策树模型下，问题的固有计算复杂度下界是确定的——任何算法都无法以低于问题下界的复杂度求解。排序问题的下界 $\Omega(n \log n)$ 是决策树模型下的复杂度下界实例（\cref{thm:sorting_lower_bound}）。
+    \item \textbf{精度权衡}：在数值计算中，总计算误差在\textbf{截断误差}与\textbf{舍入误差}之间权衡。具体地，对复合梯形公式，截断误差 $\sim C_1 h^2$，舍入误差 $\sim C_2 \varepsilon_{\text{mach}}/h$（$h$ 为步长），总误差 $\sim C_1 h^2 + C_2 \varepsilon_{\text{mach}}/h$ 在 $h^* \sim (C_2 \varepsilon_{\text{mach}}/(2 C_1))^{1/3}$ 处取极小。这一权衡是标度不变性在数值分析中的体现。
+    \item \textbf{资源权衡}：在并发和分布式系统中，总计算资源（CPU 时间、内存、带宽）在多个任务之间分配。负载均衡（load balancing）是资源权衡的动态实现。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 复杂度下界：以排序为例。比较排序的下界 $\Omega(n \log n)$ 来自决策树模型——任何基于比较的排序算法对应一棵至少有 $n!$ 个叶子的二叉决策树，树的高度至少为 $\log_2(n!) = \Omega(n \log n)$。任何算法都无法突破这一\textbf{信息论下界}。
+
+(ii) 精度权衡：复合梯形公式的截断误差为 $E_{\text{trunc}} = O(h^2)$。舍入误差在求和过程中累积，最坏情形 $E_{\text{round}} = O(\varepsilon_{\text{mach}}/h)$。总误差 $E_{\text{total}}(h) = C_1 h^2 + C_2 \varepsilon_{\text{mach}}/h$ 在 $h^* = (C_2 \varepsilon_{\text{mach}}/(2 C_1))^{1/3}$ 处取极小，此时 $E_{\text{total}} = O(\varepsilon_{\text{mach}}^{2/3})$。
+
+(iii) 资源权衡：在 $N$ 个节点的分布式系统中，总计算资源 $R_{\text{total}} = \sum_i R_i$。负载均衡使各节点资源利用率 $u_i = R_i^{\text{used}}/R_i$ 尽可能接近。当所有 $u_i$ 相等时，$\sum_i u_i R_i = u \sum_i R_i = u R_{\text{total}}$——即负载均衡在总负载固定时最大化系统吞吐量。
+\end{proof}
+
+\section{与下一章的接口：算法结构向智能体的传递}
+\label{sec:algorithm_to_agent_interface}
+
+\begin{proposition}[算法周期结构在智能体中的继承]\label{prop:algorithm_to_agent_inheritance}
+本章建立的算法周期结构在下一章「智能体之周期结构」中被逐层继承：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{梯度下降的阻尼振荡}（\cref{ch33_gd_bound}）$\to$ 智能体训练动力学的收敛与振荡分析；
+    \item \textbf{牛顿法的二次收敛}（\cref{prop:newton_quadratic}）$\to$ 智能体中二阶优化器的收敛分析；
+    \item \textbf{学习率调度}（引用智能体章 \cref{def:lr_scheduler}）$\to$ 智能体训练过程的周期调制；
+    \item \textbf{参数平均的周期收敛}（引用智能体章 \cref{prop:parameter_averaging}）$\to$ 多智能体分布式训练的同步周期；
+    \item \textbf{PRNG 周期}（\cref{def:prng_period}）$\to$ 智能体探索策略的随机性来源。
+\end{enumerate}
+故本章是连接“纯算法”与“学习型智能体”的桥梁。
+\end{proposition}
+
+\begin{proof}
+逐条对应：
+(i) 引理 \cref{ch32_gd_eigen}（智能体章）直接引用本章梯度下降的收敛分析。
+(ii) \cref{prop:newton_quadratic} 的二次收敛性推广到智能体中的二阶优化器（如 Newton 法、自然梯度法）。
+(iii) \cref{def:lr_scheduler}（智能体章）的周期调制继承本章梯度下降的收敛框架。
+(iv) \cref{prop:parameter_averaging}（智能体章）的分布式训练同步继承本章不动点迭代的收敛机制。
+(v) \cref{def:prng_period} 为智能体 $\varepsilon$-贪婪策略的随机源。
+\end{proof}
+
+\begin{remark}[与全书的统一]\label{rem:algorithm_chapter_unity}
+本章建立的算法系统周期结构理论是周期数学在计算机科学中的系统应用。不动点迭代和牛顿法是平移操作在相空间中的收敛——压缩映射保证了平移向不动点的单调收敛。递归算法是标度操作在算法结构中的实现——递归树的每一层将问题规模缩放 $1/b$，子问题个数缩放 $a$。循环展开和向量化是位宽-带宽对偶关系在代码优化中的直接应用。排序算法的比较次数下界是信息熵约束的算法表述。PRNG 的周期长度决定了密码系统的安全性。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 不动点迭代的压缩平移收敛（\cref{def:fixed_point_iteration}、\cref{thm:banach_fixed_point_algo}）；梯度下降的逐次平移（\cref{ch33_gd_bound}）；循环展开的步长放大（\cref{def:loop_unrolling}） \\
+缩放 & 递归的规模缩放（$a$ 子问题、$1/b$ 规模，\cref{def:recursion}）；复杂度标度 $T(n)=O(g(n))$；向量化的位宽放大（\cref{def:vectorization}） \\
+旋转 & 牛顿法雅可比矩阵的旋转修正（\cref{prop:newton_quadratic}）；快速排序的枢轴旋转（\cref{prop:quicksort_cycle}） \\
+平衡 & 复杂度下界：比较排序下界 $\Omega(n\log n)$（\cref{thm:sorting_lower_bound}）；精度权衡与资源权衡（\cref{thm:algorithm_conservation}） \\
+对称 & 分治递归的左右对称（归并排序 $a=b=2$，\cref{prop:mergesort_cycle}） \\
+闭合 & 弗洛伊德判圈的闭合轨道（\cref{ch33_floyd_cycle}）；哈希雪崩的逐轮扩散（\textbf{经验观察／研究纲领}，注 \cref{prop:avalanche_effect}） \\
+周期 & 迭代收敛螺线（收敛速率 $L^t$）；递归树层数 $\log_b n$；PRNG 周期（LCG 最大周期 $m$、梅森旋转 $2^{19937}-1$，\cref{def:prng_period}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{算法系统的三种界限与权衡}（\ref{thm:algorithm_conservation}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{thm:algorithm_conservation}。
+\end{enumerate}
+
+

@@ -1,0 +1,1592 @@
+\chapter{标量与矢量}
+\markboth{标量与矢量}{标量与矢量}
+
+\begin{remark}[本章定位]\label{rem:chapter_positioning_ch3}
+在周期数学中，标量与矢量不是预设的概念，而是从数系的对称性中自然产生的。本章将“周期基础”章确立的三大对称中心（$0$、$1$、$i$）和三种方向结构（平移方向、比例方向、旋转方向），以及“数系”章建立的运算对偶，统一纳入群表示论的框架：标量对应于对称群的平凡表示，矢量对应于非平凡表示。
+
+本章的核心工作之一，是将“周期基础”章中的三种基本生成变换——平移、缩放、旋转——落实到向量空间的具体运算中。在此基础上，本章系统建立\textbf{相似度}与\textbf{趋势}的完整谱系——相似度是仅依赖于两向量辐角的方向关系度量，趋势是相似度与两向量模长的乘积。12种相似度与12种趋势不是人为列举，而是由运算对偶的笛卡尔积生成的分类。\textbf{需要说明}：差角族相似度严格定义在 $\mathbb{R}^2\cong\mathbb{C}$ 上（需要单一辐角），和角族相似度同样需要单一辐角，因此本章的相似度谱系以 $\mathbb{R}^2\cong\mathbb{C}$ 为基本定义域；在 $\mathbb{R}^n$（$n\ge 3$）中，只能定义内积、外积模与夹角，不能定义和角。
+
+在12种基本相似度与趋势之上，本章进一步引入\textbf{复指数相似度}与\textbf{复指数趋势}，以及\textbf{四元数差角四元数与和角四元数}。复数情形把基础差角余弦族与基础差角正弦族打包为一个单位复数，左乘即二维旋转算子；四元数情形按同样的“角度差/角度和”逻辑定义差角四元数与和角四元数，它们通过共轭作用给出三维旋转算子。当旋转轴相同时，四元数情形严格退化为复数的角度差与角度和。
+
+\textbf{本章七主题导引}：平移——向量加法 $\mathbf{u}+\mathbf{v}$（定义 \ref{def:vector_addition_translation}）及其构成的交换群（命题 \ref{prop:vector_additive_group}），向量和 $\mathbf{a}+\mathbf{b}$ 的模长即半角余弦趋势（命题 \ref{prop:sum_difference_half_angle}）；缩放——标量乘法 $\alpha\mathbf{u}$ 的模长缩放（定义 \ref{def:scalar_multiplication_scaling}）与平方反比定律的 $r^{-2}$ 衰减（定理 \ref{thm:inverse_square}）；旋转——复数乘法对辐角的相加复合（命题 \ref{prop:complex_multiplication}）与四元数乘法的三维旋转复合（命题 \ref{prop:quaternion_multiplication}）、复指数相似度作为旋转差异算子（命题 \ref{prop:complex_exp_similarity_rotation_operator}）、差角四元数作为三维旋转差异算子（命题 \ref{prop:quaternion_exp_similarity_rotation_operator}）；守恒——余弦趋势（内积）在正交群 $O(n)$ 下不变（命题 \ref{prop:cosine_scalar}）、正弦趋势的绝对值（外积的模）在纯旋转 $SO(3)$ 下不变（命题 \ref{prop:sine_rotation}）、反射保持模长与折射保持正弦趋势在界面法向上的守恒（定义 \ref{def:reflection_vector}、\ref{def:refraction_vector}）；对称——反射对合体现加法反射对称 $c=0$、折射缩放体现乘法缩放反射对称 $c\neq 1$ 对 $i$-对称的调制；闭合——反射两次回到自身 $\mathbf{v}''=\mathbf{v}$ 构成周期为 $2$ 的闭合轨道、平方反比定律以闭合曲面上的通量守恒为判据（定理 \ref{thm:inverse_square}）；周期——复数乘法中辐角相加使旋转角以 $2\pi$ 为周期复合（命题 \ref{prop:complex_multiplication}）、反射的 $2$-周期闭合轨道是本章最小的周期结构（定义 \ref{def:reflection_vector}）。
+\end{remark}
+
+\begin{definition}[向量运算与三种基本生成变换]\label{def:vector_three_transformations}
+在向量空间的框架下，“周期基础”章中的三种基本生成变换获得如下具体实现：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平移}：向量与向量的加法 $\mathbf{u} + \mathbf{v}$。将一个向量沿另一个向量的方向移动，复合后的结果向量的模长和方向由平行四边形法则确定。平移对应加法反射对称（对称中心 $c=0$）。
+    \item \textbf{缩放}：标量与向量的乘法 $\alpha \mathbf{u}$。将向量的模长按比例 $\alpha$ 放大或缩小，方向保持不变（$\alpha > 0$）或反转（$\alpha < 0$）。缩放对应乘法缩放反射对称（对称中心 $c = 1$）。
+    \item \textbf{旋转}：向量与向量的外积 $\mathbf{u} \times \mathbf{v}$（在 $\mathbb{R}^3$ 中）或复数乘法 $z_1 z_2$（在 $\mathbb{R}^2 \cong \mathbb{C}$ 中）。将向量的方向按旋转角改变，模长由两向量模长的乘积及旋转角决定。旋转对应乘法取逆对称（对称中心 $c=1$）及 $i$-对称（对称中心 $c=i$）。
+\end{enumerate}
+这三种运算——向量加法（平移）、标量乘法（缩放）、向量外积/复数乘法（旋转）——构成了向量空间上三种不可互约的基本操作。
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=stealth,
+    trans/.style={draw, rounded corners, fill=blue!10, minimum width=3.2cm, minimum height=1.8cm, align=center, font=\small}]
+
+    \node[trans] (T) at (0,0) {\textbf{平移}\\向量加法 $\mathbf{u}+\mathbf{v}$\\对称中心 $c=0$};
+    \node[trans] (S) at (5.5,0) {\textbf{缩放}\\标量乘法 $\alpha\mathbf{u}$\\对称中心 $c=1$};
+    \node[trans] (R) at (11,0) {\textbf{旋转}\\外积 $\mathbf{u}\times\mathbf{v}$，复数乘法\\对称中心 $c=1,i$};
+
+    \node[font=\footnotesize, below=0.2cm of T] {加法反射对称};
+    \node[font=\footnotesize, below=0.2cm of S] {乘法缩放反射对称};
+    \node[font=\footnotesize, below=0.2cm of R] {乘法取逆/$i$-对称};
+\end{tikzpicture}
+\caption{向量空间中的三种基本生成变换：向量加法实现平移，标量乘法实现缩放，外积/复数乘法实现旋转。三者分别对应加法反射对称（$c=0$）、乘法缩放反射对称（$c=1$）、乘法取逆/$i$-对称（$c=1,i$）。}
+\label{fig:three_transformations_vector}
+\end{figure}
+\section{\texorpdfstring{标量与矢量的定义}{标量与矢量的定义}}
+
+\begin{definition}[标量]\label{def:scalar}
+设 $G$ 为对称群，$\rho: G \to \operatorname{GL}(V)$ 为 $G$ 在向量空间 $V$ 上的一个表示。若 $\rho$ 是平凡表示，即对任意 $g \in G$ 有 $\rho(g) = \operatorname{id}_V$，则 $V$ 中的元素称为关于 $G$ 的\textbf{标量}。标量在群作用下不变，因此不携带方向信息，仅作为数值参与缩放运算。
+
+“数系”章中的自然数 $\mathbb{N}$ 提供了标量的原始模型——它仅有正向运算（加法、乘法、幂），无逆元，不涉及任何方向对偶，因而也不涉及任何对称中心。标量在向量空间中的主要作用是作为\textbf{缩放因子}，实现标量乘法这一基本变换。
+\end{definition}
+
+\begin{definition}[矢量]\label{def:vector}
+设 $G$ 为对称群，$\rho: G \to \operatorname{GL}(V)$ 为 $G$ 的一个表示。若 $\rho$ 不是平凡表示（即至少存在某个 $g \in G$ 使得 $\rho(g) \neq \operatorname{id}_V$），则 $V$ 中的元素 $\mathbf{v}$ 称为关于 $G$ 的\textbf{矢量}。矢量具有大小（范数 $\|\mathbf{v}\|$）和方向。矢量的方向由群作用的轨道刻画——在表示 $\rho$ 下，$\mathbf{v}$ 的方向是 $\{\rho(g)\mathbf{v} \mid g \in G\}$ 所张成的子空间中的位置。这是“周期基础”章中方向性概念的代数实现。
+
+矢量与矢量之间可以进行\textbf{加法}（平移）和\textbf{外积/复数乘法}（旋转），矢量与标量之间可以进行\textbf{标量乘法}（缩放）。这三种运算恰好穷尽了向量空间上所有的基本对称操作。
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2,>=stealth]
+    \draw[->, thick] (0,0) -- (4.5,0) node[right] {$\mathbb{R}$（标量轴）};
+    \filldraw[blue] (2.5,0) circle (2pt) node[below=4pt] {$x$（标量）};
+    \draw[->, gray, thick] (2.5,0.15) -- (2.5,0.8) node[above] {$\rho(g)x = x$（不变）};
+
+    \draw[->, thick] (0,-2.8) -- (4.5,-2.8) node[right] {$\mathbb{R}^2$（矢量空间）};
+    \draw[->, red, thick] (1.8,-2.8) -- (3.5,-1.5) node[above right] {$\mathbf{v}$（矢量）};
+    \draw[->, blue, thick, dashed] (1.8,-2.8) -- (1.8,-1.3) node[left] {$\rho(g)\mathbf{v}$};
+    \draw[gray, dotted] (1.8,-2.8) circle (1.3);
+    \node[font=\footnotesize] at (3.2,-3.2) {群轨道（方向变换）};
+\end{tikzpicture}
+\caption{标量与矢量的群作用区别：标量在群作用下不变（平凡表示，仅参与缩放）；矢量沿群轨道变换方向（非平凡表示，可参与平移、缩放、旋转三种变换）。}
+\label{fig:scalar_vector_group_action}
+\end{figure}
+
+\begin{table}[htbp]
+    \centering
+    \caption{矢量类型、对称群与方向结构的对应}
+    \label{tab:vector_types}
+    \begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}>{\centering\arraybackslash}p{2.5cm}}
+        \toprule
+        矢量类型 & 标量域 & 对称中心 & 方向结构 & 对称群 \\
+        \midrule
+        整数矢量 & $\mathbb{Z}$ & $0$ & 平移方向 & $C_2$（加法反射） \\
+        有理数矢量 & $\mathbb{Q}$ & $1$ & 比例方向 & $\mathbb{G}_m$（乘法缩放反射） \\
+        实数矢量 & $\mathbb{R}$ & $0,1$ & 平移+比例 & $\mathbb{R}^+$（连续方向） \\
+        复数矢量 & $\mathbb{C}$ & $i$ & 旋转方向 & $U(1)$（乘法取逆） \\
+        四元数矢量 & $\mathbb{H}$ & $i,j,k$ & 三维旋转 & $SU(2)$（非交换旋转） \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+\section{\texorpdfstring{向量空间的基本运算：平移、缩放与旋转}{向量空间的基本运算：平移、缩放与旋转}}
+
+\begin{definition}[向量加法——平移]\label{def:vector_addition_translation}
+设 $\mathbf{u} = (u_1,\dots,u_n)$, $\mathbf{v} = (v_1,\dots,v_n) \in \mathbb{R}^n$。定义\textbf{向量加法}（平移操作）：
+\[\mathbf{u} + \mathbf{v} = (u_1+v_1, \dots, u_n+v_n).\]
+这是“数系”章中加法运算在向量空间中的逐分量推广，也是“周期基础”章中平移变换的向量实现。此外，定义\textbf{零向量} $\mathbf{0} = (0,\dots,0)$（对应加法对称中心 $0$），以及\textbf{负向量} $-\mathbf{u} = (-u_1,\dots,-u_n)$（对应加法逆元，即逆向平移）。
+\end{definition}
+
+\begin{definition}[标量乘法——缩放]\label{def:scalar_multiplication_scaling}
+设 $\mathbf{u} \in \mathbb{R}^n$，$\alpha \in \mathbb{R}$。定义\textbf{标量乘法}（缩放操作）：
+\[\alpha \mathbf{u} = (\alpha u_1, \dots, \alpha u_n).\]
+这是“数系”章中乘法运算在向量空间中的标量-向量作用，也是“周期基础”章中缩放变换的向量实现。当 $\alpha > 1$ 时放大，$0 < \alpha < 1$ 时缩小，$\alpha = 1$ 时不变（$1$ 是比例方向的对称中心），$\alpha = -1$ 时反向。
+\end{definition}
+
+\begin{definition}[外积与复数乘法——旋转]\label{def:outer_product_rotation}
+旋转操作根据空间维数有两种等价实现：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{外积}（$\mathbb{R}^3$ 中）：设 $\mathbf{a}, \mathbf{b} \in \mathbb{R}^3$。其\textbf{外积}（叉积）$\mathbf{a} \times \mathbf{b}$ 是一个向量，方向垂直于 $\mathbf{a}$ 和 $\mathbf{b}$ 所张成的平面（由右手定则确定），模长为 $\|\mathbf{a}\| \|\mathbf{b}\| \sin\theta$。
+    \item \textbf{复数乘法}（$\mathbb{R}^2 \cong \mathbb{C}$ 中）：设 $z_1 = r_1 e^{i\alpha}, z_2 = r_2 e^{i\beta} \in \mathbb{C}$。其乘积 $z_1 z_2 = r_1 r_2 e^{i(\alpha+\beta)}$ 将两向量的辐角相加，模长相乘。
+\end{enumerate}
+外积和复数乘法是“周期基础”章中旋转变换的向量实现。
+\end{definition}
+
+\begin{proposition}[向量加法的群结构——平移的代数基础]\label{prop:vector_additive_group}
+$\mathbb{R}^n$ 在向量加法下构成一个交换群，零向量为单位元，负向量为逆元。该群同构于 $n$ 个实数加法群的直积。这是“周期基础”章中加法反射对称在向量空间中的直接实现：对称中心为 $\mathbf{0}$，对合 $\sigma_{\mathbf{0}}(\mathbf{u}) = -\mathbf{u}$ 是 $\mathbb{R}^n$ 上的加法反射自同构，生成一个 $C_2$ 自同构群。
+\end{proposition}
+
+\begin{proof}
+验证群公理：加法结合律和交换律由实数加法的对应性质直接继承；零向量满足 $\mathbf{u} + \mathbf{0} = \mathbf{u}$；$\mathbf{u} + (-\mathbf{u}) = \mathbf{0}$。因此 $(\mathbb{R}^n, +)$ 是交换群。对合 $\sigma_{\mathbf{0}}(\mathbf{u}) = -\mathbf{u}$ 满足 $\sigma_{\mathbf{0}} \circ \sigma_{\mathbf{0}} = \operatorname{id}$，是以 $\mathbf{0}$ 为唯一不动点的加法反射。由于 $\sigma_{\mathbf{0}} \neq \operatorname{id}$ 且 $\sigma_{\mathbf{0}}^2 = \operatorname{id}$，它生成的群为 $C_2$。
+\end{proof}
+
+\begin{proposition}[标量乘法的线性性质——缩放的代数基础]\label{prop:scalar_multiplication}
+标量乘法满足以下性质：
+\begin{enumerate}[label=(\roman*)]
+    \item $\alpha(\mathbf{u} + \mathbf{v}) = \alpha\mathbf{u} + \alpha\mathbf{v}$；
+    \item $(\alpha + \beta)\mathbf{u} = \alpha\mathbf{u} + \beta\mathbf{u}$；
+    \item $\alpha(\beta\mathbf{u}) = (\alpha\beta)\mathbf{u}$；
+    \item $1 \cdot \mathbf{u} = \mathbf{u}$，其中 $1$ 是乘法单位元，即比例方向的对称中心。
+\end{enumerate}
+标量乘法只改变矢量的模长而不改变其方向（除反转外），是\textbf{比例缩放操作}的代数实现。
+\end{proposition}
+
+\begin{proof}
+设 $\mathbf{u} = (u_1,\dots,u_n)$，$\mathbf{v} = (v_1,\dots,v_n)$。(i) 左端第 $i$ 分量为 $\alpha(u_i + v_i)$，右端第 $i$ 分量为 $\alpha u_i + \alpha v_i$，二者由实数分配律相等。(ii) 左端第 $i$ 分量为 $(\alpha+\beta)u_i$，右端为 $\alpha u_i + \beta u_i$，由实数分配律相等。(iii) 左端为 $\alpha(\beta u_i) = (\alpha\beta)u_i$，右端为 $(\alpha\beta)u_i$，由实数乘法结合律相等。(iv) $1 \cdot u_i = u_i$，故 $1\cdot\mathbf{u} = \mathbf{u}$——标量 $1$ 是乘法群的单位元（缩放中心），作用在矢量上不改变其方向和大小。当 $\alpha = 0$ 时，$0\cdot u_i = 0$，故 $0\cdot\mathbf{u} = \mathbf{0}$，零标量将任意矢量压缩到加法对称中心 $\mathbf{0}$。
+\end{proof}
+
+\section{\texorpdfstring{相似度：方向关系的纯粹度量}{相似度：方向关系的纯粹度量}}
+
+\begin{definition}[相似度的计算本源]\label{def:similarity_root}
+本章的相似度定义在 $\mathbb{R}^2\cong\mathbb{C}$ 上（需要单一辐角）。一切相似度——无论其角度类型（差角、和角、倍角、半角）如何——本质上都是对两个向量辐角进行某种代数运算后，再取余弦或正弦得到的标量。相似度的唯一信息来源是\textbf{两个向量的辐角}（$\alpha$ 和 $\beta$）。余弦系列度量的是辐角运算后的\textbf{实轴投影}（偶函数，对方向反转不敏感），正弦系列度量的是\textbf{虚轴投影}（奇函数，对方向反转变号）。
+
+换言之，相似度谱系的\textbf{全部多样性}，仅来自对 $(\alpha, \beta)$ 这一对辐角所做的不同代数操作（$\alpha - \beta$, $\alpha + \beta$, $2(\alpha - \beta)$, $2(\alpha + \beta)$, $(\alpha - \beta)/2$, $(\alpha + \beta)/2$）。除此之外，不需要任何其他信息。本章定义的12种基本相似度均以此为本源。
+\end{definition}
+
+\begin{lemma}[12种相似度的生成]\label{lem:similarity_generation}
+12种相似度由以下三个二元选择的笛卡尔积生成：
+\[
+\{\text{差角}, \text{和角}\} \times \{\text{基础}, \text{倍角}, \text{半角}\} \times \{\text{余弦}, \text{正弦}\} = 12.
+\]
+这三个二元选择分别对应三类运算对偶：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{差角/和角}对应\textbf{减法与加法}（平移方向，对称中心 $c=0$）：差角（有符号差 $\alpha - \beta$）是减法在辐角上的实现，和角 $\phi = \alpha + \beta$ 是加法在辐角上的实现。
+    \item \textbf{倍角/半角}对应\textbf{幂与根}（旋转方向，对称中心 $c=i$）：倍角 $2\theta$ 是辐角的幂运算（旋转两次），半角 $\theta/2$ 是辐角的根运算（旋转均分）。
+    \item \textbf{余弦/正弦}对应\textbf{实部与虚部}（投影与旋转）：余弦是辐角在实轴上的投影，正弦是辐角在虚轴上的投影。
+\end{enumerate}
+因此，12种相似度由运算对偶的笛卡尔积生成。
+\end{lemma}
+
+\begin{proof}
+相似度的本质是对两个辐角进行\textbf{一次代数运算}后取三角函数（定义 \ref{def:similarity_root}）。一次代数运算只有三种基本类型：减法（差角）、加法（和角）、以及这两种运算的\textbf{幂次}。幂次为 $1$ 时给出基础角（$\theta$ 或 $\phi$），幂次为 $2$ 时给出倍角（$2\theta$ 或 $2\phi$），幂次为 $\frac{1}{2}$ 时给出半角（$\theta/2$ 或 $\phi/2$）。幂次超过 $2$ 的操作（如三倍角 $3\theta$）可以分解为倍角与基础角的复合（$3\theta = 2\theta + \theta$），因此不属于“基本相似度”的范畴——它们可以由基本相似度通过代数组合得到。同理，幂次为负整数或非 $\frac{1}{2}$ 的分数次幂也可以分解为基本操作的复合。因此，$6$ 种基本角操作 $\{\theta, \phi, 2\theta, 2\phi, \theta/2, \phi/2\}$ 是完备的。对每种角操作取余弦或正弦，得到 $6 \times 2 = 12$ 种基本相似度。三种二元选择与运算对偶的对应关系由定义直接给出。
+\end{proof}
+
+\begin{definition}[相似度的本质]\label{def:similarity_essence}
+相似度是描述两个矢量方向关系的核心工具。其本质特征是\textbf{仅依赖于两矢量的辐角}，与矢量的模长完全无关。有符号的差角 $\alpha - \beta$ 度量了从 $\mathbf{b}$ 的方向旋转到 $\mathbf{a}$ 的方向所需的旋转角，其绝对值即两向量的夹角 $\theta$；和角 $\phi = \alpha + \beta$ 度量了两方向在旋转群中的合成。
+\end{definition}
+
+\subsection{\texorpdfstring{差角相似度}{差角相似度}}
+
+\begin{definition}[基础差角相似度]\label{def:basic_diff_similarity}
+设 $\mathbf{a}, \mathbf{b} \in \mathbb{R}^2\cong\mathbb{C}$ 为非零向量，辐角分别为 $\alpha$ 和 $\beta$。按本章统一口径，两向量方向之间的\textbf{夹角}一律取 $\theta = \lvert\alpha-\beta\rvert \in [0,\pi]$；有符号的 $\alpha-\beta$ 称为\textbf{差角}，仅用于正弦族相似度的符号判定。定义：
+\begin{align*}
+\operatorname{cosine}(\mathbf{a}, \mathbf{b}) &= \cos(\alpha - \beta) = \cos\theta \quad (\text{方向相似度}), \\
+\operatorname{sine}(\mathbf{a}, \mathbf{b}) &= \sin(\alpha - \beta) \quad (\text{垂直相似度}).
+\end{align*}
+\end{definition}
+
+\begin{proposition}[基础差角相似度的性质]\label{prop:basic_diff_similarity_properties}
+设 $\theta = \lvert\alpha-\beta\rvert \in [0, \pi]$ 为两向量的夹角。方向相似度 $\operatorname{cosine}$ 和垂直相似度 $\operatorname{sine}$ 满足：
+\begin{enumerate}[label=(\roman*)]
+    \item $\operatorname{cosine}(\mathbf{a}, \mathbf{b})$ 度量两矢量在平移方向上的“一致性”：当 $\theta=0$ 时取得最大值 $1$（完全同向），当 $\theta=\pi$ 时取得最小值 $-1$（完全反向）。
+    \item $\lvert\operatorname{sine}(\mathbf{a}, \mathbf{b})\rvert$ 度量两矢量在旋转方向上的“正交性”：当 $\theta=\pi/2$ 时取得最大值 $1$（完全正交）。
+    \item 二者满足恒等式：$\operatorname{cosine}^2 + \operatorname{sine}^2 = 1$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由余弦函数在 $[0,\pi]$ 上的单调性直接得出。\\
+(ii) 由 (iii) 的恒等式 $\operatorname{cosine}^2+\operatorname{sine}^2=1$，$\lvert\operatorname{sine}\rvert$ 在 $\operatorname{cosine}=0$ 即 $\theta=\pi/2$ 处取得最大值 $1$。\\
+(iii) 是三角恒等式 $\cos^2\theta + \sin^2\theta = 1$ 的直接推论。
+\end{proof}
+
+\begin{definition}[倍角差角相似度]\label{def:double_diff_similarity}
+向量 $\mathbf{a}, \mathbf{b}$ 的\textbf{轴向相似度}和\textbf{斜率相似度}定义为：
+\begin{align*}
+\operatorname{cosine}_2(\mathbf{a}, \mathbf{b}) &= \cos 2(\alpha - \beta) = \cos 2\theta, \\
+\operatorname{sine}_2(\mathbf{a}, \mathbf{b}) &= \sin 2(\alpha - \beta).
+\end{align*}
+\end{definition}
+
+\begin{proposition}[倍角差角相似度的退化检测]\label{prop:double_diff_degeneracy}
+设 $\theta \in [0,\pi]$。倍角差角相似度用于检测方向的退化状态：
+\begin{enumerate}[label=(\roman*)]
+    \item $\operatorname{cosine}_2 = 1$ 当且仅当 $\theta = 0$ 或 $\pi$（两矢量同向或反向）。
+    \item $\operatorname{cosine}_2 = -1$ 当且仅当 $\theta = \pi/2$（两矢量正交）。
+    \item $\lvert\operatorname{sine}_2\rvert = 1$ 当且仅当 $\theta = \pi/4$ 或 $3\pi/4$（两方向均衡或近于反向）。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+由 $\cos 2\theta = 2\cos^2\theta - 1 = 1 - 2\sin^2\theta$ 直接验证各临界值。(i) $\cos 2\theta = 1 \iff 2\theta = 0 \text{ 或 } 2\pi \iff \theta = 0 \text{ 或 } \pi$（因 $\theta \in [0,\pi]$）。(ii) $\cos 2\theta = -1 \iff 2\theta = \pi \iff \theta = \pi/2$。(iii) $\lvert\sin 2\theta\rvert = 1 \iff 2\theta = \pi/2 \text{ 或 } 3\pi/2 \iff \theta = \pi/4 \text{ 或 } 3\pi/4$（因 $\theta \in [0,\pi]$）。
+\end{proof}
+
+\begin{definition}[半角差角相似度]\label{def:half_diff_similarity}
+向量 $\mathbf{a}, \mathbf{b}$ 的\textbf{和向相似度}和\textbf{差向相似度}定义为：
+\begin{align*}
+\operatorname{cosine}_{1/2}(\mathbf{a}, \mathbf{b}) &= \cos\frac{\theta}{2}, \\
+\operatorname{sine}_{1/2}(\mathbf{a}, \mathbf{b}) &= \sin\frac{\theta}{2}, \qquad \theta = \lvert\alpha-\beta\rvert \in [0,\pi].
+\end{align*}
+\end{definition}
+
+\begin{remark}\label{rem:half_angle_sum_difference}
+半角相似度与向量和/差的模长密切相关（见命题 \ref{prop:sum_difference_half_angle}）。等模长条件下，向量和的模长正比于 $\cos(\theta/2)$，向量差的模长正比于 $\sin(\theta/2)$。
+\end{remark}
+
+\subsection{\texorpdfstring{和角相似度}{和角相似度}}
+
+\begin{definition}[基础和角相似度]\label{def:basic_sum_similarity}
+向量 $\mathbf{a}, \mathbf{b}$ 的\textbf{合向相似度}和\textbf{合垂相似度}定义为：
+\begin{align*}
+\operatorname{cosine}_+(\mathbf{a}, \mathbf{b}) &= \cos(\alpha + \beta) = \cos\phi, \\
+\operatorname{sine}_+(\mathbf{a}, \mathbf{b}) &= \sin(\alpha + \beta) = \sin\phi.
+\end{align*}
+和角相似度以两矢量辐角之和 $\phi = \alpha + \beta$ 为自变量，描述两矢量的\textbf{绝对方向复合}关系。它不可约化为差角相似度，天然地对应于复数乘法的方向复合——旋转的合成。
+\end{definition}
+
+\begin{remark}[差角与和角的本质区别]\label{rem:diff_sum_distinction}
+差角相似度度量的是\textbf{两个向量之间的相对方向}——这是“观察者”的视角：观察者站在一个向量上，测量另一个向量相对于自己的偏离程度。和角相似度度量的是\textbf{两个向量作为独立方向的合成}——这是“参与者”的视角：两个方向各自独立旋转，然后合成一个新的方向。
+\end{remark}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.1,>=stealth]
+
+        \begin{scope}
+            \draw[->, gray] (-0.3,0) -- (3.2,0);
+            \draw[->, gray] (0,-0.3) -- (0,2.8);
+            \draw[->, thick, blue] (0,0) -- (55:2.4) node[above right, font=\footnotesize] {$\mathbf{a}$};
+            \draw[->, thick, red]  (0,0) -- (15:2.4) node[right, font=\footnotesize] {$\mathbf{b}$};
+            \draw[->, orange] (0.9,0.24) arc (15:55:0.9);
+
+            \node[orange, font=\footnotesize] (thlbl) at (2.55, 1.55) {$\theta=\lvert\alpha-\beta\rvert$};
+            \draw[->, orange, thin] (thlbl.south west) -- (35:0.9);
+
+            \node[font=\small\bfseries] at (1.5,-1.9)
+                {(a) 差角：观察者视角};
+            \node[font=\scriptsize, align=center] at (1.5,-2.45)
+                {“站于 $\mathbf{b}$ 上测 $\mathbf{a}$ 的偏离”};
+        \end{scope}
+
+        \begin{scope}[xshift=6.0cm]
+            \draw[->, gray] (-0.3,0) -- (3.2,0);
+            \draw[->, gray] (0,-0.3) -- (0,2.8);
+            \draw[->, thick, blue] (0,0) -- (45:2.4) node[above right, font=\footnotesize] {$\mathbf{a}$};
+            \draw[->, thick, red]  (0,0) -- (-25:2.4) node[right, font=\footnotesize] {$\mathbf{b}$};
+            \draw[->, thick, green!60!black] (0,0) -- (100:2.0)
+                node[above left, font=\footnotesize] {$\alpha+\beta$};
+            \draw[->, orange] (0.9,0) arc (0:100:0.9);
+
+            \node[orange, font=\footnotesize] (phlbl) at (2.75, 0.85) {$\phi=\alpha+\beta$};
+            \draw[->, orange, thin] (phlbl.west) -- (50:0.9);
+
+            \node[font=\small\bfseries] at (1.5,-1.9)
+                {(b) 和角：参与者视角};
+            \node[font=\scriptsize, align=center] at (1.5,-2.45)
+                {“两方向各自独立，合成新方向”};
+        \end{scope}
+    \end{tikzpicture}
+    \caption{差角相似度与和角相似度的几何视角对比。(a) 差角 $\theta=\lvert\alpha-\beta\rvert$ 度量两个方向之间的相对偏离，是“观察者”的视角；(b) 和角 $\phi=\alpha+\beta$ 度量两个方向合成的总偏转（合成方向的辐角即 $\alpha+\beta$），是“参与者”的视角。二者不可互相约化（注释 \ref{rem:diff_sum_distinction}）。}
+    \label{fig:diff_vs_sum_angle}
+\end{figure}
+
+\begin{definition}[倍角和角相似度]\label{def:double_sum_similarity}
+向量 $\mathbf{a}, \mathbf{b}$ 的\textbf{倍角合向相似度}和\textbf{倍角合垂相似度}定义为：
+\begin{align*}
+\operatorname{cosine}_{2+}(\mathbf{a}, \mathbf{b}) &= \cos 2(\alpha + \beta) = \cos 2\phi, \\
+\operatorname{sine}_{2+}(\mathbf{a}, \mathbf{b}) &= \sin 2(\alpha + \beta) = \sin 2\phi.
+\end{align*}
+\end{definition}
+
+\begin{definition}[半角和角相似度]\label{def:half_sum_similarity}
+向量 $\mathbf{a}, \mathbf{b}$ 的\textbf{半角合向相似度}和\textbf{半角合垂相似度}定义为：
+\begin{align*}
+\operatorname{cosine}_{1/2+}(\mathbf{a}, \mathbf{b}) &= \cos\frac{\alpha + \beta}{2} = \cos\frac{\phi}{2}, \\
+\operatorname{sine}_{1/2+}(\mathbf{a}, \mathbf{b}) &= \sin\frac{\alpha + \beta}{2} = \sin\frac{\phi}{2}.
+\end{align*}
+\end{definition}
+\subsection{\texorpdfstring{12种基本相似度总览}{12种基本相似度总览}}
+
+\begin{table}[htbp]
+    \centering
+    \caption{12种基本相似度谱系}
+    \label{tab:similarity_spectrum}
+    \begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{3.5cm}>{\centering\arraybackslash}p{3.5cm}}
+        \toprule
+        角度类型 & 层级 & 余弦相似度 (cosine) & 正弦相似度 (sine) \\
+        \midrule
+        \multirow{3}*{\parbox{2.0cm}{\centering 差角 $\theta=\lvert\alpha-\beta\rvert$}}
+        & 基础 & $\cos\theta$（方向相似度） & $\sin\theta$（垂直相似度） \\
+        & 倍角 & $\cos 2\theta$（轴向相似度） & $\sin 2\theta$（斜率相似度） \\
+        & 半角 & $\cos\frac{\theta}{2}$（和向相似度） & $\sin\frac{\theta}{2}$（差向相似度） \\
+        \midrule
+        \multirow{3}*{\parbox{2.0cm}{\centering 和角 $\phi=\alpha+\beta$}}
+        & 基础 & $\cos\phi$（合向相似度） & $\sin\phi$（合垂相似度） \\
+        & 倍角 & $\cos 2\phi$（倍角合向相似度） & $\sin 2\phi$（倍角合垂相似度） \\
+        & 半角 & $\cos\frac{\phi}{2}$（半角合向相似度） & $\sin\frac{\phi}{2}$（半角合垂相似度） \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=0.9,>=stealth,
+        cell/.style={draw, minimum width=2.6cm, minimum height=1.2cm,
+                     align=center, font=\footnotesize},
+        hdr/.style={draw, fill=gray!12, minimum width=2.6cm, minimum height=0.7cm,
+                    align=center, font=\footnotesize\bfseries},
+        rowlbl/.style={draw, fill=gray!8, minimum width=2.0cm, minimum height=4.0cm,
+                       align=center, font=\footnotesize\bfseries}]
+
+        \node[hdr] at (0, 3.0) {层级};
+        \node[hdr] at (2.6, 3.0) {余弦 (cos)};
+        \node[hdr] at (5.2, 3.0) {正弦 (sin)};
+
+        \node[rowlbl, fill=blue!12] at (0, 0.4)
+            {差角\\ $\theta=\lvert\alpha-\beta\rvert$};
+
+        \node[cell, fill=blue!6] at (2.6, 1.8) {方向};
+        \node[cell, fill=blue!6] at (5.2, 1.8) {垂直};
+        \node[cell, fill=blue!6] at (2.6, 0.4) {轴向};
+        \node[cell, fill=blue!6] at (5.2, 0.4) {斜率};
+        \node[cell, fill=blue!6] at (2.6,-1.0) {和向};
+        \node[cell, fill=blue!6] at (5.2,-1.0) {差向};
+
+        \node[rowlbl, fill=red!12] at (0, -4.6)
+            {和角\\ $\phi=\alpha+\beta$};
+
+        \node[cell, fill=red!6] at (2.6,-3.2) {合向};
+        \node[cell, fill=red!6] at (5.2,-3.2) {合垂};
+        \node[cell, fill=red!6] at (2.6,-4.6) {倍角合向};
+        \node[cell, fill=red!6] at (5.2,-4.6) {倍角合垂};
+        \node[cell, fill=red!6] at (2.6,-6.0) {半角合向};
+        \node[cell, fill=red!6] at (5.2,-6.0) {半角合垂};
+
+        \draw[->, gray!60, thick] (-1.5, 3.0) -- (-1.5, -6.0);
+        \node[gray!70, font=\scriptsize, rotate=90, anchor=south] at (-1.7, -1.5)
+            {笛卡尔积生成};
+
+        \node[font=\small\bfseries, below=0.6cm] at (2.6,-7.2)
+            {$12 = \{\text{差角},\text{和角}\}\times\{\text{基础},\text{倍角},\text{半角}\}\times\{\cos,\sin\}$};
+    \end{tikzpicture}
+    \caption{12 种基本相似度的二维格点谱系（生成规则示意图）。横向二元选择为余弦/正弦（实部/虚部投影），纵向为差角/和角（减法/加法）与基础/倍角/半角（幂次）的复合。每一格对应一种相似度，具体公式见紧邻的表 \ref{tab:similarity_spectrum}；本图的重点是显式展示 $2\times3\times2$ 的笛卡尔积生成结构（引理 \ref{lem:similarity_generation}）。}
+    \label{fig:similarity_spectrum_grid}
+\end{figure}
+
+\begin{remark}[复指数打包与四元数打包]\label{rem:exponential_packaging}
+基础差角余弦相似度与基础差角正弦相似度可统一为复指数相似度
+$\operatorname{Similarity}^{\mathbb C}(a,b)=e^{i(\alpha-\beta)}$；
+基础差角余弦趋势与有符号正弦趋势可统一为复指数趋势
+$\operatorname{Tendency}^{\mathbb C}(a,b)=a\overline b$。
+四元数情形按角度差与角度和定义差角四元数
+$D_{\mathbb H}(p,q)=p\overline q/(|p||q|)$
+与和角四元数
+$S_{\mathbb H}(p,q)=pq/(|p||q|)$，
+它们通过共轭作用给出三维旋转算子。详见第 \ref{sec:complex_quaternion_exponential_similarity} 节。
+\end{remark}
+\section{\texorpdfstring{趋势：方向与尺度的综合度量}{趋势：方向与尺度的综合度量}}
+
+\begin{definition}[趋势的计算本源]\label{def:tendency_root}
+一切趋势——无论其对应的相似度类型如何——本质上都是对应相似度与两向量模长的乘积：
+\[
+\text{趋势} = \text{相似度} \times \|\mathbf{a}\| \times \|\mathbf{b}\|.
+\]
+趋势的信息来源有两部分：\textbf{两向量的辐角}（提供相似度）和\textbf{两向量的模长}（提供尺度）。相似度编码纯方向关系（仅依赖辐角差或辐角和），模长乘积编码尺度信息。趋势将两者综合为一个标量，给出了“有向尺度”的完整度量。
+\end{definition}
+
+\begin{proposition}[相似度是趋势的约化]\label{prop:similarity_reduction}
+设 $T(\mathbf{a},\mathbf{b})$ 为趋势，$S(\mathbf{a},\mathbf{b})$ 为对应的相似度。则
+\[
+S(\mathbf{a},\mathbf{b}) = \frac{T(\mathbf{a},\mathbf{b})}{\|\mathbf{a}\| \|\mathbf{b}\|}.
+\]
+即相似度是趋势在模长归一化后的约化。相似度只保留方向信息，趋势同时保留方向信息和尺度信息。
+\end{proposition}
+
+\begin{proof}
+由趋势的定义 $T(\mathbf{a},\mathbf{b}) = \|\mathbf{a}\| \|\mathbf{b}\| \cdot S(\mathbf{a},\mathbf{b})$，两边同除以 $\|\mathbf{a}\| \|\mathbf{b}\|$（非零）即得。
+\end{proof}
+
+\begin{corollary}[12种趋势的完备性]\label{cor:tendency_completeness}
+12种趋势由12种相似度与模长乘积 $\|\mathbf{a}\|\|\mathbf{b}\|$ 的一一对应生成。相似度的完备性（引理 \ref{lem:similarity_generation}）直接保证趋势的完备性。
+\end{corollary}
+
+\begin{proof}
+由趋势的定义（定义 \ref{def:tendency_root}），每种相似度 $S$ 唯一对应一种趋势 $T = \|\mathbf{a}\|\|\mathbf{b}\| \cdot S$。映射 $S \mapsto T$ 是双射（因 $\|\mathbf{a}\|\|\mathbf{b}\| \neq 0$）。引理 \ref{lem:similarity_generation} 保证相似度的集合恰有 12 个元素，故趋势的集合也恰有 12 个元素。
+\end{proof}
+
+\begin{definition}[趋势]\label{def:tendency}
+设 $\mathbf{a}, \mathbf{b} \in \mathbb{R}^2$ 为非零向量。对于任意一种相似度 $S(\mathbf{a}, \mathbf{b})$，其对应的\textbf{趋势} $T(\mathbf{a}, \mathbf{b})$ 定义为该相似度与两向量模长的乘积：
+\[
+T(\mathbf{a}, \mathbf{b}) = \|\mathbf{a}\| \|\mathbf{b}\| \cdot S(\mathbf{a}, \mathbf{b}).
+\]
+若两向量之一为零向量，则趋势为零——这对应于缩放因子退化为加法对称中心 $0$。
+\end{definition}
+
+\subsection{\texorpdfstring{差角趋势}{差角趋势}}
+
+\begin{definition}[基础差角趋势]\label{def:basic_diff_tendency}
+对应于基础差角相似度的趋势为：
+\begin{align*}
+\operatorname{cosine\_tendency}(\mathbf{a}, \mathbf{b}) &= \|\mathbf{a}\| \|\mathbf{b}\| \cos\theta = \mathbf{a} \cdot \mathbf{b}, \\
+\operatorname{sine\_tendency}(\mathbf{a}, \mathbf{b}) &= \|\mathbf{a}\| \|\mathbf{b}\| \sin(\alpha-\beta), \\
+\lvert\operatorname{sine\_tendency}(\mathbf{a}, \mathbf{b})\rvert &= \|\mathbf{a}\| \|\mathbf{b}\| \sin\theta = \|\mathbf{a} \times \mathbf{b}\| \quad (\text{在 } \mathbb{R}^3 \text{ 中，此时 } \theta \text{ 为夹角}).
+\end{align*}
+余弦趋势即内积，是平移方向上带尺度的投影度量；正弦趋势的绝对值即外积的模，是旋转方向上带尺度的有向面积度量。
+\end{definition}
+
+\begin{proposition}[基础差角趋势与向量运算的对应]\label{prop:diff_tendency_relations}
+基础差角趋势与基本的向量运算有如下精确对应：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{余弦趋势即内积}：$\operatorname{cosine\_tendency}(\mathbf{a}, \mathbf{b}) = \mathbf{a} \cdot \mathbf{b}$。内积是平移方向上的投影度量。
+    \item \textbf{正弦趋势的绝对值即外积的模}：$\lvert\operatorname{sine\_tendency}(\mathbf{a}, \mathbf{b})\rvert = \|\mathbf{a} \times \mathbf{b}\|$。外积的模是旋转方向上的有向面积度量。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由内积的几何定义 $\mathbf{a} \cdot \mathbf{b} = \|\mathbf{a}\| \|\mathbf{b}\| \cos\theta$ 及余弦趋势的定义直接得出。(ii) 由外积的几何定义 $\|\mathbf{a} \times \mathbf{b}\| = \|\mathbf{a}\| \|\mathbf{b}\| \sin\theta$（$\theta$ 为两向量的夹角）及正弦趋势的定义，两边取绝对值直接得出。
+\end{proof}
+
+\begin{definition}[倍角差角趋势]\label{def:double_diff_tendency}
+倍角差角趋势由倍角差角相似度与模长乘积得到：
+\begin{align*}
+\operatorname{cosine\_tendency}_2(\mathbf{a}, \mathbf{b}) &= \|\mathbf{a}\| \|\mathbf{b}\| \cos 2\theta, \\
+\operatorname{sine\_tendency}_2(\mathbf{a}, \mathbf{b}) &= \|\mathbf{a}\| \|\mathbf{b}\| \sin 2\theta.
+\end{align*}
+\end{definition}
+
+\begin{definition}[半角差角趋势]\label{def:half_diff_tendency}
+半角差角趋势由半角差角相似度与模长乘积得到：
+\begin{align*}
+\operatorname{cosine\_tendency}_{1/2}(\mathbf{a}, \mathbf{b}) &= \|\mathbf{a}\| \|\mathbf{b}\| \cos\frac{\theta}{2}, \\
+\operatorname{sine\_tendency}_{1/2}(\mathbf{a}, \mathbf{b}) &= \|\mathbf{a}\| \|\mathbf{b}\| \sin\frac{\theta}{2}.
+\end{align*}
+\end{definition}
+
+\subsection{\texorpdfstring{和角趋势}{和角趋势}}
+
+\begin{definition}[基础和角趋势]\label{def:basic_sum_tendency}
+对应于基础和角相似度的趋势为：
+\begin{align*}
+\operatorname{cosine\_tendency}_+(\mathbf{a}, \mathbf{b}) &= \|\mathbf{a}\| \|\mathbf{b}\| \cos(\alpha + \beta), \\
+\operatorname{sine\_tendency}_+(\mathbf{a}, \mathbf{b}) &= \|\mathbf{a}\| \|\mathbf{b}\| \sin(\alpha + \beta).
+\end{align*}
+\end{definition}
+
+\begin{definition}[倍角和角趋势]\label{def:double_sum_tendency}
+倍角和角趋势由倍角和角相似度与模长乘积得到：
+\begin{align*}
+\operatorname{cosine\_tendency}_{2+}(\mathbf{a}, \mathbf{b}) &= \|\mathbf{a}\| \|\mathbf{b}\| \cos 2(\alpha + \beta), \\
+\operatorname{sine\_tendency}_{2+}(\mathbf{a}, \mathbf{b}) &= \|\mathbf{a}\| \|\mathbf{b}\| \sin 2(\alpha + \beta).
+\end{align*}
+\end{definition}
+
+\begin{definition}[半角和角趋势]\label{def:half_sum_tendency}
+半角和角趋势由半角和角相似度与模长乘积得到：
+\begin{align*}
+\operatorname{cosine\_tendency}_{1/2+}(\mathbf{a}, \mathbf{b}) &= \|\mathbf{a}\| \|\mathbf{b}\| \cos\frac{\alpha + \beta}{2}, \\
+\operatorname{sine\_tendency}_{1/2+}(\mathbf{a}, \mathbf{b}) &= \|\mathbf{a}\| \|\mathbf{b}\| \sin\frac{\alpha + \beta}{2}.
+\end{align*}
+\end{definition}
+
+\subsection{\texorpdfstring{12种趋势总览}{12种趋势总览}}
+
+\begin{table}[htbp]
+    \centering
+    \caption{12种趋势与向量运算的对应}
+    \label{tab:tendency_spectrum}
+    \begin{tabularx}{\textwidth}{>{\centering\arraybackslash}p{2.4cm}
+                                >{\centering\arraybackslash}p{1.4cm}
+                                >{\centering\arraybackslash}X
+                                >{\centering\arraybackslash}X}
+        \toprule
+        角度类型 & 层级 & 余弦趋势 (cosine tendency) & 正弦趋势 (sine tendency) \\
+        \midrule
+        \multirow{3}*{\parbox{2.0cm}{\centering 差角 $\theta=\lvert\alpha-\beta\rvert$}}
+        & 基础 & $\mathbf{a} \cdot \mathbf{b}$（内积） & $\|\mathbf{a}\| \|\mathbf{b}\| \sin(\alpha-\beta)$（有符号；其绝对值为外积的模） \\
+        & 倍角 & $\|\mathbf{a}\| \|\mathbf{b}\| \cos 2\theta$ & $\|\mathbf{a}\| \|\mathbf{b}\| \sin 2\theta$（有符号） \\
+        & 半角 & $\|\mathbf{a}\| \|\mathbf{b}\| \cos\frac{\theta}{2}$ & $\|\mathbf{a}\| \|\mathbf{b}\| \sin\frac{\theta}{2}$ \\
+        \midrule
+        \multirow{3}*{\parbox{2.0cm}{\centering 和角 $\phi=\alpha+\beta$}}
+        & 基础 & $\operatorname{Re}(z_1 z_2)$ & $\operatorname{Im}(z_1 z_2)$ \\
+        & 倍角 & $\|\mathbf{a}\| \|\mathbf{b}\| \cos 2\phi$ & $\|\mathbf{a}\| \|\mathbf{b}\| \sin 2\phi$ \\
+        & 半角 & $\|\mathbf{a}\| \|\mathbf{b}\| \cos\frac{\phi}{2}$ & $\|\mathbf{a}\| \|\mathbf{b}\| \sin\frac{\phi}{2}$ \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+\section{\texorpdfstring{内积与外积：余弦趋势与正弦趋势的几何实现}{内积与外积：余弦趋势与正弦趋势的几何实现}}
+
+\begin{property}[内积的基本性质]\label{prop:inner_product_properties}
+设 $\mathbf{a}, \mathbf{b}, \mathbf{c} \in \mathbb{R}^n$，$\alpha, \beta \in \mathbb{R}$。内积满足：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{对称性}：$\mathbf{a} \cdot \mathbf{b} = \mathbf{b} \cdot \mathbf{a}$；
+    \item \textbf{双线性性}：$(\alpha\mathbf{a} + \beta\mathbf{b}) \cdot \mathbf{c} = \alpha(\mathbf{a}\cdot\mathbf{c}) + \beta(\mathbf{b}\cdot\mathbf{c})$；
+    \item \textbf{正定性}：$\mathbf{a} \cdot \mathbf{a} \ge 0$，且 $\mathbf{a}\cdot\mathbf{a} = 0 \iff \mathbf{a} = \mathbf{0}$。
+\end{enumerate}
+\end{property}
+
+\begin{property}[外积的基本性质]\label{prop:outer_product_properties}
+设 $\mathbf{a}, \mathbf{b}, \mathbf{c} \in \mathbb{R}^3$，$\alpha, \beta \in \mathbb{R}$。外积满足：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{反交换性}：$\mathbf{a} \times \mathbf{b} = -\mathbf{b} \times \mathbf{a}$；
+    \item \textbf{双线性性}：$(\alpha\mathbf{a} + \beta\mathbf{b}) \times \mathbf{c} = \alpha(\mathbf{a}\times\mathbf{c}) + \beta(\mathbf{b}\times\mathbf{c})$；
+    \item \textbf{雅可比恒等式}：$\mathbf{a} \times (\mathbf{b} \times \mathbf{c}) + \mathbf{b} \times (\mathbf{c} \times \mathbf{a}) + \mathbf{c} \times (\mathbf{a} \times \mathbf{b}) = \mathbf{0}$。
+\end{enumerate}
+\end{property}
+
+\begin{proposition}[余弦趋势是正交群不变量——守恒主题的向量实现]\label{prop:cosine_scalar}
+设 $G = O(n)$ 为 $\mathbb{R}^n$ 上的正交群。对于任意 $R \in O(n)$ 与任意非零向量 $\mathbf{a}, \mathbf{b} \in \mathbb{R}^n$，余弦相似度和余弦趋势在群作用下是不变的：
+\[\operatorname{cosine}(R\mathbf{a}, R\mathbf{b}) = \operatorname{cosine}(\mathbf{a}, \mathbf{b}), \quad (R\mathbf{a}) \cdot (R\mathbf{b}) = \mathbf{a} \cdot \mathbf{b}.\]
+
+内积（余弦趋势）在正交群 $O(n)$ 下的不变性是本章守恒主题的核心事实：两向量经任意正交变换（旋转或反射）后，其平移方向上的投影度量严格守恒。
+\end{proposition}
+
+\begin{proof}
+设 $R$ 的矩阵元为 $R_{ij}$，且满足 $R^{\mathsf T}R = I$，即 $\sum_k R_{ki}R_{kj} = \delta_{ij}$。计算内积：
+\begin{align*}
+(R\mathbf{a}) \cdot (R\mathbf{b})
+&= \sum_i \left( \sum_j R_{ij} a_j \right) \left( \sum_k R_{ik} b_k \right) \\
+&= \sum_{j,k} a_j b_k \left( \sum_i R_{ij}R_{ik} \right) \\
+&= \sum_{j,k} a_j b_k \delta_{jk}
+= \mathbf{a} \cdot \mathbf{b}.
+\end{align*}
+同时，正交变换保持模长：$\|R\mathbf{a}\| = \|\mathbf{a}\|$，$\|R\mathbf{b}\| = \|\mathbf{b}\|$。因此
+\[
+\operatorname{cosine}(R\mathbf{a}, R\mathbf{b})
+= \frac{R\mathbf{a} \cdot R\mathbf{b}}{\|R\mathbf{a}\| \|R\mathbf{b}\|}
+= \frac{\mathbf{a} \cdot \mathbf{b}}{\|\mathbf{a}\| \|\mathbf{b}\|}
+= \operatorname{cosine}(\mathbf{a}, \mathbf{b}).
+\]
+\end{proof}
+
+\begin{proposition}[正弦趋势的绝对值在纯旋转下不变——守恒主题的旋度实现]\label{prop:sine_rotation}
+设 $R \in SO(3)$ 为三维空间中的旋转。则对任意非零向量 $\mathbf{a},\mathbf{b} \in \mathbb{R}^3$，有
+\[\lvert\operatorname{sine}(R\mathbf{a}, R\mathbf{b})\rvert = \lvert\operatorname{sine}(\mathbf{a}, \mathbf{b})\rvert.\]
+
+正弦趋势的绝对值（外积的模，旋转方向上的有向面积度量）在纯旋转 $SO(3)$ 下严格守恒——这是旋度方向上守恒律（角动量守恒）在向量层面的实现：绕任意轴旋转不改变两向量张成的有向面积的\textbf{大小}；有向面积的方向随旋转同步变换。
+\end{proposition}
+
+\begin{proof}
+由外积在旋转下的变换性质，$(R\mathbf{a}) \times (R\mathbf{b}) = R(\mathbf{a} \times \mathbf{b})$。旋转保持模长，故 $\|(R\mathbf{a}) \times (R\mathbf{b})\| = \|R(\mathbf{a} \times \mathbf{b})\| = \|\mathbf{a} \times \mathbf{b}\|$。又 $\|R\mathbf{a}\| = \|\mathbf{a}\|$，$\|R\mathbf{b}\| = \|\mathbf{b}\|$，因此 $\lvert\operatorname{sine}(R\mathbf{a}, R\mathbf{b})\rvert = \|(R\mathbf{a}) \times (R\mathbf{b})\| / (\|R\mathbf{a}\| \|R\mathbf{b}\|) = \|\mathbf{a} \times \mathbf{b}\| / (\|\mathbf{a}\| \|\mathbf{b}\|) = \lvert\operatorname{sine}(\mathbf{a}, \mathbf{b})\rvert$，即 $\lvert\operatorname{sine}\rvert$ 在纯旋转下不变。
+\end{proof}
+
+\section{\texorpdfstring{向量和、向量差与半角趋势}{向量和、向量差与半角趋势}}
+
+\begin{proposition}[向量和/差与半角趋势]\label{prop:sum_difference_half_angle}
+设 $\mathbf{a}, \mathbf{b} \in \mathbb{R}^n$ 为等模长非零向量（$\|\mathbf{a}\| = \|\mathbf{b}\| = r>0$），$\theta \in [0,\pi]$ 为两向量的夹角。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 向量和 $\mathbf{a} + \mathbf{b}$ 的模长正比于半角余弦相似度：$\|\mathbf{a} + \mathbf{b}\| = 2r\cos\frac{\theta}{2}$。
+    \item 向量差 $\mathbf{a} - \mathbf{b}$ 的模长正比于半角正弦相似度：$\|\mathbf{a} - \mathbf{b}\| = 2r\sin\frac{\theta}{2}$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由平行四边形法则，
+\[\|\mathbf{a} + \mathbf{b}\|^2 = \|\mathbf{a}\|^2 + \|\mathbf{b}\|^2 + 2\mathbf{a}\cdot\mathbf{b} = 2r^2 + 2r^2\cos\theta = 2r^2(1 + \cos\theta).\]
+利用半角公式 $1 + \cos\theta = 2\cos^2\frac{\theta}{2}$，得 $\|\mathbf{a} + \mathbf{b}\|^2 = 4r^2\cos^2\frac{\theta}{2}$。由于 $\|\mathbf{a} + \mathbf{b}\| \ge 0$ 且 $\cos\frac{\theta}{2} \ge 0$（因 $\theta \in [0,\pi]$ 时 $\frac{\theta}{2} \in [0,\frac{\pi}{2}]$），开方即得。
+
+(ii) 同理，
+\[\|\mathbf{a} - \mathbf{b}\|^2 = \|\mathbf{a}\|^2 + \|\mathbf{b}\|^2 - 2\mathbf{a}\cdot\mathbf{b} = 2r^2 - 2r^2\cos\theta = 2r^2(1 - \cos\theta).\]
+利用 $1 - \cos\theta = 2\sin^2\frac{\theta}{2}$，由 $\theta\in[0,\pi]$ 得 $\sin\frac{\theta}{2}\ge0$，开方即得 $\|\mathbf{a}-\mathbf{b}\|=2r\sin\frac{\theta}{2}$。
+\end{proof}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.0,>=stealth]
+
+        \coordinate (O) at (0,0);
+        \coordinate (A) at (55:2.4);
+        \coordinate (B) at (15:2.4);
+        \coordinate (S) at ($(A)+(B)$);
+
+        \draw[->, thick, blue] (O) -- (A)
+            node[above left, font=\footnotesize] {$\mathbf{a}$};
+        \draw[->, thick, red]  (O) -- (B)
+            node[below right, font=\footnotesize] {$\mathbf{b}$};
+
+        \draw[orange, thick] (15:0.85) arc (15:55:0.85);
+        \node[orange, font=\footnotesize] (theta) at (-1.3, 1.3) {$\theta$};
+        \draw[orange, ->, thin] (theta.east) -- (25:0.85);
+
+        \draw[gray, dashed, thick] (15:1.3) arc (15:35:1.3);
+        \node[gray, font=\footnotesize] (thetahalf) at (4.0, -1.5) {$\theta/2$};
+        \draw[gray, ->, thin] (thetahalf.north west) -- (25:1.3);
+
+        \draw[->, thick, green!60!black] (O) -- (S);
+        \draw[gray, dashed] (A) -- (S);
+        \draw[gray, dashed] (B) -- (S);
+
+        \node[green!60!black, font=\footnotesize, align=left] (sumlbl) at (3.1, 3.5)
+            {$\|\mathbf{a}+\mathbf{b}\|=2r\cos\frac{\theta}{2}$};
+        \draw[green!60!black, ->, thin] (sumlbl.south) -- (S);
+
+        \draw[->, thick, magenta] (B) -- (A);
+
+        \node[magenta, font=\footnotesize, align=left] (difflbl) at (-3.4, 2.4)
+            {$\|\mathbf{a}-\mathbf{b}\|=2r\sin\frac{\theta}{2}$};
+        \draw[magenta, ->, thin] (difflbl.east) -- ($(A)!0.5!(B)$);
+
+        \node[font=\small\bfseries, align=center] at (1.8, -2.4)
+            {等模长 $\|\mathbf{a}\|=\|\mathbf{b}\|=r$ 时，半角公式精确成立};
+
+    \end{tikzpicture}
+    \caption{半角相似度与向量和/差的几何关系。在等模长条件下，向量和的模长正比于半角余弦（和向），向量差的模长正比于半角正弦（差向）。两式的对称性体现了平行四边形法则的三角结构（命题 \ref{prop:sum_difference_half_angle}）。}
+    \label{fig:half_angle_sum_diff}
+\end{figure}
+
+\begin{remark}\label{rem:sum_difference_non_equal_length}
+命题 \ref{prop:sum_difference_half_angle} 要求两向量等模长（$\|\mathbf{a}\| = \|\mathbf{b}\| = r$），这是结论能以简洁的半角三角函数形式表达的关键前提。对于非等模长向量，公式为：
+\[\|\mathbf{a} + \mathbf{b}\|^2 = \|\mathbf{a}\|^2 + \|\mathbf{b}\|^2 + 2\|\mathbf{a}\|\|\mathbf{b}\|\cos\theta,\]
+\[\|\mathbf{a} - \mathbf{b}\|^2 = \|\mathbf{a}\|^2 + \|\mathbf{b}\|^2 - 2\|\mathbf{a}\|\|\mathbf{b}\|\cos\theta,\]
+无法简化为单一的半角三角函数形式。
+\end{remark}
+
+\section{\texorpdfstring{反射、折射与倍角相似度}{反射、折射与倍角相似度}}
+
+\begin{definition}[反射——倍角余弦相似度守恒]\label{def:reflection_vector}
+设 $\mathbf{v}$ 为入射方向，$\mathbf{n}$ 为法线（单位向量）。反射方向 $\mathbf{v}'$ 为：
+\[\mathbf{v}' = \mathbf{v} - 2(\mathbf{v} \cdot \mathbf{n})\mathbf{n}.\]
+反射变换是一个对合（$\mathbf{v}'' = \mathbf{v}$），体现了加法反射对称（$c=0$）。反射前后，方向与法线的\textbf{倍角余弦相似度保持不变}，即 $\cos 2\theta_{\text{in}} = \cos 2\theta_{\text{out}}$。
+
+从守恒与闭合主题看，反射给出本章最小的周期结构：反射两次回到自身，$\mathbf{v} \mapsto \mathbf{v}' \mapsto \mathbf{v}''=\mathbf{v}$ 构成一个周期为 $2$ 的\textbf{闭合轨道}；同时反射保持模长守恒 $\|\mathbf{v}'\| = \|\mathbf{v}\|$（见紧随其后的证明），这是加法反射对称 $c=0$ 下投影度量的守恒。
+\end{definition}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.1,>=stealth]
+
+        \draw[gray!60, thick] (-2.5,0) -- (2.5,0);
+        \node[gray!70, font=\footnotesize, right] at (2.5,0) {界面};
+
+        \draw[gray!70, dashed] (0,-1.8) -- (0,2.2);
+        \node[gray!70, font=\footnotesize, above] at (0,2.2) {$\mathbf{n}$};
+
+        \draw[->, thick, blue] (-1.5,1.5) -- (0,0);
+        \node[blue, font=\footnotesize] at (-0.9, 1.18) {$\mathbf{v}$};
+
+        \draw[->, thick, red] (0,0) -- (1.5,1.5);
+        \node[red, font=\footnotesize] at (0.9, 1.18) {$\mathbf{v}'$};
+
+        \draw[orange, thick] (0,0) ++(90:0.55) arc (90:135:0.55);
+        \node[orange, font=\footnotesize] at (-0.30, 0.72) {$\theta_{\text{in}}$};
+
+        \draw[cyan!70!black, thick] (0,0) ++(90:0.7) arc (90:45:0.7);
+        \node[cyan!70!black, font=\footnotesize] at (0.37, 0.78) {$\theta_{\text{out}}$};
+
+        \node[font=\small\bfseries, below=1.4cm] at (0,0)
+            {$\cos 2\theta_{\text{in}}=\cos 2\theta_{\text{out}}$};
+        \node[font=\scriptsize, align=center, below=1.9cm] at (0,0)
+            {反射对合 $(\mathbf{v}'')=\mathbf{v}$，构成周期 $2$ 的闭合轨道};
+    \end{tikzpicture}
+    \caption{反射的倍角余弦相似度守恒。入射方向 $\mathbf{v}$ 与法线 $\mathbf{n}$ 的倍角余弦 $\cos 2\theta_{\text{in}}$ 在反射后不变。反射是对合，两次反射回到 $\mathbf{v}$，构成本章最小的周期结构（定义 \ref{def:reflection_vector}）。}
+    \label{fig:reflection_conservation}
+\end{figure}
+
+\begin{proof}
+计算模长平方：
+\[\|\mathbf{v}'\|^2 = \|\mathbf{v} - 2(\mathbf{v}\cdot\mathbf{n})\mathbf{n}\|^2 = \|\mathbf{v}\|^2 - 4(\mathbf{v}\cdot\mathbf{n})^2 + 4(\mathbf{v}\cdot\mathbf{n})^2\|\mathbf{n}\|^2 = \|\mathbf{v}\|^2,\]
+因为 $\|\mathbf{n}\|=1$。反射两次：$\mathbf{v}'' = \mathbf{v}' - 2(\mathbf{v}'\cdot\mathbf{n})\mathbf{n} = \mathbf{v} - 2(\mathbf{v}\cdot\mathbf{n})\mathbf{n} - 2((\mathbf{v} - 2(\mathbf{v}\cdot\mathbf{n})\mathbf{n})\cdot\mathbf{n})\mathbf{n}$。计算内积：$(\mathbf{v} - 2(\mathbf{v}\cdot\mathbf{n})\mathbf{n})\cdot\mathbf{n} = \mathbf{v}\cdot\mathbf{n} - 2(\mathbf{v}\cdot\mathbf{n}) = -\mathbf{v}\cdot\mathbf{n}$。代入得 $\mathbf{v}'' = \mathbf{v} - 2(\mathbf{v}\cdot\mathbf{n})\mathbf{n} - 2(-\mathbf{v}\cdot\mathbf{n})\mathbf{n} = \mathbf{v}$。故反射是对合。倍角余弦相似度不变是因为反射角等于入射角：$\theta_{\text{out}} = \theta_{\text{in}}$，因此 $\cos 2\theta_{\text{out}} = \cos 2\theta_{\text{in}}$。
+\end{proof}
+
+\begin{definition}[折射——正弦趋势的缩放]\label{def:refraction_vector}
+设入射向量为 $\mathbf{v}$，法线为 $\mathbf{n}$（单位向量），入射角为 $\theta_1$。折射向量 $\mathbf{v}''$ 位于 $\mathbf{v}$ 和 $\mathbf{n}$ 所张成的平面内，与法线的夹角 $\theta_2$ 满足斯涅尔定律：
+\[n_1 \sin\theta_1 = n_2 \sin\theta_2.\]
+折射体现了乘法缩放反射对称（$c \neq 1$）对旋转方向（$i$-对称）的调制：折射率 $n_1, n_2$ 作为比例因子，缩放了两介质中的正弦趋势。折射向量的模长由能量守恒或振幅系数确定，方向由斯涅尔定律唯一确定（在入射平面内）。
+\end{definition}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.1,>=stealth]
+
+        \draw[gray!60, thick] (-3.2,0) -- (3.2,0);
+        \node[gray!70, font=\footnotesize, right] at (3.2,0) {界面};
+
+        \draw[gray!70, dashed] (0,-2.0) -- (0,2.2);
+        \node[gray!70, font=\footnotesize, above] at (0,2.2) {$\mathbf{n}$};
+
+        \draw[->, thick, blue] (-2.4,1.7) -- (0,0);
+        \node[blue, font=\footnotesize] at (-1.6,0.75) {$\mathbf{v}$};
+        \draw[orange] (0,0.8) arc (90:126:0.8);
+        \node[orange, font=\footnotesize] at (-0.45,1.05) {$\theta_1$};
+        \node[blue, font=\footnotesize] at (-2.3,1.95) {$n_1$};
+
+        \draw[->, thick, red] (0,0) -- (1.8,-1.7);
+        \node[red, font=\footnotesize] at (1.4,-0.8) {$\mathbf{v}''$};
+        \draw[orange] (0,-0.8) arc (-90:-42:0.8);
+        \node[orange, font=\footnotesize] at (0.45,-1.05) {$\theta_2$};
+        \node[red, font=\footnotesize] at (2.3,-1.95) {$n_2$};
+
+        \node[font=\small\bfseries, below=2.5cm] at (0,0)
+            {$n_1\sin\theta_1 = n_2\sin\theta_2$};
+        \node[font=\scriptsize, align=center, below=3.0cm] at (0,0)
+            {正弦趋势在界面法向上守恒；折射率 $n_1,n_2$ 为缩放因子};
+    \end{tikzpicture}
+    \caption{折射的斯涅尔定律与正弦趋势缩放。入射与折射方向的正弦趋势 $n\sin\theta$ 在界面处守恒，折射率 $n_1,n_2$ 作为缩放因子调制旋转方向。当 $n_1\sin\theta_1 > n_2$ 时出现全内反射（命题 \ref{prop:critical_angle}）。}
+    \label{fig:refraction_snell}
+\end{figure}
+
+\begin{proposition}[折射的临界角]\label{prop:critical_angle}
+当 $n_1 > n_2$ 且入射角 $\theta_1$ 超过临界角 $\theta_c = \arcsin(n_2/n_1)$ 时，$\sin\theta_1 > n_2/n_1$，斯涅尔定律要求 $\sin\theta_2 > 1$，在实数域无解，折射不再发生，光线全部反射回原介质（全内反射）。
+\end{proposition}
+
+\begin{proof}
+由斯涅尔定律，$\sin\theta_2 = \frac{n_1}{n_2}\sin\theta_1$。若 $\sin\theta_1 > \frac{n_2}{n_1}$，则 $\sin\theta_2 > 1$，但正弦函数的值域为 $[-1,1]$，故无实数解。临界角定义为 $\theta_c = \arcsin(n_2/n_1)$。
+\end{proof}
+
+\section{复数与四元数乘法的方向复合，以及指数相似度}
+\label{sec:complex_quaternion_exponential_similarity}
+
+本节按“角度差 / 角度和”的统一逻辑处理复数与四元数：差角算子与和角算子分别编码“旋转差异”与“旋转复合”，其实部对应余弦族、虚部（或向量部分）对应正弦族。复数情形左乘即旋转；四元数情形通过共轭作用给出三维旋转。轴相同时，四元数情形严格退化为复数的角度差与角度和。
+
+\subsection{复数乘法：和角趋势与旋转复合}
+
+\begin{proposition}[复数乘法——和角趋势与旋转复合]\label{prop:complex_multiplication}
+将复数 $z=a+bi$ 视为 $\mathbb R^2$ 中的矢量。设
+\[
+z_1=r_1e^{i\alpha},\qquad z_2=r_2e^{i\beta}.
+\]
+则乘积 $z_1z_2$ 的实部与虚部分别对应\textbf{基础和角余弦趋势}与\textbf{基础和角正弦趋势}：
+\[
+z_1z_2
+=
+\operatorname{cosine\_tendency}_+(\mathbf a,\mathbf b)
++
+i\operatorname{sine\_tendency}_+(\mathbf a,\mathbf b),
+\]
+其中 $\mathbf a,\mathbf b$ 分别对应 $z_1,z_2$。复数乘法把两个旋转角相加、两个模长相乘：辐角相加对应旋转方向上的方向复合，模长相乘对应比例方向上的尺度复合。
+\end{proposition}
+
+\begin{proof}
+由复数乘法，
+\[
+z_1z_2
+=
+r_1r_2e^{i(\alpha+\beta)}
+=
+r_1r_2\bigl[\cos(\alpha+\beta)+i\sin(\alpha+\beta)\bigr].
+\]
+而 $r_1r_2=\|\mathbf a\|\|\mathbf b\|$，故实部为
+\[
+\|\mathbf a\|\|\mathbf b\|\cos(\alpha+\beta)
+=
+\operatorname{cosine\_tendency}_+(\mathbf a,\mathbf b),
+\]
+虚部为
+\[
+\|\mathbf a\|\|\mathbf b\|\sin(\alpha+\beta)
+=
+\operatorname{sine\_tendency}_+(\mathbf a,\mathbf b).
+\]
+证毕。
+\end{proof}
+
+\begin{remark}
+复数乘法对应“和角”，即两个方向各自独立，然后合成为一个新方向。它描述的是旋转的合成，而不是两个方向之间的相对差异。相对差异由下面的复指数相似度描述。
+\end{remark}
+
+\begin{definition}[复指数差角算子与和角算子]\label{def:complex_diff_sum}
+设 $z_1=r_1e^{i\alpha}$、$z_2=r_2e^{i\beta}$，二者均非零。定义
+\[
+\boxed{
+D_{\mathbb C}(z_1,z_2):=\frac{z_1\overline{z_2}}{|z_1|\,|z_2|}
+}
+\]
+为 $z_1$ 与 $z_2$ 的\textbf{复指数差角算子}（角度差算子）；
+\[
+\boxed{
+S_{\mathbb C}(z_1,z_2):=\frac{z_1z_2}{|z_1|\,|z_2|}
+}
+\]
+为 $z_1$ 与 $z_2$ 的\textbf{复指数和角算子}（角度和算子）。二者均为单位复数，且可写为
+\[
+D_{\mathbb C}(z_1,z_2)=e^{i(\alpha-\beta)},\qquad
+S_{\mathbb C}(z_1,z_2)=e^{i(\alpha+\beta)}.
+\]
+\end{definition}
+
+\begin{proposition}[复指数差角算子是二维旋转差异算子]\label{prop:complex_exp_similarity_rotation_operator}
+设 $z_1,z_2\in\mathbb C^\times$。则 $D_{\mathbb C}(z_1,z_2)$ 通过乘法作用给出从 $z_2$ 的单位方向到 $z_1$ 的单位方向的二维旋转：
+\[
+\boxed{
+D_{\mathbb C}(z_1,z_2)\cdot \frac{z_2}{|z_2|}
+=
+\frac{z_1}{|z_1|}
+}
+\]
+即 $D_{\mathbb C}(z_1,z_2)$ 是二维旋转差异算子。其辐角为 $\alpha-\beta$，实部对应基础差角余弦相似度、虚部对应基础差角正弦相似度；与之平行地，$S_{\mathbb C}(z_1,z_2)$ 的辐角为 $\alpha+\beta$，实部与虚部分别对应基础和角余弦趋势与基础和角正弦趋势。
+\end{proposition}
+
+\begin{proof}
+由定义及 $z_2\overline{z_2}=|z_2|^2$，
+\[
+D_{\mathbb C}(z_1,z_2)\cdot\frac{z_2}{|z_2|}
+=
+\frac{z_1\overline{z_2}}{|z_1|\,|z_2|}\cdot\frac{z_2}{|z_2|}
+=
+\frac{z_1\,|z_2|^2}{|z_1|\,|z_2|^2}
+=
+\frac{z_1}{|z_1|}.
+\]
+故 $D_{\mathbb C}(z_1,z_2)$ 把 $z_2$ 的单位方向送到 $z_1$ 的单位方向，其作用方式为复数乘法（即二维旋转），且无需取共轭。辐角与实虚部的对应由
+\[
+D_{\mathbb C}(z_1,z_2)=e^{i(\alpha-\beta)}=\cos(\alpha-\beta)+i\sin(\alpha-\beta)
+\]
+直接得到；$S_{\mathbb C}$ 一侧的对应已由命题 \ref{prop:complex_multiplication} 给出。证毕。
+\end{proof}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.15,>=stealth]
+
+        \draw[gray!50] (0,0) circle (1.8);
+        \draw[->, gray] (-2.1,0) -- (2.1,0) node[right, font=\footnotesize] {$\operatorname{Re}$};
+        \draw[->, gray] (0,-2.1) -- (0,2.1) node[above, font=\footnotesize] {$\operatorname{Im}$};
+
+        \filldraw[red] (30:1.8) circle (2.5pt);
+        \node[red, font=\footnotesize, right=2pt] at (30:1.8) {$z_2/|z_2|$};
+        \draw[->, thick, red] (0,0) -- (30:1.8);
+
+        \filldraw[blue] (110:1.8) circle (2.5pt);
+        \node[blue, font=\footnotesize, above left=1pt] at (110:1.8) {$z_1/|z_1|$};
+        \draw[->, thick, blue] (0,0) -- (110:1.8);
+
+        \draw[->, thick, orange] (0.9,0.52) arc (30:110:1.05);
+        \node[orange, font=\footnotesize] (anglelabel) at (1.564, 2.414) {$\alpha-\beta$};
+        \draw[->, thick, orange] (anglelabel.south west) -- (70:1.05);
+
+        \node[font=\small\bfseries, below=2.3cm] at (0,0)
+            {$D_{\mathbb{C}}(z_1,z_2)\cdot\frac{z_2}{|z_2|}=\frac{z_1}{|z_1|}$};
+        \node[font=\scriptsize, align=center, below=2.8cm] at (0,0)
+            {复指数差角算子 $D_{\mathbb{C}}=e^{i(\alpha-\beta)}$ 是二维旋转差异算子};
+    \end{tikzpicture}
+    \caption{复指数差角算子的旋转差异作用。$D_{\mathbb{C}}(z_1,z_2)=e^{i(\alpha-\beta)}$ 将 $z_2$ 的单位方向精确旋转到 $z_1$ 的单位方向，实现“从 $z_2$ 到 $z_1$ 的旋转差异”（命题 \ref{prop:complex_exp_similarity_rotation_operator}）。}
+    \label{fig:complex_exp_rotation_operator}
+\end{figure}
+
+\begin{remark}[复指数差角算子的复合律]\label{rem:complex_exp_similarity_composition}
+设 $z_1,z_2,z_3\in\mathbb C^\times$。由定义直接得到
+\[
+D_{\mathbb C}(z_1,z_2)\,D_{\mathbb C}(z_2,z_3)=D_{\mathbb C}(z_1,z_3),
+\]
+即复指数差角算子满足旋转差异的复合律。该复合律与四元数情形的 \cref{prop:quaternion_exp_similarity_composition} 完全平行；二者的差别在于复数乘法可交换，而四元数乘法不可交换（见 \cref{rem:quaternion_exp_similarity_noncommutative}），这正是二维与三维旋转差异的结构性差异。
+\end{remark}
+
+\subsection{四元数乘法：非交换旋转复合}
+
+\begin{proposition}[四元数乘法——非交换旋转方向]\label{prop:quaternion_multiplication}
+四元数乘法是复数乘法的非交换推广，实现三维旋转方向。单位四元数 $q=e^{\mathbf u\theta}$ 作用于纯虚向量 $v$，通过共轭
+\[
+v\longmapsto qvq^{-1}
+\]
+产生绕轴 $\mathbf u$ 旋转 $2\theta$ 的效果。两个单位四元数的乘积
+\[
+q_1q_2=e^{\mathbf u_1\theta_1}e^{\mathbf u_2\theta_2}
+\]
+对应于两个三维旋转的合成；由于一般 $q_1q_2\neq q_2q_1$，合成结果依赖顺序。这是旋转方向从交换群 $U(1)$ 到非交换群 $SU(2)$ 的推广。
+\end{proposition}
+
+\begin{proof}
+将单位四元数写为
+\[
+q=\cos\theta+\mathbf u\sin\theta,
+\]
+其中 $\mathbf u$ 是单位纯虚四元数，$\mathbf u^2=-1$，且
+\[
+q^{-1}=\cos\theta-\mathbf u\sin\theta.
+\]
+对纯虚四元数 $v$，共轭作用的像仍为纯虚四元数：
+\[
+\overline{qvq^{-1}}
+=
+\overline{q^{-1}}\,\bar v\,\bar q
+=
+q\,(-v)\,q^{-1}
+=
+-qvq^{-1}.
+\]
+将 $v$ 沿轴分解为
+\[
+v=v_\parallel+v_\perp,
+\]
+其中 $v_\parallel\parallel \mathbf u$，$v_\perp\perp \mathbf u$。平行分量满足 $\mathbf u v_\parallel=v_\parallel \mathbf u$，故
+\[
+qv_\parallel q^{-1}=v_\parallel.
+\]
+对垂直分量，因 $\mathbf u\cdot v_\perp=0$，纯虚四元数乘法满足
+\[
+\mathbf u v_\perp=\mathbf u\times v_\perp,\qquad
+v_\perp \mathbf u=-\mathbf u\times v_\perp.
+\]
+于是
+\begin{align*}
+qv_\perp q^{-1}
+&=
+(\cos\theta+\mathbf u\sin\theta)\,v_\perp\,(\cos\theta-\mathbf u\sin\theta) \\
+&=
+\cos^2\theta\,v_\perp
+-\cos\theta\sin\theta\,(v_\perp \mathbf u)
++\sin\theta\cos\theta\,(\mathbf u v_\perp)
+-\sin^2\theta\,(\mathbf u v_\perp \mathbf u).
+\end{align*}
+利用 $v_\perp \mathbf u=-\mathbf u v_\perp$ 与三重叉积恒等式
+\[
+(\mathbf u\times v_\perp)\times \mathbf u=v_\perp
+\]
+（因 $\mathbf u\perp v_\perp$ 且 $\|\mathbf u\|=1$），得
+\[
+qv_\perp q^{-1}
+=
+(\cos^2\theta-\sin^2\theta)\,v_\perp
++
+2\sin\theta\cos\theta\,(\mathbf u\times v_\perp)
+=
+\cos 2\theta\,v_\perp
++
+\sin 2\theta\,(\mathbf u\times v_\perp).
+\]
+这正是绕轴 $\mathbf u$ 旋转角 $2\theta$ 的 Rodrigues 公式。故共轭作用 $v\mapsto qvq^{-1}$ 是绕轴 $\mathbf u$ 旋转 $2\theta$。
+
+两个单位四元数的乘积对应的共轭作用为
+\[
+v\longmapsto (q_1q_2)v(q_1q_2)^{-1}
+=
+q_1\,(q_2 v q_2^{-1})\,q_1^{-1},
+\]
+即先绕 $\mathbf u_2$ 旋转 $2\theta_2$、再绕 $\mathbf u_1$ 旋转 $2\theta_1$ 的复合。由于一般 $q_1q_2\neq q_2q_1$，三维旋转的复合顺序不可交换，这正是 $SO(3)$ 非交换性的来源；单位四元数按此共轭对应构成 $SO(3)$ 的二重覆盖 $SU(2)$。证毕。
+\end{proof}
+
+\subsection{差角四元数与和角四元数}
+
+\begin{definition}[四元数的极形式与角度]\label{def:quaternion_polar}
+设 $q\in\mathbb H^\times$，$q$ 不是负实数。则 $q$ 可唯一地写为\textbf{极形式}
+\[
+q=|q|\Bigl(\cos\theta+\mathbf u\sin\theta\Bigr),
+\]
+其中 $\theta\in[0,\pi)$ 称为 $q$ 的\textbf{辐角}（或\textbf{角度}），$\mathbf u$ 是单位纯虚四元数（$\mathbf u^2=-1$），称为 $q$ 的\textbf{轴}。当 $q$ 为负实数时，约定 $\theta=\pi$，$\mathbf u$ 任意单位纯虚四元数。
+\end{definition}
+
+\begin{definition}[差角四元数与和角四元数]\label{def:quaternion_diff_sum}
+设 $p,q\in\mathbb H^\times$。定义
+\[
+\boxed{
+D_{\mathbb H}(p,q):=\frac{p\overline q}{|p|\,|q|}
+}
+\]
+为 $p$ 与 $q$ 的\textbf{差角四元数}（角度差算子）；
+\[
+\boxed{
+S_{\mathbb H}(p,q):=\frac{pq}{|p|\,|q|}
+}
+\]
+为 $p$ 与 $q$ 的\textbf{和角四元数}（角度和算子）。二者均为单位四元数。
+\end{definition}
+
+\begin{lemma}[差角四元数与和角四元数的实虚分解]\label{lem:quaternion_diff_sum_decomposition}
+设 $p=|p|e^{\mathbf u\alpha}$，$q=|q|e^{\mathbf v\beta}$，即
+\[
+p=|p|\bigl(\cos\alpha+\mathbf u\sin\alpha\bigr),\qquad
+q=|q|\bigl(\cos\beta+\mathbf v\sin\beta\bigr).
+\]
+则差角四元数展开为
+\[
+\begin{aligned}
+D_{\mathbb H}(p,q)
+={}& \underbrace{\bigl(\cos\alpha\cos\beta+\sin\alpha\sin\beta\,(\mathbf u\cdot\mathbf v)\bigr)}_{\text{标量部分}} \\
+&+ \underbrace{\bigl(\sin\alpha\cos\beta\,\mathbf u-\cos\alpha\sin\beta\,\mathbf v
+   -\sin\alpha\sin\beta\,(\mathbf u\times\mathbf v)\bigr)}_{\text{向量部分}},
+\end{aligned}
+\]
+和角四元数展开为
+\[
+\begin{aligned}
+S_{\mathbb H}(p,q)
+={}& \underbrace{\bigl(\cos\alpha\cos\beta-\sin\alpha\sin\beta\,(\mathbf u\cdot\mathbf v)\bigr)}_{\text{标量部分}} \\
+&+ \underbrace{\bigl(\sin\alpha\cos\beta\,\mathbf u+\cos\alpha\sin\beta\,\mathbf v
+   +\sin\alpha\sin\beta\,(\mathbf u\times\mathbf v)\bigr)}_{\text{向量部分}}.
+\end{aligned}
+\]
+当 $\mathbf u=\mathbf v$ 时，交叉项消失，二者分别退化为
+\[
+D_{\mathbb H}(p,q)=\cos(\alpha-\beta)+\mathbf u\sin(\alpha-\beta),\qquad
+S_{\mathbb H}(p,q)=\cos(\alpha+\beta)+\mathbf u\sin(\alpha+\beta),
+\]
+与复数情形完全平行：差角四元数的角度为 $\alpha-\beta$，和角四元数的角度为 $\alpha+\beta$，轴均为 $\mathbf u$。
+\end{lemma}
+
+\begin{proof}
+利用纯虚四元数乘法公式
+\[
+\mathbf u\mathbf v=-\mathbf u\cdot\mathbf v+\mathbf u\times\mathbf v,
+\]
+以及 $e^{\mathbf u\alpha}=\cos\alpha+\mathbf u\sin\alpha$、$e^{-\mathbf v\beta}=\cos\beta-\mathbf v\sin\beta$、$e^{\mathbf v\beta}=\cos\beta+\mathbf v\sin\beta$。
+
+先展开差角四元数：
+\[
+D_{\mathbb H}(p,q)=e^{\mathbf u\alpha}e^{-\mathbf v\beta}
+=
+(\cos\alpha+\mathbf u\sin\alpha)(\cos\beta-\mathbf v\sin\beta).
+\]
+标量部分为
+\[
+\cos\alpha\cos\beta-(\mathbf u\cdot(-\mathbf v))\sin\alpha\sin\beta
+=
+\cos\alpha\cos\beta+\sin\alpha\sin\beta\,(\mathbf u\cdot\mathbf v),
+\]
+向量部分为
+\[
+\sin\alpha\cos\beta\,\mathbf u-\cos\alpha\sin\beta\,\mathbf v
++\sin\alpha\sin\beta\,(\mathbf u\times(-\mathbf v)),
+\]
+其中 $\mathbf u\times(-\mathbf v)=-\mathbf u\times\mathbf v$，故向量部分为
+\[
+\sin\alpha\cos\beta\,\mathbf u-\cos\alpha\sin\beta\,\mathbf v-\sin\alpha\sin\beta\,(\mathbf u\times\mathbf v).
+\]
+同理展开和角四元数：
+\[
+S_{\mathbb H}(p,q)=e^{\mathbf u\alpha}e^{\mathbf v\beta}
+=
+(\cos\alpha+\mathbf u\sin\alpha)(\cos\beta+\mathbf v\sin\beta).
+\]
+标量部分为
+\[
+\cos\alpha\cos\beta-(\mathbf u\cdot\mathbf v)\sin\alpha\sin\beta,
+\]
+向量部分为
+\[
+\sin\alpha\cos\beta\,\mathbf u+\cos\alpha\sin\beta\,\mathbf v+\sin\alpha\sin\beta\,(\mathbf u\times\mathbf v).
+\]
+当 $\mathbf u=\mathbf v$ 时，$\mathbf u\cdot\mathbf v=1$、$\mathbf u\times\mathbf v=0$，代入即得退化式。证毕。
+\end{proof}
+
+\begin{proposition}[差角四元数是三维旋转差异算子]\label{prop:quaternion_exp_similarity_rotation_operator}
+设 $p,q\in\mathbb H^\times$。则 $D_{\mathbb H}(p,q)$ 通过共轭作用给出从 $q$ 的单位方向到 $p$ 的单位方向的三维旋转：
+\[
+\boxed{
+D_{\mathbb H}(p,q)\cdot \frac{q}{|q|}\cdot D_{\mathbb H}(p,q)^{-1}
+=
+\frac{p}{|p|}
+}
+\]
+即 $D_{\mathbb H}(p,q)$ 是旋转差异算子。其标量部分对应四元数余弦相似度，向量部分的模对应四元数正弦相似度。
+\end{proposition}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.0,>=stealth]
+
+        \draw[->, gray] (-0.3,0) -- (3.0,0) node[right, font=\footnotesize] {$x$};
+        \draw[->, gray] (0,-0.3) -- (0,2.8) node[above, font=\footnotesize] {$z$};
+        \draw[->, gray] (0,0) -- (-1.6,-1.2) node[below left, font=\footnotesize] {$y$};
+
+        \draw[->, thick, purple!70!black] (0,0) -- (55:2.4)
+            node[above right, font=\footnotesize] {$\mathbf{u}$（旋转轴）};
+
+        \draw[gray!40, dashed] (0,0) circle (1.7);
+        \draw[gray!40, dashed] (0,0) ellipse (1.7 and 0.55);
+        \draw[gray!40, dashed] (0,0) ellipse (0.55 and 1.7);
+
+        \coordinate (P) at (30:1.7);
+        \filldraw[red] (P) circle (2.5pt);
+        \node[red, font=\footnotesize, right=1pt] at (P) {$q/|q|$};
+
+        \coordinate (Q) at (85:1.7);
+        \filldraw[blue] (Q) circle (2.5pt);
+        \node[blue, font=\footnotesize, above right=1pt] at (Q) {$p/|p|$};
+
+        \draw[->, thick, orange] (40:1.85) arc (40:78:1.85);
+        \node[orange, font=\footnotesize] at (1.55,1.55) {$D_{\mathbb{H}}$};
+
+        \node[font=\small\bfseries, below=1.4cm] at (0.7,-0.2)
+            {$D_{\mathbb{H}}(p,q)\cdot\frac{q}{|q|}\cdot D_{\mathbb{H}}(p,q)^{-1}=\frac{p}{|p|}$};
+        \node[font=\scriptsize, align=center, below=1.9cm] at (0.7,-0.2)
+            {差角四元数通过共轭作用给出三维旋转差异};
+    \end{tikzpicture}
+    \caption{差角四元数的三维旋转差异作用。$D_{\mathbb{H}}(p,q)=p\overline{q}/(|p||q|)$ 通过共轭作用 $v\mapsto DvD^{-1}$ 将 $q$ 的单位方向送到 $p$ 的单位方向，实现三维旋转差异算子。轴相同时退化为复数的角度差（命题 \ref{prop:quaternion_exp_similarity_rotation_operator}、定理 \ref{thm:quaternion_sum_rotation_degeneration}）。}
+    \label{fig:quaternion_conjugation_rotation}
+\end{figure}
+
+\begin{proof}
+由定义
+\[
+D_{\mathbb H}(p,q)=\frac{p\overline q}{|p||q|},
+\]
+故
+\[
+D_{\mathbb H}(p,q)\cdot \frac{q}{|q|}\cdot D_{\mathbb H}(p,q)^{-1}
+=
+\frac{p\overline q}{|p||q|}\cdot\frac{q}{|q|}\cdot\frac{q\overline p}{|q||p|}.
+\]
+利用 $q\overline q=|q|^2$ 与 $\overline q\,q=|q|^2$，得
+\[
+D_{\mathbb H}(p,q)\cdot \frac{q}{|q|}\cdot D_{\mathbb H}(p,q)^{-1}
+=
+\frac{p\,|q|^2\,\overline p}{|p|^2|q|^2|q|}
+=
+\frac{p\,\overline p}{|p|^2}\cdot\frac{q}{|q|}.
+\]
+当 $p,q$ 为单位四元数时，$p\overline p=|p|^2=1$，$|q|=1$，上式化为
+\[
+D_{\mathbb H}(p,q)\,q\,D_{\mathbb H}(p,q)^{-1}=p.
+\]
+一般情形由单位化归约。因此 $D_{\mathbb H}(p,q)$ 通过共轭作用把 $q$ 的单位方向送到 $p$ 的单位方向。标量部分与向量部分的分解由引理 \ref{lem:quaternion_diff_sum_decomposition} 给出。证毕。
+\end{proof}
+
+\begin{proposition}[差角四元数的复合律]\label{prop:quaternion_exp_similarity_composition}
+设 $p,q,r\in\mathbb H^\times$。则
+\[
+D_{\mathbb H}(p,q)\,D_{\mathbb H}(q,r)
+=
+D_{\mathbb H}(p,r).
+\]
+即差角四元数满足旋转差异的复合律。
+\end{proposition}
+
+\begin{proof}
+由定义，
+\[
+D_{\mathbb H}(p,q)D_{\mathbb H}(q,r)
+=
+\frac{p\overline q}{|p||q|}\cdot\frac{q\overline r}{|q||r|}
+=
+\frac{p|q|^2\overline r}{|p||q|^2|r|}
+=
+\frac{p\overline r}{|p||r|}
+=
+D_{\mathbb H}(p,r).
+\]
+证毕。
+\end{proof}
+
+\begin{theorem}[和角四元数是三维旋转复合算子]\label{thm:quaternion_sum_rotation_operator}
+设 $p,q\in\mathbb H^\times$。则 $S_{\mathbb H}(p,q)=pq/(|p||q|)$ 通过共轭作用给出旋转复合：先由 $q$ 给出旋转，再由 $p$ 给出旋转，复合结果为 $S_{\mathbb H}(p,q)$ 的共轭作用。
+\end{theorem}
+
+\begin{proof}
+对纯虚四元数 $v$，共轭作用满足
+\[
+(pq)v(pq)^{-1}=p\bigl(qvq^{-1}\bigr)p^{-1}.
+\]
+因此，先由 $q$ 作用再由 $p$ 作用，复合等价于由 $pq$ 作用。单位化后即得 $S_{\mathbb H}(p,q)=pq/(|p||q|)$ 通过共轭作用给出旋转复合。证毕。
+\end{proof}
+
+\begin{theorem}[和角四元数的轴相同时退化与复数情形平行]\label{thm:quaternion_sum_rotation_degeneration}
+当 $p,q$ 的轴相同（$\mathbf u=\mathbf v$）时，差角四元数与和角四元数分别退化为
+\[
+D_{\mathbb H}(p,q)=e^{\mathbf u(\alpha-\beta)},\qquad
+S_{\mathbb H}(p,q)=e^{\mathbf u(\alpha+\beta)},
+\]
+与复指数相似度与复指数趋势完全平行。标量部分对应余弦族，向量部分的模对应正弦族。
+\end{theorem}
+
+\begin{proof}
+由引理 \ref{lem:quaternion_diff_sum_decomposition}，轴相同时差角四元数化为
+\[
+D_{\mathbb H}(p,q)=\cos(\alpha-\beta)+\mathbf u\sin(\alpha-\beta)=e^{\mathbf u(\alpha-\beta)},
+\]
+和角四元数化为
+\[
+S_{\mathbb H}(p,q)=\cos(\alpha+\beta)+\mathbf u\sin(\alpha+\beta)=e^{\mathbf u(\alpha+\beta)}.
+\]
+标量部分分别为 $\cos(\alpha-\beta)$ 与 $\cos(\alpha+\beta)$，对应余弦相似度与余弦趋势；向量部分的模分别为 $|\sin(\alpha-\beta)|$ 与 $|\sin(\alpha+\beta)|$，对应正弦相似度与正弦趋势。复情形只有一个固定轴 $i$，故上述退化即复指数相似度与复指数趋势。证毕。
+\end{proof}
+
+\begin{theorem}[四元数指数趋势的内积-叉积分解]\label{thm:quaternion_exp_tendency_geometry}
+设 $p,q\in\mathbb H^\times$。写
+\[
+p=p_0+\mathbf p,\qquad q=q_0+\mathbf q,
+\]
+其中 $p_0,q_0\in\mathbb R$，$\mathbf p,\mathbf q$ 为纯虚四元数。则
+\[
+\operatorname{Tendency}^{\mathbb H}(p,q):=p\overline q
+\]
+满足
+\[
+\operatorname{Sc}\bigl(\operatorname{Tendency}^{\mathbb H}(p,q)\bigr)
+=
+p_0q_0+\mathbf p\cdot\mathbf q
+=
+\langle p,q\rangle,
+\]
+即标量部分为四元数内积，也就是四元数余弦趋势。若 $p,q$ 为纯虚四元数，即 $p=\mathbf p$，$q=\mathbf q$，则
+\[
+\operatorname{Vec}\bigl(\operatorname{Tendency}^{\mathbb H}(p,q)\bigr)
+=
+-\mathbf p\times\mathbf q,
+\]
+从而
+\[
+\left\|\operatorname{Vec}\bigl(\operatorname{Tendency}^{\mathbb H}(p,q)\bigr)\right\|
+=
+\|\mathbf p\|\,\|\mathbf q\|\sin\theta,
+\]
+即向量部分的模为四元数正弦趋势，方向由叉积给出。
+\end{theorem}
+
+\begin{proof}
+由四元数乘法公式
+\[
+(a+\mathbf A)(b+\mathbf B)
+=
+ab-\mathbf A\cdot\mathbf B
++
+a\mathbf B+b\mathbf A+\mathbf A\times\mathbf B.
+\]
+取 $b=q_0$，$\mathbf B=-\mathbf q$，则
+\[
+p\overline q=(p_0+\mathbf p)(q_0-\mathbf q).
+\]
+标量部分为
+\[
+p_0q_0-\mathbf p\cdot(-\mathbf q)=p_0q_0+\mathbf p\cdot\mathbf q.
+\]
+若 $p_0=q_0=0$，则
+\[
+p\overline q=\mathbf p(-\mathbf q)=-\mathbf p\times\mathbf q+\mathbf p\cdot\mathbf q,
+\]
+其中标量部分为 $\mathbf p\cdot\mathbf q$，向量部分为 $-\mathbf p\times\mathbf q$。因此向量部分的模为
+\[
+\|\mathbf p\times\mathbf q\|=\|\mathbf p\|\,\|\mathbf q\|\sin\theta.
+\]
+证毕。
+\end{proof}
+
+\begin{example}[四元数指数相似度的数值示例]\label{ex:quaternion_exp_similarity_example}
+取
+\[
+p=i,\qquad q=1.
+\]
+则
+\[
+D_{\mathbb H}(p,q)=\frac{i\cdot 1}{1\cdot 1}=i.
+\]
+写
+\[
+i=\cos\frac{\pi}{2}+i\sin\frac{\pi}{2},
+\]
+故标量部分为 $\cos(\pi/2)=0$，向量部分为 $i\sin(\pi/2)=i$，模为 $1$。它通过共轭作用给出从 $1$ 到 $i$ 的三维旋转差异：绕 $i$ 轴旋转角 $\pi$。其差角四元数与和角四元数（此处 $q=1$，二者相等）均为 $i$，体现了四元数情形与复数情形的一致性，同时保留了三维旋转轴的信息。
+\end{example}
+
+\begin{remark}[四元数差角四元数的非交换性]\label{rem:quaternion_exp_similarity_noncommutative}
+复指数相似度在同时左乘或同时右乘公共因子时均不变；四元数差角四元数则不同：右乘公共因子不变，而左乘公共因子一般给出共轭变换
+\[
+D_{\mathbb H}(rp,rq)=r\,D_{\mathbb H}(p,q)\,\overline r.
+\]
+这正是四元数非交换性在相似度层面的表现。若 $r$ 与 $D_{\mathbb H}(p,q)$ 交换，则共轭变换退化为不变。四元数差角四元数因此不仅记录“旋转角”，还记录“旋转轴”，并与 $SU(2)\to SO(3)$ 的二重覆盖结构相容。
+\end{remark}
+
+\begin{remark}[与 12 种相似度/趋势谱系的关系]\label{rem:exponential_similarity_relation_to_12}
+复指数相似度与复指数趋势把其中\textbf{基础差角}的余弦族与正弦族打包为复数：
+\[
+\operatorname{Similarity}^{\mathbb C}
+=
+\operatorname{cosine}
++
+i\operatorname{sine},
+\]
+\[
+\operatorname{Tendency}^{\mathbb C}
+=
+\operatorname{cosine\_tendency}
++
+i\operatorname{sine\_tendency}.
+\]
+四元数情形按角度差与角度和定义差角四元数与和角四元数：
+\[
+D_{\mathbb H}(p,q)=\frac{p\overline q}{|p||q|},\qquad
+S_{\mathbb H}(p,q)=\frac{pq}{|p||q|}.
+\]
+当轴相同时，它们分别退化为 $e^{\mathbf u(\alpha-\beta)}$ 与 $e^{\mathbf u(\alpha+\beta)}$，与复数情形完全平行；一般情形下，标量部分对应余弦族，向量部分对应正弦族，交叉项 $\mathbf u\times\mathbf v$ 编码两轴之间的扭转，它们通过共轭作用给出三维旋转差异与三维旋转复合。
+\end{remark}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=0.95,>=stealth,
+        box/.style={draw, rounded corners=3pt, align=center, font=\footnotesize,
+                    minimum height=0.9cm, inner sep=4pt},
+        arr/.style={->, thick, >=stealth}]
+
+        \node[box, fill=blue!10, minimum width=3.6cm] (real12) at (0,2)
+            {12 种实相似度\\ $\cos\theta,\sin\theta,\cos 2\theta,\dots$};
+        \node[box, fill=red!10, minimum width=4.2cm] (complex) at (7.0,2)
+            {复指数差角算子\\ $D_{\mathbb{C}}=e^{i(\alpha-\beta)}$};
+
+        \node[box, fill=blue!6, minimum width=3.6cm] (real12b) at (0,-0.6)
+            {6 个复相位核\\ $S^{(1)},\dots,S^{(6)}$};
+        \node[box, fill=red!6, minimum width=4.2cm] (quat) at (7.0,-0.6)
+            {差角四元数 / 和角四元数\\ $D_{\mathbb{H}},\;S_{\mathbb{H}}$};
+
+        \draw[arr] (real12.east) -- node[above, font=\scriptsize] {实部/虚部} (complex.west);
+        \draw[arr] (real12b.east) -- node[above, font=\scriptsize] {非交换扩张} (quat.west);
+
+        \draw[arr] (complex.south) -- node[right, font=\scriptsize, align=left]
+            {轴相同时\\ 退化} (quat.north);
+
+        \node[font=\scriptsize, align=center, below=0.8cm] at (3.5,-1.8)
+            {复指数打包 = 差角的 $\cos+i\sin$；四元数打包 = 三维旋转的轴-角表示};
+    \end{tikzpicture}
+    \caption{12 种实相似度到复指数/四元数打包的结构关系。6 个复相位核是 12 种实相似度的复打包；复指数差角算子是相位核的二维旋转实现；差角/和角四元数是同一逻辑在三维旋转中的非交换扩张（注释 \ref{rem:exponential_similarity_relation_to_12}）。}
+    \label{fig:similarity_packaging}
+\end{figure}
+
+\section{\texorpdfstring{平方反比定律的几何根源}{平方反比定律的几何根源}}
+
+\begin{theorem}[平方反比定律的几何推导]\label{thm:inverse_square}
+设 $\mathbf{F}$ 是以 $O$ 为中心的径向矢量场，在 $O$ 之外无源，且 $\mathbf{F}$ 的大小只依赖于到 $O$ 的距离 $r$（球对称性）。若 $\mathbf{F}$ 穿过任意包围 $O$ 的闭合曲面的总通量为常数 $\Phi_0$，则 $\mathbf{F}$ 的大小必与距离的平方成反比：
+\[F(r) = \frac{\Phi_0}{4\pi r^2}.\]
+\end{theorem}
+
+\begin{proof}
+取包围 $O$ 的球面 $S_r$（半径为 $r$）。由前提，$\mathbf{F}$ 的大小只依赖于 $r$，因此在半径为 $r$ 的球面上 $F(r)$ 为常数；方向处处沿径向，故 $\mathbf{F}$ 与面元外法向量 $\mathbf{n} = \frac{\mathbf{r}}{r}$ 处处平行。穿过球面的总通量为：
+\[\Phi_0 = \oiint_{S_r} \mathbf{F} \cdot d\mathbf{S} = \oiint_{S_r} F(r) \, dS = F(r) \oiint_{S_r} dS = F(r) \cdot 4\pi r^2.\]
+解出 $F(r) = \Phi_0/(4\pi r^2)$。因此 $F(r) \propto 1/r^2$。
+\end{proof}
+
+\begin{corollary}[平方反比衰减与通量守恒（单向蕴含）]\label{cor:inverse_square_converse}
+定理 \ref{thm:inverse_square} 的逆命题在球面上成立：若以 $O$ 为心的径向矢量场按
+\[\mathbf{F}(\mathbf{r}) = \frac{C}{r^2} \frac{\mathbf{r}}{r}\]
+衰减，则它穿过任意以 $O$ 为心的球面的通量恒为常数 $4\pi C$。此外，同一形式 $\mathbf F=C\mathbf r/r^3$ 在 $r>0$ 处无源（$\nabla\cdot\mathbf F=0$），故由散度定理，它穿过任意包围 $O$ 的闭合曲面的通量也恒为 $4\pi C$。
+\end{corollary}
+
+\begin{proof}
+对以 $O$ 为心、半径 $r$ 的球面 $S_r$，
+\[\oiint_{S_r} \mathbf{F} \cdot d\mathbf{S} = \oiint_{S_r} \frac{C}{r^2} \, dS = \frac{C}{r^2} \oiint_{S_r} dS = \frac{C}{r^2} \cdot 4\pi r^2 = 4\pi C,\]
+结果与 $r$ 无关，故球面通量守恒。对任意包围 $O$ 的闭合曲面 $\Sigma$，在 $\mathbb{R}^3\setminus\{O\}$ 的区域内对 $\mathbf F$ 用散度定理（$r>0$ 时 $\nabla\cdot\mathbf F=\frac{1}{r^2}\frac{d}{dr}\bigl(r^2\cdot\frac{C}{r^2}\bigr)=0$），得 $\Sigma$ 与同心球面 $S_r$ 的通量相等，故亦为 $4\pi C$。
+\end{proof}
+
+\begin{remark}[“通量守恒”与“平方反比衰减”不是无条件等价的]\label{rem:inverse_square_converse_scope}
+定理 \ref{thm:inverse_square} 与推论 \ref{cor:inverse_square_converse} 合起来给出的是如下两条\emph{单向}蕴含，而不是“通量守恒$\iff$平方反比衰减”：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{（充分性）}若 $\mathbf{F}=C\mathbf{r}/r^3$，则 $\mathbf F$ 在 $r>0$ 处无源，且任意包围 $O$ 的闭曲面上通量恒为 $4\pi C$；
+    \item \textbf{（必要性）}若径向场 $\mathbf{F}=F(r)\hat{\mathbf{r}}$ 穿过任意以 $O$ 为心的球面的通量为常数 $\Phi_0$，则 $F(r)=\Phi_0/(4\pi r^2)$；此时 $\nabla\cdot\mathbf F=0$（$r>0$）由结论自动成立，无需另设。
+\end{enumerate}
+因此“互为充要条件”的说法必须收窄：定理 \ref{thm:inverse_square} 的前提是「穿过任意包围 $O$ 的\emph{闭曲面}的通量为常数」，(ii) 则只把球面写进前提，两侧的前提并不对称；(ii) 中「无源」是结论的推论而非前提。前提去掉后等价性即失效——$\mathbf F=f(r)\hat{\mathbf r}$、$f(r)=1/r^2+1$（$r>1$）的场在区域 $r>1$ 内无源、球对称，但其球面通量 $\Phi(r)=4\pi(1+r^2)$ 随 $r$ 变化，故它是定理 \ref{thm:inverse_square} 的\textbf{反例}（通量非常数而衰减非纯 $r^{-2}$），见「矢量分析」章的 \cref{ex:inverse_square_needs_const_flux}。
+\end{remark}
+
+\begin{example}[牛顿万有引力定律]
+取源 $O$ 处置质量 $M$，引力场 $\mathbf{g}$ 穿过包围 $M$ 的闭合曲面的通量为 $\Phi_0 = -4\pi GM$。这里通量为负值，因为引力场的方向约定为指向源点（与径向向外方向相反）。代入定理 \ref{thm:inverse_square} 得：
+\[\mathbf{g}(\mathbf{r}) = -G \frac{M}{r^2} \cdot \frac{\mathbf{r}}{r}.\]
+\end{example}
+
+\begin{example}[库仑定律]
+取源 $O$ 处置电荷 $Q$，电场 $\mathbf{E}$ 穿过包围 $Q$ 的闭合曲面的通量为 $\Phi_0 = Q/\varepsilon_0$。代入定理 \ref{thm:inverse_square} 得：
+\[\mathbf{E}(\mathbf{r}) = \frac{1}{4\pi\varepsilon_0} \frac{Q}{r^2} \cdot \frac{\mathbf{r}}{r}.\]
+\end{example}
+
+\begin{remark}[平方反比定律与三种对称中心]\label{rem:inverse_square_three_symmetries}
+平方反比定律体现了三种对称中心的协同作用：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{旋转对称（$i$-对称）}：源点 $O$ 具有全空间旋转对称性——以 $O$ 为球心的任意球面上，场的大小处处相等。
+    \item \textbf{比例对称（$1$-对称）}：场的衰减按 $1/r^2$ 进行，即距离每增加一倍，场的大小缩小为原来的 $1/4$。
+    \item \textbf{加法反射对称（$0$-对称）}：场的径向方向在通过源点 $O$ 的任意直线上呈现反射对称。
+\end{enumerate}
+\end{remark}
+
+\section{\texorpdfstring{三种对称中心与向量运算的对应总表}{三种对称中心与向量运算的对应总表}}
+
+\begin{table}[htbp]
+    \centering
+    \caption{三种基本生成变换、向量运算与对称中心的完整对应}
+    \label{tab:symmetry_correspondence}
+    \renewcommand{\arraystretch}{1.35}
+    \begin{tabular}{>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{4.5cm}>{\centering\arraybackslash}p{3cm}}
+        \toprule
+        对称中心与对称类型 & 基本变换 & 向量运算 & 守恒量 \\
+        \midrule
+        \textbf{0}（加法反射对称） & 平移 & 向量加法 $\mathbf{u}+\mathbf{v}$ & 动量 \\[4pt]
+         &  & 向量减法 $\mathbf{u}-\mathbf{v}$ &  \\[4pt]
+         &  & 内积 $\mathbf{a}\cdot\mathbf{b}$ &  \\[4pt]
+         &  & 反射 &  \\
+        \midrule
+        \textbf{1}（$c \neq 1$，乘法缩放反射对称） & 缩放 & 标量乘法 $\alpha\mathbf{u}$ & 相空间体积 \\[4pt]
+         &  & 折射（正弦趋势缩放） &  \\[4pt]
+         &  & 模长的缩放 &  \\
+        \midrule
+        \textbf{1}（$c=1$）/ \textbf{i}（乘法取逆/$i$-对称） & 旋转 & 外积 $\mathbf{a}\times\mathbf{b}$ & 角动量 \\[4pt]
+         &  & 复数乘法 $z_1 z_2$ &  \\[4pt]
+         &  & 四元数乘法 &  \\[4pt]
+         &  & 复指数相似度、差角四元数、和角四元数 &  \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=stealth,
+    symmetry/.style={draw, rounded corners, minimum width=2.8cm, minimum height=1.4cm, align=center, font=\small\bfseries},
+    arrow/.style={->, thick, >=stealth}]
+
+    \node[symmetry, fill=blue!10] (add) at (0,0) {加法反射对称\\对称中心 $c=0$};
+    \node[symmetry, fill=red!10] (mul) at (0,-3.5) {乘法缩放反射对称\\对称中心 $c \neq 1$};
+    \node[symmetry, fill=green!10] (rot) at (0,-7.0) {乘法取逆/$i$-对称\\对称中心 $c=1,i$};
+
+    \node[font=\small, right=0.3cm of add] {向量加法/减法，内积，反射};
+    \node[font=\small, right=0.3cm of mul] {标量乘法，折射，趋势缩放};
+    \node[font=\small, right=0.3cm of rot] {外积，复数乘法，四元数乘法，指数相似度};
+
+    \draw[arrow, blue] (add) to[bend left=20] node[right, font=\footnotesize] {对数转换} (mul);
+    \draw[arrow, red] (mul) to[bend left=20] node[left, font=\footnotesize] {指数转换} (add);
+    \draw[arrow, orange!80!black, dashed] (mul) to[bend left=20] node[right, font=\footnotesize] {单位圆限制 $|\lambda|=1$} (rot);
+    \draw[arrow, green!60!black] (rot.west) to[bend left=30] node[left=0.6cm, font=\footnotesize] {投影} (add.west);
+\end{tikzpicture}
+\caption{三种对称中心与向量运算的对应关系。加法反射对称（$c=0$）对应向量加法/减法、内积、反射；乘法缩放反射对称（$c\neq 1$）对应标量乘法、折射、趋势缩放；乘法取逆/$i$-对称（$c=1,i$）对应外积、复数乘法、四元数乘法、复指数相似度与差角/和角四元数。对数/指数映射实现加法反射对称与乘法缩放反射对称之间的转换，单位圆限制（$|\lambda|=1$）实现乘法缩放反射对称到乘法取逆对称的层级递进。}
+\label{fig:three_symmetries_correspondence}
+\end{figure}
+
+\begin{remark}[本章的守恒与闭合主题]\label{rem:conservation_closure_theme_ch3}
+本章的守恒主题由三组不变性构成：余弦趋势（内积）在正交群 $O(n)$ 下守恒（命题 \ref{prop:cosine_scalar}），正弦趋势的绝对值（外积的模）在纯旋转 $SO(3)$ 下守恒（命题 \ref{prop:sine_rotation}），以及反射保持模长守恒（定义 \ref{def:reflection_vector}）与折射保持正弦趋势在界面法向上的守恒（定义 \ref{def:refraction_vector}）；径向无源场的通量在闭合曲面上守恒（定理 \ref{thm:inverse_square} 及推论 \ref{cor:inverse_square_converse}）。闭合主题则由反射对合给出的 $2$-周期闭合轨道（定义 \ref{def:reflection_vector}）与闭合曲面上的通量判据共同承载。这些守恒量与闭合判据，是“周期基础”章三大守恒律（动量、角动量、相空间体积）在向量运算层面的具体显现。
+\end{remark}
+
+\section{对合与二周期：离散对称的周期结构}
+\label{sec:involution_two_period}
+
+本章建立的三种对称中心与向量运算的对应，有一个直接而严格的周期后果：\textbf{无不动点的对合给出的闭合轨道周期恰为 $2$}。这既是本章与全书「周期」主题的接口，也是最小非平凡周期在向量层面的第一个实例。
+
+\begin{proposition}[对合诱导 2-周期闭合轨道]\label{prop:involution_two_period}
+设 $\sigma:X\to X$ 满足 $\sigma^2=\operatorname{id}$ 且在 $X$ 上无不动点。则对每个 $x\in X$，轨道
+\[
+\mathcal{O}_x=\{x,\ \sigma(x)\}
+\]
+恰含两个元素，$\sigma$ 在 $\mathcal{O}_x$ 上的限制是一个 $2$-循环；即 $\sigma$ 的每条轨道都是最小正周期为 $2$ 的闭合轨道。
+\end{proposition}
+
+\begin{proof}
+由 $\sigma^2=\operatorname{id}$ 得 $\sigma(\sigma(x))=x$，故 $\mathcal{O}_x=\{x,\sigma(x)\}$ 在 $\sigma$ 下封闭。又无不动点蕴含 $\sigma(x)\neq x$，故 $\mathcal{O}_x$ 恰含两个元素。于是 $\sigma^2(x)=x$ 而 $\sigma(x)\neq x$，最小正周期为 $2$。
+\end{proof}
+
+\begin{corollary}[本章两种对称中心都给出 2-周期]\label{cor:reflection_two_period}
+在本章的生成变换中：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{加法反射} $\mathbf{v}\mapsto-\mathbf{v}$ 在 $\mathbb{R}^n\setminus\{\mathbf{0}\}$ 上无不动点，故给出 $2$-周期闭合轨道；其对称中心为 $c=0$。
+    \item \textbf{乘法取逆} $z\mapsto z^{-1}$ 在 $\mathbb{C}\setminus\{0,1,-1\}$ 上无不动点（因 $z^{-1}=z\iff z=\pm1$），同样给出 $2$-周期闭合轨道；其对称中心为 $c=i$。
+\end{enumerate}
+两者共同说明：\textbf{严格周期不必来自连续旋转，离散对合同样产生周期}，只是它只能给出最小可能的非平凡周期 $2$。
+\end{corollary}
+
+\begin{proof}
+(i) $-\mathbf{v}=\mathbf{v}\iff\mathbf{v}=\mathbf{0}$，故在 $\mathbb{R}^n\setminus\{\mathbf{0}\}$ 上无不动点，由命题 \ref{prop:involution_two_period} 得 $2$-周期。
+(ii) 同理，$z^{-1}=z\iff z^2=1\iff z=\pm1$。
+\end{proof}
+
+\begin{remark}[与「周期」主题的接口]\label{rem:vector_two_period_interface}
+命题 \ref{prop:involution_two_period} 给出本章在「周期」主题上的入口：\textbf{对合}是继三种连续变换之后最简单的周期机制，且它产生的周期只能是 $2$——这正是「周期基础」章「有限阶作用 $\Rightarrow$ 闭合轨道」中阶为 $2$ 的最简非平凡情形。由此，本章的三种对称中心在周期层面获得统一解释：
+\[
+c=0\ (\text{加法反射}),\qquad c=i\ (\text{乘法取逆})\ \Longrightarrow\ \text{2-周期闭合轨道}.
+\]
+至于 $c=1$（缩放）为何不产生闭合轨道：连续缩放群 $(\mathbb{R}^+,\times)$ \textbf{无扭}，没有非平凡的有限阶元素（见「周期基础」章 \cref{cor:rotation_unique}）。
+\end{remark}
+
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{9.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 向量加法 $\mathbf{u}+\mathbf{v}$（定义 \ref{def:vector_addition_translation}）构成交换群（命题 \ref{prop:vector_additive_group}）；向量和 $\mathbf{a}+\mathbf{b}$ 的模长即半角余弦趋势（命题 \ref{prop:sum_difference_half_angle}）。 \\
+缩放 & 标量乘法 $\alpha\mathbf{u}$ 的模长缩放（定义 \ref{def:scalar_multiplication_scaling}）；平方反比定律 $F(r)\propto r^{-2}$（定理 \ref{thm:inverse_square}）与推论 \ref{cor:inverse_square_converse}。 \\
+旋转 & 复数乘法将辐角相加、模长相乘（命题 \ref{prop:complex_multiplication}）；四元数乘法实现三维旋转的复合（命题 \ref{prop:quaternion_multiplication}）；差角四元数作为三维旋转差异算子（命题 \ref{prop:quaternion_exp_similarity_rotation_operator}）；和角四元数作为三维旋转复合算子（定理 \ref{thm:quaternion_sum_rotation_operator}）。 \\
+守恒 & 余弦趋势（内积）在 $O(n)$ 下不变（命题 \ref{prop:cosine_scalar}）；正弦趋势的绝对值（外积的模）在 $SO(3)$ 下不变（命题 \ref{prop:sine_rotation}）；反射保持模长、折射保持正弦趋势在界面法向上的守恒（定义 \ref{def:reflection_vector}、\ref{def:refraction_vector}）。 \\
+对称 & 反射对合体现加法反射对称 $c=0$（定义 \ref{def:reflection_vector}）；折射缩放体现乘法缩放反射对称 $c\neq 1$ 对 $i$-对称的调制（定义 \ref{def:refraction_vector}）；差角四元数在右乘下不变、左乘下共轭变换（注释 \ref{rem:quaternion_exp_similarity_noncommutative}）。 \\
+闭合 & 反射两次回到自身 $\mathbf{v}''=\mathbf{v}$，构成周期为 $2$ 的闭合轨道（定义 \ref{def:reflection_vector}）；平方反比定律以闭合曲面上的通量守恒为判据（定理 \ref{thm:inverse_square}、推论 \ref{cor:inverse_square_converse}）。 \\
+周期 & 复数乘法中辐角相加使旋转角以 $2\pi$ 为周期复合（命题 \ref{prop:complex_multiplication}）；反射的 $2$-周期闭合轨道是本章最小的周期结构（定义 \ref{def:reflection_vector}）；差角四元数的复合律封闭（命题 \ref{prop:quaternion_exp_similarity_composition}）；轴相同时四元数情形退化为复数的角度差与角度和（定理 \ref{thm:quaternion_sum_rotation_degeneration}）。 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 根据定义 \ref{def:scalar} 与定义 \ref{def:vector}，说明标量与矢量的本质区别不在于“是否带方向”，
+    而在于\textbf{在群表示下的变换律}。请举出两个具体例子：一个标量场与一个矢量场，
+    并验证它们在空间旋转下的变换行为确实不同。
+
+    \item 证明命题 \ref{prop:vector_additive_group}：$\mathbb{R}^n$ 在向量加法下构成交换群，
+    零向量为单位元，负向量为逆元。进一步说明，加法反射
+    $\sigma_{\mathbf{0}}(\mathbf{u})=-\mathbf{u}$ 是以 $\mathbf{0}$ 为唯一不动点的对合自同构，
+    并指出它生成的群同构于 $C_2$。
+
+    \item 验证引理 \ref{lem:similarity_generation} 中的笛卡尔积生成：
+    \[
+    12=\{\text{差角},\text{和角}\}\times\{\text{基础},\text{倍角},\text{半角}\}\times\{\cos,\sin\}.
+    \]
+    请分别写出差角基础、差角倍角、差角半角、和角基础、和角倍角、和角半角
+    对应的六个余弦相似度与六个正弦相似度的显式表达式
+    （可参考定义 \ref{def:basic_diff_similarity} 至定义 \ref{def:half_sum_similarity}）。
+
+    \item 取 $\mathbf{a}=(3,4)$，$\mathbf{b}=(1,\sqrt{3})$，计算：
+    \begin{enumerate}[label=(\roman*)]
+        \item 两向量的辐角 $\alpha$ 与 $\beta$；
+        \item 有符号差角 $\alpha-\beta$ 与和角 $\phi=\alpha+\beta$；
+        \item 12 种相似度中\textbf{基础差角余弦}、\textbf{基础差角正弦}、
+              \textbf{基础和角余弦}、\textbf{基础和角正弦}的具体数值；
+        \item 12 种趋势中对应上述四种相似度的趋势值（模长乘积 $\|\mathbf{a}\|\|\mathbf{b}\|$ 乘相似度）。
+    \end{enumerate}
+    并验证 $(\operatorname{cosine})^2+(\operatorname{sine})^2=1$。
+
+    \item 证明命题 \ref{prop:sum_difference_half_angle}：
+    当 $\|\mathbf{a}\|=\|\mathbf{b}\|=r$ 且夹角为 $\theta$ 时，
+    \[
+    \|\mathbf{a}+\mathbf{b}\|=2r\cos\frac{\theta}{2},\qquad
+    \|\mathbf{a}-\mathbf{b}\|=2r\sin\frac{\theta}{2}.
+    \]
+    再说明：若去掉等模长条件，公式应如何修正？为什么此时不能简化为单一半角三角函数形式
+    （参见注 \ref{rem:sum_difference_non_equal_length}）。
+
+    \item 验证定义 \ref{def:reflection_vector} 中的反射变换：
+    \[
+    \mathbf{v}'=\mathbf{v}-2(\mathbf{v}\cdot\mathbf{n})\mathbf{n}
+    \]
+    是对合（$\mathbf{v}''=\mathbf{v}$），且保持模长（$\|\mathbf{v}'\|=\|\mathbf{v}\|$）。
+    进一步证明：反射前后方向与法线的倍角余弦相似度守恒，即
+    $\cos 2\theta_{\text{in}}=\cos 2\theta_{\text{out}}$。
+    最后说明为什么反射给出本章最小的周期结构——周期为 $2$ 的闭合轨道。
+
+    \item 证明斯涅尔定律的临界角结论（命题 \ref{prop:critical_angle}）：
+    当 $n_1>n_2$ 且入射角 $\theta_1>\theta_c=\arcsin(n_2/n_1)$ 时，
+    斯涅尔定律要求 $\sin\theta_2>1$，在实数域无解，发生全内反射。
+    请给出一个具体数值例子，并计算临界角。
+
+    \item 证明复指数差角算子
+    \[
+    D_{\mathbb{C}}(z_1,z_2)=\frac{z_1\overline{z_2}}{|z_1||z_2|}
+    \]
+    是二维旋转差异算子，即
+    \[
+    D_{\mathbb{C}}(z_1,z_2)\cdot\frac{z_2}{|z_2|}=\frac{z_1}{|z_1|}
+    \]
+    （命题 \ref{prop:complex_exp_similarity_rotation_operator}）。
+    并验证复合律
+    \[
+    D_{\mathbb{C}}(z_1,z_2)D_{\mathbb{C}}(z_2,z_3)=D_{\mathbb{C}}(z_1,z_3).
+    \]
+
+    \item 根据定义 \ref{def:quaternion_diff_sum}，写出差角四元数
+    $D_{\mathbb{H}}(p,q)=p\overline{q}/(|p||q|)$ 与和角四元数
+    $S_{\mathbb{H}}(p,q)=pq/(|p||q|)$ 的显式表达式。
+    证明当 $p,q$ 的旋转轴相同时（$\mathbf{u}=\mathbf{v}$），
+    差角四元数与和角四元数分别退化为
+    \[
+    e^{\mathbf{u}(\alpha-\beta)},\qquad e^{\mathbf{u}(\alpha+\beta)},
+    \]
+    与复数情形完全平行（定理 \ref{thm:quaternion_sum_rotation_degeneration}）。
+
+    \item 证明定理 \ref{thm:quaternion_exp_tendency_geometry}：
+    对 $p=p_0+\mathbf{p}$、$q=q_0+\mathbf{q}$，四元数指数趋势
+    $\operatorname{Tendency}^{\mathbb{H}}(p,q)=p\overline{q}$ 满足
+    \[
+    \operatorname{Sc}(p\overline{q})=p_0q_0+\mathbf{p}\cdot\mathbf{q},
+    \]
+    且当 $p,q$ 为纯虚四元数时，
+    \[
+    \operatorname{Vec}(p\overline{q})=-\mathbf{p}\times\mathbf{q}.
+    \]
+    请利用四元数乘法公式
+    $(a+\mathbf{A})(b+\mathbf{B})=ab-\mathbf{A}\cdot\mathbf{B}+a\mathbf{B}+b\mathbf{A}+\mathbf{A}\times\mathbf{B}$
+    完成证明。
+
+    \item 证明定理 \ref{thm:inverse_square}：
+    设 $\mathbf{F}$ 是以 $O$ 为中心的径向矢量场，在 $O$ 之外无源，
+    且 $F$ 的大小只依赖于距离 $r$，穿过任意包围 $O$ 的闭合曲面的总通量为常数 $\Phi_0$。
+    则 $F(r)=\Phi_0/(4\pi r^2)$。
+    再证明其逆命题（推论 \ref{cor:inverse_square_converse}）：
+    若径向场按 $C/r^2$ 衰减，则穿过任意以 $O$ 为心的球面的通量恒为 $4\pi C$。
+
+    \item 验证命题 \ref{prop:cosine_scalar} 与命题 \ref{prop:sine_rotation}：
+    余弦趋势（内积）在正交群 $O(n)$ 下不变；
+    正弦趋势的绝对值（外积的模）在纯旋转 $SO(3)$ 下不变。
+    请分别用矩阵计算证明，并说明这两条守恒律分别对应“平移方向”与“旋转方向”上的投影度量守恒。
+
+    \item 综合题：根据表 \ref{tab:symmetry_correspondence} 与注释 \ref{rem:conservation_closure_theme_ch3}，
+    说明为什么本章把\textbf{梯度}、\textbf{散度}、\textbf{旋度}与\textbf{平移}、\textbf{缩放}、\textbf{旋转}
+    之间的关系表述为“形式对应”而非严格定理。
+    请从“变换作用于空间”与“算子作用于场”的层次差异出发，
+    讨论这一表述的谨慎性，并指出在什么附加条件下这一对应可以成为严格命题
+    （可参考「矢量分析」章的相关讨论）。
+\end{enumerate}
+

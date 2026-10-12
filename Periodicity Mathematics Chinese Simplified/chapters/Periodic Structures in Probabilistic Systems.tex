@@ -1,0 +1,1043 @@
+\chapter{概率系统之周期结构}
+\label{chap:prob_periodic}
+\label{chap:probability-periodic}
+\markboth{概率系统之周期结构}{概率系统之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:prob_ps_hook}
+本章判定研究目标是否具有周期性、确定其周期类型、以及查找最小正周期时，一律引用「周期系统」章：
+周期性判据见 \cref{thm:ps_periodicity_decision}，
+周期类型判别见 \cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}，
+最小正周期查找见 \cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}，
+由数据构建周期级数与周转圆组见 \cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}。
+\end{remark}
+
+\begin{remark}[本章定位：按「周期系统」章五步接口展开]\label{rem:prob_chapter_positioning}
+概率系统之周期结构研究随机过程中周期性、准周期性和标度不变性的数学表征。本章不另立周期性判据，而是把概率论与随机过程理论接入「周期系统」章规定的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把随机过程或概率分布化为离散动力系统，引用 \cref{thm:ps_periodicity_decision} 判定是否具有周期性，并确定周期类型；
+    \item \textbf{构建}：由概率数据构建振幅级数、频率级数、相位级数，组装为概率周转圆组；
+    \item \textbf{调节}：用贝叶斯更新、谱峰值搜索与残差能量下降动态调节周转圆组；
+    \item \textbf{卷积}：在概率周转圆组上引入振幅卷积、相位卷积、频率卷积，并与特征函数、协方差、互相关衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成概率周期诊断流程。
+\end{enumerate}
+本章使用的概率论知识包括：概率空间、随机变量、分布函数、特征函数、平稳过程、谱测度、Herglotz--Cramér 谱表示、循环平稳过程、贝叶斯更新、MCMC、隐马尔可夫模型、高斯过程、ARFIMA 长记忆过程。
+\end{remark}
+
+\begin{remark}[本章七主题导引]\label{rem:prob_seven_themes}
+平移——平稳过程的时间平移不变性与均方导数方差 $P_{\mathbb P}=-\gamma''(0)$；
+缩放——自相似过程的标度不变性与 Hurst 指数、尾指数；
+旋转——循环平稳过程的相位旋转不变性与相位相干时间 $\tau_{\mathrm{coh}}=2/\sigma^2$；
+平衡——概率测度连续不变性对应的不变量；
+对称——先验、似然、后验三类分布携带的标度、平移、旋转信息；
+闭合——细致平衡的概率流闭合 $\mathbf J_{ij}=0$；
+周期——循环频率 $\alpha=k/T$、相位相干时间、自相似周期、马尔可夫链周期分解。
+\end{remark}
+
+\section{概率目标的周期性判定：接入「周期系统」章第一步}
+\label{sec:prob_periodicity_decision}
+
+\subsection{概率目标、判定输入与判定映射}
+
+\begin{definition}[概率目标与判定输入]\label{def:prob_target}
+一个\textbf{概率目标}是指下列对象之一：
+\begin{enumerate}[label=(\roman*)]
+    \item 一个概率空间 $(\Omega,\mathcal F,\mathbb P)$ 上的随机过程 $\{X_t\}_{t\in\mathcal T}$；
+    \item 一个有限状态马尔可夫链，其状态空间为 $S$，转移矩阵为 $P$；
+    \item 一个参数后验分布族 $\{p(\theta\mid \mathbf D)\}$；
+    \item 一个由观测得到的离散时间序列 $\{x_1,\dots,x_n\}$，视为某个随机过程的样本路径。
+\end{enumerate}
+概率目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal D_{\mathbb P}=(\mathcal T,\mu),
+\]
+其中 $\mathcal T$ 是时间或指标集，$\mu$ 是目标在 $\mathcal T$ 上的概率规律描述。若 $\mathcal T=\mathbb Z$ 或 $\mathbb N$，称目标为\textbf{离散时间概率目标}；若 $\mathcal T=\mathbb R$，称目标为\textbf{连续时间概率目标}。
+\end{definition}
+
+\begin{definition}[概率判定映射]\label{def:prob_periodization}
+设概率目标由判定输入 $\mathcal D_{\mathbb P}=(\mathcal T,\mu)$ 给出。若存在映射 $\Phi:\mathcal T\to\mathcal T$、映射 $\Psi:M\to M$ 及状态 $x_0\in M$，使目标的概率规律与状态由 $\Phi$ 与 $\Psi$ 生成，即
+\[
+\mu_t=\mu_0\circ \Phi^{-t},\qquad x_t=\Psi^t(x_0),
+\]
+当 $t\in\mathbb Z$ 时 $\Phi^{-t}$ 为 $\Phi^{-1}$ 的迭代、$\Psi^t$ 为 $\Psi$ 的迭代；当 $t\in\mathbb R$ 时，以单参数演化族 $\{\Phi_t\}_{t\in\mathbb R}$ 与 $\{\Psi_t\}_{t\in\mathbb R}$ 记之（其中每个 $\Phi_t$ 为 $\mathcal T$ 上的双射、每个 $\Psi_t$ 为 $M$ 上的双射，且 $\Phi_0=\operatorname{id}$、$\Phi_{s+t}=\Phi_s\circ\Phi_t$ 与 $\Psi_0=\operatorname{id}$、$\Psi_{s+t}=\Psi_s\circ\Psi_t$ 对一切 $s,t\in\mathbb R$ 成立，$(t,\theta)\mapsto\Phi_t(\theta)$ 与 $(t,x)\mapsto\Psi_t(x)$ 连续）。
+则称 $\Phi$ 与 $\Psi$ 为目标的\textbf{概率判定映射}。此时当 $t\in\mathbb Z$ 时概率目标化为指标集动力系统 $(\mathcal T,\Phi)$ 或状态空间动力系统 $(M,\Psi)$，当 $t\in\mathbb R$ 时化为其中的连续情形，两种情形均可直接套用「周期基础」章与「周期系统」章的判据。
+\end{definition}
+
+\begin{theorem}[概率周期性判定定理]\label{thm:prob_periodicity_decision}
+设概率目标的概率判定映射为 $\Phi$，且 $(\mathcal T,\Phi)$ 为离散动力系统。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 $m\in\mathbb N^+$ 使 $\Phi^m=\mathrm{id}$，则目标为一致周期概率系统；每条概率轨道闭合，且轨道长度整除 $m$。
+    \item \textbf{判定等价}：目标为一致周期概率系统当且仅当 $\operatorname{ord}(\Phi)<\infty$。
+    \item \textbf{逐点判据}：目标在状态 $x_0$ 处的概率轨道闭合当且仅当 $x_0$ 为周期点；此时轨道长度即该点处的周期。
+    \item \textbf{不可省略性}：守恒量与对称群的合取不能替代 $\operatorname{ord}(\Phi)<\infty$；准周期概率目标不属于周期概率系统。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:prob_periodicity_decision} 是「周期系统」章 \cref{thm:ps_periodicity_decision} 的领域实例化：
+只需把判定映射 $f$ 与演化群替换为本章的 $\Phi$，(A) 充分判定、(B) 判定等价、(C) 逐点判据、
+(D) 不可省略性四条即逐条成立。依 \cref{rem:ps_applications_hook} 的约定，此处不再重复展开。
+\end{proof}
+
+\begin{corollary}[概率周期类型]\label{cor:prob_period_type}
+经 \cref{thm:prob_periodicity_decision} 判定后，概率目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 $m_0=1$，概率分布为不动点；
+    \item \textbf{严格周期型}：$1<m_0<\infty$，分布或状态严格周期；
+    \item \textbf{一致周期型}：$\operatorname{ord}(\Phi)=m<\infty$，所有轨道长度整除 $m$；
+    \item \textbf{准周期型}：$\operatorname{ord}(\Phi)=\infty$，轨道不闭合但在紧致承载结构上稠密；
+    \item \textbf{最终周期型}：存在 $N$，使 $t\ge N$ 后目标为周期；
+    \item \textbf{离散周期型}：承载结构为 $\mathbb Z$，且归一化周期比 $\rho=T_x/\Delta x\in\mathbb Q$。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，残差按 $e^{-\kappa t}$ 衰减（见 \cref{def:ps_period_type}(vii)）。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于周期概率系统；(iv) 不属于周期概率系统，但可用有界逼近工具处理；(v) 只在稳定阶段是周期概率系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期概率系统，只在稳定阶段可用有界逼近工具处理。
+\end{corollary}
+
+\begin{proof}
+逐条由 \cref{thm:prob_periodicity_decision} 与「周期系统」章 \cref{def:ps_period_type} 代入概率目标即得。
+\end{proof}
+
+\begin{lemma}[有限马尔可夫链的周期判定]\label{lem:markov_period}
+设 $\{Z_t\}$ 为有限状态空间 $S$ 上的不可约马尔可夫链，转移矩阵为 $P$，周期为 $d$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 状态空间可唯一分解为 $d$ 个循环类 $C_1,\dots,C_d$，且
+    \[
+    \mathbb P(Z_{t+1}\in C_{j+1}\mid Z_t\in C_j)=1,\qquad j=1,\dots,d\pmod d;
+    \]
+    \item $P$ 的谱中包含 $d$ 次单位根 $e^{2\pi i k/d}$，$k=0,1,\dots,d-1$；
+    \item 链非周期当且仅当 $d=1$，当且仅当 $P$ 除 $\lambda_1=1$ 外所有特征值模严格小于 $1$。
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(i) 由马尔可夫链的周期分解定理：对状态 $i,j$，令 $d_i$ 为所有满足 $P^n(i,i)>0$ 的 $n$ 的最大公约数。不可约性保证所有 $d_i$ 相等，记为 $d$。按返回步数模 $d$ 的同余类分解状态空间，得到循环类。
+(ii) 在循环类分解下，$P^d$ 在每个循环类上不可约且非周期。因此 $P^d$ 的特征值除 $1$ 外模小于 $1$；于是 $P$ 的特征值 $\lambda$ 满足 $\lambda^d$ 为 $P^d$ 的特征值。$P$ 的 Perron 根为 $1$，其余满足 $\lambda^d$ 模小于 $1$，故 $|\lambda|<1$ 或 $\lambda^d=1$。后者给出 $d$ 次单位根。
+(iii) $d=1$ 即非周期，此时无单位根。反之，若存在非平凡单位根，则链有周期 $>1$。
+\end{proof}
+
+\begin{definition}[概率最小正周期算法]\label{def:prob_minimal_period_algorithm}
+本定义与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{def:ps_minimal_period_algorithm} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处的差别仅为术语（概率目标 / 概率样本），算法步骤与结论完全相同。
+\end{definition}
+
+\begin{theorem}[概率最小正周期算法的正确性]\label{thm:prob_minimal_period_correctness}
+本定理与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{thm:ps_minimal_period_correctness} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。本处的差别仅为术语（概率目标 / 概率样本），算法步骤与结论完全相同。
+\end{theorem}
+
+\begin{example}[伯努利链与周期判定]\label{ex:bernoulli_period}
+设 $Z_t\in\{0,1\}$ 为独立同分布伯努利序列。其概率判定映射为恒等映射，$\operatorname{ord}(\Phi)=1$，故为平凡周期型；但其样本路径几乎必然不周期。这说明：\textbf{概率规律的周期性与样本路径的周期性不是同一个概念}。概率周期判定的是规律，而不是单条样本路径。
+\end{example}
+
+\begin{example}[有限循环马尔可夫链]\label{ex:cyclic_markov}
+设 $S=\mathbb Z/d\mathbb Z$，转移为 $Z_{t+1}=Z_t+1\pmod d$。该链是确定性的、不可约、周期为 $d$。由 \cref{lem:markov_period}，转移矩阵特征值为 $e^{2\pi i k/d}$，$k=0,\dots,d-1$。这是概率系统中最纯粹的严格周期型。
+\end{example}
+
+\begin{remark}[不变量不保证周期]\label{rem:prob_invariant_not_period}
+概率系统的不变性是周期结构的辅助条件，但不构成充分条件。白噪声具有时间平移不变性和均方导数方差，但其自相关函数在非零滞后处恒为零，不存在非平凡周期分量。概率周期结构的判定必须依赖 \cref{thm:prob_periodicity_decision} 或 \cref{lem:markov_period} 等具体判据。
+\end{remark}
+
+\section{概率周期级数与周转圆组的构建：接入「周期系统」章第二步}
+\label{sec:prob_series_construction}
+
+\begin{definition}[概率振幅级数、频率级数、相位级数]\label{def:prob_series}
+设 $\{X_t\}$ 为零均值弱平稳过程，自协方差函数为 $\gamma(h)$，谱测度为 $F$。若 $F$ 在频率 $\omega_k$ 处有原子 $A_k^2$，则可写
+\[
+X_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+其中 $\phi_k$ 为随机相位或相位分量。称
+\[
+\mathcal A_X(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_X(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_X(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+分别为概率目标的\textbf{振幅级数}、\textbf{频率级数}与\textbf{相位级数}。三者与「级数与卷积」章 \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} 一致。
+\end{definition}
+
+\begin{definition}[概率周转圆组]\label{def:prob_epicycle_group}
+本定义与第~\ref{chap:sampling}~章「周转圆组：周期信号的旋转分解」节（\cref{sec:epicycle_system}）中的 \cref{def:epicycle_system} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处的差别仅为术语（概率目标 / 概率样本），数学对象与结论完全相同。
+\end{definition}
+
+\begin{theorem}[由概率数据构建周期级数]\label{thm:prob_series_reconstruction}
+设 $\{X_t\}$ 为零均值弱平稳过程，谱测度为 $F$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $F$ 为纯离散测度，$F=\sum_k A_k^2\delta_{\omega_k}$，则 $X_t$ 有概率周期级数表示
+    \[
+    X_t=\sum_k A_k e^{i(\omega_k t+\phi_k)},
+    \]
+    其中相位 $\phi_k$ 由谱分解中的随机相位给出；
+    \item 若 $F$ 关于勒贝格测度绝对连续，$dF(\omega)=S(\omega)d\omega$，则 $X_t$ 有连续谱表示
+    \[
+    X_t=\int_{-\pi}^{\pi}e^{i\omega t}\,dZ(\omega),
+    \]
+    此时不存在有限或可数周转圆组的严格周期分解，只能作谱密度分解；
+    \item 若 $F$ 为奇异连续测度，则 $X_t$ 具有分形谱，对应自相似周期结构。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 由 Herglotz 定理（\cref{thm:herglotz}），$\gamma(h)=\int e^{i\omega h}dF(\omega)$。若 $F$ 为纯离散，则 $\gamma(h)=\sum_k A_k^2 e^{i\omega_k h}$。由 Cramér 谱表示（\cref{thm:cramer}），$X_t=\int e^{i\omega t}dZ(\omega)$，在原子处 $dZ(\omega_k)$ 为随机振幅，写为 $A_k e^{i\phi_k}$，即得。
+(ii) 绝对连续时谱为连续分布，不能写成可数原子之和，故只能保留积分表示。
+(iii) 奇异连续时谱测度无原子也无密度，其傅里叶系数衰减由奇异测度的分形维数控制，对应自相似周期。
+\end{proof}
+
+\begin{definition}[谱测度与谱分布函数]\label{def:spectral_measure}
+设 $\{X_t\}$ 为零均值弱平稳过程，自协方差函数为 $\gamma(h)$。若存在 $[-\pi,\pi]$ 上的有限测度 $F$ 使得
+\[
+\gamma(h)=\int_{-\pi}^{\pi}e^{i\omega h}\,dF(\omega),\qquad h\in\mathbb Z,
+\]
+则称 $F$ 为 $\{X_t\}$ 的\textbf{谱测度}。若 $F$ 关于勒贝格测度绝对连续，即 $dF(\omega)=S(\omega)d\omega$，则 $S(\omega)$ 称为\textbf{谱密度}。
+\end{definition}
+
+\begin{theorem}[Herglotz 定理]\label{thm:herglotz}
+设 $\gamma:\mathbb Z\to\mathbb C$ 为非负定函数，即对任意 $n\in\mathbb N$ 和任意 $t_1,\dots,t_n\in\mathbb Z$、$z_1,\dots,z_n\in\mathbb C$，有
+\[
+\sum_{j,k=1}^{n}z_j\overline{z_k}\gamma(t_j-t_k)\ge0.
+\]
+则存在 $[-\pi,\pi]$ 上唯一的有限测度 $F$，使得
+\[
+\gamma(h)=\int_{-\pi}^{\pi}e^{i\omega h}\,dF(\omega),\qquad \forall h\in\mathbb Z.
+\]
+\end{theorem}
+
+\begin{proof}
+考虑函数
+\[
+f_N(\omega)=\frac{1}{2\pi N}\left|\sum_{t=1}^{N}X_t e^{-i\omega t}\right|^2.
+\]
+由 $\gamma$ 的非负定性，$f_N(\omega)\ge0$，且
+\[
+\frac{1}{2\pi}\int_{-\pi}^{\pi}f_N(\omega)\,d\omega
+=\frac{1}{N}\sum_{t,s=1}^{N}\gamma(t-s)
+\to \sum_h\gamma(h)
+\]
+在适当求和意义下。由 Riesz 表示定理和 Helly 选择定理，$f_N$ 的弱极限给出谱测度 $F$。反向论证：若 $\gamma(h)=\int e^{i\omega h}dF(\omega)$，则由 $F\ge0$ 直接验证 $\gamma$ 非负定。唯一性由三角多项式的稠密性给出。
+\end{proof}
+
+\begin{theorem}[Cramér 谱表示定理]\label{thm:cramer}
+设 $\{X_t\}$ 为零均值弱平稳过程，则存在 $[-\pi,\pi]$ 上正交增量过程 $\{Z(\omega)\}$，满足
+\[
+\mathbb E[Z(\omega_1)\overline{Z(\omega_2)}]=F(\omega_1\wedge\omega_2),
+\]
+使得
+\[
+X_t=\int_{-\pi}^{\pi}e^{i\omega t}\,dZ(\omega),\qquad t\in\mathbb Z,
+\]
+其中积分在均方意义下理解。$F$ 为 $\{X_t\}$ 的谱测度。
+\end{theorem}
+
+\begin{proof}
+构造 Hilbert 空间 $H=\overline{\operatorname{span}}\{X_t:t\in\mathbb Z\}$。由平稳性，映射 $U:X_t\mapsto X_{t+1}$ 是 $H$ 上的酉算子。由谱定理，
+\[
+U=\int_{-\pi}^{\pi}e^{i\omega}\,dE(\omega),
+\]
+其中 $E$ 为投影值测度。令 $Z(\omega)=E(\omega)X_0$，则
+\[
+X_t=U^tX_0=\int e^{i\omega t}\,dZ(\omega),
+\]
+且
+\[
+\mathbb E[|Z(\omega)|^2]=\|E(\omega)X_0\|^2=F(\omega).
+\]
+证毕。
+\end{proof}
+
+\begin{lemma}[谱测度勒贝格分解与周期类型三分]\label{lem:spectral_lebesgue_decomposition}
+设 $F$ 为平稳过程的谱测度。则 $F$ 有唯一勒贝格分解
+\[
+F=F_{\mathrm{d}}+F_{\mathrm{ac}}+F_{\mathrm{sc}},
+\]
+其中 $F_{\mathrm d}$ 为纯离散、$F_{\mathrm{ac}}$ 为绝对连续、$F_{\mathrm{sc}}$ 为奇异连续。对应概率周期类型为：
+\begin{enumerate}[label=(\roman*)]
+    \item $F_{\mathrm d}$ 对应严格周期分量；
+    \item $F_{\mathrm{ac}}$ 对应宽带随机周期或准周期分量；
+    \item $F_{\mathrm{sc}}$ 对应分形自相似周期分量。
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+勒贝格分解是测度论标准结论。周期类型对应由 Herglotz--Cramér 表示直接读出：原子对应确定性复指数分量；绝对连续部分对应连续谱密度；奇异连续部分对应无原子无密度的分形谱。
+\end{proof}
+
+\begin{proposition}[典型平稳过程的谱结构]\label{prop:typical_prob_spectra}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{白噪声}：$\gamma_\varepsilon(h)=\sigma^2\delta_{h,0}$，$S_\varepsilon(\omega)=\sigma^2/(2\pi)$，均方导数方差 $P_{\mathbb P}=\sigma^2\pi^2/3$。
+    \item \textbf{AR(1)}：$X_t=\phi X_{t-1}+\varepsilon_t$，$|\phi|<1$，则
+    \[
+    \gamma(h)=\frac{\sigma^2}{1-\phi^2}\phi^{|h|},\qquad
+    S(\omega)=\frac{\sigma^2}{2\pi}\frac{1}{1-2\phi\cos\omega+\phi^2}.
+    \]
+    \item \textbf{OU 过程}：$dX_t=-\theta X_tdt+\sigma dW_t$，则
+    \[
+    \gamma(\tau)=\frac{\sigma^2}{2\theta}e^{-\theta|\tau|},\qquad
+    S(\omega)=\frac{\sigma^2}{2\pi}\frac{1}{\theta^2+\omega^2}.
+    \]
+    \item \textbf{周期图}：$I_n(\omega)=n^{-1}|\sum_{t=1}^nX_t e^{-i\omega t}|^2$，有
+    \[
+    \mathbb E[I_n(\omega)]\to 2\pi S(\omega),\qquad
+    \operatorname{Var}(I_n(\omega))\to (2\pi S(\omega))^2.
+    \]
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 独立性给出 $\gamma_\varepsilon(h)=\sigma^2\delta_{h,0}$；由维纳--辛钦定理得平坦谱；直接积分得均方导数方差。
+(ii) 将递推展开为 $X_t=\sum_{k=0}^\infty\phi^k\varepsilon_{t-k}$，计算自协方差得 $\gamma(h)=\sigma^2\phi^{|h|}/(1-\phi^2)$；傅里叶变换得谱密度。
+(iii) OU 解为 $X_t=X_0e^{-\theta t}+\sigma\int_0^t e^{-\theta(t-s)}dW_s$，由 Itô 等距得 $\gamma(\tau)=\sigma^2 e^{-\theta|\tau|}/(2\theta)$；连续傅里叶变换得洛伦兹谱。
+(iv) 期望部分由 Toeplitz 引理；方差部分在高斯情形下 $I_n(\omega)$ 渐近服从 $\frac12(2\pi S(\omega))\chi^2_2$，故方差趋于 $(2\pi S(\omega))^2$。
+\end{proof}
+
+\begin{remark}[谱表示与周期结构的关系]\label{rem:spectral_period_relation}
+Herglotz 与 Cramér 定理揭示：平稳过程的全部周期信息都编码在谱测度 $F$ 中。离散谱给出严格周期，绝对连续谱给出宽带随机周期，奇异连续谱给出分形自相似周期。概率周期级数的构建，本质上就是把 $F$ 的原子部分显式写成周转圆组。
+\end{remark}
+
+\section{概率周转圆组的动态调节：接入「周期系统」章第三步}
+\label{sec:prob_adaptive}
+
+\begin{definition}[概率周转圆组的动态调节]\label{def:prob_adaptive_adjustment}
+设当前概率周转圆组为 $\mathfrak E^{(j)}$，部分和
+\[
+X^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+残差 $r^{(j)}=X-X^{(j)}$。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 $\|r^{(j)}\|^2>\delta$，则依残差周期图峰值新增一个周转圆：
+    \[
+    \mathfrak E^{(j+1)}=\mathfrak E^{(j)}\cup\{(\hat A,\hat\omega,\hat\phi)\},\qquad
+    \hat\omega=\arg\max_\omega |\widehat{X_r}(\omega)|;
+    \]
+    \item \textbf{参数调节}：对已有周转圆参数按正则化最小二乘或贝叶斯更新修正：
+    \[
+    (A_k,\phi_k)\leftarrow\arg\min_{A,\phi}\sum_n\left|X(n)-\sum_kA_ke^{i(\omega_kn+\phi_k)}\right|^2.
+    \]
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:prob_adaptive_growth}
+本命题与第~\ref{chap:periodic_system}~章「周转圆组的动态调节」节（\cref{sec:ps_adaptive}）中的 \cref{prop:ps_adaptive_growth} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。本处的差别仅为术语（概率目标 / 概率样本），算法步骤与结论完全相同。
+\end{proposition}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:prob_adaptive_convergence}
+设概率目标为长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值有限周期序列}且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得概率周转圆组即目标的精确傅里叶数据；若序列为\textbf{复值}，则相应步数为至多 $T_0$ 步。
+\end{theorem}
+
+\begin{proof}
+长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值}有限周期序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波（含常数项）上完备；\textbf{复值}序列则需 $T_0$ 个分量（正、负频率各自独立）。每步按 \cref{prop:prob_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。参数收敛性由正则化最小二乘的强凸性给出。
+\end{proof}
+
+\begin{definition}[指数族与自然参数]\label{def:exp_family_prob}
+本定义与第~\ref{chap:propagation}~章「贝叶斯更新的平移结构」节（\cref{subsec:bayesian_translation}）中的 \cref{def:exponential_family} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处的差别仅为术语（概率目标 / 概率样本），数学对象与结论完全相同。
+\end{definition}
+
+\begin{definition}[共轭先验]\label{def:conjugate_prior_prob}
+本定义与第~\ref{chap:probability}~章「贝叶斯推断的基本框架」节（\cref{subsec:bayes_framework}）中的 \cref{def:conjugate_prior} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处的差别仅为术语（概率目标 / 概率样本），数学对象与结论完全相同。
+\end{definition}
+
+\begin{theorem}[共轭先验下贝叶斯更新的精确有限阶平移]\label{thm:conjugate_exact_finite_order_prob}
+本定理与第~\ref{chap:propagation}~章「贝叶斯更新的平移结构」节（\cref{subsec:bayesian_translation}）中的 \cref{thm:conjugate_exact_finite_order} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。本处的差别仅为术语（概率目标 / 概率样本），数学对象与结论完全相同。
+\end{theorem}
+
+\begin{corollary}[自然参数的单调累积]\label{cor:natural_param_monotone_prob}
+本推论与第~\ref{chap:propagation}~章「贝叶斯更新的平移结构」节（\cref{subsec:bayesian_translation}）中的 \cref{cor:natural_parameter_monotone} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处的差别仅为术语（概率目标 / 概率样本），数学对象与结论完全相同。
+\end{corollary}
+
+\begin{proof}
+$\nu_n=\nu_0+n$ 严格单调递增；$\tau_n-\tau_{n-1}=T(x_n)$。
+\end{proof}
+
+\begin{example}[Beta--二项共轭的精确演化]\label{ex:beta_binomial_prob}
+设似然 $X\mid\theta\sim\mathrm{Bernoulli}(\theta)$，共轭先验为 $\mathrm{Beta}(\alpha,\beta)$。$n$ 次观测后
+\[
+\alpha_n=\alpha_0+\sum_{i=1}^nx_i,\qquad \beta_n=\beta_0+n-\sum_{i=1}^nx_i.
+\]
+在自然参数坐标下，每次观测对应一次平移。
+\end{example}
+
+\begin{example}[Gaussian--Gaussian 共轭的精确演化]\label{ex:gaussian_gaussian_prob}
+设似然 $X\mid\mu\sim\mathcal N(\mu,\sigma^2)$，$\sigma^2$ 已知，先验 $\mu\sim\mathcal N(\mu_0,\tau_0^2)$。以精度--均值积坐标 $(1/\tau^2,\mu/\tau^2)$ 为自然参数坐标，则 $n$ 次观测后
+\[
+\frac{1}{\tau_n^2}=\frac{1}{\tau_0^2}+\frac{n}{\sigma^2},\qquad
+\frac{\mu_n}{\tau_n^2}=\frac{\mu_0}{\tau_0^2}+\frac{\sum_ix_i}{\sigma^2}.
+\]
+\end{example}
+
+\begin{remark}[动态调节的边界]\label{rem:prob_adaptive_boundary}
+\cref{thm:prob_adaptive_convergence} 依赖有限谐波完备性与残差主频提取。若目标为连续谱或长记忆过程，则不存在有限周转圆组精确表示，只能作有界逼近或谱密度估计。非共轭先验下的贝叶斯更新一般不能在有限维自然参数空间中表示为有限阶平移，属于开放问题。
+\end{remark}
+
+\section{概率卷积：接入「周期系统」章第四步}
+\label{sec:prob_convolution}
+
+\begin{definition}[概率振幅卷积、相位卷积与频率卷积]\label{def:prob_convolution_types}
+设两个概率周转圆组为
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+定义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅卷积}：$\mathbb A_{mn}=A_nB_m$；
+    \item \textbf{相位卷积}：$\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$；
+    \item \textbf{频率卷积}：$\mathbb F_{mn}=\omega_n\nu_m$；
+    \item \textbf{趋势卷积}：$\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$。
+\end{enumerate}
+这与「级数与卷积」章 \cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution}、\cref{def:tendency_convolution} 一致。
+\end{definition}
+
+\begin{theorem}[三类卷积在概率周转圆组上的作用]\label{thm:prob_convolution_action}
+设两个概率目标的周转圆组分别为 $\mathfrak E$ 与 $\mathfrak E'$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 振幅卷积只作用于半径；
+    \item 相位卷积只作用于相位；
+    \item 频率卷积只作用于转速；
+    \item 趋势卷积同时保留振幅与相位。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:prob_convolution_types} 直接读出：振幅卷积不含相位与频率；相位卷积不含振幅与频率；频率卷积不含振幅与相位；趋势卷积是振幅卷积与相位卷积的逐项乘积。
+\end{proof}
+
+\begin{proposition}[特征函数与相位卷积]\label{prop:char_phase_convolution}
+设 $X,Y$ 为独立随机变量，特征函数分别为 $\phi_X(t)=\mathbb E[e^{itX}]$、$\phi_Y(t)=\mathbb E[e^{itY}]$。则
+\[
+\phi_{X+Y}(t)=\phi_X(t)\phi_Y(t).
+\]
+在概率周转圆组语言中，独立和的相位卷积为两个特征函数相位因子的乘积。
+\end{proposition}
+
+\begin{proof}
+由独立性，
+\[
+\phi_{X+Y}(t)=\mathbb E[e^{it(X+Y)}]=\mathbb E[e^{itX}]\mathbb E[e^{itY}]=\phi_X(t)\phi_Y(t).
+\]
+若写 $\phi_X=|\phi_X|e^{i\arg\phi_X}$，则相位部分满足 $\arg\phi_{X+Y}=\arg\phi_X+\arg\phi_Y$，即相位相加。
+\end{proof}
+
+\begin{corollary}[独立和与卷积]\label{cor:indep_sum_conv}
+若 $X_1,\dots,X_n$ 独立同分布，特征函数为 $\phi$，则 $S_n=\sum_{i=1}^nX_i$ 的特征函数为 $\phi_{S_n}(t)=\phi(t)^n$。在概率周转圆组中，独立和对应相位卷积的 $n$ 次幂。
+\end{corollary}
+
+\begin{proof}
+由 \cref{prop:char_phase_convolution} 递推即得。
+\end{proof}
+
+\begin{example}[高斯和的相位卷积]\label{ex:gaussian_sum}
+设 $X_i\sim\mathcal N(\mu_i,\sigma_i^2)$ 独立，则
+\[
+\phi_{X_i}(t)=e^{i\mu_it-\sigma_i^2t^2/2}.
+\]
+于是
+\[
+\phi_{\sum_iX_i}(t)=\exp\Bigl(i(\sum_i\mu_i)t-\frac12(\sum_i\sigma_i^2)t^2\Bigr),
+\]
+即独立高斯和仍为高斯，均值和方差分别相加。相位部分线性相加，振幅部分平方相加。
+\end{example}
+
+\begin{remark}[概率卷积与周期卷积的关系]\label{rem:prob_convolution_relation}
+概率卷积不是新的卷积运算，而是「级数与卷积」章周期卷积在概率周转圆组上的实例。特征函数乘积、协方差、互相关分别是相位卷积、振幅卷积和趋势卷积在概率论中的具体表现。
+\end{remark}
+
+\section{与离散采样、调和分析、时序分析的整合：接入「周期系统」章第五步}
+\label{sec:prob_integration}
+
+\begin{definition}[概率周期诊断流程]\label{def:probabilistic_periodic_diagnosis}
+对随机过程观测数据 $\{X_1,\dots,X_N\}$，采用周期卷积框架进行概率周期结构诊断：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平移周期诊断}：计算样本自相关函数与功率谱密度，识别主导频率
+    \[
+    \omega_0=\arg\max_\omega \hat S(\omega).
+    \]
+    \item \textbf{缩放周期诊断}：计算 Hurst 指数 $\hat H$。若 $\hat H\neq1/2$，则过程具有标度结构。
+    \item \textbf{旋转周期诊断}：计算循环自相关函数与循环谱密度，识别主导循环频率 $\alpha_0$。
+    \item \textbf{贝叶斯周期诊断}：拟合贝叶斯模型，计算先验熵、Fisher 信息矩阵及后验协方差矩阵。
+    \item \textbf{不变性检验}：分别检验平稳性、自相似性与循环平稳性。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[概率周期诊断流程与三章接口]\label{thm:prob_diagnosis_integration}
+\cref{def:probabilistic_periodic_diagnosis} 的五个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}、\cref{thm:intercalation_leakage_suppression}；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}、\cref{prop:twelve_to_six}；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}、\cref{def:ts_window_validation}。
+\end{enumerate}
+因此概率周期诊断不是独立方法，而是周期数学统一工具链在随机系统上的应用。
+\end{theorem}
+
+\begin{proof}
+逐条对应：
+(i) 平移周期诊断需要采样与谱估计，采样定义与泄漏抑制见「离散采样逼近、同余角与置闰」章；
+(ii) 频率分解与相位核见「调和分析」章；
+(iii) 周期图峰值、Fisher 检验与窗函数验证见「时序分析」章。
+故诊断流程由三章工具链合成。
+\end{proof}
+
+\begin{remark}[整合后的操作顺序]\label{rem:prob_integration_order}
+实际诊断建议顺序为：先判定概率目标是否周期（\cref{thm:prob_periodicity_decision}）；再构建谱测度与周转圆组（\cref{thm:prob_series_reconstruction}）；再用动态调节与贝叶斯更新优化参数（\cref{thm:prob_adaptive_convergence}、\cref{thm:conjugate_exact_finite_order_prob}）；再作概率卷积与特征函数分析（\cref{prop:char_phase_convolution}）；最后按 \cref{def:probabilistic_periodic_diagnosis} 输出诊断。
+\end{remark}
+
+\section{概率周期系统的相空间、演化与守恒}
+\label{sec:prob_phase_space}
+
+\subsection{均方导数方差：平移不变性的不变量}
+
+\begin{definition}[均方导数方差]\label{def:probability_momentum}
+设 $\{X_t\}$ 为均方可导的弱平稳随机过程，自协方差函数为 $\gamma(h)$。其\textbf{均方导数方差} $P_{\mathbb P}$ 定义为
+\[
+P_{\mathbb P}=\mathbb E\left[\left(\frac{dX_t}{dt}\right)^2\right].
+\]
+\end{definition}
+
+\begin{proposition}[均方导数方差与自相关函数的关系]\label{prop:momentum_autocorrelation}
+设 $\{X_t\}$ 为均方可导的平稳随机过程。则
+\[
+P_{\mathbb P}=-\gamma''(0)=-\left.\frac{d^2}{dh^2}\gamma(h)\right|_{h=0}.
+\]
+\end{proposition}
+
+\begin{proof}
+由均方导数定义：
+\[
+\mathbb E\left[\left(\frac{dX_t}{dt}\right)^2\right]
+=\lim_{h\to0}\mathbb E\left[\left(\frac{X_{t+h}-X_t}{h}\right)^2\right].
+\]
+展开得
+\[
+\frac1{h^2}\mathbb E[X_{t+h}^2-2X_{t+h}X_t+X_t^2]
+=\frac{2}{h^2}(\gamma(0)-\gamma(h)).
+\]
+平稳性使 $\gamma$ 为偶函数，故 $\gamma'(0)=0$，从而
+\[
+\gamma(h)=\gamma(0)+\frac12\gamma''(0)h^2+o(h^2).
+\]
+代入取极限得 $P_{\mathbb P}=-\gamma''(0)$。
+\end{proof}
+
+\begin{proposition}[均方导数方差的频域表示]\label{prop:momentum_frequency}
+均方导数方差 $P_{\mathbb P}$ 在频域中由功率谱密度 $S(\omega)$ 的二阶矩给出：
+\[
+P_{\mathbb P}=\int_{-\pi}^{\pi}\omega^2S(\omega)\,d\omega.
+\]
+\end{proposition}
+
+\begin{proof}
+由维纳--辛钦定理，
+\[
+\gamma(h)=\int_{-\pi}^{\pi}e^{i\omega h}S(\omega)\,d\omega.
+\]
+对 $h$ 求二阶导数：
+\[
+\gamma''(h)=-\int_{-\pi}^{\pi}\omega^2e^{i\omega h}S(\omega)\,d\omega.
+\]
+取 $h=0$ 即得。
+\end{proof}
+
+\begin{proposition}[均方导数方差的不变性与平稳性]\label{prop:momentum_conservation_stationarity}
+设 $\{X_t\}$ 为均方可导随机过程。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $\{X_t\}$ 弱平稳，则 $P_{\mathbb P}$ 与时间 $t$ 无关；
+    \item 反之，若对某个二次可微自协方差 $\gamma(t,s)$，$-\partial^2\gamma/\partial h^2|_{h=0}$ 与 $t$ 无关，则过程至少保持二阶平稳性。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 弱平稳要求 $\gamma(t,t+h)$ 仅依赖 $h$，故 $\gamma''(0)$ 与 $t$ 无关。
+(ii) 若该二阶导数与 $t$ 无关，则 $\operatorname{Var}(dX_t/dt)$ 与 $t$ 无关；结合均值有限，得二阶平稳性。
+\end{proof}
+
+\subsection{平稳过程的谱表示}
+
+\cref{def:spectral_measure,thm:herglotz,thm:cramer} 已给出谱测度与谱表示。此处补充其概率周期解释。
+
+\begin{remark}[谱表示与周期结构的关系]\label{rem:spectral_period_relation_2}
+Herglotz 与 Cramér 定理揭示：平稳过程的全部周期信息都编码在谱测度 $F$ 中。离散谱对应严格周期，绝对连续谱对应随机周期或准周期，奇异连续谱对应自相似周期。谱测度的勒贝格分解对应周期结构的三分。
+\end{remark}
+
+\subsection{典型平稳过程的周期结构}
+
+\cref{prop:typical_prob_spectra} 已给出白噪声、AR(1)、OU、周期图的谱结构。此处补充其概率周期判定。
+
+\begin{example}[白噪声无周期]\label{ex:white_noise_no_period}
+白噪声自协方差在非零滞后处为零，故不存在非平凡周期分量。其概率判定映射为恒等，周期类型为平凡周期型，但样本路径不周期。
+\end{example}
+
+\begin{example}[AR(1) 的谱峰]\label{ex:ar1_peak}
+AR(1) 中 $\phi>0$ 时谱在 $\omega=0$ 处最大，表示正持续性；$\phi<0$ 时谱在 $\omega=\pi$ 处最大，表示交替反转。谱峰位置给出主导周期。
+\end{example}
+
+\subsection{多窗谱估计}
+
+\begin{definition}[Slepian 序列]\label{def:slepian}
+设时间带宽积 $W\in(0,1/2)$，样本长度 $N$。\textbf{Slepian 序列} $\{v_k^{(N,W)}(t)\}_{k=0}^{N-1}$ 定义为
+\[
+\sum_{s=1}^{N}\frac{\sin2\pi W(t-s)}{\pi(t-s)}v_k(s)=\lambda_k^{(N,W)}v_k(t),\qquad t=1,\dots,N.
+\]
+对应的 $\lambda_k^{(N,W)}$ 称为\textbf{Slepian 特征值}，满足 $1>\lambda_0>\lambda_1>\dots>\lambda_{N-1}>0$。
+\end{definition}
+
+\begin{theorem}[Slepian 序列的正交性与能量集中性]\label{thm:slepian}
+Slepian 序列 $\{v_k^{(N,W)}\}_{k=0}^{N-1}$ 构成 $\mathbb R^N$ 的标准正交基：
+\[
+\sum_{t=1}^{N}v_j(t)v_k(t)=\delta_{jk}.
+\]
+且能量集中度满足
+\[
+\beta_k^2(W)=\frac{\int_{-W}^{W}|\sum_{t=1}^{N}v_k(t)e^{-i2\pi ft}|^2df}{\int_{-1/2}^{1/2}|\sum_{t=1}^{N}v_k(t)e^{-i2\pi ft}|^2df}=\lambda_k^{(N,W)}.
+\]
+当 $k<2NW-1$ 时 $\lambda_k\approx1$；当 $k>2NW+1$ 时 $\lambda_k\approx0$。$2NW$ 称为 Shannon 数。
+\end{theorem}
+
+\begin{proof}
+矩阵 $A_{ts}=\sin2\pi W(t-s)/(\pi(t-s))$ 实对称，其特征向量正交。归一化得标准正交基。能量集中度由频域积分：
+\[
+\int_{-W}^{W}|V_k(f)|^2df
+=\sum_{t,s}v_k(t)v_k(s)\frac{\sin2\pi W(t-s)}{\pi(t-s)}
+=\lambda_k\sum_t|v_k(t)|^2=\lambda_k.
+\]
+总能量为 $1$，故 $\beta_k^2=\lambda_k$。渐近行为由 Slepian 1978 证明。
+\end{proof}
+
+\begin{definition}[多窗谱估计]\label{def:multitaper}
+设 $\{X_1,\dots,X_N\}$ 为零均值平稳过程样本，$\{v_k^{(N,W)}\}_{k=0}^{K-1}$ 为前 $K$ 个 Slepian 序列。\textbf{多窗谱估计}定义为
+\[
+\hat S_{\mathrm{MT}}(f)=\frac1K\sum_{k=0}^{K-1}\hat S_k(f),\qquad
+\hat S_k(f)=\Delta t\left|\sum_{t=1}^{N}v_k(t)X_te^{-i2\pi ft\Delta t}\right|^2.
+\]
+\end{definition}
+
+\begin{proposition}[多窗谱估计的偏差--方差分析]\label{prop:multitaper_consistency}
+在高斯平稳、$N\to\infty$、$W\to0$、$NW\to\infty$ 条件下：
+\begin{enumerate}[label=(\roman*)]
+    \item 渐近无偏：$\mathbb E[\hat S_{\mathrm{MT}}(f)]\to S(f)$；
+    \item 方差缩减：$\operatorname{Var}[\hat S_{\mathrm{MT}}(f)]\approx S^2(f)/K$；
+    \item 自由度：$\hat S_{\mathrm{MT}}(f)$ 渐近服从 $S(f)\chi^2_{2K}/(2K)$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 每个 $\hat S_k(f)$ 是加窗周期图，期望趋于 $S(f)$。
+(ii) 由 Slepian 正交性，各 $\hat S_k(f)$ 渐近不相关，故方差为 $S^2(f)/K$。
+(iii) 高斯情形下每个 $\hat S_k(f)/S(f)$ 渐近服从 $\frac12\chi^2_2$，$K$ 个独立平均得 $\chi^2_{2K}/(2K)$。
+\end{proof}
+
+\begin{example}[太阳黑子多窗谱]\label{ex:sunspot_multitaper}
+对 1749--2024 太阳黑子月均值，取 $NW=4$、$K=8$，多窗谱在 $11$ 年处给出清晰峰，方差降为单窗 $1/8$。自适应 Thomson 估计进一步压低低频泄露。
+\end{example}
+
+\subsection{自相似指数与尾指数}
+
+\begin{definition}[自相似指数与尾指数]\label{def:probability_scaling_charge}
+概率系统的\textbf{缩放不变量}包括：
+\begin{enumerate}[label=(\roman*)]
+    \item 自相似过程的 Hurst 指数 $H$：$X_{\lambda t}\stackrel{d}{=}\lambda^H X_t$；
+    \item 重尾分布的尾指数 $\alpha$：$\mathbb P(|X|>x)\sim x^{-\alpha}$；
+    \item 贝叶斯模型的对数边际似然 $\log p(\mathbf D)$。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Hurst 指数与尾指数的对偶关系]\label{prop:hurst_tail_duality}
+设自相似过程 $X_t$ 满足 $X_{\lambda t}\stackrel{d}{=}\lambda^H X_t$，且 $X_1$ 的尾指数为 $\alpha>0$。则 $\alpha=1/H$。
+\end{proposition}
+
+\begin{proof}
+由自相似性，
+\[
+\mathbb P(|X_\lambda|>x)=\mathbb P(\lambda^H|X_1|>x)=\mathbb P(|X_1|>\lambda^{-H}x).
+\]
+由尾指数定义，$\mathbb P(|X_1|>y)\sim y^{-\alpha}$，代入 $y=\lambda^{-H}x$ 得
+\[
+\mathbb P(|X_\lambda|>x)\sim \lambda^{H\alpha}x^{-\alpha}.
+\]
+另一方面 $X_\lambda$ 自身尾指数为 $\alpha$，比较得 $\lambda^{H\alpha}=1$，即 $H\alpha=1$。
+\end{proof}
+
+\subsection{相位相干性}
+
+\begin{definition}[相位相干性]\label{def:probability_angular_momentum}
+概率系统的\textbf{相位相干性}包括：
+\begin{enumerate}[label=(\roman*)]
+    \item 循环平稳过程的循环频率守恒：$\alpha=k/T$；
+    \item 随机振荡的相位相干时间 $\tau_{\mathrm{coh}}=2/\sigma^2$；
+    \item 贝叶斯后验协方差矩阵迹 $\operatorname{tr}(\Sigma_{\mathrm{post}})$。
+\end{enumerate}
+\end{definition}
+
+\begin{lemma}[相位扩散的相干时间]\label{ch15_coherence_time}
+设相位 $\Phi_t$ 为扩散系数 $\sigma^2$ 的维纳过程，则
+\[
+\mathbb E[e^{i(\Phi_{t+\tau}-\Phi_t)}]=e^{-\sigma^2\tau/2},
+\]
+相干时间为
+\[
+\tau_{\mathrm{coh}}=\frac{2}{\sigma^2}.
+\]
+\end{lemma}
+
+\begin{proof}
+$\Phi_{t+\tau}-\Phi_t=\sigma(W_{t+\tau}-W_t)$ 是均值为零、方差为 $\sigma^2\tau$ 的正态随机变量。由正态特征函数得
+\[
+\mathbb E[e^{i(\Phi_{t+\tau}-\Phi_t)}]=e^{-\sigma^2\tau/2}.
+\]
+令 $e^{-\sigma^2\tau/2}=e^{-1}$ 解得 $\tau=2/\sigma^2$。
+\end{proof}
+
+\subsection{循环平稳过程}
+
+\begin{definition}[循环平稳过程]\label{def:cyclostationary_strict}
+随机过程 $\{X_t\}$ 称为以 $T$ 为周期的\textbf{循环平稳过程}，若
+\[
+\mu(t+T)=\mu(t),\qquad \gamma(t+T,s+T)=\gamma(t,s),\qquad \forall t,s\in\mathbb R.
+\]
+若对任意 $T$ 成立，则退化为平稳过程。
+\end{definition}
+
+\begin{definition}[循环自协方差函数]\label{def:cyclic_autocovariance}
+设 $\{X_t\}$ 为以 $T$ 为周期的循环平稳过程。其\textbf{循环自协方差函数}定义为
+\[
+R_X^\alpha(\tau)=\lim_{N\to\infty}\frac1{2N+1}\sum_{t=-N}^{N}\mathbb E[(X_{t+\tau}-\mu)\overline{(X_t-\mu)}]e^{-i2\pi\alpha t},
+\]
+其中 $\alpha=k/T$ 称为\textbf{循环频率}。
+\end{definition}
+
+\begin{theorem}[循环平稳过程的谱分解]\label{thm:cyclostationary_spectral_decomposition}
+设 $\{X_t\}$ 为以 $T$ 为周期的循环平稳过程，具有有限二阶矩。则
+\[
+X_t=\sum_{k\in\mathbb Z}X_t^{(k)}e^{i2\pi kt/T},
+\]
+其中每个 $X_t^{(k)}$ 是平稳过程，且不同 $k$ 的分量在平均意义上正交。
+\end{theorem}
+
+\begin{proof}
+由循环平稳性，$\gamma(t,s)$ 关于 $t$ 以 $T$ 为周期，可展开为
+\[
+\gamma(t,s)=\sum_k\gamma_k(s-t)e^{i2\pi kt/T}.
+\]
+将 $X_t$ 投影到频率 $\omega_k=2\pi k/T$：
+\[
+X_t^{(k)}=\frac1T\int_0^TX_{t-u}e^{-i2\pi k(t-u)/T}du.
+\]
+由循环平稳性，
+\[
+\mathbb E[X_{t+\tau}^{(k)}\overline{X_t^{(l)}}]=\gamma_k(\tau)\delta_{kl}.
+\]
+证毕。
+\end{proof}
+
+\subsection{卡尔曼滤波的谱理论}
+
+\begin{definition}[状态空间模型]\label{def:state_space_model}
+线性高斯\textbf{状态空间模型}：
+\[
+\mathbf x_{t+1}=\mathbf F\mathbf x_t+\mathbf w_t,\qquad
+\mathbf y_t=\mathbf H\mathbf x_t+\mathbf v_t,
+\]
+其中 $\mathbf w_t\sim\mathcal N(\mathbf 0,\mathbf Q)$，$\mathbf v_t\sim\mathcal N(\mathbf 0,\mathbf R)$，且独立。
+\end{definition}
+
+\begin{theorem}[状态空间模型的谱密度]\label{thm:kalman_spectrum}
+设状态空间模型稳定。则观测过程 $\{\mathbf y_t\}$ 平稳，其谱密度为
+\[
+\mathbf S_y(\omega)=\mathbf H(e^{i\omega}\mathbf I-\mathbf F)^{-1}\mathbf Q(e^{-i\omega}\mathbf I-\mathbf F^{-\mathsf T})^{-1}\mathbf H^{\mathsf T}+\mathbf R.
+\]
+若 $\mathbf Q=\mathbf 0$，则 $\mathbf S_y=\mathbf R$。
+\end{theorem}
+
+\begin{proof}
+由状态方程递推得
+\[
+\mathbf y_t=\mathbf H\sum_{k=0}^{\infty}\mathbf F^k\mathbf w_{t-1-k}+\mathbf v_t.
+\]
+自协方差为
+\[
+\boldsymbol\gamma_y(\tau)=\mathbf H\mathbf F^{|\tau|}\mathbf P\mathbf H^{\mathsf T}+\mathbf R\delta_{\tau,0},
+\]
+其中 $\mathbf P$ 满足 Lyapunov 方程 $\mathbf P=\mathbf F\mathbf P\mathbf F^{\mathsf T}+\mathbf Q$。傅里叶变换得谱密度。
+\end{proof}
+
+\begin{proposition}[卡尔曼滤波的周期信号提取]\label{prop:kalman_periodic_extraction}
+取
+\[
+\mathbf F=\begin{pmatrix}\cos\omega_0&-\sin\omega_0\\ \sin\omega_0&\cos\omega_0\end{pmatrix},\qquad
+\mathbf H=\begin{pmatrix}1&0\end{pmatrix}.
+\]
+则模型生成以 $\omega_0$ 为中心频率的窄带信号。稳态卡尔曼滤波实现自适应带宽带通滤波，等效带宽
+\[
+\Delta\omega\approx \frac{q}{\sqrt{p_0r}}.
+\]
+\end{proposition}
+
+\begin{proof}
+对模型线性化，稳态预测协方差 $p_0$ 满足 Riccati 方程。频域响应 $3$ dB 带宽由 $q,r,p_0$ 决定，近似为 $q/\sqrt{p_0r}$。
+\end{proof}
+
+\subsection{贝叶斯推断中的结构对应}
+
+\begin{remark}[贝叶斯模型三类分布的结构对应（\textbf{经验观察／研究纲领}）]\label{thm:bayesian_grammar_correspondence}
+下面三条是\textbf{经验观察／研究纲领}式的启发式类比，不是已证明的定理——「携带标度／平移／旋转信息」在本节中没有独立的数学定义，三条的「证明」也只是比喻：
+\begin{enumerate}[label=(\roman*)]
+    \item 先验分布 $\pi(\theta)$ 携带标度信息；
+    \item 似然函数 $p(\mathbf D\mid\theta)$ 携带平移信息；
+    \item 后验分布 $p(\theta\mid\mathbf D)$ 携带旋转信息。
+\end{enumerate}
+若要把它写成可检验的命题，需要先给出「携带某类变换信息」的数学定义（例如：$\pi$ 在 $\theta\mapsto a\theta+b$ 下等变 $\Rightarrow$ 标度信息；得分函数 $\nabla_\theta\log p(\mathbf D\mid\theta)$ 在 $\theta\mapsto\theta+c$ 下协变 $\Rightarrow$ 平移信息；后验协方差矩阵 $\Sigma_{\mathrm{post}}$ 的特征分解给出参数空间正交标架 $\Rightarrow$ 旋转信息）。这些工作超出本章范围，此处仅作为类比保留。
+\end{remark}
+
+\begin{proposition}[边际似然的周期卷积表示]\label{prop:marginal_likelihood_periodic_transform}
+边际似然可表示为
+\[
+p(\mathbf D)=\mathcal K^{(1)}\{p_{\mathbf D},\pi\}(\mathbf D)\big|_{\text{全局积分}},
+\]
+其中 $p_{\mathbf D}(\theta)=p(\mathbf D\mid\theta)$，周期卷积参数取 $\alpha=1,d=1$。
+\end{proposition}
+
+\begin{proof}
+由边际似然定义
+\[
+p(\mathbf D)=\int p(\mathbf D\mid\theta)\pi(\theta)d\theta.
+\]
+被积函数是似然与先验的逐点乘积，即周期卷积在 $\alpha=1,d=1,W\equiv1,\tau=0$ 下的核化乘积。
+\end{proof}
+
+\subsection{MCMC 的收敛性与周期诊断}
+
+\begin{definition}[马尔可夫链的谱隙]\label{def:spectral_gap}
+设有限状态马尔可夫链不可约、非周期，且关于平稳分布 $\boldsymbol\pi$ \textbf{可逆}（即满足细致平衡 $\pi(x)P(x,y)=\pi(y)P(y,x)$；可逆性保证 $\mathbf P$ 在 $L^2(\pi)$ 中自伴、特征值全为实数，从而「第二大特征值模」与谱分解同时可用；不可逆链需改用奇异值定义谱隙）。转移矩阵 $\mathbf P$，平稳分布 $\boldsymbol\pi$。\textbf{谱隙}为
+\[
+\gamma=1-\lambda_2,
+\]
+其中 $\lambda_2$ 为第二大特征值模。收敛速率满足
+\[
+\|P^t(x,\cdot)-\pi\|_{\mathrm{TV}}\le \frac12\|\pi_x/\pi-1\|_2(1-\gamma)^t,
+\]
+其中 $\pi_x(\cdot)=P(x,\cdot)$ 为初始状态 $x$ 对应的一步行分布，$\|\pi_x/\pi-1\|_2^2=\sum_y\bigl(\pi_x(y)/\pi(y)-1\bigr)^2\pi(y)$ 为初始状态偏离平稳分布的程度（$\chi^2$ 距离）。该界由 Levin--Peres--Wilmer, \textit{Markov Chains and Mixing Times}, 2nd ed., AMS, 2017 的定理 12.3（$\chi^2$ 距离的收缩估计：$\chi^2(\pi_xP^t)\le(1-\gamma)^{2t}\chi^2(\pi_x)$）与总变差距离--$\chi^2$ 距离不等式 $\|\mu-\pi\|_{\mathrm{TV}}\le\frac12\|\mu/\pi-1\|_2$ 合并得到。
+\end{definition}
+
+\begin{theorem}[MCMC 收敛性与周期诊断]\label{thm:mcmc_convergence}
+设 $\{X_t\}$ 为有限状态、不可约马尔可夫链，周期为 $d$，且关于平稳分布 $\boldsymbol\pi$ 可逆。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 收敛速度由谱隙决定：$\|P^t(x,\cdot)-\pi\|_{\mathrm{TV}}\le\frac12\|\pi_x/\pi-1\|_2(1-\gamma)^t$（见 \cref{def:spectral_gap}）；
+    \item 链以 $d$ 为周期当且仅当 $\mathbf P$ 有特征值 $e^{2\pi ik/d}$，$k=0,\dots,d-1$；
+    \item 若除 $\lambda_1=1$ 外所有特征值模严格小于 $1$，则链非周期（$d=1$）。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 由可逆性，$\mathbf P$ 在 $L^2(\pi)$ 中自伴，存在关于 $\pi$ 正交归一的实特征向量基 $\{v_j\}$，对应特征值 $1=\lambda_1>\lambda_2\ge\cdots\ge\lambda_n\ge-1$；Perron--Frobenius 给出 $\lambda_1=1$ 为单根且 $v_1\equiv1$。写 $\pi_x/\pi-1=\sum_{j\ge2}a_jv_j$，则 $P^t(x,y)/\pi(y)-1=\sum_{j\ge2}a_j\lambda_j^tv_j(y)$，故 $\chi^2$ 距离满足 $\sum_y\bigl(P^t(x,y)/\pi(y)-1\bigr)^2\pi(y)=\sum_{j\ge2}a_j^2\lambda_j^{2t}\le(1-\gamma)^{2t}\|\pi_x/\pi-1\|_2^2$（这里用到 $|\lambda_j|\le1-\gamma$ 对一切 $j\ge2$）。由 Cauchy--Schwarz，$\|P^t(x,\cdot)-\pi\|_{\mathrm{TV}}=\frac12\sum_y\pi(y)\bigl|P^t(x,y)/\pi(y)-1\bigr|\le\frac12\|\pi_x/\pi-1\|_2(1-\gamma)^t$。
+(ii) 不可约链的周期分解把状态空间分为 $d$ 个循环类，且 $d$ 是使 $P^d$ 在各类上非周期的最小正整数；$P$ 的特征值恰为 $P^d$ 特征值的 $d$ 次根，故单位根只有 $e^{2\pi ik/d}$（$k=0,\dots,d-1$）。反之，若存在这样的特征值，则对应的特征向量给出模为 $d$ 的循环结构（\cref{lem:markov_period}）。
+(iii) 非周期即 $d=1$，此时除 $\lambda_1=1$ 外无模为 $1$ 的特征值，即所有 $|\lambda_i|<1$；反之若所有 $|\lambda_i|<1$（$i\ne1$），由 (ii) 无单位根，故 $d=1$。
+\end{proof}
+
+\begin{proposition}[MCMC 周期诊断方法]\label{prop:mcmc_periodicity}
+对 MCMC 样本，可用：
+\begin{enumerate}[label=(\roman*)]
+    \item 自相关函数在 $h=kT$ 处峰值；
+    \item 谱密度在 $\omega=2\pi/T$ 处尖峰；
+    \item 多链距离周期性振荡。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+若转移矩阵有特征值 $e^{i2\pi/T}$，自协方差含该频率分量；谱密度对应尖峰；多链在 $T$ 步后回到相近位置。
+\end{proof}
+
+\subsection{隐马尔可夫模型的周期结构}
+
+\begin{definition}[隐马尔可夫模型]\label{def:hmm}
+\textbf{隐马尔可夫模型}由隐含状态链 $\{Z_t\}$ 与观测链 $\{X_t\}$ 构成：
+\[
+Z_t\in\{1,\dots,K\},\qquad \mathbb P(Z_{t+1}=j\mid Z_t=i)=a_{ij},
+\]
+\[
+X_t\mid Z_t=j\sim p_j(\cdot).
+\]
+\end{definition}
+
+\begin{theorem}[HMM 转移矩阵的周期分解]\label{thm:hmm_period}
+设 HMM 转移矩阵 $\mathbf A$ 不可约。则状态空间唯一分解为 $d$ 个循环类 $C_1,\dots,C_d$：
+\[
+\mathbb P(Z_{t+1}\in C_{j+1}\mid Z_t\in C_j)=1,\qquad j=1,\dots,d\pmod d.
+\]
+$d=1$ 非周期；$d>1$ 以周期 $d$ 循环。
+\end{theorem}
+
+\begin{proof}
+由马尔可夫链周期分解定理，$d$ 为返回步数最大公约数，状态按模 $d$ 同余类分解。
+\end{proof}
+
+\begin{proposition}[HMM 观测过程的谱密度]\label{prop:hmm_spectrum}
+设 $\mu_j=\mathbb E[X_t\mid Z_t=j]$，则
+\[
+S_X(\omega)=\sigma_X^2+2\operatorname{Re}\left[\sum_{h=1}^\infty\boldsymbol\mu^{\mathsf T}\operatorname{diag}(\boldsymbol\pi)\mathbf A^h\boldsymbol\mu e^{-i\omega h}\right].
+\]
+\end{proposition}
+
+\begin{proof}
+由
+\[
+\mathbb E[(X_{t+h}-\mathbb EX)(X_t-\mathbb EX)]
+=\boldsymbol\mu^{\mathsf T}\operatorname{diag}(\boldsymbol\pi)\mathbf A^h\boldsymbol\mu-(\mathbb EX)^2,
+\]
+傅里叶变换即得。
+\end{proof}
+
+\subsection{高斯过程与周期核}
+
+\begin{definition}[周期核]\label{def:periodic_kernel}
+\textbf{周期核}为
+\[
+k_{\mathrm{per}}(x,x')=\sigma^2\exp\left(-\frac{2\sin^2(\pi|x-x'|/T)}{\ell^2}\right).
+\]
+\end{definition}
+
+\begin{proposition}[周期核的谱密度]\label{prop:gp_spectrum}
+MacKay 周期核的谱密度为
+\[
+S_{\mathrm{per}}(\omega)=\sigma^2\sum_{k=-\infty}^{\infty}I_k\left(\frac1{\ell^2}\right)e^{-1/\ell^2}\delta\left(\omega-\frac{2\pi k}{T}\right),
+\]
+其中 $I_k$ 为修正贝塞尔函数。故周期核高斯过程仅含频率 $2\pi k/T$ 的谐波。
+\end{proposition}
+
+\begin{proof}
+由
+\[
+k_{\mathrm{per}}(x,x')=\sigma^2e^{-1/\ell^2}e^{(2/\ell^2)\cos(2\pi(x-x')/T)}
+\]
+及 Bessel 生成函数 $e^{z\cos\theta}=\sum_kI_k(z)e^{ik\theta}$，对 $x-x'$ 傅里叶变换得离散谱。
+\end{proof}
+
+\subsection{长记忆过程的周期诊断}
+
+\begin{definition}[ARFIMA 过程]\label{def:arfima}
+\textbf{ARFIMA}$(p,d,q)$ 过程定义为
+\[
+\Phi(B)(1-B)^dX_t=\Theta(B)\varepsilon_t,
+\]
+其中 $d\in(-1/2,1/2)$。
+\end{definition}
+
+\begin{proposition}[ARFIMA 过程的谱密度]\label{prop:arfima_spectrum}
+ARFIMA$(p,d,q)$ 的谱密度为
+\[
+S_X(\omega)=\frac{\sigma^2}{2\pi}\frac{|\Theta(e^{-i\omega})|^2}{|\Phi(e^{-i\omega})|^2}|1-e^{-i\omega}|^{-2d}.
+\]
+当 $\omega\to0$ 时 $S_X(\omega)\sim C|\omega|^{-2d}$。
+\begin{enumerate}[label=(\roman*)]
+    \item $d=0$：短记忆；
+    \item $0<d<1/2$：长记忆，谱发散；
+    \item $d<0$：反持续性。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+分数阶差分频域表示为 $(1-B)^d\to(1-e^{-i\omega})^d$，故模方为 $|1-e^{-i\omega}|^{-2d}$。当 $\omega\to0$ 时 $|1-e^{-i\omega}|^2\approx\omega^2$，得 $S_X\propto\omega^{-2d}$。
+\end{proof}
+
+\subsection{概率测度连续不变性对应的不变量}
+
+\begin{theorem}[概率测度连续不变性对应的不变量]\label{thm:probability_noether}
+设随机过程 $\{X_t\}$ 的概率分布 $\mathbb P$ 在连续变换群 $G$ 下不变。则存在概率不变量 $Q_{\mathbb P}$，满足 $\mathbb E[dQ_{\mathbb P}/dt]=0$：
+\begin{enumerate}[label=(\roman*)]
+    \item 平移不变性 $G=\mathbb R$：不变量为 $P_{\mathbb P}=-\gamma''(0)$；
+    \item 缩放不变性 $G=\mathbb R^+$：不变量为 Hurst 指数 $H$、尾指数 $\alpha$、对数边际似然；
+    \item 旋转不变性 $G=U(1)$：不变量为循环频率、相位相干时间、后验协方差矩阵迹。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+三类不变性分别诱导 $L^2(\mathbb P)$ 上的酉或自伴算子，其谱泛函沿过程保持常数。具体对应见 \cref{prop:momentum_autocorrelation}、\cref{prop:hurst_tail_duality}、\cref{ch15_coherence_time}。
+\end{proof}
+
+\begin{remark}[概率不变性与周期的关系]\label{rem:probability_period_scope}
+概率不变性是周期结构的辅助条件，不构成充分条件。白噪声具有均方导数方差不变，但无周期分量。概率周期结构必须由 \cref{thm:prob_periodicity_decision} 或 \cref{lem:markov_period} 等判据判定。
+\end{remark}
+
+\subsection{细致平衡与涨落--耗散定理}
+
+\begin{proposition}[细致平衡与概率流闭合]\label{prop:detailed_balance_curl}
+设马尔可夫过程具有平稳分布 $\pi$ 和转移率矩阵 $Q$。细致平衡
+\[
+\pi_iQ_{ij}=\pi_jQ_{ji},\qquad \forall i,j
+\]
+等价于概率流
+\[
+\mathbf J_{ij}=\pi_iQ_{ij}-\pi_jQ_{ji}
+\]
+处处为零。
+\end{proposition}
+
+\begin{proof}
+细致平衡直接给出 $\mathbf J_{ij}=0$。反之，若 $\mathbf J_{ij}=0$，则 $\pi_iQ_{ij}=\pi_jQ_{ji}$。
+\end{proof}
+
+\begin{theorem}[涨落--耗散定理的结构分解]\label{thm:fluctuation_dissipation_grammar}
+设朗之万方程
+\[
+\frac{dX}{dt}=-\gamma X+\sqrt{2\gamma k_BT}\xi_t,
+\]
+其中 $\xi_t$ 为标准白噪声。则稳态分布为
+\[
+p_{\mathrm{eq}}(x)\propto e^{-\gamma x^2/(2k_BT)},
+\]
+且涨落与耗散满足 $D=\gamma k_BT$。
+\end{theorem}
+
+\begin{proof}
+对应 Fokker--Planck 方程为
+\[
+\partial_tp=\partial_x(\gamma xp)+\gamma k_BT\partial_x^2p.
+\]
+稳态解 $p_{\mathrm{eq}}\propto e^{-\gamma x^2/(2k_BT)}$，代入即得 $D=\gamma k_BT$。
+\end{proof}
+
+\section{概率周期结构的综合诊断}
+\label{sec:prob_final_diagnosis}
+
+\begin{example}[太阳黑子序列的周期诊断：完整数值流程]\label{ex:sunspot_diagnosis}
+对 1749--2024 年太阳黑子月均值序列（$N=3312$）：
+\begin{enumerate}[label=(\roman*)]
+    \item 平移周期：样本自相关在滞后 $132$ 月处局部最大，对应 Schwabe 周期；
+    \item 多窗谱估计：$K=8$，$NW=4$，周期图在 $\omega_0=2\pi/132\approx0.0476$ 月$^{-1}$ 处最高峰，方差降为 $1/8$；
+    \item 缩放周期：R/S 分析给出 $\hat H\approx0.85>0.5$，强长程正持续性；
+    \item 旋转周期：循环自相关在 $\alpha=1/132$ 月$^{-1}$ 处主导循环频率；
+    \item 卡尔曼滤波：状态空间模型提取光滑 $11$ 年周期分量，向前预测 $12$ 个月；
+    \item 不变性检验：ADF 不能拒绝单位根，KPSS 在 $5\%$ 水平拒绝平稳性。
+\end{enumerate}
+\end{example}
+
+\begin{remark}[与全书的衔接]\label{rem:prob_book_interface}
+本章建立的概率周期结构理论是周期数学在随机系统中的应用。Herglotz 与 Cramér 定理揭示平稳过程的周期信息编码在谱测度中；谱测度勒贝格分解对应周期结构三分。具体过程谱结构展示从无周期到长记忆周期的连续过渡。循环平稳过程处理幅度调制、频率调制等非平稳周期信号。多窗谱估计克服周期图方差不一致性。卡尔曼滤波提供周期信号自适应提取。MCMC 谱隙理论给出收敛诊断。HMM 周期分解联系语音识别。GP 周期核提供非参数周期建模。ARFIMA 补充长记忆。概率系统的不变性是周期结构的辅助条件，不是充分条件；概率周期结构判定依赖循环平稳性、相位锁定与马尔可夫链周期分解等具体判据。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 平稳过程时间平移不变性；均方导数方差 $P_{\mathbb P}=-\gamma''(0)=\int\omega^2S(\omega)d\omega$（\cref{def:probability_momentum}、\cref{prop:momentum_autocorrelation}、\cref{prop:momentum_frequency}）；Herglotz--Cramér 谱表示（\cref{thm:herglotz}、\cref{thm:cramer}） \\
+缩放 & 自相似与重尾标度不变性：Hurst 指数 $H$ 与尾指数 $\alpha=1/H$（\cref{def:probability_scaling_charge}、\cref{prop:hurst_tail_duality}）；ARFIMA 长记忆谱（\cref{prop:arfima_spectrum}） \\
+旋转 & 循环平稳相位旋转不变性；相位扩散与相干时间 $\tau_{\mathrm{coh}}=2/\sigma^2$（\cref{def:probability_angular_momentum}、\cref{ch15_coherence_time}、\cref{def:cyclostationary_strict}、\cref{thm:cyclostationary_spectral_decomposition}） \\
+平衡 & 概率测度连续不变性对应不变量（\cref{thm:probability_noether}）；概率周期结构判据与边界（\cref{rem:probability_period_scope}） \\
+对称 & 先验/似然/后验三类分布携带标度/平移/旋转信息（\textbf{经验观察／研究纲领}，见注 \cref{thm:bayesian_grammar_correspondence}） \\
+闭合 & 细致平衡概率流闭合 $\mathbf J_{ij}=0$（\cref{prop:detailed_balance_curl}）；涨落--耗散关系（\cref{thm:fluctuation_dissipation_grammar}）；MCMC 谱隙与收敛（\cref{thm:mcmc_convergence}） \\
+周期 & 循环频率 $\alpha=k/T$；自相似周期；典型过程谱结构（\cref{prop:typical_prob_spectra}）；多窗谱估计（\cref{thm:slepian}、\cref{prop:multitaper_consistency}）；卡尔曼滤波周期提取（\cref{thm:kalman_spectrum}、\cref{prop:kalman_periodic_extraction}）；HMM 周期分解（\cref{thm:hmm_period}）；GP 周期核（\cref{def:periodic_kernel}、\cref{prop:gp_spectrum}）；太阳黑子数值诊断（\cref{ex:sunspot_diagnosis}、\cref{ex:sunspot_multitaper}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{概率周期性判定定理}（\ref{thm:prob_periodicity_decision}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 验证\textbf{数量调节的单调性}（\ref{prop:prob_adaptive_growth}）的前提在本章领域对象上成立，并给出一个不满足前提的反例。
+
+    \item 考察\textbf{贝叶斯模型三类分布的结构对应}（\textbf{经验观察／研究纲领}，见注 \ref{thm:bayesian_grammar_correspondence}）在参数退化时的行为，说明该类比如何随之退化；若要把其中任一条提升为可检验命题，需要补出哪些定义。
+
+    \item 说明\textbf{概率周期诊断流程与三章接口}（\ref{thm:prob_diagnosis_integration}）与「周期系统」章相应通用结论的关系（是一致、特例还是需要附加条件）。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理或注：\ref{thm:prob_periodicity_decision}、\ref{prop:prob_adaptive_growth}、\ref{thm:bayesian_grammar_correspondence}（\textbf{经验观察／研究纲领}）、\ref{thm:prob_diagnosis_integration}。
+\end{enumerate}
+

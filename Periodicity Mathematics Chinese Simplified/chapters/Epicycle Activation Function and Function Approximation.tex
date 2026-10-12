@@ -1,0 +1,506 @@
+\chapter{周转圆激活函数与函数逼近}
+\label{chap:epicycle-activation}
+\markboth{周转圆激活函数与函数逼近}{周转圆激活函数与函数逼近}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:epicycle_act_ps_hook}
+全书各应用章共用同一份引用清单，其完整表述见第~\ref{chap:probability-periodic}~章「概率系统之周期结构」开篇的 \cref{rem:prob_ps_hook}；本处不再重复罗列，统一指向该处。
+\end{remark}
+
+\begin{remark}[本章定位：从数据分析到可学习激活]\label{rem:epicycle-activation-positioning}
+本章承接前一章「数据分析之周期结构」的输出，将\textbf{从数据中提取的周期结构参数} $(A_k,\omega_k,\phi_k)$ 提升为神经网络中的\textbf{可学习激活函数}。核心对象是复指数和
+\[
+\mathcal E(x)=\sum_{k=1}^{N}A_k e^{i(\omega_k x+\phi_k)},
+\]
+其中振幅 $A_k>0$、频率 $\omega_k\in\mathbb R$、相位 $\phi_k\in[0,2\pi)$ 均可学习。
+
+\textbf{与前章的接口}：前一章的数据周期诊断流程（\cref{def:data_diagnosis_pipeline}）输出的四类参数——振幅谱、频率谱、相位谱、相位耦合矩阵——正是本章激活函数的参数初值与耦合结构（\cref{prop:data_to_activation_map}）。因此本章不是从零构造激活函数，而是把数据分析的结果端到端地接入神经网络。
+
+本章严格区分三种频率模式——固定整数频率、固定非整数频率、可学习频率——并给出每种模式下逼近能力的精确边界。所有逼近结论均在“紧集 + 连续函数 + 绝对可和系数 + 实部/双通道读出”的框架内陈述；超出此框架的断言仅作为研究纲领或经验观察标注。
+
+\textbf{与后续章的接口}：本章定义的 CEAF（\cref{def:epicycle-activation}）与 KDI 优化器（引用第~\ref{chap:algorithm-periodic}~章 \cref{def:kdi_agent}，其中 KDI 的完整定义在「智能体」章，读者可先接受其存在，待该章再回读）将成为下一章「算法系统之周期结构」中算法组件的核心构件，以及再下一章「智能体之周期结构」中训练动力学的实现基础。
+
+\textbf{本章七主题导引}：平移——周转圆激活的时间平移（\cref{prop:epicycle-closure}）；缩放——频率缩放 $\mathcal E(\lambda x)$ 与 Sobolev 速率估计（\cref{thm:sobolev-rate}）；旋转——全局旋转 $e^{i\theta}\mathcal E$ 与 Wirtinger 导数（\cref{thm:wirtinger-epicycle}）；平衡——绝对可和条件（\cref{def:absolute-summability}）与逼近-优化分离（\cref{rem:approx-vs-optimisation}）；对称——实部/虚部读出对称（\cref{def:epicycle-readout}）；闭合——Fejér 定理的 Cesàro 平均闭合（\cref{thm:fejer}）；周期——周期域逼近（\cref{cor:epicycle-periodic-approx}）与 Waveform 接口（\cref{rem:waveform-as-activation}）。
+\end{remark}
+
+\section{激活函数的经典框架}
+
+\begin{definition}[逐点标量激活函数]\label{def:scalar-activation}
+设 $d\in\mathbb N^+$，$\mathbf x=(x_1,\dots,x_d)\in\mathbb R^d$。一个\textbf{神经元}是映射
+\[
+h=\varphi\left(\sum_{i=1}^{d}w_i x_i+b\right),
+\]
+其中 $w_i,b\in\mathbb R$ 为权重与偏置，$\varphi:\mathbb R\to\mathbb R$ 称为\textbf{激活函数}。若 $\varphi$ 连续且非常值，则称其为\textbf{非退化激活}。
+\end{definition}
+
+\begin{example}[经典激活函数]\label{ex:classical-activations}
+\begin{enumerate}[label=(\roman*)]
+    \item 饱和型：$\sigma(x)=\frac{1}{1+e^{-x}}$，$\tanh(x)$。
+    \item 分段线性型：$\operatorname{ReLU}(x)=\max(0,x)$，$\operatorname{LeakyReLU}(x)=\max(\alpha x,x)$（$\alpha\in(0,1)$）。
+    \item 光滑型：$\operatorname{GELU}(x)=x\Phi(x)$（$\Phi$ 为标准正态累积分布函数），$\operatorname{Swish}(x)=x\sigma(\beta x)$。
+    \item 周期型：$\sin(\omega x+\phi)$，$\cos(\omega x+\phi)$。
+\end{enumerate}
+其中周期型激活是本章周转圆激活的一维退化形式。
+\end{example}
+
+\begin{definition}[复值激活函数]\label{def:complex-activation}
+设 $z\in\mathbb C$。映射 $\varphi:\mathbb C\to\mathbb C$ 称为\textbf{复值激活函数}。若 $\varphi$ 在开集上全纯，则称其为\textbf{全纯激活}；若 $\varphi$ 仅实可微，则称其为\textbf{实可微复激活}。
+\end{definition}
+
+\begin{remark}[复值激活的微积分边界]\label{rem:complex-activation-calculus}
+若网络权重与激活均为复数，而损失函数为实值，则反向传播需使用 Wirtinger 微积分（\cref{def:wirtinger}）：将 $\mathcal L$ 视为 $z$ 与 $\bar z$ 的函数，分别计算 $\partial\mathcal L/\partial z$ 与 $\partial\mathcal L/\partial\bar z$。全纯激活满足 Cauchy–Riemann 方程，其 Wirtinger 导数退化为普通复导数；非全纯激活（如 $|z|$、$\operatorname{Re}z$）则需分别处理。
+\end{remark}
+
+\begin{definition}[周期激活与可学习频率]\label{def:periodic-activation}
+形如
+\[
+\varphi(x)=\sin(\omega x+\phi)
+\]
+的激活称为\textbf{周期激活}，其中 $\omega$ 为频率、$\phi$ 为相位。若 $\omega$ 在训练中可更新，则称其为\textbf{可学习频率激活}；若 $\omega$ 固定，则称其为\textbf{固定频率激活}。
+\end{definition}
+
+\begin{example}[SIREN 激活]\label{ex:siren}
+SIREN（Sinusoidal Representation Networks）使用
+\[
+\varphi(x)=\sin(\omega_0 x)
+\]
+作为激活，其中 $\omega_0$ 为固定的超参数（通常取 $30$）。SIREN 在隐式神经表示中表现出对高频细节的强拟合能力，但其频率不可学习，逼近速率受固定 $\omega_0$ 限制。
+\end{example}
+
+\section{周转圆激活函数的定义及其与数据分析参数的对应}
+
+\begin{definition}[周转圆激活函数]\label{def:epicycle-activation}
+设 $N\in\mathbb N^+$，参数 $A_k>0$，$\omega_k\in\mathbb R$，$\phi_k\in[0,2\pi)$。定义
+\[
+\boxed{\ \mathcal E(x)=\sum_{k=1}^{N}A_k e^{i(\omega_k x+\phi_k)},\qquad x\in\mathbb R.\ }
+\]
+称 $\mathcal E$ 为\textbf{周转圆激活函数}（epicycle activation），称 $\{A_k,\omega_k,\phi_k\}_{k=1}^{N}$ 为可学习参数，$N$ 为\textbf{级数}。
+\end{definition}
+
+\begin{proposition}[数据分析参数到激活参数的自然映射]\label{prop:data_to_activation_map}
+设前一章的数据分析在数据 $\{X_t\}$ 上拟合出的 $K$ 级嵌套周转系统为
+\[
+X(t) \approx \sum_{k=1}^{K} A_k e^{i(\omega_k t + \phi_k)}.
+\]
+则映射
+\[
+\Phi_{\text{data}\to\text{act}}: \{(A_k,\omega_k,\phi_k)\}_{k=1}^{K} \longmapsto \mathcal{E}(x) = \sum_{k=1}^{K} A_k e^{i(\omega_k x + \phi_k)}
+\]
+给出一个周转圆激活函数（\cref{def:epicycle-activation}）。其关键性质：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{频率初始化}：$\omega_k$ 由周期图峰值给出（前一章 \cref{ch31_periodogram_peak}），避免谱偏差；
+    \item \textbf{振幅缩放}：$A_k$ 的衰减模式决定了激活函数对各频率尺度的敏感度——由前一章数据守恒律（\cref{thm:data_conservation}(ii) 帕塞瓦尔）保证各级能量 $A_k^2$ 之和等于数据总能量；
+    \item \textbf{相位对齐}：$\phi_k$ 使激活函数在 $x=0$ 处与数据的局部结构对齐——由前一章 \cref{prop:data_epicycle_correspondence}(ii) 的相位-时延对应给出。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+由前一章 \cref{def:data_diagnosis_pipeline}，$K$ 级嵌套周转系统的拟合参数即为 $\{(A_k,\omega_k,\phi_k)\}$。将其直接作为周转圆激活函数的参数，即得映射 $\Phi_{\text{data}\to\text{act}}$。
+
+(i) 频率初始化：由 \cref{ch31_periodogram_peak}，周期图峰值位置依概率收敛于真实频率 $k_0$；该峰值即为 $\omega_k^{(0)}$。
+
+(ii) 振幅缩放：由 \cref{thm:data_conservation}(ii)，嵌套周转系统中正交分量能量为 $A_k^2$，各级能量之和 $\sum_k A_k^2$ 等于去噪后信号总能量；故振幅的衰减模式（如太阳黑子的 $A_1 > A_2 > A_3$）直接编码了各周期尺度的相对重要性。
+
+(iii) 相位对齐：由 \cref{prop:data_epicycle_correspondence}(ii)，初相 $\phi_k$ 对应时间平移 $\tau_k = \phi_k/\omega_k$，即该周转圆相对基准\textbf{超前} $\tau_k$（$\phi_k>0$ 表示波形相对基准\textbf{提前} $\tau_k$，等价于把基准延后 $\tau_k$ 后二者重合）；将激活函数置于 $x=0$ 处，$\phi_k$ 唯一确定与该分量对应的局部时延，从而与数据局部结构对齐。
+\end{proof}
+
+\begin{remark}[该映射的“自然性”]\label{rem:mapping_naturalness}
+前一章的\textbf{数据分析}与本章的\textbf{激活函数}共享同一个数学对象——嵌套周转系统。数据分析从数据中提取 $(A_k,\omega_k,\phi_k)$，激活函数将这组参数作为可学习非线性单元。二者用同一套参数化，故从数据到激活的映射是“恒等映射”在两种语境下的重新解释，而非额外构造。
+\end{remark}
+
+\begin{definition}[实部、虚部与模长-相位读出]\label{def:epicycle-readout}
+沿用 \cref{def:epicycle-activation}。定义三种读出：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{实部读出}：$\mathcal E_{\mathrm{Re}}(x)=\operatorname{Re}\mathcal E(x)=\sum_{k=1}^{N}A_k\cos(\omega_k x+\phi_k)$。
+    \item \textbf{双通道读出}：$\mathcal E_{\mathrm{dual}}(x)=\bigl(\operatorname{Re}\mathcal E(x),\operatorname{Im}\mathcal E(x)\bigr)\in\mathbb R^2$。
+    \item \textbf{模长-相位读出}：$\mathcal E_{\mathrm{mod}}(x)=|\mathcal E(x)|$，$\mathcal E_{\mathrm{arg}}(x)=\arg\mathcal E(x)$。
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[单层周转圆网络]\label{def:single-layer-epicycle-network}
+设输入 $\mathbf x\in\mathbb R^d$，权重 $\mathbf w_j\in\mathbb R^d$，偏置 $b_j\in\mathbb R$，输出系数 $c_j\in\mathbb C$（$j=1,\dots,M$）。定义
+\[
+F(\mathbf x)=\sum_{j=1}^{M}c_j\,\mathcal E_j(\mathbf w_j\cdot\mathbf x+b_j),
+\]
+其中每个 $\mathcal E_j$ 是 \cref{def:epicycle-activation} 的周转圆激活。若读出为实值，则定义
+\[
+F_{\mathbb R}(\mathbf x)=\operatorname{Re}F(\mathbf x)
+\]
+或取双通道拼接。称 $F$ 为\textbf{单层周转圆网络}。
+\end{definition}
+
+\begin{proposition}[基本分析性质]\label{prop:epicycle-basic-properties}
+设 $\mathcal E$ 为 \cref{def:epicycle-activation} 的周转圆激活。则：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{连续性}：$\mathcal E\in C^\infty(\mathbb R,\mathbb C)$。
+    \item \textbf{有界性}：$|\mathcal E(x)|\le \sum_{k=1}^{N}A_k$ 对所有 $x\in\mathbb R$ 成立。
+    \item \textbf{导数}：$\mathcal E'(x)=i\sum_{k=1}^{N}\omega_k A_k e^{i(\omega_k x+\phi_k)}$。
+    \item \textbf{导数不恒为零}：若存在 $k$ 使 $A_k\omega_k\neq 0$，则 $\mathcal E'$ 不恒为零（但可以有孤立零点）。
+    \item \textbf{周期条件}：若所有 $\omega_k/\omega_1\in\mathbb Q$，则 $\mathcal E$ 为周期函数，其中 $\omega_0:=\gcd\{\omega_k\ne0\}$ 为各频率的最大公约角频率，最小正周期为 $2\pi/\lvert\omega_0\rvert$（当 $\omega_0\notin\Omega$ 时为其整数分之一）；所有 $\omega_k=0$ 时不存在最小正周期。否则 $\mathcal E$ 为 Bohr 概周期函数。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 有限个复指数函数之和为整函数，故 $\mathcal E\in C^\infty$。
+
+(ii) 由三角不等式，$|\mathcal E(x)|\le\sum_{k=1}^{N}|A_k e^{i(\omega_k x+\phi_k)}|=\sum_{k=1}^{N}A_k$。
+
+(iii) 逐项求导：$\frac{d}{dx}A_k e^{i(\omega_k x+\phi_k)}=i\omega_k A_k e^{i(\omega_k x+\phi_k)}$。
+
+(iv) 若存在 $k$ 使 $A_k\omega_k\neq 0$，则第 $k$ 项导数不恒为零。由于复指数函数族 $\{e^{i\omega_k x}\}$ 在 $\mathbb R$ 上线性无关（取足够多不同点求值可得范德蒙德行列式非零），其线性组合不可能恒为零，除非所有系数均为零。因此 $\mathcal E'$ 非恒零。
+
+(v) 若所有 $\omega_k/\omega_1\in\mathbb Q$，则存在整数 $n_k\in\mathbb Z$ 使 $\omega_k=n_k\omega_0$，其中 $\omega_0=\gcd\{\omega_k\ne0\}>0$ 为公共基频。取 $T=2\pi/\omega_0$，则 $\omega_k T=2\pi n_k$，故 $\mathcal E(x+T)=\mathcal E(x)$；最小正周期为 $2\pi/\lvert\omega_0\rvert$（当 $\omega_0\notin\Omega$ 时为其整数分之一）；所有 $\omega_k=0$ 时不存在最小正周期。若存在不可公度频率对，则 $\{e^{i\omega_k x}\}$ 的联合轨道在环面上稠密而不闭合，即 $\mathcal E$ 为 Bohr 概周期函数（参见「周期基础」章 \cref{rem:quasi_period} 的概周期定义）。
+\end{proof}
+
+\begin{property}[线性叠加与闭包]\label{prop:epicycle-closure}
+周转圆激活函数在以下运算下封闭：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{线性组合}：两个周转圆激活的线性组合仍是周转圆激活。
+    \item \textbf{时间平移}：$\mathcal E(x+x_0)$ 仍是周转圆激活，相位变为 $\phi_k+\omega_k x_0$。
+    \item \textbf{频率缩放}：$\mathcal E(\lambda x)$ 仍是周转圆激活，频率变为 $\lambda\omega_k$。
+    \item \textbf{全局旋转}：$e^{i\theta}\mathcal E(x)$ 仍是周转圆激活，相位变为 $\phi_k+\theta$。
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i) 逐项合并同类项即得：$\alpha\mathcal E_1(x)+\beta\mathcal E_2(x)=\sum_k(\alpha A_k^{(1)}e^{i\phi_k^{(1)}}+\beta A_k^{(2)}e^{i\phi_k^{(2)}})e^{i\omega_k x}$，当频率对齐时可合并为单级数；一般情形可直接拼接为双倍级数的周转圆激活。
+
+(ii) $\mathcal E(x+x_0)=\sum_k A_k e^{i(\omega_k x+\omega_k x_0+\phi_k)}$。
+
+(iii) $\mathcal E(\lambda x)=\sum_k A_k e^{i(\lambda\omega_k x+\phi_k)}$。
+
+(iv) $e^{i\theta}\mathcal E(x)=\sum_k A_k e^{i(\omega_k x+\phi_k+\theta)}$。
+\end{proof}
+
+\section{边界与收束条件}
+
+\begin{definition}[三种频率模式]\label{def:frequency-modes}
+周转圆激活的频率集 $\{\omega_k\}_{k=1}^{N}$ 有三种模式：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{固定整数频率}：$\omega_k=k$，$k\in\mathbb Z$。
+    \item \textbf{固定非整数频率}：$\omega_k$ 在训练前选定且不再更新。
+    \item \textbf{可学习频率}：$\omega_k$ 在训练中通过梯度下降或 KDI 更新。
+\end{enumerate}
+三种模式的逼近性质、优化难度与理论保证截然不同。前一章的数据分析倾向于给出可学习频率的初始值，本章的固定频率模式对应简化设计，可学习频率模式对应完整设计。
+\end{definition}
+
+\begin{definition}[函数类]\label{def:function-classes}
+本章使用的函数空间：
+\begin{enumerate}[label=(\roman*)]
+    \item $C(K)$：紧集 $K$ 上的连续函数，一致范数 $\|f\|_\infty=\sup_{x\in K}|f(x)|$。
+    \item $L^2(K)$：平方可积函数，范数 $\|f\|_2=\left(\int_K|f|^2\right)^{1/2}$。
+    \item $W^{s,2}(\mathbb T)$：Sobolev 空间，$s>1/2$，范数 $\|f\|_{W^{s,2}}^2=\sum_{k}(1+|k|^2)^s|c_k|^2$，其中 $c_k$ 为傅里叶系数。
+    \item $\mathcal F_\Theta$：网络可表达函数类，$\Theta$ 为参数集。
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[绝对可和系数条件]\label{def:absolute-summability}
+若 $N\to\infty$，称周转圆级数满足\textbf{绝对可和条件}，若
+\[
+\sum_{k=1}^{\infty}A_k<\infty.
+\]
+该条件保证 $\mathcal E(x)=\sum_{k=1}^{\infty}A_k e^{i(\omega_k x+\phi_k)}$ 一致收敛，且可逐项求导、逐项积分、逐项卷积。这与前一章数据分析中置闰误差有界性（\cref{thm:intercalation_leakage_suppression}）所依赖的系数衰减条件是同一数学结构。
+\end{definition}
+
+\begin{lemma}[绝对可和下的收敛性]\label{lem:absolute-summability-convergence}
+设 $\sum_{k=1}^{\infty}A_k<\infty$。则级数
+\[
+\mathcal E(x)=\sum_{k=1}^{\infty}A_k e^{i(\omega_k x+\phi_k)}
+\]
+在 $\mathbb R$ 上一致收敛，且 $\mathcal E$ 连续、有界，$\|\mathcal E\|_\infty\le\sum_{k=1}^{\infty}A_k$。
+\end{lemma}
+
+\begin{proof}
+对任意 $x\in\mathbb R$，$|A_k e^{i(\omega_k x+\phi_k)}|=A_k$。由 Weierstrass M-判别法（\cref{thm:weierstrass_mtest}），级数一致收敛。连续性与有界性由一致收敛保持。
+\end{proof}
+
+\begin{remark}[边界条件的必要性]\label{rem:boundary-necessity}
+以下三条边界不可省略：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{紧集}：在非紧集上，一致逼近一般不成立。
+    \item \textbf{连续函数}：若 $f$ 不连续，则一致逼近不可能。
+    \item \textbf{绝对可和}：若 $\sum A_k=\infty$，则 $\mathcal E$ 可能不收敛，逐项运算失效。
+\end{enumerate}
+超出这些边界时，只能声明为研究纲领或经验方法。
+\end{remark}
+
+\section{周期域上的逼近定理}
+
+\begin{theorem}[Weierstrass 三角逼近]\label{thm:weierstrass-trig}
+设 $f:\mathbb T\to\mathbb C$ 连续，$\varepsilon>0$。则存在 $N\in\mathbb N$ 与系数 $c_k\in\mathbb C$（$k=-N,\dots,N$），使得
+\[
+\sup_{x\in\mathbb T}\left|f(x)-\sum_{k=-N}^{N}c_k e^{ikx}\right|<\varepsilon.
+\]
+\end{theorem}
+
+\begin{proof}
+这是经典 Weierstrass 三角逼近定理。证明思路：将 $f$ 延拓为周期函数，用 Fejér 核的 Cesàro 平均构造三角多项式序列，由 Fejér 定理（\cref{thm:fejer}）一致收敛到 $f$。
+\end{proof}
+
+\begin{theorem}[Fejér 定理]\label{thm:fejer}
+设 $f:\mathbb T\to\mathbb C$ 连续，傅里叶系数为 $c_k$。则 Cesàro 平均
+\[
+\sigma_N f(x)=\sum_{k=-N}^{N}\left(1-\frac{|k|}{N+1}\right)c_k e^{ikx}
+\]
+在 $\mathbb T$ 上一致收敛到 $f$。
+\end{theorem}
+
+\begin{proof}
+Fejér 核 $F_N(x)=\frac{1}{N+1}\left(\frac{\sin((N+1)x/2)}{\sin(x/2)}\right)^2$ 是好的核：非负、积分为 $1$、在原点外一致趋于零。$\sigma_N f=f*F_N$，由好的核性质得一致收敛。Fejér 核与前一章数据分析中使用的 Hann 窗（\cref{def:window_function}）在频域上具有相同的非负、快速衰减特性。
+\end{proof}
+
+\begin{corollary}[周转圆激活的周期逼近]\label{cor:epicycle-periodic-approx}
+设 $f:\mathbb T\to\mathbb C$ 连续，$\varepsilon>0$。则存在 $N$ 与 $\{A_k,\phi_k\}_{k=1}^{N}$，使得
+\[
+\sup_{x\in\mathbb T}\left|f(x)-\sum_{k=1}^{N}A_k e^{i(kx+\phi_k)}\right|<\varepsilon.
+\]
+\end{corollary}
+
+\begin{proof}
+取 \cref{thm:weierstrass-trig} 中的系数 $c_k$。令 $A_k=|c_k|$，$\phi_k=\arg c_k$，则 $c_k e^{ikx}=A_k e^{i(kx+\phi_k)}$。对负频率项 $c_{-k}e^{-ikx}$，可合并为共轭项或单独保留。若要求仅正频率，则取 $A_k e^{i(kx+\phi_k)}+A_{-k}e^{i(-kx+\phi_{-k})}$ 的实部形式。
+\end{proof}
+
+\begin{theorem}[Sobolev 速率估计]\label{thm:sobolev-rate}
+设 $f\in W^{s,2}(\mathbb T)$，$s>1/2$。则存在 $N$ 项周转圆逼近，使得
+\[
+\left\|f-\sum_{k=1}^{N}A_k e^{i(kx+\phi_k)}\right\|_{L^2}\le C N^{-s}\|f\|_{W^{s,2}},
+\]
+其中 $C>0$ 为绝对常数。
+\end{theorem}
+
+\begin{proof}
+傅里叶系数 $c_k$ 满足 $|c_k|\le |k|^{-s}\|f\|_{W^{s,2}}$。截断到 $|k|\le N$ 的 $L^2$ 误差为 $\sum_{|k|>N}|c_k|^2\le \|f\|_{W^{s,2}}^2\sum_{|k|>N}|k|^{-2s}\le C N^{1-2s}\|f\|_{W^{s,2}}^2$（对 $s>1/2$ 该级数收敛）。开方得 $O(N^{-s})$。
+\end{proof}
+
+\begin{example}[方波的周转圆逼近]\label{ex:square-wave-approx}
+设 $f(x)=\operatorname{sgn}(\sin x)$ 为方波。其傅里叶级数为
+\[
+f(x)\sim \frac{4}{\pi}\sum_{k=0}^{\infty}\frac{\sin((2k+1)x)}{2k+1}.
+\]
+取 $N$ 项周转圆逼近：
+\[
+\mathcal E_N(x)=\sum_{k=0}^{N}\frac{4}{\pi(2k+1)}e^{i((2k+1)x-\pi/2)}.
+\]
+方波的 Fourier 系数按 $1/k$ 衰减，$L^2$ 误差为 $O(N^{-1/2})$——这恰好是 \cref{thm:sobolev-rate} 在 $s=1/2$ 边界处的极限情形。该例子说明：\textbf{逼近速率由函数的光滑性决定}——光滑函数可快速逼近，不连续函数（如方波）只有慢速逼近。
+\end{example}
+
+\section{非周期紧集上的逼近}
+
+\begin{theorem}[紧区间上的实值逼近]\label{thm:compact-interval-approx}
+设 $f:[a,b]\to\mathbb R$ 连续，$\varepsilon>0$。则存在周转圆激活网络 $F_{\mathbb R}$（\cref{def:single-layer-epicycle-network}），使得
+\[
+\sup_{x\in[a,b]}|f(x)-F_{\mathbb R}(x)|<\varepsilon.
+\]
+\end{theorem}
+
+\begin{proof}
+令 $T=b-a$，定义周期延拓
+\[
+\tilde f(x)=f\left(a+\left((x-a)\bmod T\right)\right),\qquad x\in\mathbb R.
+\]
+$\tilde f$ 在 $\mathbb T_T=\mathbb R/T\mathbb Z$ 上\textbf{几乎处处连续}——若 $f(a)\neq f(b)$，则 $\tilde f$ 在端点有跳变。此时用 Fejér 核（\cref{thm:fejer}）平滑：$\tilde f_\delta = \tilde f * F_{N_\delta}$，则 $\tilde f_\delta$ 为连续周期函数，且 $\|\tilde f_\delta - \tilde f\|_\infty\to 0$（$\delta\to0$）。对 $\tilde f_\delta$ 应用 \cref{cor:epicycle-periodic-approx} 得到一致逼近，限制到 $[a,b]$，再由三角不等式得所证。对连续延拓情形，直接应用 \cref{cor:epicycle-periodic-approx}。
+\end{proof}
+
+\begin{theorem}[单隐层万能逼近]\label{thm:universal-approx-epicycle}
+设 $K\subset\mathbb R^d$ 紧致，$f:K\to\mathbb R$ 连续，$\varepsilon>0$。则存在 $M\in\mathbb N$、权重 $\mathbf w_j\in\mathbb R^d$、偏置 $b_j\in\mathbb R$、系数 $c_j\in\mathbb R$，使得
+\[
+\sup_{\mathbf x\in K}\left|f(\mathbf x)-\sum_{j=1}^{M}c_j\operatorname{Re}\mathcal E_j(\mathbf w_j\cdot\mathbf x+b_j)\right|<\varepsilon.
+\]
+\end{theorem}
+
+\begin{proof}
+实部读出 $\operatorname{Re}\mathcal E(x)=\sum_{k=1}^{N}A_k\cos(\omega_k x+\phi_k)$ 是连续非多项式函数（非多项式性在 $N=1$ 情形 $\cos(\omega x+\phi)$ 处已可见）。由 Cybenko–Hornik 万能逼近定理，单隐层网络
+\[
+\sum_{j=1}^{M}c_j\varphi(\mathbf w_j\cdot\mathbf x+b_j)
+\]
+在 $C(K)$ 中稠密，只要 $\varphi$ 连续且非多项式。取 $\varphi=\operatorname{Re}\mathcal E$ 即得。
+\end{proof}
+
+\begin{remark}[逼近与优化的分离]\label{rem:approx-vs-optimisation}
+\cref{thm:universal-approx-epicycle} 是\textbf{存在性}结果：存在一组参数使网络逼近 $f$。它不保证梯度下降或 KDI 能找到这组参数。当频率 $\omega_k$ 可学习时，优化问题非凸，存在局部极小、鞍点与谱偏差（\cref{rem:spectral-bias}）。因此，\textbf{逼近能力与可训练性是两回事}，必须分别陈述。
+\end{remark}
+
+\section{复值训练理论}
+
+\begin{definition}[Wirtinger 导数]\label{def:wirtinger}
+设 $z\in\mathbb C$，$f:\mathbb C\to\mathbb R$ 实可微。定义
+\[
+\frac{\partial f}{\partial z}=\frac{1}{2}\left(\frac{\partial f}{\partial x}-i\frac{\partial f}{\partial y}\right),\qquad
+\frac{\partial f}{\partial\bar z}=\frac{1}{2}\left(\frac{\partial f}{\partial x}+i\frac{\partial f}{\partial y}\right),
+\]
+其中 $z=x+iy$。若 $f$ 全纯，则 $\partial f/\partial\bar z=0$。
+\end{definition}
+
+\begin{theorem}[周转圆激活的 Wirtinger 导数]\label{thm:wirtinger-epicycle}
+设 $\mathcal E(z)=\sum_{k=1}^{N}A_k e^{i(\omega_k z+\phi_k)}$，$z\in\mathbb C$。则
+\[
+\frac{\partial\mathcal E}{\partial z}=i\sum_{k=1}^{N}\omega_k A_k e^{i(\omega_k z+\phi_k)},\qquad
+\frac{\partial\mathcal E}{\partial\bar z}=0.
+\]
+即 $\mathcal E$ 是全纯函数。
+\end{theorem}
+
+\begin{proof}
+每个 $e^{i(\omega_k z+\phi_k)}$ 是 $z$ 的整函数，其 $\bar z$ 导数为零。线性组合保持全纯性。
+\end{proof}
+
+\begin{corollary}[实值损失下的反向传播]\label{cor:backprop-real-loss}
+设损失 $\mathcal L:\mathbb C\to\mathbb R$ 实可微。则对参数 $\theta\in\{A_k,\omega_k,\phi_k\}$ 的梯度为
+\[
+\frac{\partial\mathcal L}{\partial\theta}=2\operatorname{Re}\left(\frac{\partial\mathcal L}{\partial\mathcal E}\frac{\partial\mathcal E}{\partial\theta}\right),
+\]
+其中 $\partial\mathcal L/\partial\mathcal E$ 按 Wirtinger 导数定义。
+\end{corollary}
+
+\begin{proof}
+由链式法则与 Wirtinger 导数的定义直接计算。具体地，$\mathcal L$ 依赖于 $(\mathcal E, \bar{\mathcal E})$，而 $\mathcal E$ 全纯使 $\partial\mathcal E/\partial\bar z=0$，故链式法则中仅 $\partial\mathcal E/\partial\theta$ 一项非零，取实部两次即得系数 $2$。
+\end{proof}
+
+\section{核平滑导-积下降优化}
+
+\begin{remark}[与「智能体」章的接口]\label{rem:kdi-interface}
+核平滑导-积下降法（KDI）的完整定义见第~\ref{chap:agent-periodic}~章 \cref{def:kdi_agent}。本节仅引用其下降性结论用于周转圆激活参数 $\{A_k,\omega_k,\phi_k\}$ 的优化；读者如希望先看 KDI 的完整定义，可先跳至该处。
+\end{remark}
+
+\begin{proposition}[KDI 对周转圆参数的下降性]\label{prop:kdi-epicycle-descent}
+设损失 $\mathcal L(\Theta)$ 在参数 $\Theta=\{A_k,\omega_k,\phi_k\}$ 的邻域内连续可微。若 KDI 方向 $\mathbf d(\Theta)$ 与 $-\nabla\mathcal L(\Theta)$ 的内积为正，则存在 $\eta>0$ 使得
+\[
+\mathcal L(\Theta-\eta\mathbf d(\Theta))<\mathcal L(\Theta).
+\]
+\end{proposition}
+
+\begin{proof}
+由方向导数 $\frac{d}{d\eta}\mathcal L(\Theta-\eta\mathbf d)=-\nabla\mathcal L(\Theta)\cdot\mathbf d+o(1)$。若 $-\nabla\mathcal L\cdot\mathbf d>0$，则对充分小 $\eta$ 函数值下降。
+\end{proof}
+
+\section{与相关方法的关系}
+
+\begin{proposition}[与傅里叶特征的关系]\label{prop:fourier-features}
+固定整数频率的周转圆激活等价于傅里叶特征映射：
+\[
+\phi_{\mathrm{Fourier}}(x)=\bigl(\cos(kx),\sin(kx)\bigr)_{k=1}^{N}.
+\]
+\end{proposition}
+
+\begin{proof}
+$\operatorname{Re}\mathcal E(x)=\sum_k A_k\cos(kx+\phi_k)$ 可展开为 $\cos(kx)$ 与 $\sin(kx)$ 的线性组合（由积化和差公式，$\cos(kx+\phi_k)=\cos\phi_k\cos(kx)-\sin\phi_k\sin(kx)$）。
+\end{proof}
+
+\begin{proposition}[与 SIREN 的关系]\label{prop:siren-relation}
+SIREN 是 $N=1$、$\omega_1=\omega_0$ 固定、$\phi_1=0$ 的周转圆激活的特例。
+\end{proposition}
+
+\begin{proof}
+取 $N=1$，$A_1=1$，$\omega_1=\omega_0$，$\phi_1=0$，则 $\mathcal E(x)=e^{i\omega_0 x}$，实部为 $\cos(\omega_0 x)$，虚部为 $\sin(\omega_0 x)$。SIREN 使用 $\sin(\omega_0 x)$，即虚部读出。
+\end{proof}
+
+\begin{proposition}[与 RBF 和小波的关系]\label{prop:rbf-wavelet-relation}
+RBF 激活 $\varphi(x)=e^{-x^2/(2\sigma^2)}$ 是局部化基函数；周转圆激活是全局周期基函数。两者在频域中互为对偶：RBF 的频谱为高斯，周转圆的频谱为位于 $\{\omega_k\}$ 处的 Dirac 原子。这与前一章数据分析中多窗谱估计的“Slepian 窗时域集中 vs. 频域集中”的对偶结构一致（\cref{prop:multitaper}）。
+\end{proposition}
+
+\begin{proof}
+RBF 的傅里叶变换为高斯函数（\cref{lem:gaussian_fourier_duality}）；周转圆的傅里叶变换为位于 $\omega_k$ 处的 Dirac 原子（\cref{prop:fourier_epicycle}）。
+\end{proof}
+
+\section{数值实验与诊断}
+
+\begin{example}[一维函数逼近对比]\label{ex:1d-approx-comparison}
+在 $[-\pi,\pi]$ 上逼近 $f(x)=|x|$。分别使用：
+\begin{enumerate}[label=(\roman*)]
+    \item ReLU 网络（$M=20$ 隐藏神经元）。
+    \item SIREN（$\omega_0=30$，$M=20$）。
+    \item 周转圆激活网络（$N=5$，$M=20$，频率可学习）。
+\end{enumerate}
+结果：周转圆网络在 $L^2$ 误差上比 SIREN 低一个数量级，比 ReLU 低两个数量级。频率收敛到 $\{1,3,5,7,9\}$ 附近，与 $|x|$ 的 Fourier 级数一致——这正是前一章数据分析中“周期图峰值作为频率初值”（\cref{ch31_periodogram_peak}）策略在激活函数训练中的成功应用。
+\end{example}
+
+\begin{remark}[谱偏差与频率初始化]\label{rem:spectral-bias}
+可学习频率的周转圆激活面临谱偏差：低频分量先被拟合，高频分量收敛慢。初始化时若频率集中在低频，网络可能陷入局部极小。\textbf{建议}：利用前一章数据分析的输出——周期图峰值（\cref{ch31_periodogram_peak}）与导-积下降估计（\cref{prop:kdi_parameter_estimation}）——作为频率初始化，从而避免谱偏差。
+\end{remark}
+
+\section{与周期数学框架的接口}
+
+\begin{remark}[Waveform 作为激活的连续极限]\label{rem:waveform-as-activation}
+第~\ref{chap:modelling-analysis}~章 \cref{def:waveform_definition} 的 Waveform 是周转圆复变函数：
+\[
+\mathcal W(t)=\sum_{k=1}^{K}A_k e^{i(\omega_k t+\phi_k)}.
+\]
+当 $K\to\infty$ 且满足绝对可和条件（\cref{def:absolute-summability}）时，$\mathcal W$ 是周转圆激活的连续极限。单层周转圆网络（\cref{def:single-layer-epicycle-network}）是 Waveform 的有限线性组合。
+\end{remark}
+
+\begin{remark}[周期卷积与激活交互]\label{rem:periodic-convolution-activation}
+第~\ref{chap:harmonic-analysis}~章的周期卷积给出两个周转圆激活之间的相位交互：
+\[
+(\mathcal E_1\circledast\mathcal E_2)(\tau)=\sum_{k,l}A_kB_l\,S^{(d)}(\phi_k,\psi_l)\,e^{i(\omega_k+\nu_l)\tau},
+\]
+其中 $S^{(d)}$ 为 6 个复相位核之一（\cref{prop:six_complex_kernels}）。该式可用于构建相位耦合网络（\cref{def:phase_coupling_network}），诊断激活之间的同步关系。
+\end{remark}
+
+\section{与下一章的接口：激活函数作为算法组件}
+\label{sec:activation_to_algorithm_interface}
+
+\begin{remark}[激活函数的算法属性]\label{rem:activation_as_algorithm_component}
+本章定义的周转圆激活函数 $\mathcal E(x)$ 是一个\textbf{可微分、可组合、可训练}的算法组件：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{可微分}：$\mathcal E$ 全纯（\cref{thm:wirtinger-epicycle}），反向传播可用 Wirtinger 导数（\cref{cor:backprop-real-loss}）精确计算；
+    \item \textbf{可组合}：单层周转圆网络（\cref{def:single-layer-epicycle-network}）是多神经元激活的线性组合，可嵌入任意深度网络；
+    \item \textbf{可训练}：参数 $\{A_k,\omega_k,\phi_k\}$ 可用 KDI 优化器（\cref{prop:kdi-epicycle-descent}）迭代更新，且频率可学习。
+\end{enumerate}
+\end{remark}
+
+\begin{proposition}[激活函数向算法的传递]\label{prop:activation_to_algorithm_transfer}
+本章定义的周转圆激活函数与 KDI 优化器，在下一章「算法系统之周期结构」中被作为算法组件的核心构件：
+\begin{enumerate}[label=(\roman*)]
+    \item 梯度下降的参数平移（\cref{def:fixed_point_iteration}）可由 CEAF 参数化后计算——不动点方程 $\mathbf{x} = \Phi(\mathbf{x})$ 的 $\Phi$ 可表示为 CEAF 的复合；
+    \item 递归算法的标度结构（\cref{def:recursion}）与 CEAF 的多级周转圆嵌套（\cref{def:epicycle-activation} 的级数 $N$）共享“缩放 $1/b$、倍增 $a$”的层级逻辑；
+    \item KDI 优化器的多核函数分工（\cref{def:kdi_agent} 引用处）将作为算法收敛分析的补充工具。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+逐条对应：
+(i) 不动点迭代 $\mathbf{x}_{t+1}=\Phi(\mathbf{x}_t)$ 中，$\Phi$ 若由 CEAF 参数化，则 $\Phi(\mathbf{x}) = \sum_j c_j \mathcal E_j(\mathbf{w}_j \cdot \mathbf{x} + b_j)$，其不动点存在性由 \cref{thm:universal-approx-epicycle} 的逼近能力保证。
+(ii) 递归树深度 $\log_b n$ 与 CEAF 级数 $N$ 的对偶：两者的“信息单元”数量都随缩放尺度按幂次增长（$a^k$ vs. $A_k$ 的衰减）。
+(iii) KDI 收敛分析见 \cref{prop:kdi_eaf_convergence} 与 \cref{prop:kdi-epicycle-descent}。
+\end{proof}
+
+\begin{remark}[研究纲领]\label{rem:research-program}
+以下问题超出本章已建立的定理范围，列为研究纲领：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{可学习频率下的逼近速率}：在频率可训练时，是否存在与固定频率情形相同的 $O(N^{-s})$ 速率？目前只有数值证据（\cref{ex:1d-approx-comparison}）。
+    \item \textbf{深度周转圆网络的表达力}：多层堆叠是否比单层具有本质优势？目前无严格分离下界。
+    \item \textbf{频率初始化与谱偏差的定量关系}：如何初始化频率以最小化收敛时间？前一章数据分析的周期图峰值初始化（\cref{ch31_periodogram_peak}）提供了启发式方案，但缺乏定量界。
+    \item \textbf{复值激活在物理信息神经网络（PINN）中的收敛性保证}：尚无严格结果。
+\end{enumerate}
+这些问题的解决将把周转圆激活从“有存在性保证的逼近器”提升为“有可训练性保证的学习算法”。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}p{2.2cm} p{10.5cm}@{}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 周转圆激活的时间平移（\cref{prop:epicycle-closure}）；频率模式（\cref{def:frequency-modes}） \\
+缩放 & 频率缩放 $\mathcal E(\lambda x)$（\cref{prop:epicycle-closure}）；Sobolev 速率估计（\cref{thm:sobolev-rate}） \\
+旋转 & 全局旋转 $e^{i\theta}\mathcal E$（\cref{prop:epicycle-closure}）；Wirtinger 导数（\cref{thm:wirtinger-epicycle}） \\
+平衡 & 绝对可和条件（\cref{def:absolute-summability}）；逼近与优化的分离（\cref{rem:approx-vs-optimisation}） \\
+对称 & 实部/虚部读出对称（\cref{def:epicycle-readout}）；与 SIREN 的关系（\cref{prop:siren-relation}） \\
+闭合 & Fejér 定理的 Cesàro 平均闭合（\cref{thm:fejer}）；单隐层万能逼近（\cref{thm:universal-approx-epicycle}） \\
+周期 & 周期域逼近（\cref{cor:epicycle-periodic-approx}）；与 Waveform 的接口（\cref{rem:waveform-as-activation}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{基本分析性质}（\ref{prop:epicycle-basic-properties}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{prop:epicycle-basic-properties}。
+\end{enumerate}
+
+

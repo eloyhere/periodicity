@@ -1,0 +1,767 @@
+\chapter{Quaternion Analysis}
+\label{chap:quaternion_analysis}
+\markboth{Quaternion Analysis}{Quaternion Analysis}
+
+\begin{remark}[Positioning of this chapter]\label{rem:q_chapter_positioning}
+This chapter follows the `Complex Analysis' chapter and systematically generalises the core structures of complex analysis---limits, continuity, derivatives, differentials, integrals, series expansions, convolution, integral transforms and harmonic analysis---to the quaternion algebra $\mathbb{H}$. Unlike the commutative case of the complex field $\mathbb{C}$, multiplication in $\mathbb{H}$ is non-commutative, which gives rise to a series of essential structural differences:
+\begin{enumerate}[label=(\roman*)]
+    \item the left and right derivatives must be defined separately, and the two are in general not equal (Definition \ref{def:q_derivative_left_right});
+    \item analytic functions (Fueter-regular functions) are far rarer than complex analytic functions, and polynomial functions are in general not right Fueter-regular (Remark \ref{rem:q_polynomial_not_regular});
+    \item the Cauchy--Riemann equations are generalised to the Cauchy--Riemann--Fueter system (Theorem \ref{thm:q_crf});
+    \item the integral theorems can be formulated rigorously only with the aid of quaternion differential forms and the language of the exterior derivative (Theorem \ref{thm:q_cauchy_fueter});
+    \item convolution is no longer commutative, and the convolution theorem requires additional restrictive conditions (Theorem \ref{thm:q_convolution_theorem});
+    \item the group of unit quaternions $S^3\cong SU(2)$ realises three-dimensional rotations through conjugation, giving the double covering $SU(2)\to SO(3)$ (Theorem \ref{thm:q_rotation}).
+\end{enumerate}
+This chapter provides a unified interface for the $SU(2)$ and $SO(3)$ of the later `Linear Algebra' chapter, for the Lie groups and fibre bundles of `Manifold and Fibre Bundle', for the quaternion episphere groups of `Epicycle Sets and Deferent Sphere Sets', and for the non-commutative harmonic analysis of `Harmonic Analysis'.
+
+Seven-theme positioning of this chapter: \textbf{Translation}---the translation invariance of quaternion addition and limits; \textbf{Scaling}---the multiplicativity and dilation of the quaternion modulus; \textbf{Rotation}---the realisation of three-dimensional rotations by the conjugation action of unit quaternions; \textbf{Conservation}---the invariance of the quaternion norm and inner product under rotation; \textbf{Symmetry}---the conjugation anti-automorphism and the group structure of $S^3$; \textbf{Closure}---elements of finite order in $S^3$ generate cyclic subgroups; \textbf{Period}---the $2\pi$-periodicity of the quaternion exponential function and the group of roots of unity.
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  >=Stealth, thick,
+  node distance=0.8cm and 0.9cm,
+  box/.style={draw, rounded corners, align=center, minimum width=2.2cm, minimum height=0.7cm, font=\small, fill=blue!8},
+  arr/.style={-{Stealth[length=2.2mm]}, very thick}
+]
+\node[box, fill=blue!12]  (alg) {Quaternion algebra\\$\mathbb{H}$};
+\node[box, fill=cyan!12, right=of alg] (lim) {Limits and continuity\\completeness/compact sets};
+\node[box, fill=green!12, right=of lim] (der) {Derivatives and differentials\\left and right derivatives/CRF};
+\node[box, fill=orange!12, right=of der] (int) {Integration\\differential forms/Fueter};
+\node[box, fill=red!12, below=of alg] (ser) {Series\\power series/domain of convergence};
+\node[box, fill=purple!12, right=of ser] (conv) {Convolution\\non-commutative/convolution theorem};
+\node[box, fill=magenta!12, right=of conv] (ft) {Fourier transform\\QFT/QDFT};
+\node[box, fill=yellow!16, right=of ft] (lap) {Laplace transform\\QLT};
+\node[box, fill=teal!12, below=of ser] (reg) {Fueter-regular\\function spaces};
+\node[box, fill=olive!12, right=of reg] (gen) {Generalised functions\\distributions/kernels};
+\node[box, fill=brown!12, right=of gen] (rot) {Three-dimensional rotations\\$S^3\to SO(3)$};
+\node[box, fill=gray!12, right=of rot] (hyper) {Hypercomplex analysis\\Clifford generalisation};
+
+\draw[arr] (alg) -- (lim);
+\draw[arr] (lim) -- (der);
+\draw[arr] (der) -- (int);
+\draw[arr] (alg) -- (ser);
+\draw[arr] (ser) -- (conv);
+\draw[arr] (conv) -- (ft);
+\draw[arr] (ft) -- (lap);
+\draw[arr] (ser) -- (reg);
+\draw[arr] (reg) -- (gen);
+\draw[arr] (gen) -- (rot);
+\draw[arr] (rot) -- (hyper);
+\draw[arr, dashed] (int) -- (reg);
+\end{tikzpicture}
+\caption{Overview of the structure of this chapter: starting from the quaternion algebra and passing through limits and continuity, derivatives and differentials, integration, series, convolution, the Fourier transform, the Laplace transform, Fueter-regular functions, distributions and three-dimensional rotations, before finally converging into hypercomplex analysis.}
+\label{fig:quaternion_analysis_overview}
+\end{figure}
+
+\section{Review of the quaternion algebra}
+
+\begin{definition}[The quaternion algebra]\label{def:q_quaternion}
+The \textbf{quaternion algebra} $\mathbb{H}$ is the four-dimensional associative algebra over $\mathbb{R}$ with basis $\{1,i,j,k\}$, whose multiplication is the bilinear extension of
+\[
+i^2=j^2=k^2=ijk=-1
+\]
+together with the relations derived from them,
+\[
+ij=k,\quad ji=-k,\quad jk=i,\quad kj=-i,\quad ki=j,\quad ik=-j
+\]
+An arbitrary quaternion is written
+\[
+q=a+bi+cj+dk,\qquad a,b,c,d\in\mathbb{R}.
+\]
+Here $a=\operatorname{Re}q$ is called the \textbf{scalar part} and $\mathbf{v}=bi+cj+dk=\operatorname{Vec}q$ the \textbf{vector part}. The conjugate is $\bar q=a-bi-cj-dk$, and the modulus is $|q|=\sqrt{q\bar q}=\sqrt{a^2+b^2+c^2+d^2}$.
+\end{definition}
+
+\begin{property}[Basic algebraic properties of the quaternions]\label{prop:q_basic_props}
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathbb{H}$ is a \textbf{division algebra}: every non-zero element has a multiplicative inverse $q^{-1}=\bar q/|q|^2$.
+    \item $\mathbb{H}$ is \textbf{non-commutative}: $ij\neq ji$, and in general $q_1q_2\neq q_2q_1$.
+    \item \textbf{Conjugation is an anti-automorphism}: $\overline{pq}=\bar q\,\bar p$, $\overline{\bar q}=q$.
+    \item \textbf{Multiplicativity of the modulus}: $|pq|=|p|\,|q|$, and hence $|q^{-1}|=|q|^{-1}$.
+    \item \textbf{Inner product}: $\langle p,q\rangle=\operatorname{Re}(\bar p q)$ is the Euclidean inner product on $\mathbb{R}^4$. In accordance with the convention of the `Linear Algebra' chapter, it is \textbf{linear in the second argument} ($\langle p,\lambda q\rangle=\lambda\langle p,q\rangle$) and conjugate-linear in the first ($\langle \lambda p,q\rangle=\bar\lambda\langle p,q\rangle$).
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i) For $q\neq 0$ we have $q\bar q=|q|^2>0$, so $q^{-1}=\bar q/|q|^2$ satisfies $qq^{-1}=q^{-1}q=1$.
+
+(ii) Since $ij=k$ and $ji=-k$, the two are not equal.
+
+(iii) Verify componentwise that $\overline{pq}=\bar q\,\bar p$.
+
+(iv) $|pq|^2=pq\overline{pq}=pq\bar q\bar p=p|q|^2\bar p=|p|^2|q|^2$, and taking square roots gives $|pq|=|p||q|$.
+
+(v) A direct computation gives $\operatorname{Re}(\bar p q)=\sum_{i=0}^3 p_iq_i$, which is a symmetric positive-definite bilinear form.
+\end{proof}
+
+\begin{example}[An instance of quaternion multiplication]\label{ex:q_multiplication}
+Take $p=1+i$ and $q=1+j$. Then
+\[
+pq=(1+i)(1+j)=1+j+i+ij=1+i+j+k,
+\]
+whilst
+\[
+qp=(1+j)(1+i)=1+i+j+ji=1+i+j-k.
+\]
+Hence $pq\neq qp$, the difference being $2k$.
+\end{example}
+
+\begin{remark}[The vector form of the quaternion product]\label{rem:q_product_vector_form}
+Let $p=a+\mathbf{u}$ and $q=b+\mathbf{v}$, where $a,b\in\mathbb{R}$ and $\mathbf{u},\mathbf{v}\in\operatorname{Im}\mathbb{H}\cong\mathbb{R}^3$. Then
+\[
+pq=ab-\mathbf{u}\cdot\mathbf{v}+a\mathbf{v}+b\mathbf{u}+\mathbf{u}\times\mathbf{v}.
+\]
+This formula decomposes quaternion multiplication into a scalar part and a vector part, and it is a basic tool for the differential calculus that follows.
+\end{remark}
+
+\begin{remark}[Comparison with the complex algebra]\label{rem:q_vs_complex}
+The complex numbers $\mathbb{C}$ form a commutative field, whereas the quaternions $\mathbb{H}$ form a non-commutative division algebra. This difference leads to the following:
+\begin{itemize}
+    \item in complex analysis there is only one definition of the derivative; in quaternion analysis the left and right derivatives must be distinguished.
+    \item complex analytic functions are very abundant, whereas quaternion analytic functions (Fueter-regular functions) are very rare.
+    \item the complex unit-circle group $U(1)$ is commutative, whereas the quaternion unit-sphere group $S^3\cong SU(2)$ is non-commutative.
+\end{itemize}
+\end{remark}
+
+\section{Quaternion limits and continuity}
+
+\begin{definition}[Quaternion limit]\label{def:q_limit}
+Let $f:\mathbb{H}\supseteq D\to\mathbb{H}$ and $q_0\in\overline{D}$. We write $\lim_{q\to q_0}f(q)=L$ if
+\[
+\forall \varepsilon>0,\ \exists \delta>0,\ \forall q\in D,\quad 0<|q-q_0|<\delta\implies |f(q)-L|<\varepsilon.
+\]
+If $\lim_{q\to q_0}f(q)=f(q_0)$, then $f$ is said to be \textbf{continuous} at $q_0$.
+\end{definition}
+
+\begin{proposition}[Coordinate description of the limit]\label{prop:q_limit_coordinate}
+Write $q=q_0+h$ with $h=h_0+h_1i+h_2j+h_3k$, and $f=f_0+f_1i+f_2j+f_3k$. Then
+\[
+\lim_{h\to 0}f(q_0+h)=L
+\]
+if and only if the four real-component limits each hold.
+\end{proposition}
+
+\begin{proof}
+By $|h|=\sqrt{h_0^2+h_1^2+h_2^2+h_3^2}$ and the inequalities for the absolute values of the components,
+\[
+|h_\mu|\le |h|\le |h_0|+|h_1|+|h_2|+|h_3|,
+\]
+the two control each other, so the limit is equivalent to the componentwise limit.
+\end{proof}
+
+\begin{theorem}[Completeness of $\mathbb{H}$]\label{thm:q_completeness}
+Every Cauchy sequence in $\mathbb{H}$ converges.
+\end{theorem}
+
+\begin{proof}
+Let $\{q_n\}$ be a Cauchy sequence, with $q_n=a_n+b_ni+c_nj+d_nk$. Since $|a_m-a_n|\le |q_m-q_n|$, the sequence $\{a_n\}$ is a Cauchy sequence in $\mathbb{R}$, and by the completeness of $\mathbb{R}$ it converges to $a$. Similarly $b_n\to b$, $c_n\to c$ and $d_n\to d$. Setting $q=a+bi+cj+dk$, we obtain $|q_n-q|\to 0$.
+\end{proof}
+
+\begin{theorem}[Continuous functions on compact sets]\label{thm:q_continuous_compact}
+Let $K\subseteq\mathbb{H}$ be compact and let $f:K\to\mathbb{H}$ be continuous. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item $f(K)$ is compact;
+    \item $f$ is bounded on $K$;
+    \item $|f|$ attains its maximum and minimum on $K$;
+    \item $f$ is uniformly continuous on $K$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+Since $\mathbb{H}\cong\mathbb{R}^4$, regard $f$ as four continuous real-valued functions $(f_0,f_1,f_2,f_3)$. The corresponding properties of continuous functions on compact sets in real analysis are then obtained by applying them componentwise.
+\end{proof}
+
+\section{Quaternion derivatives and differentials}
+
+\subsection{Left and right derivatives}
+
+\begin{definition}[Left and right derivatives]\label{def:q_derivative_left_right}
+Let $f:\mathbb{H}\supseteq D\to\mathbb{H}$ and $q_0\in D$.
+\begin{enumerate}[label=(\roman*)]
+    \item If the limit
+    \[
+    f'_L(q_0)=\lim_{h\to 0}\bigl[f(q_0+h)-f(q_0)\bigr]h^{-1}
+    \]
+    exists, then $f$ is said to be \textbf{left-differentiable} at $q_0$, and $f'_L(q_0)$ is called the left derivative.
+    \item If the limit
+    \[
+    f'_R(q_0)=\lim_{h\to 0}h^{-1}\bigl[f(q_0+h)-f(q_0)\bigr]
+    \]
+    exists, then $f$ is said to be \textbf{right-differentiable} at $q_0$, and $f'_R(q_0)$ is called the right derivative.
+\end{enumerate}
+Since quaternion multiplication is non-commutative, the left and right derivatives are in general not equal.
+\end{definition}
+
+\begin{remark}[The essential difference between the left and right derivatives]\label{rem:q_derivative_difference}
+In the definition of the right derivative $h^{-1}$ multiplies on the left, whilst in the definition of the left derivative $h^{-1}$ multiplies on the right. If $f(q)=aq$ (left multiplication by a constant), then
+\[
+f(q+h)-f(q)=a h,\qquad [f(q+h)-f(q)]h^{-1}=a h h^{-1}=a,
+\]
+so $f(q)=aq$ is left-differentiable, with left derivative $a$. Conversely, $f(q)=qb$ (right multiplication by a constant) is right-differentiable, with right derivative $b$. This shows that \textbf{left multiplication by a constant is left-analytic, whilst right multiplication by a constant is right-analytic}, and the two cannot hold simultaneously (unless $b$ is real).
+\end{remark}
+
+\begin{definition}[Quaternion analytic functions]\label{def:q_analytic}
+If $f$ is right-differentiable everywhere on an open set $U\subseteq\mathbb{H}$, then $f$ is said to be \textbf{right-analytic} on $U$. Left-analytic is defined similarly. Note that the difference-quotient limit definition of right-differentiability is too narrow, and Fueter-regular functions are defined by an integral (see \S\ref{sec:q_fueter_regular}).
+\end{definition}
+
+\subsection{The Cauchy--Riemann--Fueter system}
+
+\begin{definition}[The Fueter operator]\label{def:q_fueter_operator}
+The \textbf{Fueter operator} is defined by
+\[
+\frac{\partial}{\partial \bar q}:=
+\frac{\partial}{\partial x_0}
++i\frac{\partial}{\partial x_1}
++j\frac{\partial}{\partial x_2}
++k\frac{\partial}{\partial x_3},
+\]
+where $q=x_0+x_1i+x_2j+x_3k$.
+\end{definition}
+
+\begin{theorem}[The Cauchy--Riemann--Fueter system]\label{thm:q_crf}
+Let $f=f_0+f_1i+f_2j+f_3k$ be right Fueter-regular on an open set $U$ (that is, $\partial f/\partial \bar q=0$). Then the four component functions satisfy
+\[
+\begin{aligned}
+\frac{\partial f_0}{\partial x_0}
+-\frac{\partial f_1}{\partial x_1}
+-\frac{\partial f_2}{\partial x_2}
+-\frac{\partial f_3}{\partial x_3}&=0,\\[2pt]
+\frac{\partial f_0}{\partial x_1}
++\frac{\partial f_1}{\partial x_0}
++\frac{\partial f_2}{\partial x_3}
+-\frac{\partial f_3}{\partial x_2}&=0,\\[2pt]
+\frac{\partial f_0}{\partial x_2}
+-\frac{\partial f_1}{\partial x_3}
++\frac{\partial f_2}{\partial x_0}
++\frac{\partial f_3}{\partial x_1}&=0,\\[2pt]
+\frac{\partial f_0}{\partial x_3}
++\frac{\partial f_1}{\partial x_2}
+-\frac{\partial f_2}{\partial x_1}
++\frac{\partial f_3}{\partial x_0}&=0.
+\end{aligned}
+\]
+\end{theorem}
+
+\begin{proof}
+Apply the Fueter operator $\partial/\partial\bar q=\partial_0+i\partial_1+j\partial_2+k\partial_3$ to $f=f_0+f_1i+f_2j+f_3k$; expanding term by term and using the quaternion multiplication rules ($ij=k$ and so on), then comparing the four components, gives the result.
+\end{proof}
+
+\begin{remark}[Historical note: Fueter's contribution]\label{rem:q_fueter_history}
+The Swiss mathematician Rudolf Fueter (1880--1950) was the first to establish systematically the theory of quaternion analytic functions, in the 1930s. He found that if the Cauchy--Riemann condition in complex analysis is generalised directly to the existence of the difference-quotient limit, then the resulting class of functions is too narrow. He therefore generalised the Cauchy--Riemann condition itself instead, and defined\ \textbf{Fueter-regular functions}---quaternion-valued functions satisfying $\partial f/\partial \bar q=0$. This class of functions is far richer than the difference-quotient differentiable functions, and it possesses integral theorems analogous to those for complex analytic functions (Fueter's theorem).
+\end{remark}
+
+\begin{example}[Instances of quaternion regular functions]\label{ex:q_regular_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item The constant function $f(q)=c$ is right Fueter-regular.
+    \item The function $f(q)=q^{-1}/|q|^2=\bar q/|q|^4$ is right Fueter-regular (for $q\neq 0$). This is the most important basic example, and it is called the \textbf{Fueter kernel}. Note that $q^{-1}=\bar q/|q|^2$ alone is \emph{not} right Fueter-regular (the scalar part of its $\partial/\partial\bar q$ is $2/|q|^2\neq 0$); what is regular is $q^{-1}$ multiplied by the scalar factor $|q|^{-2}$.
+    \item More generally, $f(q)=(q-a)^{-1}/|q-a|^2$ is right Fueter-regular for $q\neq a$.
+    \item The polynomial $f(q)=\sum_{n=0}^N q^n a_n$ (with coefficients on the right) is \textbf{slice-regular}, but in general \emph{not} right Fueter-regular (see \S\ref{sec:q_slice_vs_fueter}).
+\end{enumerate}
+\end{example}
+
+\begin{remark}[Polynomial functions are in general not right Fueter-regular]\label{rem:q_polynomial_not_regular}
+The quaternion polynomial $\sum_{n=0}^N a_n q^n$ (with coefficients on the left) is in general not right Fueter-regular. For example, for $f(q)=q^2$ a computation gives $\partial(q^2)/\partial\bar q\neq 0$ (unless the vector part of $q$ is zero). Nor is the polynomial $\sum_{n=0}^N q^n a_n$, with coefficients on the right, right Fueter-regular: for a single term $q^n a_n$ with $n\ge 1$ the Fueter derivative satisfies $\partial(qa)/\partial\bar q=a+iai+jaj+kak=-2a\neq 0$. Polynomials of this kind belong to the class of \textbf{slice-regular} functions; the division of labour between the two classes is described in \S\ref{sec:q_slice_vs_fueter}.
+\end{remark}
+
+\section{Quaternion integration}
+
+\subsection{Quaternion-valued differential forms}
+
+\begin{definition}[Quaternion-valued differential forms]\label{def:q_differential_forms}
+Let $U\subseteq\mathbb{H}$ be an open set. A \textbf{quaternion-valued $k$-form} is
+\[
+\omega=\sum_{|I|=k} \omega_I(q)\,dq_I,
+\]
+where $\omega_I:U\to\mathbb{H}$ is a quaternion-valued function, $dq_I=dq_{i_1}\wedge\cdots\wedge dq_{i_k}$, and $dq_\mu$ corresponds to the coordinate $x_\mu$ ($q=x_0+x_1i+x_2j+x_3k$).
+\end{definition}
+
+\begin{definition}[Exterior derivative]\label{def:q_exterior_derivative}
+The \textbf{exterior derivative} $d$ is defined by
+\[
+d\omega=\sum_{|I|=k}\sum_{\mu=0}^3 \frac{\partial \omega_I}{\partial x_\mu}\,dq_\mu\wedge dq_I.
+\]
+\end{definition}
+
+\subsection{Fueter's integral theorem}
+
+\begin{theorem}[Cauchy's integral theorem in Fueter's form]\label{thm:q_cauchy_fueter}
+Let $f$ be right Fueter-regular on a simply connected domain $\Omega\subseteq\mathbb{H}$ (that is, $\partial f/\partial \bar q=0$), and let $\gamma$ be a closed three-dimensional surface in $\Omega$. Then
+\[
+\oint_\gamma Dq\,f(q)=0,
+\]
+where $Dq$ is the quaternion area element
+\[
+Dq:=dq_1\wedge dq_2\wedge dq_3
+-i\,dq_0\wedge dq_2\wedge dq_3
++j\,dq_0\wedge dq_1\wedge dq_3
+-k\,dq_0\wedge dq_1\wedge dq_2.
+\]
+\end{theorem}
+
+\begin{proof}
+Use the quaternion version of the Stokes--Cartan theorem: for the 3-form $F=Dq\,f(q)$ we have $\oint_{\partial C}F=\int_C dF$. A direct computation of $dF$ gives
+\[
+dF=Dq\wedge\left(\frac{\partial f}{\partial \bar q}\right)\,dq_0\wedge dq_1\wedge dq_2\wedge dq_3.
+\]
+The right Fueter-regularity condition $\partial f/\partial \bar q=0$ gives $dF=0$, hence $\oint_{\partial C}F=0$.
+\end{proof}
+
+\begin{corollary}[Fueter's integral formula]\label{cor:q_cauchy_formula}
+Let $f$ be right Fueter-regular on a domain containing $\overline{B(q_0,r)}$. Then
+\[
+f(q_0)=\frac{1}{2\pi^2}\oint_{\partial B(q_0,r)} \frac{(q-q_0)^{-1}}{|q-q_0|^2}\,Dq\,f(q).
+\]
+\end{corollary}
+
+\begin{proof}
+Consider the function $G(q,q_0)=(q-q_0)^{-1}/|q-q_0|^2$, which is right Fueter-regular for $q\neq q_0$. Apply Fueter's integral theorem to $G f$ and let $r\to 0$ to extract $f(q_0)$.
+\end{proof}
+
+\begin{remark}[Comparison with Cauchy's integral formula in complex analysis]\label{rem:q_cauchy_vs_complex}
+Cauchy's integral formula in complex analysis reads $f(z_0)=\frac{1}{2\pi i}\oint_\gamma \frac{f(z)}{z-z_0}\,dz$. The quaternion version of the integral formula involves the quaternion kernel $(q-q_0)^{-1}/|q-q_0|^2$ and the 3-form area element $Dq$, and its domain of integration is a closed three-dimensional surface rather than a closed one-dimensional curve. This difference stems from the four-dimensional character of quaternion analysis.
+\end{remark}
+
+\section{Quaternion series}
+
+\subsection{Slice regularity and Fueter regularity: division of labour}\label{sec:q_slice_vs_fueter}
+
+\begin{remark}[The division of labour between the two classes]\label{rem:q_slice_vs_fueter}
+There are two inequivalent notions of `regularity' in quaternion analysis, and the exposition in this chapter has to allocate the work between them.
+\textbf{Slice-regular functions}: let $f$ be defined on an open set $U\subseteq\mathbb{H}$. For every pure imaginary unit quaternion $I$ (with $I^2=-1$), write $\mathbb{C}_I=\{x_0+x_II:x_0,x_I\in\mathbb{R}\}$ for the corresponding complex slice. If the restriction $f|_{\mathbb{C}_I\cap U}$ is holomorphic for every $I$---that is, if, writing $f=f_0+If_I$,
+\[
+\frac{\partial f_0}{\partial x_0}=\frac{\partial f_I}{\partial x_I},\qquad
+\frac{\partial f_0}{\partial x_I}=-\frac{\partial f_I}{\partial x_0}
+\]
+on that slice---then $f$ is called \textbf{slice-regular}. This class is closed under power series and local expansions: $\sum_{n=0}^\infty q^n a_n$ and expansions in powers of $(q-q_0)$ are its typical objects (see Definition \ref{def:q_power_series} and Theorem \ref{thm:q_local_expansion}).
+\textbf{Fueter-regular functions}: these are defined by the Fueter operator equation $\partial f/\partial\bar q=0$ (Definition \ref{def:q_fueter_regular}), whose prototype is the kernel $\bar q/|q|^4=q^{-1}/|q|^2$. The integral theorems, Cauchy's integral formula and the theory of distributions in this chapter all rest on the Fueter-regular class.
+\textbf{The relation between the two}: for a single term $q^n a_n$ with $n\ge 1$ we have $\partial(q^n a_n)/\partial\bar q=-2a_n\neq 0$, so a Fueter-regular power series \textbf{cannot} be written in the form $\sum q^n a_n$; a \textbf{Fueter polynomial basis} must be used instead---that is, the family of homogeneous polynomials generated symmetrically from $q$ and $\bar q$ and satisfying $\partial P_n/\partial\bar q=0$. The construction of that basis is not developed in this chapter. The two classes cannot be interchanged: the slice-regular class describes power series and local expansions (isolation of zeros holding slice by slice), whilst the Fueter-regular class describes the integral theory in the sense of partial differential equations; outside the real axis their intersection is small (for instance the kernels $\bar q/|q|^4$ and their scalar multiples).
+\end{remark}
+
+\subsection{Quaternion power series}
+
+\begin{definition}[Quaternion power series]\label{def:q_power_series}
+A series of the form
+\[
+\sum_{n=0}^\infty q^n a_n \qquad\text{or}\qquad \sum_{n=0}^\infty a_n q^n,\qquad a_n\in\mathbb{H}
+\]
+is called a \textbf{quaternion power series}. A series whose coefficients lie on the right, $\sum_{n=0}^\infty q^n a_n$, is \textbf{slice-regular}, but it is \emph{not} right Fueter-regular (see \S\ref{sec:q_slice_vs_fueter}); a Fueter-regular power series must use a Fueter polynomial basis instead.
+\end{definition}
+
+\begin{theorem}[Convergence of quaternion power series]\label{thm:q_power_series_convergence}
+Let $\sum_{n=0}^\infty q^n a_n$ be a quaternion power series. Then there exists $R\in[0,\infty]$, called the \textbf{radius of convergence}, such that:
+\begin{enumerate}[label=(\roman*)]
+    \item it converges absolutely for $|q|<R$;
+    \item it diverges for $|q|>R$;
+    \item it converges uniformly on $|q|\le \rho<R$;
+    \item the sum function is slice-regular for $|q|<R$ and may be differentiated term by term (see \S\ref{sec:q_slice_vs_fueter}).
+\end{enumerate}
+The radius of convergence $R$ is determined by the coefficients and satisfies $1/R=\limsup_{n\to\infty}|a_n|^{1/n}$.
+\end{theorem}
+
+\begin{proof}
+(i)(ii)(iii) are the same as for real power series and follow from control by the modulus. (iv) The legitimacy of term-by-term differentiation is guaranteed by uniform convergence; each term $q^n a_n$ is slice-regular (on a slice $\mathbb{C}_I$ it is simply the complex power series $z^n a_n$), and term-by-term differentiation preserves slice regularity, so the sum function is slice-regular. This does \emph{not} make the power series right Fueter-regular: $\partial(q^n a_n)/\partial\bar q=-2a_n\neq 0$ for $n\ge 1$.
+\end{proof}
+
+\begin{theorem}[Abel's limit theorem: the quaternion version]\label{thm:q_abel}
+Let $a=\sum_{n=0}^\infty a_n$ be a convergent quaternion series and let $G_a(q)=\sum_{n=0}^\infty q^n a_n$ be its power series. Then, as $q\to 1$ with $|1-q|/(1-|q|)$ bounded, $G_a(q)\to G_a(1)$.
+\end{theorem}
+
+\begin{proof}
+The framework of the proof follows Ahlfors's classical method. Let $\varepsilon>0$, and set $a=0$ (by adjusting the constant term). Consider the partial sums $\sigma_n=\sum_{k=0}^n a_k$ and use summation by parts:
+\[
+\sigma_n(q)=(1-q)(\sigma_0+q\sigma_1+\cdots+q^{n-1}\sigma_{n-1})+q^n\sigma_n.
+\]
+Since $a$ converges, $q^n\sigma_n\to 0$. Hence
+\[
+G_a(q)=(1-q)\sum_{n=0}^\infty q^n\sigma_n.
+\]
+Since $|1-q|/(1-|q|)$ is bounded, write $|1-q|\le M(1-|q|)$. Because $\sigma_n\to 0$, for sufficiently large $N$ we have $|\sigma_n|<\varepsilon$ ($n\ge N$). Thus
+\[
+\left|\sum_{n=N}^\infty q^n\sigma_n\right|<\varepsilon\sum_{n=N}^\infty|q|^n=\frac{\varepsilon|q|^N}{1-|q|}<\frac{\varepsilon}{1-|q|}.
+\]
+From this we obtain $|G_a(q)|<\varepsilon M$, that is, $G_a(q)\to 0=G_a(1)$.
+\end{proof}
+
+\begin{theorem}[Power series for the exponential, sine and cosine]\label{thm:q_exp_sin_cos}
+The quaternion exponential, sine and cosine are defined by the following power series:
+\[
+e^p=\sum_{l=0}^\infty\frac{p^l}{l!},\qquad
+\sin p=\sum_{l=0}^\infty(-1)^l\frac{p^{2l+1}}{(2l+1)!},\qquad
+\cos p=\sum_{l=0}^\infty(-1)^l\frac{p^{2l}}{(2l)!}.
+\]
+All three series have radius of convergence $R=\infty$, that is, their set of convergence is the whole of the quaternions. Moreover they satisfy
+\[
+(e^p)'=e^p,\qquad (\sin p)'=\cos p,\qquad (\cos p)'=-\sin p.
+\]
+\end{theorem}
+
+\begin{proof}
+Radius of convergence: apply the ratio test to the series for $\sin p$,
+\[
+L=\lim_{l\to\infty}\frac{|p^{2(l+1)+1}|/[2(l+1)+1]!}{|p^{2l+1}|/(2l+1)!}
+=\lim_{l\to\infty}\frac{|p|^2}{(2l+2)(2l+3)}=0<1,
+\]
+so $R=1/L=\infty$. The same argument applies to $\cos p$ and $e^p$.
+
+Term-by-term differentiation: uniform convergence permits differentiation term by term.
+\[
+(e^p)'=\sum_{l=0}^\infty\left(\frac{p^l}{l!}\right)'=\sum_{k=1}^\infty\frac{p^{k-1}}{(k-1)!}=e^p,
+\]
+\[
+(\sin p)'=\sum_{l=0}^\infty(-1)^l\frac{p^{2l}}{(2l)!}=\cos p,\qquad
+(\cos p)'=-\sin p.
+\]
+These are completely parallel to the corresponding results in complex analysis.
+\end{proof}
+
+\begin{example}[Evaluating the quaternion exponential]\label{ex:q_exp_calc}
+Take $p=\pi i/2$. By the quaternion Euler formula (Proposition \ref{prop:quaternion_exp_rotation}), $e^{\pi i/2}=\cos(\pi/2)+i\sin(\pi/2)=i$. More generally, for a pure imaginary quaternion $\mathbf{u}\theta$ (with $\mathbf{u}$ a unit pure imaginary quaternion), $e^{\mathbf{u}\theta}=\cos\theta+\mathbf{u}\sin\theta$.
+\end{example}
+
+\section{Quaternion convolution}
+
+\begin{definition}[Quaternion convolution]\label{def:q_convolution}
+Let $x,y:\mathbb{R}\to\mathbb{H}$ be quaternion-valued signals. Their \textbf{convolution} is defined by
+\[
+(x*y)(t)=\int_{-\infty}^{+\infty}x(u)y(t-u)\,du.
+\]
+\end{definition}
+
+\begin{theorem}[Non-commutativity of quaternion convolution]\label{thm:q_convolution_noncommutative}
+In general $x*y\neq y*x$. Quaternion convolution is no longer commutative.
+\end{theorem}
+
+\begin{proof}
+Take $x(t)=\delta(t)i$ and $y(t)=\delta(t)j$. Then $(x*y)(t)=ij=k$, whilst $(y*x)(t)=ji=-k$, and the two are not equal.
+\end{proof}
+
+\begin{theorem}[The quaternion convolution theorem]\label{thm:q_convolution_theorem}
+Let $x:\mathbb{R}\to\mathbb{H}$ be a general quaternion-valued signal, and let $y:\mathbb{R}\to\mathbb{C}_\mu$ take values in the same complex subfield as the Fourier atom $e^{-\mu 2\pi vt}$. Then
+\[
+x*y(t)\ \overset{\text{QFT}}{\longleftrightarrow}\ X(v)Y(v).
+\]
+That is: when one of the signals is restricted to a particular complex subfield, the QFT of the convolution equals the product of the QFTs.
+\end{theorem}
+
+\begin{proof}
+After $y$ is restricted to the complex subfield $\mathbb{C}_\mu$, the signal $y$ commutes with the Fourier atom $e^{-\mu 2\pi vt}$. A direct computation of the QFT gives
+\[
+\widehat{x*y}(v)=\int\left(\int x(u)y(t-u)du\right)e^{-\mu 2\pi vt}dt.
+\]
+Substituting $t=u+s$ and using the commutativity of $y$ with $e^{-\mu 2\pi vs}$, we obtain
+\[
+\widehat{x*y}(v)=\int x(u)e^{-\mu 2\pi vu}du\cdot\int y(s)e^{-\mu 2\pi vs}ds=X(v)Y(v).
+\]
+If $y$ does not lie in the same complex subfield, then the convolution theorem fails because of non-commutativity.
+\end{proof}
+
+\begin{remark}[The restriction in the convolution theorem]\label{rem:q_convolution_restriction}
+The condition $y:\mathbb{R}\to\mathbb{C}_\mu$ in the quaternion convolution theorem should not be regarded as too restrictive. In fact, this condition covers the usual smoothing operations (filtering) in the time domain or the frequency domain. Filtering relations that involve geometric operations (rotations) cannot be expressed simply by convolution, and they will be discussed in later chapters.
+\end{remark}
+
+\begin{proposition}[Basic properties of quaternion convolution]\label{prop:q_convolution_properties}
+Quaternion convolution satisfies:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Bilinearity}: $(\alpha x_1+\beta x_2)*y=\alpha(x_1*y)+\beta(x_2*y)$;
+    \item \textbf{Associativity}: $(x*y)*z=x*(y*z)$;
+    \item \textbf{Non-commutativity}: in general $x*y\neq y*x$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) By the linearity of the integral.
+
+(ii) By Fubini's theorem, interchanging the order of integration.
+
+(iii) By Theorem \ref{thm:q_convolution_noncommutative}.
+\end{proof}
+
+\section{The quaternion Fourier transform}
+
+\begin{definition}[The quaternion Fourier transform]\label{def:q_fourier}
+For $x\in L^1(\mathbb{R};\mathbb{H})\cap L^2(\mathbb{R};\mathbb{H})$, the \textbf{quaternion Fourier transform} (QFT) is defined by
+\[
+X(v)=\int_{-\infty}^{+\infty}x(t)e^{-j2\pi vt}\,dt.
+\]
+The inverse transform is
+\[
+x(t)=\int_{-\infty}^{+\infty}X(v)e^{j2\pi vt}\,dv.
+\]
+Here $j$ is a fixed imaginary unit, determined by a choice of symmetry.
+\end{definition}
+
+\begin{remark}[Several types of QFT]\label{rem:q_fourier_types}
+Because quaternion multiplication is non-commutative, there are several ways of defining the QFT: the left QFT (with the exponential factor multiplying on the left), the right QFT (with the exponential factor multiplying on the right), and the two-sided QFT (with the two exponential factors placed on either side). Different definitions have different properties.
+\end{remark}
+
+\begin{proposition}[Relation between the QFT and the complex Fourier transform]\label{prop:q_fourier_complex_relation}
+Write the signal as $x(t)=u(t)+iv(t)$, where $u,v$ take values in $\mathbb{C}_j$. Then
+\[
+X(v)=U(v)+iV(v),
+\]
+where $U(v)$ and $V(v)$ are the standard complex Fourier transforms of $u(t)$ and $v(t)$ respectively.
+\end{proposition}
+
+\begin{proof}
+Substituting directly into the definition:
+\[
+X(v)=\int(u(t)+iv(t))e^{-j2\pi vt}dt=\int u(t)e^{-j2\pi vt}dt+i\int v(t)e^{-j2\pi vt}dt.
+\]
+Since $u,v$ take values in $\mathbb{C}_j$ and commute with $e^{-j2\pi vt}$, these integrals are precisely the standard complex Fourier transforms.
+\end{proof}
+
+\begin{theorem}[Differentiation properties of the QFT]\label{thm:q_fourier_derivative}
+\[
+\frac{d^n x(t)}{dt^n}\ \overset{\text{QFT}}{\longleftrightarrow}\ X(v)(\mu 2\pi v)^n,
+\]
+\[
+x(t)(-\mu 2\pi t)^n\ \overset{\text{QFT}}{\longleftrightarrow}\ \frac{d^n X(v)}{dv^n}.
+\]
+\end{theorem}
+
+\begin{proof}
+This follows directly from integration by parts and the definition of the QFT.
+\end{proof}
+
+\begin{theorem}[The quaternion Parseval--Plancherel identity]\label{thm:q_parseval}
+For $x,y\in L^2(\mathbb{R};\mathbb{H})$,
+\[
+\langle x,y\rangle_{L^2}=\int x(t)\overline{y(t)}\,dt=\int X(v)\overline{Y(v)}\,dv.
+\]
+In particular, $\|x\|_{L^2}^2=\|X\|_{L^2}^2$.
+\end{theorem}
+
+\begin{proof}
+The space $L^2(\mathbb{R};\mathbb{H})$ is a left Hilbert space, with inner product $\langle x,y\rangle=\int x(t)\overline{y(t)}dt$. The QFT is an isometric isomorphism of left Hilbert spaces and therefore preserves the inner product.
+\end{proof}
+
+\begin{definition}[The discrete quaternion Fourier transform]\label{def:q_dft}
+For a quaternion sequence $\{x[n]\}_{n=0}^{N-1}$ of length $N$, the \textbf{discrete quaternion Fourier transform} (QDFT) is defined by
+\[
+X[m]=\sum_{n=0}^{N-1}x[n]e^{-j2\pi nm/N},\qquad m=0,1,\cdots,N-1.
+\]
+The inverse transform is $x[n]=\frac1N\sum_{m=0}^{N-1}X[m]e^{j2\pi nm/N}$.
+\end{definition}
+
+\section{The quaternion Laplace transform}
+
+\begin{definition}[The quaternion Laplace transform]\label{def:q_laplace}
+Let $f(t)$ be a quaternion-valued function defined for $t\ge 0$. The \textbf{quaternion Laplace transform} (QLT) is
+\[
+\mathcal{L}\{f\}(s)=\int_0^\infty e^{-st}f(t)\,dt,
+\]
+where $s$ is a quaternion variable. According to whether the exponential factor lies on the left or on the right, there are two different ways of defining the QLT.
+\end{definition}
+
+\begin{theorem}[Differentiation property of the QLT]\label{thm:q_laplace_derivative}
+The differentiation property of the QLT is
+\[
+\mathcal{L}\{f'\}(s)=s\mathcal{L}\{f\}(s)-f(0),
+\]
+but its precise form depends on the way the QLT is defined (left or right), and it differs significantly from the classical Laplace transform.
+\end{theorem}
+
+\begin{proof}
+Let $\mathcal{L}\{f\}(s)=\int_0^\infty e^{-st}f(t)dt$. Integration by parts gives:
+\[
+\mathcal{L}\{f'\}(s)=\int_0^\infty e^{-st}f'(t)dt=[e^{-st}f(t)]_0^\infty+s\int_0^\infty e^{-st}f(t)dt.
+\]
+If $f$ satisfies a suitable growth condition, the boundary term is $-f(0)$, so $\mathcal{L}\{f'\}(s)=s\mathcal{L}\{f\}(s)-f(0)$. Note, however, that the non-commutativity of $s$ and $f$ may give rise to correction terms in explicit computations.
+\end{proof}
+
+\begin{theorem}[Convolution property of the QLT]\label{thm:q_laplace_convolution}
+The convolution property of the QLT is
+\[
+\mathcal{L}\{f*g\}(s)=\mathcal{L}\{f\}(s)\cdot\mathcal{L}\{g\}(s),
+\]
+where convolution is defined by $(f*g)(t)=\int_0^t f(\tau)g(t-\tau)d\tau$. This property, however, requires a restriction to be imposed on $g$ (analogous to the complex-subfield condition in the QFT convolution theorem).
+\end{theorem}
+
+\begin{proof}
+A direct computation gives:
+\[
+\mathcal{L}\{f*g\}(s)=\int_0^\infty e^{-st}\left(\int_0^t f(\tau)g(t-\tau)d\tau\right)dt.
+\]
+Interchanging the order of integration and substituting $u=t-\tau$, we obtain
+\[
+=\int_0^\infty\int_0^\infty e^{-s(\tau+u)}f(\tau)g(u)d\tau du.
+\]
+If $g$ commutes with $e^{-su}$, then $=\mathcal{L}\{f\}(s)\cdot\mathcal{L}\{g\}(s)$. Otherwise a correction is required because of non-commutativity.
+\end{proof}
+
+\section{Fueter-regular functions}\label{sec:q_fueter_regular}
+
+\begin{definition}[Fueter-regular functions]\label{def:q_fueter_regular}
+Let $U\subseteq\mathbb{H}$ be an open set. A function $f:U\to\mathbb{H}$ is called \textbf{right Fueter-regular} if
+\[
+\frac{\partial f}{\partial\bar q}=0.
+\]
+It is called \textbf{left Fueter-regular} if
+\[
+f\frac{\partial}{\partial\bar q}=0.
+\]
+\end{definition}
+
+\begin{theorem}[Fueter's theorem]\label{thm:q_fueter_theorem}
+Let $f:\mathbb{C}\to\mathbb{C}$ be a complex analytic function. Then
+\[
+F(q)=f(q_0)+\sum_{k=1}^\infty\frac{1}{k!}\left(\frac{\partial^k f}{\partial z^k}(q_0)\right)q^k
+\]
+(with suitable adjustment of the variables) generates a right Fueter-regular function.
+\end{theorem}
+
+\begin{proof}
+This is the standard form of Fueter's generation theorem. Replacing the complex variable in the Taylor expansion of the complex analytic function $f$ by a quaternion variable, and handling the non-commutativity appropriately, yields a Fueter-regular function. It must be stressed that this power series is itself \textbf{slice-regular} rather than Fueter-regular (see Definition \ref{def:q_power_series}); the correct content of Fueter's generation theorem is that one first takes the axially symmetric extension of $f$ and then applies the four-dimensional Laplacian $\Delta=\partial_{x_0}^2+\partial_{x_1}^2+\partial_{x_2}^2+\partial_{x_3}^2$, the resulting function being right Fueter-regular. The name of the theorem is retained in this section, but, as explained above, the series is to be read as a slice-regular object.
+\end{proof}
+
+\begin{theorem}[Local expansion of slice-regular functions]\label{thm:q_local_expansion}
+Let $f$ be slice-regular in a neighbourhood of $q_0$. Then $f$ can be expanded near $q_0$ as
+\[
+f(q)=\sum_{n=0}^\infty (q-q_0)^n a_n,\qquad a_n\in\mathbb{H}.
+\]
+\end{theorem}
+
+\begin{proof}
+This is the local expansion theorem for slice-regular functions. Its proof uses Fueter's integral formula and the geometric series expansion, in analogy with the proof of the Taylor expansion in complex analysis. \textbf{A Fueter-regular function has in general no local expansion in powers of $(q-q_0)$}: for $n\ge 1$, $(q-q_0)^n$ is itself not right Fueter-regular (see \S\ref{sec:q_slice_vs_fueter}). The overlap between the two classes in a local expansion is therefore small: Fueter polynomials are homogeneous ($P_n$ being of degree $n$), so in an expansion about the origin only the constant term belongs to both classes.
+\end{proof}
+
+\begin{corollary}[Isolation of the zeros of slice-regular functions]\label{cor:q_zero_isolated}
+If a slice-regular function $f$ on a connected open set $U$ is not identically zero, then its zero set has no accumulation point in $U$.
+\end{corollary}
+
+\begin{proof}
+By the local expansion theorem, Theorem \ref{thm:q_local_expansion}, if the zeros had an accumulation point then all the coefficients $a_n=0$, so that $f\equiv 0$, a contradiction.
+\end{proof}
+
+\section{Quaternion distributions}
+
+\begin{definition}[Quaternion distributions]\label{def:q_generalised}
+Let $\mathcal{S}(\mathbb{H})$ be the quaternion-valued Schwartz space. A \textbf{quaternion distribution} is a continuous linear functional on $\mathcal{S}(\mathbb{H})$. In particular, the \textbf{Fueter-kernel distribution} is defined by
+\[
+\left\langle \frac{\bar q}{|q|^4}, \phi\right\rangle
+=\lim_{\varepsilon\to 0}\int_{|q|>\varepsilon}\frac{\bar q}{|q|^4}\,\phi(q)\,dq,
+\]
+that is, it is the principal-value distribution with kernel $\bar q/|q|^4=q^{-1}/|q|^2$. The kernel $\bar q/|q|^4$ is taken here rather than $1/q$ because the latter is not Fueter-regular (see \S\ref{sec:q_slice_vs_fueter}), whilst $\bar q/|q|^4$ is precisely the Fueter kernel used in \ref{cor:q_cauchy_formula}.
+\end{definition}
+
+\begin{theorem}[Partial derivative of the Fueter-kernel distribution]\label{thm:q_cauchy_kernel_derivative}
+The distribution induced by the Fueter kernel in quaternion analysis satisfies
+\[
+\frac{\partial}{\partial\bar q}\left(q^{-1}|q|^{-2}\right)
+=\frac{\partial}{\partial\bar q}\left(\frac{\bar q}{|q|^4}\right)=2\pi^2\delta(q),
+\]
+where $\delta(q)$ is the quaternion Dirac distribution.
+\end{theorem}
+
+\begin{proof}
+This is a standard result in the theory of distributions in quaternion analysis, its prototype being the fundamental solution of $|q|^{-2}$ in $\mathbb{R}^4$. The proof involves differentiating the Fueter kernel $\bar q/|q|^4=q^{-1}|q|^{-2}$ in the distributional sense, together with the quaternion version of distribution theory. Note the homogeneity check: the kernel $\bar q/|q|^4$ is homogeneous of degree $-3$ under the dilation $q\mapsto\lambda q$, and applying the Fueter operator once gives degree $-4$, which agrees with the degree of $\delta(q)$ in $\mathbb{R}^4$ (under $q=\lambda q'$ we have $\delta(\lambda q')=\lambda^{-4}\delta(q')$, so both sides scale as $\lambda^{-4}$); with $1/q$ instead, differentiation would give degree $-2$, which is incompatible with $\delta$, so the kernel must carry the factor $|q|^{-2}$.
+\end{proof}
+
+\section{Quaternion conjugation and three-dimensional rotations}
+
+\begin{theorem}[The group of unit quaternions]\label{thm:q_unit_sphere}
+The set of unit quaternions $S^3=\{q\in\mathbb{H}:|q|=1\}$ forms a non-commutative Lie group under quaternion multiplication, and it is isomorphic to $SU(2)$.
+\end{theorem}
+
+\begin{proof}
+Closure: if $|p|=|q|=1$, then $|pq|=|p||q|=1$. The identity element is $1$. The inverse of an element is $\bar q$, and $|\bar q|=1$. Associativity is inherited from $\mathbb{H}$. The isomorphism $S^3\cong SU(2)$ is given by
+\[
+a+bi+cj+dk\longmapsto
+\begin{pmatrix}
+a+bi & c+di\\
+-c+di & a-bi
+\end{pmatrix}
+\]
+\end{proof}
+
+\begin{theorem}[Quaternion conjugation and three-dimensional rotations]\label{thm:q_rotation}
+For a unit quaternion $q\in S^3$ and a pure imaginary quaternion $v\in\operatorname{Im}\mathbb{H}\cong\mathbb{R}^3$, the map $\rho_q(v)=q v q^{-1}$ is a rotation of $\mathbb{R}^3$. The map $\Pi:S^3\to SO(3)$, $q\mapsto\rho_q$, is a double covering, with $\ker\Pi=\{\pm 1\}$.
+\end{theorem}
+
+\begin{proof}
+\textbf{Preservation of pure imaginary quaternions}: $\overline{qvq^{-1}}=\bar q^{-1}\bar v\bar q=q(-v)q^{-1}=-qvq^{-1}$.
+
+\textbf{Preservation of the modulus}: $|\rho_q(v)|=|q||v||q^{-1}|=|v|$.
+
+\textbf{Rodrigues' formula}: write $q=\cos(\theta/2)+\mathbf{u}\sin(\theta/2)$, with $\mathbf{u}$ a unit pure imaginary quaternion. Decompose $v$ as $v=v_\parallel+v_\perp$; a direct computation gives
+\[
+qvq^{-1}=v_\parallel+\cos\theta\,v_\perp+\sin\theta\,(\mathbf{u}\times v_\perp),
+\]
+which is precisely Rodrigues' formula for a rotation through angle $\theta$ about the axis $\mathbf{u}$.
+
+\textbf{Double covering}: $\rho_q=\rho_{-q}$, and by Rodrigues' formula every rotation corresponds uniquely to a pair $\pm q$, so $\Pi$ is a double covering.
+\end{proof}
+
+\begin{corollary}[Periodic structure of three-dimensional rotations]\label{cor:q_rotation_period}
+Let $q=e^{\mathbf{u}\theta}$. Then $\rho_q$ is the rotation through angle $2\theta$ about the axis $\mathbf{u}$.
+\begin{enumerate}[label=(\roman*)]
+    \item When $\theta=\pi$ we have $q=-1$ and $\rho_q=\operatorname{id}$ (a rotation through $2\pi$ about the axis).
+    \item If $\theta=\pi p/q$ (with $p/q$ in lowest terms), then $q$ is a $2q$-th root of unity and $\rho_q$ generates a cyclic subgroup of order $q$ in $SO(3)$.
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+By Rodrigues' formula in Theorem \ref{thm:q_rotation}, the angle of the rotation corresponding to $\rho_q$ is $2\theta$. (i) For $\theta=\pi$ the rotation angle is $2\pi$, and the rotation is the identity. (ii) The order of $q=e^{\mathbf{u}\pi p/q}$ is $2q/\gcd(2q,p)$, and the order of the corresponding rotation is $q/\gcd(q,p)=q$.
+\end{proof}
+
+\section{Outlook: hypercomplex analysis}
+
+\begin{remark}[Clifford analysis]\label{rem:q_clifford}
+Quaternion analysis is the first instance of hypercomplex analysis. More generally, analysis on the Clifford algebra $\mathrm{Cl}_{0,n}(\mathbb{R})$ is called \textbf{Clifford analysis}. Quaternion analysis corresponds to the case $\mathrm{Cl}_{0,2}(\mathbb{R})\cong\mathbb{H}$.
+\end{remark}
+
+\begin{remark}[Slice-regular functions]\label{rem:q_slice_regular}
+Besides Fueter-regular functions, another important class of quaternion analytic functions is that of \textbf{slice-regular functions}, introduced by Gentili and Stoppato in 2006. Slice-regular functions have better convergence properties with respect to the slice topology.
+\end{remark}
+
+\begin{remark}[Interfaces with later chapters]\label{rem:q_interfaces}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{With `Linear Algebra'}: the double covering $S^3\cong SU(2)$ and $SU(2)\to SO(3)$ provides an instance for the theory of matrix groups.
+    \item \textbf{With `Manifold and Fibre Bundle'}: $S^3\to SO(3)$ is a typical example of a principal fibre bundle.
+    \item \textbf{With `Epicycle Sets and Deferent Sphere Sets'}: the quaternion episphere group $\beta_{a,\mathbf{u},\theta}(t)=ae^{\mathbf{u}\theta t}$ is a direct application of the exponential function of this chapter.
+    \item \textbf{With `Harmonic Analysis'}: the quaternion Fourier transform is a special case of harmonic analysis on groups.
+    \item \textbf{With `Probability and Distribution'}: quaternion distributions and quaternion probability distributions can be combined further.
+\end{enumerate}
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & translation invariance of quaternion addition and limits (Definition \ref{def:q_limit}); the translation property of the QFT; translation invariance of convolution \\
+Scaling & multiplicativity of the quaternion modulus $|pq|=|p||q|$ (Property \ref{prop:q_basic_props}); angle scaling in the exponential map $e^{\mathbf{u}\theta}$; the $s$ scaling in the QLT \\
+Rotation & the conjugation action of unit quaternions realising three-dimensional rotations (Theorem \ref{thm:q_rotation}); Rodrigues' formula and the rotation angle $2\theta$ (Corollary \ref{cor:q_rotation_period}); the rotation factor in the QFT \\
+Conservation & invariance of the quaternion norm and inner product under rotation; the Parseval--Plancherel identity for the QFT (Theorem \ref{thm:q_parseval}) \\
+Symmetry & the conjugation anti-automorphism $\overline{pq}=\bar q\bar p$ (Property \ref{prop:q_basic_props}); the group structure and double covering of $S^3$ (Theorem \ref{thm:q_unit_sphere}); the conjugate symmetry of the QFT \\
+Closure & elements of finite order in $S^3$ generating cyclic subgroups (Corollary \ref{cor:q_rotation_period}); the closure of the roots of unity $e^{2\pi i p/q}$ \\
+Period & the $2\pi$-periodicity of the quaternion exponential function (Proposition \ref{prop:quaternion_exp_rotation}); the period $q$ of a finite-order rotation (Corollary \ref{cor:q_rotation_period}); the periodicity of the QDFT \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the five basic algebraic properties in Property \ref{prop:q_basic_props}.
+    \item Verify that the difference between $pq$ and $qp$ in Example \ref{ex:q_multiplication} is $2k$.
+    \item Prove the coordinate description of Proposition \ref{prop:q_limit_coordinate}.
+    \item Prove the completeness of $\mathbb{H}$ in Theorem \ref{thm:q_completeness}.
+    \item Write down the right and left derivatives of the quaternion linear function $f(q)=aq+b$. Explain why $f(q)=aq$ is left-analytic and $f(q)=qb$ is right-analytic.
+    \item Prove the quaternion Euler formula of Proposition \ref{prop:quaternion_exp_rotation}.
+    \item Prove that all three series in Theorem \ref{thm:q_exp_sin_cos} have radius of convergence $R=\infty$.
+    \item Prove Abel's limit theorem of Theorem \ref{thm:q_abel}.
+    \item Prove that the restriction $y:\mathbb{R}\to\mathbb{C}_\mu$ in the convolution theorem of Theorem \ref{thm:q_convolution_theorem} cannot be omitted.
+    \item Prove the quaternion Parseval--Plancherel identity of Theorem \ref{thm:q_parseval}.
+    \item Explain the difference between the left and right derivatives in quaternion analysis, and give an example of a function that is right-differentiable but not left-differentiable.
+    \item Verify that $f(q)=q^{-1}/|q|^2=\bar q/|q|^4$ in Example \ref{ex:q_regular_examples} is right Fueter-regular, and explain why $q^{-1}$ alone is not (hint: compute $\partial(q^{-1})/\partial\bar q$ directly; its scalar part is $2/|q|^2$).
+    \item Prove Fueter's integral theorem of Theorem \ref{thm:q_cauchy_fueter}. Hint: use the quaternion version of the Stokes--Cartan theorem and the condition $\partial f/\partial \bar q=0$.
+    \item Prove Fueter's generation theorem of Theorem \ref{thm:q_fueter_theorem}: first write down the axially symmetric extension of the complex analytic function $f$, then verify that $\Delta(\tilde f)$ is right Fueter-regular; also explain why replacing $z$ by $q$ directly can only yield a slice-regular power series.
+    \item Prove the partial derivative formula for the Fueter-kernel distribution in Theorem \ref{thm:q_cauchy_kernel_derivative}, and use homogeneity to explain why the factor $|q|^{-2}$ must appear in the kernel.
+    \item Prove the periodic structure of three-dimensional rotations in Corollary \ref{cor:q_rotation_period}.
+\end{enumerate}
+

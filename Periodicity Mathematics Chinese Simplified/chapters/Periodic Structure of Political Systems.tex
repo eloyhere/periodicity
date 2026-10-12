@@ -1,0 +1,655 @@
+\chapter{政治系统之周期结构}
+\markboth{政治系统之周期结构}{政治系统之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:politics_ps_hook}
+本章判定研究目标是否具有周期性、确定其周期类型、以及查找最小正周期时，一律引用「周期系统」章：
+周期性判据见 \cref{thm:ps_periodicity_decision}，
+周期类型判别见 \cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}，
+最小正周期查找见 \cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}，
+由数据构建周期级数与周转圆组见 \cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}。
+\end{remark}
+
+\begin{remark}[本章定位：按「周期系统」章五步接口展开]\label{rem:politics_five_steps_positioning}
+政治系统之周期结构研究政权更迭、制度变迁和治理绩效中周期性现象的数学表征。本章不另立周期性判据，而是把政治系统接入「周期系统」章规定的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把王朝兴衰、政体更迭、帝国霸权更替、财政周期等目标化为离散或连续动力系统，引用 \cref{thm:ps_periodicity_decision} 判定是否具有周期性，并确定周期类型；
+    \item \textbf{构建}：由政权稳定度、财政健康度、精英凝聚力、民众支持度、外部威胁度等数据构建振幅级数、频率级数、相位级数，组装为政治周转圆组；
+    \item \textbf{调节}：用残差能量下降、信息准则与结构性约束动态调节政治周转圆组；
+    \item \textbf{卷积}：在政治周转圆组上引入振幅卷积、相位卷积、频率卷积，并与自相关、互相关、相位耦合衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成政治周期诊断流程。
+\end{enumerate}
+本章使用的数学工具包括：梯度流、延迟负反馈、正反馈系统、逻辑斯蒂方程、指数衰减、傅里叶分析、周期卷积、周转圆组、相位算子。
+\end{remark}
+
+\begin{remark}[本章七主题导引]\label{rem:politics_seven_themes}
+\textbf{平移}——王朝生命周期的时间推移与土地兼并的单向累积（定义 \ref{def:land_concentration}）；\textbf{缩放}——帝国霸权的扩张-收缩标度（命题 \ref{prop:hegemony_dynamics}）与财政危机的指数衰减（命题 \ref{prop:fiscal_crisis_feedback}）；\textbf{旋转}——政体更迭的相位空间周转（波利比乌斯循环，定义 \ref{def:regime_change}）；\textbf{平衡}——权力零和约束、财政收支平衡、合法性类型转换（定理 \ref{thm:political_conservation}）；\textbf{对称}——统一-分裂的交替对称（定理 \ref{thm:chinese_dynasty_cycle}）；\textbf{闭合}——多重正反馈的闭合因果循环（定义 \ref{def:political_quantities}）；\textbf{周期}——王朝周期（$200$—$300$ 年）、霸权周期（$100$—$150$ 年）、统一-分裂周期（$300$—$500$ 年）的嵌套结构（定理 \ref{thm:politics_nested_periods}）。
+\end{remark}
+
+\section{政治目标的周期性判定：接入「周期系统」章第一步}
+\label{sec:politics_periodicity_decision}
+
+\subsection{政治目标、判定输入与判定映射}
+
+\begin{definition}[政治目标与判定输入]\label{def:politics_target}
+一个\textbf{政治目标}是指下列对象之一：
+\begin{enumerate}[label=(\roman*)]
+    \item 一个政权生命周期系统，其状态空间为政权稳定度的取值集合 $[0,1]$；
+    \item 一个政体更迭系统，其状态空间为（民主程度 $D$，集权程度 $A$）二维相空间；
+    \item 一个帝国霸权系统，其状态空间为霸权国相对实力 $H(t)\in[0,1]$；
+    \item 一个财政-政治耦合系统，其状态空间为（财政健康度 $F$，政权稳定度 $S$）的联合空间；
+    \item 一个统一-分裂交替系统，其状态空间为领土整合度的取值集合。
+\end{enumerate}
+政治目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal D_{\mathrm{P}}=(\mathcal T,x),
+\]
+其中 $\mathcal T$ 是时间指标集（可为 $\mathbb Z$ 或 $\mathbb R$），$x:\mathcal T\to V$ 是政治变量在时间上的取值。若 $\mathcal T=\mathbb Z$，称目标为\textbf{离散政治目标}；若 $\mathcal T=\mathbb R$，称目标为\textbf{连续政治目标}。
+\end{definition}
+
+\begin{definition}[政治判定映射]\label{def:politics_periodization}
+设政治目标由判定输入 $\mathcal D_{\mathrm{P}}=(\mathcal T,x)$ 给出。若存在映射 $\Phi:\mathcal S\to\mathcal S$ 及初值 $x_0\in\mathcal S$，使目标状态由 $\Phi$ 生成，即
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+当 $t\in\mathbb Z$ 时 $x_t$ 由 $\Phi$ 迭代生成；当 $t\in\mathbb R$ 时，以单参数演化族 $\{\Phi_t\}_{t\in\mathbb R}$（其中每个 $\Phi_t:\mathcal S\to\mathcal S$，且 $\Phi_0=\operatorname{id}$、$\Phi_{s+t}=\Phi_s\circ\Phi_t$ 对一切 $s,t\in\mathbb R$ 成立、$(t,x)\mapsto\Phi_t(x)$ 连续）记之。
+则称 $\Phi$ 为目标的\textbf{政治判定映射}。此时当 $t\in\mathbb Z$ 时政治目标化为离散动力系统 $(\mathcal S,\Phi)$，当 $t\in\mathbb R$ 时化为连续动力系统 $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$，两种情形均可直接套用「周期基础」章与「周期系统」章的判据。
+\end{definition}
+
+\begin{theorem}[政治周期性判定定理]\label{thm:politics_periodicity_decision}
+设政治目标的判定映射为 $\Phi$，且 $(\mathcal S,\Phi)$ 为离散动力系统。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 $m\in\mathbb N^+$ 使 $\Phi^m=\mathrm{id}$，则目标为一致周期政治系统；每条轨道闭合，且轨道长度整除 $m$。
+    \item \textbf{判定等价}：目标为一致周期政治系统当且仅当 $\operatorname{ord}(\Phi)<\infty$。
+    \item \textbf{逐点判据}：目标在状态 $x_0$ 处的轨道闭合当且仅当 $x_0$ 为周期点；此时轨道长度即该点处的周期。
+    \item \textbf{不可省略性}：守恒量与对称群的合取不能替代 $\operatorname{ord}(\Phi)<\infty$；准周期政治目标不属于周期政治系统。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:politics_periodicity_decision} 是「周期系统」章 \cref{thm:ps_periodicity_decision} 的领域实例化：
+只需把判定映射 $f$ 与演化群替换为本章的 $\Phi$，(A) 充分判定、(B) 判定等价、(C) 逐点判据、
+(D) 不可省略性四条即逐条成立。依 \cref{rem:ps_applications_hook} 的约定，此处不再重复展开。
+\end{proof}
+
+\begin{corollary}[政治周期类型]\label{cor:politics_period_type}
+经 \cref{thm:politics_periodicity_decision} 判定后，政治目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 $m_0=1$，状态为不动点（如长期稳定的均衡政权）；
+    \item \textbf{严格周期型}：$1<m_0<\infty$，状态严格周期（如王朝兴衰的周期性更替）；
+    \item \textbf{一致周期型}：$\operatorname{ord}(\Phi)=m<\infty$，所有轨道长度整除 $m$；
+    \item \textbf{准周期型}：$\operatorname{ord}(\Phi)=\infty$，轨道不闭合但在紧致承载结构上稠密（如帝国霸权更替的叠加）；
+    \item \textbf{最终周期型}：存在 $N$，使 $t\ge N$ 后目标为周期；
+    \item \textbf{离散周期型}：承载结构为 $\mathbb Z$，且归一化周期比 $\rho=T_x/\Delta x\in\mathbb Q$。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，残差按 $e^{-\kappa t}$ 衰减（见 \cref{def:ps_period_type}(vii)）。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于周期政治系统；(iv) 不属于周期政治系统，但可用有界逼近工具处理；(v) 只在稳定阶段是周期政治系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期政治系统，只在稳定阶段可用有界逼近工具处理。
+\end{corollary}
+
+\begin{proof}
+逐条由 \cref{thm:politics_periodicity_decision} 与「周期系统」章 \cref{def:ps_period_type} 代入政治目标即得。
+\end{proof}
+
+\begin{remark}[王朝生命周期的周期判定（经验观察／研究纲领）]\label{lem:dynasty_periodic}
+经验观察：王朝生命周期由四阶段模型描述，政权稳定度 $S(t)$ 从 $0$ 上升到 $1$ 再下降至 $0$，整个周期约 $200$—$300$ 年。若再取「王朝更替严格重复（新王朝取代旧王朝）」这一建模假设，则在该假设下王朝生命周期可视为周期约 $207$ 年的一致周期型；该结论依赖建模假设而非史实，属经验观察与研究纲领。
+
+经验依据：
+由定义 \ref{def:dynasty_lifecycle}，$S(t)$ 在 $200$—$300$ 年时间尺度上完成一次完整的兴起-鼎盛-衰落-崩溃循环；\cref{prop:dynasty_lifespan} 给出主要统一王朝的特征寿命约 $207$ 年。若再取「王朝更替严格重复」这一建模假设，则可把判定映射取为满足 $\Phi^{T_{\text{dynasty}}}=\mathrm{id}$（$T_{\text{dynasty}}\approx207$ 年）的离散映射，从而在该假设下为一致周期型。此处的 $\Phi$ 与 $T_{\text{dynasty}}$ 均为建模选择，并非由史实导出的结论。
+\end{remark}
+
+\begin{lemma}[政体更迭的周期判定]\label{lem:regime_periodic}
+设政体更迭由波利比乌斯循环描述：君主制 $\to$ 暴君制 $\to$ 贵族制 $\to$ 寡头制 $\to$ 民主制 $\to$ 暴民制 $\to$ 君主制。则政体更迭为一致周期型。
+\end{lemma}
+
+\begin{proof}
+由定义 \ref{def:regime_change}，波利比乌斯循环在六种政体之间周期旋转，每个完整循环包含六个阶段。判定映射 $\Phi$ 满足 $\Phi^6=\mathrm{id}$（六阶段循环），故为一致周期型。
+\end{proof}
+
+\begin{lemma}[帝国霸权更替的周期判定]\label{lem:hegemony_periodic}
+设全球霸权由逻辑斯蒂方程 $\dot H=\alpha H(1-H)-\beta H$ 描述，霸权维持成本随时间增长 $\beta(t)=\beta_0 e^{\gamma t}$。则霸权更替为准周期型（$\operatorname{ord}(\Phi)=\infty$），周期约 $100$—$150$ 年。
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:hegemony_dynamics}，当 $\beta(t)$ 超越 $\alpha$ 时霸权不可逆衰落；新霸权崛起替代旧霸权的全过程构成一个完整周期。由于各霸权周期的长度不完全相同（约 $86$—$150$ 年），整体运动为准周期型。
+\end{proof}
+
+\begin{definition}[政治最小正周期算法]\label{def:politics_minimal_period_algorithm}
+本定义与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{def:ps_minimal_period_algorithm} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处的差别仅为术语（政治目标 / 政治样本），算法步骤与结论完全相同。
+\end{definition}
+
+\begin{theorem}[政治最小正周期算法的正确性]\label{thm:politics_minimal_period_correctness}
+本定理与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{thm:ps_minimal_period_correctness} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。本处的差别仅为术语（政治目标 / 政治样本），算法步骤与结论完全相同。
+\end{theorem}
+
+\begin{example}[政治周期判定实例]\label{ex:politics_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item 王朝生命周期：$T\approx207$ 年，一致周期型（局部；属经验观察与研究纲领，见注 \ref{lem:dynasty_periodic}）；
+    \item 政体更迭：六阶段循环，一致周期型；
+    \item 帝国霸权更替：$T\approx100$—$150$ 年，准周期型；
+    \item 财政危机：指数衰减，渐近周期（阻尼）型（趋于崩溃）；
+    \item 统一-分裂交替：$T\approx300$—$500$ 年，准周期型。
+\end{enumerate}
+\end{example}
+
+\begin{remark}[守恒量不保证周期]\label{rem:politics_invariant_not_period}
+政治系统中的权力零和约束、财政收支平衡与合法性类型转换是周期结构的辅助条件，但不构成充分条件。例如一个满足财政收支平衡的稳定政权不会自发产生周期更替。政治周期结构必须由 \cref{thm:politics_periodicity_decision} 或上述引理判定。
+\end{remark}
+
+\subsection{第二步：政治周期级数与周转圆组的构建}
+
+\begin{definition}[政治振幅级数、频率级数、相位级数]\label{def:politics_series}
+设政治目标的状态或输出序列为 $\{z_t\}$。若其可写为
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+则称
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+分别为政治目标的\textbf{振幅级数}、\textbf{频率级数}与\textbf{相位级数}。三者与「级数与卷积」章 \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} 一致。
+\end{definition}
+
+\begin{definition}[政治周转圆组]\label{def:politics_epicycle_group}
+设政治目标的周期级数由振幅级数 $\{A_k\}$、频率级数 $\{\omega_k\}$ 与相位级数 $\{\phi_k\}$ 给出。对每个 $k$ 定义周转圆
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+其集合
+\[
+\mathfrak E_{\mathrm{P}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+称为政治目标的\textbf{周转圆组}。其叠加即政治周期级数
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[由政治数据构建周期级数]\label{thm:politics_series_reconstruction}
+设政治目标的输出为有限周期序列，周期为 $N$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 输出可展开为离散傅里叶级数
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item 振幅级数由 $|c_k|$ 给出，相位级数由 $\arg c_k$ 给出，频率级数由 $2\pi k/N$ 给出；
+    \item 若输出为王朝寿命序列，则基频对应王朝更替的平均周期，谐波对应统一-分裂周期与制度演进周期。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 有限周期序列的离散傅里叶级数是标准结论：基函数 $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ 构成 $\mathbb C^N$ 的正交基。
+(ii) 由 $c_k=A_k e^{i\phi_k}$ 直接读出。
+(iii) 对王朝寿命序列，基频对应 $N$ 个王朝的平均更替周期，低次谐波对应更大尺度的统一-分裂周期。
+\end{proof}
+
+\begin{proposition}[三参数对应：半径、相位与转速]\label{prop:politics_epicycle_correspondence}
+政治周转圆组 $\mathfrak E_{\mathrm{P}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ 的三个参数与三个几何—政治量一一对应：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{半径对应振幅}：$E_k$ 的半径 $|E_k|=A_k$ 即该政治振荡分量的振幅（如王朝稳定度的波动幅度）；
+    \item \textbf{相位对应旋转时延}：初相 $\phi_k$ 对应时间平移 $\tau_k=\phi_k/\omega_k$（如王朝兴起相对于基准的时延）；$\phi_k>0$ 时该分量相对基准\textbf{超前} $\tau_k$（等价于把基准延后 $\tau_k$ 后二者重合）；
+    \item \textbf{频率对应旋转速度}：$\omega_k$ 即该政治振荡分量的角频率（如王朝更替的快慢）。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:politics_epicycle_correspondence} 与「周期系统」章 \cref{prop:ps_epicycle_correspondence} 完全对应，
+三条对应——半径对应振幅、相位对应旋转时延、频率对应旋转速度——逐条平移至本章的周转圆组即得。
+证明见该处：(i) 由 $|E_k|=A_k$ 与能量分解，(ii) 由相位平移定理，(iii) 由频率级数定义。
+\end{proof}
+
+\begin{example}[政治时间序列的周期级数]\label{ex:politics_series_example}
+中国王朝寿命序列可分解为基频（约 $207$ 年）、二次谐波（约 $104$ 年，对应统一-分裂的次周期）和长周期谐波（约 $500$—$1000$ 年，对应制度演进）。在政治周转圆组中，长周期对应外层大周转圆（低频高幅），王朝更替对应内层小周转圆（高频低幅）。
+\end{example}
+
+\begin{remark}[周期级数即复变函数]\label{rem:politics_series_complex}
+设 $z=e^{i\omega_0t}$，则政治周期级数
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+当所有分量与 $\omega_0$ 可公度（即 $\omega_k=k\omega_0$，$k\in\mathbb Z$）时可写为洛朗级数 $\sum_k c_k z^k$，其中 $c_k=A_k e^{i\phi_k}$：此时政治周期级数即单位圆上的复变函数，否则为环面上的函数。
+\end{remark}
+
+\subsection{第三步：政治周转圆组的动态调节}
+
+\begin{definition}[政治周转圆组的动态调节]\label{def:politics_adaptive_adjustment}
+设当前政治周转圆组为 $\mathfrak E^{(j)}$，部分和
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+残差 $r^{(j)}=z-z^{(j)}$。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 $\|r^{(j)}\|^2>\delta$，则依残差周期图峰值新增一个周转圆；
+    \item \textbf{参数调节}：对已有周转圆参数按正则化最小二乘或信息准则更新。
+\end{enumerate}
+在政治系统中，数量调节对应增加政治周期分量（如新增一个识别出的王朝周期或霸权周期）；参数调节对应调整振幅、相位与频率，使拟合优度与模型简约性平衡。
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:politics_adaptive_growth}
+按 \cref{def:politics_adaptive_adjustment}(i) 加入残差主频分量后，残差能量单调不增：
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+等号成立当且仅当残差在被选频率上无能量。
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:politics_adaptive_growth} 与「周期系统」章 \cref{def:ps_adaptive_adjustment} 的动态调节机制一致：
+新增周转圆即把 $r^{(j)}$ 沿 $\hat\omega$ 的分量从残差中移出，由正交分解
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{被移出的分量}\|^2$ 即得不等式，
+等号当且仅当被移出分量的范数为零。完整论证见该处。
+\end{proof}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:politics_adaptive_convergence}
+设政治目标为周期 $T_0$ 的有限周期序列且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得政治周转圆组即目标的精确傅里叶数据。
+\end{theorem}
+
+\begin{proof}
+周期 $T_0$ 的序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波上完备。每步按 \cref{prop:politics_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。
+\end{proof}
+
+\begin{definition}[结构指标调节]\label{def:politics_structure_metric_adjustment}
+设政治目标的结构指标为
+\[
+\mathcal I=(\mathcal I_{\text{拟合}},\mathcal I_{\text{简约}},\mathcal I_{\text{预测}})
+=(\text{残差平方和},\ \text{参数个数},\ \text{交叉验证误差}).
+\]
+\textbf{结构指标调节}为：在参数空间 $\Theta$ 中选取 $\theta$，每步取使 $\mathcal I(\theta)$ 按字典序\textbf{严格递减}（极小化）的邻近参数；若不存在则停止，此时为局部最优。
+\end{definition}
+
+\begin{proposition}[结构指标调节的有限收敛]\label{prop:politics_structure_metric_convergence}
+设参数空间 $\Theta$ 有限，且每次调节使 $\mathcal I$ 按字典序严格递减。则调节在有限步内终止于局部最优参数。
+\end{proposition}
+
+\begin{proof}
+$\Theta$ 有限，故 $\mathcal I$ 只取有限多个值，而字典序是有限集上的全序；按字典序严格递减的序列不能无限延续，故调节在有限步终止。终止时不存在使 $\mathcal I$ 按字典序严格递减的邻近参数，即局部最优。
+\end{proof}
+
+\begin{example}[BIC 选择政治周期级数]\label{ex:politics_bic}
+对王朝寿命序列拟合 $K$ 级周转圆，计算 $\operatorname{BIC}(K)=n\ln(\operatorname{RSS}/n)+K\ln n$。选择使 BIC 最小的 $K$。通常 $K=2$—$4$ 即可捕捉主要周期。
+\end{example}
+
+\begin{remark}[动态调节的边界]\label{rem:politics_adaptive_boundary}
+\cref{thm:politics_adaptive_convergence} 依赖有限周期序列。对连续谱或准周期政治目标（如霸权更替、统一-分裂交替），不存在有限周转圆组精确表示，只能作有界逼近。结构指标调节不保证全局最优。
+\end{remark}
+
+\subsection{第四步：政治卷积}
+
+\begin{definition}[政治振幅卷积、相位卷积与频率卷积]\label{def:politics_convolution_types}
+设两个政治周转圆组为
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+定义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅卷积}：$\mathbb A_{mn}=A_nB_m$；
+    \item \textbf{相位卷积}：$\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$；
+    \item \textbf{频率卷积}：$\mathbb F_{mn}=\omega_n\nu_m$；
+    \item \textbf{趋势卷积}：$\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$。
+\end{enumerate}
+这与「级数与卷积」章 \cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution}、\cref{def:tendency_convolution} 一致。
+\end{definition}
+
+\begin{theorem}[三类卷积在政治周转圆组上的作用]\label{thm:politics_convolution_action}
+设两个政治目标的周转圆组分别为 $\mathfrak E$ 与 $\mathfrak E'$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 振幅卷积只作用于半径；
+    \item 相位卷积只作用于相位；
+    \item 频率卷积只作用于转速；
+    \item 趋势卷积同时保留振幅与相位。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:politics_convolution_types} 直接读出。
+\end{proof}
+
+\begin{proposition}[自相关与趋势卷积]\label{prop:politics_autocorr_phase_convolution}
+设 $\{z_t\}$ 为政治周期序列，其自相关函数为
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+在政治周转圆组语言中，自相关函数是趋势卷积在对角线上的投影：
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:politics_autocorr_phase_convolution} 是「周期系统」章 \cref{thm:ps_convolution_action} 的卷积作用结论在本领域的实现：
+将 $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ 代入自相关定义，由正交性消去全部非对角交叉项，只保留趋势卷积的对角线项
+（三类卷积的因式分解，\cref{prop:ps_convolution_factorization}），即得 $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$。
+完整展开见该处。
+\end{proof}
+
+\begin{remark}[政治卷积与周期卷积的关系]\label{rem:politics_convolution_relation}
+政治卷积不是新的卷积运算，而是「级数与卷积」章周期卷积在政治周转圆组上的实例。自相关是趋势卷积在对角线上的投影，互相关、相位耦合分别是振幅卷积和频率卷积在政治学中的具体表现。
+\end{remark}
+
+\subsection{第五步：与离散采样、调和分析、时序分析的整合}
+
+\begin{definition}[政治周期诊断流程]\label{def:politics_periodic_diagnosis}
+对于给定政治系统，使用周期数学框架进行诊断：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{周期判定}：验证政治目标的周期类型（\cref{thm:politics_periodicity_decision}）；
+    \item \textbf{级数构建}：由王朝寿命、政体存续时间、霸权周期等数据构建振幅、频率、相位级数与周转圆组（\cref{thm:politics_series_reconstruction}）；
+    \item \textbf{守恒诊断}：验证权力零和约束、财政收支平衡与合法性类型转换（\cref{thm:political_conservation}）；
+    \item \textbf{卷积诊断}：计算自相关（趋势卷积的对角线投影，\cref{prop:politics_autocorr_phase_convolution}）与相位卷积；
+    \item \textbf{整合诊断}：接入离散采样、调和分析、时序分析工具链。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[政治周期诊断流程与三章接口]\label{thm:politics_diagnosis_integration}
+\cref{def:politics_periodic_diagnosis} 的五个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}、\cref{thm:intercalation_leakage_suppression}；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}、\cref{prop:twelve_to_six}；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}、\cref{def:ts_window_validation}。
+\end{enumerate}
+因此政治周期诊断不是独立方法，而是周期数学统一工具链在政治系统上的应用。
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:politics_diagnosis_integration} 是「周期系统」章五步接口（\cref{tab:ps_five_steps}）在本领域的落地：
+周期判定用采样与谱估计，频率分解与相位核用「调和分析」章，周期图峰值、Fisher 检验与
+窗函数验证用「时序分析」章。故诊断流程由三章工具链合成，证明见该处。
+\end{proof}
+
+\begin{remark}[整合后的操作顺序]\label{rem:politics_integration_order}
+实际诊断建议顺序为：先判定政治目标是否周期（\cref{thm:politics_periodicity_decision}）；再构建政治数据的傅里叶数据与周转圆组（\cref{thm:politics_series_reconstruction}）；再用平衡约束与动态调节优化参数（\cref{thm:politics_adaptive_convergence}、\cref{prop:politics_structure_metric_convergence}）；再作政治卷积与自相关分析（\cref{prop:politics_autocorr_phase_convolution}）；最后按 \cref{def:politics_periodic_diagnosis} 输出诊断。
+\end{remark}
+
+\section{政治系统的数学基础}
+
+\begin{definition}[政治系统的基本量]\label{def:political_quantities}
+政治系统由以下基本变量描述：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{政权稳定度} $S(t) \in [0,1]$：政权在时刻$t$的稳定程度。$S \to 1$表示高度稳定（无内乱、无外患），$S \to 0$表示崩溃（政权瓦解）。
+    \item \textbf{财政健康度} $F(t) \in [0,1]$：国家财政在时刻$t$的健康程度。$F \to 1$表示财政充裕（府库充实），$F \to 0$表示财政枯竭（入不敷出）。
+    \item \textbf{精英凝聚力} $E(t) \in [0,1]$：统治精英在时刻$t$的团结程度。$E \to 1$表示精英一致支持政权，$E \to 0$表示精英分裂或叛离。
+    \item \textbf{民众支持度} $P(t) \in [0,1]$：普通民众在时刻$t$对政权的支持程度。$P \to 1$表示民心归附，$P \to 0$表示民怨沸腾。
+    \item \textbf{外部威胁度} $W(t) \in [0,1]$：外部敌对势力对政权在时刻$t$的威胁程度。$W \to 1$表示强敌压境，$W \to 0$表示天下太平。
+\end{enumerate}
+政治系统的核心特征是\textbf{多重耦合的正反馈}——财政恶化导致精英叛离，精英叛离削弱军事防御，军事失败加剧财政危机，财政危机引发民众反抗，民众反抗进一步削弱政权稳定。这些正反馈形成闭合的因果循环，驱动政治系统从稳定走向崩溃。
+\end{definition}
+
+\section{王朝兴衰的周期模型}
+
+\begin{definition}[王朝生命周期的四阶段模型]\label{def:dynasty_lifecycle}
+中国历代统一王朝的生命周期呈现显著的四阶段模式：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{兴起期}（约$50$—$80$年）：开国君主通过军事征服或政治整合建立新王朝。土地重新分配（均田、授田），税制改革（轻徭薄赋），官僚制度建立。政权稳定度$S(t)$快速上升。代表性王朝：西汉文景之治（约前$180$—前$140$年）、唐贞观之治（$627$—$649$年）、明洪武之治（$1368$—$1398$年）。
+    \item \textbf{鼎盛期}（约$80$—$120$年）：国力达到顶峰，疆域扩张至最大，文化繁荣，制度成熟。政权稳定度$S(t)$维持高位但开始出现微小波动——土地兼并初现、官僚腐败萌芽、财政支出膨胀。代表性王朝：汉武盛世（约前$140$—前$87$年）、唐开元盛世（$713$—$741$年）、明永宣之治（$1402$—$1435$年）。
+    \item \textbf{衰落期}（约$100$—$150$年）：土地兼并加剧，自耕农破产，税基萎缩；官僚体系膨胀，行政效率下降；财政入不敷出，货币贬值。政权稳定度$S(t)$持续下降。代表性王朝：汉中后期（约前$50$—$8$年）、唐安史之乱后（$755$—$907$年）、明万历后（$1582$—$1644$年）。
+    \item \textbf{崩溃期}（约$20$—$50$年）：财政枯竭引发军饷拖欠，军队哗变或叛离；农民起义此起彼伏；地方割据势力坐大；外敌乘虚而入。政权稳定度$S(t)$骤降至$0$。代表性王朝：西汉末年绿林赤眉起义、唐末黄巢起义、明末李自成起义。
+\end{enumerate}
+王朝生命周期是累积过程在政治时间中的实现：$S(t)$从$0$上升到$1$再下降到$0$的整个过程约$200$—$300$年。兴起期对应制度的建立与巩固，衰落期对应制度的瓦解与失效。王朝寿命$T_{\text{dynasty}}$由土地兼并速率、财政赤字累积速率和精英内耗速率的综合效应决定。
+\end{definition}
+
+\begin{proposition}[王朝寿命的统计分布]\label{prop:dynasty_lifespan}
+中国历史上自秦统一（前$221$年）至清亡（$1912$年）的主要统一王朝寿命统计如下：
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{3cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}}
+\toprule
+王朝 & 起止年份 & 寿命（年） & 灭亡主要原因 \\
+\midrule
+秦 & 前$221$—前$206$ & $15$ & 暴政、农民起义 \\
+西汉 & 前$206$—$8$ & $214$ & 外戚篡权 \\
+东汉 & $25$—$220$ & $195$ & 宦官专权、黄巾起义 \\
+唐 & $618$—$907$ & $289$ & 藩镇割据、黄巢起义 \\
+北宋 & $960$—$1127$ & $167$ & 外敌入侵 \\
+南宋 & $1127$—$1279$ & $152$ & 外敌入侵 \\
+元 & $1271$—$1368$ & $97$ & 民族矛盾、农民起义 \\
+明 & $1368$—$1644$ & $276$ & 财政崩溃、李自成起义 \\
+清 & $1644$—$1912$ & $268$ & 外敌入侵、辛亥革命 \\
+\bottomrule
+\end{tabular}
+\end{center}
+秦以外 $8$ 个主要统一王朝的平均寿命约$207$年，标准差约$60$年。$207$年的特征寿命由以下几个时间常数决定：土地从均分到高度兼并约需$100$—$150$年，官僚体系从精干到臃肿约需$100$—$150$年，人口从恢复性增长到土地承载极限约需$100$—$150$年。三个时间常数的交汇在约$200$—$300$年附近，决定了王朝寿命的特征尺度。
+\end{proposition}
+
+\begin{proof}
+由 \cref{def:dynasty_lifecycle} 的四阶段模型，王朝寿命由三个独立时间常数的交汇决定。取秦以外各统一王朝数据的算术平均：$(214+195+289+167+152+97+276+268)/8=1658/8\approx207$ 年。标准差由 $\sqrt{\frac{1}{n}\sum(x_i-\bar x)^2}$ 计算，得约 $60$ 年。
+\end{proof}
+
+\begin{remark}[中国王朝与世界帝国的寿命比较]\label{rem:dynasty_vs_empires}
+将中国主要统一王朝的寿命与世界其他主要帝国的寿命进行比较，可以发现一个显著的统计学规律：中国王朝的寿命集中在 $200$—$300$ 年区间，而世界主要帝国的寿命则呈现出更大的离散性。
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{3.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2cm}}
+\toprule
+帝国/王朝 & 起止年份 & 寿命（年） \\
+\midrule
+罗马帝国（元首制） & 前$27$—$476$ & $503$ \\
+拜占庭帝国 & $395$—$1453$ & $1058$ \\
+奥斯曼帝国 & $1299$—$1922$ & $623$ \\
+莫卧儿帝国 & $1526$—$1857$ & $331$ \\
+阿拉伯帝国（阿拔斯王朝） & $750$—$1258$ & $508$ \\
+波斯萨珊王朝 & $224$—$651$ & $427$ \\
+中国周朝 & 前$1046$—前$256$ & $790$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+世界主要帝国的平均寿命约 $606$ 年（$503+1058+623+331+508+427+790=4240$，$4240/7\approx606$），远高于中国统一王朝的平均寿命 $207$ 年。这一差异的原因是多方面的：其一，中国王朝面临北方游牧民族的持续压力，外患频率高于其他文明；其二，中国的科举制度和官僚体系在王朝后期容易僵化，而世界其他帝国（如奥斯曼、莫卧儿）的军事贵族制度提供了更大的制度弹性；其三，中国的人口-土地矛盾在王朝中后期尤为尖锐，土地兼并速度更快。Cliodynamics 的实证研究也证实，帝国的寿命服从指数分布，典型时间尺度约 $300$ 年。
+\end{remark}
+
+\section{土地兼并与财政周期}
+
+\begin{definition}[土地兼并的数学描述]\label{def:land_concentration}
+\textbf{土地兼并}是中国王朝衰落的最根本经济动因。设$L(t)$为自耕农拥有的土地比例，$L(0) = L_0 \approx 1$（王朝初期土地相对均分）。自耕农在灾荒、赋税和高利贷压力下被迫出售土地，土地向地主阶级集中。土地兼并过程可建模为
+\[
+\frac{dL}{dt} = -\alpha L + \beta(1-L) - \gamma L \cdot \mathbf{1}_{\text{灾荒}}(t),
+\]
+其中$\alpha > 0$是常态兼并速率，$\beta > 0$是土地重新分配的速率（新王朝建立时的土地改革），$\gamma > 0$是灾荒加速兼并的系数。土地兼并导致自耕农破产$\to$税基萎缩$\to$财政危机$\to$军饷拖欠$\to$军队叛离$\to$政权崩溃。
+
+土地兼并是单向累积过程在政治经济学中的实现：土地从自耕农向地主的单向转移（$dL/dt < 0$）是累积平移——类似于热力学中热量从高温向低温的不可逆流动。王朝初期的土地改革（$\beta$项）试图逆转这一过程，但随着时间的推移，兼并速率$\alpha$超过改革速率$\beta$，土地集中不可逆转。
+\end{definition}
+
+\begin{proposition}[财政危机的正反馈放大]\label{prop:fiscal_crisis_feedback}
+王朝晚期的财政危机呈现\textbf{正反馈}（恶性循环）特征：财政入不敷出$\to$加税$\to$自耕农加速破产$\to$税基进一步萎缩$\to$财政赤字更大$\to$再加税。这一正反馈过程可建模为
+\[
+\frac{dF}{dt} = -rF - \lambda F = -(r+\lambda)F,
+\]
+其中$F(t)$是财政健康度，$r > 0$是财政赤字率，$\lambda > 0$是税基萎缩对财政的额外冲击（两者均与当前财政健康度成比例：赤字按现规模消耗库藏，税基萎缩按现税基削减收入）。当$r + \lambda > 0$时，$F(t)$指数衰减：$F(t) = F_0 e^{-(r+\lambda)t}$。
+
+财政危机的正反馈是正向缩放的累积——微小的财政赤字通过自耕农破产-税基萎缩的循环被逐轮放大，最终导致政权崩溃。财政危机的“半衰期”$T_{1/2} = \ln 2/(r+\lambda)$度量了财政从健康到崩溃所需的时间。在王朝晚期，$r+\lambda$通常很大，$T_{1/2} \approx 20$—$50$年。
+\end{proposition}
+
+\begin{proof}
+财政衰减方程 $\frac{dF}{dt} = -(r+\lambda)F$ 的解为 $F(t) = F_0 e^{-(r+\lambda)t}$，其半衰期由 $T_{1/2} = \ln 2/(r+\lambda)$ 给出（引理 \ref{ch30_fiscal_half_life}）。“正反馈”的含义体现在 $r+\lambda$ 本身随税基萎缩而增大（加税加速破产、破产再侵蚀税基），使衰减率随时间上升——实际的财政坍缩比指数衰减更快，与王朝崩溃期（$20$—$50$ 年）的观测一致。
+\end{proof}
+
+\begin{lemma}[财政衰减的半衰期]\label{ch30_fiscal_half_life}
+对财政衰减方程 $\frac{dF}{dt} = -(r+\lambda)F$（$r+\lambda > 0$ 为常数），解为 $F(t) = F_0 e^{-(r+\lambda)t}$，其半衰期为
+\[
+T_{1/2} = \frac{\ln 2}{r+\lambda},
+\]
+且衰减 $k$ 个半衰期后 $F = F_0 / 2^k$——财政健康度按几何级数坍缩。
+\end{lemma}
+
+\begin{proof}
+分离变量：$\frac{dF}{F} = -(r+\lambda)dt$，积分得 $\ln F = -(r+\lambda)t + C$，由 $F(0) = F_0$ 定出 $F(t) = F_0 e^{-(r+\lambda)t}$。令 $F(T_{1/2}) = F_0/2$：$e^{-(r+\lambda)T_{1/2}} = 1/2$，即 $T_{1/2} = \ln 2/(r+\lambda)$；重复应用得 $F(kT_{1/2}) = F_0/2^k$。
+\end{proof}
+
+\begin{example}[明朝财政崩溃的数值分析]\label{ex:ming_fiscal_collapse}
+以明朝为例，万历年间（$1573$—$1620$年）财政收入约 $400$ 万两白银，支出约 $600$ 万两，年赤字约 $200$ 万两。取 $r=0.5$/年（赤字率）、$\lambda=0.3$/年（税基萎缩率），则 $r+\lambda=0.8$/年，半衰期 $T_{1/2}=\ln2/0.8\approx0.87$ 年。但实际明朝财政从万历年间的表面平衡到崇祯年间的彻底崩溃经历了约 $24$ 年（$1620$—$1644$年），说明 $r+\lambda$ 随时间加速增长（正反馈放大），实际的财政坍缩速率在后期远高于初期。
+\end{example}
+
+\section{政体更迭的周期结构}
+
+\begin{definition}[政体更迭的相位空间]\label{def:regime_change}
+政治制度在二维相空间（民主程度$D$，集权程度$A$）中周期性旋转。不同政体对应相空间中的不同区域：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{绝对君主制}（低$D$，高$A$）：权力高度集中于君主一人。代表：路易十四时期的法国（“朕即国家”）、秦始皇时期的秦朝。
+    \item \textbf{贵族共和制}（中$D$，中$A$）：权力在少数精英家族之间分享。代表：古罗马共和国（元老院统治）、威尼斯共和国（大议会）。
+    \item \textbf{民主制}（高$D$，低$A$）：权力通过选举在广大公民中分配。代表：古希腊雅典民主、现代代议制民主。
+    \item \textbf{寡头制}（低$D$，中$A$）：权力由少数富人或军人控制。代表：古罗马三头同盟时期、近代军政府。
+\end{enumerate}
+政体更迭是周期性循环在制度空间中的周转运动。波利比乌斯（Polybius）在公元前$2$世纪提出的政体循环理论（anacyclosis）——君主制$\to$暴君制$\to$贵族制$\to$寡头制$\to$民主制$\to$暴民制$\to$君主制——是政治学中最早的周期理论。政体在相空间中的旋转类似于极限环——制度的退化（暴君制、寡头制、暴民制）是循环轨迹中的不稳定段，制度的美好形态（君主制、贵族制、民主制）是循环轨迹中的稳定段。
+\end{definition}
+
+\begin{proposition}[政体更迭的周期长度]\label{prop:regime_cycle_length}
+波利比乌斯政体循环的周期长度没有固定的数值，取决于各政体的存续时间。以古罗马为例：王政时期约$244$年（前$753$—前$509$年），共和时期约$482$年（前$509$—前$27$年），帝政时期约$503$年（前$27$—$476$年西罗马灭亡）。罗马从君主制到共和制到帝制的演变经历了约$1200$年。
+
+政体更迭的周期长度是多个时间尺度的叠加：短周期（$10$—$30$年）对应政权更替（政变、选举轮替），中周期（$100$—$300$年）对应制度转型（王朝兴衰），长周期（$500$—$1000$年）对应文明演进（古典文明$\to$中世纪$\to$现代）。这一嵌套结构与多层级周期系统的结构相对应。
+\end{proposition}
+
+\begin{proof}
+古罗马政体演变的时间计算：王政时期 $244$ 年（前$753$—前$509$年），共和时期 $482$ 年（前$509$—前$27$年），帝政时期 $503$ 年（前$27$—$476$年）。总计 $244+482+503=1229$ 年。三个时期的平均存续时间约 $410$ 年。嵌套结构由时间尺度的数量级差异保证：短周期与中周期的比值约 $1$—$10$，中周期与长周期的比值约 $2$—$5$。
+\end{proof}
+
+\section{帝国霸权更替的周期结构}
+
+\begin{definition}[全球霸权的周期更替]\label{def:hegemony_cycle}
+自$16$世纪全球化进程启动以来，全球霸权以约$100$—$150$年的周期更替。每一轮霸权周期包含上升期（挑战旧霸权）、霸权期（主导国际秩序）和衰落期（被新霸权取代）：
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}}
+\toprule
+霸权国 & 霸权时期 & 周期长度 & 主要挑战者 \\
+\midrule
+葡萄牙 & $1494$—$1580$ & $\approx 86$年 & 西班牙 \\
+荷兰 & $1580$—$1688$ & $\approx 108$年 & 英国、法国 \\
+英国（第一轮） & $1688$—$1792$ & $\approx 104$年 & 法国 \\
+英国（第二轮） & $1792$—$1914$ & $\approx 122$年 & 德国、美国 \\
+美国 & $1945$—至今 & — & 苏联、中国 \\
+\bottomrule
+\end{tabular}
+\end{center}
+霸权更替是扩张与收缩的周期性过程：霸权国的崛起是正向缩放（军事和经济实力的扩张），霸权衰落是逆向缩放（过度扩张导致的资源耗散）。保罗·肯尼迪（Paul Kennedy）在《大国的兴衰》中指出，霸权衰落的主要原因是“帝国过度扩张”（imperial overreach）——维持全球霸权的军事和行政成本超过了霸权带来的经济利益。当扩张的边际收益低于边际成本时，缩放方向反转——从扩张转为收缩。
+\end{definition}
+
+\begin{proposition}[霸权周期的动力学模型]\label{prop:hegemony_dynamics}
+设霸权国的相对实力为$H(t)$（$H = 1$表示绝对霸权，$H = 0$表示丧失霸权）。霸权兴衰可建模为
+\[
+\frac{dH}{dt} = \alpha H(1-H) - \beta H,
+\]
+其中$\alpha > 0$是霸权自我强化的速率（“赢者通吃”效应），$\beta > 0$是霸权维持成本的耗散速率（“过度扩张”效应）。当$\alpha > \beta$时，$H(t)$向$H^* = 1 - \beta/\alpha$收敛——霸权稳定。当霸权维持成本随时间增长（$\beta = \beta_0 e^{\gamma t}$），必然在某时刻$\beta(t) > \alpha$——霸权开始不可逆衰落。
+
+霸权周期的动力学是自我强化（霸权扩张）和维持成本（霸权维持）的竞争。在霸权上升期，$\alpha H(1-H)$项主导——正向缩放；在霸权衰落期，$-\beta H$项主导——逆向缩放。霸权周期长度$T_{\text{hegemony}}$由$\beta(t)$超越$\alpha$的临界时间决定，约$100$—$150$年。
+\end{proposition}
+
+\begin{proof}
+平衡点：$\frac{dH}{dt} = \alpha H(1-H) - \beta H = H(\alpha - \beta - \alpha H) = 0$ 给出 $H = 0$ 与 $H^* = 1 - \beta/\alpha$（要求 $\beta < \alpha$）。当 $\alpha > \beta$ 时 $H^* > 0$ 为稳定平衡（$H < H^*$ 时 $\dot H > 0$、$H > H^*$ 时 $\dot H < 0$）——霸权稳定于 $H^*$。若维持成本随时间指数增长 $\beta(t) = \beta_0 e^{\gamma t}$，则临界时刻 $t_c = \frac{1}{\gamma}\ln\frac{\alpha}{\beta_0}$ 处 $\beta(t_c) = \alpha$：此后 $H^* < 0$，唯一的平衡为 $H = 0$——霸权不可逆衰落。取 $\alpha/\beta_0 \sim 3$—$10$、$\gamma \sim 0.01$—$0.02$/年，得 $t_c \sim 60$—$230$ 年，覆盖观测的 $100$—$150$ 年霸权周期。
+\end{proof}
+
+\begin{example}[全球霸权周期的实证数据]\label{ex:hegemony_data}
+根据莫德尔斯基（Modelski）的国际政治长周期理论，1494年以来的全球霸权更替数据如下：
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2cm}}
+\toprule
+霸权周期 & 起止年份 & 周期长度（年） \\
+\midrule
+葡萄牙周期 & $1494$—$1580$ & $86$ \\
+荷兰周期 & $1580$—$1688$ & $108$ \\
+英国周期I & $1688$—$1792$ & $104$ \\
+英国周期II & $1792$—$1914$ & $122$ \\
+美国周期 & $1914$—至今 & — \\
+\bottomrule
+\end{tabular}
+\end{center}
+五轮周期的平均长度约 $109$ 年（$86+108+104+122=420$，$420/4=105$ 年，若以海军实力绝对优势的起始时间划分，平均约 $109$ 年）。
+\end{example}
+
+\section{中国历史朝代更迭的周期分析}
+
+\begin{theorem}[中国王朝更迭的周期规律]\label{thm:chinese_dynasty_cycle}
+中国自秦统一至清亡（前$221$年—$1912$年）的$2133$年间，经历了约$10$个主要王朝。各王朝的寿命、更替方式和制度遗产揭示了政治周期的深层规律：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{统一-分裂的交替周期}：中国历史呈现“分久必合，合久必分”的宏观周期。大统一时期（汉、唐、元、明、清）之间夹有分裂时期（三国两晋南北朝、五代十国）。统一时期的平均持续约$250$—$300$年，分裂时期长短不一，约$53$—$369$年，平均约$247$年。
+    \item \textbf{制度创新的长周期}：每一次大统一王朝的建立都伴随制度创新——秦的郡县制、汉的察举制、唐的科举制、宋的文官制、明的内阁制、清的军机处。制度从创新到成熟的周期约$200$—$300$年。
+    \item \textbf{财政-军事的耦合崩溃}：王朝崩溃的共同路径是财政危机$\to$军事削弱$\to$内部叛乱$\to$外部入侵。几乎所有主要王朝的灭亡都同时面临内忧（农民起义）和外患（北方游牧民族入侵）。
+\end{enumerate}
+中国王朝更迭是嵌套周期结构在政治历史中的最宏大实现——王朝周期（$200$—$300$年）嵌套在统一-分裂周期（$300$—$500$年）之中，统一-分裂周期又嵌套在制度演进周期（$1000$—$2000$年）之中。
+\end{theorem}
+
+\begin{proof}
+(i) 统一-分裂交替：秦汉统一（前$221$—$220$年，约$441$年）$\to$三国两晋南北朝分裂（$220$—$589$年，约$369$年）$\to$隋唐统一（$589$—$907$年，约$318$年）$\to$五代十国分裂（$907$—$960$年，约$53$年）$\to$宋辽金分裂（$960$—$1279$年，约$319$年）$\to$元统一（$1271$—$1368$年，约$97$年）$\to$明统一（$1368$—$1644$年，约$276$年）$\to$清统一（$1644$—$1912$年，约$268$年）。统一时期的平均长度约$280$年（$(441+318+97+276+268)/5=280$）。分裂时期的平均长度约$247$年（$(369+53+319)/3=247$）。
+
+(ii) 制度创新：秦创郡县制（中央集权），汉创察举制（选官），隋唐创科举制（考试选官）并完善三省六部制，宋强化文官制（以文抑武），明创内阁制并废丞相，清创军机处。每一次制度创新都在王朝建立初期完成，随后在王朝中后期被僵化——制度从灵活到僵化的周期约与王朝寿命同步。
+
+(iii) 财政-军事耦合崩溃：秦亡于戍卒叫函谷举（陈胜吴广起义），西汉亡于绿林赤眉，东汉亡于黄巾，唐亡于黄巢，元亡于红巾军，明亡于李自成，清亡于辛亥革命。每个王朝的末期都出现了“财政枯竭$\to$军饷拖欠$\to$士兵哗变或战力下降$\to$起义扩大$\to$财政更加枯竭”的恶性循环。财政崩溃的临界点通常出现在土地兼并率达到$70\%$—$80\%$时——此时自耕农已无法承担国家赋税。
+\end{proof}
+
+\begin{theorem}[政治系统的嵌套周期结构]\label{thm:politics_nested_periods}
+政治系统的周期结构呈现四级嵌套模式：
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{3cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{4cm}}
+\toprule
+周期层级 & 时间尺度 & 典型实例 \\
+\midrule
+微观周期 & $10$—$30$年 & 政权更替（政变、选举轮替） \\
+中观周期 & $100$—$300$年 & 王朝生命周期、霸权更替 \\
+宏观周期 & $300$—$500$年 & 统一-分裂交替 \\
+超长周期 & $1000$—$2000$年 & 制度演进（郡县制$\to$科举制$\to$内阁制） \\
+\bottomrule
+\end{tabular}
+\end{center}
+各层级周期的周期比约为 $1.9$—$10.4$（即频率比约 $0.10$—$0.53$）——内层周期在外层周期的每个相位中完成约 $1.9$—$10.4$ 个整循环。这一嵌套结构是「周期系统」章中嵌套周转系统在政治历史中的实现。
+\end{theorem}
+
+\begin{proof}
+频率比计算：微观/中观 = $207/20\approx10.4$（取微观平均 $20$ 年），中观/宏观 = $400/207\approx1.9$，宏观/超长 = $1500/400=3.75$。嵌套结构由时间尺度的数量级差异保证：每一层级的时间尺度比上一层级大 $1.9$—$10.4$ 倍，使得内层周期在外层周期的每个相位中完成多个整循环。
+\end{proof}
+
+\section{政治系统的平衡关系}
+
+\begin{theorem}[政治系统的三种平衡关系]\label{thm:political_conservation}
+政治系统的动力学由三种平衡关系支配：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{权力零和约束}：在封闭政治系统中，总权力量保持恒定——一个人或集团获得权力必然意味着另一个人或集团失去权力。权力在君主、贵族、官僚、民众之间的分配变化是权力零和约束的动态表现。权力零和约束是零和博弈的政治学表述。
+    \item \textbf{财政收支平衡}：在无外部融资的封闭财政系统中，政府的总收入（赋税）$=$总支出（行政$+$军事$+$皇室）。当支出持续超过收入时，政府通过铸币税（通货膨胀）、债务违约或出售特权来弥补赤字——但这些手段都有其极限。财政崩溃是财政收支平衡被破坏的结果——政府无法再通过任何手段平衡收支。
+    \item \textbf{合法性类型转换}：政权的合法性来源有三种（韦伯分类）：传统型（“历来如此”）、魅力型（“追随伟大领袖”）和法理型（“按照法律程序”）。政权的总合法性在三种类型之间转换——传统合法性衰落时，魅力型领袖崛起；魅力型领袖去世后，政权需要建立法理型合法性以维持稳定。合法性在三种类型之间的转换是相位旋转的政治实现。
+\end{enumerate}
+三种平衡关系的层级关系为：权力零和约束是政治博弈的零和约束，财政收支平衡是政权存续的物质基础，合法性类型转换是政权稳定的心理基础。三者共同构成了政治系统周期结构的自洽性保证。
+\end{theorem}
+
+\begin{proof}
+(i) 权力零和约束：在绝对君主制下，君主的权力集中度$A(t)$和贵族的权力分散度$D(t)$满足$A + D = 1$（忽略其他权力主体）。当君主集权时（$A \to 1$），贵族权力被压缩（$D \to 0$）；当贵族坐大时（$D \to 1$），君主被架空（$A \to 0$）。中国历史上的相权与皇权之争、地方与中央之争都是权力零和约束的实例。
+
+(ii) 财政收支平衡：以明朝为例，万历年间（$1573$—$1620$年）的财政收入约$400$万两白银，支出约$600$万两（包括三大征的军费和皇室开支），年赤字约$200$万两。到崇祯年间（$1628$—$1644$年），辽东军费激增至每年约$500$万两，而内地因战乱税基萎缩，财政收入降至约$200$万两——年赤字扩大至$300$万两以上。持续的赤字最终导致明朝财政崩溃。
+
+(iii) 合法性类型转换：以清朝为例，清初的合法性主要来自军事征服（魅力型——努尔哈赤和皇太极的领袖魅力）。康熙和乾隆时期，清朝通过编纂《四库全书》、举行科举考试和尊孔崇儒，将合法性基础从魅力型转向传统型和法理型。晚清时期，传统合法性在西方冲击下瓦解，革命党人的魅力型领导（孙中山）崛起——合法性从传统型向魅力型的再次旋转。
+\end{proof}
+
+\begin{remark}[与全书的统一]
+本章建立的政治系统周期结构理论是周期数学在政治学和历史学中的系统应用。王朝生命周期（兴起-鼎盛-衰落-崩溃）是累积过程在政治时间中的实现——土地兼并和财政危机的累积效应驱动政权稳定度从高到低。政体更迭（君主制-贵族制-民主制-暴民制）是周期性循环在制度空间中的周转运动。帝国霸权更替（葡萄牙-荷兰-英国-美国）是扩张与收缩在地缘政治中的标度实现——霸权扩张和过度收缩的交替以约$100$—$150$年为周期。中国两千年的王朝更迭史是嵌套周期结构的政治实证——王朝周期（$200$—$300$年）嵌套在统一-分裂周期（$300$—$500$年）之中，统一-分裂周期又嵌套在制度演进周期（$1000$—$2000$年）之中。政治系统的三种平衡关系——权力零和约束、财政收支平衡、合法性类型转换——共同构成了政治系统周期结构的自洽性保证。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 王朝生命周期的时间推移与土地兼并的单向累积 $dL/dt = -\alpha L$（定义 \ref{def:land_concentration}） \\
+缩放 & 帝国霸权的扩张-收缩标度（命题 \ref{prop:hegemony_dynamics}）；财政危机的指数衰减与半衰期（引理 \ref{ch30_fiscal_half_life}） \\
+旋转 & 政体更迭的相位空间周转：波利比乌斯循环（定义 \ref{def:regime_change}）；合法性在传统-魅力-法理间的旋转（定理 \ref{thm:political_conservation}） \\
+平衡 & 权力零和约束、财政收支平衡、合法性类型转换（定理 \ref{thm:political_conservation}） \\
+对称 & 统一-分裂的交替对称（“分久必合，合久必分”，定理 \ref{thm:chinese_dynasty_cycle}） \\
+闭合 & 多重正反馈的闭合因果循环：财政恶化$\to$精英叛离$\to$军事削弱$\to$财政更恶化（定义 \ref{def:political_quantities}） \\
+周期 & 王朝周期（$200$—$300$ 年，命题 \ref{prop:dynasty_lifespan}）、霸权周期（$100$—$150$ 年，定义 \ref{def:hegemony_cycle}）、统一-分裂周期（$300$—$500$ 年，定理 \ref{thm:chinese_dynasty_cycle}）的三级嵌套（定理 \ref{thm:politics_nested_periods}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{政治周期性判定定理}（\ref{thm:politics_periodicity_decision}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 验证\textbf{数量调节的单调性}（\ref{prop:politics_adaptive_growth}）的前提在本章领域对象上成立，并给出一个不满足前提的反例。
+
+    \item 考察\textbf{三参数对应：半径、相位与转速}（\ref{prop:politics_epicycle_correspondence}）在参数退化时的行为，说明结论如何随之退化。
+
+    \item 说明\textbf{政治周期诊断流程与三章接口}（\ref{thm:politics_diagnosis_integration}）与「周期系统」章相应通用结论的关系（是一致、特例还是需要附加条件）。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{thm:politics_periodicity_decision}、\ref{prop:politics_adaptive_growth}、\ref{prop:politics_epicycle_correspondence}、\ref{thm:politics_diagnosis_integration}。
+\end{enumerate}
+
+

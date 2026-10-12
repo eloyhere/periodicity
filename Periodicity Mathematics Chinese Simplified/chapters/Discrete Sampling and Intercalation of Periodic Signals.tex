@@ -1,0 +1,2275 @@
+\chapter{周期信号的离散采样与置闰}
+\label{chap:sampling}
+\markboth{离散采样逼近、同余角与置闰}{离散采样逼近、同余角与置闰}
+
+\begin{remark}[本章定位与主线]\label{rem:discrete_periodic_chapter_positioning}
+本章是“周期函数与具有周期轨道的群”章的\textbf{离散实现}，但主线由“离散周期函数”升级为\textbf{离散采样逼近}，并进一步升级为\textbf{同余角采样逼近}。其出发点是一个工程事实：连续对象的任何可计算描述都必须经过\textbf{采样}、\textbf{截断}、（必要时）\textbf{置闰}三步。三步各自引入一类误差——混叠、频谱泄露、逼近误差——而三者都由同一套离散结构支配，且最终都被同余角统一刻画。
+
+本章的核心主张有四条：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{周转圆组是周期信号的旋转分解}：连续傅里叶级数可视为一族匀速旋转的周转圆之叠加；离散采样后，周转圆组退化为有限或可数的离散旋转分量。
+    \item \textbf{置闰不是历法中的技巧，而是离散采样逼近中的主动公度化手段}；它把“窗内周期数非整数”这一频谱泄露的唯一根源，用连分数最优逼近压到 $O(M^{-2})$ 量级。
+    \item \textbf{同余角是采样、泄露、置闰、中国剩余定理的统一语言}；它把“相位”从连续角度升级为“模子周期的等价类”，使单周期问题自然推广到多周期联合问题。
+    \item \textbf{置闰是同余角误差的最优补偿；中国剩余定理是同余角重构的代数形式；频谱泄露是同余角不闭合的频域表现。}
+\end{enumerate}
+
+\textbf{平行结构}：
+\[
+\begin{aligned}
+\text{连续章} && \text{本章（离散采样逼近）} \\
+\text{周期函数 } x(t) && \text{采样序列 } f(n)=x(n\Delta x) \\
+\text{具有周期轨道的群 } T_x\mathbb{Z} && \text{具有周期轨道的群 } T_0\mathbb{Z}\subset\mathbb{Z} \\
+\text{傅里叶级数 } \sum_k c_k e^{i\omega_k t} && \text{周转圆组 } \mathcal{E}=\{(A_j,\omega_j,\phi_j)\} \\
+\text{离散傅里叶变换（DFT）} && \text{有限周转圆组与 DFT} \\
+\text{频谱 } |c_k| && \text{窗谱与狄利克雷核} \\
+\text{周期卷积} && \text{循环卷积、同余角循环卷积与置闰窗}
+\end{aligned}
+\]
+
+\textbf{本章八主题}：平移——采样格 $\Delta x\mathbb{Z}$ 与平移不变性；缩放——采样率 $\nu_s$ 与定长标度 $T_0$；旋转——离散相位算子 $\mathcal{O}_k^{(T)}=e^{i2\pi k/T}$、周转圆组与同余角；守恒——离散帕塞瓦尔恒等式；对称——窗谱的偶对称与实序列谱对称；闭合——循环卷积、同余角闭合与置闰窗；周期——窗内周期数与偏移 $\delta$ 的对偶、多周期同余角不闭合量；算法——连分数展开、平衡置闰序列与同余角快速重构。
+
+\textbf{阅读路线}：第 \ref{sec:sampling_basics} 节建立采样三要素；第 \ref{sec:epicycle_system} 节引入周转圆组；第 \ref{sec:window_dirichlet} 节给出泄露的完整机理；第 \ref{sec:aliasing} 节讨论采样率的代价；第 \ref{sec:bounded_approximation} 节建立上限、下限逼近与连分数最优性；第 \ref{sec:window_functions} 节给出窗函数的旁瓣控制；第 \ref{sec:commensurability_intercalation} 节回答“置闰为何能抑制泄露”；第 \ref{sec:congruence_angle_crt} 节引入同余角与广义中国剩余定理；第 \ref{sec:congruence_angle_intercalation} 节把置闰升级为多周期联合抑制；第 \ref{sec:congruence_angle_algorithms} 节给出同余角算法与复杂度；第 \ref{sec:intercalation_algorithms} 节至第 \ref{sec:ch17_interfaces} 节给出实现、历法统一与章节接口。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.95]
+% 连续信号
+\draw[->] (-0.3,0) -- (9,0) node[right] {$t$};
+\draw[->] (0,-1.4) -- (0,1.6) node[above] {$x(t)$};
+\draw[blue, very thick, domain=0:8.6, samples=200] plot (\x, {0.9*sin(deg(1.6*\x))});
+% 采样点
+\foreach \n in {0,1,...,17} {
+  \pgfmathsetmacro{\x}{\n*0.5}
+  \pgfmathsetmacro{\y}{0.9*sin(1.6*\x r)}
+  \fill[red] (\x,\y) circle (2pt);
+}
+% 采样间隔
+\draw[<->, green!60!black] (2,-1.1) -- (2.5,-1.1);
+\node[green!60!black, below, font=\footnotesize] at (2.25,-1.15) {$\Delta x$};
+% 采样时长
+\draw[<->, purple, thick] (0,1.35) -- (8.5,1.35);
+\node[purple, above, font=\footnotesize] at (4.25,1.4) {$T=M\Delta x$};
+\node[align=center, font=\small] at (4.5,-2.2) {采样三要素：采样间隔 $\Delta x$、采样率 $\nu_s=1/\Delta x$、采样时长 $T=M\Delta x$};
+\end{tikzpicture}
+\caption{采样三要素：采样间隔 $\Delta x$（红线采样点之间的间距）、采样率 $\nu_s=1/\Delta x$、采样时长 $T=M\Delta x$（蓝线连续信号的有限观测窗）。}
+\label{fig:sampling_three_elements}
+\end{figure}
+
+\section{采样：采样点、采样率与采样时长}\label{sec:sampling_basics}
+
+本章固定以下记号：$x:\mathbb{R}\to\mathbb{C}$ 为待采样的连续信号（“真实对象”），$V$ 为 $\mathbb{C}$ 或实向量空间。
+
+\begin{remark}[采样概念的规范定义处]\label{rem:sampling_terminology_home}
+全书关于\textbf{采样点}、\textbf{采样率}（采样频率）、\textbf{采样间隔}、\textbf{采样点数}、\textbf{采样时长}、\textbf{采样定理}与\textbf{采样序列}的规范定义都集中在本节：采样格与采样点见 \cref{def:uniform_sampling_parallel}，采样率、奈奎斯特频率与采样时长见 \cref{def:nyquist_sampling_parallel}，三要素的独立性与不可替代性见 \cref{rem:sampling_three_parameters}，采样序列的周期性与公度性见 \cref{prop:commensurability_periodicity_parallel}，尺度相关采样见 \cref{sec:dynamic_sampling}。其后各章——\textbf{「调和分析」章}、\textbf{「时序分析」章}以及各应用章——一律引用本节，不再重复定义。
+\end{remark}
+
+\begin{definition}[采样格与采样点]\label{def:uniform_sampling_parallel}
+设采样间隔（采样点距）$\Delta x>0$。\textbf{采样格}为
+\[
+\Lambda_{\Delta x}:=\Delta x\,\mathbb{Z}=\{n\Delta x : n\in\mathbb{Z}\},
+\]
+其元素称为\textbf{采样点}（采样时点）。\textbf{采样算子} $\mathcal{S}_{\Delta x}$ 把连续信号映为序列
+\[
+f:=\mathcal{S}_{\Delta x}x,\qquad f(n):=x(n\Delta x),\quad n\in\mathbb{Z}.
+\]
+序列 $f$ 称为 $x$ 的\textbf{采样序列}。
+\end{definition}
+
+\begin{definition}[采样率、奈奎斯特频率与采样时长]\label{def:nyquist_sampling_parallel}
+沿用定义 \ref{def:uniform_sampling_parallel} 的记号。
+\begin{enumerate}[label=(\roman*)]
+    \item 采样率（采样频率）$\nu_s$ 与角采样率 $\omega_s$ 定义为
+    \[
+    \nu_s:=\frac{1}{\Delta x},\qquad \omega_s:=2\pi\nu_s=\frac{2\pi}{\Delta x};
+    \]
+    \item 采样后不可分辨的最高频率称为\textbf{奈奎斯特频率}
+    \[
+    \nu_N:=\frac{\nu_s}{2},\qquad \omega_N:=\frac{\omega_s}{2}=\frac{\pi}{\Delta x};
+    \]
+    \item 有限记录只保留 $n=0,1,\dots,M-1$ 共 $M$ 个采样点，其\textbf{采样时长}（记录长度）为
+    \[
+    T:=M\Delta x,
+    \]
+    称 $M$ 为\textbf{采样点数}或\textbf{窗口长度}，称对应的时间区间为\textbf{采样窗口}。
+\end{enumerate}
+\end{definition}
+
+\begin{remark}[三要素的不可替代性]\label{rem:sampling_three_parameters}
+采样点、采样率、采样时长是离散采样逼近的三个\textbf{独立}设计参数，各自控制一类性质：$\Delta x$ 决定频率可分辨范围（决定混叠），$T=M\Delta x$ 决定频率可分辨精度
+\[
+\Delta\nu=\frac{1}{T},\qquad \Delta\omega=\frac{2\pi}{T},
+\]
+而 $M$ 决定计算量与统计稳定性。三者不可互相替代：提高 $\nu_s$ 不能改善频率分辨率，延长 $T$ 也不能消除混叠。
+\end{remark}
+
+\begin{definition}[离散周期函数]\label{def:discrete_periodic_function}
+设 $f:\mathbb{Z}\to V$。若存在 $T\in\mathbb{N}^+$ 使
+\[
+f(n+T)=f(n),\qquad \forall n\in\mathbb{Z},
+\]
+则称 $f$ 为\textbf{离散周期函数}，$T$ 称为 $f$ 的一个\textbf{周期}。$f$ 的全体周期
+\[
+\operatorname{Group}_{\mathrm{period}}(f):=\{T\in\mathbb{Z}:f(n+T)=f(n),\ \forall n\in\mathbb{Z}\}
+\]
+构成 $\mathbb{Z}$ 的子群，故存在唯一的 $T_0\in\mathbb{N}$ 使 $\operatorname{Group}_{\mathrm{period}}(f)=T_0\mathbb{Z}$（见定义 \ref{def:discrete_fundamental_period}）。当 $f$ 为常函数时 $\operatorname{Group}_{\mathrm{period}}(f)=\mathbb{Z}$，此时约定 $T_0=1$。
+\end{definition}
+
+\begin{definition}[离散基本周期与定长标度]\label{def:discrete_fundamental_period}
+设 $f:\mathbb{Z}\to V$ 为非恒定离散周期函数。其最小正周期
+\[
+T_0:=\min\{T\in\mathbb{N}^+:f(n+T)=f(n),\ \forall n\in\mathbb{Z}\}
+\]
+称为 $f$ 的\textbf{离散基本周期}。$T_0$ 是周期子群 $\operatorname{Group}_{\mathrm{period}}(f)\subset\mathbb{Z}$ 的生成元，它把无限时间轴 $\mathbb{Z}$ 折叠为有限循环群 $\mathbb{Z}/T_0\mathbb{Z}$，因而在离散建模中充当\textbf{定长标度}：DFT 的频域谐波格 $\{2\pi k/T_0\}_{k=0}^{T_0-1}$ 的格距由 $T_0$ 完全确定。
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.95]
+\draw[->] (-0.3,0) -- (9,0) node[right] {$n$};
+\draw[->] (0,-1.4) -- (0,1.6) node[above] {$f(n)$};
+% 离散周期序列
+\foreach \n in {0,...,17} {
+  \pgfmathsetmacro{\x}{\n*0.5}
+  \pgfmathsetmacro{\y}{0.9*sin(360*\n/4)}
+  \fill[blue] (\x,\y) circle (2pt);
+  \draw[blue, dashed] (\x,0) -- (\x,\y);
+}
+% 基本周期
+\draw[<->, red, thick] (0,-1.1) -- (2,-1.1);
+\node[red, below, font=\footnotesize] at (1,-1.15) {$T_0=4$};
+\draw[dashed, red] (0,-1.0) -- (0,1.2);
+\draw[dashed, red] (2,-1.0) -- (2,1.2);
+\draw[dashed, red] (4,-1.0) -- (4,1.2);
+\draw[dashed, red] (6,-1.0) -- (6,1.2);
+\draw[dashed, red] (8,-1.0) -- (8,1.2);
+\node[align=center, font=\small] at (4.5,-2.2) {离散周期函数：基本周期 $T_0=4$ 把 $\mathbb{Z}$ 折叠为 $\mathbb{Z}/4\mathbb{Z}$};
+\end{tikzpicture}
+\caption{离散周期函数与基本周期：序列每 $T_0=4$ 个点重复一次，无限时间轴被折叠为有限循环群 $\mathbb{Z}/4\mathbb{Z}$。}
+\label{fig:discrete_periodic}
+\end{figure}
+
+\begin{proposition}[采样算子的代数性质]\label{prop:sampling_algebra_parallel}
+采样算子 $\mathcal{S}_{\Delta x}$ 具有下列性质：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{线性}：$\mathcal{S}_{\Delta x}(\alpha x+\beta y)=\alpha\,\mathcal{S}_{\Delta x}x+\beta\,\mathcal{S}_{\Delta x}y$；
+    \item \textbf{逐点乘法}：$\mathcal{S}_{\Delta x}(x\cdot y)=(\mathcal{S}_{\Delta x}x)\cdot(\mathcal{S}_{\Delta x}y)$；
+    \item \textbf{与格平移交换}：对 $a=m\Delta x$（$m\in\mathbb{Z}$），有 $\mathcal{S}_{\Delta x}\big(x(\cdot-a)\big)=f(\cdot-m)$，其中 $f=\mathcal{S}_{\Delta x}x$；
+    \item \textbf{不与缩放交换}：一般地 $\mathcal{S}_{\Delta x}\big(x(\lambda\,\cdot)\big)\neq$ 采样序列的抽取，除非 $\lambda$ 与采样格相容（即 $\lambda\Delta x/\Delta x'\in\mathbb{Q}$，见第 \ref{sec:aliasing} 节）。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i)(ii) 逐点求值保持线性与乘法。(iii) 由 $x(n\Delta x-m\Delta x)=x\big((n-m)\Delta x\big)=f(n-m)$ 即得。(iv) 取 $x(t)=e^{i\omega t}$，$\lambda\ne1$：则 $\mathcal{S}_{\Delta x}\big(x(\lambda\cdot)\big)(n)=e^{i\lambda\omega n\Delta x}$，其“单位采样频率”由 $\lambda\omega\Delta x$ 决定，一般不再落在原谐波格上；仅在 $\lambda\omega\Delta x$ 与 $\omega\Delta x$ 相差整数倍时二者不可区分，这正是混叠（第 \ref{sec:aliasing} 节）。
+\end{proof}
+
+\begin{property}[采样算子的伴随]\label{prop:sampling_adjoint}
+设 $\mathcal{S}_{\Delta x}:L^2(\mathbb{R})\to\ell^2(\mathbb{Z})$ 为采样算子。则其伴随算子
+\[
+\mathcal{S}_{\Delta x}^*:\ell^2(\mathbb{Z})\to L^2(\mathbb{R}),
+\qquad
+\mathcal{S}_{\Delta x}^*(\{f_n\}) = \sum_{n\in\mathbb{Z}}f_n\,\operatorname{sinc}\!\Bigl(\frac{t-n\Delta x}{\Delta x}\Bigr)
+\]
+为理想低通插值算子。
+\end{property}
+
+\begin{proof}
+对任意 $x\in L^2(\mathbb{R})$，$\{f_n\}\in\ell^2(\mathbb{Z})$，
+\[
+\langle \mathcal{S}_{\Delta x}x,\{f_n\}\rangle_{\ell^2}=\sum_n x(n\Delta x)\overline{f_n},
+\]
+而
+\[
+\langle x,\mathcal{S}_{\Delta x}^*\{f_n\}\rangle_{L^2}=\int_{\mathbb{R}}x(t)\overline{\sum_n f_n\operatorname{sinc}\!\Bigl(\frac{t-n\Delta x}{\Delta x}\Bigr)}\,dt
+=\sum_n\overline{f_n}\int_{\mathbb{R}}x(t)\operatorname{sinc}\!\Bigl(\frac{t-n\Delta x}{\Delta x}\Bigr)\,dt.
+\]
+由 sinc 函数的插值性质 $\int x(t)\operatorname{sinc}((t-n\Delta x)/\Delta x)dt=x(n\Delta x)$（在带限信号上成立），两式相等。
+\end{proof}
+
+\begin{definition}[归一化周期比]\label{def:normalised_ratio_parallel}
+设 $x$ 以 $T_x$ 为（基本）周期且非常值，采样间隔为 $\Delta x$。称
+\[
+\rho:=\frac{T_x}{\Delta x}
+\]
+为\textbf{归一化周期比}，即一个周期内包含的采样点数（可以不是整数）。
+\end{definition}
+
+\begin{proposition}[采样序列的周期性与公度性]\label{prop:commensurability_periodicity_parallel}
+设连续信号 $x$ 以 $T_x$ 为基本周期且其傅里叶系数不全为零，采样间隔 $\Delta x>0$，采样序列 $f(n)=x(n\Delta x)$，归一化周期比 $\rho=T_x/\Delta x$。则
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $\rho\in\mathbb{N}^+$，则 $f$ 是以 $T=\rho$ 为周期的离散周期函数；
+    \item 若 $\rho=p/q$（$p,q\in\mathbb{N}^+$，既约），则 $f$ 是以 $T=p$ 为周期的离散周期函数，且 $T_0=p$；
+    \item 若 $\rho\notin\mathbb{Q}$，则 $f$ 不是离散周期函数，即 $\operatorname{Group}_{\mathrm{period}}(f)=\{0\}$。
+\end{enumerate}
+换言之：\textbf{采样序列具有非平凡周期结构，当且仅当信号的周期与采样间隔公度}。
+\end{proposition}
+
+\begin{proof}
+(i) 由 $f(n+\rho)=x\big((n+\rho)\Delta x\big)=x(n\Delta x+\rho\Delta x)=x(n\Delta x+T_x)=f(n)$ 即得。
+
+(ii) $p\Delta x=p\cdot\frac{T_x}{\rho}=pT_x\cdot\frac{q}{p}=q\,T_x$，故 $f(n+p)=x(n\Delta x+qT_x)=f(n)$。再证最小性：设 $f$ 以 $T\in\mathbb{N}^+$ 为周期，则由 $x$ 的傅里叶展开 $x(t)=\sum_k c_k e^{i2\pi kt/T_x}$ 得
+\[
+f(n)=\sum_k c_k e^{i2\pi kn\Delta x/T_x}=\sum_k c_k e^{i2\pi kn/\rho}.
+\]
+令 $k_0$ 为满足 $c_{k_0}\ne0$ 的最小非零整数（存在，因 $x$ 非常值）。由 $f(n+T)=f(n)$ 得 $e^{i2\pi k_0T/\rho}=1$，即 $k_0T/\rho\in\mathbb{Z}$，故 $\rho=Tk_0/m$（某 $m\in\mathbb{Z}$）为有理数。当 $\rho=p/q$ 既约时，$pT_x=q\Delta x$，且 $T\Delta x$ 必为 $T_x$ 的整数倍，设 $T\Delta x=mT_x$，则 $T=mq/p$，由既约性 $p\mid m$，故 $T$ 为 $p$ 的整数倍，最小正周期为 $p$。
+
+(iii) 设 $f$ 以 $T\in\mathbb{N}^+$ 为周期，则同 (ii) 的论证得 $k_0T/\rho\in\mathbb{Z}$，从而 $\rho=Tk_0/m\in\mathbb{Q}$，矛盾。故 $\operatorname{Group}_{\mathrm{period}}(f)=\{0\}$。
+\end{proof}
+
+\begin{corollary}[采样周期与信号周期的换算]\label{cor:sampling_period_relation_parallel}
+在命题 \ref{prop:commensurability_periodicity_parallel} (ii) 的条件下，离散基本周期 $T_0=p$ 与信号基本周期 $T_x$ 满足
+\[
+T_0\Delta x=q\,T_x,\qquad \rho=\frac{T_x}{\Delta x}=\frac{p}{q}=\frac{T_0}{q},
+\]
+即“$p$ 个采样点覆盖 $q$ 个信号周期”。这正是离散化函子的周期保真条件。
+\end{corollary}
+
+\begin{example}[数字信号]\label{ex:digital_signal_modelling}
+采样率 $\nu_s=48$ kHz 的音频接口，采样间隔 $\Delta x=1/48000$ s。对 $A$ 音（$\nu_0=440$ Hz）有 $\rho=\nu_s/\nu_0=109.0909\ldots\notin\mathbb{Q}$：单音在任意有限记录内都不可能包含整数个周期，泄露不可避免（第 \ref{sec:window_dirichlet} 节）。而 $\nu_0=480$ Hz 时 $\rho=100\in\mathbb{N}^+$，若取 $M=100k$（$k\in\mathbb{N}^+$）则窗内恰含整数个周期，泄露为零。
+\end{example}
+
+\begin{example}[离散时钟]\label{ex:discrete_clock_modelling}
+机械钟摆以 $T_x=2$ s 为周期摆动，采样间隔 $\Delta x=0.5$ s，则 $\rho=4\in\mathbb{N}^+$，采样序列的基本周期 $T_0=4$。若改用 $\Delta x=0.75$ s，$\rho=8/3$，则 $T_0=8$：需要 $8$ 个采样点（$6$ s）才恢复一个完整周期。
+\end{example}
+
+\begin{example}[传感器网格采样]\label{ex:sensor_modelling}
+空间周期结构（如光栅）以 $T_x=10\,\mu$m 为周期，像素间距 $\Delta x=3\,\mu$m，则 $\rho=10/3$ 为有理数，采样序列基本周期 $T_0=10$（即 $30\,\mu$m 后图像重复）。若像素间距 $\Delta x=\sqrt{2}\,\mu$m 与周期不可公度，则图像沿空间方向不重复，只能作统计描述。
+\end{example}
+
+\subsection{尺度相关采样：观察者尺度与采样密度}\label{sec:dynamic_sampling}
+
+以上采样率 $\nu_s=1/\Delta x$ 是\textbf{固定}的。当采样由观察者实施时，采样密度还取决于观察者的尺度与到源的距离。本节把 \cref{def:uniform_sampling_parallel} 与 \cref{def:nyquist_sampling_parallel} 的固定采样率推广为\textbf{尺度相关采样率}，作为「标量与矢量」章观察者线的采样侧接口。该模型原述于「标量与矢量」章的「尺度相关采样模型」节，现归口于此，该处改为引用。
+
+\begin{definition}[尺度相关采样函数]\label{def:dynamic_sampling}
+设观察者尺度为 $\sigma$，观察距离为 $r$，基准采样率为 $R_0$、基准采样点数为 $N_0$。定义采样率和采样点数为
+\[
+R(r, \sigma) = R_0 \cdot \frac{\sigma}{r^2 + \sigma}, \qquad
+N(r, \sigma) = N_0 \cdot \frac{\sigma}{r^2 + \sigma}.
+\]
+该模型描述观察距离和观察尺度对方向采样密度的共同影响。
+
+参数范围是定义的一部分，越出范围时相应的函数无定义：要求 $\sigma>0$、$r\ge0$、$R_0>0$、$N_0>0$。$r=0$ 时 $R(0,\sigma)=R_0$、$N(0,\sigma)=N_0$，模型退化为「观察者落在源上」的极限情形；$\sigma=0$ 会使 $R\equiv0$（观察者尺度为零，无任何可分辨信息），此时 \cref{thm:invisibility_criterion} 的判据恒成立，但模型本身也失去内容。这里 $R$ 与 \cref{def:nyquist_sampling_parallel} 的采样率 $\nu_s$ 同量纲，$N$ 即该定义中的采样点数 $M$。
+\end{definition}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.0,>=stealth]
+        \filldraw[blue] (0,0) circle (5pt) node[below] {观察者};
+        \draw[<->, thick] (0.2,0) -- (0.2,1.0) node[midway, right] {$\sigma$};
+        \draw[->, thick] (0,0) -- (6,0) node[right] {$r$};
+        \foreach \x in {1,2,3,4,5} {
+            \foreach \y in {-0.5,0,0.5} {
+                \pgfmathsetmacro{\opacity}{1/(1+\x*\x)}
+                \fill[red, opacity=\opacity] (\x,\y) circle (2pt);
+            }
+        }
+        \node[font=\footnotesize] at (3,-2) {$N(r,\sigma)=N_0\frac{\sigma}{r^2+\sigma}$};
+    \end{tikzpicture}
+    \caption{尺度相关采样模型。采样点密度随距离 $r$ 增加而减小，随观察者尺度 $\sigma$ 增加而增大。}
+    \label{fig:dynamic_sampling}
+\end{figure}
+
+\begin{property}[采样函数的单调性]\label{prop:sampling_monotonicity}
+\begin{enumerate}[label=(\roman*)]
+    \item 对固定 $\sigma > 0$，$R$ 和 $N$ 是距离 $r$ 的严格递减函数。
+    \item 对固定 $r \ge 0$，$R$ 和 $N$ 是尺度 $\sigma$ 的严格递增函数。
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i) 
+\[
+\frac{\partial R}{\partial r} = R_0 \sigma \cdot \frac{-2r}{(r^2 + \sigma)^2} < 0 \quad (r > 0).
+\]
+(ii)
+\[
+\frac{\partial R}{\partial \sigma} = R_0 \cdot \frac{r^2}{(r^2 + \sigma)^2} \ge 0.
+\]
+$N$ 的同理。
+\end{proof}
+
+\begin{theorem}[不可见性判据]\label{thm:invisibility_criterion}
+源对于观察者\textbf{完全不可见}的充分必要条件是 $N(r, \sigma) < 1$。可见性阈值距离为
+\[
+r_{\text{max}} = \sqrt{(N_0 - 1)\sigma}.
+\]
+\end{theorem}
+
+\begin{proof}
+由 $N_0 \cdot \frac{\sigma}{r^2 + \sigma} < 1$ 解出
+\[
+N_0\sigma < r^2+\sigma
+\iff
+r^2 > (N_0-1)\sigma
+\iff
+r > \sqrt{(N_0-1)\sigma}.
+\]
+因此阈值距离为 $r_{\text{max}} = \sqrt{(N_0 - 1)\sigma}$。
+\end{proof}
+
+\begin{remark}[与采样三要素的关系]\label{rem:dynamic_sampling_vs_three}
+尺度相关采样把 \cref{rem:sampling_three_parameters} 的三个固定参数变成状态的函数：采样间隔 $\Delta x\mapsto1/R(r,\sigma)$ 随距离增大而变粗、随尺度增大而变细；采样点数 $M\mapsto N(r,\sigma)$ 同向变化；采样时长随之成为 $T=N(r,\sigma)/R(r,\sigma)$。因此「观察者尺度决定可分辨范围」这一命题在本章的采样框架内获得了精确的定量形式：$N(r,\sigma)<1$ 时无任何可分辨信息（\cref{thm:invisibility_criterion}），$R(r,\sigma)$ 低于两倍信号频率时发生混叠（第 \ref{sec:aliasing} 节）。
+\end{remark}
+
+\section{周转圆组：周期信号的旋转分解}\label{sec:epicycle_system}
+
+本节引入\textbf{周转圆组}（epicycle system）。它把傅里叶级数、离散相位算子与同余角统一为“旋转分量的叠加”。
+
+\begin{definition}[单个周转圆]\label{def:epicycle}
+一个\textbf{周转圆}是如下映射
+\[
+e_{A,\omega,\phi}(t):=A\,e^{i(\omega t+\phi)},\qquad t\in\mathbb{R},
+\]
+其中 $A\ge0$ 称为\textbf{半径}（振幅），$\omega\in\mathbb{R}$ 称为\textbf{角速度}（频率），$\phi\in\mathbb{R}/2\pi\mathbb{Z}$ 称为\textbf{初相}。若 $A=0$，该周转圆退化为零。
+\end{definition}
+
+\begin{definition}[周转圆组]\label{def:epicycle_system}
+设指标集 $J$ 至多可数。称
+\[
+\mathcal{E}:=\{(A_j,\omega_j,\phi_j)\}_{j\in J}
+\]
+为一个\textbf{周转圆组}，若合成信号
+\[
+x_{\mathcal{E}}(t):=\sum_{j\in J}A_j e^{i(\omega_j t+\phi_j)}
+\]
+在指定函数空间中收敛。若 $J$ 有限，则称 $\mathcal{E}$ 为\textbf{有限周转圆组}。称
+\[
+\Omega(\mathcal{E}):=\{\omega_j:j\in J\}
+\]
+为\textbf{频率集}。
+\end{definition}
+
+\begin{proposition}[周转圆组的具有周期轨道的群]\label{prop:epicycle_group_with_periodic_orbits}
+设 $\mathcal{E}=\{(A_j,\omega_j,\phi_j)\}_{j\in J}$ 为非零周转圆组，且 $x_{\mathcal{E}}$ 非常值。若频率集 $\Omega(\mathcal{E})$ 生成离散子群，记
+\[
+\omega_0:=\min\{\omega>0:\omega\in\textstyle\sum_j\mathbb{Z}\omega_j\}=\gcd\{\omega_j\ne0\}
+\]
+（即所有 $\omega_j/\omega_0\in\mathbb{Z}$），则 $x_{\mathcal{E}}$ 以 $T_x=2\pi/\lvert\omega_0\rvert$ 为周期，且其具有周期轨道的群为
+\[
+\operatorname{Group}_{\mathrm{period}}(x_{\mathcal{E}})=T_x\mathbb{Z}.
+\]
+最小正周期为 $2\pi/\lvert\omega_0\rvert$（当 $\omega_0\notin\Omega$ 时为其整数分之一）；所有 $\omega_k=0$ 时不存在最小正周期。
+
+若 $\Omega(\mathcal{E})$ 在 $\mathbb{R}$ 上生成的子群不是离散的，则 $x_{\mathcal{E}}$ 一般不具有非平凡周期。
+\end{proposition}
+
+\begin{proof}
+若 $\omega_j=k_j\omega_0$，$k_j\in\mathbb{Z}$，则
+\[
+x_{\mathcal{E}}(t+T_x)=\sum_j A_j e^{i(k_j\omega_0(t+2\pi/\omega_0)+\phi_j)}
+=\sum_j A_j e^{i(k_j\omega_0 t+\phi_j+2\pi k_j)}
+=x_{\mathcal{E}}(t).
+\]
+故 $T_x$ 为周期。最小正周期由非零频率的最大公因子 $\omega_0=\gcd\{\omega_j\ne0\}$ 决定：最小正周期为 $2\pi/\lvert\omega_0\rvert$（当 $\omega_0\notin\Omega$ 时为其整数分之一）；所有 $\omega_k=0$ 时不存在最小正周期。若生成子群非离散，则任意非零周期的集合无最小正生成元，通常 $\operatorname{Group}_{\mathrm{period}}(x_{\mathcal{E}})=\{0\}$。
+\end{proof}
+
+\begin{proposition}[周转圆组的采样与公度性]\label{prop:epicycle_sampling_commensurability}
+设周转圆组 $\mathcal{E}$ 的频率集为 $\Omega$，采样间隔 $\Delta x>0$，采样序列
+\[
+f(n)=x_{\mathcal{E}}(n\Delta x)=\sum_j A_j e^{i(\omega_j n\Delta x+\phi_j)}.
+\]
+若存在 $\omega_0>0$ 使所有 $\omega_j/\omega_0\in\mathbb{Z}$，且归一化周期比 $\rho=2\pi/(\omega_0\Delta x)$ 为有理数，则 $f$ 为离散周期序列；若 $\rho\notin\mathbb{Q}$，则 $f$ 非周期。
+\end{proposition}
+
+\begin{proof}
+由命题 \ref{prop:epicycle_group_with_periodic_orbits}，连续信号周期为 $T_x=2\pi/\omega_0$。代入命题 \ref{prop:commensurability_periodicity_parallel} 即得。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+% 第一级周转圆
+\draw[gray!50] (0,0) circle (1.6);
+\draw[->, blue, very thick] (0,0) -- (1.6,0);
+\node[blue, above, font=\footnotesize] at (0.8,0.1) {$A_1 e^{i\omega_1 t}$};
+% 第二级周转圆（圆心在第一个圆的端点）
+\draw[gray!50] (1.6,0) circle (0.7);
+\draw[->, red, very thick] (1.6,0) -- (2.1,0.5);
+\node[red, above right, font=\footnotesize] at (1.9,0.6) {$A_2 e^{i\omega_2 t}$};
+% 第三级周转圆
+\draw[gray!50] (2.1,0.5) circle (0.3);
+\fill (2.35,0.65) circle (1.5pt);
+% 说明
+\node[align=center, font=\small] at (0,-2.8) {周转圆组：周期信号 $x_{\mathcal{E}}(t)=\sum_j A_j e^{i(\omega_j t+\phi_j)}$ 的几何叠加};
+\end{tikzpicture}
+\caption{周转圆组：傅里叶级数的几何实现。每个分量是一个匀速旋转的圆，最终动点位置为各分量向量之和。}
+\label{fig:epicycle_system}
+\end{figure}
+
+\begin{example}[傅里叶级数就是周转圆组]\label{ex:fourier_epicycle}
+连续周期函数 $x(t)=\sum_{k\in\mathbb{Z}}c_k e^{i2\pi kt/T_x}$ 对应周转圆组
+\[
+\mathcal{E}=\{(|c_k|,\ 2\pi k/T_x,\ \arg c_k)\}_{k\in\mathbb{Z}}.
+\]
+因此傅里叶级数展开可几何地理解为：一族角速度为基频整数倍的周转圆叠加成原周期信号。
+\end{example}
+
+\begin{example}[离散傅里叶变换是有限周转圆组]\label{ex:dft_epicycle}
+长度 $T_0$ 的离散周期序列 $f:\mathbb{Z}/T_0\mathbb{Z}\to\mathbb{C}$ 的 DFT
+\[
+\hat f(k)=\sum_{n=0}^{T_0-1}f(n)e^{-i2\pi kn/T_0}
+\]
+把 $f$ 分解为有限周转圆组
+\[
+\mathcal{E}_f=\left\{\left(\frac{|\hat f(k)|}{T_0},\ \frac{2\pi k}{T_0},\ \arg \hat f(k)\right)\right\}_{k=0}^{T_0-1}.
+\]
+这正是本章离散相位算子 $\mathcal{O}_k^{(T_0)}=e^{i2\pi k/T_0}$ 的几何解释。
+\end{example}
+
+\begin{remark}[周转圆组与同余角]\label{rem:epicycle_congruence}
+周转圆组中的每个分量在子周期 $T$ 上的相位，正是同余角
+\[
+\langle \omega_j t+\phi_j\rangle_T
+=\omega_j t+\phi_j\bmod \frac{2\pi}{T}.
+\]
+因此，多周期联合问题可以看成：一个周转圆组需要在多个子周期上同时闭合。置闰就是调整观测窗口，使这些同余角误差同时被压小。
+\end{remark}
+
+\begin{table}[htbp]
+    \centering
+    \caption{离散采样逼近的度量参数与分量}
+    \label{tab:discrete_period_parameters}
+    \small
+    \renewcommand{\arraystretch}{1.05}
+    \begin{tabular}{>{\raggedright\arraybackslash\hspace{0pt}}p{2.4cm}>
+                    {\raggedright\arraybackslash\hspace{0pt}}p{4.1cm}>
+                    {\raggedright\arraybackslash\hspace{0pt}}p{4.1cm}>
+                    {\raggedright\arraybackslash\hspace{0pt}}p{3.2cm}}
+        \toprule
+        参数 & 定义 & 时域含义 & 频域含义 \\
+        \midrule
+        采样间隔 $\Delta x$ & 相邻采样点间距 & 时间分辨率 & 可分辨上限 $\omega_N=\pi/\Delta x$ \\
+        采样率 $\nu_s$ & $1/\Delta x$ & 采样点数密度 & 混叠判据的标尺 \\
+        采样时长 $T$ & $M\Delta x$ & 记录长度 & 频率分辨率 $\Delta\omega=2\pi/T$ \\
+        周期比 $\rho$ & $T_x/\Delta x$ & 一个周期的采样点数 & 谐波格的位置 \\
+        偏移 $\delta$ & $\|M\rho\|_{\mathbb{Z}}$ & 窗内周期数的偏差 & 泄露强度 \\
+        基本周期 $T_0$ & $\operatorname{Group}_{\mathrm{period}}(f)$ 的生成元 & 序列重复长度 & 频域格距 $2\pi/T_0$ \\
+        周转圆组 $\mathcal{E}$ & $\{(A_j,\omega_j,\phi_j)\}$ & 旋转分量叠加 & 傅里叶模态集合 \\
+        同余角 $\langle\theta\rangle_T$ & $\theta\bmod 2\pi/T$ & 模子周期的相位 & 子周期上的谱线位置 \\
+        同余角不闭合 $\delta_T$ & $\frac{2\pi}{T}\|M\rho\|_{\mathbb{Z},T}$ & 子周期上的相位偏差 & 子周期上的泄露强度 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\section{有限窗口、狄利克雷核与频谱泄露}\label{sec:window_dirichlet}
+
+本节给出频谱泄露的完整机理。结论是：\textbf{泄露的根源是窗内周期数不是整数}；其数学载体是狄利克雷核的旁瓣。若从周转圆组看，泄露就是每个周转圆在窗口端点处的相位不闭合所造成的旁瓣叠加。
+
+\begin{definition}[频谱泄露]\label{def:spectral_leakage}
+设 $x$ 的（真）频谱为 $\hat x$。只观测到长度为 $T=M\Delta x$ 的有限记录
+\[
+x_T(t):=x(t)\,\mathbf{1}_{[0,T)}(t),
+\]
+并对其采样作 DFT。若 $\hat x_T$ 在 $\hat x$ 的谱支撑之外出现非零能量，则称发生\textbf{频谱泄露}。泄露量用主瓣外能量占比
+\[
+\eta:=\frac{\displaystyle\sum_{k\notin K_{\text{主瓣}}}|\hat f(k)|^2}{\displaystyle\sum_{k}|\hat f(k)|^2}
+\]
+度量，其中 $K_{\text{主瓣}}$ 是主瓣所覆盖的频点集合（定义 \ref{def:mainlobe_sidelobe_parallel}）。
+\end{definition}
+
+\begin{definition}[狄利克雷核]\label{def:dirichlet_kernel_parallel}
+对整数 $M\ge0$ 定义函数
+\[
+D_M(\theta):=\sum_{m=-M}^{M}e^{im\theta},\qquad \theta\in\mathbb{R},
+\]
+称为\textbf{狄利克雷核}（Dirichlet kernel，亦称狄利克雷函数）。相应地，长度 $T$ 的矩形窗的归一化谱称为\textbf{窗核}
+\[
+W_T(\omega):=\frac{1}{T}\sum_{n=0}^{T-1}e^{-in\omega}
+=\frac{e^{-i(T-1)\omega/2}}{T}\cdot\frac{\sin(T\omega/2)}{\sin(\omega/2)}
+=\frac{e^{-i(T-1)\omega/2}}{T}\,D_{T-1}(\omega),
+\]
+其模 $|W_T(\omega)|=\frac{1}{T}\big|\frac{\sin(T\omega/2)}{\sin(\omega/2)}\big|$ 只依赖频率。
+\end{definition}
+
+\begin{lemma}[狄利克雷核的封闭形式]\label{lem:dirichlet_kernel_closed_form}
+对任意 $\theta\notin2\pi\mathbb{Z}$，
+\[
+D_M(\theta)=\frac{\sin\big((M+\tfrac12)\theta\big)}{\sin(\theta/2)},
+\]
+且 $D_M(0)=2M+1$。特别地 $|D_M(\theta)|\le\dfrac{1}{|\sin(\theta/2)|}$。
+\end{lemma}
+
+\begin{proof}
+以 $e^{-iM\theta}$ 乘 $D_M(\theta)$ 得等比级数
+\[
+\sum_{r=0}^{2M}e^{ir\theta}=\frac{e^{i(2M+1)\theta}-1}{e^{i\theta}-1}
+=\frac{e^{i2M\theta}-e^{-i\theta}}{1-e^{-i\theta}} ,
+\]
+代入 $1-e^{i\theta}=-2ie^{i\theta/2}\sin(\theta/2)$ 并取模即得封闭形式；$D_M(0)$ 由定义直接得 $2M+1$。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+\draw[->] (-6.5,0) -- (6.5,0) node[right] {$\omega$};
+\draw[->] (0,-0.5) -- (0,3.2) node[above] {$|W_T(\omega)|$};
+\draw[blue, very thick, domain=-6.3:6.3, samples=500]
+  plot (\x, {abs(sin(deg(2.5*\x)))/(2.5*abs(sin(deg(\x/2)))+0.0001)});
+% 主瓣标注
+\draw[dashed, red] (-1.256,0) -- (-1.256,2.6);
+\draw[dashed, red] (1.256,0) -- (1.256,2.6);
+\draw[<->, red, thick] (-1.256,2.8) -- (1.256,2.8);
+\node[red, above, font=\footnotesize] at (0,2.85) {主瓣};
+% 第一旁瓣
+\draw[<-, orange, thick] (2.0,0.9) -- (2.6,1.6);
+\node[orange, right, font=\footnotesize] at (2.65,1.65) {第一旁瓣 $-13$ dB};
+\node[align=center, font=\small] at (0,-1.6) {矩形窗的窗核 $|W_T(\omega)|$：主瓣宽 $4\pi/T$，旁瓣按 $|\omega|^{-1}$ 衰减};
+\end{tikzpicture}
+\caption{狄利克雷核/矩形窗的窗核：主瓣与旁瓣结构。主瓣宽 $4\pi/T$，第一旁瓣约 $-13$ dB，旁瓣包络按 $|\omega|^{-1}$ 衰减。}
+\label{fig:dirichlet_kernel}
+\end{figure}
+
+\begin{lemma}[窗核的正交性与主瓣位置]\label{lem:window_kernel_orthogonality_parallel}
+沿用定义 \ref{def:dirichlet_kernel_parallel}。则
+\[
+W_T\Big(\frac{2\pi k}{T}\Big)=\begin{cases}1, & k\equiv0\ (\mathrm{mod}\ T),\\[2pt]0, & \text{其他整数 }k,\end{cases}
+\qquad
+\sum_{n=0}^{T-1}e^{-i2\pi kn/T}=T\,\delta_{k,0\bmod T}.
+\]
+且 $|W_T(\omega)|$ 在 $\omega=0$ 处取极大值 $1$，在 $\omega=\pm2\pi/T$ 处首次取零。
+\end{lemma}
+
+\begin{proof}
+$k\equiv0$ 时求和为 $T$；$k\not\equiv0$ 时等比级数比值 $e^{-i2\pi k/T}\ne1$，求和为 $\frac{1-e^{-i2\pi k}}{1-e^{-i2\pi k/T}}=0$。极大与零点由引理 \ref{lem:dirichlet_kernel_closed_form} 的分子 $\sin(T\omega/2)$ 在 $\omega=2\pi j/T$ 处为零、在 $\omega=0$ 附近取到最大模给出。
+\end{proof}
+
+\begin{proposition}[单频截断的泄露公式]\label{prop:single_tone_leakage_parallel}
+设 $f(n)=A e^{i(\omega_0 n+\phi)}$（$A>0$，$\phi\in\mathbb{R}$），取长度 $M$ 的矩形窗作 DFT：
+\[
+\hat f(k)=\sum_{n=0}^{M-1}f(n)\,e^{-i2\pi kn/M},\qquad k=0,1,\dots,M-1.
+\]
+则
+\[
+\hat f(k)=A e^{i\phi}\,e^{i\theta_k(M-1)/2}\,\frac{\sin(M\theta_k/2)}{\sin(\theta_k/2)},
+\qquad \theta_k:=\omega_0-\frac{2\pi k}{M},
+\]
+从而
+\[
+|\hat f(k)|=A\left|\frac{\sin(M\theta_k/2)}{\sin(\theta_k/2)}\right|.
+\]
+\end{proposition}
+
+\begin{proof}
+把 $f$ 代入求和：$\hat f(k)=Ae^{i\phi}\sum_{n=0}^{M-1}e^{i\theta_k n}$，再用等比级数求和公式 $\sum_{n=0}^{M-1}e^{i\theta n}=e^{i\theta(M-1)/2}\frac{\sin(M\theta/2)}{\sin(\theta/2)}$ 即得。
+\end{proof}
+
+\begin{theorem}[泄露包络与旁瓣]\label{thm:leakage_envelope_parallel}
+设 $M\omega_0/(2\pi)=\nu+\delta$，其中 $\nu\in\mathbb{Z}$、$\delta\in[-1/2,1/2]$ 为窗内周期数的\textbf{偏移}。则
+\begin{enumerate}[label=(\roman*)]
+    \item 主瓣位于 $\nu$ 处，峰值
+    \[
+    |\hat f(\nu)|=A\left|\frac{\sin(\pi\delta)}{\sin(\pi\delta/M)}\right|\xrightarrow[M\to\infty]{}A\,\frac{|\sin(\pi\delta)|}{\pi|\delta|}\cdot M;
+    \]
+    \item 对 $j\ne0$ 有 $\theta_{\nu+j}=\frac{2\pi}{M}(\delta-j)$，故
+    \[
+    \frac{|\hat f(\nu+j)|}{|\hat f(\nu)|}
+    =\frac{\big|\sin\big(\tfrac{\pi\delta}{M}\big)\big|}{\big|\sin\big(\tfrac{\pi(j-\delta)}{M}\big)\big|}
+    \xrightarrow[M\to\infty]{}\frac{|\delta|}{|j-\delta|}=O\!\Big(\frac{1}{|j|}\Big),
+    \]
+    即\textbf{旁瓣包络随与主频点的距离倒易衰减}；矩形窗第一旁瓣约 $-13.3$ dB，并按 $|\omega|^{-1}$ 衰减；
+    \item 若 $\delta=0$（窗内恰含整数个周期），则 $\hat f(k)=A M e^{i\phi}\delta_{k,\nu\bmod M}$，\textbf{泄露为零}；
+    \item 若 $\delta\ne0$，则所有频点均含非零能量，且主瓣外能量占比
+    \[
+    \eta(\delta)=1-\operatorname{sinc}^2(\delta)+O(M^{-1}),
+    \qquad \operatorname{sinc}(u):=\frac{\sin(\pi u)}{\pi u},
+    \]
+    特别地 $\eta(1/2)=1-4/\pi^2\approx0.595$，即最坏情形下约 $60\%$ 的能量泄露到主瓣之外。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 取 $k=\nu$ 代入命题 \ref{prop:single_tone_leakage_parallel}，注意 $\theta_\nu=2\pi\delta/M$，得 $|\hat f(\nu)|=A\big|\frac{\sin(\pi\delta)}{\sin(\pi\delta/M)}\big|$，而 $\sin(\pi\delta/M)\sim\pi\delta/M$，故当 $\delta\ne0$ 时随 $M$ 线性增长（主瓣峰值为 $O(M)$）。
+
+(ii) 对 $k=\nu+j$（$j\ne0$）有 $\theta_k=\frac{2\pi}{M}(\delta-j)$，代入命题 \ref{prop:single_tone_leakage_parallel} 得 $|\hat f(\nu+j)|=A\frac{|\sin(\pi(\delta-j))|}{|\sin(\pi(\delta-j)/M)|}=A\frac{|\sin(\pi\delta)|}{|\sin(\pi(j-\delta)/M)|}$，与 $|\hat f(\nu)|\approx AM|\sin(\pi\delta)|$ 相比即得所示比值。矩形窗第一旁瓣的精确离散值与连续包络极值略有差异，但数量级为 $-13.3$ dB。
+
+(iii) $\delta=0$ 时 $\theta_k=2\pi(\nu-k)/M$，当 $k\ne\nu\bmod M$ 时分子 $\sin(\pi(\nu-k))=0$，故仅 $k=\nu\bmod M$ 非零，值为 $AMe^{i\phi}$。
+
+(iv) 由离散帕塞瓦尔恒等式（定理 \ref{thm:discrete_parseval_parallel}），
+$\sum_{k=0}^{M-1}|\hat f(k)|^2=M\sum_{n=0}^{M-1}|f(n)|^2=M\cdot MA^2=M^2A^2$。主瓣能量 $|\hat f(\nu)|^2=A^2M^2\operatorname{sinc}^2(\delta)+O(M)$，故 $\eta=1-\operatorname{sinc}^2(\delta)+O(M^{-1})$；$|\delta|=1/2$ 时 $\operatorname{sinc}(1/2)=2/\pi$，得 $\eta=1-4/\pi^2\approx0.595$。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+\draw[->] (-0.3,0) -- (8.5,0) node[right] {频点 $k$};
+\draw[->] (0,-0.3) -- (0,2.8) node[above] {$|\hat f(k)|$};
+% 主瓣附近
+\foreach \k in {0,1,...,16} {
+  \pgfmathsetmacro{\x}{\k*0.5}
+  \pgfmathsetmacro{\y}{abs(sin(deg(3.14159*(0.3+0.05*\k))))/(3.14159*abs(0.3+0.05*\k)+0.0001)}
+  \pgfmathsetmacro{\yn}{\y>2.6?2.6:\y}
+  \fill[blue] (\x,\yn) circle (2pt);
+}
+% 突出主瓣外能量
+\draw[red, thick, dashed] (1.5,0) -- (1.5,2.6);
+\node[red, above, font=\footnotesize] at (1.5,2.6) {主瓣};
+\draw[<-, orange, thick] (4.0,0.9) -- (5.0,1.8);
+\node[orange, right, font=\footnotesize] at (5.05,1.85) {旁瓣（泄露能量）};
+\node[align=center, font=\small] at (4.2,-1.4) {偏移 $\delta=0.3$ 时的泄露分布：$\eta=1-\operatorname{sinc}^2(0.3)\approx0.088$};
+\end{tikzpicture}
+\caption{频谱泄露的能量分布：主瓣集中于真频点附近，旁瓣把泄露能量散布到所有频点。偏移 $\delta$ 越大，泄露越强。}
+\label{fig:spectral_leakage}
+\end{figure}
+
+\begin{definition}[主瓣与旁瓣]\label{def:mainlobe_sidelobe_parallel}
+设窗核 $|W_T(\omega)|$ 在 $\omega>0$ 上的零点依次为 $\omega_1<\omega_2<\cdots$。称 $[-\omega_1,\omega_1]$ 上的包络为\textbf{主瓣}，其\textbf{主瓣宽度}为 $2\omega_1$；称每个区间 $(\omega_j,\omega_{j+1})$ 上的包络为一个\textbf{旁瓣}，其最大值称为\textbf{旁瓣峰值}，各旁瓣峰值随 $j$ 的整体衰减速率称为\textbf{旁瓣衰减率}。对矩形窗，$\omega_j=2\pi j/T$，主瓣宽度 $4\pi/T$，第一旁瓣峰值约 $-13.3$ dB，旁瓣包络按 $|\omega|^{-1}$ 衰减。
+\end{definition}
+
+\begin{corollary}[整数窗口无泄露]\label{cor:integer_window_no_leakage}
+设 $f(n)=Ae^{i(\omega_0 n+\phi)}$，$\omega_0=2\pi m/T$（$m\in\mathbb{Z}$），则长度 $T$ 的矩形窗 DFT 满足 $\hat f(k)=ATe^{i\phi}\delta_{k,m\bmod T}$：\textbf{当窗内恰好包含整数个周期时，离散谱只有一根谱线，泄露为零}。
+\end{corollary}
+
+\begin{corollary}[非整数窗口必有泄露]\label{cor:noninteger_window_leakage}
+设 $\omega_0\notin\frac{2\pi}{T}\mathbb{Z}$，则 $\hat f(k)\ne0$ 对所有 $k=0,\dots,T-1$ 成立，且泄露能量占比由定理 \ref{thm:leakage_envelope_parallel}(iv) 给出。
+\end{corollary}
+
+\begin{proposition}[泄露的相位刻画]\label{prop:leakage_phase_characterisation}
+在命题 \ref{prop:single_tone_leakage_parallel} 的记号下，在非零点处，相邻频点的幅度比
+\[
+\frac{|\hat f(k+1)|}{|\hat f(k)|}=\left|\frac{\sin\big(\tfrac{\pi}{M}(k+1-\nu-\delta)\big)}{\sin\big(\tfrac{\pi}{M}(k-\nu-\delta)\big)}\right|
+\]
+只依赖 $k-\nu$ 与偏移 $\delta$；而相位差
+\[
+\arg\frac{\hat f(k+1)}{\hat f(k)}=-\frac{\pi(M-1)}{M}+\varepsilon_k,\qquad
+\varepsilon_k\in\{0,\pi\},
+\]
+与 $k$ 无关，其中 $\varepsilon_k=\pi$ 当且仅当两频点分居主瓣峰值两侧（即该对频点跨越 $\nu+\delta$）。因此：\textbf{相位差的取值模式定位主瓣，幅度比反解偏移}——这正是\textbf{双谱线插值}与\textbf{相位差频率估计}的原理。
+\end{proposition}
+
+\begin{proof}
+由命题 \ref{prop:single_tone_leakage_parallel} 的封闭形式，
+$\hat f(k)=Ae^{i\phi}e^{i\theta_k(M-1)/2}\frac{\sin(M\theta_k/2)}{\sin(\theta_k/2)}$。幅度即得第一式。相位由线性项 $\theta_k(M-1)/2$ 与正弦因子的符号组成：$\theta_{k+1}-\theta_k=-2\pi/M$ 给出相邻相位差 $-\pi(M-1)/M$，而 $\sin(M\theta_k/2)=\sin(\pi(k-\nu-\delta))$ 在相邻频点处符号相反当且仅当两频点位于零点 $\nu+\delta$ 的两侧，贡献附加相位 $\pi$；其余情形符号相同。故相位差的取值只有两种可能，与 $k$ 无关，且翻转位置直接给出主瓣的连续位置 $\nu+\delta$。
+\end{proof}
+
+\begin{proposition}[泄露的同余角刻画]\label{prop:leakage_congruence_angle}
+设 $f(n)=Ae^{i\omega_0 n}$，$\omega_0=2\pi\rho$，窗口长度 $M$。则单周期泄露占比可写成
+\[
+\eta(M)=1-\operatorname{sinc}^2\!\big(\|M\rho\|_{\mathbb{Z}}\big)+O(M^{-1}),
+\]
+其中 $\|M\rho\|_{\mathbb{Z}}$ 是窗内周期数的偏移。若引入子周期 $T$，则 $T\mid M\rho$ 时该子周期上的同余角不闭合量 $\delta_T=0$，泄露在该子周期意义下闭合。
+\end{proposition}
+
+\begin{proof}
+由定理 \ref{thm:leakage_envelope_parallel}(iv) 即得；子周期断言由定义 \ref{def:congruence_angle_misclosure} 与 $T\mid M\rho$ 直接得到。
+\end{proof}
+
+\begin{example}[泄露的数值量级]\label{ex:rectangular_leakage_numeric}
+取 $f(n)=e^{i2\pi(0.25+0.5/M)n}$（即 $\delta=1/2$，主瓣恰落在两个频点之间），$M=16$。由定理 \ref{thm:leakage_envelope_parallel}(iv)，泄露占比 $\eta\approx0.595$，即约 $60\%$ 的能量分布在主瓣之外；主瓣两峰各占约 $20\%$，其余旁瓣合计约 $19\%$。若把窗长改为 $M=20$ 且取 $\omega_0=2\pi\cdot7/20$（$\delta=0$），则全部能量集中于单根谱线，$\eta=0$。
+\end{example}
+
+\begin{remark}[泄露的必然性与可控性]\label{rem:leakage_inevitability}
+由推论 \ref{cor:noninteger_window_leakage}，只要窗内周期数非整数，泄露就必然发生——这是“有限观测”的代价，与采样率无关（后者决定混叠）。但定理 \ref{thm:leakage_envelope_parallel}(iv) 表明泄露强度\textbf{只依赖偏移} $\delta=\|M\rho\|_{\mathbb{Z}}$：只要把 $\delta$ 压小，泄露就小。这就把泄露控制问题转化为一个纯数论问题——\textbf{用整数窗长最优化逼近实数周期比}，而这正是置闰（第 \ref{sec:commensurability_intercalation} 节）。
+\end{remark}
+
+\section{混叠：采样率的代价}\label{sec:aliasing}
+
+上一节说明泄露由\textbf{采样时长}决定。本节说明另一类误差——\textbf{混叠}——由\textbf{采样率}决定；二者独立，需要分别处理。
+
+\begin{definition}[混叠]\label{def:aliasing_parallel}
+设角采样率 $\omega_s=2\pi/\Delta x$。称两个角频率 $\omega,\omega'\in\mathbb{R}$ \textbf{混叠}，若
+\[
+\omega'\equiv\omega\pmod{\omega_s},
+\qquad\text{即}\qquad
+\omega'=\omega+m\omega_s,\quad m\in\mathbb{Z}.
+\]
+函数 $e^{i\omega t}$ 与 $e^{i\omega' t}$ 在采样格 $\Lambda_{\Delta x}$ 上取值完全相同，故二者在采样后\textbf{不可区分}；这一现象称为\textbf{混叠}（频率折叠）。
+\end{definition}
+
+\begin{proposition}[折叠映射]\label{prop:aliasing_frequency_map_parallel}
+定义折叠映射
+\[
+\mathcal{A}_{\omega_s}:\mathbb{R}\to\Big(-\frac{\omega_s}{2},\frac{\omega_s}{2}\Big],\qquad
+\mathcal{A}_{\omega_s}(\omega):=\omega-m\,\omega_s,
+\quad m:=\Big\lfloor\frac{\omega}{\omega_s}+\frac12\Big\rfloor .
+\]
+则
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathcal{A}_{\omega_s}(\omega)$ 与 $\omega$ 混叠，且 $|\omega-\mathcal{A}_{\omega_s}(\omega)|\le\omega_s/2$；
+    \item $\mathcal{A}_{\omega_s}$ 是满射而非单射，每个原像类恰为 $\{\omega+m\omega_s\}_{m\in\mathbb{Z}}$；
+    \item $\mathcal{A}_{\omega_s}$ 在每个奈奎斯特带 $\big(\tfrac{2k-1}{2}\omega_s,\tfrac{2k+1}{2}\omega_s\big]$ 上是平移，且在第 $k$ 带上为反射复合平移（$k$ 奇偶交替）。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由定义 $\omega-\mathcal{A}(\omega)=m\omega_s\in\omega_s\mathbb{Z}$ 故混叠；又 $m$ 为最近整数，故 $|m-\omega/\omega_s|\le1/2$，即 $|\omega-\mathcal{A}(\omega)|\le\omega_s/2$。(ii) 对任意 $\eta\in(-\omega_s/2,\omega_s/2]$，$\eta=\mathcal{A}(\eta)$，故满射；若 $\mathcal{A}(\omega)=\mathcal{A}(\omega')$ 则 $\omega-\omega'\in\omega_s\mathbb{Z}$，故每个原像类为等差列。(iii) 在带内 $m$ 为常数，故 $\mathcal{A}(\omega)=\omega-k\omega_s$，为平移；带边界处 $m$ 跳变一次，因而相邻两带的像方向相反。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.9]
+\draw[->] (-4.5,0) -- (4.5,0) node[right] {$\omega$};
+\draw[->] (0,-2.5) -- (0,1.5) node[above] {$\mathcal{A}(\omega)$};
+% 奈奎斯特带
+\draw[dashed, gray] (-3.14,0) -- (-3.14,-2.4);
+\draw[dashed, gray] (-1.57,0) -- (-1.57,-2.4);
+\draw[dashed, gray] (1.57,0) -- (1.57,-2.4);
+\draw[dashed, gray] (3.14,0) -- (3.14,-2.4);
+\node[font=\footnotesize] at (-3.14,-2.55) {$-2\pi$};
+\node[font=\footnotesize] at (-1.57,-2.55) {$-\pi$};
+\node[font=\footnotesize] at (0,-2.55) {$0$};
+\node[font=\footnotesize] at (1.57,-2.55) {$\pi$};
+\node[font=\footnotesize] at (3.14,-2.55) {$2\pi$};
+% 折叠曲线
+\draw[blue, very thick] (-4.5,0) -- (-3.14,0) -- (-3.14,-1.57) -- (-1.57,-1.57) -- (-1.57,0) -- (0,0) -- (0,0) -- (1.57,0) -- (1.57,-1.57) -- (3.14,-1.57) -- (3.14,0) -- (4.5,0);
+\node[align=center, font=\small] at (0,-3.6) {折叠映射 $\mathcal{A}_{\omega_s}(\omega)$：所有奈奎斯特带被折到 $(-\pi,\pi]$};
+\end{tikzpicture}
+\caption{混叠的折叠映射：频率轴上的每个奈奎斯特带（宽度 $\omega_s=2\pi$）被折叠到基本区间 $(-\pi,\pi]$。所有混叠频率在该区间内不可区分。}
+\label{fig:aliasing_folding}
+\end{figure}
+
+\begin{theorem}[奈奎斯特--香农采样定理]\label{thm:nyquist_shannon_parallel}
+设 $x\in L^2(\mathbb{R})$ 连续，其傅里叶变换 $\hat x$ 满足支撑条件
+\[
+\operatorname{supp}\hat x\subset(-\omega_N,\omega_N),\qquad \omega_N=\frac{\pi}{\Delta x},
+\]
+则 $x$ 由其样本 $\{x(n\Delta x)\}_{n\in\mathbb{Z}}$ 唯一重构：
+\[
+x(t)=\sum_{n\in\mathbb{Z}}x(n\Delta x)\,\operatorname{sinc}\!\Big(\frac{t-n\Delta x}{\Delta x}\Big),
+\qquad
+\operatorname{sinc}(u):=\frac{\sin(\pi u)}{\pi u},
+\]
+且级数在 $L^2$ 与一致范数下收敛。
+\end{theorem}
+
+\begin{proof}
+由带限条件，频率周期化
+\[
+P(\omega):=\frac{1}{\Delta x}\sum_{m\in\mathbb{Z}}\hat x\Big(\omega+\frac{2\pi m}{\Delta x}\Big)
+\]
+的各项支撑互不重叠，故 $P$ 在 $(-\omega_N,\omega_N)$ 上与 $\hat x/\Delta x$ 一致。另一方面，$P$ 是采样序列 $\{x(n\Delta x)\}$ 的离散时间傅里叶变换（周期 $2\pi/\Delta x$）。把 $P$ 限制在 $(-\omega_N,\omega_N)$ 并在其余处取零，乘矩形窗 $W$（其反变换为 $\operatorname{sinc}(t/\Delta x)/\Delta x$），即得重构公式；级数收敛性由 $x\in L^2$ 与 $\operatorname{sinc}$ 的正交性得到。
+\end{proof}
+
+\begin{lemma}[采样定理的 Poisson 求和证明]\label{lem:poisson_summation_sampling}
+采样序列的频谱可用 Poisson 求和公式表示为
+\[
+\sum_{n\in\mathbb{Z}}x(n\Delta x)e^{-i\omega n\Delta x}
+=\frac{1}{\Delta x}\sum_{m\in\mathbb{Z}}\hat x(\omega+2\pi m/\Delta x).
+\]
+\end{lemma}
+
+\begin{proof}
+由傅里叶反变换 $x(n\Delta x)=\frac{1}{2\pi}\int\hat x(\omega')e^{in\Delta x\omega'}d\omega'$，代入左端得
+\[
+\sum_n x(n\Delta x)e^{-i\omega n\Delta x}=\frac{1}{2\pi}\sum_n\int\hat x(\omega')e^{in\Delta x(\omega'-\omega)}d\omega'.
+\]
+利用 Poisson 求和公式 $\sum_ne^{in\Delta x\theta}=\frac{2\pi}{\Delta x}\sum_m\delta(\theta-2\pi m/\Delta x)$，交换求和与积分即得。
+\end{proof}
+
+\begin{corollary}[混叠的不可逆性]\label{cor:aliasing_irreversibility_parallel}
+设 $\omega\ne\omega'$ 且 $\omega'\equiv\omega\pmod{\omega_s}$。则 $\mathcal{S}_{\Delta x}e^{i\omega\cdot}=\mathcal{S}_{\Delta x}e^{i\omega'\cdot}$，故不存在仅依赖样本的算法能区分二者；采样算子在每个混叠类上不可逆。抗混叠只能在其之前完成，即\textbf{在采样前作模拟低通滤波}。
+\end{corollary}
+
+\begin{definition}[抗混叠滤波器]\label{def:anti_aliasing_filter}
+设信号 $x$ 的频谱支撑超出奈奎斯特频率。\textbf{抗混叠滤波器}是一个截止频率为 $\omega_N$ 的低通滤波器 $h$：采样前先作卷积 $x_{\text{filt}}=h*x$，再以 $\Delta x$ 采样。滤波后的信号满足带限条件，从而采样定理适用。
+\end{definition}
+
+\begin{property}[抗混叠滤波器的理想特性]\label{prop:anti_aliasing_ideal}
+理想抗混叠滤波器在频域上等于矩形窗
+\[
+\hat h(\omega)=\mathbf{1}_{(-\omega_N,\omega_N)}(\omega).
+\]
+此时滤波后的信号在带内无失真，带外完全滤除，从而采样定理成立且混叠严格为零。
+\end{property}
+
+\begin{proof}
+由卷积定理 $\widehat{x_{\text{filt}}}=\hat h\hat x$，故 $\operatorname{supp}\widehat{x_{\text{filt}}}\subseteq(-\omega_N,\omega_N)$，满足采样定理的带限条件。带内 $\hat h=1$ 保证信号不变。
+\end{proof}
+
+\begin{remark}[混叠与泄露的区别]\label{rem:aliasing_vs_leakage}
+混叠与泄露是两个独立的误差源，容易混淆，须严格区分：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{来源}：混叠来自\textbf{离散化}（采样率有限，$\Delta x>0$）；泄露来自\textbf{截断}（采样时长有限，$T<\infty$）。
+    \item \textbf{数学机制}：混叠是频率的\textbf{模 $\omega_s$ 折叠}（命题 \ref{prop:aliasing_frequency_map_parallel}）；泄露是真谱与窗核的\textbf{卷积外溢}（定理 \ref{thm:leakage_envelope_parallel}）。
+    \item \textbf{控制手段}：混叠靠提高 $\nu_s$ 或前置抗混叠滤波器；泄露靠延长 $T$ 或\textbf{置闰}（第 \ref{sec:commensurability_intercalation} 节）。
+    \item \textbf{可逆性}：混叠不可逆（推论 \ref{cor:aliasing_irreversibility_parallel}）；泄露可逆——只要偏移 $\delta=0$，泄露完全消失（推论 \ref{cor:integer_window_no_leakage}）。
+\end{enumerate}
+\end{remark}
+
+\begin{example}[混叠的数值例子]\label{ex:aliasing_numeric}
+取 $\Delta x=1$ s（$\omega_s=2\pi$ rad/s）。信号 $x_1(t)=\cos(2\pi\cdot0.9\,t)$ 与 $x_2(t)=\cos(2\pi\cdot0.1\,t)$ 的样本完全相同：
+\[
+\cos(2\pi\cdot0.9\,n)=\cos(2\pi\cdot0.1\,n),\qquad n\in\mathbb{Z},
+\]
+因为 $0.9\equiv-0.1\pmod1$ 而余弦为偶函数。两者在频谱上分别位于 $0.9$ 与 $0.1$ 周期/秒，采样后都落在 $\pm0.1$ 周期/秒处。若只观测样本，无法判断真实频率是 $0.9$ 还是 $0.1$——这正是混叠的实践含义。
+\end{example}
+
+\section{上限逼近与下限逼近}\label{sec:bounded_approximation}
+
+由定理 \ref{thm:leakage_envelope_parallel}(iv)，泄露强度只依赖偏移 $\delta=\|M\rho\|_{\mathbb{Z}}$。于是泄露控制等价于：\textbf{用整数窗长 $M$ 逼近实数周期比 $\rho$}。本节建立这一逼近的两个基本工具——上限逼近与下限逼近——并给出连分数最优性。
+
+\begin{definition}[上限逼近与下限逼近]\label{def:bounded_approximation_parallel}
+设 $\rho>0$，$M\in\mathbb{N}^+$。定义
+\[
+\begin{aligned}
+\rho^{(-)}_M&:=\frac{\lfloor M\rho\rfloor}{M}\quad(\text{下限逼近}),\\
+\rho^{(+)}_M&:=\frac{\lceil M\rho\rceil}{M}\quad(\text{上限逼近}),\\
+\rho^{(\pm)}_M&:=\frac{\lfloor M\rho+\tfrac12\rfloor}{M}\quad(\text{平衡逼近}),
+\end{aligned}
+\]
+并称 $\delta_M:=\|M\rho\|_{\mathbb{Z}}:=\min_{m\in\mathbb{Z}}|M\rho-m|$ 为窗口 $M$ 的\textbf{偏移}。
+\end{definition}
+
+\begin{proposition}[取整不等式]\label{prop:bounds_integrality}
+对任意 $\rho>0$，$M\in\mathbb{N}^+$，
+\[
+0\le M\rho-\lfloor M\rho\rfloor<1,\qquad 0\le\lceil M\rho\rceil-M\rho<1,\qquad
+\lceil M\rho\rceil-\lfloor M\rho\rfloor\in\{0,1\},
+\]
+且 $\delta_M=\min\{M\rho-\lfloor M\rho\rfloor,\ \lceil M\rho\rceil-M\rho\}\le1/2$。
+\end{proposition}
+
+\begin{proof}
+由取整定义 $M\rho-1<\lfloor M\rho\rfloor\le M\rho\le\lceil M\rho\rceil<M\rho+1$ 即得前两式；第三式由两者之差小于 $2$ 且为整数得到。偏移表达式由 $\delta_M$ 是 $M\rho$ 到最近整数之距得到，故 $\le1/2$。
+\end{proof}
+
+\begin{proposition}[上下限逼近的同余角表述]\label{prop:bounded_approx_congruence}
+上限逼近 $\rho^{(+)}_M$ 对应同余角正误差，下限逼近 $\rho^{(-)}_M$ 对应同余角负误差：
+\[
+\rho^{(+)}_M-\rho=\frac{\delta_M^+}{M},\qquad
+\rho-\rho^{(-)}_M=\frac{\delta_M^-}{M},
+\]
+其中 $\delta_M^\pm\ge0$ 且 $\delta_M^++\delta_M^-=\delta_M$。平衡逼近 $\rho^{(\pm)}_M$ 使二者相等。
+\end{proposition}
+
+\begin{proof}
+由定义 \ref{def:bounded_approximation_parallel} 与命题 \ref{prop:bounds_integrality} 即得。
+\end{proof}
+
+\begin{theorem}[逼近误差的上下界]\label{thm:intercalation_error_bound_parallel}
+设 $\rho>0$，$M\in\mathbb{N}^+$。则
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{夹逼}：$\rho^{(-)}_M\le\rho\le\rho^{(+)}_M$，且上、下限逼近的误差分别为
+    \[
+    \rho-\rho^{(-)}_M=\frac{M\rho-\lfloor M\rho\rfloor}{M}<\frac1M,
+    \qquad
+    \rho^{(+)}_M-\rho=\frac{\lceil M\rho\rceil-M\rho}{M}<\frac1M;
+    \]
+    \item \textbf{平衡最优性}：$|\rho-\rho^{(\pm)}_M|=\delta_M/M\le\dfrac{1}{2M}$，且对固定的 $M$ 这是所有“整数分子 $/$ 分母 $M$”逼近中误差最小者；
+    \item \textbf{置闰表述}：设 $E_M\subseteq\{1,\dots,M\}$ 是按平衡方案选取的置闰位置集合（即第 $n$ 位置闰当且仅当 $\lfloor(n+1)\rho\rfloor-\lfloor n\rho\rfloor=1$），则
+    \[
+    \big||E_M|-M\rho\big|<1,
+    \]
+    即置闰次数与理想值 $M\rho$ 之差小于一个单元。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 由 $\lfloor M\rho\rfloor\le M\rho\le\lceil M\rho\rceil$ 除以 $M$ 即得夹逼；误差式由命题 \ref{prop:bounds_integrality} 的小于 $1$ 的余量给出。
+
+(ii) $\rho^{(\pm)}_M=\frac{\lfloor M\rho+1/2\rfloor}{M}$ 的分子是 $M\rho$ 的最近整数，故 $|\rho-\rho^{(\pm)}_M|=\delta_M/M$；对任意整数 $p$，$|\rho-p/M|=|M\rho-p|/M\ge\delta_M/M$，故最小性成立。
+
+(iii) 记 $N_M:=|E_M|$。由平衡序列的定义逐步求和得
+\[
+N_M=\sum_{n=1}^{M}\big(\lfloor(n+1)\rho\rfloor-\lfloor n\rho\rfloor\big)=\lfloor(M+1)\rho\rfloor-\lfloor\rho\rfloor,
+\]
+另一方面 $\lfloor(M+1)\rho\rfloor-\lfloor\rho\rfloor=M\rho+\{(M+1)\rho\}-\{\rho\}$（$\{\cdot\}$ 为小数部分），由 $0\le\{(M+1)\rho\}<1$ 与 $0\le\{\rho\}<1$ 得 $\{(M+1)\rho\}-\{\rho\}<1$，且该差大于 $-1$，故 $|N_M-M\rho|<1$。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.9]
+\draw[->] (-0.3,0) -- (7.5,0) node[right] {$M$};
+\draw[->] (0,-0.3) -- (0,2.6) node[above] {$\rho^{(\cdot)}_M$};
+\draw[dashed, red, thick] (0,1.5) -- (7.2,1.5);
+\node[red, above, font=\footnotesize] at (7.2,1.5) {$\rho$};
+% 上限逼近
+\foreach \M in {1,2,...,7} {
+  \pgfmathsetmacro{\x}{\M*0.9}
+  \pgfmathsetmacro{\yup}{ceil(1.5*\M)/\M}
+  \pgfmathsetmacro{\ydn}{floor(1.5*\M)/\M}
+  \fill[blue] (\x,\yup) circle (2pt);
+  \fill[green!60!black] (\x,\ydn) circle (2pt);
+}
+\node[blue, above, font=\footnotesize] at (3.2,2.1) {上限逼近 $\rho^{(+)}_M$};
+\node[green!60!black, below, font=\footnotesize] at (3.2,0.3) {下限逼近 $\rho^{(-)}_M$};
+\node[align=center, font=\small] at (3.7,-1.0) {上限/下限逼近从两侧夹逼 $\rho$，收敛速度 $O(1/M)$};
+\end{tikzpicture}
+\caption{上限逼近与下限逼近：蓝点从上方、绿点从下方夹逼真值 $\rho$（红线），误差均为 $O(1/M)$。平衡逼近取两者中点，误差 $O(1/(2M))$。}
+\label{fig:bounded_approximation}
+\end{figure}
+
+\begin{proposition}[夹逼的收敛性]\label{prop:sandwich_convergence_parallel}
+对任意 $\rho>0$，序列 $\rho^{(-)}_M$ 单调不减，$\rho^{(+)}_M$ 单调不增，二者均收敛于 $\rho$，且收敛速率为 $O(1/M)$：
+\[
+0\le\rho-\rho^{(-)}_M<1/M,\qquad 0\le\rho^{(+)}_M-\rho<1/M,\qquad
+\rho^{(-)}_M\le\rho^{(\pm)}_M\le\rho^{(+)}_M .
+\]
+\end{proposition}
+
+\begin{proof}
+单调性由窗口嵌套给出：对 $M<M'$，$\lfloor M\rho\rfloor/M\le\lfloor M'\rho\rfloor/M'$（交叉相乘即得）。收敛性由定理 \ref{thm:intercalation_error_bound_parallel}(i) 的界直接得到，夹逼不等式由三者同阶即得。
+\end{proof}
+
+\begin{proposition}[误差与分母的标度]\label{prop:error_denominator_scaling_parallel}
+设 $\rho\notin\mathbb{Q}$。
+\begin{enumerate}[label=(\roman*)]
+    \item 对一般窗口 $M$，偏移满足 $\delta_M\le1/2$，故逼近误差为 $O(1/M)$；
+    \item 若取 $M=q_k$（$\rho$ 的连分数分母），则 $\delta_{q_k}<1/q_{k+1}$，故逼近误差为 $O(1/M^2)$，比一般窗口\textbf{提高一个数量级}；
+    \item 对任何窗口序列 $M_j\to\infty$，不能保证 $\delta_{M_j}\to0$；只有按连分数分母取的子序列才保证 $\delta_{q_k}\to0$ 且平方级收敛。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由命题 \ref{prop:bounds_integrality}。(ii) 由定理 \ref{thm:continued_fraction_best_approx_parallel}(ii) 的 $\delta_{q_k}=|q_k\rho-p_k|<1/q_{k+1}$，而 $q_{k+1}>q_k$，故 $\delta_{q_k}/q_k<1/(q_kq_{k+1})=O(q_k^{-2})$。(iii) 取 $M_j$ 使 $\{M_j\rho\}$ 有正的下极限，则 $\delta_{M_j}$ 不趋于零。
+\end{proof}
+
+\begin{theorem}[连分数最佳逼近]\label{thm:continued_fraction_best_approx_parallel}
+设 $\rho\notin\mathbb{Q}$ 的连分数展开为
+\[
+\rho=[a_0;a_1,a_2,\dots],\qquad a_0\in\mathbb{Z},\ a_j\in\mathbb{N}^+\ (j\ge1),
+\]
+其收敛子记为 $p_k/q_k$（$p_k,q_k$ 互素，$q_k\to\infty$）。则
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{误差上界}：$\Big|\rho-\dfrac{p_k}{q_k}\Big|<\dfrac{1}{q_kq_{k+1}}<\dfrac{1}{q_k^2}$；
+    \item \textbf{最佳逼近性}：若 $0<q<q_{k+1}$ 且 $p\in\mathbb{Z}$，则 $|q\rho-p|\ge|q_k\rho-p_k|$；即任何分母小于 $q_{k+1}$ 的有理数都不可能比 $p_k/q_k$ 更接近 $\rho$；
+    \item \textbf{偏移等价}：$\delta_{q_k}=|q_k\rho-p_k|$ 严格递减，且 $\dfrac{1}{q_k+q_{k+1}}<\delta_{q_k}<\dfrac{1}{q_{k+1}}$。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 由连分数的经典恒等式
+\[
+\rho-\frac{p_k}{q_k}=\frac{(-1)^k}{q_k\,(q_{k+1}+q_k\beta_{k+1})},\qquad \beta_{k+1}=[a_{k+1};a_{k+2},\dots]>0
+\]
+立得 $|\rho-p_k/q_k|<1/(q_kq_{k+1})$，又 $q_{k+1}>q_k$ 得第二式。
+
+(ii) 由 Legendre 定理：任何满足 $|\rho-p/q|<1/(2q^2)$ 的有理数必为收敛子；结合 $q_{k+1}\le2q_k$ 即得结论。
+
+(iii) 由 (i) 与 $\beta_{k+1}\ge a_{k+1}\ge1$ 得下界 $\delta_{q_k}>\frac{1}{q_k+q_{k+1}}$；递减性由 $\rho$ 位于 $p_k/q_k$ 与 $p_{k+1}/q_{k+1}$ 之间且两误差符号交替得到。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+\draw[->] (-0.3,0) -- (8.5,0) node[right] {$k$};
+\draw[->] (0,-0.3) -- (0,3.0) node[above] {$\log_{10}\delta_{q_k}$};
+% 数据点（示意）
+\foreach \k/\d in {1/0.4, 2/0.1, 3/0.05, 4/0.01, 5/0.003, 6/0.001, 7/0.0003} {
+  \pgfmathsetmacro{\x}{\k*1.0}
+  \pgfmathsetmacro{\y}{3+log10(\d)/3}
+  \fill[blue] (\x,\y) circle (2.5pt);
+}
+\draw[blue, thick, dashed] (1,2.85) -- (7,0.6);
+\node[blue, above, font=\footnotesize] at (5.5,1.5) {$\delta_{q_k}=O(1/q_{k+1})$};
+\node[align=center, font=\small] at (4.2,-1.2) {连分数收敛子的偏移 $\delta_{q_k}$ 按 $1/q_{k+1}$ 递减，比一般窗口的 $1/M$ 快一个数量级};
+\end{tikzpicture}
+\caption{连分数收敛子的最优逼近：偏移 $\delta_{q_k}$ 随分母 $q_k$ 的增大按 $O(1/q_{k+1})$ 递减，即置闰窗口的泄露按 $O(q_k^{-2})$ 衰减。}
+\label{fig:continued_fraction_convergence}
+\end{figure}
+
+\begin{theorem}[最佳置闰]\label{thm:best_intercalation_parallel}
+设 $\rho>0$ 为周期比（一个周期内的单元数），置闰问题指：在 $M$ 个基本单元内整数值地实现 $\rho$。则
+\begin{enumerate}[label=(\roman*)]
+    \item 存在置闰窗口序列 $\{M_k\}$ 使误差 $|\rho-\rho^{(\pm)}_{M_k}|$ 平方级收敛，即 $O(M_k^{-2})$；
+    \item 最优窗口长度序列恰为连分数分母序列 $\{q_k\}$：在 $q_k$ 个单元内取 $p_k$ 个置闰单元，误差为 $\delta_{q_k}<1/q_{k+1}$，且（当 $\rho\notin\mathbb{Q}$ 时）不存在任何更小的窗口长度达到同样的精度；
+    \item 对每个 $k$，误差符号交替：$p_k/q_k$ 从上下两侧交替逼近 $\rho$，故上限逼近与下限逼近\textbf{交替使用}即可达到最优。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(ii) 的精度由定理 \ref{thm:continued_fraction_best_approx_parallel}(iii) 给出；最优性即 (ii) 的最佳逼近性。(i) 由 (ii) 取 $M_k=q_k$ 得到。(iii) 由连分数收敛子的交替性得到。
+\end{proof}
+
+\begin{corollary}[平衡置闰的最优性]\label{cor:balanced_intercalation_optimal}
+设 $\rho\notin\mathbb{Q}$，$M=q_k$。平衡置闰序列的误差满足
+\[
+\big||E_M|-M\rho\big|\le\delta_{q_k}<\frac1{q_{k+1}},
+\]
+即该窗口上的偏差恰为 $\delta_{q_k}$，且不超过连分数误差界 $1/q_{k+1}$。在所有窗口长度为 $M=q_k$ 的置闰方案中，置闰次数 $|E_M|$ 与 $M\rho$ 的距离都不可能小于 $\delta_{q_k}$，故\textbf{平衡置闰在最短窗口上达到最优精度}。
+\end{corollary}
+
+\begin{example}[19 年 7 闰的定量分析]\label{ex:metonic_parallel}
+取回归年 $T_x=365.2422$ 日、朔望月 $T_{\mathrm{syn}}=29.530588$ 日。以“月”为基本单元、以“年”为周期，则周期比
+\[
+\rho=\frac{T_x}{T_{\mathrm{syn}}}\approx12.368266 .
+\]
+连分数展开为 $[12;2,1,2,1,1,16,\dots]$，收敛子依次为
+\[
+\frac{12}{1},\ \frac{25}{2},\ \frac{37}{3},\ \frac{99}{8},\ \frac{136}{11},\ \frac{235}{19},\ \frac{3896}{315}.
+\]
+取 $q_5=19$、$p_5=235$：$19$ 个回归年含 $235$ 个朔望月，即\textbf{十九年七闰}。其偏移
+\[
+\delta_{19}=|19\rho-235|\approx0.00295<\frac1{q_6}=\frac1{315}\approx0.00317,
+\]
+与定理 \ref{thm:continued_fraction_best_approx_parallel}(iii) 的界吻合。相应地，若把“年”视为采样窗、把“月”视为信号周期，则由定理 \ref{thm:leakage_envelope_parallel}(iv) 泄露占比
+\[
+\eta\le\frac{\pi^2}{3}\delta_{19}^2\approx2.9\times10^{-5},
+\]
+即约\textbf{十万分之三}：置闰把泄露压低了四个数量级（对照 $\delta=1/2$ 时的 $0.595$）。
+\end{example}
+
+\begin{remark}[置闰序列的 Sturmian 结构]\label{rem:intercalation_sturmian}
+平衡置闰序列 $E_M=\{n:\lfloor(n+1)\rho\rfloor-\lfloor n\rho\rfloor=1\}$ 是斜率 $\rho$ 的机械字（Sturmian 字）：它是二元的、非周期的，且任意长度为 $L$ 的因子最多只有两个（三间隙定理），置闰密度恰为 $\{\rho\}$。这一结构说明\textbf{置闰不是周期性地“补一天”，而是按最优逼近律非均匀地分配余量}——这正是它能在 $O(M^{-2})$ 精度上实现公度化的原因。
+\end{remark}
+
+\begin{property}[Sturmian 字的三间隙性]\label{prop:sturmian_three_gap}
+设 $E\subseteq\mathbb{Z}$ 是斜率 $\rho\notin\mathbb{Q}$ 的平衡置闰集合。则相邻闰单元之间的间隙只取两个相邻整数值 $k$ 与 $k+1$，其中 $k=\lfloor 1/\{\rho\}\rfloor$。这一性质称为\textbf{三间隙定理}。
+\end{property}
+
+\begin{proof}
+由平衡置闰序列的机械字定义：闰位置为 $\{\lfloor n/\rho\rfloor\}$ 或等价地由旋转轨道给出。三间隙定理是 Sturmian 字的标准结论，可通过对小数部分 $\{n\rho\}$ 的分布分析得到。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+
+\foreach \n in {0,...,29} {
+  \pgfmathtruncatemacro{\prev}{floor(\n*1.4)}
+  \pgfmathtruncatemacro{\next}{floor((\n+1)*1.4)}
+  \pgfmathtruncatemacro{\isInt}{\next-\prev}
+  \ifnum\isInt=1
+    \fill[red] (\n*0.28,0.5) circle (3pt);
+  \else
+    \fill[blue] (\n*0.28,0) circle (2.5pt);
+  \fi
+}
+\draw[->] (-0.2,-0.4) -- (9,-0.4) node[right] {$n$};
+\node[red, above, font=\footnotesize] at (0.5,0.8) {闰单元};
+\node[blue, below, font=\footnotesize] at (1.5,-0.5) {平单元};
+
+\draw[<->, green!60!black, thick] (0,1.2) -- (1.12,1.2);
+\node[green!60!black, above, font=\footnotesize] at (0.56,1.25) {$k$};
+\draw[<->, orange, thick] (1.12,1.2) -- (1.96,1.2);
+\node[orange, above, font=\footnotesize] at (1.54,1.25) {$k+1$};
+\node[align=center, font=\small] at (4.5,-1.2) {平衡置闰序列的 Sturmian 结构：闰单元之间间隙只取两个相邻整数值（三间隙定理）};
+\end{tikzpicture}
+\caption{平衡置闰序列的 Sturmian 结构：闰单元（红点）之间的间隙只取两个相邻整数值 $k$ 与 $k+1$，这是最优逼近律的直接体现。}
+\label{fig:sturmian_intercalation}
+\end{figure}
+
+\section{窗函数与旁瓣控制}\label{sec:window_functions}
+
+置闰消除泄露的根源（偏移 $\delta$）。与之互补的另一类手段是\textbf{窗函数}：保留偏移但重塑泄露能量的分布，把能量从主瓣“推”向衰减更快的旁瓣。本节建立窗函数的频域理论与旁瓣衰减律。
+
+\begin{definition}[窗函数与加窗]\label{def:window_function}
+设 $M\in\mathbb{N}^+$。序列
+\[
+w:\{0,1,\dots,M-1\}\to\mathbb{R}
+\]
+称为长度 $M$ 的\textbf{窗函数}，若 $w(0)=1$ 且 $w$ 关于中点对称（$w(n)=w(M-1-n)$）。加窗运算为逐点乘法
+\[
+f_w(n):=f(n)\,w(n).
+\]
+常用窗包括：\textbf{矩形窗} $w\equiv1$；\textbf{三角窗}（Bartlett）$w(n)=1-\big|\frac{2n}{M-1}-1\big|$；\textbf{Hann 窗} $w(n)=\frac12\big(1-\cos\frac{2\pi n}{M-1}\big)$；\textbf{Hamming 窗} $w(n)=0.54-0.46\cos\frac{2\pi n}{M-1}$；\textbf{Blackman 窗} $w(n)=0.42-0.5\cos\frac{2\pi n}{M-1}+0.08\cos\frac{4\pi n}{M-1}$。
+\end{definition}
+
+\begin{definition}[Kaiser 窗与平顶窗]\label{def:kaiser_flat_top_window}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Kaiser 窗}由参数 $\beta\ge0$ 控制：
+    \[
+    w(n)=\frac{I_0\big(\beta\sqrt{1-(2n/(M-1)-1)^2}\big)}{I_0(\beta)},
+    \]
+    其中 $I_0$ 是零阶修正贝塞尔函数。$\beta$ 越大，旁瓣越低但主瓣越宽。
+    \item \textbf{平顶窗} $w(n)=a_0-a_1\cos\frac{2\pi n}{M-1}+a_2\cos\frac{4\pi n}{M-1}-a_3\cos\frac{6\pi n}{M-1}+a_4\cos\frac{8\pi n}{M-1}$，其中系数使主瓣顶部平坦，用于精确的幅度估计。
+\end{enumerate}
+\end{definition}
+
+\begin{property}[Kaiser 窗的最优性]\label{prop:kaiser_optimality}
+Kaiser 窗在给定主瓣宽度的约束下，使主瓣外能量占比最小，即它是\textbf{最优化}的窗函数族。这一最优性由离散扁球序列的集中性定理给出。
+\end{property}
+
+\begin{proof}
+Kaiser 窗是离散扁球序列在频域的逼近：它以 $\beta$ 为参数扫描主瓣宽度—旁瓣水平的最优前沿。集中性定理证明离散扁球序列在给定带内能量约束下最大化带内能量占比，Kaiser 窗是其闭式逼近。
+\end{proof}
+
+\subsection{窗函数的时序应用：平滑、加权与截断}\label{sec:window_function_ts_app}
+\begin{definition}[窗函数在时序分析中的三重作用]\label{def:ts_window_function}
+窗函数 $K_\Delta$ 在时序分析中具有三重作用：平滑（卷积平滑）、加权（相似度计算中加权）、截断（限制分析窗口范围）。
+\end{definition}
+
+\begin{proposition}[窗函数的选择原则]\label{prop:ts_window_selection}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{拐点检测}：小窗口高斯核——局部方向变化需要高分辨率。
+    \item \textbf{周期检测}：大窗口柯西核或矩形核——全局周期结构需要长程信息。
+    \item \textbf{转折率计算}：中等窗口墨西哥帽核——平衡噪声抑制和信号保留。
+    \item \textbf{模型验证}：多种核函数综合诊断。
+\end{enumerate}
+\end{proposition}
+\begin{proposition}[加窗谱的卷积表示与基本性质]\label{prop:window_spectrum_properties_parallel}
+设 $f,w$ 以 $M$ 为周期，$\hat f,\hat w$ 为对应 DFT，则
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{卷积表示}：$\widehat{f_w}(k)=\dfrac1M\displaystyle\sum_{j=0}^{M-1}\hat f(j)\,\hat w(k-j)$；
+    \item \textbf{实偶窗}：若 $w$ 实值且对称，则 $\hat w$ 实值且对称，$\hat w(k)=\hat w(-k)=\hat w(M-k)$；
+    \item \textbf{归一化}：$\hat w(0)=\sum_{n}w(n)$，故归一化窗满足 $\hat w(0)=1$；
+    \item \textbf{主瓣加宽律}：窗越光滑，主瓣越宽；矩形窗主瓣宽 $2$ 个频格，Hann 窗为 $4$ 个频格，Blackman 窗为 $6$ 个频格。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由循环卷积定理即得。(ii) $w$ 实值给出 $\hat w(-k)=\overline{\hat w(k)}$，对称性给出 $\hat w(k)=\hat w(-k)$，故 $\hat w$ 实偶。(iii) 代入 $k=0$。(iv) 由定义 \ref{def:window_function} 计算其谱的首次零点位置得到。
+\end{proof}
+
+\begin{theorem}[主瓣宽度与旁瓣峰值的权衡]\label{thm:window_mainlobe_sidelobe_tradeoff_parallel}
+对任何非负窗 $w$，记其时域\emph{有效时长}
+\[
+N_{\mathrm{eff}}:=\frac{\big(\sum_n w(n)\big)^2}{\sum_n w(n)^2},
+\]
+频域\emph{主瓣半宽} $\Omega_{\mathrm{ML}}:=|W_M|$ 的首次零点。则
+\[
+N_{\mathrm{eff}}\cdot\,\Omega_{\mathrm{ML}}\ \ge\ 2\pi,
+\]
+且一般地，主瓣宽度 $\Omega_{\mathrm{ML}}$ 与最大旁瓣电平 $S:=\max_{\omega\notin\text{主瓣}}|W_M(\omega)|$ 满足
+\[
+S\ \ge\ C\cdot\frac{2\pi}{N_{\mathrm{eff}}\,\Omega_{\mathrm{ML}}}
+\]
+（$C>0$ 为绝对常数）。因此\textbf{不存在同时具有最窄主瓣与最低旁瓣的窗}。
+\end{theorem}
+
+\begin{proof}
+第一式为时频不确定性（Gabor 极限）的离散形式，由 Cauchy--Schwarz 不等式与 $W_M$ 在零点的二阶展开联立得到。第二式由能量守恒得到。
+\end{proof}
+
+\begin{theorem}[光滑性与旁瓣衰减律]\label{thm:window_smoothness_decay_parallel}
+设窗 $w$ 可延拓为周期偶函数，且其前 $m$ 阶差分在两端为零（等价地：$W_M$ 在零点有 $m$ 重零点，$m\ge0$）。则窗谱的旁瓣包络满足
+\[
+|W_M(\omega)|\le\frac{C_m}{|\omega|^{m+1}},\qquad |\omega|\to\infty .
+\]
+特别地
+\begin{enumerate}[label=(\roman*)]
+    \item 矩形窗（端点跳变，$m=0$）：旁瓣按 $|\omega|^{-1}$ 衰减，第一旁瓣约 $-13$ dB；
+    \item 三角窗（连续，一阶差分跳变，$m=1$）：旁瓣按 $|\omega|^{-2}$ 衰减，第一旁瓣约 $-27$ dB；
+    \item Hann 窗（$C^1$，一阶导数在两端为零，$m=2$）：旁瓣按 $|\omega|^{-3}$ 衰减，第一旁瓣约 $-31$ dB；
+    \item Blackman 窗（$C^2$，$m=3$）：旁瓣按 $|\omega|^{-3}$ 衰减（系数更小），第一旁瓣约 $-58$ dB。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+把窗作周期延拓并在区间长度 $M$ 上作离散分部积分：
+\[
+W_M(\omega)=\frac{1}{M}\sum_{n}w(n)e^{-in\omega}
+=\frac{1}{M}\cdot\frac{1}{1-e^{-i\omega}}\sum_n\big(w(n)-w(n-1)\big)e^{-in\omega},
+\]
+若窗的 $m$ 阶差分在端点为零，则可重复该过程 $m+1$ 次，每次贡献因子 $(1-e^{-i\omega})^{-1}=O(1/|\omega|)$，故得 $|\omega|^{-(m+1)}$ 的衰减。各窗的 $m$ 值由定义 \ref{def:window_function} 在端点的光滑性直接验证。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.85]
+
+\begin{scope}[xshift=-4cm]
+\draw[->] (-0.3,0) -- (4.5,0) node[right] {$n$};
+\draw[->] (0,-0.3) -- (0,1.5) node[above] {$w(n)$};
+\draw[blue, very thick, domain=0:4, samples=100] plot (\x, {1});
+\draw[red, very thick, domain=0:4, samples=100]
+  plot (\x, {0.5*(1-cos(90*\x))});
+\draw[green!60!black, very thick, domain=0:4, samples=100]
+  plot (\x, {0.42-0.5*cos(90*\x)+0.08*cos(180*\x)});
+\node[font=\footnotesize] at (2,-1.0) {时域};
+\end{scope}
+
+\begin{scope}[xshift=1cm]
+\draw[->] (-3.5,0) -- (3.5,0) node[right] {$\omega$};
+\draw[->] (0,-0.3) -- (0,3.2) node[above] {$|W|$};
+\draw[blue, very thick, domain=-3.3:3.3, samples=200]
+  plot (\x, {abs(sin(pi*\x))/(pi*abs(\x)+0.001)});
+\draw[red, very thick, domain=-3.3:3.3, samples=200]
+  plot (\x, {abs(sin(pi*\x))/(pi*abs(\x)+0.001)/(1+(\x/1.2)^2)});
+\draw[green!60!black, very thick, domain=-3.3:3.3, samples=200]
+  plot (\x, {abs(sin(pi*\x))/(pi*abs(\x)+0.001)/(1+(\x/0.9)^4)});
+\node[font=\footnotesize] at (2,-1.0) {频域};
+\node[blue, font=\footnotesize] at (-2.5,2.5) {矩形};
+\node[red, font=\footnotesize] at (-1.5,1.8) {Hann};
+\node[green!60!black, font=\footnotesize] at (1.5,1.5) {Blackman};
+\end{scope}
+\node[align=center, font=\small] at (0,-2.0) {常用窗函数：时域越光滑，频域旁瓣衰减越快，但主瓣越宽};
+\end{tikzpicture}
+\caption{常用窗函数的时频对比：矩形窗主瓣最窄但旁瓣最高；Hann 与 Blackman 窗通过时域光滑性换取更低的旁瓣。}
+\label{fig:window_comparison}
+\end{figure}
+
+\begin{corollary}[常用窗的对照]\label{cor:optimal_window_table}
+各窗的取舍见表 \ref{tab:window_comparison}。
+\end{corollary}
+
+\begin{table}[htbp]
+    \centering
+    \caption{常用窗函数的主瓣宽度、第一旁瓣与衰减率}
+    \label{tab:window_comparison}
+    \small
+    \renewcommand{\arraystretch}{1.05}
+    \begin{tabular}{>{\raggedright\arraybackslash\hspace{0pt}}p{2.3cm}>
+                    {\centering\arraybackslash\hspace{0pt}}p{1.9cm}>
+                    {\centering\arraybackslash\hspace{0pt}}p{1.9cm}>
+                    {\centering\arraybackslash\hspace{0pt}}p{1.9cm}>
+                    {\raggedright\arraybackslash\hspace{0pt}}p{5.0cm}}
+        \toprule
+        窗 & 主瓣宽度 & 第一旁瓣 & 衰减率 & 适用场合 \\
+        \midrule
+        矩形 & $2$ 格 & $-13$ dB & $|\omega|^{-1}$ & 窗内恰含整数周期（配合置闰）\\
+        三角 & $4$ 格 & $-27$ dB & $|\omega|^{-2}$ & 一般平滑需求 \\
+        Hann & $4$ 格 & $-31$ dB & $|\omega|^{-3}$ & 通用谱估计默认选择 \\
+        Hamming & $4$ 格 & $-43$ dB & $|\omega|^{-1}$ & 需低近旁瓣、远旁瓣要求不高 \\
+        Blackman & $6$ 格 & $-58$ dB & $|\omega|^{-3}$ & 强动态范围（如弱谱线检测）\\
+        Kaiser & 可调 & 可调 & 可调 & 主瓣—旁瓣最优折中 \\
+        平顶 & 宽 & 极低 & $|\omega|^{-2}$ & 精确幅度估计 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{proposition}[多窗平均与方差抑制]\label{prop:multitaper_averaging_parallel}
+设 $w^{(1)},\dots,w^{(K)}$ 为长度 $M$ 的离散扁球序列。以各窗分别作谱估计并平均：
+\[
+\hat S(k):=\frac1K\sum_{i=1}^{K}\Big|\sum_n f(n)w^{(i)}(n)e^{-i2\pi kn/M}\Big|^2 .
+\]
+则 $\hat S(k)$ 的方差约为单窗估计的 $1/K$，而主瓣宽度仅由集中带宽决定，不随 $K$ 增大。故多窗法以“少量主瓣加宽”换取“方差线性下降”。
+\end{proposition}
+
+\begin{proof}
+各窗的谱估计在集中带宽之外近似不相关，故平均后方差按 $1/K$ 衰减；主瓣宽度由 $\omega$ 带集中条件固定，与 $K$ 无关。
+\end{proof}
+
+\begin{example}[同样偏移下窗函数的对比]\label{ex:window_comparison_numeric}
+取 $M=64$、偏移 $\delta=1/2$（最坏情形）。矩形窗：泄露占比约 $0.595$，主瓣宽 $2$ 格；Hann 窗：第一旁瓣下降到 $-31$ dB，主瓣加宽到 $4$ 格；Blackman 窗：第一旁瓣 $-58$ dB，主瓣 $6$ 格。可见窗函数并不减少泄露的总量，而是把泄露能量\textbf{重新分布}到衰减更快的旁瓣上；若同时使用置闰（$\delta\to10^{-3}$），则泄露总量本身被消除，两者效果可以叠加。
+\end{example}
+
+\begin{remark}[窗函数与置闰的互补性]\label{rem:window_and_intercalation_complementarity}
+两种手段作用于泄露的不同环节，构成互补：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{窗函数作用于旁瓣}：它不改变偏移 $\delta$，而是把泄露能量从近旁瓣推向远旁瓣，并按 $|\omega|^{-(m+1)}$ 快速衰减。其代价是主瓣加宽，即\textbf{牺牲分辨率}。
+    \item \textbf{置闰作用于偏移}：它不改变窗的形状（保持矩形窗的最窄主瓣），而是通过调整窗口长度使 $\delta=O(M^{-2})$，从而\textbf{直接消除泄露}。
+    \item \textbf{叠加使用}：先用置闰使 $\delta$ 小到 $10^{-3}$ 量级，再用窗函数压制残余旁瓣，即得到“最窄主瓣 + 可忽略泄露”的逼近。
+\end{enumerate}
+\end{remark}
+
+\section{置闰：离散采样逼近的主动公度化}\label{sec:commensurability_intercalation}
+
+本节回答本章的核心问题：\textbf{置闰为何能抑制频谱泄露？} 答案是：泄露由偏移 $\delta=\|M\rho\|_{\mathbb{Z}}$ 唯一决定（定理 \ref{thm:leakage_envelope_parallel}(iv)），而置闰正是把 $\delta$ 压到最优——它是离散采样逼近中对“窗内周期数”的\textbf{主动公度化}。从周转圆组看，置闰就是调整窗口，使各周转圆在窗口端点的相位尽量闭合。
+
+\begin{definition}[公度性]\label{def:commensurability_parallel}
+设 $\rho>0$。称 $\rho$ 与 $1$ \textbf{公度}，若 $\rho\in\mathbb{Q}$；称 $\rho$ 与 $1$ \textbf{非公度}，若 $\rho\notin\mathbb{Q}$。对采样问题，$\rho=T_x/\Delta x$ 公度意味着存在整数窗长 $M$ 使窗内恰含整数个信号周期（推论 \ref{cor:integer_window_no_leakage}），非公度则意味着不存在这样的窗长。
+\end{definition}
+
+\begin{definition}[置闰序列与置闰窗]\label{def:intercalation_sequence_parallel}
+设周期比 $\rho>0$，窗口长度 $M\in\mathbb{N}^+$。称
+\[
+E_M:=\big\{n\in\{1,2,\dots,M\}:\lfloor(n+1)\rho\rfloor-\lfloor n\rho\rfloor=1\big\}
+\]
+为\textbf{平衡置闰集合}，其元素称为\textbf{闰单元}（置闰位置）；$M-|E_M|$ 个非闰单元称为\textbf{平单元}。对应的\textbf{置闰窗}为
+\[
+w^{\mathrm{int}}_M(n):=\mathbf{1}_{E_M}(n),
+\]
+而\textbf{置闰窗口}指“$M$ 个基本单元中恰含 $|E_M|$ 个闰单元”的观测窗口。置闰计数记作 $N_M:=|E_M|$。
+\end{definition}
+
+\begin{proposition}[置闰窗的整数性]\label{prop:intercalation_window_integrality_parallel}
+沿用定义 \ref{def:intercalation_sequence_parallel}。则
+\[
+N_M=\lfloor M\rho\rfloor\ \text{或}\ \lceil M\rho\rceil,
+\qquad
+\big|N_M-M\rho\big|<1,
+\]
+且置闰后窗口的\textbf{等效周期数} $N_M$ 与理想值 $M\rho$ 的偏差小于一个单元（$N_M$ 取最接近 $M\rho$ 的两个整数之一）。特别地，当 $\rho=p/q$ 为有理数且 $M$ 是 $q$ 的整数倍时，$N_M=M\rho$ 为整数，置闰窗使窗内周期数\textbf{严格成为整数}。
+\end{proposition}
+
+\begin{proof}
+第一式直接计算：由 $N_M=\sum_{n=1}^{M}\big(\lfloor(n+1)\rho\rfloor-\lfloor n\rho\rfloor\big)$ 与 $\sum_{n=1}^{M}\lfloor n\rho\rfloor=\sum_{n=2}^{M+1}\lfloor(n-1)\rho\rfloor$ 得 $N_M=\lfloor(M+1)\rho\rfloor-\lfloor\rho\rfloor$；又 $\lfloor(M+1)\rho\rfloor-\lfloor\rho\rfloor\in\{\lfloor M\rho\rfloor,\lceil M\rho\rceil\}$。偏差式即 $|N_M-M\rho|<1$。当 $\rho=p/q$、$M=kq$ 时 $M\rho=kp\in\mathbb Z$，故 $N_M=kp=M\rho$。
+\end{proof}
+
+\begin{definition}[循环卷积]\label{def:circular_convolution_parallel}
+设 $f,g$ 以 $M$ 为周期。其\textbf{循环卷积}定义为
+\[
+(f\circledast g)(n):=\sum_{m=0}^{M-1}f(m)\,g(n-m\bmod M),
+\]
+其 DFT 满足 $\widehat{(f\circledast g)}(k)=\hat f(k)\hat g(k)$。
+\end{definition}
+
+\begin{theorem}[离散帕塞瓦尔恒等式]\label{thm:discrete_parseval_parallel}
+设 $f$ 以 $T$ 为周期，$\hat f(k)=\sum_{n=0}^{T-1}f(n)e^{-i2\pi kn/T}$ 为其 DFT。则
+\[
+\sum_{n=0}^{T-1}|f(n)|^{2}=\frac{1}{T}\sum_{k=0}^{T-1}|\hat f(k)|^{2},
+\]
+且对加窗序列 $f_w(n)=f(n)w(n)$ 同样成立。恒等式说明：\textbf{泄露是能量的重新分配，而非能量的产生或消灭}。
+\end{theorem}
+
+\begin{proof}
+由正交性 $\sum_{n=0}^{T-1}e^{i2\pi(k-k')n/T}=T\delta_{kk'}$，
+\[
+\frac1T\sum_k|\hat f(k)|^2=\frac1T\sum_k\sum_{n,n'}\overline{f(n)}f(n')e^{i2\pi k(n-n')/T}
+=\sum_{n,n'}\overline{f(n)}f(n')\delta_{nn'}=\sum_n|f(n)|^2 .
+\]
+加窗情形把 $f$ 换为 $f_w$ 重复上述论证即得。
+\end{proof}
+
+\begin{theorem}[置闰抑制频谱泄露]\label{thm:intercalation_leakage_suppression}
+设信号为 $f(n)=Ae^{i(\omega_0n+\phi)}$，周期比为 $\rho$，窗口长度 $M$，偏移 $\delta_M=\|M\rho\|_{\mathbb{Z}}$。则
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{泄露强度只依赖偏移}：主瓣外能量占比满足
+    \[
+    \eta(M)=1-\operatorname{sinc}^2(\delta_M)+O(M^{-1})\le\frac{\pi^2}{3}\delta_M^{2}+O(M^{-1});
+    \]
+    \item \textbf{一般窗口的平均泄露}：若 $\delta$ 在 $[-1/2,1/2]$ 上近似均匀分布，则
+    \[
+    \bar\eta=\int_{-1/2}^{1/2}\big(1-\operatorname{sinc}^2(u)\big)\,du\approx0.21,
+    \]
+    且最坏情形 $\eta(1/2)\approx0.595$——即普通窗口的泄露是 $O(1)$ 级的；
+    \item \textbf{置闰窗口的泄露}：取窗口长度为连分数分母 $M=q_k$，则
+    \[
+    \delta_{q_k}=\|q_k\rho\|_{\mathbb{Z}}<\frac{1}{q_{k+1}},\qquad
+    \eta(q_k)\le\frac{\pi^2}{3q_{k+1}^{2}}+O(q_k^{-1})=O(q_k^{-2});
+    \]
+    即\textbf{置闰把泄露从 $O(1)$ 级降到 $O(M^{-2})$ 级}；
+    \item \textbf{等价表述}：置闰使窗内周期数的偏差 $\delta$ 成为被优化的对象，而泄露是 $\delta$ 的严格增函数，故\textbf{最优置闰窗口同时是最优泄露抑制窗口}。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 即定理 \ref{thm:leakage_envelope_parallel}(iv)，并用 $1-\operatorname{sinc}^2(u)\le\frac{\pi^2u^2}{3}$ 放大。
+
+(ii) 直接积分，数值积分得 $0.212$；端点值 $\eta(1/2)=1-4/\pi^2=0.595$。
+
+(iii) 由定理 \ref{thm:continued_fraction_best_approx_parallel}(iii) 得 $\delta_{q_k}<1/q_{k+1}$，代入 (i) 即得。
+
+(iv) 由 (i)，$\eta$ 关于 $\delta$ 在 $[0,1/2]$ 上严格递增，而 $\delta_M$ 由窗口长度决定；故最小化 $\delta_M$ 即最小化 $\eta$。
+\end{proof}
+
+\begin{theorem}[置闰即同余角闭合]\label{thm:intercalation_congruence_closure}
+设周期比 $\rho$，窗口长度 $M$，子周期 $T$。则
+\[
+\text{置闰使 }\delta_T=0
+\iff
+T\mid M\rho
+\iff
+\text{窗内周期数在子周期 }T\text{ 上闭合}.
+\]
+因此，置闰的数学本质是\textbf{强制同余角闭合}；当 $\rho\notin\mathbb{Q}$ 时不能对所有 $T$ 同时闭合，只能按连分数最优逼近使 $\delta_T=O(M^{-2})$。
+\end{theorem}
+
+\begin{proof}
+由命题 \ref{prop:congruence_angle_properties}(iv) 与定义 \ref{def:congruence_angle_misclosure} 即得。
+\end{proof}
+
+\begin{corollary}[泄露抑制的充分条件]\label{cor:intercalation_suppression_sufficient}
+若窗口长度 $M$ 满足 $\|M\rho\|_{\mathbb{Z}}\le\varepsilon$（$\varepsilon\le1/2$），则
+\[
+\eta(M)\le\frac{\pi^2}{3}\varepsilon^2+O(M^{-1}).
+\]
+数值上：$\varepsilon=10^{-1}\Rightarrow\eta\lesssim3.3\%$；$\varepsilon=10^{-2}\Rightarrow\eta\lesssim3.3\times10^{-4}$；$\varepsilon=10^{-3}\Rightarrow\eta\lesssim3.3\times10^{-6}$。故\textbf{只需把偏移压到千分之一，泄露即降到百万分之三量级}。
+\end{corollary}
+
+\begin{proposition}[上限逼近与下限逼近的联合抑制]\label{prop:optimal_joint_suppression}
+设 $\rho\notin\mathbb{Q}$，$\{q_k\}$ 为其连分数分母序列。则在相邻两个最优窗口上的置闰分别实现上限逼近与下限逼近：
+\[
+\rho^{(-)}_{q_k}=\frac{p_k}{q_k}<\rho<\frac{p_{k+1}}{q_{k+1}}=\rho^{(+)}_{q_{k+1}}
+\quad\text{（或方向相反）},
+\]
+且联合使用二者可使\textbf{累积}相位误差始终不超过 $1$ 个单元：
+\[
+\Big|\sum_{j\le k}(q_j\rho-p_j)\Big|<1 .
+\]
+故上下限逼近的交替使用，等价于对泄露的\textbf{双侧夹逼}。
+\end{proposition}
+
+\begin{proof}
+由连分数收敛子的交替夹逼性质知 $p_k/q_k$ 与 $p_{k+1}/q_{k+1}$ 分居 $\rho$ 两侧，故一端为下限、另一端为上限。由连分数的精确误差式 $q_j\rho-p_j=\frac{(-1)^j}{q_{j+1}+q_j\beta_{j+1}}$（$\beta_{j+1}=[a_{j+1};a_{j+2},\dots]>0$）知各项 $\varepsilon_j:=q_j\rho-p_j$ 符号交替且 $|\varepsilon_j|<\frac1{q_{j+1}}\le\frac12$。设 $S_k:=\sum_{j\le k}\varepsilon_j$。由收敛子递推关系 $q_j=a_jq_{j-1}+q_{j-2}$ 与 $p_j=a_jp_{j-1}+p_{j-2}$ 得 $\varepsilon_j=-a_j\varepsilon_{j-1}+\varepsilon_{j-2}$，于是 $S_k$ 恒位于 $0$ 与 $\varepsilon_0=\rho-\lfloor\rho\rfloor$ 之间，故 $|S_k|\le\max(\{\rho\},1-\{\rho\})<1$。（最坏情形可达 $0.7183>1/2$，例如 $\rho=e-2$，故此处常数是 $1$ 而非 $1/2$。）
+\end{proof}
+
+\begin{property}[置闰密度与三间隙性]\label{prop:intercalation_density_property}
+平衡置闰序列的密度恰为小数部分 $\{\rho\}$：
+\[
+\lim_{M\to\infty}\frac{N_M}{M}=\{\rho\}=\rho-\lfloor\rho\rfloor,
+\]
+且对任意 $L\in\mathbb{N}^+$，任意长度为 $L$ 的窗口中闰单元数只取两个相邻整数值（三间隙定理）。因此置闰方案具有\textbf{均匀性与稳定性}。
+\end{property}
+
+\begin{theorem}[置闰窗的循环卷积实现]\label{thm:intercalation_circular_convolution}
+设 $\rho=p/q$（既约），$M=kq$。则置闰后的等效序列可写成循环卷积
+\[
+f^{\mathrm{int}}=w^{\mathrm{int}}_M\circledast f,
+\qquad
+\widehat{f^{\mathrm{int}}}(j)=\hat w^{\mathrm{int}}_M(j)\,\hat f(j),
+\]
+且置闰窗的谱在真谱线上为常数、在其他频点上为零：
+\[
+\hat w^{\mathrm{int}}_M\Big(\frac{2\pi j}{p}\Big)=kp\,e^{-i\theta_j},\quad j=0,\dots,p-1,
+\qquad
+\hat w^{\mathrm{int}}_M\Big(\frac{2\pi j}{M}\Big)=0,\quad \frac{j}{M}\notin\frac{\mathbb{Z}}{p},
+\]
+从而 $f^{\mathrm{int}}$ 只有 $p$ 根谱线，\textbf{泄露严格为零}。这说明置闰在频域上是一个“保留真谐波、抹去非真谐波”的投影算子。
+\end{theorem}
+
+\begin{proof}
+由命题 \ref{prop:intercalation_window_integrality_parallel}，$M=kq$ 时窗内周期数为整数 $kp$，故所有真谱线落在频格 $\{2\pi j/(kq)\}$ 的整数位置上，且累积相位为 $2\pi$ 的整数倍；对非真谐波，求和按几何级数在整数周期上取零。由循环卷积定理即得频域乘性表述。
+\end{proof}
+
+\begin{remark}[置闰抑制泄露的机制：三步分解]\label{rem:leakage_intercalation_mechanism}
+把上述结果串起来，置闰抑制泄露的机制可以精确地表述为三步：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{定位根源}：泄露不来自采样率，也不来自窗的形状，而只来自一个数——窗内周期数的偏移 $\delta_M=\|M\rho\|_{\mathbb{Z}}$。
+    \item \textbf{把泄露变成数论问题}：由 $\eta(M)\le\frac{\pi^2}{3}\delta_M^2+O(M^{-1})$，抑制泄露等价于\textbf{用整数窗长最小化 $\|M\rho\|_{\mathbb{Z}}$}。
+    \item \textbf{用置闰求解}：连分数分母 $q_k$ 是这一数论问题的最优解，而置闰正是把该解\textbf{物化}为观测方案。于是 $\delta_{q_k}<1/q_{k+1}$，泄露降到 $O(q_k^{-2})$。
+\end{enumerate}
+\end{remark}
+
+\begin{example}[置闰窗与普通窗的对比]\label{ex:intercalation_vs_normal_window}
+设 $\rho=\sqrt2=1.41421356\ldots$（非公度）。其连分数为 $[1;2,2,2,\dots]$，分母序列 $q_k=1,2,5,12,29,70,\dots$。
+\begin{enumerate}[label=(\roman*)]
+    \item 取任意普通窗口 $M=100$：$\|100\sqrt2\|=0.0050$，$\eta\approx8.2\times10^{-5}$；
+    \item 取 $M=71$：$\|71\sqrt2\|=0.409$，$\eta\approx0.55$——泄露达 $55\%$；
+    \item 取连分数分母 $M=70$：$\|70\sqrt2\|=0.0051$，与 $q_5=70$ 对应的界 $1/q_6=1/169=0.0059$ 吻合。
+\end{enumerate}
+这说明\textbf{窗口长度不是越大越好，而是必须落在最优逼近的分母上}。
+\end{example}
+
+\begin{example}[历法置闰即置闰窗口]\label{ex:calendar_intercalation_parallel}
+在历法中，“回归年”是周期、“朔望月”是基本单元、$\rho=365.2422/29.530588\approx12.368266$ 是周期比。“十九年七闰”取 $q=19$、$p=235$，偏移 $\delta=0.00295$。若把 $19$ 年视为采样窗、把月相视为被采样信号，则由推论 \ref{cor:intercalation_suppression_sufficient} 泄露占比约 $2.9\times10^{-5}$：历法家用置闰把“年—月”这一非公度对的泄露压低了四个数量级。与之对照，若不置闰（$M=12$，$\|12\rho\|=0.419$），泄露将高达 $57\%$。
+\end{example}
+
+\begin{remark}[统一视角]\label{rem:leakage_intercalation_unified}
+至此，三个看似无关的对象被统一在同一公式下：
+\[
+\underbrace{\frac{p_k}{q_k}}_{\text{连分数}}\ \xrightarrow{\ \text{置闰}\ }\ \underbrace{\delta_{q_k}<1/q_{k+1}}_{\text{数论误差}}\ \xrightarrow{\ \eta\le\frac{\pi^2}{3}\delta^2\ }\ \underbrace{\eta=O(q_k^{-2})}_{\text{频谱泄露}} .
+\]
+左端是纯数论（最佳有理逼近），右端是纯信号处理（泄露能量占比），中间的“置闰”既是历法操作，又是采样方案。这解释了为什么置闰历法在实践中恰好具有优良的频谱性质：\textbf{历法置闰与频谱泄露抑制在数学上是同一个最优化问题}。
+\end{remark}
+
+\section{同余角与广义中国剩余定理}\label{sec:congruence_angle_crt}
+
+前六节把泄露归约为单周期比的偏移 $\delta=\|M\rho\|_{\mathbb{Z}}$，并把置闰表述为对 $\rho$ 的最优有理逼近。本节引入\textbf{同余角}，把单周期问题升级为多周期联合问题，并给出统一的重构与抑制框架。核心结论是：\textbf{置闰是同余角误差的最优补偿；中国剩余定理是同余角重构的代数形式；频谱泄露是同余角不闭合的频域表现。}
+
+\subsection{同余角的定义与基本性质}
+
+\begin{definition}[同余角]\label{def:congruence_angle}
+设总周期为 $N\in\mathbb{N}^+$，总相位为
+\[
+\theta=2\pi\frac{n}{N},\qquad n\in\mathbb{Z}/N\mathbb{Z}.
+\]
+对任意子周期 $T\mid N$，定义\textbf{模 $T$ 的同余角}为
+\[
+\langle\theta\rangle_T:=\theta\bmod\frac{2\pi}{T}
+=\frac{2\pi}{T}\,(n\bmod T).
+\]
+称两个相位 $\theta,\theta'$ \textbf{模 $T$ 同余}，若
+\[
+\theta-\theta'\in\frac{2\pi}{T}\mathbb{Z},
+\]
+记作 $\theta\equiv\theta'\pmod{\frac{2\pi}{T}}$。
+\end{definition}
+
+\begin{proposition}[同余角的基本性质]\label{prop:congruence_angle_properties}
+沿用定义 \ref{def:congruence_angle}。则
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{商群结构}：模 $T$ 同余角取值于
+    \[
+    \mathbb{R}\Big/\frac{2\pi}{T}\mathbb{Z}\cong\mathbb{Z}/T\mathbb{Z};
+    \]
+    \item \textbf{单位根表示}：若 $\omega_N=e^{2\pi i/N}$，则
+    \[
+    e^{i\langle\theta\rangle_T}
+    =\omega_N^{(N/T)(n\bmod T)}
+    =\big(\omega_N^n\big)^{N/T};
+    \]
+    \item \textbf{投影相容性}：若 $T'\mid T$，则
+    \[
+    \big\langle\langle\theta\rangle_T\big\rangle_{T'}
+    =\langle\theta\rangle_{T'};
+    \]
+    \item \textbf{等价判据}：$\langle\theta\rangle_T=0$ 当且仅当 $T\mid n$，即总相位在子周期 $T$ 上\textbf{闭合}。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由定义，同余角只依赖 $n\bmod T$，且对任意 $m\in\mathbb{Z}$，$\theta+2\pi m/T$ 给出同一同余角，故商群为 $\mathbb{R}/(2\pi/T)\mathbb{Z}\cong\mathbb{Z}/T\mathbb{Z}$。
+
+(ii) 直接计算：
+\[
+e^{i\langle\theta\rangle_T}
+=e^{i\cdot\frac{2\pi}{T}(n\bmod T)}
+=e^{2\pi i n/T}
+=\big(e^{2\pi i n/N}\big)^{N/T}
+=\omega_N^{(N/T)n}.
+\]
+
+(iii) 由 $T'\mid T$，$\frac{2\pi}{T'}$ 是 $\frac{2\pi}{T}$ 的整数倍，故投影良定义；计算 $(n\bmod T)\bmod T'=n\bmod T'$ 即得。
+
+(iv) $\langle\theta\rangle_T=0$ 等价于 $\frac{2\pi}{T}(n\bmod T)=0$，即 $n\bmod T=0$，即 $T\mid n$。
+\end{proof}
+
+\begin{remark}[同余角是“模子周期的相位”]\label{rem:congruence_angle_interpretation}
+同余角不是普通角度，而是\textbf{以 $2\pi/T$ 为模}的角度。它把连续相位 $\theta$ 折叠到子周期 $T$ 的循环群上。天干、地支、六十甲子正是不同 $T$ 下的同余角：天干是 $T=10$，地支是 $T=12$，干支是 $T=60$。第二十章的离散相位算子 $\mathcal{O}_k^{(T)}=e^{i2\pi k/T}$ 正是同余角的复指数表示。周转圆组中每个旋转分量在子周期 $T$ 上的相位，也正是同余角。
+\end{remark}
+
+\subsection{同余角采样与广义中国剩余定理}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.15,>=stealth]
+    \draw[gray!60] (0,0) circle (2.3);
+    \draw[gray!60] (0,0) circle (1.55);
+    \foreach \k in {0,...,9} {
+        \filldraw[blue] (\k*36:2.3) circle (2.4pt);
+    }
+    \foreach \k in {0,...,11} {
+        \filldraw[red] (\k*30:1.55) circle (1.8pt);
+    }
+    \draw[->,thick,blue] (0,0) -- (36:2.3);
+    \draw[->,thick,red] (0,0) -- (30:1.55);
+    \draw[->,gray] (0.62,0) arc (0:36:0.62);
+    \node[font=\footnotesize] at (0.82,0.35) {$\Delta\theta$};
+    \node[font=\footnotesize,blue] at (2.75,1.55) {$T=10$};
+    \node[font=\footnotesize,red] at (0.85,1.95) {$T=12$};
+    \node[font=\footnotesize] at (0,-2.75) {两个周期各自的等分点集，画在同一个圆上};
+\end{tikzpicture}
+\caption{同余角的几何图像。把周期 $T$ 的相位 $\theta_k = 2\pi k/T$ 统一画在一个圆上：$T=10$（蓝点，外圈）与 $T=12$（红点，内圈）各自给出一个等分点集。两个周期的相容性由此化为两组点在圆上的\textbf{角度相容条件}：可公度时两组点在某一步重合；不可公度时永不重合，但通过置闰可使\textbf{累积角度偏差始终落在有界带内}，这正是置闰抑制泄露的几何来源。}
+\label{fig:congruence_angle_circle}
+\end{figure}
+
+\begin{definition}[同余角采样]\label{def:congruence_angle_sampling}
+设周期组 $T_1,\dots,T_k\in\mathbb{N}^+$，总周期
+\[
+N:=\operatorname{lcm}(T_1,\dots,T_k).
+\]
+对总状态 $n\in\mathbb{Z}/N\mathbb{Z}$，定义\textbf{同余角采样}为
+\[
+\mathcal{C}(n):=\big(\langle\theta\rangle_{T_1},\dots,\langle\theta\rangle_{T_k}\big),
+\qquad \theta=2\pi\frac{n}{N}.
+\]
+等价地，用整数索引 $a_i:=n\bmod T_i$，则
+\[
+\mathcal{C}(n)=(a_1,\dots,a_k)\in\prod_{i=1}^k\mathbb{Z}/T_i\mathbb{Z}.
+\]
+\end{definition}
+
+\begin{theorem}[同余角采样与广义中国剩余定理]\label{thm:congruence_angle_crt}
+沿用定义 \ref{def:congruence_angle_sampling}。则
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{像的刻画}：$(a_1,\dots,a_k)$ 属于 $\mathcal{C}$ 的像，当且仅当
+    \[
+    a_i\equiv a_j\pmod{\gcd(T_i,T_j)},\qquad\forall i,j;
+    \]
+    \item \textbf{唯一性}：若上述条件成立，则同余方程组
+    \[
+    n\equiv a_i\pmod{T_i},\qquad i=1,\dots,k
+    \]
+    在模 $N$ 下唯一确定 $n$，即同余角采样在该像上可逆；
+    \item \textbf{合法状态数}：像的元素个数为
+    \[
+    |\operatorname{Im}\mathcal{C}|=N=\operatorname{lcm}(T_1,\dots,T_k),
+    \]
+    而全部组合数为 $\prod_i T_i$，故冗余度为
+    \[
+    R:=\frac{\prod_i T_i}{N}.
+    \]
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i)(ii) 即非互素版中国剩余定理：同余方程组有解当且仅当两两相容，且解模 $\operatorname{lcm}(T_i)=N$ 唯一。(iii) 由 $\mathcal{C}$ 是 $\mathbb{Z}/N\mathbb{Z}$ 到 $\prod_i\mathbb{Z}/T_i\mathbb{Z}$ 的单射（由 (ii)），故像的大小为 $N$；组合总数为 $\prod_i T_i$，冗余度定义即得。
+\end{proof}
+
+\begin{corollary}[六十甲子的同余角解释]\label{cor:sexagenary_congruence}
+取 $T_1=10$（天干）、$T_2=12$（地支），则 $N=60$，像为
+\[
+\{(a,b):a\equiv b\pmod 2\},
+\]
+共 $60$ 个合法组合，冗余度 $R=120/60=2$。这正是“十天干与十二地支只有 $60$ 种合法配对”的代数原因。
+\end{corollary}
+
+\begin{theorem}[同余角重构的显式公式]\label{thm:congruence_angle_reconstruction}
+在定理 \ref{thm:congruence_angle_crt} 的条件下，令
+\[
+N_i:=\frac{N}{T_i},\qquad M_i:=N_i^{-1}\bmod T_i
+\]
+（$M_i$ 存在当且仅当 $\gcd(N_i,T_i)=1$；一般情形用逐对合并或 Smith 标准形）。则
+\[
+n\equiv\sum_{i=1}^k a_i N_i M_i\pmod N.
+\]
+若某些 $\gcd(N_i,T_i)\ne1$，可先按 $\gcd$ 合并模数，再用上式。
+\end{theorem}
+
+\begin{proof}
+标准中国剩余定理构造。对互素情形，$N_iM_i\equiv1\pmod{T_i}$ 且 $N_iM_i\equiv0\pmod{T_j}$（$j\ne i$），故右端模 $T_i$ 等于 $a_i$。非互素情形由逐步合并得到。
+\end{proof}
+
+\begin{remark}[同余角与剩余数系统]\label{rem:congruence_angle_rns}
+同余角采样在整数域就是\textbf{剩余数系统}（RNS）：用一组模 $T_i$ 的余数 $(a_1,\dots,a_k)$ 表示整数 $n\bmod N$。同余角是 RNS 的相位表示：
+\[
+(a_1,\dots,a_k)\ \longleftrightarrow\ \big(e^{i\langle\theta\rangle_{T_1}},\dots,e^{i\langle\theta\rangle_{T_k}}\big).
+\]
+因此，第二十章的离散相位算子、本章的同余角、工程中的 RNS 是同一结构在三种语言下的表述。
+\end{remark}
+
+\subsection{同余角下的频谱泄露}
+
+\begin{definition}[同余角不闭合]\label{def:congruence_angle_misclosure}
+设总周期 $N$，子周期 $T\mid N$，窗内周期数为 $M\rho$。定义到 $T\mathbb{Z}$ 的距离
+\[
+\|x\|_{\mathbb{Z},T}:=\min_{m\in\mathbb{Z}}|x-mT|.
+\]
+定义\textbf{模 $T$ 的同余角不闭合量}为
+\[
+\delta_T:=\frac{2\pi}{T}\,\|M\rho\|_{\mathbb{Z},T}.
+\]
+特别地，$T=1$ 时
+\[
+\delta_1=2\pi\|M\rho\|_{\mathbb{Z}},
+\]
+与单周期泄露偏移一致；而 $T\mid M\rho$ 等价于 $\delta_T=0$。
+\end{definition}
+
+\begin{theorem}[同余角泄露公式]\label{thm:congruence_angle_leakage}
+设 $f(n)=Ae^{i\omega_0 n}$，$\omega_0=2\pi\rho$，窗口长度 $M$。则
+\begin{enumerate}[label=(\roman*)]
+    \item 单周期泄露由 $\delta_1$ 决定：
+    \[
+    \eta=1-\operatorname{sinc}^2\!\Big(\frac{\delta_1}{2\pi}\Big)+O(M^{-1});
+    \]
+    \item 若要求在子周期 $T_i$ 上闭合，则对应不闭合量为 $\delta_{T_i}$；多周期联合泄露由各子周期不闭合量控制：
+    \[
+    \eta\le\sum_i\left(\frac{\pi^2}{3}\delta_{T_i}^2+O(M^{-1})\right)
+    \le \frac{\pi^2}{3}k\max_i\delta_{T_i}^2+O(M^{-1});
+    \]
+    \item \textbf{闭合成真}：若所有 $\delta_{T_i}=0$，则各子周期同时闭合，联合泄露为零；若存在 $\delta_{T_i}\ne0$，则相应子周期上的泄露不能严格为零。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 由定理 \ref{thm:leakage_envelope_parallel}(iv) 与 $\delta_1=2\pi\|M\rho\|_{\mathbb{Z}}$。
+
+(ii) 对每个子周期使用同一泄露估计，并利用能量次可加性。
+
+(iii) 由 $\delta_{T_i}=0\iff T_i\mid M\rho$ 与整数窗口无泄露推论 \ref{cor:integer_window_no_leakage}。
+\end{proof}
+
+\begin{remark}[同余角是泄露的统一语言]\label{rem:congruence_angle_unified_leakage}
+前六节把泄露归约为“窗内周期数偏移 $\delta$”。同余角把这一归约推广到多周期：泄露不再由单一 $\delta$ 决定，而是由各子周期上的同余角不闭合量 $\delta_{T_i}$ 共同决定。置闰的目标也从“最小化 $\|M\rho\|_{\mathbb{Z}}$”升级为“同时最小化各 $\delta_{T_i}$”。
+\end{remark}
+
+\begin{theorem}[同余角下的 Parseval 恒等式]\label{thm:congruence_parseval}
+设 $f$ 以 $N$ 为周期，$\mathcal{C}$ 为同余角采样，$\hat f$ 为 DFT。则
+\[
+\sum_{n=0}^{N-1}|f(n)|^2 = \frac{1}{N}\sum_{k=0}^{N-1}|\hat f(k)|^2
+= \frac{1}{N}\sum_{T\mid N}\sum_{a\in\mathbb{Z}/T\mathbb{Z}}|f_T(a)|^2\cdot w_T,
+\]
+其中 $f_T(a)=\sum_{n\equiv a\pmod T}f(n)$ 是同余角 $a$ 下的聚合，$w_T$ 是子周期 $T$ 的权重。特别地，能量可按子周期分解。
+\end{theorem}
+
+\begin{proof}
+第一式即离散帕塞瓦尔恒等式（定理 \ref{thm:discrete_parseval_parallel}）。第二式由同余角采样把 $\mathbb{Z}/N\mathbb{Z}$ 分解为 $\mathbb{Z}/T\mathbb{Z}$ 的纤维：对每个余数 $a$，聚合 $f_T(a)$ 是同一纤维上所有 $f(n)$ 的和；由中国剩余定理，各纤维在 $N$ 上的权重为 $N/T$，故 $w_T=N/T$。求和并整理即得。
+\end{proof}
+
+\section{同余角置闰与多周期联合抑制}\label{sec:congruence_angle_intercalation}
+
+本节把第 \ref{sec:commensurability_intercalation} 节的置闰理论升级到多周期同余角框架。核心结论是：\textbf{置闰是同余角误差的最优补偿；上下限逼近的交替使用等价于同余角的双侧夹逼；多周期联合置闰可以同时抑制多个子周期上的泄露。}
+
+\subsection{同余角误差与置闰}
+
+\begin{definition}[同余角置闰]\label{def:congruence_angle_intercalation}
+设周期比 $\rho>0$，窗口长度 $M$，子周期组 $T_1,\dots,T_k$，总周期 $N=\operatorname{lcm}(T_i)$。设 $E_M$ 为平衡置闰集合，$N_M=|E_M|$。若
+\[
+T_i\mid N_M
+\]
+对某 $i$ 成立，则称 $E_M$ 为\textbf{模 $T_i$ 的同余角置闰集合}，记
+\[
+E_M^{(T_i)}:=E_M.
+\]
+对应的\textbf{同余角置闰窗}为
+\[
+w^{\mathrm{int}}_{M,T_i}(n):=\mathbf{1}_{E_M^{(T_i)}}(n).
+\]
+若需同时满足多个子周期，则取满足 $T_i\mid N_M$（对所有指定 $i$）的窗口 $M$。
+\end{definition}
+
+\begin{theorem}[同余角置闰的最优性]\label{thm:congruence_angle_intercalation_optimal}
+沿用定义 \ref{def:congruence_angle_intercalation}。则
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $\rho=p/q$ 为有理数且 $M=kq$，则 $M\rho=kp$ 为整数；此时对任意 $T_i\mid kp$，有 $\delta_{T_i}=0$，该子周期上的泄露严格为零；
+    \item 若 $\rho\notin\mathbb{Q}$，取 $M=q_k$（连分数分母），则
+    \[
+    \delta_{T_i}\le\frac{2\pi}{T_i}\cdot\frac{1}{q_{k+1}},
+    \]
+    泄露占比
+    \[
+    \eta_{T_i}\le\frac{\pi^2}{3}\Big(\frac{2\pi}{T_i q_{k+1}}\Big)^2+O(q_k^{-1})=O(q_k^{-2});
+    \]
+    \item \textbf{多周期联合最优}：取
+    \[
+    M=\operatorname{lcm}(q_k,T_1,\dots,T_k),
+    \]
+    则所有子周期上的同余角误差同时达到最优，泄露被联合压到 $O(M^{-2})$。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 由 $M\rho=kp\in\mathbb{Z}$，故 $T_i\mid kp$ 时 $\|M\rho\|_{\mathbb{Z},T_i}=0$，从而 $\delta_{T_i}=0$。
+
+(ii) 由 $\|q_k\rho\|_{\mathbb{Z}}<1/q_{k+1}$ 与
+\[
+\delta_{T_i}=\frac{2\pi}{T_i}\|q_k\rho\|_{\mathbb{Z},T_i}
+\le\frac{2\pi}{T_i}\|q_k\rho\|_{\mathbb{Z}}
+\]
+即得。
+
+(iii) 取 $M$ 为所有相关周期的最小公倍数，则 $M$ 是 $q_k$ 的整数倍，故 $\|M\rho\|_{\mathbb{Z}}\le\|q_k\rho\|_{\mathbb{Z}}<1/q_{k+1}$；对每个 $T_i$ 代入 (ii) 即得。
+\end{proof}
+
+\begin{proposition}[上下限逼近与同余角夹逼]\label{prop:congruence_angle_sandwich}
+设 $\rho\notin\mathbb{Q}$，$\{q_k\}$ 为连分数分母序列。则相邻两个最优窗口上的同余角误差符号相反：
+\[
+\delta_{T_i}^{(k)}\cdot\delta_{T_i}^{(k+1)}<0,
+\]
+且联合使用二者（交替取窗口）可使累积同余角误差始终不超过半个子周期：
+\[
+\Big|\sum_{j\le k}\delta_{T_i}^{(j)}\Big|\le\frac{\pi}{T_i}.
+\]
+\end{proposition}
+
+\begin{proof}
+由连分数收敛子的交替夹逼性（定理 \ref{thm:continued_fraction_best_approx_parallel}(iii)），$p_k/q_k$ 与 $p_{k+1}/q_{k+1}$ 分居 $\rho$ 两侧，故 $q_k\rho-p_k$ 与 $q_{k+1}\rho-p_{k+1}$ 符号相反。同余角误差 $\delta_{T_i}$ 是 $q\rho-p$ 在模 $T_i$ 下的投影，符号继承之。累积误差由三间隙定理的标准推论得到。
+\end{proof}
+
+\subsection{多周期联合置闰算法}
+
+\begin{definition}[多周期联合置闰算法]\label{def:multi_period_intercalation_algorithm}
+\textbf{输入}：周期组 $T_1,\dots,T_k$，周期比 $\rho>0$，容限 $\varepsilon>0$，上界 $M_{\max}$。\textbf{输出}：联合置闰集合 $E_M$ 与各子周期偏移 $\delta_{T_i}$。
+\begin{enumerate}[label=\textbf{步骤 \arabic*.}]
+    \item 计算 $N=\operatorname{lcm}(T_1,\dots,T_k)$；
+    \item 对 $\rho$ 作连分数展开，生成分母 $q_k$ 至 $\max(M_{\max},N)$；
+    \item 取 $M=\operatorname{lcm}(q_{k^\ast},T_1,\dots,T_k)$，其中 $k^\ast$ 是满足 $1/q_{k^\ast+1}\le\varepsilon$ 的最小指标；
+    \item 生成平衡置闰集合
+    \[
+    E_M=\{n\le M:\lfloor(n+1)\rho\rfloor-\lfloor n\rho\rfloor=1\};
+    \]
+    \item 对每个 $T_i$，计算 $\delta_{T_i}=\frac{2\pi}{T_i}\|M\rho\|_{\mathbb{Z},T_i}$，输出泄露上界 $\eta_{T_i}\le\frac{\pi^2}{3}\delta_{T_i}^2$。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[多周期联合置闰的正确性与最优性]\label{thm:multi_period_intercalation_correctness}
+上述算法输出的 $(M,E_M)$ 满足：
+\begin{enumerate}[label=(\roman*)]
+    \item 对所有 $i$，$\delta_{T_i}\le\frac{2\pi}{T_i}\cdot\frac{1}{q_{k^\ast+1}}\le\frac{2\pi\varepsilon}{T_i}$；
+    \item 泄露联合上界
+    \[
+    \eta\le\frac{\pi^2}{3}k\max_i\Big(\frac{2\pi\varepsilon}{T_i}\Big)^2+O(M^{-1})=O(\varepsilon^2);
+    \]
+    \item 在所有窗口长度不超过 $M_{\max}$ 的方案中，该 $M$ 给出的联合泄露最小（若 $\rho\notin\mathbb{Q}$，则唯一最小）。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 由 $M$ 是 $q_{k^\ast}$ 的整数倍，$\|M\rho\|_{\mathbb{Z}}\le\|q_{k^\ast}\rho\|_{\mathbb{Z}}<1/q_{k^\ast+1}$，代入 $\delta_{T_i}$ 定义即得。
+
+(ii) 由定理 \ref{thm:congruence_angle_leakage}(ii) 与 (i)。
+
+(iii) 由连分数最佳逼近性（定理 \ref{thm:continued_fraction_best_approx_parallel}(ii)）与 $M$ 的构造即得。
+\end{proof}
+
+\begin{example}[天干地支联合置闰]\label{ex:sexagenary_intercalation}
+取 $T_1=10$（天干）、$T_2=12$（地支），$N=60$。设周期比 $\rho=\sqrt2$，连分数分母 $q_k=1,2,5,12,29,70,\dots$。取 $k^\ast=4$，$q_4=12$，则
+\[
+M=\operatorname{lcm}(12,10,12)=60.
+\]
+此时
+\[
+\|60\sqrt2\|_{\mathbb{Z}}=\|84.8528\|=0.1472,
+\]
+子周期偏移
+\[
+\delta_{10}=\frac{2\pi}{10}\|60\sqrt2\|_{\mathbb{Z},10},\qquad
+\delta_{12}=\frac{2\pi}{12}\|60\sqrt2\|_{\mathbb{Z},12}.
+\]
+由于 $60\sqrt2\approx84.8528$，模 $10$ 余 $4.8528$，模 $12$ 余 $0.8528$，故
+\[
+\delta_{10}\approx\frac{2\pi}{10}\cdot0.1472\approx0.0925,\qquad
+\delta_{12}\approx\frac{2\pi}{12}\cdot0.1472\approx0.0771.
+\]
+泄露上界
+\[
+\eta\le\frac{\pi^2}{3}\cdot0.0771^2\approx0.0196,
+\]
+即约 $2\%$。若取 $M=70$（$q_5$），则
+\[
+\|70\sqrt2\|_{\mathbb{Z}}=\|98.9949\|=0.0051,
+\]
+泄露降到约 $3\times10^{-5}$。这说明\textbf{多周期联合置闰通过取总周期与连分数分母的最小公倍数，同时压制所有子周期上的泄露}。
+\end{example}
+
+\begin{remark}[同余角置闰与单周期置闰的关系]\label{rem:congruence_vs_single_intercalation}
+单周期置闰（第 \ref{sec:commensurability_intercalation} 节）是同余角置闰在 $k=1$、$T_1=1$ 时的特例。同余角置闰的优越性在于：
+\begin{enumerate}[label=(\roman*)]
+    \item 它同时处理多个子周期，适合天干—地支、年—月—日等多周期系统；
+    \item 它把“窗内周期数闭合”升级为“子周期同余角闭合”，条件更细、更易满足；
+    \item 它与剩余数系统、广义中国剩余定理天然结合，便于硬件并行实现。
+\end{enumerate}
+\end{remark}
+
+\section{同余角算法、复杂度与接口}\label{sec:congruence_angle_algorithms}
+
+\subsection{同余角快速重构}
+
+\begin{definition}[同余角快速重构算法]\label{def:congruence_angle_fast_reconstruction}
+\textbf{输入}：同余角组 $(\theta_1,\dots,\theta_k)$，子周期 $T_1,\dots,T_k$。\textbf{输出}：总状态 $n\bmod N$。
+\begin{enumerate}[label=\textbf{步骤 \arabic*.}]
+    \item 计算 $N=\operatorname{lcm}(T_i)$；
+    \item 对每对 $(i,j)$ 检查相容性 $a_i\equiv a_j\pmod{\gcd(T_i,T_j)}$，其中 $a_i=\frac{T_i}{2\pi}\theta_i$；
+    \item 按 $\gcd$ 逐步合并模数，每次合并用扩展欧几里得算法；
+    \item 输出 $n\bmod N$。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[复杂度]\label{thm:congruence_angle_complexity}
+上述算法的时间复杂度为
+\[
+O\!\Big(k\log N+\sum_{i<j}\log\gcd(T_i,T_j)\Big),
+\]
+空间复杂度为 $O(k)$。若所有 $T_i$ 两两互素，则简化为 $O(k\log N)$。
+\end{theorem}
+
+\begin{proof}
+每对相容性检查用一次取模，代价 $O(\log\min(T_i,T_j))$；逐步合并模数用扩展欧几里得，每次 $O(\log N)$。总代价即得。
+\end{proof}
+
+\begin{remark}[与 FFT 的对比]\label{rem:congruence_vs_fft}
+同余角重构的代价远低于一次 FFT：FFT 为 $O(N\log N)$，而同余角重构为 $O(k\log N)$，其中 $k$ 是子周期个数，通常 $k\ll N$。这正是剩余数系统在工程上受青睐的原因。
+\end{remark}
+
+\subsection{同余角循环卷积}
+
+\begin{definition}[同余角循环卷积]\label{def:congruence_angle_convolution}
+设 $f,g$ 以 $N$ 为周期，子周期组 $T_1,\dots,T_k$。定义\textbf{同余角循环卷积}为
+\[
+(f\circledast_{\mathcal{C}}g)(n):=\sum_{m=0}^{N-1}f(m)\,g\big((n-m)\bmod N\big),
+\]
+其同余角表示为
+\[
+\widehat{f\circledast_{\mathcal{C}}g}\big(\theta_{T_i}\big)
+=\hat f\big(\theta_{T_i}\big)\,\hat g\big(\theta_{T_i}\big),
+\]
+其中 $\theta_{T_i}=\frac{2\pi}{T_i}$ 是子周期 $T_i$ 的基频。
+\end{definition}
+
+\begin{theorem}[同余角卷积定理]\label{thm:congruence_angle_convolution_theorem}
+在同余角框架下，循环卷积在\textbf{各子周期的基频}上退化为逐点乘法：
+\[
+\widehat{(f\circledast g)}\Big(\frac{2\pi j}{T_i}\Big)
+=\hat f\Big(\frac{2\pi j}{T_i}\Big)\,
+\hat g\Big(\frac{2\pi j}{T_i}\Big),
+\qquad j=0,\dots,T_i-1.
+\]
+因此，同余角循环卷积可以\textbf{按子周期并行计算}，每个子周期上的计算量为 $O(T_i\log T_i)$，总计算量
+\[
+O\!\Big(\sum_i T_i\log T_i\Big)\ll O(N\log N).
+\]
+\end{theorem}
+
+\begin{proof}
+由循环卷积定理（定义 \ref{def:circular_convolution_parallel}）与同余角投影（定义 \ref{def:congruence_angle}）即得。并行性来自各子周期基频在总 DFT 中的正交性。
+\end{proof}
+
+\begin{remark}[与置闰窗的联合]\label{rem:congruence_convolution_intercalation}
+同余角循环卷积与同余角置闰窗（定义 \ref{def:congruence_angle_intercalation}）联合使用，构成\textbf{同余角置闰—卷积算法}：先用置闰使各子周期同余角闭合，再用并行卷积做滤波或检测。这是本章算法的最终形态。
+\end{remark}
+
+\subsection{与各章的接口}
+
+\begin{remark}[与“周期函数与具有周期轨道的群”章的接口]\label{rem:interface_group_with_periodic_orbits_congruence}
+连续的具有周期轨道的群 $T_x\mathbb{Z}$ 在同余角框架下被替换为子周期组 $T_1,\dots,T_k$ 的乘积。总周期 $N=\operatorname{lcm}(T_i)$ 是连续的具有周期轨道的群在离散域的对应物。同余角 $\langle\theta\rangle_{T_i}$ 是连续相位在子周期的具有周期轨道的群上的投影。周转圆组则是连续傅里叶模态在旋转语言下的几何实现。
+\end{remark}
+
+\begin{remark}[与“级数与卷积”章的接口]\label{rem:interface_series_convolution_congruence}
+同余角循环卷积（定理 \ref{thm:congruence_angle_convolution_theorem}）是周期卷积在多周期分解下的实现。卷积定理在同余角框架下退化为各子周期基频上的逐点乘法，这与该章的核分解语言一致。
+\end{remark}
+
+\begin{remark}[与“调和分析”章的接口]\label{rem:interface_harmonic_congruence}
+同余角不闭合量 $\delta_{T_i}$（定义 \ref{def:congruence_angle_misclosure}）是调和分析中置闰相位修正的多周期推广。置闰在同余角框架下是\textbf{对各子周期基频的相位锁定}。
+\end{remark}
+
+\begin{remark}[与“时序分析”章的接口]\label{rem:interface_time_series_congruence}
+周期图在多周期信号下的偏差由各子周期同余角误差 $\delta_{T_i}$ 决定。多窗谱估计（命题 \ref{prop:multitaper_averaging_parallel}）可与同余角置闰联合使用：先用置闰使各子周期闭合，再用多窗平均压制残余方差。
+\end{remark}
+
+\begin{remark}[与“历法系统之周期结构”章的接口]\label{rem:interface_calendar_congruence}
+历法中的年—月—日—节气是多周期系统，对应子周期组 $T_1,\dots,T_k$。置闰规则（十九年七闰、$315$ 年 $3896$ 月）是同余角置闰在多周期下的最优解。历法的“章岁误差”就是同余角不闭合量 $\delta_{T_i}$，“历法漂移”就是多周期联合泄露 $\eta$。
+\end{remark}
+
+\section{算法与实现}\label{sec:intercalation_algorithms}
+
+本节给出可执行的置闰构造与误差估计，并说明其复杂度。
+
+\begin{definition}[置闰窗构造算法]\label{def:intercalation_window_algorithm}
+\textbf{输入}：周期比 $\rho>0$（实数，以高精度表示）、误差容限 $\varepsilon>0$、上界 $M_{\max}$。\textbf{输出}：置闰集合 $E_M$ 与偏移 $\delta_M$。
+\begin{enumerate}[label=\textbf{步骤 \arabic*.}]
+    \item 对 $\rho$ 作连分数展开 $\rho=[a_0;a_1,a_2,\dots]$，用递推 $q_k=a_kq_{k-1}+q_{k-2}$ 生成分母序列，至 $q_k>M_{\max}$ 停止；
+    \item 取满足 $1/q_{k+1}\le\varepsilon$ 的最小 $k^\ast$，令 $M:=q_{k^\ast}$；
+    \item 生成平衡置闰集合 $E_M=\{n\le M:\lfloor(n+1)\rho\rfloor-\lfloor n\rho\rfloor=1\}$；
+    \item 输出偏移 $\delta_M=|M\rho-\lfloor M\rho+1/2\rfloor|$ 作为泄露指标的代理（$\eta\le\frac{\pi^2}{3}\delta_M^2$）。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[算法的正确性与最优性]\label{thm:algorithm_correctness}
+上述算法输出的 $(M,E_M)$ 满足：
+\begin{enumerate}[label=(\roman*)]
+    \item $N_M=\lfloor(M+1)\rho\rfloor-\lfloor\rho\rfloor$（$N_M$ 恰为 $\lfloor M\rho\rfloor$ 或 $\lceil M\rho\rceil$），且 $\big|N_M-M\rho\big|<1$；
+    \item $\delta_M<1/q_{k^\ast+1}\le\varepsilon$，故泄露占比 $\eta\le\frac{\pi^2}{3}\varepsilon^2+O(M^{-1})$；
+    \item 在窗口长度不超过 $M_{\max}$ 的所有方案中，$M=q_{k^\ast}$ 给出的 $\delta_M$ 最小（若 $\rho\notin\mathbb{Q}$，则唯一最小）。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 由命题 \ref{prop:intercalation_window_integrality_parallel}。(ii) 由 $M=q_{k^\ast}$ 与定理 \ref{thm:continued_fraction_best_approx_parallel}(iii) 的界 $\delta_{q_k}<1/q_{k+1}$，结合步骤 2 的选择即得。(iii) 由定理 \ref{thm:best_intercalation_parallel}(ii) 的最佳逼近性。
+\end{proof}
+
+\begin{remark}[复杂度]\label{rem:algorithm_cost}
+连分数展开的复杂度为 $O(\log M_{\max})$；平衡集合的生成是 $O(M)$，且可用三间隙定理进一步降到 $O(\log M)$（只需记录间隙的交替模式）。因此置闰窗构造的计算代价远低于任何一次 DFT。
+\end{remark}
+
+\begin{example}[算法执行示例]\label{ex:algorithm_execution}
+取 $\rho=12.368266$（年—月比）、$\varepsilon=10^{-3}$：连分数分母 $1,2,3,8,11,19,\dots$，对应 $1/q_{k+1}$ 为 $1/2,1/3,1/8,1/11,1/19$；取 $k^\ast=4$（$q_4=11$，$1/q_5=1/19=0.0526>\varepsilon$）不满足，取 $k^\ast=5$（$q_5=19$，$1/q_6=1/315=0.00317<\varepsilon$）满足，故 $M=19$、$p_5=235$，置闰 $235-12\times19=7$ 个闰单元（十九年七闰）。实际偏移 $\delta_{19}=0.00295$，泄露占比 $\eta\le2.9\times10^{-5}$。
+\end{example}
+
+\section{与历法置闰的统一}\label{sec:calendar_unification}
+
+\begin{theorem}[历法置闰与采样置闰的同构]\label{thm:calendar_sampling_unification_parallel}
+设历法系统由两个天文周期构成：长周期 $T_1$（如回归年）与短周期 $T_2$（如朔望月），基本采样单元取 $T_2$。则
+\begin{enumerate}[label=(\roman*)]
+    \item “在 $q$ 个短周期中插入 $p$ 个额外单元”的置闰规则，与“在长度为 $q$ 的窗口中按平衡方案取 $p$ 个闰位置”的置闰窗（定义 \ref{def:intercalation_sequence_parallel}）是同一个数学对象；
+    \item 置闰后历法的累积偏差恰为 $\delta_q=q\,\big|\frac{T_1}{T_2}\big|_{\mathbb{Z}}$，与采样窗口的偏移 $\delta_M$ 完全相同；
+    \item 因此历法的置闰周期表（如十九年七闰、$315$ 年 $3896$ 月）就是 $\rho=T_1/T_2$ 的连分数分母序列（例 \ref{ex:metonic_parallel}）。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i)(ii) 把“年”视为周期 $T_1$ 的连续信号、把“月”视为采样单元 $T_2$ 的采样格，则年—月比即归一化周期比 $\rho=T_1/T_2$，置闰规则即平衡置闰集合，累积偏差即 $\delta_q$；由命题 \ref{prop:intercalation_window_integrality_parallel} 二者一致。(iii) 由定理 \ref{thm:best_intercalation_parallel} 与定理 \ref{thm:continued_fraction_best_approx_parallel}，最优窗口长度序列为连分数分母序列。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.5cm and 1.6cm,
+  box/.style={draw, rounded corners, align=center, minimum width=3.4cm, minimum height=0.9cm, fill=blue!8, font=\small}]
+% 历法侧
+\node[box, fill=orange!12] (cal_year) {回归年 $T_1$};
+\node[box, fill=orange!12, below=of cal_year] (cal_month) {朔望月 $T_2$};
+\node[box, fill=orange!12, below=of cal_month] (cal_rho) {年—月比 $\rho=T_1/T_2$};
+\node[box, fill=orange!12, below=of cal_rho] (cal_leap) {置闰规则};
+\node[box, fill=orange!12, below=of cal_leap] (cal_err) {章岁误差 $\delta_q$};
+% 采样侧
+\node[box, fill=blue!12, right=4cm of cal_year] (samp_signal) {信号周期 $T_x$};
+\node[box, fill=blue!12, below=of samp_signal] (samp_step) {采样间隔 $\Delta x$};
+\node[box, fill=blue!12, below=of samp_step] (samp_rho) {周期比 $\rho=T_x/\Delta x$};
+\node[box, fill=blue!12, below=of samp_rho] (samp_window) {置闰窗口 $M$};
+\node[box, fill=blue!12, below=of samp_window] (samp_err) {偏移 $\delta_M$};
+% 箭头
+\draw[->, very thick] (cal_year) -- (samp_signal) node[midway, above, font=\footnotesize] {对应};
+\draw[->, very thick] (cal_month) -- (samp_step);
+\draw[->, very thick] (cal_rho) -- (samp_rho);
+\draw[->, very thick] (cal_leap) -- (samp_window);
+\draw[->, very thick] (cal_err) -- (samp_err);
+\node[align=center, font=\small] at (3.5,-7.2) {历法置闰与采样置闰的同构：每一个历法概念都有对应的采样概念，反之亦然};
+\end{tikzpicture}
+\caption{历法置闰与采样置闰的同构：回归年对应信号周期，朔望月对应采样间隔，年—月比对应周期比，置闰规则对应置闰窗口，章岁误差对应偏移。}
+\label{fig:calendar_sampling_correspondence}
+\end{figure}
+
+\begin{example}[天文观测窗口的最优化]\label{ex:astronomical_optimal_window}
+观测某周期性天体（周期 $T_x$）以确定其相位。若观测时长固定为 $T$，则相位测量的系统误差由偏移 $\delta=\|T/T_x\|$ 主导，误差量级 $\sim\delta$；而统计误差（噪声）按 $1/\sqrt{M}$ 下降。二者的最优折中给出观测策略：\textbf{在连分数分母处取观测窗长}，使系统误差按 $M^{-2}$ 下降，与统计误差的 $M^{-1/2}$ 相比成为次要项。
+\end{example}
+
+\begin{example}[统一的天文—历法方案]\label{ex:unified_astronomical_calendar}
+对 $\rho=235/19$（墨冬章）：$19$ 年 $=6939.602$ 日，$235$ 月 $=6940.888$ 日，差值 $1.29$ 日（$19$ 年累计）；若把闰单元视为“闰月”，则 $19$ 年内插入 $7$ 个闰月后长度与回归年序列的偏差 $0.00295$ 单元 $=0.087$ 日。这恰好是经典历法中“墨冬章误差约 $0.09$ 日/19 年”的数值来源，与泄露占比 $\eta\approx2.9\times10^{-5}$ 是同一事实的两种表述。
+\end{example}
+
+\begin{remark}[历法与信号处理的术语对照]\label{rem:calendar_vs_signal}
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}>{\raggedright\arraybackslash\hspace{0pt}}p{3.4cm}>
+                {\raggedright\arraybackslash\hspace{0pt}}p{5.4cm}>
+                {\raggedright\arraybackslash\hspace{0pt}}p{5.4cm}@{}}
+\toprule
+历法术语 & 采样逼近术语 & 数学对象 \\
+\midrule
+回归年 & 信号周期 $T_x$ & 长周期 \\
+朔望月 & 采样间隔/基本单元 & 短周期 \\
+年—月比 & 归一化周期比 $\rho$ & 实数 \\
+闰月 & 闰单元 & 置闰集合元素 \\
+十九年七闰 & 最优窗口 $(q_5,p_5)$ & 连分数收敛子 \\
+章岁误差 & 偏移 $\delta_M$ & $\|M\rho\|_{\mathbb{Z}}$ \\
+历法漂移 & 频谱泄露 & $\eta\le\frac{\pi^2}{3}\delta^2$ \\
+年—月—日多周期 & 同余角组 $(\theta_{T_1},\dots,\theta_{T_k})$ & 子周期投影 \\
+章岁误差（多周期） & 同余角不闭合量 $\delta_{T_i}$ & $\frac{2\pi}{T_i}\|M\rho\|_{\mathbb{Z},T_i}$ \\
+周转圆 & 傅里叶模态 & $A_j e^{i(\omega_j t+\phi_j)}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{remark}
+
+\section{与其他章节的接口}\label{sec:ch17_interfaces}
+
+\begin{remark}[与“周期函数与具有周期轨道的群”章的接口]\label{rem:interface_periodic_function_parallel}
+连续周期函数 $x(t)$ 与连续傅里叶级数 $\sum_kc_ke^{i\omega_kt}$ 在本章被替换为采样序列 $f(n)=x(n\Delta x)$ 与离散傅里叶变换 $\hat f(k)$；连续卷积被循环卷积（定义 \ref{def:circular_convolution_parallel}）替换。定理 \ref{thm:nyquist_shannon_parallel} 与命题 \ref{prop:commensurability_periodicity_parallel} 建立了离散与连续之间严格的桥梁：前者给出无混叠重构条件，后者给出周期结构的保持条件。周转圆组则给出傅里叶级数的旋转几何解释。
+\end{remark}
+
+\begin{remark}[与“级数与卷积”章的接口]\label{rem:interface_series_convolution_parallel}
+本章的循环卷积是周期卷积在有限群 $\mathbb{Z}/T\mathbb{Z}$ 上的实现，其频域乘性（定义 \ref{def:circular_convolution_parallel}）是卷积定理的离散形态；置闰窗与信号的循环卷积（定理 \ref{thm:intercalation_circular_convolution}）说明置闰在频域上是投影算子，这与该章的核分解语言一致。同余角循环卷积（定理 \ref{thm:congruence_angle_convolution_theorem}）进一步把卷积分解到各子周期基频上，是该章核分解语言在多周期框架下的实现。
+\end{remark}
+
+\begin{remark}[与“调和分析”章的接口]\label{rem:interface_harmonic_analysis_parallel}
+本章把泄露的定量刻画归约为偏移 $\delta$ 的二次型（定理 \ref{thm:intercalation_leakage_suppression}），这正是“调和分析”章中置闰作为\textbf{泄露有界化工具}的数学依据；该章的置闰相位修正与本章的置闰窗构造是同一算子的两种表述。同余角不闭合量（定义 \ref{def:congruence_angle_misclosure}）把这一归约推广到多周期。
+\end{remark}
+
+\begin{remark}[与“时序分析”章的接口]\label{rem:interface_time_series_parallel}
+周期图与多窗谱估计的偏差来源即本章的泄露（定义 \ref{def:spectral_leakage}）；离散帕塞瓦尔恒等式（定理 \ref{thm:discrete_parseval_parallel}）是周期图能量守恒的来源；窗函数的选择准则（定理 \ref{thm:window_mainlobe_sidelobe_tradeoff_parallel}、定理 \ref{thm:window_smoothness_decay_parallel}）给出谱估计中偏差—方差权衡的解析形式。多周期信号的谱估计由同余角组 $(\theta_{T_i})$ 刻画，多窗平均可与同余角置闰联合使用。
+\end{remark}
+
+\begin{remark}[与“历法系统之周期结构”章的接口]\label{rem:interface_calendar_parallel}
+本章第 \ref{sec:calendar_unification} 节证明历法置闰与采样置闰是同一数学对象（定理 \ref{thm:calendar_sampling_unification_parallel}）：历法的“章岁误差”就是采样窗口的偏移，历法的“历法漂移”就是频谱泄露。该章的具体历法参数可直接代入本章的 $\delta_M$ 与 $\eta$ 公式作精度估计。同余角框架进一步把年—月—日—节气等多周期系统统一为子周期组 $T_1,\dots,T_k$，历法置闰即同余角置闰在多周期下的最优解。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}>{\raggedright\arraybackslash\hspace{0pt}}p{3.1cm}>
+                {\raggedright\arraybackslash\hspace{0pt}}p{10.5cm}@{}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 采样格 $\Delta x\mathbb{Z}$（定义 \ref{def:uniform_sampling_parallel}）与格平移交换性（命题 \ref{prop:sampling_algebra_parallel}）；置闰窗的循环移位；同余角平移 $\langle\theta+\theta_0\rangle_T$；周转圆组的相位平移 \\
+缩放 & 采样率 $\nu_s$（定义 \ref{def:nyquist_sampling_parallel}）与定长标度 $T_0$（定义 \ref{def:discrete_fundamental_period}）；窗口长度作为标度参数；子周期 $T_i$ 作为缩放标度；周转圆频率的缩放 \\
+旋转 & 离散相位算子 $e^{i2\pi k/T}$；周转圆 $A e^{i(\omega t+\phi)}$；泄露公式中的相位线性项（命题 \ref{prop:leakage_phase_characterisation}）；同余角单位根表示（命题 \ref{prop:congruence_angle_properties}） \\
+守恒 & 离散帕塞瓦尔恒等式（定理 \ref{thm:discrete_parseval_parallel}）：泄露是能量的重新分配而非消灭；同余角能量分解（定理 \ref{thm:congruence_parseval}） \\
+对称 & 实偶窗的实偶谱（命题 \ref{prop:window_spectrum_properties_parallel}）；折叠映射关于 $\omega_s/2$ 的反射（命题 \ref{prop:aliasing_frequency_map_parallel}）；同余角模 $T$ 对称 \\
+闭合 & 循环卷积与置闰窗的频域投影（定理 \ref{thm:intercalation_circular_convolution}）；同余角闭合 $\delta_T=0$（定理 \ref{thm:intercalation_congruence_closure}）；周转圆组在窗口端点的相位闭合 \\
+周期 & 周期比 $\rho$ 与偏移 $\delta=\|M\rho\|_{\mathbb{Z}}$ 的对偶（定理 \ref{thm:leakage_envelope_parallel}、定理 \ref{thm:intercalation_leakage_suppression}）；多周期同余角不闭合量 $\delta_{T_i}$（定义 \ref{def:congruence_angle_misclosure}）；周转圆组的频率生成具有周期轨道的群 \\
+算法 & 连分数展开与平衡置闰构造（定义 \ref{def:intercalation_window_algorithm}、定理 \ref{thm:algorithm_correctness}）；同余角快速重构（定义 \ref{def:congruence_angle_fast_reconstruction}）与多周期联合置闰（定义 \ref{def:multi_period_intercalation_algorithm}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 根据定义 \ref{def:uniform_sampling_parallel} 与定义 \ref{def:nyquist_sampling_parallel}，
+    说明采样点、采样率、采样间隔、采样点数与采样时长的定义。
+    请以 $48$ kHz 采样率的音频接口为例，
+    计算采样间隔 $\Delta x$、奈奎斯特频率 $\nu_N$ 与 $1$ 秒记录中的采样点数 $M$，
+    并说明三要素为何不可互相替代（参见注 \ref{rem:sampling_three_parameters}）。
+
+    \item 证明命题 \ref{prop:commensurability_periodicity_parallel}：
+    设连续信号 $x$ 以 $T_x$ 为基本周期，采样间隔为 $\Delta x$，
+    采样序列 $f(n)=x(n\Delta x)$，归一化周期比 $\rho=T_x/\Delta x$。则
+    \begin{enumerate}[label=(\roman*)]
+        \item 若 $\rho\in\mathbb{N}^+$，则 $f$ 以 $T=\rho$ 为周期；
+        \item 若 $\rho=p/q$ 既约，则 $f$ 以 $T=p$ 为基本周期；
+        \item 若 $\rho\notin\mathbb{Q}$，则 $\operatorname{Group}_{\mathrm{period}}(f)=\{0\}$。
+    \end{enumerate}
+    请分别证明三种情形，并说明“采样序列具有非平凡周期结构当且仅当信号周期与采样间隔公度”。
+
+    \item 证明采样算子的代数性质（命题 \ref{prop:sampling_algebra_parallel}）：
+    \begin{enumerate}[label=(\roman*)]
+        \item 线性：$\mathcal{S}_{\Delta x}(\alpha x+\beta y)
+              =\alpha\mathcal{S}_{\Delta x}x+\beta\mathcal{S}_{\Delta x}y$；
+        \item 逐点乘法：$\mathcal{S}_{\Delta x}(x\cdot y)
+              =(\mathcal{S}_{\Delta x}x)\cdot(\mathcal{S}_{\Delta x}y)$；
+        \item 与格平移交换：$\mathcal{S}_{\Delta x}(x(\cdot-a))=f(\cdot-m)$（$a=m\Delta x$）；
+        \item 不与缩放交换。
+    \end{enumerate}
+    请说明为什么 (iv) 是混叠的代数根源。
+
+    \item 证明命题 \ref{prop:sampling_adjoint}：
+    采样算子 $\mathcal{S}_{\Delta x}$ 的伴随为理想低通插值算子
+    \[
+    \mathcal{S}_{\Delta x}^*(\{f_n\})
+    =\sum_n f_n\operatorname{sinc}
+    \Bigl(\frac{t-n\Delta x}{\Delta x}\Bigr).
+    \]
+    请说明为什么这一伴随与采样定理的重构公式一致。
+
+    \item 证明定理 \ref{thm:nyquist_shannon_parallel}（奈奎斯特--香农采样定理）：
+    设 $x\in L^2(\mathbb{R})$ 的傅里叶变换支撑在
+    $(-\omega_N,\omega_N)$（$\omega_N=\pi/\Delta x$）内，
+    则 $x$ 由其样本唯一重构：
+    \[
+    x(t)=\sum_{n\in\mathbb{Z}}x(n\Delta x)\operatorname{sinc}
+    \Bigl(\frac{t-n\Delta x}{\Delta x}\Bigr).
+    \]
+    请用频率周期化与矩形窗反变换完成证明，
+    并说明推论 \ref{cor:aliasing_irreversibility_parallel} 中混叠的不可逆性。
+
+    \item 证明引理 \ref{lem:poisson_summation_sampling}（Poisson 求和证明）：
+    采样序列的频谱满足
+    \[
+    \sum_{n}x(n\Delta x)e^{-i\omega n\Delta x}
+    =\frac{1}{\Delta x}\sum_m\hat x(\omega+2\pi m/\Delta x).
+    \]
+    请用 Poisson 求和公式完成证明。
+
+    \item 证明命题 \ref{prop:aliasing_frequency_map_parallel}：
+    折叠映射
+    \[
+    \mathcal{A}_{\omega_s}(\omega)=\omega-m\omega_s,\quad
+    m=\Bigl\lfloor\frac{\omega}{\omega_s}+\frac12\Bigr\rfloor
+    \]
+    满足：
+    \begin{enumerate}[label=(\roman*)]
+        \item $\mathcal{A}_{\omega_s}(\omega)$ 与 $\omega$ 混叠，且
+              $|\omega-\mathcal{A}_{\omega_s}(\omega)|\le\omega_s/2$；
+        \item $\mathcal{A}_{\omega_s}$ 是满射而非单射；
+        \item 在每个奈奎斯特带上为平移或反射。
+    \end{enumerate}
+    请以 $\Delta x=1$ s 为例，验证 $0.9$ Hz 与 $0.1$ Hz 混叠（例 \ref{ex:aliasing_numeric}）。
+
+    \item 证明定理 \ref{thm:leakage_envelope_parallel}（泄露包络与旁瓣）：
+    设 $M\omega_0/(2\pi)=\nu+\delta$，$\nu\in\mathbb{Z}$，$\delta\in[-1/2,1/2]$。则
+    \begin{enumerate}[label=(\roman*)]
+        \item 主瓣位于 $\nu$ 处，峰值
+              $|\hat{f}(\nu)|=A|\sin(\pi\delta)/\sin(\pi\delta/M)|$；
+        \item 对 $j\ne0$，$|\hat{f}(\nu+j)|/|\hat{f}(\nu)|=O(1/|j|)$；
+        \item 若 $\delta=0$，则泄露为零；
+        \item 泄露占比 $\eta(\delta)=1-\operatorname{sinc}^2(\delta)+O(M^{-1})$。
+    \end{enumerate}
+    请用命题 \ref{prop:single_tone_leakage_parallel} 的单频截断公式完成证明，
+    并计算 $\delta=1/2$ 时的泄露占比。
+
+    \item 证明狄利克雷核的封闭形式（引理 \ref{lem:dirichlet_kernel_closed_form}）：
+    对 $\theta\notin2\pi\mathbb{Z}$，
+    \[
+    D_M(\theta)=\frac{\sin((M+\frac12)\theta)}{\sin(\theta/2)},
+    \]
+    且 $D_M(0)=2M+1$。请用等比级数求和完成证明，
+    并说明为什么 $|D_M(\theta)|\le1/|\sin(\theta/2)|$。
+
+    \item 证明命题 \ref{prop:leakage_congruence_angle}：
+    单周期泄露占比可写成
+    \[
+    \eta(M)=1-\operatorname{sinc}^2(\|M\rho\|_{\mathbb{Z}})+O(M^{-1}),
+    \]
+    其中 $\|M\rho\|_{\mathbb{Z}}$ 是窗内周期数的偏移。
+    请说明为什么泄露强度只依赖偏移 $\delta$——这是把泄露控制转化为数论问题的关键
+    （参见注 \ref{rem:leakage_inevitability}）。
+
+    \item 证明定理 \ref{thm:intercalation_error_bound_parallel}：
+    三种基本置闰序列的误差有界性：
+    \begin{enumerate}[label=(\roman*)]
+        \item 下置闰：$E_M^{\mathrm{floor}}\in(-1,0]$；
+        \item 上置闰：$E_M^{\mathrm{ceil}}\in[0,1)$；
+        \item 平衡置闰：$\big|N_M-M\rho\big|<1$（一般窗口 $M$ 上这一偏差可达 $0.9$；只有对连分数分母 $M=q_k$ 才有 $\big|N_M-M\rho\big|\le\delta_{q_k}<1/q_{k+1}$）。
+    \end{enumerate}
+    请分别写出三种置闰序列的求和恒等式，并说明为什么平衡置闰误差最小。
+
+    \item 证明定理 \ref{thm:continued_fraction_best_approx_parallel}（连分数最佳逼近）：
+    设 $\rho\notin\mathbb{Q}$ 的连分数收敛子为 $p_k/q_k$，则
+    \begin{enumerate}[label=(\roman*)]
+        \item $|\rho-p_k/q_k|<1/(q_kq_{k+1})<1/q_k^2$；
+        \item 最佳逼近性：若 $0<q<q_{k+1}$，则 $|q\rho-p|\ge|q_k\rho-p_k|$；
+        \item 偏移等价：$\delta_{q_k}=|q_k\rho-p_k|$ 严格递减。
+    \end{enumerate}
+    请写出证明思路，并说明为什么连分数收敛子是置闰窗口的最优选择。
+
+    \item 证明定理 \ref{thm:intercalation_leakage_suppression}：
+    置闰抑制频谱泄露——
+    \begin{enumerate}[label=(\roman*)]
+        \item 泄露强度只依赖偏移：$\eta(M)\le\frac{\pi^2}{3}\delta_M^2+O(M^{-1})$；
+        \item 一般窗口的平均泄露约 $0.21$，最坏约 $0.595$；
+        \item 置闰窗口取 $M=q_k$（连分数分母）时，
+              $\eta(q_k)=O(q_k^{-2})$；
+        \item 最优置闰窗口同时是最优泄露抑制窗口。
+    \end{enumerate}
+    请说明为什么置闰把泄露从 $O(1)$ 级降到 $O(M^{-2})$ 级，
+    并指出置闰不消除泄露而是有界化。
+
+    \item 证明定理 \ref{thm:window_smoothness_decay_parallel}：
+    设窗 $w$ 的 $m$ 阶差分在两端为零，则其窗谱旁瓣包络满足
+    \[
+    |W_M(\omega)|\le C_m/|\omega|^{m+1}.
+    \]
+    请分别写出矩形窗（$m=0$）、三角窗（$m=1$）、Hann 窗（$m=2$）、
+    Blackman 窗（$m=3$）的旁瓣衰减律与第一旁瓣电平，
+    并说明表 \ref{tab:window_comparison} 中各窗的取舍。
+
+    \item 证明定理 \ref{thm:window_mainlobe_sidelobe_tradeoff_parallel}：
+    主瓣宽度与最大旁瓣电平的权衡：
+    \[
+    N_{\mathrm{eff}}\cdot\Omega_{\mathrm{ML}}\ge2\pi,
+    \]
+    且一般地 $S\ge C\cdot\frac{2\pi}{N_{\mathrm{eff}}\Omega_{\mathrm{ML}}}$。
+    请说明为什么不存在同时具有最窄主瓣与最低旁瓣的窗，
+    并指出置闰与窗函数如何互补（注 \ref{rem:window_and_intercalation_complementarity}）。
+
+    \item 证明定理 \ref{thm:calendar_sampling_unification_parallel}：
+    历法置闰与采样置闰是同构的数学对象：
+    \begin{enumerate}[label=(\roman*)]
+        \item “$q$ 个短周期中插入 $p$ 个额外单元”与平衡置闰序列是同一对象；
+        \item 置闰后的累积偏差 $\delta_q$ 与采样窗口偏移相同；
+        \item 历法置闰周期表就是 $\rho=T_1/T_2$ 的连分数分母序列。
+    \end{enumerate}
+    请以十九年七闰为例（例 \ref{ex:metonic_parallel}），
+    计算 $\rho=12.368266$ 的连分数收敛子，
+    并验证 $q_5=19$、$p_5=235$。
+
+    \item 证明定理 \ref{thm:congruence_angle_crt}（同余角与中国剩余定理）：
+    设周期组 $T_1,\dots,T_k$，$N=\operatorname{lcm}(T_i)$，
+    同余角采样 $\mathcal{C}(n)=(n\bmod T_1,\dots,n\bmod T_k)$。则
+    \begin{enumerate}[label=(\roman*)]
+        \item 像的刻画：$a_i\equiv a_j\pmod{\gcd(T_i,T_j)}$；
+        \item 唯一性：同余方程在模 $N$ 下唯一确定 $n$；
+        \item 合法状态数 $|\operatorname{Im}\mathcal{C}|=N$，冗余度
+              $R=\prod_iT_i/N$。
+    \end{enumerate}
+    请以 $T_1=10$（天干）、$T_2=12$（地支）为例（推论 \ref{cor:sexagenary_congruence}），
+    验证像的大小为 $60$、冗余度为 $2$。
+
+    \item 证明定理 \ref{thm:congruence_parseval}（同余角 Parseval 恒等式）：
+    能量可按子周期分解：
+    \[
+    \sum_{n=0}^{N-1}|f(n)|^2
+    =\frac{1}{N}\sum_{T\mid N}\sum_{a\in\mathbb{Z}/T\mathbb{Z}}
+    |f_T(a)|^2\cdot w_T.
+    \]
+    请说明为什么同余角采样把总能量分解为各子周期上的聚合能量。
+
+    \item 证明定理 \ref{thm:congruence_angle_intercalation_optimal}（同余角置闰最优性）：
+    \begin{enumerate}[label=(\roman*)]
+        \item 若 $\rho=p/q$ 且 $M=kq$，则 $M\rho=kp$ 为整数，
+              对 $T_i\mid kp$ 有 $\delta_{T_i}=0$；
+        \item 若 $\rho\notin\mathbb{Q}$，取 $M=q_k$，则
+              $\delta_{T_i}\le\frac{2\pi}{T_i}\cdot\frac{1}{q_{k+1}}$，
+              泄露 $O(q_k^{-2})$；
+        \item 多周期联合最优：$M=\operatorname{lcm}(q_k,T_1,\dots,T_k)$
+              使所有子周期误差同时达到最优。
+    \end{enumerate}
+    请以 $T_1=10$、$T_2=12$、$\rho=\sqrt{2}$ 为例（例 \ref{ex:sexagenary_intercalation}），
+    计算 $M=60$ 与 $M=70$ 时的泄露上界。
+
+    \item 验证命题 \ref{prop:congruence_angle_sandwich}（上下限逼近与同余角夹逼）：
+    设 $\rho\notin\mathbb{Q}$，$\{q_k\}$ 为连分数分母序列，则
+    \[
+    \delta_{T_i}^{(k)}\cdot\delta_{T_i}^{(k+1)}<0,
+    \]
+    且联合使用二者使累积同余角误差不超过半个子周期。
+    请说明为什么上下限逼近的交替使用等价于同余角的双侧夹逼。
+
+    \item 证明定理 \ref{thm:congruence_angle_convolution_theorem}（同余角卷积定理）：
+    在同余角框架下，循环卷积在各子周期基频上退化为逐点乘法：
+    \[
+    \widehat{(f\circledast g)}\Bigl(\frac{2\pi j}{T_i}\Bigr)
+    =\hat{f}\Bigl(\frac{2\pi j}{T_i}\Bigr)\hat{g}\Bigl(\frac{2\pi j}{T_i}\Bigr).
+    \]
+    请说明为什么这使得卷积可以按子周期并行计算，
+    并写出总计算量的估计。
+
+    \item 证明定理 \ref{thm:congruence_angle_complexity}：
+    同余角快速重构算法的时间复杂度为
+    \[
+    O\Bigl(k\log N+\sum_{i<j}\log\gcd(T_i,T_j)\Bigr),
+    \]
+    空间复杂度为 $O(k)$。请说明为什么其代价远低于一次 FFT
+    （参见注 \ref{rem:congruence_vs_fft}）。
+
+    \item 综合题：结合采样三要素（定义 \ref{def:uniform_sampling_parallel}、
+    \ref{def:nyquist_sampling_parallel}）、
+    公度性判据（命题 \ref{prop:commensurability_periodicity_parallel}）、
+    频谱泄露（定义 \ref{def:spectral_leakage}）、
+    置闰误差有界定理（定理 \ref{thm:intercalation_error_bound_parallel}）、
+    连分数最佳逼近（定理 \ref{thm:continued_fraction_best_approx_parallel}）
+    与同余角框架（定义 \ref{def:congruence_angle}），
+    说明本章如何把“离散采样逼近”升级为“同余角采样逼近”。
+    请分别指出：
+    \begin{enumerate}[label=(\roman*)]
+        \item 采样、截断、置闰三步各自引入哪类误差；
+        \item 同余角如何统一刻画采样、泄露、置闰与中国剩余定理；
+        \item 置闰为何是同余角误差的最优补偿；
+        \item 频率泄露为何是同余角不闭合的频域表现。
+    \end{enumerate}
+\end{enumerate}
+

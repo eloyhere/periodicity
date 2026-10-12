@@ -1,0 +1,937 @@
+\chapter{社交系统之周期结构}
+\markboth{社交系统之周期结构}{社交系统之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:social_ps_hook}
+本章判定研究目标是否具有周期性、确定其周期类型、以及查找最小正周期时，一律引用「周期系统」章：
+周期性判据见 \cref{thm:ps_periodicity_decision}，
+周期类型判别见 \cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}，
+最小正周期查找见 \cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}，
+由数据构建周期级数与周转圆组见 \cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}。
+\end{remark}
+
+\begin{remark}[本章定位：按「周期系统」章五步接口展开]\label{rem:social_five_steps_positioning}
+社交系统之周期结构研究人类社会中群体互动、信息传播、文化变迁与人口演化中周期性现象的数学表征。本章不另立周期性判据，而是把社交系统接入「周期系统」章规定的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把社交节律、周期博弈、信息传播、网络演化、文化周期、人口演化、群体同步等目标化为离散或连续动力系统，引用 \cref{thm:ps_periodicity_decision} 判定是否具有周期性，并确定周期类型；
+    \item \textbf{构建}：由社交活跃度、信息感染率、关系强度、人口规模、人口年龄结构构建振幅级数、频率级数、相位级数，组装为社交周转圆组；
+    \item \textbf{调节}：用残差能量下降、人口守恒、信息守恒与信任守恒（隐喻）约束动态调节社交周转圆组；
+    \item \textbf{卷积}：在社交周转圆组上引入振幅卷积、相位卷积、频率卷积，并与自相关、互相关、相位锁定、群体同步衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成社交周期诊断流程。
+\end{enumerate}
+本章使用的数学工具包括：傅里叶级数、重复囚徒困境、贝叶斯更新、SIR/SIRS 方程、阻尼振荡、网络聚类系数、逻辑斯蒂增长、年龄结构方程、Kuramoto 模型、相位锁定、周期卷积、周转圆组、相位算子。
+\end{remark}
+
+\begin{remark}[本章七主题导引]\label{rem:social_seven_themes}
+\textbf{平移}——人际关系随时间的推移（社交节律的日/周/年重复、互惠交换周期 $T_{\text{ex}}$）；\textbf{缩放}——社交网络规模标度（邓巴数 $150$ 等分层标度、社区半衰期 $T_{1/2}$）；\textbf{旋转}——关系亲疏的相位循环（亲近-疏远交替、文化复古的相位旋转、Kuramoto 相位锁定）；\textbf{守恒}——人口守恒、信息守恒与信任守恒（其中信任守恒为隐喻，见定理 \ref{thm:social_conservation} 与注释 \ref{ch27_trust_metaphor}）；\textbf{对称}——互惠对称（以牙还牙的对称策略、废物测试的对称纳什均衡）；\textbf{闭合}——社交圈闭合与关系回路（三角闭合、交换-测试反馈回路）；\textbf{周期}——关系周期与 Kuramoto 群体同步（命题 \ref{prop:kuramoto_model}）。
+\end{remark}
+
+\section{接入「周期系统」章的五步接口}
+\label{sec:social_five_steps}
+
+\subsection{第一步：社交目标的周期性判定}
+
+\begin{definition}[社交目标与判定输入]\label{def:social_target}
+一个\textbf{社交目标}是指下列对象之一：
+\begin{enumerate}[label=(\roman*)]
+    \item 一个社交节律系统，其状态空间为社交活跃度 $A(t)$ 的区间空间；
+    \item 一个周期博弈系统，其状态空间为行为状态 $(a,b)\in\{C,D\}^2$ 的序列空间；
+    \item 一个信息传播系统，其状态空间为 $(S,I,R)$ 单纯形；
+    \item 一个社交网络演化系统，其状态空间为关系强度矩阵 $\{W_{ij}\}$ 的空间；
+    \item 一个文化-人口演化系统，其状态空间为人口规模 $N(t)$ 与年龄结构 $n(a,t)$ 的联合空间；
+    \item 一个群体同步系统，其状态空间为个体相位 $(\theta_1,\dots,\theta_N)$ 的联合空间。
+\end{enumerate}
+社交目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal D_{\mathrm{S}}=(\mathcal S,\Phi),
+\]
+其中 $\mathcal S$ 是状态空间，$\Phi:\mathcal S\to\mathcal S$ 是时间平移、相位旋转或演化所诱导的映射。若 $\mathcal S$ 为有限集，称目标为\textbf{有限社交目标}；若 $\mathcal S$ 为无限集，称目标为\textbf{无限社交目标}。
+\end{definition}
+
+\begin{definition}[社交判定映射]\label{def:social_periodization}
+设社交目标由判定输入 $\mathcal D_{\mathrm{S}}=(\mathcal S,\Phi)$ 给出。若目标的状态由 $\Phi$ 生成，即存在 $x_0\in\mathcal S$ 使
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+当 $t\in\mathbb Z$ 时 $x_t$ 由 $\Phi$ 迭代生成；当 $t\in\mathbb R$ 时，以单参数演化族 $\{\Phi_t\}_{t\in\mathbb R}$（其中每个 $\Phi_t:\mathcal S\to\mathcal S$，且 $\Phi_0=\operatorname{id}$、$\Phi_{s+t}=\Phi_s\circ\Phi_t$ 对一切 $s,t\in\mathbb R$ 成立、$(t,x)\mapsto\Phi_t(x)$ 连续）记之。
+则称 $\Phi$ 为目标的\textbf{社交判定映射}。此时当 $t\in\mathbb Z$ 时社交目标化为离散动力系统 $(\mathcal S,\Phi)$，当 $t\in\mathbb R$ 时化为连续动力系统 $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$，两种情形均可直接套用「周期基础」章与「周期系统」章的判据。
+\end{definition}
+
+\begin{theorem}[社交周期性判定定理]\label{thm:social_periodicity_decision}
+设社交目标的判定映射为 $\Phi$，且 $(\mathcal S,\Phi)$ 为离散动力系统。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 $m\in\mathbb N^+$ 使 $\Phi^m=\mathrm{id}$，则目标为一致周期社交系统；每条轨道闭合，且轨道长度整除 $m$。
+    \item \textbf{判定等价}：目标为一致周期社交系统当且仅当 $\operatorname{ord}(\Phi)<\infty$。
+    \item \textbf{逐点判据}：目标在状态 $x_0$ 处的轨道闭合当且仅当 $x_0$ 为周期点；此时轨道长度即该点处的周期。
+    \item \textbf{不可省略性}：守恒量与对称群的合取不能替代 $\operatorname{ord}(\Phi)<\infty$；准周期社交目标不属于周期社交系统。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:social_periodicity_decision} 是「周期系统」章 \cref{thm:ps_periodicity_decision} 的领域实例化：
+只需把判定映射 $f$ 与演化群替换为本章的 $\Phi$，(A) 充分判定、(B) 判定等价、(C) 逐点判据、
+(D) 不可省略性四条即逐条成立。依 \cref{rem:ps_applications_hook} 的约定，此处不再重复展开。
+\end{proof}
+
+\begin{corollary}[社交周期类型]\label{cor:social_period_type}
+经 \cref{thm:social_periodicity_decision} 判定后，社交目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 $m_0=1$，状态为不动点；
+    \item \textbf{严格周期型}：$1<m_0<\infty$，状态严格周期；
+    \item \textbf{一致周期型}：$\operatorname{ord}(\Phi)=m<\infty$，所有轨道长度整除 $m$；
+    \item \textbf{准周期型}：$\operatorname{ord}(\Phi)=\infty$，轨道不闭合但在紧致承载结构上稠密；
+    \item \textbf{最终周期型}：存在 $N$，使 $t\ge N$ 后目标为周期；
+    \item \textbf{离散周期型}：承载结构为 $\mathbb Z$，且归一化周期比 $\rho=T_x/\Delta x\in\mathbb Q$。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，残差按 $e^{-\kappa t}$ 衰减（见 \cref{def:ps_period_type}(vii)）。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于周期社交系统；(iv) 不属于周期社交系统，但可用有界逼近工具处理；(v) 只在稳定阶段是周期社交系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期社交系统，只在稳定阶段可用有界逼近工具处理。
+\end{corollary}
+
+\begin{proof}
+逐条由 \cref{thm:social_periodicity_decision} 与「周期系统」章 \cref{def:ps_period_type} 代入社交目标即得。
+\end{proof}
+
+\begin{lemma}[社交节律的周期判定]\label{lem:social_rhythm_periodic}
+设社交活跃度 $A(t)$ 满足日周期条件 $A(t+T_{\text{day}})=A(t)$（$T_{\text{day}}=24$ h）、周周期条件 $A(t+T_{\text{week}})=A(t)$（$T_{\text{week}}=168$ h）、年周期条件 $A(t+T_{\text{year}})=A(t)$（$T_{\text{year}}=8760$ h）。则 $A$ 为一致周期系统，其最小正周期整除
+\[
+T_0=\gcd(T_{\text{day}},T_{\text{week}},T_{\text{year}}).
+\]
+\end{lemma}
+
+\begin{proof}
+由三个周期条件，$A$ 的具有周期轨道的群 $\operatorname{Group}_{\mathrm{period}}(A)$ 包含 $24\mathbb Z$、$168\mathbb Z$、$8760\mathbb Z$。故 $\gcd(24,168,8760)\mathbb Z=24\mathbb Z\subseteq\operatorname{Group}_{\mathrm{period}}(A)$，$A$ 的最小正周期整除 $24$。由「周期基础」章 \cref{def:strict_period} 与 \cref{thm:closed_orbit_criterion}，$A$ 为一致周期系统，最小正周期整除 $T_0$。
+\end{proof}
+
+\begin{lemma}[TFT 周期博弈的周期判定]\label{lem:tft_periodic}
+设重复囚徒困境中双方使用以牙还牙（TFT）策略，误判概率为 $\varepsilon>0$。则合作-报复-回归合作的循环为一致周期系统，其期望周期为
+\[
+\mathbb{E}[L_{\text{cycle}}]\sim \frac{2}{\varepsilon}\qquad(\varepsilon\to0^+).
+\]
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:tit_for_tat_period}，TFT 的 4 状态马尔可夫链（状态为 $(a,b)\in\{C,D\}^2$）在无噪声时 $(C,C)$ 为吸收态，噪声下以概率 $2\varepsilon(1-\varepsilon)$ 跳出。首次脱离-回归的期望时间 $O(1/\varepsilon)$，完整周期包含两次这样的过程，故 $\mathbb{E}[L_{\text{cycle}}]\sim2/\varepsilon$。由「周期基础」章 \cref{def:strict_period}，该循环为一致周期系统（期望意义下）。
+\end{proof}
+
+\begin{lemma}[SIRS 信息传播的周期判定]\label{lem:sirs_periodic}
+设信息传播由 SIRS 模型描述，参数满足 $\Delta=(\beta I^*+\alpha)^2-4\beta I^*(\gamma+\alpha)<0$。则感染比例 $I(t)$ 为一致周期系统，其阻尼振荡周期为
+\[
+T=\frac{2\pi}{\omega},\qquad \omega=\sqrt{\beta I^*(\alpha+\gamma)-\frac{(\beta I^*+\alpha)^2}{4}}.
+\]
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:sir_periodic}，在 $\Delta<0$ 时雅可比矩阵特征值为复共轭 $\lambda=-\frac{\beta I^*+\alpha}{2}\pm i\omega$，阻尼振荡的角频率为 $\omega$。由「周期基础」章 \cref{def:strict_period}，$I(t)-I^*$ 的衰减振荡构成阻尼周期系统；忽略阻尼后为一致周期系统，周期 $T=2\pi/\omega$。
+\end{proof}
+
+\begin{lemma}[社区生命周期的周期判定]\label{lem:community_periodic}
+设社区活跃度 $u(t)$ 在形成期上升、峰值期最高、衰退期指数衰减 $u(t)=u_{\text{peak}}e^{-\lambda(t-t_{\text{peak}})}$。则社区生命周期为渐近周期（阻尼）型（衰退收敛到稳态），半衰期为
+\[
+T_{1/2}=\frac{\ln 2}{\lambda}.
+\]
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:community_cycle}，衰退期 $u(t)$ 指数衰减至 $0$，属「周期系统」章 \cref{def:ps_period_type}(vii) 渐近周期（阻尼）型的极限情形（趋近不动点 $u=0$）。半衰期由 $e^{-\lambda T_{1/2}}=1/2$ 解得 $T_{1/2}=\ln2/\lambda$。
+\end{proof}
+
+\begin{lemma}[代际人口周期的周期判定]\label{lem:generational_pop_periodic}
+设离散世代人口模型 $N_{n+1}=s f(N_{n-1})N_n$，取 $f(N)=r(1-N/K)$。则当 $4srN^*/K>1$ 时，人口动态为一致周期系统，其周期约为两代时间：
+\[
+T_{\text{gen}}\approx 2\times 25\text{ 年}=50\text{ 年}.
+\]
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:generational_population_cycle} 的证明，在平衡态附近线性化得特征方程 $\lambda^2-\lambda+srN^*/K=0$，判别式 $\Delta=1-4srN^*/K$。当 $\Delta<0$ 时特征值为复共轭，人口动态呈现周期振荡。周期约为两个世代时间，$T_{\text{gen}}\approx50$ 年。
+\end{proof}
+
+\begin{lemma}[Kuramoto 群体同步的周期判定]\label{lem:kuramoto_periodic}
+设 $N$ 个个体由 Kuramoto 模型耦合，固有频率分布 $g(\omega)$ 单峰对称，耦合强度 $K>K_c$。则同步态的序参量 $r>0$ 为一致周期系统的宏观表现，个体相位锁定的周期为共同均值频率 $\bar\omega$ 的周期：
+\[
+T_{\text{sync}}=\frac{2\pi}{\bar\omega}.
+\]
+\end{lemma}
+
+\begin{proof}
+由引理 \ref{ch27_kuramoto_threshold}，$K>K_c$ 时存在 $r>0$ 的同步解。由命题 \ref{prop:kuramoto_model}，所有个体相位在共同均值频率 $\bar\omega$ 附近锁定。故由「周期基础」章 \cref{def:strict_period}，同步群体为一致周期系统，周期为 $T_{\text{sync}}=2\pi/\bar\omega$。
+\end{proof}
+
+\begin{definition}[社交最小正周期算法]\label{def:social_minimal_period_algorithm}
+本定义与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{def:ps_minimal_period_algorithm} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处的差别仅为术语（社交目标 / 社交样本），算法步骤与结论完全相同。
+\end{definition}
+
+\begin{theorem}[社交最小正周期算法的正确性]\label{thm:social_minimal_period_correctness}
+本定理与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{thm:ps_minimal_period_correctness} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。本处的差别仅为术语（社交目标 / 社交样本），算法步骤与结论完全相同。
+\end{theorem}
+
+\begin{example}[社交周期判定实例]\label{ex:social_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item 社交节律：$T_0=\gcd(24,168,8760)=24$ h，一致周期型；
+    \item TFT 周期博弈：$\mathbb{E}[L_{\text{cycle}}]\sim2/\varepsilon$，一致周期型；
+    \item SIRS 信息传播：$T=2\pi/\omega$，一致周期型（阻尼）；
+    \item 社区生命周期：渐近周期（阻尼）型（趋于 $u=0$），半衰期 $\ln2/\lambda$；
+    \item 代际人口周期：$T_{\text{gen}}\approx50$ 年，一致周期型；
+    \item Kuramoto 群体同步：$T_{\text{sync}}=2\pi/\bar\omega$，一致周期型。
+\end{enumerate}
+\end{example}
+
+\begin{remark}[守恒量不保证周期]\label{rem:social_invariant_not_period}
+社交系统中的人口守恒、信息守恒与信任守恒（隐喻）是周期结构的辅助条件，但不构成充分条件。例如一个具有人口守恒但无反馈耦合的封闭社会不会自发产生周期振荡。社交周期结构必须由 \cref{thm:social_periodicity_decision} 或上述引理判定。
+\end{remark}
+
+\subsection{第二步：社交周期级数与周转圆组的构建}
+
+\begin{definition}[社交振幅级数、频率级数、相位级数]\label{def:social_series}
+设社交目标的状态或输出序列为 $\{z_t\}$。若其可写为
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+则称
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+分别为社交目标的\textbf{振幅级数}、\textbf{频率级数}与\textbf{相位级数}。三者与「级数与卷积」章 \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} 一致。
+\end{definition}
+
+\begin{definition}[社交周转圆组]\label{def:social_epicycle_group}
+设社交目标的周期级数由振幅级数 $\{A_k\}$、频率级数 $\{\omega_k\}$ 与相位级数 $\{\phi_k\}$ 给出。对每个 $k$ 定义周转圆
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+其集合
+\[
+\mathfrak E_{\mathrm{S}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+称为社交目标的\textbf{周转圆组}。其叠加即社交周期级数
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[由社交数据构建周期级数]\label{thm:social_series_reconstruction}
+设社交目标的输出为有限周期序列，周期为 $N$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 输出可展开为离散傅里叶级数
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item 振幅级数由 $|c_k|$ 给出，相位级数由 $\arg c_k$ 给出，频率级数由 $2\pi k/N$ 给出；
+    \item 若输出为社交节律序列，则基频对应日周期，$k=7$ 谐波对应周周期，$k=365$ 谐波对应年周期；若输出为信息传播序列，则基频对应阻尼振荡周期。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 有限周期序列的离散傅里叶级数是标准结论：基函数 $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ 构成 $\mathbb C^N$ 的正交基。
+(ii) 由 $c_k=A_k e^{i\phi_k}$ 直接读出。
+(iii) 对社交节律序列 $N=8760$（小时采样），基频对应 1 小时，$k=24$ 对应日周期，$k=168$ 对应周周期，$k=8760$ 对应年周期；对信息传播序列，基频对应 SIRS 阻尼振荡的角频率 $\omega/(2\pi)$。
+\end{proof}
+
+\begin{proposition}[三参数对应：半径、相位与转速]\label{prop:social_epicycle_correspondence}
+社交周转圆组 $\mathfrak E_{\mathrm{S}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ 的三个参数与三个几何—社会量一一对应：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{半径对应振幅}：$E_k$ 的半径 $|E_k|=A_k$ 即该社交振荡分量的振幅；
+    \item \textbf{相位对应旋转时延}：初相 $\phi_k$ 对应时间平移 $\tau_k=\phi_k/\omega_k$；$\phi_k>0$ 时该分量相对基准\textbf{超前} $\tau_k$（等价于把基准延后 $\tau_k$ 后二者重合）；
+    \item \textbf{频率对应旋转速度}：$\omega_k$ 即该社交振荡分量的角频率。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:social_epicycle_correspondence} 与「周期系统」章 \cref{prop:ps_epicycle_correspondence} 完全对应，
+三条对应——半径对应振幅、相位对应旋转时延、频率对应旋转速度——逐条平移至本章的周转圆组即得。
+证明见该处：(i) 由 $|E_k|=A_k$ 与能量分解，(ii) 由相位平移定理，(iii) 由频率级数定义。
+\end{proof}
+
+\begin{example}[社交活跃度的周期级数]\label{ex:social_activity_series}
+社交活跃度 $A(t)$ 在日、周、年三个尺度上均有周期分量。在社交周转圆组中，三者表现为不同半径与不同角频率的周转圆分量——日周期振幅最大，周周期次之，年周期最小。
+\end{example}
+
+\begin{remark}[周期级数即复变函数]\label{rem:social_series_complex}
+设 $z=e^{i\omega_0t}$，则社交周期级数
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+当所有分量与 $\omega_0$ 可公度（即 $\omega_k=k\omega_0$，$k\in\mathbb Z$）时可写为洛朗级数 $\sum_k c_k z^k$，其中 $c_k=A_k e^{i\phi_k}$：此时社交周期级数即单位圆上的复变函数，否则为环面上的函数。
+\end{remark}
+
+\subsection{第三步：社交周转圆组的动态调节}
+
+\begin{definition}[社交周转圆组的动态调节]\label{def:social_adaptive_adjustment}
+设当前社交周转圆组为 $\mathfrak E^{(j)}$，部分和
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+残差 $r^{(j)}=z-z^{(j)}$。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 $\|r^{(j)}\|^2>\delta$，则依残差周期图峰值新增一个周转圆；
+    \item \textbf{参数调节}：对已有周转圆参数按正则化最小二乘或守恒约束更新。
+\end{enumerate}
+在社交系统中，数量调节对应增加社交节律模态或信息传播谐波；参数调节对应调整振幅、相位与频率，使人口、信息与信任约束满足。
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:social_adaptive_growth}
+按 \cref{def:social_adaptive_adjustment}(i) 加入残差主频分量后，残差能量单调不增：
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+等号成立当且仅当残差在被选频率上无能量。
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:social_adaptive_growth} 与「周期系统」章 \cref{def:ps_adaptive_adjustment} 的动态调节机制一致：
+新增周转圆即把 $r^{(j)}$ 沿 $\hat\omega$ 的分量从残差中移出，由正交分解
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{被移出的分量}\|^2$ 即得不等式，
+等号当且仅当被移出分量的范数为零。完整论证见该处。
+\end{proof}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:social_adaptive_convergence}
+设社交目标为周期 $T_0$ 的有限周期序列且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得社交周转圆组即目标的精确傅里叶数据。
+\end{theorem}
+
+\begin{proof}
+周期 $T_0$ 的序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波上完备。每步按 \cref{prop:social_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。
+\end{proof}
+
+\begin{definition}[结构指标调节]\label{def:social_structure_metric_adjustment}
+设社交目标的结构指标为
+\[
+\mathcal I=(\mathcal I_{\text{人口}},\mathcal I_{\text{信息}},\mathcal I_{\text{信任}})
+=(\text{人口守恒度},\ \text{信息守恒度},\ \text{信任守恒度}).
+\]
+\textbf{结构指标调节}为：在参数空间 $\Theta$ 中选取 $\theta$，每步取使 $\mathcal I(\theta)$ 按字典序\textbf{严格递减}（极小化）的邻近参数；若不存在则停止，此时为局部最优。
+\end{definition}
+
+\begin{proposition}[结构指标调节的有限收敛]\label{prop:social_structure_metric_convergence}
+设参数空间 $\Theta$ 有限，且每次调节使 $\mathcal I$ 按字典序严格递减。则调节在有限步内终止于局部最优参数。
+\end{proposition}
+
+\begin{proof}
+$\Theta$ 有限，故 $\mathcal I$ 只取有限多个值，而字典序是有限集上的全序；按字典序严格递减的序列不能无限延续，故调节在有限步终止。终止时不存在使 $\mathcal I$ 按字典序严格递减的邻近参数，即局部最优。
+\end{proof}
+
+\begin{remark}[动态调节的边界]\label{rem:social_adaptive_boundary}
+\cref{thm:social_adaptive_convergence} 依赖有限周期序列。对连续谱或准周期社交目标，不存在有限周转圆组精确表示，只能作有界逼近。结构指标调节不保证全局最优。
+\end{remark}
+
+\subsection{第四步：社交卷积}
+
+\begin{definition}[社交振幅卷积、相位卷积与频率卷积]\label{def:social_convolution_types}
+设两个社交周转圆组为
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+定义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅卷积}：$\mathbb A_{mn}=A_nB_m$；
+    \item \textbf{相位卷积}：$\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$；
+    \item \textbf{频率卷积}：$\mathbb F_{mn}=\omega_n\nu_m$；
+    \item \textbf{趋势卷积}：$\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$。
+\end{enumerate}
+这与「级数与卷积」章 \cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution}、\cref{def:tendency_convolution} 一致。
+\end{definition}
+
+\begin{theorem}[三类卷积在社交周转圆组上的作用]\label{thm:social_convolution_action}
+设两个社交目标的周转圆组分别为 $\mathfrak E$ 与 $\mathfrak E'$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 振幅卷积只作用于半径；
+    \item 相位卷积只作用于相位；
+    \item 频率卷积只作用于转速；
+    \item 趋势卷积同时保留振幅与相位。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:social_convolution_types} 直接读出。
+\end{proof}
+
+\begin{proposition}[自相关与趋势卷积]\label{prop:social_autocorr_phase_convolution}
+设 $\{z_t\}$ 为社交周期序列，其自相关函数为
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+在社交周转圆组语言中，自相关函数是趋势卷积在对角线上的投影：
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:social_autocorr_phase_convolution} 是「周期系统」章 \cref{thm:ps_convolution_action} 的卷积作用结论在本领域的实现：
+将 $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ 代入自相关定义，由正交性消去全部非对角交叉项，只保留趋势卷积的对角线项
+（三类卷积的因式分解，\cref{prop:ps_convolution_factorization}），即得 $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$。
+完整展开见该处。
+\end{proof}
+
+\begin{remark}[社交卷积与周期卷积的关系]\label{rem:social_convolution_relation}
+社交卷积不是新的卷积运算，而是「级数与卷积」章周期卷积在社交周转圆组上的实例。自相关是趋势卷积在对角线上的投影，互相关、相位锁定、群体同步分别是振幅卷积和频率卷积在社会科学中的具体表现。
+\end{remark}
+
+\subsection{第五步：与离散采样、调和分析、时序分析的整合}
+
+\begin{definition}[社交周期诊断流程]\label{def:social_periodic_diagnosis}
+对于给定社交系统，使用周期数学框架进行诊断：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{周期判定}：验证社交目标的周期类型（\cref{thm:social_periodicity_decision}）；
+    \item \textbf{级数构建}：由社交活跃度、信息传播率、人口数据构建振幅、频率、相位级数与周转圆组（\cref{thm:social_series_reconstruction}）；
+    \item \textbf{守恒诊断}：验证人口、信息与信任守恒（\cref{thm:social_conservation}）；
+    \item \textbf{卷积诊断}：计算自相关（趋势卷积的对角线投影，\cref{prop:social_autocorr_phase_convolution}）与相位卷积；
+    \item \textbf{整合诊断}：接入离散采样、调和分析、时序分析工具链。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[社交周期诊断流程与三章接口]\label{thm:social_diagnosis_integration}
+\cref{def:social_periodic_diagnosis} 的五个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}、\cref{thm:intercalation_leakage_suppression}；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}、\cref{prop:twelve_to_six}；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}、\cref{def:ts_window_validation}。
+\end{enumerate}
+因此社交周期诊断不是独立方法，而是周期数学统一工具链在社交系统上的应用。
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:social_diagnosis_integration} 是「周期系统」章五步接口（\cref{tab:ps_five_steps}）在本领域的落地：
+周期判定用采样与谱估计，频率分解与相位核用「调和分析」章，周期图峰值、Fisher 检验与
+窗函数验证用「时序分析」章。故诊断流程由三章工具链合成，证明见该处。
+\end{proof}
+
+\begin{remark}[整合后的操作顺序]\label{rem:social_integration_order}
+实际诊断建议顺序为：先判定社交目标是否周期（\cref{thm:social_periodicity_decision}）；再构建社交数据的傅里叶数据与周转圆组（\cref{thm:social_series_reconstruction}）；再用守恒约束与动态调节优化参数（\cref{thm:social_adaptive_convergence}、\cref{prop:social_structure_metric_convergence}）；再作社交卷积与自相关分析（\cref{prop:social_autocorr_phase_convolution}）；最后按 \cref{def:social_periodic_diagnosis} 输出诊断。
+\end{remark}
+
+\section{社交系统的数学基础}
+
+\begin{definition}[社交系统的基本量]\label{def:social_quantities}
+社交系统由以下基本变量描述：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{社交网络图} $G = (V, E)$：顶点 $V$ 表示个体（人、组织），边 $E$ 表示社交关系（友谊、关注、通信）。图的拓扑结构决定了信息传播的路径和速度。
+    \item \textbf{社交活跃度} $A(t) \in [0,1]$：个体或群体在时刻 $t$ 参与社交互动的强度。$A \to 1$ 表示高强度社交（频繁联系、大量互动），$A \to 0$ 表示社交隔离。
+    \item \textbf{信息感染率} $I(t) \in [0,1]$：特定信息（或行为、观点）在群体中的传播比例。$I(t)$ 是 SIR 类模型的核心变量。
+    \item \textbf{关系强度} $W_{ij}(t) \in [0,1]$：个体 $i$ 和 $j$ 之间在时刻 $t$ 的社交关系强度。$W \to 1$ 表示强关系（亲密友谊），$W \to 0$ 表示弱关系或无关系。
+    \item \textbf{人口规模} $N(t)$：社会系统在时刻 $t$ 的总人口。人口规模的变化由出生率、死亡率与迁移率决定。
+    \item \textbf{人口年龄结构} $n(a, t)$：在时刻 $t$、年龄为 $a$ 的人口密度。年龄结构是人口演化周期结构的基础。
+\end{enumerate}
+社交系统的核心特征是\textbf{网络结构约束下的群体动力学}——个体的行为受其在社交网络中的位置和邻域状态的影响，群体层面的周期现象是个体互动的涌现结果。
+\end{definition}
+
+\begin{property}[基本量的直接约束]\label{ch27_basic_constraints}
+由定义 \ref{def:social_quantities}，社交系统的基本量满足以下直接约束：
+\begin{enumerate}[label=(\roman*)]
+    \item 归一化：$A(t), I(t), W_{ij}(t) \in [0,1]$，均为无量纲比例量；$N(t) \ge 0$ 且 $n(a, t) \ge 0$。
+    \item 网络承载：关系强度矩阵 $\{W_{ij}(t)\}$ 是社交网络图 $G=(V,E)$ 的加权邻接矩阵，其支撑集由边集 $E$ 决定，$W_{ij}(t)$ 仅对 $(i,j) \in E$ 非零。
+    \item 人口平衡：$\int_0^\infty n(a,t)\, da = N(t)$；人口变化率 $\frac{dN}{dt} = B(t) - D(t) + M(t)$，其中 $B, D, M$ 分别为出生率、死亡率与净迁移率。
+    \item 涌现性：群体层面（$I(t)$、$A(t)$ 的统计量）的周期现象由个体互动（$W_{ij}$、网络拓扑）与人口过程决定，而非预先给定。
+\end{enumerate}
+\end{property}
+
+\section{社交节律}
+
+\begin{definition}[社交活动的多尺度周期]\label{def:social_rhythms}
+人类社交活动在多个时间尺度上呈现显著的周期性：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{日周期}：社交活跃度在 $24$ 小时内规律变化——凌晨最低（睡眠），上午逐渐升高，午后略有下降（午休），傍晚至夜间达到峰值（社交活动高峰），深夜迅速下降。
+    \item \textbf{周周期}：七日星期制是纯粹的\textbf{社会建构周期}——没有天文基础，完全由文化惯例维持。社交活跃度在周末（周五晚至周日）达到峰值，在周初（周一）最低。
+    \item \textbf{年周期}：社交活动随季节变化——冬季室内社交增多，夏季户外社交增多。特定节日（春节、圣诞节、感恩节）引发大规模的周期性社交聚集和人口流动。
+\end{enumerate}
+社交节律表现为 $24$ 小时、$7$ 天、$365$ 天的时间平移重复：每一天、每一周、每一年的社交模式在统计意义上重复。社交活跃度 $A(t)$ 在日周期 $T_{\text{day}}=24$ h、周周期 $T_{\text{week}}=168$ h、年周期 $T_{\text{year}}=8760$ h 上近似满足 $A(t+T) \approx A(t)$。
+\end{definition}
+
+\begin{proposition}[社交活跃度的周期分解]\label{ch27_rhythm_fourier}
+若社交活跃度 $A(t)$ 满足日周期条件 $A(t+T_{\text{day}})=A(t)$（$T_{\text{day}}=24$ h），则 $A$ 可展开为傅里叶级数
+\[
+A(t) = \sum_{k=-\infty}^{\infty} \hat{A}_k e^{i k \omega_0 t}, \qquad \omega_0 = \frac{2\pi}{T_{\text{day}}},
+\]
+其中第 $k$ 次谐波的能量占比为 $p_k = |\hat{A}_k|^2 / \sum_{n} |\hat{A}_n|^2$，满足 $\sum_k p_k = 1$。基频（$k=1$）对应昼夜节律，二次谐波（$k=2$）对应工作-休息的双峰结构，三次谐波（$k=3$）对应用餐时间的附加峰。
+\end{proposition}
+
+\begin{proof}
+$A$ 以 $T_{\text{day}}$ 为周期，故由傅里叶级数定理，$A(t)$ 可展为上述级数，系数
+\[
+\hat{A}_k = \frac{1}{T_{\text{day}}}\int_0^{T_{\text{day}}} A(t)e^{-ik\omega_0 t}\,dt.
+\]
+Parseval 等式 $\sum_{k}|\hat{A}_k|^2 = \frac{1}{T_{\text{day}}}\int_0^{T_{\text{day}}}|A(t)|^2 dt$ 保证 $p_k$ 的定义合法且 $\sum_k p_k = 1$。若 $A(t)$ 严格以 $T_{\text{day}}$ 为周期，则能量仅集中在整数倍频 $\omega = k\omega_0$ 处。
+\end{proof}
+
+\begin{remark}[社交媒体的节律模式（经验观察）]\label{prop:social_media_rhythm}
+社交媒体平台（Twitter/X、微信、微博）的发帖量、点赞量和评论量呈现精确的周期性。以日为周期的傅里叶分析显示，发帖量的基频 $\omega_0 = 2\pi/24\text{h}$ 解释了约 $60\%$ 的方差，二倍频和三倍频分别对应工作-休息的双峰模式和用餐时间的附加峰——此为\textbf{经验观察}，其具体数值（$60\%$ 方差占比）来自对真实平台数据的统计拟合，非数学定理。
+
+社交媒体数据是研究社交节律的素材——海量用户数据的统计平均揭示了社交行为的周期结构。全球社交媒体活动的二十四小时热力图显示，不同时区的用户轮流进入活跃状态——全球社交网络表现为一个接力系统，活跃度在时区之间平移。这一现象的数学表述为：在适当的时区覆盖下，$\sum_{\text{时区}} A_{\text{时区}}(t)$ 在日内近似恒定——同样为经验观察。
+\end{remark}
+
+\section{社交互动中的周期博弈}
+
+社交互动中的两个核心动力学——\textbf{利益交换}（reciprocal altruism）和\textbf{废物测试}（fitness test）——均呈现出基于概率的周期性结构。本节使用“概率论”章建立的数学框架，对这两种社交博弈进行形式化分析。
+
+\subsection{利益交换的周期博弈}
+
+\begin{definition}[利益交换的周期模型]\label{def:reciprocal_altruism}
+\textbf{利益交换}（或称互惠利他）是指个体 A 在时刻 $t$ 向个体 B 提供利益（帮助、资源、信息），期望在未来某个时刻获得回报。设 $X_{AB}(t) \in \{0,1\}$ 表示 A 在时刻 $t$ 是否向 B 提供利益（$1$ = 提供，$0$ = 不提供），$Y_{BA}(t)$ 同理。利益交换的长期平衡要求双方的累计付出与累计回报在统计意义上相等：
+\[
+\mathbb{E}\left[\sum_{t=1}^{T} X_{AB}(t) \cdot v_A(t)\right] \approx \mathbb{E}\left[\sum_{t=1}^{T} Y_{BA}(t) \cdot v_B(t)\right],
+\]
+其中 $v_A(t), v_B(t)$ 是各自提供利益的“价值”（可能随时间变化）。
+
+互惠行为的周期性（你帮我一次，我帮你一次）是时间平移重复在社交博弈中的体现。交换周期 $T_{\text{ex}}$（两次互惠之间的平均时间间隔）度量了社交关系的亲密度。亲密关系中 $T_{\text{ex}}$ 较长（交换不急于即时对等），疏远关系中 $T_{\text{ex}}$ 较短（每次帮助都需要快速回报）。
+\end{definition}
+
+\begin{proposition}[以牙还牙策略的周期分析]\label{prop:tit_for_tat_period}
+在重复囚徒困境中，最成功的策略之一是以牙还牙（Tit-for-Tat, TFT）：第一步合作，此后每一步重复对方上一步的行为。在噪声环境中（存在误判概率 $\varepsilon$），TFT 策略的演化产生\textbf{合作-背叛的周期振荡}。
+
+设误判概率为 $\varepsilon$（对方实际合作但被误判为背叛的概率，或反之）。当 $\varepsilon > 0$ 时，单次误判触发报复循环——A 误判 B 为背叛后报复，B 感知到 A 的背叛后报复回去，如此循环。在互惠对称情形下，一个完整的“合作-报复-回归合作”周期的期望长度渐近为
+\[
+\mathbb{E}[L_{\text{cycle}}] \sim \frac{2}{\varepsilon} \qquad (\varepsilon \to 0^+).
+\]
+宽恕策略（Forgiving TFT）以概率 $p$ 忽略对方的一次背叛，将振荡周期缩短为 $\mathbb{E}[L_{\text{cycle}}] \sim 2/p$。
+\end{proposition}
+
+\begin{proof}
+设状态为双方上一次的行为 $(a, b)$，其中 $a, b \in \{C, D\}$（合作或背叛）。TFT 策略下的状态转移矩阵为 $4 \times 4$ 马尔可夫链。在无噪声时，$(C, C)$ 是吸收态。在有噪声时，从 $(C, C)$ 以概率 $2\varepsilon(1-\varepsilon)$ 跳转到 $(C, D)$ 或 $(D, C)$；从 $(D, D)$ 出发，TFT 导致双方交替背叛，以概率 $(1-\varepsilon)^2$ 同时回到 $(C, C)$。首次脱离合作态到回归合作态的期望时间在小 $\varepsilon$ 下为 $\mathbb{E}[T] = O(1/\varepsilon)$——单个“误判-报复-回归”周期的期望长度为 $O(1/\varepsilon)$。完整周期（两次回归合作态之间的时间）包含两次这样的过程，故 $\mathbb{E}[L_{\text{cycle}}] \sim 2/\varepsilon$。
+\end{proof}
+
+\subsection{废物测试的概率模型}
+
+\begin{definition}[废物测试的数学定义]\label{def:shittest}
+\textbf{废物测试}（fitness test）是指个体 A 向个体 B 发出一个有成本的挑战（言语、行为、要求），观察 B 的反应以评估 B 的“适应性”（自信、能力、资源、社交地位）。从概率论的角度，废物测试是一个\textbf{贝叶斯更新}过程——A 通过观察 B 对测试的反应，更新对 B 的“类型”（高价值/低价值）的后验概率。
+
+设 B 的未知类型为 $\theta \in \{H, L\}$（High/Low），先验概率为 $\mathbb{P}(\theta = H) = p_0$。A 发出测试 $T$，B 对测试的反应为 $R \in \{\text{通过}, \text{不通过}\}$。似然函数为
+\[
+\mathbb{P}(R = \text{通过} \mid \theta = H) = \alpha_H, \quad \mathbb{P}(R = \text{通过} \mid \theta = L) = \alpha_L,
+\]
+其中 $\alpha_H > \alpha_L$（高价值个体更可能通过测试）。由贝叶斯公式，A 在观察到 B 的反应后更新对 B 类型的后验概率：
+\[
+\mathbb{P}(\theta = H \mid R) = \frac{\mathbb{P}(R \mid \theta = H) \cdot p_0}{\mathbb{P}(R \mid \theta = H) \cdot p_0 + \mathbb{P}(R \mid \theta = L) \cdot (1-p_0)}.
+\]
+\end{definition}
+
+\begin{proposition}[废物测试的周期性与序贯决策]\label{prop:shittest_periodic}
+在长期社交互动中，废物测试不是一次性的，而是\textbf{周期性}发生的——随着时间推移，A 对 B 类型判断的不确定性逐渐增加（遗忘、环境变化、B 可能“伪装”），需要定期重新测试。废物测试的最优时间间隔 $\Delta T_{\text{test}}$ 由以下因素决定：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{信息衰减率} $\lambda$：后验概率随时间衰减的速率——$\mathbb{P}_t(\theta = H) = \mathbb{P}_0(\theta = H) \cdot e^{-\lambda t} + p_0 \cdot (1 - e^{-\lambda t})$。
+    \item \textbf{测试成本} $C_{\text{test}}$：发出测试的社会成本（冒犯对方、暴露自己的意图）。
+    \item \textbf{误判成本} $C_{\text{error}}$：错误判断对方类型的代价（错信低价值者或错失高价值者）。
+\end{enumerate}
+在“陈旧性线性累积”假设下（误判风险随距上次测试的时间线性增长），最优测试周期为
+\[
+\Delta T_{\text{test}}^* = \sqrt{\frac{2 C_{\text{test}}}{C_{\text{error}}\, p(1-p)\, \lambda}},
+\]
+其中 $p$ 是上一次测试后的后验概率、$p(1-p)$ 是信念不确定性的方差度量。测试周期 $\Delta T_{\text{test}}^*$ 度量了社交信息在多长时间后需要重新校准。
+\end{proposition}
+
+\begin{proof}
+信息衰减模型 $\frac{dp}{dt} = -\lambda(p-p_0)$ 的解为 $p(t) = p_0 + (p_{\text{post}}-p_0)e^{-\lambda t}$，其中 $p_{\text{post}}$ 是上一次测试后的后验概率。测试后的信念不确定性用方差 $p(1-p)$ 度量。设距上次测试 $\tau$ 处，误判的瞬时成本率为 $C_{\text{error}}\,p(1-p)\,\lambda\tau$（陈旧性线性累积）。则一个周期 $[0,\Delta T]$ 内的总期望成本为
+\[
+C(\Delta T) = C_{\text{test}} + \int_0^{\Delta T} C_{\text{error}}\,p(1-p)\,\lambda\tau\,d\tau
+= C_{\text{test}} + \frac12 C_{\text{error}}\,p(1-p)\,\lambda\,\Delta T^2.
+\]
+单位时间平均成本为
+\[
+c(\Delta T) = \frac{C(\Delta T)}{\Delta T} = \frac{C_{\text{test}}}{\Delta T} + \frac12 C_{\text{error}}\,p(1-p)\,\lambda\,\Delta T.
+\]
+一阶条件
+\[
+c'(\Delta T) = -\frac{C_{\text{test}}}{\Delta T^2} + \frac12 C_{\text{error}}\,p(1-p)\,\lambda = 0
+\]
+给出
+\[
+\Delta T^* = \sqrt{\frac{2C_{\text{test}}}{C_{\text{error}}\,p(1-p)\,\lambda}}.
+\]
+二阶条件 $c''(\Delta T^*) = 2C_{\text{test}}/(\Delta T^*)^3 > 0$ 保证其为最小值。例如取 $C_{\text{test}}=1$、$C_{\text{error}}=10$、$p=0.8$、$\lambda = 0.1$/周，则 $p(1-p)=0.16$，$\Delta T^* = \sqrt{2/(10\cdot 0.16\cdot 0.1)} = \sqrt{12.5} \approx 3.54$ 周，与日常经验中“约一月一次”的测试频率同量级。
+\end{proof}
+
+\begin{theorem}[废物测试的纳什均衡]\label{thm:shittest_nash}
+在双方都进行废物测试的社交博弈中，存在对称的贝叶斯-纳什均衡。设 A 和 B 同时选择“通过测试的努力程度”$e_A, e_B \in [0, \infty)$，努力成本为 $c(e)$（$c' > 0, c'' > 0$）。努力程度 $e$ 越高，通过对方测试的概率越高，但成本也越高。对称均衡下的最优努力程度 $e^*$ 满足
+\[
+c'(e^*) = \frac{\partial \mathbb{P}(\text{通过} \mid e^*)}{\partial e} \cdot \Delta V,
+\]
+其中 $\Delta V$ 是“被视为高价值”相对于“被视为低价值”的社交收益差。
+
+A 和 B 的努力程度构成相空间 $(e_A, e_B)$ 中的对称轨道——双方的最优策略是对称的，类似于耦合振子的同相同步。均衡努力程度 $e^*$ 随测试的频率（$\Delta T_{\text{test}}^{-1}$）和社交收益差（$\Delta V$）增大而增大。
+\end{theorem}
+
+\begin{proof}
+A 的期望收益为 $\mathbb{E}[U_A] = \mathbb{P}_A(\text{通过 B 的测试} \mid e_A) \cdot V_H + (1 - \mathbb{P}_A) \cdot V_L - c(e_A)$，其中 $V_H, V_L$ 分别为被视为高/低价值时的社交收益。一阶条件：$\frac{\partial \mathbb{E}[U_A]}{\partial e_A} = \frac{\partial \mathbb{P}_A}{\partial e_A} \cdot (V_H - V_L) - c'(e_A) = 0$。对称均衡要求 $e_A = e_B = e^*$。二阶条件由 $c''(e^*) > 0$ 保证（边际成本递增）。
+\end{proof}
+
+\begin{example}[社交场合中的经典废物测试]
+社交互动中常见的废物测试模式及其概率结构：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{服从性测试}（Compliance Test）：A 要求 B 做一件稍微麻烦但合理的事（如递一杯水）。高价值个体（$\theta = H$）以概率 $\alpha_H \approx 0.9$ 友好地完成或风趣地拒绝，低价值个体（$\theta = L$）以概率 $\alpha_L \approx 0.3$ 过度顺从或过度抗拒。测试周期 $\Delta T_{\text{test}} \approx 1$—$2$ 周。
+    \item \textbf{一致性测试}（Congruence Test）：A 表达一个观点或情绪，观察 B 是否保持自己的立场还是迎合 A。高价值个体保持一致性（不迎合也不攻击），低价值个体要么过度迎合要么过度反驳。测试周期 $\Delta T_{\text{test}} \approx 1$—$3$ 天。
+    \item \textbf{压力测试}（Stress Test）：A 制造一个轻微的尴尬或紧张情境，观察 B 在压力下的反应。高价值个体保持冷静和幽默，低价值个体表现出焦虑或攻击性。测试周期 $\Delta T_{\text{test}} \approx 1$—$4$ 周。
+\end{enumerate}
+这些废物测试的共性在于通过观察对方对\textbf{相位扰动}（测试）的反应来估计对方的“类型参数”。测试的强度（难度、尴尬程度）是缩放因子。对方反应的信息增益通过贝叶斯更新更新先验概率，形成完整的“先验-测试-后验”周期。
+\end{example}
+
+\subsection{利益交换与废物测试的周期耦合}
+
+\begin{proposition}[交换-测试的复合周期]\label{prop:exchange_test_coupling}
+在长期社交关系中，利益交换和废物测试形成\textbf{耦合的周期系统}：利益交换的失败（对方未回报）触发废物测试（对方是否仍然可信），废物测试的结果决定是否继续利益交换。设交换周期为 $T_{\text{ex}}$，测试周期为 $T_{\text{test}}$，两者的耦合动力学为
+\[
+\frac{dT_{\text{ex}}}{dt} = -\alpha \cdot \mathbf{1}_{\text{测试失败}} + \beta \cdot \mathbf{1}_{\text{测试通过}}, \quad T_{\text{test}} = \gamma \cdot T_{\text{ex}} + \delta,
+\]
+其中 $\alpha, \beta, \gamma, \delta > 0$ 是耦合参数。交换周期 $T_{\text{ex}}$（交换频率）在测试通过时缩短（关系升温），在测试失败时延长（关系降温）。测试周期 $T_{\text{test}}$ 与交换周期正相关——交换越频繁，测试越频繁。
+
+利益交换和废物测试的耦合是两个子结构相互锁定的实例：利益交换提供关系的实质内容，废物测试提供关系的质量评估。两者的频率比 $T_{\text{ex}}/T_{\text{test}}$ 度量了关系中的信任度。高信任关系中 $T_{\text{test}} \gg T_{\text{ex}}$（偶尔测试，频繁交换），低信任关系中 $T_{\text{test}} \approx T_{\text{ex}}$（每次交换前后都需测试）。
+\end{proposition}
+
+\begin{proof}
+设一次测试通过的概率为 $p$（失败概率 $1-p$）。对耦合方程第一式取期望：
+\[
+\mathbb{E}\left[\frac{dT_{\text{ex}}}{dt}\right] = -\alpha\,\mathbb{E}[\mathbf{1}_{\text{测试失败}}] + \beta\,\mathbb{E}[\mathbf{1}_{\text{测试通过}}] = -\alpha(1-p) + \beta p = (\alpha+\beta)p - \alpha.
+\]
+令其为零得平衡通过率
+\[
+p^* = \frac{\alpha}{\alpha+\beta}.
+\]
+这是负反馈稳定不动点：当 $p > p^*$ 时 $\mathbb{E}[dT_{\text{ex}}/dt] > 0$，交换周期被拉长（关系降温），下一次测试更易失败、$p$ 回落；当 $p < p^*$ 时交换周期缩短（关系升温）、$p$ 回升。故系统围绕 $p^*$ 动态平衡。将平衡交换周期 $\overline{T}_{\text{ex}}$ 代入 $T_{\text{test}} = \gamma T_{\text{ex}} + \delta$，得平衡测试周期 $\overline{T}_{\text{test}} = \gamma\overline{T}_{\text{ex}} + \delta$，频率比在平衡态趋于常数 $\overline{T}_{\text{ex}}/\overline{T}_{\text{test}} = 1/(\gamma + \delta/\overline{T}_{\text{ex}})$。例如取 $\alpha=1, \beta=3$（测试通过后关系升温更快），则 $p^* = 1/4$——长期看约四分之一的测试以失败告终时，交换-测试系统达到平衡。
+\end{proof}
+
+\section{信息传播}
+
+\begin{definition}[SIR 信息传播模型]\label{def:sir_model}
+\emergencystretch=6em
+社交网络中信息传播的经典模型是 SIR 模型（Susceptible-Infected-Recovered，即易感者—感染者—免疫者）：
+\[
+\frac{dS}{dt} = -\beta S I, \quad \frac{dI}{dt} = \beta S I - \gamma I, \quad \frac{dR}{dt} = \gamma I,
+\]
+其中 $S(t)$ 是尚未接触信息的易感者比例，$I(t)$ 是已接触并正在传播信息的感染者比例，$R(t)$ 是对信息失去兴趣的免疫者比例。$\beta$ 是传播率（单位时间内一个感染者能传染的易感者数量），$\gamma$ 是恢复率（感染者失去传播兴趣的速率）。
+
+信息从感染者向易感者的传播是正向缩放（$I$ 增加，$S$ 减少），感染者向免疫者的转化是逆向缩放（$I$ 减少，$R$ 增加）。基本再生数 $R_0 = \beta/\gamma$ 决定了传播规模——$R_0 > 1$ 时信息爆发性传播，$R_0 < 1$ 时信息逐渐消亡。感染曲线 $I(t)$ 在 $R_0 > 1$ 时呈现先上升后下降的单峰形态——信息的热度随时间先增后减。
+\end{definition}
+
+\begin{proposition}[SIRS 模型中的阻尼振荡]\label{prop:sir_periodic}
+当 SIR 模型中添加易感者的补充（新用户加入、遗忘者重新变为易感者）时，模型变为 SIRS：
+\[
+\frac{dS}{dt} = -\beta S I + \alpha R, \quad \frac{dI}{dt} = \beta S I - \gamma I, \quad \frac{dR}{dt} = \gamma I - \alpha R,
+\]
+其中 $\alpha$ 是免疫者重新变为易感者的速率。SIRS 模型存在地方病平衡点 $S^* = \gamma/\beta$；当判别式为负时，雅可比矩阵的特征值为复共轭——系统呈现阻尼振荡，感染比例趋向平衡点的过程中以周期
+\[
+T = \frac{2\pi}{\omega}, \qquad \omega = \sqrt{\beta I^*(\alpha+\gamma) - \frac{(\beta I^*+\alpha)^2}{4}}
+\]
+波动，其中 $I^* = \frac{\alpha}{\alpha+\gamma}\left(1-\frac{\gamma}{\beta}\right)$ 为平衡感染比例。
+
+SIRS 模型的周期解表现为信息的“爆发-消退-再爆发”模式。当 $\alpha$ 较大（免疫者快速遗忘并重新关注）时，振荡显著——信息反复成为热点。社交媒体中的“旧闻重提”现象是 SIRS 周期解的实证。
+\end{proposition}
+
+\begin{proof}
+利用 $S+I+R=1$ 将系统降为二维（变量 $S, I$）。平衡点由 $dI/dt = 0$ 与 $dS/dt = 0$ 联立：由 $I(\beta S-\gamma)=0$ 取非零解得 $S^* = \gamma/\beta$；由 $\gamma I = \alpha R$ 得 $R^* = \gamma I^*/\alpha$，代入 $S^*+I^*+R^*=1$ 解得
+\[
+I^* = \frac{\alpha}{\alpha+\gamma}\left(1-\frac{\gamma}{\beta}\right).
+\]
+$R_0 = \beta/\gamma > 1$ 时 $I^* > 0$。在平衡点处雅可比矩阵为
+\[
+J = \begin{pmatrix} -\beta I^* - \alpha & -\gamma - \alpha \\ \beta I^* & 0 \end{pmatrix},
+\]
+特征方程为 $\lambda^2 + (\beta I^*+\alpha)\lambda + \beta I^*(\gamma+\alpha) = 0$。当判别式 $\Delta = (\beta I^*+\alpha)^2 - 4\beta I^*(\gamma+\alpha) < 0$ 时，特征值为 $\lambda = -\frac{\beta I^*+\alpha}{2} \pm i\omega$，其中
+\[
+\omega = \sqrt{\beta I^*(\gamma+\alpha) - \frac{(\beta I^*+\alpha)^2}{4}}.
+\]
+虚部 $\omega$ 给出阻尼振荡的角频率，故周期 $T = 2\pi/\omega$。阻尼率 $(\beta I^*+\alpha)/2 > 0$ 保证振荡随时间衰减，系统最终趋于平衡点。当 $\alpha$ 较大（免疫者快速重新变为易感者）时 $I^*$ 与 $\omega$ 增大，振荡显著。
+\end{proof}
+
+\section{社交网络演化}
+
+\begin{definition}[社交关系的周期演化]\label{def:relationship_cycle}
+社交关系不是静态的，而是随时间\textbf{周期性演化}的。关系强度 $W_{ij}(t)$ 的变化可建模为
+\[
+\frac{dW_{ij}}{dt} = \eta_{ij}(t) - \lambda W_{ij} + \sigma \xi_{ij}(t),
+\]
+其中 $\eta_{ij}(t)$ 是互动频率（随时间变化），$\lambda$ 是关系自然衰减率，$\xi_{ij}(t)$ 是随机扰动。互动频率 $\eta_{ij}(t)$ 本身具有周期性——工作日互动、周末互动、节日互动各有不同频率。
+
+关系的亲近-疏远交替类似于相空间中的旋转。关系强度的周期性变化在周期卷积中对应于差角相似度 $\operatorname{Similarity}^{(1)}(\theta_i, \theta_j)$ 的周期调制——当两人的社交活跃度同相位时关系最亲密（$\cos(0)=1$），反相位时关系最疏远（$\cos(\pi)=-1$）。
+\end{definition}
+
+\begin{proposition}[社交网络的社区结构周期]\label{prop:community_cycle}
+社交网络的社区结构（朋友群、兴趣组、工作团队）随时间演化——社区的形成、稳定和瓦解具有内在的周期。设衰退期的社区活跃度 $u(t)$（成员互动频率）按指数衰减
+\[
+u(t) = u_{\text{peak}}\, e^{-\lambda (t - t_{\text{peak}})}, \qquad t \ge t_{\text{peak}},
+\]
+其中 $t_{\text{peak}}$ 是活跃度峰值时刻，$\lambda > 0$ 是衰减率。则社区的“半衰期”（一半成员保持活跃的时间）为
+\[
+T_{1/2} = \frac{\ln 2}{\lambda}.
+\]
+社区生命周期表现为形成期（关系建立，互动增加）、峰值期（活跃度最高）、衰退期（关系瓦解，互动减少）的完整循环。半衰期 $T_{1/2}$ 度量了社区凝聚力的持久性。在线社交平台的群组数据分析表明，大多数群组的活跃度在创建后 $3$—$6$ 个月达到峰值，随后以近似指数衰减，完整生命周期约 $6$ 个月至 $5$ 年（此为\textbf{经验观察}，具体时长取决于社区类型）。
+\end{proposition}
+
+\begin{proof}
+由 $u(t) = u_{\text{peak}} e^{-\lambda(t-t_{\text{peak}})}$，令 $u(t_{1/2}) = u_{\text{peak}}/2$，则 $e^{-\lambda(t_{1/2}-t_{\text{peak}})} = 1/2$，两边取对数得 $\lambda(t_{1/2}-t_{\text{peak}}) = \ln 2$，故
+\[
+T_{1/2} = t_{1/2} - t_{\text{peak}} = \frac{\ln 2}{\lambda}.
+\]
+例如取实测半衰期 $T_{1/2} = 3$ 个月，则 $\lambda = \ln 2/(3\text{个月}) \approx 0.231/\text{月}$，对应每月活跃度衰减约 $1 - e^{-0.231} \approx 20.6\%$。
+\end{proof}
+
+\begin{definition}[社交圈闭合]\label{ch27_triadic_closure}
+\textbf{社交圈闭合}（三角闭合）指：若个体 $i$ 与 $j$、$i$ 与 $k$ 均存在关系，则 $j$ 与 $k$ 之间形成关系的概率显著高于随机水平。记节点 $i$ 的度为 $d_i$，以 $i$ 为顶点的闭合三角形数为 $T_i$，则节点 $i$ 的局部聚类系数为
+\[
+C_i = \frac{\text{节点}i\text{的邻居之间实际存在的边数}}{\binom{d_i}{2}} = \frac{2T_i}{d_i(d_i-1)},
+\]
+全网聚类系数 $\overline{C} = \frac{1}{|V|}\sum_{i\in V} C_i$。$\overline{C}=0$ 对应无闭合的树状网络，$\overline{C}=1$ 对应完全闭合的团。
+\end{definition}
+
+\begin{proposition}[社交圈闭合的关系回路]\label{ch27_closure_loop}
+在互惠对称假设下（关系强度 $W_{ij}=W_{ji}$，对应定理 \ref{thm:shittest_nash} 的对称均衡），社交圈闭合使关系网络形成大量闭合回路——三角形 $i$-$j$-$k$-$i$。对随机图（Erdős–Rényi 图 $G(n,p)$），任意两邻居独立成边，故 $\mathbb{E}[\overline{C}] = p$；而真实社交网络的实测 $\overline{C} \gg p$，说明关系边倾向于嵌入闭合三角形——社交圈闭合是系统性的，而非随机巧合。
+\end{proposition}
+
+\begin{proof}
+对 $G(n,p)$，节点 $i$ 的任意两条邻边对应的两个邻居之间独立地以概率 $p$ 连边，故 $\mathbb{E}[C_i] = p$，从而 $\mathbb{E}[\overline{C}] = p$。由定义，每个闭合三角形 $i$-$j$-$k$ 对三个顶点的 $T_i, T_j, T_k$ 各贡献 $1$，故三角形总数 $= \frac{1}{3}\sum_i T_i$，全网闭合回路数由 $\{C_i\}$ 唯一确定。真实社交网络满足 $\overline{C} \gg p$：例如某社交平台 $n \sim 10^4$、$p \sim 10^{-3}$（此时 $\overline{C}_{ER}\approx 0.001$），而实测 $\overline{C}\approx 0.12$，即闭合三角形比随机图丰富约 $120$ 倍——这量化了“朋友的朋友往往也成为朋友”的三角闭合效应。
+\end{proof}
+
+\section{文化周期与人口演化}
+
+\subsection{时尚与风格的文化周期}
+
+\begin{definition}[时尚与风格的文化周期]\label{def:cultural_cycle}
+文化潮流（时尚、音乐风格、艺术流派、建筑风格）的兴衰呈现显著的周期性。文化周期的时间尺度因领域而异：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{快时尚周期}：服装款式的流行周期约 $6$—$12$ 个月（季节性更替）。
+    \item \textbf{音乐风格周期}：流行音乐风格的兴起-巅峰-衰退周期约 $5$—$10$ 年。
+    \item \textbf{艺术流派周期}：现代艺术流派的更替周期约 $20$—$30$ 年（一个世代）。
+    \item \textbf{复古周期}：旧风格的重新流行——约 $20$—$30$ 年的复古周期（“二十年前的东西又开始流行”）。
+\end{enumerate}
+文化潮流的兴起和衰退表现为从边缘到主流再到过时的标度变换，复古周期表现为文化偏好绕“新-旧”轴的周期性旋转。周期长度由世代交替速度和技术变革速率共同决定。
+\end{definition}
+
+\begin{remark}[世代交替的文化周期（经验观察）]\label{prop:generational_cycle}
+文化周期与世代交替密切相关。一个世代（约 $20$—$30$ 年）是出生同龄人从童年到成年、从文化接受者到文化创造者的时间。每一代人倾向于反叛上一代的文化风格，建立自己的文化标志——这种“反叛-建立-被反叛”的循环驱动了文化潮流的世代周期。以上世代更替与“反叛”机制均为\textbf{经验观察}，非可证明的定理。
+
+世代文化周期可形式类比为文化偏好的相位旋转：每一代的文化偏好与上一代形成对比（反叛），经过两代后文化偏好与祖辈相似（复古）。此形式类比中，文化偏好的“相位”是一个启发性概念，并非有严格定义的数学量。
+\end{remark}
+
+\subsection{人口演化与代际周期}
+
+\begin{definition}[人口演化的基本模型]\label{def:population_evolution}
+\textbf{人口演化}描述人口规模 $N(t)$ 及其年龄结构 $n(a,t)$ 随时间的演化。基本方程包括：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{马尔萨斯增长模型}：$\frac{dN}{dt} = rN$（$r > 0$ 为内禀增长率）。解为指数增长 $N(t) = N_0 e^{rt}$——增长不受资源限制。
+    \item \textbf{逻辑斯蒂增长模型（Verhulst）}：$\frac{dN}{dt} = rN\left(1 - \frac{N}{K}\right)$（$K$ 为环境承载力）。解为 S 型曲线，最终趋于 $K$。
+    \item \textbf{年龄结构方程（McKendrick–von Foerster）}：
+    \[
+    \frac{\partial n(a,t)}{\partial t} + \frac{\partial n(a,t)}{\partial a} = -\mu(a) n(a,t),
+    \]
+    其中 $\mu(a)$ 为年龄相关死亡率。边界条件 $n(0,t) = \int_0^\infty b(a)\, n(a,t)\, da$ 给出新生儿数量（$b(a)$ 为年龄相关出生率）。
+\end{enumerate}
+人口演化的周期结构来源于世代更替——每一代人在 $20$—$30$ 年的时间尺度上经历出生、成长、生育、衰老与死亡。这一世代周期与资源约束的耦合产生了人口动态中的周期性波动。
+\end{definition}
+
+\begin{proposition}[人口动态中的世代周期]\label{prop:generational_population_cycle}
+考虑离散世代人口模型：设第 $n$ 代人口为 $N_n$，其成年后的生育率为 $f(N_{n-1})$（依赖上一代人口的环境影响），存活率为 $s$。则人口动态为
+\[
+N_{n+1} = s \cdot f(N_{n-1}) \cdot N_n.
+\]
+当 $f$ 随上代人口增加而下降（资源竞争）时，人口动态可出现周期性振荡。其周期 $T_{\text{gen}}$ 约为两代时间（$T_{\text{gen}} \approx 2 \times 25$ 年 $= 50$ 年）。
+\end{proposition}
+
+\begin{proof}
+取 $f(N) = r(1 - N/K)$（线性竞争），则
+\[
+N_{n+1} = s r N_n \left(1 - \frac{N_{n-1}}{K}\right).
+\]
+设平衡态为 $N^*$，则 $N^* = s r N^*(1 - N^*/K)$，即 $1 = s r (1 - N^*/K)$，解得 $N^* = K(1 - 1/(sr))$。平衡态的存在要求 $sr > 1$。
+
+在平衡态附近线性化，设 $N_n = N^*(1 + x_n)$，得
+\[
+x_{n+1} = x_n - s r \frac{N^*}{K} x_{n-1}.
+\]
+特征方程为 $\lambda^2 - \lambda + s r N^*/K = 0$。判别式 $\Delta = 1 - 4 s r N^*/K$。当 $4 s r N^*/K > 1$ 时，特征值为复共轭，$x_n$ 呈现周期振荡。振荡周期约为 $2$ 个世代时间（每个世代约 $25$ 年），故 $T_{\text{gen}} \approx 50$ 年。
+\end{proof}
+
+\begin{definition}[人口转变]\label{def:demographic_transition}
+\textbf{人口转变}（Demographic Transition）是人口从高出生率-高死亡率向低出生率-低死亡率的系统性转变。人口转变包含四个典型阶段：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{前工业阶段}：高出生率、高死亡率，人口规模近似恒定。
+    \item \textbf{过渡阶段}：死亡率下降而出生率仍高，人口快速膨胀。
+    \item \textbf{工业阶段}：出生率开始下降，人口增长放缓。
+    \item \textbf{后工业阶段}：低出生率、低死亡率，人口规模趋于稳定或下降。
+\end{enumerate}
+人口转变的时间尺度约为 $100$—$200$ 年——在人口演化史上表现为一次大规模的结构性跃迁。
+\end{definition}
+
+\begin{proposition}[人口转变的S型模型]\label{prop:demographic_transition_s}
+人口转变过程可用逻辑斯蒂型方程近似：
+\[
+\frac{dN}{dt} = r(t) N \left(1 - \frac{N}{K(t)}\right),
+\]
+其中增长率 $r(t)$ 与承载力 $K(t)$ 随时间变化。在转变初期 $r(t) > 0$ 且 $K(t)$ 上升（死亡率下降），人口快速增长；在转变后期 $r(t)$ 下降甚至转负（出生率下降），人口增长放缓乃至萎缩。
+\end{proposition}
+
+\begin{proof}
+在转变初期，医疗进步使死亡率快速下降而出生率基本不变，故 $r(t)$ 上升；此时 $N \ll K(t)$，方程近似为 $\frac{dN}{dt} \approx r(t) N$，人口指数增长。在转变后期，出生率下降使 $r(t) \to 0$ 甚至 $r(t) < 0$，人口增长放缓直至稳定。将 $r(t)$ 与 $K(t)$ 的经验时间序列代入即可拟合各阶段人口动态。
+\end{proof}
+
+\begin{remark}[人口演化的多层周期结构（经验观察／研究纲领）]\label{thm:population_multi_cycle}
+人口演化包含多层周期的嵌套结构。\textbf{以下层级为经验观察与研究纲领，不是已证定理}：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{世代周期}（$20$—$30$ 年）：出生、成长、生育、死亡的个体生命周期。
+    \item \textbf{代际振荡}（$40$—$60$ 年）：由世代资源竞争与生育率下降产生的两代周期振荡（命题 \ref{prop:generational_population_cycle}）。
+    \item \textbf{康德拉季耶夫型人口长波}（$50$—$60$ 年）：由人口年龄结构与经济周期耦合产生的长波。
+    \item \textbf{人口转变周期}（$100$—$200$ 年）：从高出生-高死亡向低出生-低死亡的完整跃迁。
+    \item \textbf{文明周期}（数百年至数千年）：人口、技术、文化的协同演化周期。
+\end{enumerate}
+各层级周期呈现嵌套结构：世代周期嵌套在代际振荡之中，代际振荡嵌套在人口长波之中，人口长波嵌套在人口转变之中，人口转变嵌套在文明周期之中。
+
+\textbf{经验依据}：
+各层级周期的存在由相应的动态机制导出：
+\begin{itemize}
+    \item 世代周期由个体生命周期直接给出，为人口演化的基本单位。
+    \item 代际振荡由命题 \ref{prop:generational_population_cycle} 的离散世代模型导出，周期约为两代时间。
+    \item 人口长波由代际振荡与经济周期的耦合产生，其时间尺度由世代周期与资本更新周期的乘积决定。
+    \item 人口转变由命题 \ref{prop:demographic_transition_s} 的 S 型模型给出，周期由死亡率下降与出生率下降的时间差决定。
+    \item 文明周期由人口、技术与文化的多层级耦合产生，时间尺度约为人口转变周期的数倍。
+\end{itemize}
+嵌套结构由各层级时间尺度之比约为 $2$—$5$ 保证，即高层级周期包含若干个低层级周期。
+\end{remark}
+
+\begin{example}[代际周期与“回声潮”]\label{ex:echo_boom}
+“回声潮”（Echo Boom）是代际周期在人口统计中的具体实例。以美国为例：
+\begin{enumerate}[label=(\roman*)]
+    \item 1946—1964 年“婴儿潮”一代（Baby Boomers）出生约 $7600$ 万人。
+    \item 1965—1979 年“X 世代”出生率下降，人口相对减少。
+    \item 1980—1994 年“回声潮”一代——婴儿潮一代进入生育年龄后，其子女数量再次增加，形成第二轮人口高峰。
+    \item 1995—2010 年“千禧一代”及 Z 世代的人口规模再次出现回落。
+\end{enumerate}
+婴儿潮与回声潮之间的时间间隔约 $25$—$30$ 年，恰好对应一代的世代时间。这一周期的形成由代际资源竞争（婴儿潮占用大量资源，压低了下一代的生育意愿）与年龄结构效应（婴儿潮集中进入生育年龄）共同驱动。
+\end{example}
+
+\begin{remark}[人口周期与文化周期的耦合]
+人口演化周期与文化周期存在耦合关系：世代交替既驱动了文化潮流的更新（每一代人反叛上一代的文化），又驱动了人口年龄结构的更新。两者的共同时间尺度（约 $20$—$30$ 年）使文化复古周期与人口世代周期在统计上呈现相关性。这种耦合是周期系统章中多层级周期相互作用的实例。
+\end{remark}
+
+\section{集体行为的相位锁定}
+
+\begin{definition}[群体同步行为]\label{def:collective_synchrony}
+人类群体中存在多种\textbf{自发的同步行为}——个体的行为节律在群体互动中趋于一致：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{鼓掌同步}：观众在音乐会或演讲结束时的鼓掌从混乱到同步——鼓掌节奏在数秒内从随机相位趋于一致的周期拍打。
+    \item \textbf{步态同步}：并排行走的人在不经意间步频趋于一致——腿部摆动周期在耦合后锁相。
+    \item \textbf{金融市场恐慌}：投资者在市场崩盘时集体抛售——恐慌情绪在极短时间内传染，所有市场参与者的行为趋于同步。
+\end{enumerate}
+群体同步行为是“周期系统”章中相位锁定（命题 \ref{prop:phase-locking}）在社会群体层面的实现：每个个体是一个独立的周期子系统（固有鼓掌频率、固有步频、固有风险偏好），社会互动是子结构之间的耦合系数。当耦合足够强时，所有个体的相位趋于一致——群体同步。
+\end{definition}
+
+\begin{lemma}[Kuramoto 同步阈值]\label{ch27_kuramoto_threshold}
+设固有频率分布 $g(\omega)$ 连续、单峰，且关于其均值 $\Omega$ 对称。在连续极限 $N\to\infty$ 下，Kuramoto 模型存在临界耦合强度
+\[
+K_c = \frac{2}{\pi g(\Omega)},
+\]
+使得：当 $K \le K_c$ 时唯一的稳定解是异步态（$r=0$）；当 $K > K_c$ 时出现 $r>0$ 的同步解分支，且序参量在阈值附近满足
+\[
+r \approx \sqrt{\frac{16(K-K_c)}{\pi K_c^4\,(-g''(\Omega))}} \qquad (K \to K_c^+),
+\]
+其中 $g''(\Omega) < 0$（单峰在 $\Omega$ 处取极大）。
+\end{lemma}
+
+\begin{proof}
+在连续极限下，相位锁定个体分布在 $|\theta| \le \pi/2$ 的弧上，其固有频率满足 $\omega = \Omega - Kr\sin\theta$，故同步态满足平均场自洽方程
+\[
+r = K r \int_{-\pi/2}^{\pi/2} \cos^2\theta \, g(\Omega + K r \sin\theta)\, d\theta.
+\]
+对 $r>0$ 分支两边除以 $r$，并将 $g$ 在 $\Omega$ 处泰勒展开（由对称性 $g'(\Omega)=0$）：
+\[
+1 = K\int_{-\pi/2}^{\pi/2}\cos^2\theta\left[g(\Omega) + \frac12 g''(\Omega)K^2r^2\sin^2\theta\right]d\theta + O(r^4).
+\]
+利用 $\int_{-\pi/2}^{\pi/2}\cos^2\theta\,d\theta = \frac{\pi}{2}$、$\int_{-\pi/2}^{\pi/2}\cos^2\theta\sin^2\theta\,d\theta = \frac{\pi}{8}$，得
+\[
+1 = \frac{\pi}{2}Kg(\Omega) + \frac{\pi}{16}K^3g''(\Omega)r^2 + O(r^4).
+\]
+令 $r\to0^+$ 得阈值条件 $1 = \frac{\pi}{2}K_c g(\Omega)$，即 $K_c = \frac{2}{\pi g(\Omega)}$。对 $K > K_c$，整理上式得
+\[
+r^2 = \frac{16}{\pi K^3(-g''(\Omega))}\left(\frac{\pi}{2}Kg(\Omega) - 1\right)
+= \frac{16}{\pi K^3(-g''(\Omega))}\cdot\frac{K-K_c}{K_c},
+\]
+其中用到 $\frac{\pi}{2}g(\Omega) = 1/K_c$。取 $K \to K_c^+$（此时 $K^3 \to K_c^3$），得
+\[
+r \approx \sqrt{\frac{16\,(K-K_c)}{\pi K_c^4\,(-g''(\Omega))}}.
+\]
+线性稳定性分析表明 $r=0$ 在 $K<K_c$ 时稳定、在 $K>K_c$ 时失稳，故 $K_c$ 处发生超临界分岔。
+\end{proof}
+
+\begin{proposition}[Kuramoto 模型与群体同步]\label{prop:kuramoto_model}
+群体同步的经典数学模型是 Kuramoto 模型。设 $N$ 个个体各有固有频率 $\omega_i$，通过相位耦合相互影响：
+\[
+\frac{d\theta_i}{dt} = \omega_i + \frac{K}{N} \sum_{j=1}^{N} \sin(\theta_j - \theta_i), \quad i = 1, \dots, N,
+\]
+其中 $K \ge 0$ 是耦合强度。定义序参量 $r(t) = \frac{1}{N}|\sum_{j=1}^{N} e^{i\theta_j(t)}|$（度量群体同步程度：$r=0$ 完全异步，$r=1$ 完全同步）。当 $K$ 超过临界值 $K_c$（其显式表达式与阈值附近的标度律由引理 \ref{ch27_kuramoto_threshold} 给出），群体发生\textbf{相变}——序参量 $r$ 从零连续增长到正值，群体从异步状态进入同步状态。
+
+Kuramoto 模型的相变表现为相位锁定在群体层面的临界现象：序参量 $r$ 是相位相似度 $\operatorname{Similarity}^{(1)}$ 的群体平均。当耦合强度超过临界值，群体进入同步状态——周期卷积的差角正弦分量 $\operatorname{Im}\mathcal{K}^{(1)}\{f_i, f_j\}$ 驱动所有个体的相位趋于共同的均值相位。
+\end{proposition}
+
+\begin{proof}
+序参量 $r(t)$ 的非零解分支与临界值由引理 \ref{ch27_kuramoto_threshold} 给出：$K \le K_c$ 时异步态 $r=0$ 线性稳定；$K > K_c$ 时 $r=0$ 失稳并出现 $r>0$ 的同步解，且 $r \sim \sqrt{K-K_c}$（平方根标度）。因此序参量在 $K_c$ 处\textbf{连续}地从 $0$ 开始增长——这是二阶（连续）相变。序参量 $r = \frac{1}{N}|\sum_j e^{i\theta_j}|$ 正是群体相位一致程度的模长度量，故 $r$ 由 $0$ 升至正值即群体由相位杂乱转为相位锁定。
+\end{proof}
+
+\begin{example}[社交网络中的情绪传染]
+2014 年 Facebook 情绪传染实验（Kramer et al., PNAS, 2014）证明了社交媒体上的情绪可以通过文本内容传播。实验中，约 $69$ 万用户的新鲜事推送被暗中调整——部分用户看到的积极内容减少，部分用户看到的消极内容减少。结果显示，看到更少积极内容的用户自己发布的积极词汇减少，消极词汇增加——情绪通过纯文本互动传染。
+
+情绪传染是社交网络中相位锁定的实证：用户的情绪状态 $\theta_i$（在效价-唤醒空间中）通过社交网络连边相互耦合。Facebook 实验中的效应量虽小（$d \approx 0.001$），但在统计上高度显著——$N$ 极大时微小耦合也能产生可检测的群体偏移。
+\end{example}
+
+\section{社交系统的守恒律}
+
+\begin{theorem}[社交系统的三种守恒律]\label{thm:social_conservation}
+社交系统的动力学由三种守恒律支配：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{人口守恒}：在封闭社交系统中，总人口 $N = S + I + R$ 保持恒定。在开放系统中，人口变化 $=$ 新用户加入 $-$ 老用户流失。长期平均下，社交平台的总活跃用户数趋近于一个动态平衡——流入等于流出。人口年龄结构的变化由 McKendrick–von Foerster 方程（定义 \ref{def:population_evolution}）描述。
+    \item \textbf{信息守恒}：在信息传播过程中，信息的“总量”（知晓该信息的人数）从易感者向感染者转移，最终向免疫者转移——信息知晓的总人数 $I + R$ 单调不减。信息传播的最终规模（$R_{\infty}$）由基本再生数 $R_0$ 决定：$R_{\infty} = 1 - e^{-R_0 R_{\infty}}$。
+    \item \textbf{信任守恒}：在社交关系网络中，总信任量（关系强度的总和）在无外部事件时保持稳定。个体之间关系的亲近与疏远只是信任在不同关系之间的重新分配——一个人对某些人的疏远往往伴随着对另一些人的亲近。信任总量在社交网络中的守恒类似于角动量在旋转系统中的守恒——信任的“总角动量”在网络拓扑中保持恒定。
+\end{enumerate}
+三种守恒律的层级关系为：人口守恒是社交系统存在的基础，信息守恒是社交互动的动力，信任守恒是社交关系的结构约束。三者共同构成了社交系统周期结构的自洽性保证。
+\end{theorem}
+
+\begin{proof}
+(i) 人口守恒：封闭系统中 $d(S+I+R)/dt = 0$。开放系统中，若新用户加入率 $b$ 和老用户流失率 $d$ 相等（$b=d$），则总人口稳定。社交平台的用户增长曲线通常为 S 型——初期指数增长，中期线性增长，后期饱和（逻辑斯蒂方程，定义 \ref{def:population_evolution}）。
+
+(ii) 信息守恒：在 SIR 模型中，$\frac{d}{dt}(I+R) = \beta S I \ge 0$——知晓信息的人数单调增加。最终免疫者比例 $R_{\infty}$ 满足超越方程 $R_{\infty} = 1 - e^{-R_0 R_{\infty}}$（假设 $S_0 \approx 1$）。$R_0$ 越大，信息传播越广——当 $R_0 = 2$ 时，$R_{\infty} \approx 0.80$（$80\%$ 的人最终知晓信息）。
+
+(iii) 信任守恒：社交网络中的总关系强度 $\sum_{i<j} W_{ij}$ 在无重大事件时趋于稳定。关系强度的变化更可能是重新分配而非总量变化——类似于相空间体积守恒（Liouville 定理）。这一假设得到了社会学“邓巴数”（Dunbar's number）理论的支持：人类能维持的稳定社交关系数约为 $150$——总社交投入在多个关系之间分配。
+\end{proof}
+
+\begin{remark}[信任守恒的隐喻性质]\label{ch27_trust_metaphor}
+在定理 \ref{thm:social_conservation} 的三条守恒律中，人口守恒与信息守恒可由人口动态方程与 SIR/SIRS 微分方程严格导出（见该定理证明之 (i)(ii)）。\textbf{信任守恒则不同}：目前并无严格的“信任总量”数学定义，“总信任量不随时间变化”是形式类比与经验假设，而非定理。邓巴数（约 $150$）度量的是人类大脑维持稳定关系的认知容量，它意味着\textbf{社交注意力}（社交能量）在被维持的关系之间重新分配，而不是一个可精确测量的守恒物理量。故本章所说的“信任守恒/社交注意力守恒”应理解为\textbf{隐喻}——它刻画社交投入的再分配结构，而非严格守恒律。
+\end{remark}
+
+\begin{remark}[社交圈规模标度：邓巴分层（经验观察）]\label{ch27_dunbar_scaling}
+人类社交圈规模呈现近似分层的标度结构。邓巴数理论（\textbf{经验观察}，非定理）给出若干特征尺度：核心支持圈约 $5$ 人、亲密圈约 $15$ 人、好友圈约 $50$ 人、稳定关系圈约 $150$ 人、熟人圈约 $500$ 人。相邻层规模之比约 $3$ 倍（$5\to15\to50\to150\to500$），近似等比缩放。这一标度由人类大脑新皮层容量决定，是社交注意力认知约束在规模上的体现——它是缩放主题在社交系统中的落点；其具体数值属于经验观察，不构成可证明的定理。
+\end{remark}
+
+\begin{remark}[与全书的衔接]
+本章建立的社交系统周期结构理论是周期数学在社会科学中的应用。社交节律表现为日、周、年周期对社交活动的重复组织。SIR/SIRS 信息传播模型描述了信息的爆发性传播和周期性回热。社交网络演化描述了关系的亲近-疏远交替。文化周期与人口演化呈现世代更替驱动的周期性兴衰——人口转变是人口演化的结构性跃迁，代际周期与“回声潮”是世代更替在人口统计中的直接体现。Kuramoto 模型的相变是“周期系统”章中相位锁定的群体实现——当耦合强度超过临界值，群体从异步进入同步。社交系统的三种守恒律——人口守恒、信息守恒与信任守恒（后者为隐喻）——共同构成了社交系统周期结构的社会学基础。
+\end{remark}
+
+\section*{本章七主题对照表}
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{9.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 人际关系随时间的推移：社交节律的日/周/年重复（定义 \ref{def:social_rhythms}）、互惠交换周期 $T_{\text{ex}}$（定义 \ref{def:reciprocal_altruism}、命题 \ref{prop:tit_for_tat_period}） \\
+缩放 & 社交网络规模标度：邓巴分层 $5/15/50/150/500$（注释 \ref{ch27_dunbar_scaling}）、社区半衰期 $T_{1/2}=\ln2/\lambda$（命题 \ref{prop:community_cycle}）、再生数 $R_0=\beta/\gamma$（定义 \ref{def:sir_model}） \\
+旋转 & 关系亲疏的相位循环：亲近-疏远交替（定义 \ref{def:relationship_cycle}）、文化复古的相位旋转（定义 \ref{def:cultural_cycle}）、Kuramoto 相位锁定（引理 \ref{ch27_kuramoto_threshold}、命题 \ref{prop:kuramoto_model}） \\
+守恒 & 社交能量/注意守恒（\textbf{隐喻}）：人口/信息/信任三种守恒律（定理 \ref{thm:social_conservation}），其中信任/注意力守恒明示为隐喻（注释 \ref{ch27_trust_metaphor}） \\
+对称 & 互惠对称：以牙还牙的对称策略（命题 \ref{prop:tit_for_tat_period}）、废物测试的对称贝叶斯-纳什均衡 $e_A=e_B=e^*$（定理 \ref{thm:shittest_nash}）、关系强度对称 $W_{ij}=W_{ji}$（命题 \ref{ch27_closure_loop}） \\
+闭合 & 社交圈闭合与关系回路：三角闭合与聚类系数 $\overline{C}$（定义 \ref{ch27_triadic_closure}、命题 \ref{ch27_closure_loop}）、交换-测试反馈回路（命题 \ref{prop:exchange_test_coupling}） \\
+周期 & 关系周期与 Kuramoto 群体同步：报复循环周期 $2/\varepsilon$（命题 \ref{prop:tit_for_tat_period}）、测试周期 $\Delta T_{\text{test}}^*$（命题 \ref{prop:shittest_periodic}）、SIRS 振荡周期（命题 \ref{prop:sir_periodic}）、群体同步相变（命题 \ref{prop:kuramoto_model}）、人口演化的多层周期结构（经验观察／研究纲领，注 \ref{thm:population_multi_cycle}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{社交周期性判定定理}（\ref{thm:social_periodicity_decision}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 验证\textbf{数量调节的单调性}（\ref{prop:social_adaptive_growth}）的前提在本章领域对象上成立，并给出一个不满足前提的反例。
+
+    \item 考察\textbf{三参数对应：半径、相位与转速}（\ref{prop:social_epicycle_correspondence}）在参数退化时的行为，说明结论如何随之退化。
+
+    \item 说明\textbf{社交周期诊断流程与三章接口}（\ref{thm:social_diagnosis_integration}）与「周期系统」章相应通用结论的关系（是一致、特例还是需要附加条件）。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{thm:social_periodicity_decision}、\ref{prop:social_adaptive_growth}、\ref{prop:social_epicycle_correspondence}、\ref{thm:social_diagnosis_integration}。
+\end{enumerate}
+
+

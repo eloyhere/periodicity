@@ -1,0 +1,1361 @@
+\chapter{Complex Analysis}
+\label{chap:complex_analysis}
+\markboth{Complex Analysis}{Complex Analysis}
+
+\begin{remark}[Positioning of this chapter]\label{rem:complex_analysis_positioning}
+Building on the `Number Systems', `Functions and Limits', `Real Analysis' and `Series and Convolution' chapters, this chapter establishes the analytic theory of complex-valued functions. It does not repeat the construction of the complex field given in the `Number Systems' chapter, nor the general theory of Taylor series and Laurent series given in the `Series and Convolution' chapter; it focuses on the content specific to complex analysis: analytic functions, the Cauchy--Riemann equations, Cauchy's integral theorem, Cauchy's integral formula, the local expansion of analytic functions, the classification of isolated singularities, the residue theorem, the argument principle, Rouché's theorem, harmonic functions and the elements of conformal mapping.
+
+This chapter provides the foundation for the Fourier transform, the Laplace transform and residue calculus in the `Harmonic Analysis' chapter, supplies tools for the two-dimensional complex potential and harmonic functions in the `Vector Analysis' chapter, and furnishes the language for complex eigenvalues and analytic solutions in the `Differential Equations and Analysis' chapter.
+
+\textbf{Guide to the seven themes of this chapter}: Translation --- translation on the complex plane and the invariance of analytic functions under translation; Scaling --- the scaling of the modulus of a complex number and the angle preservation of the Cauchy--Riemann equations; Rotation --- multiplication of complex numbers as rotation, the periodicity of $e^{i\theta}$ and roots of unity; Conservation --- the conservation of the loop integral in Cauchy's integral theorem; Symmetry --- the conjugate symmetry of analytic functions and the Schwarz reflection principle; Closure --- the vanishing of the integral over a closed path in Cauchy's integral theorem; Period --- the $2\pi i$-periodicity of the complex exponential function and the group of roots of unity.
+
+\textbf{Conventions}: wherever general results on series are used --- Taylor series, Laurent series, the Cauchy--Hadamard radius-of-convergence formula and the like --- reference is always made to the corresponding definitions and theorems already established in Chapter~\ref{chap:series_conv}, `Series and Convolution' (such as \cref{def:taylor_series}, \cref{def:laurent_series}, \cref{thm:cauchy_hadamard}, \cref{thm:laurent_expansion}); wherever analytic tools such as uniform convergence, integrals with a parameter and line integrals are used, reference is always made to the corresponding definitions and theorems already established in Chapter~\ref{chap:real_analysis}, `Real Analysis' (such as \cref{def:uniform_convergence}, \cref{thm:uniform_continuity_integral}, \cref{thm:uniform_continuity_derivative}, \cref{def:line_integral_second_kind}). This chapter does not repeat these general theories; it uses their conclusions only in the context of complex analysis.
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  >=Stealth, thick,
+  node distance=0.7cm and 0.9cm,
+  box/.style={draw, rounded corners, align=center, minimum width=2.4cm, minimum height=0.75cm, font=\small, fill=blue!8},
+  arr/.style={-{Stealth[length=2.2mm]}, very thick}
+]
+\node[box, fill=blue!12]  (alg) {Complex algebra\\modulus/argument/conjugate};
+\node[box, fill=cyan!12, right=of alg] (lim) {Complex limits and continuity\\compact sets/uniform continuity};
+\node[box, fill=green!12, right=of lim] (der) {Complex derivative\\Cauchy--Riemann};
+\node[box, fill=orange!12, right=of der] (int) {Complex integration\\Cauchy's integral theorem};
+\node[box, fill=red!12, below=of alg] (exp) {Local expansion\\Taylor/Laurent};
+\node[box, fill=purple!12, right=of exp] (sing) {Isolated singularities\\residues};
+\node[box, fill=magenta!12, right=of sing] (res) {Residue theorem\\argument principle/Rouché};
+\node[box, fill=yellow!16, right=of res] (harm) {Harmonic functions\\conformal mapping};
+\draw[arr] (alg) -- (lim);
+\draw[arr] (lim) -- (der);
+\draw[arr] (der) -- (int);
+\draw[arr] (int) -- (exp);
+\draw[arr] (exp) -- (sing);
+\draw[arr] (sing) -- (res);
+\draw[arr] (res) -- (harm);
+\draw[arr, dashed] (int) -- (res);
+\end{tikzpicture}
+\caption{Overview of the structure of this chapter: complex algebra $\to$ complex limits and continuity $\to$ complex derivative $\to$ complex integration $\to$ local expansion $\to$ isolated singularities and residues $\to$ harmonic functions and conformal mapping.}
+\label{fig:complex_analysis_overview}
+\end{figure}
+
+\section{Review of complex numbers and the complex plane}
+
+\subsection{The complex field and the basic operations}
+
+\begin{definition}[The complex field]\label{def:ca_complex_field}
+Let $\mathbb{C} = \{(a,b) : a, b \in \mathbb{R}\}$, equipped with the addition $(a,b) + (c,d) = (a+c, b+d)$ and the multiplication $(a,b)(c,d) = (ac - bd, ad + bc)$. Write $i = (0,1)$; then every complex number can be written as $z = a + bi$. The number $a = \operatorname{Re} z$ is called the \textbf{real part} and $b = \operatorname{Im} z$ the \textbf{imaginary part}.
+\end{definition}
+
+\begin{proposition}[Elementary properties of the complex field]\label{prop:ca_complex_field_props}
+\begin{enumerate}[label=(\roman*)]
+    \item $(\mathbb{C}, +, \times)$ is a field, the identity element of addition is $0$ and the identity element of multiplication is $1$.
+    \item $i^2 = -1$, and $\mathbb{C} = \mathbb{R}[i] \cong \mathbb{R}[x]/(x^2+1)$.
+    \item For every $z \in \mathbb{C}$, $z = \operatorname{Re} z + i \operatorname{Im} z$.
+    \item The conjugation map $\overline{a+bi} = a - bi$ satisfies $\overline{z+w} = \bar{z} + \bar{w}$, $\overline{zw} = \bar{z} \bar{w}$ and $\overline{\bar{z}} = z$.
+    \item The modulus $|z| = \sqrt{z\bar{z}} = \sqrt{a^2 + b^2} \ge 0$ satisfies $|zw| = |z| |w|$ and $|z+w| \le |z| + |w|$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) This follows from the construction of the complex field in the `Number Systems' chapter. The associativity and commutativity of addition, the zero element $(0,0)$ and the inverse $-(a,b) = (-a,-b)$ are inherited componentwise from the additive group structure of $\mathbb{R}$. The associativity and commutativity of multiplication and the identity element $(1,0)$ are verified directly from the definition; the multiplicative inverse is $(a,b)^{-1} = (a/(a^2+b^2), -b/(a^2+b^2))$ (when $(a,b) \neq (0,0)$). The distributive law is verified by expanding componentwise. All the field axioms are satisfied.
+
+(ii) From $(0,1)(0,1) = (-1,0) = -1$ we obtain $i^2 = -1$. The map $\mathbb{R}[x]/(x^2+1) \to \mathbb{C}$, $[x] \mapsto i$, is a field isomorphism.
+
+(iii) By definition, $a + bi = (a,0) + (0,1)(b,0) = (a,0) + (0,b) = (a,b)$.
+
+(iv) $\overline{z+w} = \overline{(a+c) + (b+d)i} = (a+c) - (b+d)i = (a - bi) + (c - di) = \bar{z} + \bar{w}$. $\overline{zw} = \overline{(ac-bd) + (ad+bc)i} = (ac-bd) - (ad+bc)i = (a-bi)(c-di) = \bar{z}\bar{w}$. $\overline{\bar{z}} = \overline{a-bi} = a+bi = z$.
+
+(v) $z\bar{z} = (a+bi)(a-bi) = a^2 + b^2 \ge 0$, hence $|z| = \sqrt{a^2+b^2} \ge 0$. From $|zw|^2 = (zw)\overline{(zw)} = zw\bar{z}\bar{w} = (z\bar{z})(w\bar{w}) = |z|^2|w|^2$, taking square roots gives $|zw| = |z||w|$. The triangle inequality follows from the Cauchy--Schwarz inequality (applied in $\mathbb{R}^2$).
+\end{proof}
+
+\begin{definition}[Polar coordinates and argument]\label{def:ca_polar_argument}
+A non-zero complex number $z = a + bi$ can be written uniquely as
+\[
+z = r e^{i\theta}, \qquad r = |z| > 0,\ \theta \in \mathbb{R},
+\]
+where $e^{i\theta} = \cos\theta + i \sin\theta$ (Euler's formula) and $\theta$ is called an \textbf{argument} of $z$, written $\theta = \arg z$. The argument is not unique: if $\theta$ is an argument of $z$, then so is $\theta + 2k\pi$ ($k \in \mathbb{Z}$). We prescribe $\operatorname{Arg} z \in (-\pi, \pi]$ as the \textbf{principal argument}.
+\end{definition}
+
+\begin{theorem}[Euler's formula]\label{thm:ca_euler_formula}
+For every $\theta \in \mathbb{R}$,
+\[
+e^{i\theta} = \cos\theta + i \sin\theta.
+\]
+\end{theorem}
+
+\begin{proof}
+By power-series expansion,
+\[
+e^{i\theta} = \sum_{k=0}^{\infty} \frac{(i\theta)^k}{k!} = \sum_{j=0}^{\infty} \frac{(i\theta)^{2j}}{(2j)!} + \sum_{j=0}^{\infty} \frac{(i\theta)^{2j+1}}{(2j+1)!}.
+\]
+Since $i^{2j} = (-1)^j$ and $i^{2j+1} = (-1)^j i$, we have
+\[
+e^{i\theta} = \sum_{j=0}^{\infty} \frac{(-1)^j \theta^{2j}}{(2j)!} + i \sum_{j=0}^{\infty} \frac{(-1)^j \theta^{2j+1}}{(2j+1)!} = \cos\theta + i \sin\theta.
+\]
+The two series are the Taylor expansions of $\cos\theta$ and $\sin\theta$ respectively.
+\end{proof}
+
+\begin{proposition}[Multiplication and division in polar form]\label{prop:ca_polar_multiplication}
+Let $z_1 = r_1 e^{i\theta_1}$ and $z_2 = r_2 e^{i\theta_2}$ ($r_1, r_2 > 0$). Then:
+\begin{enumerate}[label=(\roman*)]
+    \item $z_1 z_2 = r_1 r_2 e^{i(\theta_1 + \theta_2)}$;
+    \item $z_1 / z_2 = (r_1/r_2) e^{i(\theta_1 - \theta_2)}$;
+    \item $z_1^n = r_1^n e^{in\theta_1}$ ($n \in \mathbb{Z}$; for $n \ge 0$, $z_1^0 = 1$; for $n < 0$, $z_1^n = (z_1^{-1})^{-n}$).
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) By the addition theorem for the exponential function $e^{i\theta_1} e^{i\theta_2} = e^{i(\theta_1 + \theta_2)}$ (which follows from Euler's formula and the trigonometric identities):
+\[
+z_1 z_2 = r_1 e^{i\theta_1} r_2 e^{i\theta_2} = r_1 r_2 e^{i(\theta_1 + \theta_2)}.
+\]
+(ii) Since $z_2^{-1} = r_2^{-1} e^{-i\theta_2}$, we have $z_1 / z_2 = z_1 z_2^{-1} = (r_1/r_2) e^{i(\theta_1 - \theta_2)}$.
+(iii) Induction on $n$; a direct corollary of (i).
+\end{proof}
+
+\begin{theorem}[The group of roots of unity]\label{thm:ca_unit_roots}
+For every $n \in \mathbb{N}^+$, the equation $z^n = 1$ has exactly $n$ solutions in $\mathbb{C}$:
+\[
+\zeta_k = e^{2\pi i k/n}, \qquad k = 0, 1, \dots, n-1.
+\]
+These $n$ solutions form the cyclic group $C_n$ of order $n$.
+\end{theorem}
+
+\begin{proof}
+Let $z = re^{i\theta}$. The equation $z^n = r^n e^{in\theta} = 1$ requires $r^n = 1$ and $n\theta \in 2\pi\mathbb{Z}$. Since $r \ge 0$, we have $r = 1$; and $\theta = 2\pi k/n$ ($k \in \mathbb{Z}$). In $[0, 2\pi)$ there are $n$ distinct values $\theta_k = 2\pi k/n$, $k = 0, \dots, n-1$. Hence the $n$ solutions are $\zeta_k = e^{2\pi i k/n}$. Closure under multiplication: $\zeta_j \zeta_k = e^{2\pi i(j+k)/n} = \zeta_{(j+k) \bmod n}$. The identity element is $\zeta_0 = 1$ and the inverse is $\zeta_k^{-1} = \zeta_{n-k}$. The group is generated by $\zeta_1$, hence it is $C_n$.
+\end{proof}
+
+\begin{example}[Examples of complex arithmetic]\label{ex:ca_complex_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item $(3+4i)(1-2i) = 3 - 6i + 4i - 8i^2 = 3 - 2i + 8 = 11 - 2i$.
+    \item Polar form of $z = 1 + i$: $r = \sqrt{2}$, $\theta = \pi/4$, hence $z = \sqrt{2} e^{i\pi/4}$.
+    \item $z^4 = (1+i)^4 = (\sqrt{2} e^{i\pi/4})^4 = 4 e^{i\pi} = -4$.
+    \item The case $n = 4$ of the roots of unity: $\zeta_0 = 1$, $\zeta_1 = i$, $\zeta_2 = -1$, $\zeta_3 = -i$.
+\end{enumerate}
+\end{example}
+
+\subsection{Topology on the complex plane}
+
+\begin{definition}[Open, closed, and compact sets on the complex plane]\label{def:ca_topology}
+Identify $\mathbb{C}$ with $\mathbb{R}^2$ ($a + bi \leftrightarrow (a, b)$); then all topological notions on $\mathbb{C}$ (open set, closed set, compact set, connected, simply connected) are inherited from the standard topology of $\mathbb{R}^2$.
+\begin{enumerate}[label=(\roman*)]
+    \item The open ball $B(z_0, r) = \{z : |z - z_0| < r\}$, called the \textbf{open disc}.
+    \item The closed ball $\overline{B}(z_0, r) = \{z : |z - z_0| \le r\}$, called the \textbf{closed disc}.
+    \item The circle $S(z_0, r) = \{z : |z - z_0| = r\}$.
+    \item Domain: a connected open set.
+    \item Simply connected domain: a domain whose fundamental group is trivial.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Convergence of complex sequences and Cauchy sequences]\label{def:ca_seq_convergence}
+Let $\{z_k\}$ be a sequence in $\mathbb{C}$ and $z \in \mathbb{C}$.
+\begin{enumerate}[label=(\roman*)]
+    \item $z_k \to z$: $\forall \varepsilon > 0$, $\exists K$, $\forall k \ge K$, $|z_k - z| < \varepsilon$.
+    \item $\{z_k\}$ is a \textbf{Cauchy sequence}: $\forall \varepsilon > 0$, $\exists K$, $\forall m, k \ge K$, $|z_m - z_k| < \varepsilon$.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Coordinate characterisation of complex-sequence convergence]\label{prop:ca_seq_coordinate}
+Let $z_k = x_k + i y_k$ and $z = x + iy$. Then $z_k \to z$ if and only if $x_k \to x$ and $y_k \to y$.
+\end{proposition}
+
+\begin{proof}
+$|x_k - x| \le |z_k - z|$, $|y_k - y| \le |z_k - z|$, $|z_k - z| \le |x_k - x| + |y_k - y|$. Hence the conditions are equivalent.
+\end{proof}
+
+\begin{theorem}[Completeness of $\mathbb{C}$]\label{thm:ca_completeness}
+Every Cauchy sequence in $\mathbb{C}$ converges.
+\end{theorem}
+
+\begin{proof}
+Let $\{z_k\}$ be a Cauchy sequence with $z_k = x_k + iy_k$. Since $|x_m - x_k| \le |z_m - z_k|$, $\{x_k\}$ is a Cauchy sequence in $\mathbb{R}$ and converges to some $x$ by the completeness of $\mathbb{R}$. Similarly $\{y_k\}$ converges to $y$. Hence $z_k \to x + iy = z$.
+\end{proof}
+
+\begin{definition}[Compactness and connectedness]\label{def:ca_compact_connected}
+\begin{enumerate}[label=(\roman*)]
+    \item $K \subseteq \mathbb{C}$ is compact if $K$ is a bounded closed set in $\mathbb{C} \cong \mathbb{R}^2$ (an equivalent condition, by the Heine--Borel theorem).
+    \item $K \subseteq \mathbb{C}$ is connected if it cannot be written as the disjoint union of two non-empty relatively open sets.
+    \item $K \subseteq \mathbb{C}$ is path-connected if any two points can be joined by a continuous curve.
+    \item A domain $\Omega$ is simply connected if every closed curve in $\Omega$ can be contracted continuously to a point within $\Omega$.
+\end{enumerate}
+\end{definition}
+
+\begin{example}[Examples of complex-plane topology]\label{ex:ca_topology_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item The open disc $B(0, 1)$ is a simply connected domain.
+    \item The punctured disc $B(0, 1) \setminus \{0\}$ is a domain, but it is not simply connected (the circle cannot be contracted).
+    \item The upper half-plane $\{z : \operatorname{Im} z > 0\}$ is a simply connected domain.
+    \item The annulus $\{z : 1 < |z| < 2\}$ is a domain, but it is not simply connected.
+    \item The slit plane $\mathbb{C} \setminus (-\infty, 0]$ is a simply connected domain.
+\end{enumerate}
+\end{example}
+
+\section{Complex-valued functions, limits and continuity}
+
+\subsection{Complex-valued functions}
+
+\begin{definition}[Complex-valued function]\label{def:ca_complex_function}
+Let $\Omega \subseteq \mathbb{C}$ and $f: \Omega \to \mathbb{C}$. The map $f$ is called a \textbf{complex-valued function}. Writing $z = x + iy$, we have
+\[
+f(z) = u(x, y) + i v(x, y),
+\]
+where $u, v: \Omega_{\mathbb{R}} \to \mathbb{R}$ are real-valued functions and $\Omega_{\mathbb{R}} = \{(x, y) \in \mathbb{R}^2 : x + iy \in \Omega\}$. Here $u = \operatorname{Re} f$ is called the \textbf{real part} and $v = \operatorname{Im} f$ the \textbf{imaginary part}.
+\end{definition}
+
+\begin{definition}[Complex limit and continuity]\label{def:ca_limit_continuous}
+Let $\Omega \subseteq \mathbb{C}$, $f: \Omega \to \mathbb{C}$ and $z_0 \in \Omega$.
+\begin{enumerate}[label=(\roman*)]
+    \item $f$ is \textbf{continuous} at $z_0$ if
+    \[
+    \forall \varepsilon > 0,\ \exists \delta > 0,\ \forall z \in \Omega,\quad |z - z_0| < \delta \implies |f(z) - f(z_0)| < \varepsilon.
+    \]
+    \item $f$ is continuous on $\Omega$ if it is continuous at every point.
+    \item $f$ is \textbf{uniformly continuous} on $\Omega$ if
+    \[
+    \forall \varepsilon > 0,\ \exists \delta > 0,\ \forall z, w \in \Omega,\quad |z - w| < \delta \implies |f(z) - f(w)| < \varepsilon.
+    \]
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Equivalent characterisations of continuity]\label{prop:ca_continuity_equivalent}
+Let $\Omega \subseteq \mathbb{C}$, $f: \Omega \to \mathbb{C}$ and $z_0 \in \Omega$. Then the following conditions are equivalent:
+\begin{enumerate}[label=(\roman*)]
+    \item $f$ is continuous at $z_0$;
+    \item for every sequence $z_k \to z_0$ in $\Omega$, we have $f(z_k) \to f(z_0)$;
+    \item $u = \operatorname{Re} f$ and $v = \operatorname{Im} f$ are continuous at $z_0$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\Rightarrow$ (ii): the same as the sequential characterisation of continuity in real analysis.
+
+(ii) $\Rightarrow$ (i): by contradiction.
+
+(i) $\Leftrightarrow$ (iii): equivalent, by $|u(z) - u(z_0)| \le |f(z) - f(z_0)|$ and $|f(z) - f(z_0)| \le |u(z) - u(z_0)| + |v(z) - v(z_0)|$.
+\end{proof}
+
+\begin{theorem}[Properties of continuous functions on compact sets]\label{thm:ca_continuous_compact}
+Let $K \subseteq \mathbb{C}$ be compact and $f: K \to \mathbb{C}$ continuous. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item $f(K)$ is compact;
+    \item $f$ is bounded on $K$;
+    \item $|f|$ attains its maximum and minimum on $K$;
+    \item $f$ is uniformly continuous on $K$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+This follows item by item from $\mathbb{C} \cong \mathbb{R}^2$ and the properties of continuous functions on compact sets in real analysis (Theorem \ref{thm:continuous_compact}).
+\end{proof}
+
+\begin{example}[Examples of complex-valued functions]\label{ex:ca_function_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item The polynomial $f(z) = a_n z^n + \cdots + a_0$ ($a_i \in \mathbb{C}$) is continuous on $\mathbb{C}$.
+    \item The exponential function $f(z) = e^z = e^x (\cos y + i \sin y)$ is continuous on $\mathbb{C}$.
+    \item The trigonometric function $f(z) = \sin z = (e^{iz} - e^{-iz})/(2i)$ is continuous on $\mathbb{C}$.
+    \item $f(z) = 1/z$ is continuous on $\mathbb{C}^\times = \mathbb{C} \setminus \{0\}$.
+    \item $f(z) = \operatorname{Re} z$ and $g(z) = \operatorname{Im} z$ are continuous on $\mathbb{C}$.
+\end{enumerate}
+\end{example}
+
+\section{Complex derivatives and analytic functions}
+
+\subsection{The complex derivative}
+
+\begin{definition}[Complex derivative]\label{def:ca_complex_derivative}
+Let $\Omega \subseteq \mathbb{C}$ be an open set, $f: \Omega \to \mathbb{C}$ and $z_0 \in \Omega$. The function $f$ is \textbf{complex differentiable} at $z_0$ if the limit
+\[
+f'(z_0) := \lim_{h \to 0} \frac{f(z_0 + h) - f(z_0)}{h}
+\]
+exists ($h \in \mathbb{C}$, $h \neq 0$). The number $f'(z_0)$ is called the \textbf{complex derivative} of $f$ at $z_0$.
+\end{definition}
+
+\begin{remark}[The essential difference between complex and real derivatives]\label{rem:ca_derivative_difference}
+The complex derivative requires that, as $h \to 0$, the quotient $(f(z_0 + h) - f(z_0))/h$ converge to one and the same value no matter along which path in the complex plane $h$ tends to zero. This differs from the real derivative, which requires only that $h$ tend to zero along the two directions of the real axis. Complex differentiability is therefore a stronger condition than real differentiability --- it requires the local behaviour of $f$ near $z_0$ to possess a `complex-linear' structure.
+\end{remark}
+
+\begin{theorem}[The Cauchy--Riemann equations]\label{thm:ca_cauchy_riemann}
+Let $\Omega \subseteq \mathbb{C}$ be an open set, $f = u + iv: \Omega \to \mathbb{C}$ and $z_0 = x_0 + iy_0 \in \Omega$. If $f$ is complex differentiable at $z_0$, then the partial derivatives of $u, v$ exist at $(x_0, y_0)$ and satisfy the \textbf{Cauchy--Riemann equations}
+\[
+\frac{\partial u}{\partial x} = \frac{\partial v}{\partial y}, \qquad \frac{\partial u}{\partial y} = -\frac{\partial v}{\partial x}.
+\]
+In that case
+\[
+f'(z_0) = \frac{\partial u}{\partial x} + i \frac{\partial v}{\partial x} = \frac{\partial v}{\partial y} - i \frac{\partial u}{\partial y}.
+\]
+\end{theorem}
+
+\begin{proof}
+Consider $h \to 0$ along the real axis ($h = \Delta x$, $\Delta y = 0$):
+\[
+f'(z_0) = \lim_{\Delta x \to 0} \frac{f(x_0 + \Delta x, y_0) - f(x_0, y_0)}{\Delta x} = \frac{\partial u}{\partial x}(x_0, y_0) + i \frac{\partial v}{\partial x}(x_0, y_0).
+\]
+Along the imaginary axis ($h = i \Delta y$, $\Delta x = 0$):
+\[
+f'(z_0) = \lim_{\Delta y \to 0} \frac{f(x_0, y_0 + \Delta y) - f(x_0, y_0)}{i \Delta y} = \frac{1}{i} \left( \frac{\partial u}{\partial y} + i \frac{\partial v}{\partial y} \right) = \frac{\partial v}{\partial y}(x_0, y_0) - i \frac{\partial u}{\partial y}(x_0, y_0).
+\]
+(We have used $1/i = -i$.) Since $f$ is complex differentiable, the two limits must be equal. Comparing real and imaginary parts:
+\[
+\frac{\partial u}{\partial x} = \frac{\partial v}{\partial y}, \qquad \frac{\partial v}{\partial x} = -\frac{\partial u}{\partial y}.
+\]
+That is, the Cauchy--Riemann equations hold.
+\end{proof}
+
+\begin{remark}[Sufficiency of the Cauchy--Riemann equations]\label{rem:ca_cr_sufficiency}
+The Cauchy--Riemann equations are a necessary condition for complex differentiability, but not a sufficient one. If the partial derivatives of $u, v$ exist at $(x_0, y_0)$, satisfy the Cauchy--Riemann equations, and are continuous at $(x_0, y_0)$, then $f$ is complex differentiable at $z_0$ (see Corollary \ref{cor:ca_cr_sufficient}).
+\end{remark}
+
+\begin{theorem}[The Cauchy--Riemann equations and the $C^1$ sufficiency]\label{thm:ca_cr_sufficient}
+Let $\Omega \subseteq \mathbb{C}$ be an open set and $f = u + iv: \Omega \to \mathbb{C}$. If $u, v$ are $C^1$ on $\Omega$ (that is, have continuous first-order partial derivatives) and satisfy the Cauchy--Riemann equations
+\[
+\frac{\partial u}{\partial x} = \frac{\partial v}{\partial y}, \qquad \frac{\partial u}{\partial y} = -\frac{\partial v}{\partial x},
+\]
+everywhere, then $f$ is complex differentiable on $\Omega$, and
+\[
+f'(z) = \frac{\partial u}{\partial x}(x, y) + i \frac{\partial v}{\partial x}(x, y).
+\]
+\end{theorem}
+
+\begin{proof}
+Fix $z_0 = x_0 + iy_0 \in \Omega$. Since $u, v \in C^1$, the definition of differentiability in real analysis gives
+\[
+u(x_0 + \Delta x, y_0 + \Delta y) - u(x_0, y_0) = u_x \Delta x + u_y \Delta y + o(\sqrt{\Delta x^2 + \Delta y^2}),
+\]
+\[
+v(x_0 + \Delta x, y_0 + \Delta y) - v(x_0, y_0) = v_x \Delta x + v_y \Delta y + o(\sqrt{\Delta x^2 + \Delta y^2}),
+\]
+where the partial derivatives are evaluated at $(x_0, y_0)$. Hence
+\[
+f(z_0 + h) - f(z_0) = (u_x + iv_x)\Delta x + (u_y + iv_y)\Delta y + o(|h|).
+\]
+By the Cauchy--Riemann equations, $u_y = -v_x$ and $v_y = u_x$. Hence
+\[
+(u_y + iv_y) = (-v_x + i u_x) = i(u_x + i v_x).
+\]
+Therefore
+\[
+\begin{aligned}
+f(z_0 + h) - f(z_0) &= (u_x + iv_x)\Delta x + i(u_x + iv_x)\Delta y + o(|h|)\\
+&= (u_x + iv_x)(\Delta x + i\Delta y) + o(|h|) = (u_x + iv_x)h + o(|h|).
+\end{aligned}
+\]
+Hence
+\[
+\lim_{h \to 0} \frac{f(z_0 + h) - f(z_0)}{h} = u_x + iv_x.
+\]
+That is, $f$ is complex differentiable at $z_0$, with $f'(z_0) = u_x + iv_x$.
+\end{proof}
+
+\begin{corollary}[$C^1$ plus Cauchy--Riemann implies analyticity]\label{cor:ca_cr_sufficient}
+If $u, v \in C^1(\Omega)$ and the Cauchy--Riemann equations hold everywhere, then $f = u + iv$ is complex differentiable on $\Omega$.
+\end{corollary}
+
+\begin{proof}
+This is Theorem \ref{thm:ca_cr_sufficient}.
+\end{proof}
+
+\subsection{Analytic functions}
+
+\begin{definition}[Analytic function]\label{def:ca_analytic_function}
+Let $\Omega \subseteq \mathbb{C}$ be an open set and $f: \Omega \to \mathbb{C}$. If $f$ is complex differentiable at every point of $\Omega$, then $f$ is said to be \textbf{analytic} (or \textbf{holomorphic}) on $\Omega$. If $f$ is analytic in some neighbourhood of $z_0$, then $f$ is said to be analytic at $z_0$.
+\end{definition}
+
+\begin{definition}[Entire function]\label{def:ca_entire_function}
+A function that is analytic everywhere on $\mathbb{C}$ is called an \textbf{entire function}.
+\end{definition}
+
+\begin{proposition}[Algebraic properties of analytic functions]\label{prop:ca_analytic_operations}
+Let $f, g$ be analytic on $\Omega$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item $f + g$ is analytic on $\Omega$, and $(f+g)' = f' + g'$;
+    \item $fg$ is analytic on $\Omega$, and $(fg)' = f'g + fg'$;
+    \item if $g$ has no zeros on $\Omega$, then $f/g$ is analytic on $\Omega$, and $(f/g)' = (f'g - fg')/g^2$;
+    \item if $f$ is analytic on $\Omega$ and $g$ is analytic on $f(\Omega)$, then $g \circ f$ is analytic on $\Omega$, and $(g \circ f)' = (g' \circ f) f'$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Each assertion can be verified directly from the definition of the complex derivative; the rules are the same as the corresponding differentiation rules in real analysis (with complex limits in place of real limits).
+
+(i) Directly from the linearity of limits.
+
+(ii) Expanding from the definition,
+\[
+\frac{f(z+h)g(z+h) - f(z)g(z)}{h} = f(z+h)\frac{g(z+h)-g(z)}{h} + g(z)\frac{f(z+h)-f(z)}{h}.
+\]
+Since complex differentiability of $f$ implies continuity, $f(z+h) \to f(z)$. Passing to the limit gives $(fg)'(z) = f(z)g'(z) + g(z)f'(z)$.
+
+(iii) First we prove $(1/g)' = -g'/g^2$:
+\[
+\frac{1/g(z+h) - 1/g(z)}{h} = -\frac{g(z+h)-g(z)}{h} \cdot \frac{1}{g(z+h)g(z)} \to -\frac{g'(z)}{g(z)^2}.
+\]
+Then (ii) gives $(f/g)' = f' \cdot 1/g + f \cdot (-g'/g^2) = (f'g - fg')/g^2$.
+
+(iv) The chain rule is the same as the differentiation of composite functions in real analysis: decompose $(g \circ f)(z+h) - (g \circ f)(z)$ as $g(f(z+h)) - g(f(z))$, divide by $f(z+h) - f(z)$ (when $f(z+h) \neq f(z)$) and multiply by $f(z+h) - f(z)$ divided by $h$; passing to the limit gives the result.
+\end{proof}
+
+\begin{theorem}[The real and imaginary parts of an analytic function are harmonic]\label{thm:ca_harmonic_parts}
+Let $f = u + iv$ be analytic on $\Omega$, with $u, v \in C^2(\Omega)$. Then both $u$ and $v$ are \textbf{harmonic functions}:
+\[
+\Delta u = \frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} = 0, \qquad
+\Delta v = \frac{\partial^2 v}{\partial x^2} + \frac{\partial^2 v}{\partial y^2} = 0.
+\]
+\end{theorem}
+
+\begin{proof}
+By the Cauchy--Riemann equations, $u_x = v_y$ and $u_y = -v_x$. If $u, v \in C^2$, the mixed partial derivatives commute, so
+\[
+u_{xx} = (v_y)_x = v_{yx} = v_{xy} = (-u_y)_y = -u_{yy},
+\]
+that is, $u_{xx} + u_{yy} = 0$. Similarly $v_{xx} + v_{yy} = 0$.
+\end{proof}
+
+\begin{definition}[Harmonic conjugate]\label{def:ca_harmonic_conjugate}
+Let $u: \Omega \to \mathbb{R}$ be a harmonic function. If there is a harmonic function $v: \Omega \to \mathbb{R}$ such that $u + iv$ is analytic on $\Omega$, then $v$ is called a \textbf{harmonic conjugate} of $u$.
+\end{definition}
+
+\begin{proposition}[Existence of a harmonic conjugate on a simply connected domain]\label{prop:ca_harmonic_conjugate_existence}
+Let $\Omega \subseteq \mathbb{C}$ be a simply connected domain and $u: \Omega \to \mathbb{R}$ a harmonic function. Then $u$ has a harmonic conjugate $v$ on $\Omega$.
+\end{proposition}
+
+\begin{proof}
+Since $u$ is harmonic, $u_{xx} + u_{yy} = 0$, that is, $(u_x)_x = (-u_y)_y$, so $(u_x, -u_y)$ satisfies the integrability condition. Define
+\[
+v(x, y) := \int_{(x_0, y_0)}^{(x, y)} (-u_y) \, dx + u_x \, dy,
+\]
+where the integral is taken along any path in $\Omega$ from $(x_0, y_0)$ to $(x, y)$. Since $\Omega$ is simply connected and the vector field $(-u_y, u_x)$ satisfies the vanishing-curl condition, the integral is independent of the path and $v$ is well defined. A computation gives $v_x = -u_y$ and $v_y = u_x$, so $v$ is a harmonic conjugate of $u$.
+\end{proof}
+
+\begin{example}[Examples of analytic functions]\label{ex:ca_analytic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item The polynomial $f(z) = \sum_{k=0}^{n} a_k z^k$ is analytic on $\mathbb{C}$, with $f'(z) = \sum_{k=1}^{n} k a_k z^{k-1}$.
+    \item The exponential function $f(z) = e^z = e^x(\cos y + i \sin y)$, with $u = e^x \cos y$ and $v = e^x \sin y$. Verify the Cauchy--Riemann equations: $u_x = e^x \cos y = v_y$, $u_y = -e^x \sin y = -v_x$. Hence $e^z$ is entire, and $(e^z)' = e^z$.
+    \item The trigonometric functions $\sin z = (e^{iz} - e^{-iz})/(2i)$ and $\cos z = (e^{iz} + e^{-iz})/2$ are entire and satisfy $(\sin z)' = \cos z$ and $(\cos z)' = -\sin z$.
+    \item $f(z) = 1/z$ is analytic on $\mathbb{C} \setminus \{0\}$, with $f'(z) = -1/z^2$.
+    \item $f(z) = \operatorname{Re} z = x$ is continuous on $\mathbb{C}$ but nowhere analytic: $u_x = 1$ and $v_y = 0$, so the Cauchy--Riemann equations fail.
+    \item $f(z) = |z|^2 = x^2 + y^2$ is continuous on $\mathbb{C}$, but it satisfies the Cauchy--Riemann equations only at $z = 0$; hence it is complex differentiable only at $z=0$ and is not analytic on $\mathbb{C}$.
+\end{enumerate}
+\end{example}
+
+\begin{theorem}[Periodicity and derivative of the complex exponential]\label{thm:ca_exp_periodicity}
+$f(z) = e^z$ is entire and satisfies $(e^z)' = e^z$, and
+\[
+e^{z + 2\pi i} = e^z, \qquad \forall z \in \mathbb{C}.
+\]
+That is, $e^z$ has the purely imaginary period $2\pi i$.
+\end{theorem}
+
+\begin{proof}
+By Example \ref{ex:ca_analytic_examples}(ii), $e^z$ is entire and $(e^z)' = e^z$.
+
+Periodicity: $e^{z + 2\pi i} = e^{x + i(y + 2\pi)} = e^x(\cos(y + 2\pi) + i \sin(y + 2\pi)) = e^x(\cos y + i \sin y) = e^z$.
+\end{proof}
+
+\begin{corollary}[The kernel of the complex exponential]\label{cor:ca_exp_kernel}
+$\{z \in \mathbb{C} : e^z = 1\} = 2\pi i \mathbb{Z}$.
+\end{corollary}
+
+\begin{proof}
+The equation $e^z = e^x(\cos y + i \sin y) = 1$ requires $e^x = 1$ and $\cos y + i \sin y = 1$. Hence $x = 0$ and $y = 2\pi k$ ($k \in \mathbb{Z}$), that is, $z = 2\pi i k$.
+\end{proof}
+
+\begin{example}[Multivaluedness of the complex logarithm]\label{ex:ca_log_multivalued}
+The complex logarithm is defined as the inverse function of $z = e^w$. If $z = re^{i\theta}$ ($r > 0$), then
+\[
+\log z = \ln r + i(\theta + 2k\pi), \qquad k \in \mathbb{Z}.
+\]
+The function $\log z$ is multivalued; its principal value $\operatorname{Log} z = \ln r + i\theta$ ($\theta \in (-\pi, \pi]$) is analytic on $\mathbb{C} \setminus (-\infty, 0]$, and $(\operatorname{Log} z)' = 1/z$.
+\end{example}
+
+\section{Complex integration}
+
+\subsection{Complex path integrals}
+
+\begin{definition}[Complex path and integral]\label{def:ca_contour_integral}
+Let $\gamma: [a, b] \to \mathbb{C}$ be a piecewise $C^1$ curve (that is, $\gamma$ is continuous and, except at finitely many points, differentiable with continuous derivative). Let $f: \gamma([a, b]) \to \mathbb{C}$ be continuous. The \textbf{complex integral} of $f$ along $\gamma$ is defined by
+\[
+\int_\gamma f(z) \, dz := \int_a^b f(\gamma(t)) \gamma'(t) \, dt.
+\]
+Here the right-hand side is the Riemann integral of a complex-valued function (the components being integrated separately).
+\end{definition}
+
+\begin{proposition}[Basic properties of the complex integral]\label{prop:ca_contour_integral_props}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Linearity}: $\int_\gamma (\alpha f + \beta g) \, dz = \alpha \int_\gamma f \, dz + \beta \int_\gamma g \, dz$.
+    \item \textbf{Reversal of direction}: $\int_{\gamma^-} f \, dz = -\int_\gamma f \, dz$.
+    \item \textbf{Additivity over paths}: if $\gamma = \gamma_1 \cup \gamma_2$ (joined end to end), then $\int_\gamma f \, dz = \int_{\gamma_1} f \, dz + \int_{\gamma_2} f \, dz$.
+    \item \textbf{Invariance under reparametrisation}: if $\tilde{\gamma}$ is a $C^1$ reparametrisation of $\gamma$ (preserving orientation), then $\int_{\tilde{\gamma}} f \, dz = \int_\gamma f \, dz$.
+    \item \textbf{Estimation inequality}: $\left| \int_\gamma f \, dz \right| \le \int_\gamma |f| \, |dz| = \int_a^b |f(\gamma(t))| |\gamma'(t)| \, dt$. In particular, if $|f| \le M$ on $\gamma$, then $\left| \int_\gamma f \, dz \right| \le M L(\gamma)$, where $L(\gamma)$ is the arc length of $\gamma$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) By the linearity of the Riemann integral.
+
+(ii) If $\gamma^- (t) = \gamma(a + b - t)$, then $(\gamma^-)'(t) = -\gamma'(a + b - t)$. Hence
+\[
+\int_{\gamma^-} f \, dz = \int_a^b f(\gamma(a+b-t)) (-\gamma'(a+b-t)) \, dt = -\int_a^b f(\gamma(s)) \gamma'(s) \, ds = -\int_\gamma f \, dz.
+\]
+
+(iii) By the additivity of the Riemann integral over intervals.
+
+(iv) Let $\tilde{\gamma}(s) = \gamma(\varphi(s))$, where $\varphi$ is a $C^1$ bijection. By the change-of-variable formula for integrals,
+\[
+\int_{\tilde{\gamma}} f \, dz = \int_{a'}^{b'} f(\gamma(\varphi(s))) \gamma'(\varphi(s)) \varphi'(s) \, ds.
+\]
+Setting $t = \varphi(s)$ and $dt = \varphi'(s) ds$ gives $\int_a^b f(\gamma(t)) \gamma'(t) \, dt = \int_\gamma f \, dz$.
+
+(v) By the absolute-value inequality for the Riemann integral and $|f(\gamma(t)) \gamma'(t)| = |f(\gamma(t))| |\gamma'(t)|$.
+\end{proof}
+
+\begin{example}[Basic complex integrals]\label{ex:ca_basic_integrals}
+\begin{enumerate}[label=(\roman*)]
+    \item $\int_\gamma dz = \gamma(b) - \gamma(a)$ (by the fundamental theorem of calculus).
+    \item $\int_\gamma z \, dz = (\gamma(b)^2 - \gamma(a)^2)/2$.
+    \item Let $\gamma$ be the unit circle $|z| = 1$ traversed once anticlockwise. Then $\int_\gamma z^n \, dz = 0$ for $n \neq -1$, whilst $\int_\gamma z^{-1} \, dz = 2\pi i$.
+\end{enumerate}
+\end{example}
+
+\begin{theorem}[Cauchy's integral theorem]\label{thm:ca_cauchy_integral}
+Let $\Omega \subseteq \mathbb{C}$ be a simply connected domain, $f$ analytic on $\Omega$, and $\gamma$ a piecewise $C^1$ closed path in $\Omega$. Then
+\[
+\oint_\gamma f(z) \, dz = 0.
+\]
+\end{theorem}
+
+\begin{proof}
+Write $f = u + iv$ and $dz = dx + i \, dy$. Expanding the complex integral,
+\[
+\oint_\gamma f(z) \, dz = \oint_\gamma (u + iv)(dx + i \, dy) = \oint_\gamma (u \, dx - v \, dy) + i \oint_\gamma (v \, dx + u \, dy).
+\]
+Apply Green's formula (\cref{thm:green_plane}) to each real line integral. Let $D$ be the domain enclosed by $\gamma$. Then
+\[
+\oint_\gamma (u \, dx - v \, dy) = \iint_D \left( -\frac{\partial v}{\partial x} - \frac{\partial u}{\partial y} \right) dx \, dy.
+\]
+\[
+\oint_\gamma (v \, dx + u \, dy) = \iint_D \left( \frac{\partial u}{\partial x} - \frac{\partial v}{\partial y} \right) dx \, dy.
+\]
+By the Cauchy--Riemann equations (Theorem \ref{thm:ca_cauchy_riemann}), $u_x = v_y$ and $u_y = -v_x$, so the integrands of both double integrals vanish. Hence both real line integrals vanish, and therefore so does the complex integral.
+\end{proof}
+
+\begin{corollary}[Equivalent formulation of Cauchy's integral theorem]\label{cor:ca_cauchy_integral_equivalent}
+On a simply connected domain the integral of an analytic function is independent of the path: if $\gamma_1$ and $\gamma_2$ are two piecewise $C^1$ paths from $z_0$ to $z_1$, then $\int_{\gamma_1} f \, dz = \int_{\gamma_2} f \, dz$.
+\end{corollary}
+
+\begin{proof}
+Take $\gamma = \gamma_1 \cup \gamma_2^-$ (from $z_0$ along $\gamma_1$ to $z_1$, then along $\gamma_2$ reversed from $z_1$ back to $z_0$). The path $\gamma$ is closed, so by Theorem \ref{thm:ca_cauchy_integral}, $\oint_\gamma f \, dz = 0$. That is, $\int_{\gamma_1} f \, dz - \int_{\gamma_2} f \, dz = 0$, hence the two integrals are equal.
+\end{proof}
+
+\begin{theorem}[Cauchy's integral formula]\label{thm:ca_cauchy_formula}
+Let $\Omega \subseteq \mathbb{C}$ be a domain, $f$ analytic on $\Omega$, and $\overline{B}(z_0, r) \subseteq \Omega$. Then
+\[
+f(z_0) = \frac{1}{2\pi i} \oint_{|z - z_0| = r} \frac{f(z)}{z - z_0} \, dz,
+\]
+where the path of integration is taken with positive orientation (anticlockwise).
+\end{theorem}
+
+\begin{proof}
+\textbf{Step 1: decomposing the integrand}. On $|z - z_0| = r$ we have $z \neq z_0$. For any $\rho \in (0, r)$, consider the small circle $|z - z_0| = \rho$. By Cauchy's integral theorem (applied to the domain $\{\rho < |z - z_0| < r\}$, which is multiply connected but can be made simply connected by a cut),
+\[
+\oint_{|z - z_0| = r} \frac{f(z)}{z - z_0} \, dz = \oint_{|z - z_0| = \rho} \frac{f(z)}{z - z_0} \, dz.
+\]
+
+\textbf{Step 2: computing on the small circle}. Parametrise $z = z_0 + \rho e^{i\theta}$, $\theta \in [0, 2\pi]$. Then $dz = i\rho e^{i\theta} d\theta$, and
+\[
+\oint_{|z - z_0| = \rho} \frac{f(z)}{z - z_0} \, dz = \int_0^{2\pi} \frac{f(z_0 + \rho e^{i\theta})}{\rho e^{i\theta}} i\rho e^{i\theta} \, d\theta = i \int_0^{2\pi} f(z_0 + \rho e^{i\theta}) \, d\theta.
+\]
+
+\textbf{Step 3: passing to the limit $\rho \to 0$}. Since $f$ is continuous at $z_0$, we have $f(z_0 + \rho e^{i\theta}) \to f(z_0)$ uniformly in $\theta$. Hence
+\[
+\lim_{\rho \to 0} i \int_0^{2\pi} f(z_0 + \rho e^{i\theta}) \, d\theta = i \int_0^{2\pi} f(z_0) \, d\theta = 2\pi i f(z_0).
+\]
+Therefore $\oint_{|z - z_0| = r} f(z)/(z - z_0) \, dz = 2\pi i f(z_0)$, that is, $f(z_0) = (1/(2\pi i)) \oint_{|z - z_0| = r} f(z)/(z - z_0) \, dz$.
+\end{proof}
+
+\begin{corollary}[Infinite differentiability of analytic functions]\label{cor:ca_infinite_differentiable}
+If $f$ is analytic on a domain $\Omega$, then $f$ is infinitely often complex differentiable on $\Omega$, and
+\[
+f^{(n)}(z_0) = \frac{n!}{2\pi i} \oint_{|z - z_0| = r} \frac{f(z)}{(z - z_0)^{n+1}} \, dz, \qquad n = 0, 1, 2, \dots
+\]
+\end{corollary}
+
+\begin{proof}
+Differentiate Cauchy's integral formula (Theorem \ref{thm:ca_cauchy_formula}) formally with respect to $z_0$. By differentiation under the integral sign (integrals with a parameter and uniform convergence, see \cref{thm:leibniz_rule}),
+\[
+f'(z_0) = \frac{1}{2\pi i} \oint_{|z - z_0| = r} \frac{f(z)}{(z - z_0)^2} \, dz.
+\]
+Induction gives
+\[
+f^{(n)}(z_0) = \frac{n!}{2\pi i} \oint_{|z - z_0| = r} \frac{f(z)}{(z - z_0)^{n+1}} \, dz.
+\]
+\end{proof}
+
+\begin{theorem}[Liouville's theorem]\label{thm:ca_liouville}
+If $f$ is a bounded entire function, then $f$ is constant.
+\end{theorem}
+
+\begin{proof}
+Suppose $|f(z)| \le M$ for all $z \in \mathbb{C}$. For any $z_0 \in \mathbb{C}$ and any $R > 0$, taking $n = 1$ in Corollary \ref{cor:ca_infinite_differentiable} and integrating along $|z - z_0| = R$,
+\[
+|f'(z_0)| = \left| \frac{1}{2\pi i} \oint_{|z - z_0| = R} \frac{f(z)}{(z - z_0)^2} \, dz \right| \le \frac{1}{2\pi} \cdot \frac{M}{R^2} \cdot 2\pi R = \frac{M}{R}.
+\]
+Letting $R \to \infty$ gives $f'(z_0) = 0$. Since $z_0$ is arbitrary, $f' \equiv 0$ and $f$ is constant.
+\end{proof}
+
+\begin{corollary}[The fundamental theorem of algebra]\label{cor:ca_fundamental_theorem_algebra}
+Every polynomial of degree $n \ge 1$ with complex coefficients has a root in $\mathbb{C}$.
+\end{corollary}
+
+\begin{proof}
+Suppose $p(z)$ is a polynomial of degree $n \ge 1$ with no roots. Then $1/p(z)$ is entire. As $|z| \to \infty$ we have $|p(z)| \to \infty$, so $1/p(z)$ is bounded. By Liouville's theorem (Theorem \ref{thm:ca_liouville}), $1/p$ is constant, hence $p$ is constant, contradicting $n \ge 1$.
+\end{proof}
+
+\subsection{The multiply connected version of Cauchy's integral theorem}
+
+\begin{theorem}[The multiply connected version of Cauchy's integral theorem]\label{thm:ca_cauchy_multiply_connected}
+Let $\Omega$ be a multiply connected domain whose boundary consists of $m$ simple closed curves $\gamma_1, \dots, \gamma_m$ ($\gamma_1$ being the outer boundary and $\gamma_2, \dots, \gamma_m$ the inner boundaries, all taken with positive orientation: the outer boundary anticlockwise and the inner boundaries clockwise). If $f$ is analytic on $\Omega$, then
+\[
+\oint_{\gamma_1} f(z) \, dz + \oint_{\gamma_2} f(z) \, dz + \cdots + \oint_{\gamma_m} f(z) \, dz = 0.
+\]
+\end{theorem}
+
+\begin{proof}
+Use cuts to turn the multiply connected domain $\Omega$ into a simply connected domain: draw a cut from each inner boundary to the outer boundary. The integrals along the two sides of each cut have opposite directions and cancel each other, so the boundary of the resulting domain is $\gamma_1 \cup \gamma_2 \cup \cdots \cup \gamma_m$. Applying Cauchy's integral theorem (Theorem \ref{thm:ca_cauchy_integral}) to the resulting simply connected domain gives $\sum_{i=1}^{m} \oint_{\gamma_i} f \, dz = 0$.
+\end{proof}
+
+\begin{example}[Cauchy's integral theorem on a multiply connected domain]\label{ex:ca_multiply_connected}
+Let $\Omega = \{z : 1 < |z| < 2\}$, and let $f(z) = 1/z$ be analytic on $\Omega$. Let the outer boundary $\gamma_1$ be $|z| = 2$ traversed anticlockwise and the inner boundary $\gamma_2$ be $|z| = 1$ traversed clockwise. Then
+\[
+\oint_{\gamma_1} \frac{dz}{z} = 2\pi i, \qquad \oint_{\gamma_2} \frac{dz}{z} = -2\pi i,
+\]
+and their sum is zero, which verifies Theorem \ref{thm:ca_cauchy_multiply_connected}.
+\end{example}
+
+\section{Local expansions and zeros of analytic functions}
+
+\begin{remark}[Interface with the `Series and Convolution' chapter]\label{rem:ca_series_interface}
+This section uses the general theory established in Chapter~\ref{chap:series_conv}, `Series and Convolution': Taylor series, Laurent series, the Cauchy--Hadamard radius-of-convergence formula and the like. In particular: the definition of a Taylor series and its convergence conditions are given in \cref{def:taylor_series} and \cref{thm:taylor_lagrange}; the definition of a Laurent series in \cref{def:laurent_series}; the Laurent expansion theorem in \cref{thm:laurent_expansion}; and the Cauchy--Hadamard radius-of-convergence formula in \cref{thm:cauchy_hadamard}. This section does not repeat these general theories; it gives only their direct applications in the context of complex analysis.
+\end{remark}
+
+\subsection{Taylor expansion of an analytic function}
+
+\begin{theorem}[Taylor expansion of an analytic function]\label{thm:ca_taylor_expansion}
+Let $f$ be analytic on the disc $B(z_0, R)$ ($R > 0$). Then for every $z \in B(z_0, R)$,
+\[
+f(z) = \sum_{n=0}^{\infty} \frac{f^{(n)}(z_0)}{n!} (z - z_0)^n,
+\]
+and the radius of convergence is at least $R$.
+\end{theorem}
+
+\begin{proof}
+By Cauchy's integral formula (Theorem \ref{thm:ca_cauchy_formula}), for any $|z - z_0| < r < R$ and $|\zeta - z_0| = r$,
+\[
+f(z) = \frac{1}{2\pi i} \oint_{|\zeta - z_0| = r} \frac{f(\zeta)}{\zeta - z} \, d\zeta.
+\]
+Expand $1/(\zeta - z)$ as a geometric series:
+\[
+\frac{1}{\zeta - z} = \frac{1}{(\zeta - z_0) - (z - z_0)} = \frac{1}{\zeta - z_0} \cdot \frac{1}{1 - \frac{z - z_0}{\zeta - z_0}} = \sum_{n=0}^{\infty} \frac{(z - z_0)^n}{(\zeta - z_0)^{n+1}}.
+\]
+Since $|z - z_0| < r = |\zeta - z_0|$, the geometric series converges uniformly. Substituting and integrating term by term,
+\[
+f(z) = \frac{1}{2\pi i} \sum_{n=0}^{\infty} (z - z_0)^n \oint_{|\zeta - z_0| = r} \frac{f(\zeta)}{(\zeta - z_0)^{n+1}} \, d\zeta = \sum_{n=0}^{\infty} \frac{f^{(n)}(z_0)}{n!} (z - z_0)^n,
+\]
+where the last step uses Corollary \ref{cor:ca_infinite_differentiable}. The radius of convergence is at least $R$ (since the expansion holds for every $|z - z_0| < R$).
+\end{proof}
+
+\begin{corollary}[Isolation of zeros of an analytic function]\label{cor:ca_zero_isolated}
+Let $f$ be analytic on a domain $\Omega$ and not identically zero. Then the zero set of $f$ has no accumulation point in $\Omega$. Equivalently, if $f$ vanishes on some convergent sequence of \textbf{distinct} points $\{z_n\}$ in $\Omega$ ($z_n \to z_0 \in \Omega$), then $f \equiv 0$.
+\end{corollary}
+
+\begin{proof}
+Suppose, to the contrary, that the zeros have an accumulation point $z_0 \in \Omega$. By the Taylor expansion (Theorem \ref{thm:ca_taylor_expansion}), $f$ can be expanded near $z_0$ as $\sum_n a_n (z - z_0)^n$.
+
+If the expansion is not identically zero, there is a least $k \ge 0$ with $a_k \neq 0$. Near $z_0$,
+\[
+f(z) = (z - z_0)^k g(z), \qquad g(z) = \sum_{n=0}^{\infty} a_{n+k} (z - z_0)^n, \quad g(z_0) = a_k \neq 0.
+\]
+Since $g$ is continuous, there is a neighbourhood $U$ of $z_0$ on which $g \neq 0$. Hence $f \neq 0$ on $U \setminus \{z_0\}$, which contradicts the existence of an accumulation point of zeros.
+
+Hence $a_n = 0$ for all $n$, that is, $f \equiv 0$ in a neighbourhood of $z_0$. By connectedness, $f \equiv 0$ on $\Omega$ (since $\Omega$ is connected, a function that vanishes locally vanishes on the whole of $\Omega$).
+\end{proof}
+
+\begin{corollary}[The identity theorem for analytic functions]\label{cor:ca_identity_theorem}
+Let $f, g$ be analytic on a domain $\Omega$. If $\{z \in \Omega : f(z) = g(z)\}$ has an accumulation point in $\Omega$, then $f \equiv g$ on $\Omega$.
+\end{corollary}
+
+\begin{proof}
+Put $h = f - g$ and apply Corollary \ref{cor:ca_zero_isolated}.
+\end{proof}
+
+\begin{example}[Applications of the isolation of zeros]\label{ex:ca_zero_isolated_application}
+\begin{enumerate}[label=(\roman*)]
+    \item The zeros of $\sin z$ are $z = k\pi$ ($k \in \mathbb{Z}$); these zeros have no accumulation point in $\mathbb{C}$.
+    \item The zeros of $e^z - 1$ are $z = 2\pi i k$ ($k \in \mathbb{Z}$), with no accumulation point.
+    \item If an analytic function vanishes on $[0, 1]$, then it vanishes on the whole domain containing $[0, 1]$.
+\end{enumerate}
+\end{example}
+
+\subsection{Laurent expansion of an analytic function}
+
+\begin{definition}[Isolated singularity]\label{def:ca_isolated_singularity}
+Let $f$ be analytic on some punctured neighbourhood $0 < |z - z_0| < R$ of $z_0$, but not analytic at $z_0$. Then $z_0$ is called an \textbf{isolated singularity} of $f$.
+\end{definition}
+
+\begin{theorem}[The Laurent expansion theorem]\label{thm:ca_laurent_expansion}
+Let $f$ be analytic on the annulus $r < |z - z_0| < R$ ($0 \le r < R \le \infty$). Then $f$ can be expanded uniquely in that annulus as a Laurent series
+\[
+f(z) = \sum_{n=-\infty}^{\infty} a_n (z - z_0)^n,
+\]
+where
+\[
+a_n = \frac{1}{2\pi i} \oint_{|z - z_0| = \rho} \frac{f(z)}{(z - z_0)^{n+1}} \, dz, \qquad n \in \mathbb{Z},
+\]
+and $\rho \in (r, R)$ is arbitrary.
+\end{theorem}
+
+\begin{proof}
+For any $z$ with $r < |z - z_0| < R$, choose $\rho_1, \rho_2$ such that $r < \rho_1 < |z - z_0| < \rho_2 < R$. By the multiply connected version of Cauchy's integral formula (Theorem \ref{thm:ca_cauchy_multiply_connected}),
+\[
+f(z) = \frac{1}{2\pi i} \oint_{|\zeta - z_0| = \rho_2} \frac{f(\zeta)}{\zeta - z} \, d\zeta - \frac{1}{2\pi i} \oint_{|\zeta - z_0| = \rho_1} \frac{f(\zeta)}{\zeta - z} \, d\zeta.
+\]
+For the first integral, on $|\zeta - z_0| = \rho_2$ we have $|z - z_0| < \rho_2$, so expand $1/(\zeta - z)$ as a power series in $(z - z_0)$; for the second integral, on $|\zeta - z_0| = \rho_1$ we have $|z - z_0| > \rho_1$, so expand $1/(\zeta - z)$ as a power series in $(z - z_0)^{-1}$. Combining the two gives
+\[
+f(z) = \sum_{n=0}^{\infty} a_n^{(+)} (z - z_0)^n + \sum_{n=1}^{\infty} a_{-n}^{(-)} (z - z_0)^{-n}.
+\]
+Setting $a_n = a_n^{(+)}$ for $n \ge 0$ and $a_{-n} = a_{-n}^{(-)}$ for $n \ge 1$, we obtain $f(z) = \sum_{n=-\infty}^{\infty} a_n (z - z_0)^n$.
+
+The coefficient formula is obtained by term-by-term integration (using the orthogonality of the integrals of $(z - z_0)^m$ on $|z - z_0| = \rho$).
+\end{proof}
+
+\begin{definition}[Classification of isolated singularities]\label{def:ca_singularity_types}
+Let $z_0$ be an isolated singularity of $f$, with Laurent expansion $f(z) = \sum_{n=-\infty}^{\infty} a_n (z - z_0)^n$. The series
+\[
+\text{principal part} = \sum_{n=1}^{\infty} a_{-n} (z - z_0)^{-n}
+\]
+is called the principal part of the Laurent expansion. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Removable singularity}: the principal part is zero, that is, $a_n = 0$ for all $n < 0$.
+    \item \textbf{Pole of order $m$}: the principal part is a finite non-zero sum whose highest negative power is $m$, that is, $a_{-m} \neq 0$ and $a_n = 0$ for $n < -m$.
+    \item \textbf{Essential singularity}: the principal part has infinitely many terms, that is, $a_n \neq 0$ for infinitely many $n < 0$.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[Characterisation of removable singularities]\label{thm:ca_removable_singularity}
+Let $z_0$ be an isolated singularity of $f$. Then the following conditions are equivalent:
+\begin{enumerate}[label=(\roman*)]
+    \item $z_0$ is a removable singularity;
+    \item $f$ is bounded near $z_0$;
+    \item $\lim_{z \to z_0} f(z)$ exists and is finite.
+\end{enumerate}
+In that case one may define $f(z_0) = \lim_{z \to z_0} f(z)$, making $f$ analytic at $z_0$.
+\end{theorem}
+
+\begin{proof}
+(i) $\Rightarrow$ (iii): if the principal part is zero, then $f(z) = \sum_{n=0}^{\infty} a_n (z - z_0)^n$ near $z_0$. Hence $\lim_{z \to z_0} f(z) = a_0$ exists and is finite.
+
+(iii) $\Rightarrow$ (ii): since the limit exists, $f$ is bounded near $z_0$.
+
+(ii) $\Rightarrow$ (i): suppose $|f(z)| \le M$ on $0 < |z - z_0| < R$. By the Laurent coefficient formula, for $n < 0$,
+\[
+|a_n| = \left| \frac{1}{2\pi i} \oint_{|z - z_0| = \rho} \frac{f(z)}{(z - z_0)^{n+1}} \, dz \right| \le \frac{1}{2\pi} \cdot \frac{M}{\rho^{n+1}} \cdot 2\pi \rho = \frac{M}{\rho^n} \cdot \rho \to 0 \quad (\rho \to 0)
+\]
+(since $1/\rho^n = \rho^{-n} \to 0$ for $n < 0$). Hence $a_n = 0$ for all $n < 0$, the principal part is zero, and $z_0$ is a removable singularity.
+\end{proof}
+
+\begin{example}[Examples of the three types of isolated singularity]\label{ex:ca_singularity_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Removable singularity}: $f(z) = \sin z / z$ at $z_0 = 0$. The Laurent expansion is $1 - z^2/6 + \cdots$, whose principal part is zero. After extending the definition by $f(0) = 1$, the function is analytic.
+    \item \textbf{Pole}: $f(z) = 1/z^2$ at $z_0 = 0$. The Laurent expansion is $z^{-2}$, the principal part is $z^{-2}$, a pole of order two.
+    \item \textbf{Pole}: $f(z) = 1/(z^2(z-1))$ at $z_0 = 0$. The expansion is $-1/z^2 - 1/z - 1 - z - \cdots$, a pole of order two.
+    \item \textbf{Essential singularity}: $f(z) = e^{1/z}$ at $z_0 = 0$. The Laurent expansion is $\sum_{n=0}^{\infty} z^{-n}/n!$, whose principal part has infinitely many terms. By the great Picard theorem, $e^{1/z}$ takes every value in $\mathbb{C} \setminus \{0\}$ in any punctured neighbourhood of $z_0 = 0$.
+\end{enumerate}
+\end{example}
+
+\section{The residue theorem and its applications}
+
+\subsection{Residues}
+
+\begin{definition}[Residue]\label{def:ca_residue}
+Let $z_0$ be an isolated singularity of $f$. The \textbf{residue} of $f$ at $z_0$ is defined as the coefficient of the term $(z - z_0)^{-1}$ in the Laurent expansion:
+\[
+\operatorname{Res}(f, z_0) = a_{-1} = \frac{1}{2\pi i} \oint_\gamma f(z) \, dz,
+\]
+where $\gamma$ is a small positively oriented circle around $z_0$.
+\end{definition}
+
+\begin{proposition}[Computing residues]\label{prop:ca_residue_calculation}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Simple pole}: if $f(z) = g(z)/(z - z_0)$ with $g(z_0) \neq 0$, then $\operatorname{Res}(f, z_0) = g(z_0)$.
+    \item \textbf{Quotient of two functions}: if $f = g/h$ with $h(z_0) = 0$, $h'(z_0) \neq 0$ and $g(z_0) \neq 0$, then $\operatorname{Res}(f, z_0) = g(z_0)/h'(z_0)$.
+    \item \textbf{Pole of order $m$}: $\operatorname{Res}(f, z_0) = \frac{1}{(m-1)!} \lim_{z \to z_0} \frac{d^{m-1}}{dz^{m-1}} [(z - z_0)^m f(z)]$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) If $f(z) = g(z)/(z - z_0)$ with $g$ analytic near $z_0$, then the Taylor expansion of $g$ is $g(z) = g(z_0) + g'(z_0)(z - z_0) + \cdots$. Hence $f(z) = g(z_0)/(z - z_0) + g'(z_0) + \cdots$. The coefficient of $(z - z_0)^{-1}$ is $g(z_0)$.
+
+(ii) Since $h(z_0) = 0$ and $h'(z_0) \neq 0$, the function $h$ has a simple zero at $z_0$. Hence $f = g/h$ has a simple pole at $z_0$. By (i), putting $g_{\text{new}}(z) = g(z)/((h(z) - h(z_0))/(z - z_0))$ (for $z \neq z_0$), we have $g_{\text{new}}(z_0) = g(z_0)/h'(z_0)$. Hence $\operatorname{Res}(f, z_0) = g(z_0)/h'(z_0)$.
+
+(iii) If $z_0$ is a pole of order $m$, then $(z - z_0)^m f(z)$ has a removable singularity (or is analytic) at $z_0$. Its Taylor expansion is $\sum_{k=0}^{\infty} b_k (z - z_0)^k$, where $b_k = \frac{1}{k!} \lim_{z \to z_0} \frac{d^k}{dz^k} [(z - z_0)^m f(z)]$. Hence $f(z) = \sum_{k=0}^{\infty} b_k (z - z_0)^{k-m}$. The term $(z - z_0)^{-1}$ corresponds to $k = m-1$, with coefficient $b_{m-1} = \frac{1}{(m-1)!} \lim_{z \to z_0} \frac{d^{m-1}}{dz^{m-1}} [(z - z_0)^m f(z)]$.
+\end{proof}
+
+\begin{theorem}[The residue theorem]\label{thm:ca_residue_theorem}
+Let $f$ be analytic in a simply connected domain $\Omega$ except for finitely many isolated singularities $z_1, \dots, z_m$. Let $\gamma$ be a positively oriented simple closed curve in $\Omega$ that passes through none of the singularities, with $z_1, \dots, z_m$ all inside $\gamma$. Then
+\[
+\oint_\gamma f(z) \, dz = 2\pi i \sum_{k=1}^{m} \operatorname{Res}(f, z_k).
+\]
+\end{theorem}
+
+\begin{proof}
+For each $z_k$, choose a small circle $\gamma_k$ ($|z - z_k| = \rho_k$) such that the $\gamma_k$ are pairwise disjoint and all lie inside $\gamma$. By the multiply connected version of Cauchy's integral theorem (Theorem \ref{thm:ca_cauchy_multiply_connected}),
+\[
+\oint_\gamma f(z) \, dz = \sum_{k=1}^{m} \oint_{\gamma_k} f(z) \, dz.
+\]
+By the definition of the residue (Definition \ref{def:ca_residue}), $\oint_{\gamma_k} f(z) \, dz = 2\pi i \operatorname{Res}(f, z_k)$. Hence $\oint_\gamma f(z) \, dz = 2\pi i \sum_{k=1}^{m} \operatorname{Res}(f, z_k)$.
+\end{proof}
+
+\begin{corollary}[Real integrals via the residue theorem]\label{cor:ca_residue_real_integral}
+\begin{enumerate}[label=(\roman*)]
+    \item Integrals of the form $\int_{-\infty}^{\infty} f(x) \, dx$, where $f$ has no singularities on the real axis, has finitely many singularities in the upper half-plane, and satisfies $|f(z)| \le C/|z|^2$ as $|z| \to \infty$. Then
+    \[
+    \int_{-\infty}^{\infty} f(x) \, dx = 2\pi i \sum_{\operatorname{Im} z_k > 0} \operatorname{Res}(f, z_k).
+    \]
+    \item Integrals of the form $\int_0^{2\pi} R(\cos\theta, \sin\theta) \, d\theta$, where $R$ is a rational function. Put $z = e^{i\theta}$, so that $\cos\theta = (z + z^{-1})/2$, $\sin\theta = (z - z^{-1})/(2i)$ and $d\theta = dz/(iz)$. Then
+    \[
+    \begin{aligned}
+    \int_0^{2\pi} R(\cos\theta, \sin\theta) \, d\theta
+      &= \oint_{|z| = 1} R\left( \frac{z + z^{-1}}{2}, \frac{z - z^{-1}}{2i} \right) \frac{dz}{iz}\\
+      &= 2\pi i \sum_{|z_k| < 1} \operatorname{Res}(\text{integrand}, z_k).
+    \end{aligned}
+    \]
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+(i) Take the large circle $\gamma_R$ ($|z| = R$) together with the segment $[-R, R]$ of the real axis to form a closed path. As $R \to \infty$, the integral over the large circle tends to zero (by $|f(z)| \le C/|z|^2$ and the estimation inequality), hence $\int_{-\infty}^{\infty} f(x) \, dx = 2\pi i \sum_{\operatorname{Im} z_k > 0} \operatorname{Res}(f, z_k)$.
+
+(ii) Put $z = e^{i\theta}$, so that $|z| = 1$ and $dz = i e^{i\theta} d\theta = iz \, d\theta$. Hence $d\theta = dz/(iz)$. Also $\cos\theta = (z + z^{-1})/2$ and $\sin\theta = (z - z^{-1})/(2i)$. Substitution gives a complex integral over the unit circle, which is computed by the residue theorem.
+\end{proof}
+
+\begin{example}[Real integrals computed by the residue theorem]\label{ex:ca_residue_real_integral}
+\begin{enumerate}[label=(\roman*)]
+    \item Compute $\displaystyle\int_{-\infty}^{\infty} \frac{dx}{1 + x^2}$. The function $f(z) = 1/(1 + z^2)$ has simple poles at $z = \pm i$, of which $z = i$ lies in the upper half-plane. By Proposition \ref{prop:ca_residue_calculation}(ii),
+    \[
+    \operatorname{Res}(f, i) = \frac{1}{(1 + z^2)'|_{z=i}} = \frac{1}{2i} = -\frac{i}{2}.
+    \]
+    Hence $\int_{-\infty}^{\infty} \frac{dx}{1 + x^2} = 2\pi i \cdot (-i/2) = \pi$.
+    \item Compute $\displaystyle\int_0^{2\pi} \frac{d\theta}{2 + \cos\theta}$. Putting $z = e^{i\theta}$, the integrand becomes
+    \[
+    \frac{1}{2 + (z + z^{-1})/2} \cdot \frac{1}{iz} = \frac{2}{iz(4 + z + z^{-1})} = \frac{2}{i(z^2 + 4z + 1)}.
+    \]
+    The roots of $z^2 + 4z + 1 = 0$ are $z = -2 \pm \sqrt{3}$. Inside the unit circle lies $z_1 = -2 + \sqrt{3}$. The residue is $2/(i(2z_1 + 4)) = 1/(i(z_1 + 2)) = 1/(i\sqrt{3})$. Hence the integral $= 2\pi i \cdot 1/(i\sqrt{3}) = 2\pi/\sqrt{3}$.
+\end{enumerate}
+\end{example}
+
+\begin{theorem}[The argument principle]\label{thm:ca_argument_principle}
+Let $f$ be analytic in a domain $\Omega$ except for finitely many poles, and let $\gamma$ be a positively oriented simple closed curve in $\Omega$ that passes through none of the zeros and poles of $f$. Then
+\[
+\frac{1}{2\pi i} \oint_\gamma \frac{f'(z)}{f(z)} \, dz = N - P,
+\]
+where $N$ is the number of zeros of $f$ inside $\gamma$ (counted with multiplicity) and $P$ is the number of poles of $f$ inside $\gamma$ (counted with order).
+\end{theorem}
+
+\begin{proof}
+Suppose $f$ has a zero of order $m$ at $z_0$ (or a pole of order $m$ with $m < 0$). Then $f(z) = (z - z_0)^m g(z)$, with $g(z_0) \neq 0$ and $g$ analytic. Hence
+\[
+\frac{f'(z)}{f(z)} = \frac{m}{z - z_0} + \frac{g'(z)}{g(z)}.
+\]
+Since $g(z_0) \neq 0$, the function $g'/g$ is analytic at $z_0$; hence $f'/f$ has a simple pole at $z_0$ with residue $m$ ($m > 0$ for a zero and $m < 0$ for a pole). By the residue theorem (Theorem \ref{thm:ca_residue_theorem}),
+\[
+\frac{1}{2\pi i} \oint_\gamma \frac{f'(z)}{f(z)} \, dz = \sum_{z_k \text{ zero}} m_k + \sum_{z_k \text{ pole}} m_k = N - P.
+\]
+\end{proof}
+
+\begin{corollary}[Rouché's theorem]\label{cor:ca_rouche}
+Let $f, g$ be analytic in a domain $\Omega$ and let $\gamma$ be a positively oriented simple closed curve in $\Omega$. If $|g(z)| < |f(z)|$ for all $z$ on $\gamma$, then $f$ and $f + g$ have the same number of zeros inside $\gamma$ (counted with multiplicity).
+\end{corollary}
+
+\begin{proof}
+Consider $h_t(z) = f(z) + t g(z)$ ($t \in [0, 1]$). On $\gamma$, the inequality $|g| < |f|$ implies $|t g| < |f|$, so $h_t$ has no zeros on $\gamma$. Define
+\[
+N(t) := \frac{1}{2\pi i} \oint_\gamma \frac{h_t'(z)}{h_t(z)} \, dz.
+\]
+By the argument principle (Theorem \ref{thm:ca_argument_principle}), $N(t)$ is the number of zeros of $h_t$ inside $\gamma$. The function $N(t)$ is continuous in $t$ (the integrand depends continuously on $t$ and the denominator does not vanish). Since $N(t)$ takes integer values and a function that is continuous and takes integer values must be constant, $N(0) = N(1)$; that is, $f$ and $f + g$ have the same number of zeros inside $\gamma$.
+\end{proof}
+
+\begin{example}[Applications of Rouché's theorem]\label{ex:ca_rouche_application}
+\begin{enumerate}[label=(\roman*)]
+    \item Prove that $z^4 + 3z^2 + 1 = 0$ has four roots in $|z| < 1$. Take $f(z) = 3z^2$ and $g(z) = z^4 + 1$. On $|z| = 1$ we have $|g| \le 2 < 3 = |f|$. By Rouché's theorem, $f$ and $f + g$ have the same number of zeros in $|z| < 1$. The function $3z^2$ has $2$ zeros in $|z| < 1$ (a zero of order two at $z = 0$). But $z^4 + 3z^2 + 1 = 0$ has $4$ roots in $|z| < 1$ --- which contradicts the conclusion of Rouché's theorem. The reason: the maximum of $|g|$ on $|z| = 1$ is $2$ and $|f| = 3$, so $|g| < |f|$ does hold. But $f = 3z^2$ has $2$ zeros in $|z| < 1$ (counted with multiplicity), so $f + g = z^4 + 3z^2 + 1$ ought to have $2$ zeros (counted with multiplicity), and not $4$. The number of roots of $z^4 + 3z^2 + 1 = 0$ in $|z| < 1$: put $w = z^2$, so that $w^2 + 3w + 1 = 0$ and $w = (-3 \pm \sqrt{5})/2 \approx -0.382$ or $-2.618$. Since $|w| < 1$ corresponds to $|z|^2 < 1$, only $w \approx -0.382$ yields two roots $z = \pm i\sqrt{0.382}$ with $|z| < 1$. Hence $z^4 + 3z^2 + 1 = 0$ has $2$ roots in $|z| < 1$, in agreement with Rouché's theorem.
+    \item Prove that $e^z = 3z$ has one root in $|z| < 1$. Take $f(z) = -3z$ and $g(z) = e^z$. On $|z| = 1$ we have $|g| = |e^z| = e^{\operatorname{Re} z} \le e < 3 = |f|$. By Rouché's theorem, $f$ and $f + g = e^z - 3z$ have the same number of zeros in $|z| < 1$. Since $f = -3z$ has one zero in $|z| < 1$ (namely $z = 0$), the function $e^z - 3z$ has one zero in $|z| < 1$.
+\end{enumerate}
+\end{example}
+
+\section{Harmonic functions and the elements of conformal mapping}
+
+\subsection{Harmonic functions}
+
+\begin{definition}[Harmonic function]\label{def:ca_harmonic_function}
+Let $\Omega \subseteq \mathbb{R}^2 \cong \mathbb{C}$ be a domain and $u: \Omega \to \mathbb{R}$ a $C^2$ function. Then $u$ is called a \textbf{harmonic function} if
+\[
+\Delta u = \frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} = 0
+\]
+holds everywhere on $\Omega$.
+\end{definition}
+
+\begin{theorem}[The real and imaginary parts of an analytic function are harmonic]\label{thm:ca_analytic_implies_harmonic}
+Let $f = u + iv$ be analytic on a domain $\Omega$. Then both $u$ and $v$ are harmonic functions.
+\end{theorem}
+
+\begin{proof}
+By Theorem \ref{thm:ca_harmonic_parts}, analyticity of $f$ implies $u, v \in C^\infty$ (by Corollary \ref{cor:ca_infinite_differentiable}) and the satisfaction of the Cauchy--Riemann equations. Hence $\Delta u = 0$ and $\Delta v = 0$.
+\end{proof}
+
+\begin{theorem}[The mean-value property of harmonic functions]\label{thm:ca_harmonic_mean_value}
+Let $u$ be harmonic on a domain $\Omega$, with $\overline{B}(z_0, r) \subseteq \Omega$. Then
+\[
+u(z_0) = \frac{1}{2\pi} \int_0^{2\pi} u(z_0 + re^{i\theta}) \, d\theta.
+\]
+That is, the value of a harmonic function at the centre of a disc equals its average value on the circle.
+\end{theorem}
+
+\begin{proof}
+By Proposition \ref{prop:ca_harmonic_conjugate_existence}, there is a harmonic conjugate $v$ of $u$ on $\overline{B}(z_0, r)$ such that $f = u + iv$ is analytic on $\overline{B}(z_0, r)$. By Cauchy's integral formula (Theorem \ref{thm:ca_cauchy_formula}),
+\[
+f(z_0) = \frac{1}{2\pi i} \oint_{|z - z_0| = r} \frac{f(z)}{z - z_0} \, dz.
+\]
+Parametrising $z = z_0 + re^{i\theta}$ gives
+\[
+f(z_0) = \frac{1}{2\pi} \int_0^{2\pi} f(z_0 + re^{i\theta}) \, d\theta.
+\]
+Taking real parts gives $u(z_0) = \frac{1}{2\pi} \int_0^{2\pi} u(z_0 + re^{i\theta}) \, d\theta$.
+\end{proof}
+
+\begin{corollary}[The maximum principle for harmonic functions]\label{cor:ca_harmonic_max_principle}
+Let $u$ be harmonic and non-constant on a domain $\Omega$. Then $u$ cannot attain a local maximum or minimum in $\Omega$.
+\end{corollary}
+
+\begin{proof}
+Suppose, to the contrary, that $u$ attains a local maximum $M$ at $z_0 \in \Omega$. Choose $r > 0$ such that $\overline{B}(z_0, r) \subseteq \Omega$ and $u \le M$ on $B(z_0, r)$. By the mean-value property (Theorem \ref{thm:ca_harmonic_mean_value}),
+\[
+M = u(z_0) = \frac{1}{2\pi} \int_0^{2\pi} u(z_0 + re^{i\theta}) \, d\theta \le M.
+\]
+Equality requires $u(z_0 + re^{i\theta}) = M$ for all $\theta$. Since $r$ is arbitrary, $u \equiv M$ on $B(z_0, r)$. By connectedness, $u \equiv M$ on $\Omega$, contradicting the assumption that $u$ is non-constant. Hence $u$ cannot attain a local maximum in $\Omega$. The argument for a minimum is the same (consider $-u$).
+\end{proof}
+
+\subsection{Elements of conformal mapping}
+
+\begin{definition}[Conformal mapping]\label{def:ca_conformal_map}
+Let $\Omega, \Omega' \subseteq \mathbb{C}$ be domains and $f: \Omega \to \Omega'$ a bijection. Then $f$ is called a \textbf{conformal mapping} if $f$ is analytic on $\Omega$ and $f'(z) \neq 0$ for all $z \in \Omega$.
+\end{definition}
+
+\begin{proposition}[Angle preservation of conformal mappings]\label{prop:ca_conformal_angle_preserving}
+Let $f$ be analytic at $z_0$ with $f'(z_0) \neq 0$. Then $f$ preserves the angles between curves at $z_0$ (including their orientation).
+\end{proposition}
+
+\begin{proof}
+Let two curves $\gamma_1, \gamma_2$ pass through $z_0$ with tangent vectors $\gamma_1'(0), \gamma_2'(0)$. Under $f$ the tangent vectors of the image curves are $f'(z_0) \gamma_1'(0)$ and $f'(z_0) \gamma_2'(0)$. The angle between the two tangent vectors is
+\[
+\arg(f'(z_0) \gamma_1'(0)) - \arg(f'(z_0) \gamma_2'(0)) = \arg \gamma_1'(0) - \arg \gamma_2'(0).
+\]
+That is, the angle is unchanged. Since $f'(z_0) \neq 0$, multiplication by $f'(z_0)$ is a rotation combined with a scaling, which preserves angles.
+\end{proof}
+
+\begin{example}[Examples of conformal mappings]\label{ex:ca_conformal_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item The Möbius transformation $f(z) = (az + b)/(cz + d)$ ($ad - bc \neq 0$) is a conformal mapping on domains such as the upper half-plane and the unit disc.
+    \item $f(z) = e^z$ maps the strip $\{z : 0 < \operatorname{Im} z < \pi\}$ conformally onto the upper half-plane.
+    \item $f(z) = (z - i)/(z + i)$ maps the upper half-plane conformally onto the unit disc.
+    \item $f(z) = z^2$ maps the first quadrant conformally onto the upper half-plane.
+\end{enumerate}
+\end{example}
+
+\begin{theorem}[The Riemann mapping theorem]\label{thm:ca_riemann_mapping}
+Let $\Omega \subsetneq \mathbb{C}$ be a simply connected domain. Then there exists a conformal mapping $f: \Omega \to B(0, 1)$.
+\end{theorem}
+
+\begin{proof}
+The proof lies beyond the scope of this chapter. See Ahlfors, \textit{Complex Analysis}, 3rd ed., McGraw-Hill, 1979, Chapter 6. The central idea is to construct the conformal mapping by means of normal families and an extremal problem.
+\end{proof}
+
+\section{Elements of quaternion analysis}
+
+\begin{definition}[The quaternion algebra]\label{def:ca_quaternion_algebra}
+The \textbf{quaternion algebra} $\mathbb{H}$ is the four-dimensional associative algebra over $\mathbb{R}$ with basis $\{1, i, j, k\}$, the multiplication being extended bilinearly from
+\[
+i^2 = j^2 = k^2 = ijk = -1
+\]
+to the whole algebra. Every quaternion is written as $q = a + bi + cj + dk$ ($a, b, c, d \in \mathbb{R}$).
+\end{definition}
+
+\begin{proposition}[Elementary properties of quaternions]\label{prop:ca_quaternion_props}
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathbb{H}$ is a division algebra: every non-zero element has a multiplicative inverse.
+    \item $\mathbb{H}$ is non-commutative: $ij = k \neq -k = ji$.
+    \item The conjugate $\bar{q} = a - bi - cj - dk$ satisfies $\overline{pq} = \bar{q} \bar{p}$.
+    \item The modulus $|q| = \sqrt{q\bar{q}} = \sqrt{a^2 + b^2 + c^2 + d^2}$ satisfies $|pq| = |p| |q|$.
+    \item The group of unit quaternions $S^3 = \{q : |q| = 1\}$ is isomorphic to $SU(2)$ and realises three-dimensional rotations through the conjugation action $v \mapsto qvq^{-1}$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) For $q = a + bi + cj + dk \neq 0$ we have $q\bar{q} = a^2 + b^2 + c^2 + d^2 > 0$, so $q^{-1} = \bar{q}/|q|^2$.
+
+(ii) Since $ij = k$ and $ji = -k$.
+
+(iii) Verify componentwise.
+
+(iv) $|pq|^2 = pq \overline{pq} = pq \bar{q} \bar{p} = p|q|^2 \bar{p} = |p|^2 |q|^2$.
+
+(v) See the `Vector Analysis' chapter.
+\end{proof}
+
+\begin{definition}[Quaternion-analytic function]\label{def:ca_quaternion_analytic}
+Let $f: \mathbb{H} \supseteq \Omega \to \mathbb{H}$. If the limit
+\[
+f'(q_0) = \lim_{h \to 0} [f(q_0 + h) - f(q_0)] h^{-1}
+\]
+exists, then $f$ is said to be \textbf{right differentiable} at $q_0$.
+\end{definition}
+
+\begin{remark}[The scarcity of quaternion-analytic functions]\label{rem:ca_quaternion_analytic_rarity}
+Unlike complex analytic functions, quaternion-analytic functions are extremely scarce. Here two different conditions must be distinguished. Write $f = f_0 + f_1 i + f_2 j + f_3 k$ and set $e_1 = i$, $e_2 = j$, $e_3 = k$.
+
+\textbf{(a) Differentiability by difference quotients} (the right differentiability of Definition \ref{def:ca_quaternion_analytic}) is equivalent to
+\[
+\frac{\partial f}{\partial x_\mu} = \Bigl(\frac{\partial f}{\partial x_0}\Bigr) e_\mu, \qquad \mu = 1, 2, 3,
+\]
+that is, to three component equations.
+
+\textbf{(b) The Cauchy--Riemann--Fueter equations} characterise a different class of objects, namely the \textbf{regular} functions:
+\[
+\frac{\partial f}{\partial \bar{q}} := \frac{\partial f}{\partial x_0} + i \frac{\partial f}{\partial x_1} + j \frac{\partial f}{\partial x_2} + k \frac{\partial f}{\partial x_3} = 0,
+\]
+that is, the four component functions satisfy a first-order linear system of partial differential equations.
+
+The two conditions are \textbf{not equivalent}: $f(q) = q$ is right differentiable by difference quotients ($[h]h^{-1} \equiv 1$), yet $\partial f/\partial\bar q = 1 + i\cdot i + j\cdot j + k\cdot k = -2 \neq 0$; conversely, $f(q) = x_0 + x_1 i$ satisfies $\partial f/\partial\bar q = 1 + i\cdot i = 0$, yet is not right differentiable (here $\partial_{x_2}f = 0$ whilst $(\partial_{x_0}f)e_2 = j \neq 0$, violating (a)).
+
+The CRF system consists of four first-order equations and is far more restrictive than the complex case (two equations). Nor are the \textbf{regular} functions characterised by the CRF system the only class of quaternion analytic functions: quaternion power series $\sum q^n a_n$, quaternion polynomials and local expansions in powers of $(q-q_0)$ belong to the \textbf{slice-regular} class, and the division of labour between the two classes is described in the `Quaternion Analysis' chapter (\S\ref{sec:q_slice_vs_fueter}).
+\end{remark}
+
+\begin{example}[Rotational periodicity of the quaternion exponential]\label{ex:ca_quaternion_exp}
+For every purely imaginary unit quaternion $\mathbf{u}$ ($\mathbf{u}^2 = -1$),
+\[
+e^{\mathbf{u}\theta} = \cos\theta + \mathbf{u} \sin\theta
+\]
+satisfies $e^{\mathbf{u}(\theta + 2\pi)} = e^{\mathbf{u}\theta}$. For different axes of rotation $\mathbf{u}_1 \neq \mathbf{u}_2$, the product of $e^{\mathbf{u}_1\theta_1}$ and $e^{\mathbf{u}_2\theta_2}$ does not commute in general.
+\end{example}
+
+\section{Interfaces with subsequent chapters}
+
+\begin{remark}[Interface with the `Harmonic Analysis' chapter]\label{rem:ca_to_harmonic}
+This chapter provides the `Harmonic Analysis' chapter with:
+\begin{enumerate}[label=(\roman*)]
+    \item the complex-analytic foundations of the Fourier transform: Cauchy's integral formula and the residue theorem for analytic functions are used to compute Fourier transforms;
+    \item the complex-analytic foundations of the Laplace transform: the domain of convergence and the analyticity of the Laplace transform are guaranteed by complex analysis;
+    \item residue calculus: used to compute Fourier-type integrals of the form $\int_{-\infty}^{\infty} f(x) e^{i\omega x} \, dx$;
+    \item the periodicity of the complex exponential function: the $2\pi$-periodicity of $e^{i\theta}$ is the foundation of Fourier series.
+\end{enumerate}
+\end{remark}
+
+\begin{remark}[Interface with the `Vector Analysis' chapter]\label{rem:ca_to_vector_analysis}
+This chapter provides the `Vector Analysis' chapter with:
+\begin{enumerate}[label=(\roman*)]
+    \item the two-dimensional complex potential: the real part $u$ and the imaginary part $v$ of an analytic function $f = u + iv$ are harmonic functions and can be used to describe two-dimensional irrotational solenoidal fields;
+    \item the connection between the Cauchy--Riemann equations and curl/divergence: analytic functions correspond to irrotational solenoidal fields;
+    \item conformal mapping: used to solve boundary-value problems for the two-dimensional Laplace equation.
+\end{enumerate}
+\end{remark}
+
+\begin{remark}[Interface with the `Differential Equations and Analysis' chapter]\label{rem:ca_to_diffeq}
+This chapter provides the `Differential Equations and Analysis' chapter with:
+\begin{enumerate}[label=(\roman*)]
+    \item complex eigenvalues and complex exponential solutions of ordinary differential equations;
+    \item analytic functions for constructing analytic solutions of differential equations;
+    \item the analysis of complex multipliers in Floquet theory;
+    \item the residue theorem for solving boundary-value problems for differential equations.
+\end{enumerate}
+\end{remark}
+
+\begin{remark}[Interface with the `Probability and Distribution' chapter]\label{rem:ca_to_probability}
+This chapter provides the `Probability and Distribution' chapter with:
+\begin{enumerate}[label=(\roman*)]
+    \item the complex-analytic foundations of characteristic functions: a characteristic function is a complex-valued function and its analyticity is guaranteed by complex analysis;
+    \item the residue theorem for computing the relation between characteristic functions and probability distributions;
+    \item the periodicity of the complex exponential function and the applications of Fourier analysis in probability theory.
+\end{enumerate}
+\end{remark}
+
+\begin{remark}[Open problems of this chapter]\label{rem:ca_open}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{A constructive proof of the Riemann mapping theorem}: this chapter only states the Riemann mapping theorem and gives no proof. A complete proof requires normal families and extremal methods.
+    \item \textbf{Picard's theorems}: the deep conclusions of the big and the little Picard theorem lie beyond the scope of this chapter.
+    \item \textbf{Boundary behaviour of conformal mappings}: the conclusion of Carathéodory's theorem on the boundary continuity of conformal mappings requires deeper topological and geometric tools.
+    \item \textbf{Classification of quaternion-analytic functions}: a complete classification and the properties of quaternion-analytic functions constitute the natural generalisation of complex analysis to the non-commutative case and remain a frontier of research.
+    \item \textbf{Functions of several complex variables}: this chapter treats only functions of one complex variable; functions of several complex variables (analytic functions on $\mathbb{C}^n$) have properties entirely different from the one-variable case and require an independent theoretical framework.
+\end{enumerate}
+\end{remark}
+
+\section{Roots of unity, finite order, and rotational period}
+\label{sec:unit_roots_rotation_period}
+
+The complex exponential function and the structure of the argument established in this chapter give the `rotational period' a computable criterion for the first time. This section fixes that criterion in the form of roots of unity; the criterion is subsequently the basis on which the `Harmonic Analysis' and `Discrete Sampling and Intercalation of Periodic Signals' chapters treat finite-order periods.
+
+\begin{proposition}[The finite-order criterion for the complex exponential]\label{prop:complex_exp_finite_order}
+For $\theta\in\mathbb{R}$, write $\omega:=e^{i\theta}\in U(1)$. Then
+\begin{enumerate}[label=(\roman*)]
+    \item $\operatorname{ord}(\omega)<\infty\iff\theta/(2\pi)\in\mathbb{Q}$;
+    \item if $\theta/(2\pi)=p/q$ in lowest terms ($q\ge1$), then $\operatorname{ord}(\omega)=q$, and $\omega$ is a \textbf{primitive $q$-th root of unity};
+    \item the map $\alpha+\mathbb{Z}\mapsto e^{2\pi i\alpha}$ gives an injective homomorphism $\mathbb{Q}/\mathbb{Z}\hookrightarrow U(1)$ whose image is the torsion subgroup of $U(1)$, and is dense in $U(1)$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) By the addition formula for the complex exponential, $\omega^n=e^{in\theta}$, hence
+\[
+\omega^n=1\iff n\theta\in2\pi\mathbb{Z}\iff \theta/(2\pi)\in\tfrac1n\mathbb{Z}.
+\]
+Such an $n\ge1$ exists if and only if $\theta/(2\pi)\in\mathbb{Q}$.
+
+(ii) Let $\theta/(2\pi)=p/q$ be in lowest terms. Then $\omega^n=1\iff q\mid np\iff q\mid n$ (since $\gcd(p,q)=1$), and the least positive integer solution is $n=q$; moreover $\omega^j\neq1$ for $0<j<q$, so $\omega$ is a primitive $q$-th root of unity.
+
+(iii) The map $\alpha\mapsto e^{2\pi i\alpha}$ is a surjective homomorphism $(\mathbb{R},+)\to U(1)$ with kernel $\mathbb{Z}$ (the complex exponential of this chapter has period $2\pi$), so it induces an injective homomorphism $\mathbb{R}/\mathbb{Z}\hookrightarrow U(1)$; restricting this to $\mathbb{Q}/\mathbb{Z}$ gives the required map. Its image is the set of all roots of unity, that is, the torsion subgroup of $U(1)$. Density follows from the density of $\mathbb{Q}$ in $\mathbb{R}$ and the continuity of $e^{2\pi i\cdot}$.
+\end{proof}
+
+\begin{corollary}[Finite-order rotation $\Leftrightarrow$ rational argument ratio]\label{cor:rational_angle_finite_order}
+Let $R_\theta(z)=e^{i\theta}z$ be a rotation of the complex plane. Then
+\[
+\operatorname{ord}(R_\theta)<\infty\iff\theta/(2\pi)\in\mathbb{Q},
+\]
+and in that case $\operatorname{ord}(R_\theta)$ equals the denominator of $\theta/(2\pi)$ in lowest terms, and every non-zero orbit of $R_\theta$ is a $q$-periodic closed orbit consisting of $q$ equally spaced points.
+\end{corollary}
+
+\begin{proof}
+$R_\theta^n=R_{n\theta}$ (by the periodicity of the complex exponential function in this chapter), hence $\operatorname{ord}(R_\theta)=\operatorname{ord}(e^{i\theta})$, and Proposition \ref{prop:complex_exp_finite_order} gives both the criterion and the order. The orbit $\{e^{in\theta}z\}_{n\ge0}$ lies on the circle of radius $|z|$, consists of exactly $q$ distinct points and returns to its starting point at the $q$-th step, so it is a $q$-periodic closed orbit.
+\end{proof}
+
+\begin{remark}[Interface with the `Period' theme]\label{rem:complex_period_interface}
+Proposition \ref{prop:complex_exp_finite_order} and Corollary \ref{cor:rational_angle_finite_order} compress the periodicity criterion at the level of complex numbers into a single sentence: \textbf{period = rationality of the argument ratio}. This criterion is the common source of several later conclusions: the periodicity of the discrete Fourier transform (the order of $\omega_N=e^{-2\pi i/N}$ being $N$), the condition that the normalised period ratio $\rho\in\mathbb{Q}$ in the fundamental period of a sampling sequence, and the correspondence between the finite-order rotation group $C_q$ and cyclic group representations.
+\end{remark}
+
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & Translation on the complex plane and the invariance of analytic functions under translation (Definition \ref{def:ca_complex_function}); the purely imaginary period $2\pi i$ of the complex exponential function (Theorem \ref{thm:ca_exp_periodicity}) \\
+Scaling & Scaling of the modulus of a complex number and the Cauchy--Riemann equations (Definition \ref{def:ca_polar_argument}, Theorem \ref{thm:ca_cauchy_riemann}); the angle preservation of conformal mappings (Proposition \ref{prop:ca_conformal_angle_preserving}) \\
+Rotation & Multiplication of complex numbers as rotation, the periodicity of $e^{i\theta}$ and roots of unity (Theorem \ref{thm:ca_unit_roots}, Theorem \ref{thm:ca_euler_formula}); realisation of three-dimensional rotations by the conjugation action of quaternions (Proposition \ref{prop:ca_quaternion_props}) \\
+Conservation & Conservation of the loop integral in Cauchy's integral theorem (Theorem \ref{thm:ca_cauchy_integral}); Cauchy's integral formula (Theorem \ref{thm:ca_cauchy_formula}) \\
+Symmetry & Conjugate symmetry of analytic functions and the Schwarz reflection principle; the mean-value property of harmonic functions (Theorem \ref{thm:ca_harmonic_mean_value}) \\
+Closure & Vanishing of the integral over a closed path in Cauchy's integral theorem (Theorem \ref{thm:ca_cauchy_integral}); the closed integral in the residue theorem (Theorem \ref{thm:ca_residue_theorem}) \\
+Period & The $2\pi i$-period of the complex exponential function (Theorem \ref{thm:ca_exp_periodicity}) and the group of roots of unity (Theorem \ref{thm:ca_unit_roots}); the rotational period of the quaternion exponential (Example \ref{ex:ca_quaternion_exp}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\clearpage
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+
+    \item Prove Proposition \ref{prop:ca_complex_field_props}:
+    the complex field $\mathbb{C}$ satisfies the field axioms, and
+    \begin{enumerate}[label=(\roman*)]
+        \item $\overline{z+w}=\bar{z}+\bar{w}$, $\overline{zw}=\bar{z}\bar{w}$;
+        \item $|zw|=|z||w|$, $|z+w|\le|z|+|w|$.
+    \end{enumerate}
+    Give the complete componentwise verification.
+
+    \item Prove Theorem \ref{thm:ca_euler_formula} (Euler's formula):
+    \[
+    e^{i\theta}=\cos\theta+i\sin\theta.
+    \]
+    Carry out the proof using power-series expansion and the Taylor series of $\cos\theta$ and $\sin\theta$.
+
+    \item Prove Theorem \ref{thm:ca_unit_roots}:
+    the equation $z^n=1$ has exactly $n$ solutions in $\mathbb{C}$,
+    \[
+    \zeta_k=e^{2\pi ik/n},\quad k=0,1,\dots,n-1,
+    \]
+    and these form the cyclic group $C_n$.
+    Verify closure, the identity element, inverses and a generator.
+
+    \item Prove Theorem \ref{thm:ca_completeness}:
+    every Cauchy sequence in $\mathbb{C}$ converges.
+    Carry out the proof using the coordinate description by real and imaginary parts,
+    and explain why the completeness of $\mathbb{C}$ is inherited from the completeness of $\mathbb{R}$.
+
+    \item Prove Theorem \ref{thm:ca_cauchy_riemann} (the Cauchy--Riemann equations):
+    if $f=u+iv$ is complex differentiable at $z_0$, then
+    \[
+    \frac{\partial u}{\partial x}=\frac{\partial v}{\partial y},\qquad
+    \frac{\partial u}{\partial y}=-\frac{\partial v}{\partial x}.
+    \]
+    Compute $f'(z_0)$ along the real axis and along the imaginary axis separately, and compare real and imaginary parts.
+
+    \item Prove Theorem \ref{thm:ca_cr_sufficient}:
+    if $u,v\in C^1(\Omega)$ and the Cauchy--Riemann equations hold,
+    then $f=u+iv$ is analytic on $\Omega$.
+    Carry out the proof using the definition of differentiability and the Cauchy--Riemann equations,
+    and explain why the $C^1$ condition cannot be omitted.
+
+    \item Verify the analyticity of each function in Example \ref{ex:ca_analytic_examples}:
+    \begin{enumerate}[label=(\roman*)]
+        \item $f(z)=e^z$, $u=e^x\cos y$, $v=e^x\sin y$;
+        \item $f(z)=\sin z$, $f(z)=\cos z$;
+        \item $f(z)=1/z$ on $\mathbb{C}\setminus\{0\}$.
+    \end{enumerate}
+    Verify the Cauchy--Riemann equations in each case,
+    and compute the corresponding complex derivatives.
+
+    \item Prove Theorem \ref{thm:ca_cauchy_integral} (Cauchy's integral theorem):
+    the integral of an analytic function over a closed path in a simply connected domain is zero.
+    Carry out the proof using Green's formula (Theorem \ref{thm:green_plane}) and the
+    Cauchy--Riemann equations,
+    and explain why the simple-connectedness condition cannot be omitted.
+
+    \item Prove Theorem \ref{thm:ca_cauchy_formula} (Cauchy's integral formula):
+    \[
+    f(z_0)=\frac{1}{2\pi i}\oint_{|z-z_0|=r}
+    \frac{f(z)}{z-z_0}\,dz.
+    \]
+    Carry out the proof in the three steps `decompose the integrand, compute on the small circle, pass to the limit'.
+
+    \item Prove Corollary \ref{cor:ca_infinite_differentiable}:
+    an analytic function is infinitely often complex differentiable, and
+    \[
+    f^{(n)}(z_0)=\frac{n!}{2\pi i}\oint_{|z-z_0|=r}
+    \frac{f(z)}{(z-z_0)^{n+1}}\,dz.
+    \]
+    Carry out the proof by differentiating under the integral sign in Cauchy's integral formula.
+
+    \item Prove Theorem \ref{thm:ca_liouville} (Liouville's theorem):
+    a bounded entire function must be constant.
+    Use Cauchy's integral formula to estimate $|f'(z_0)|$,
+    and explain why this estimate tends to zero as the radius $R\to\infty$.
+
+    \item Use Liouville's theorem to prove Corollary \ref{cor:ca_fundamental_theorem_algebra}
+    (the fundamental theorem of algebra):
+    every polynomial of degree $n\ge 1$ with complex coefficients has a root in $\mathbb{C}$.
+    Argue by contradiction, assuming that there is no root and constructing a bounded entire function.
+
+    \item Prove Theorem \ref{thm:ca_cauchy_multiply_connected}:
+    Cauchy's integral theorem on a multiply connected domain:
+    \[
+    \oint_{\gamma_1}f\,dz+\cdots+\oint_{\gamma_m}f\,dz=0.
+    \]
+    Explain how cuts turn a multiply connected domain into a simply connected one,
+    and verify that the integrals along the two sides of each cut cancel each other.
+
+    \item Prove Theorem \ref{thm:ca_taylor_expansion}:
+    an analytic function on a disc can be expanded as a Taylor series.
+    Carry out the proof using Cauchy's integral formula and the geometric-series expansion,
+    and explain why the radius of convergence is at least the radius of the disc.
+
+    \item Prove Corollary \ref{cor:ca_zero_isolated} (isolation of zeros):
+    the zero set of an analytic function that is not identically zero has no accumulation point.
+    Write out the complete argument by contradiction,
+    and explain why the existence of the least $k$ is guaranteed by $f\neq 0$.
+
+    \item Prove Corollary \ref{cor:ca_identity_theorem} (the identity theorem):
+    if two analytic functions agree on a set with an accumulation point in a domain, then they are identical.
+    Complete the proof by applying the isolation-of-zeros theorem.
+
+    \item Prove Theorem \ref{thm:ca_laurent_expansion} (the Laurent expansion theorem):
+    an analytic function on an annulus can be expanded as a Laurent series
+    \[
+    f(z)=\sum_{n=-\infty}^{\infty}a_n(z-z_0)^n.
+    \]
+    Use the multiply connected version of Cauchy's integral formula,
+    split the integral into integrals over the inner and the outer circle, and expand each separately.
+
+    \item Prove Theorem \ref{thm:ca_removable_singularity}:
+    an isolated singularity $z_0$ is a removable singularity if and only if $f$ is bounded near $z_0$.
+    Use the Laurent coefficient formula to estimate $|a_n|$ ($n<0$),
+    and explain why $a_n\to 0$ as $\rho\to 0$.
+
+    \item Verify the various types of singularity in Example \ref{ex:ca_singularity_examples}:
+    \begin{enumerate}[label=(\roman*)]
+        \item $\sin z/z$ at $z_0=0$ (removable singularity);
+        \item $1/z^2$ at $z_0=0$ (pole of order two);
+        \item $e^{1/z}$ at $z_0=0$ (essential singularity).
+    \end{enumerate}
+    Write out the respective Laurent expansions,
+    and state the form of the principal part.
+
+    \item Prove Proposition \ref{prop:ca_residue_calculation} (computing residues):
+    \begin{enumerate}[label=(\roman*)]
+        \item simple pole: $\operatorname{Res}(f,z_0)=g(z_0)$ ($f=g/(z-z_0)$);
+        \item quotient of two functions: $\operatorname{Res}(f,z_0)=g(z_0)/h'(z_0)$ ($f=g/h$);
+        \item pole of order $m$: $\operatorname{Res}(f,z_0)=\frac{1}{(m-1)!}\lim_{z\to z_0}\frac{d^{m-1}}{dz^{m-1}}[(z-z_0)^m f(z)]$.
+    \end{enumerate}
+    Write out the three proofs separately.
+
+    \item Prove Theorem \ref{thm:ca_residue_theorem} (the residue theorem):
+    \[
+    \oint_\gamma f(z)\,dz=2\pi i\sum_{k=1}^m\operatorname{Res}(f,z_k).
+    \]
+    Use the multiply connected version of Cauchy's integral theorem,
+    and split the integral over $\gamma$ into the sum of integrals over small circles around the individual singularities.
+
+    \item Compute the following real integrals, giving the complete working:
+    \begin{enumerate}[label=(\roman*)]
+        \item $\displaystyle\int_{-\infty}^{\infty}\frac{dx}{1+x^2}$;
+        \item $\displaystyle\int_0^{2\pi}\frac{d\theta}{2+\cos\theta}$;
+        \item $\displaystyle\int_{-\infty}^{\infty}\frac{\cos x}{1+x^2}\,dx$ (hint: consider the integral of $e^{iz}/(1+z^2)$ along a semicircular path).
+    \end{enumerate}
+    Explain the key role of the residue theorem in the computation of real integrals.
+
+    \item Prove Theorem \ref{thm:ca_argument_principle} (the argument principle):
+    \[
+    \frac{1}{2\pi i}\oint_\gamma\frac{f'(z)}{f(z)}\,dz=N-P.
+    \]
+    Compute the residues of $f'/f$ at the zeros and the poles,
+    and complete the proof using the residue theorem.
+
+    \item Use the argument principle to prove Corollary \ref{cor:ca_rouche} (Rouché's theorem):
+    if $|g|<|f|$ on $\gamma$,
+    then $f$ and $f+g$ have the same number of zeros inside $\gamma$.
+    Complete the proof using $h_t=f+tg$ and the continuity of $N(t)$.
+
+    \item Verify Example \ref{ex:ca_rouche_application}:
+    \begin{enumerate}[label=(\roman*)]
+        \item prove that $z^4+3z^2+1=0$ has $2$ roots in $|z|<1$;
+        \item prove that $e^z=3z$ has $1$ root in $|z|<1$.
+    \end{enumerate}
+    Write out the complete application of Rouché's theorem in each case.
+
+    \item Prove Theorem \ref{thm:ca_harmonic_mean_value} (the mean-value property):
+    the value of a harmonic function at the centre of a disc equals its average value on the circle.
+    Complete the proof by taking the real part of Cauchy's integral formula.
+
+    \item Use the mean-value property to prove Corollary \ref{cor:ca_harmonic_max_principle}
+    (the maximum principle for harmonic functions):
+    a non-constant harmonic function cannot attain a local maximum or minimum in a domain.
+    Write out the complete argument by contradiction.
+
+    \item Prove Proposition \ref{prop:ca_conformal_angle_preserving}:
+    if $f'(z_0)\neq 0$, then $f$ preserves the angles between curves at $z_0$.
+    Complete the proof using the images of tangent vectors under $f$ and the rotation-and-scaling action of $f'(z_0)$.
+
+    \item Synthesis question: drawing on the complex derivative, Cauchy's integral theorem,
+    Cauchy's integral formula, Taylor expansion, Laurent expansion, the residue theorem,
+    the argument principle and Rouché's theorem from this chapter,
+    explain how complex analysis provides tools for the following in the `Harmonic Analysis' chapter:
+    \begin{enumerate}[label=(\roman*)]
+        \item the computation of the Fourier transform (the residue theorem);
+        \item the analyticity of the Laplace transform (Cauchy's integral formula);
+        \item the complex-analytic foundations of characteristic functions (the complex exponential function);
+    \end{enumerate}
+    and indicate in each case the corresponding definition, theorem or proposition in this chapter.
+
+\end{enumerate}
+

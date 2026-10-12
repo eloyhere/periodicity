@@ -1,0 +1,1607 @@
+\chapter{线性代数}
+\label{chap:linear_algebra}
+\markboth{线性代数}{线性代数}
+
+\begin{remark}[本章的定位]\label{rem:linear_algebra_chapter_positioning}
+线性代数是研究向量空间、线性变换及其代数结构的数学理论。从周期数学的视角看，本章系统地建立线性代数的基础理论，重点考察线性变换的不变子空间分解、特征值问题，以及谱定理与周期结构之间的深刻联系。本章的中心目标是为线性系统的分析提供严格的数学语言。
+
+本章建立在前述各章的基础之上。其中“周期基础”一章确立了守恒律---对称性---闭轨---周期的逻辑链；“数系”一章确立了数系扩张与周期类型之间的对应；“标量与矢量”一章确立了三种基本变换在矢量层面的代数实现；“函数与极限”一章确立了方向---趋势---卷积的统一框架。本章将这些结果系统地归纳为有限维向量空间，揭示线性代数的核心定理---谱定理、奇异值分解以及矩阵群分类---是如何作为三种基本算子（梯度、散度、旋度）的代数实现的。
+
+本章的核心工作在于：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{不变子空间与周期轨道}：线性变换的不变子空间对应于动力系统的闭轨道---一维不变子空间上的演化是纯粹的平移周期，而二维不变子空间上的旋转是纯粹的旋转周期。
+    \item \textbf{特征值分解与频谱}：特征值分解将线性变换对角化为独立的一维不变子空间的直和。每个特征值对应于一个特征频率，每个特征向量对应于一个本轮分量。
+    \item \textbf{谱定理与守恒律}：自伴算子与酉算子的谱定理分别是梯度（对称中心 $0$）（实特征值，纯平移）与旋度（对称中心 $i$）（模为 $1$ 的特征值，纯旋转）在线性代数中的表述。谱分解是守恒律在算子层面的实现。
+    \item \textbf{矩阵群与对称性}：正交群、酉群与辛群在周期数学中分别对应于三种对称群---平移（$0$-对称）、旋转（$i$-对称）与伸缩（$1$-对称）---的矩阵实现。
+\end{enumerate}
+
+\textbf{本章七大主题导引}：平移---平移矩阵与循环移位（实特征值的拉伸/压缩、循环矩阵的 DFT 对角化）；伸缩---对角缩放与奇异值（对角矩阵 $\operatorname{diag}(\lambda_i)$、SVD 的 $\boldsymbol{\Sigma}$ 以及由行列式度量的体积缩放）；旋转---正交矩阵与酉矩阵（模为 $1$ 的特征值、平面旋转、$O(n)/U(n)$ 的等距作用）；守恒---Frobenius 范数、行列式与秩（维数守恒、$\sum_i \sigma_i^2$ 的能量守恒）；对称---矩阵群 $O(n)/U(n)/Sp(2n)$（$0$-对称、$i$-对称与 $1$-对称的矩阵实现）；闭包---满足 $\lambda^p = 1$ 的有限阶周期解（位于单位根上的特征值、$C_p$ 的循环结构）；周期---线性系统的周期结构（谱分解中的四类运动、迭代收敛与稳态）。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  font=\small,
+  obj/.style={draw, rounded corners, fill=blue!8, minimum width=2.4cm, minimum height=0.8cm, align=center},
+  theme/.style={draw, rounded corners, fill=green!10, minimum width=1.2cm, minimum height=0.55cm, align=center, font=\footnotesize},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[obj] (space) {向量空间\\公理与对称性};
+  \node[obj, right=0.8cm of space] (lin) {线性变换\\矩阵表示};
+  \node[obj, right=0.8cm of lin] (eig) {特征值分解\\不变子空间};
+  \node[obj, right=0.8cm of eig] (spec) {谱定理\\自伴/酉/正规};
+
+  \node[obj, below=1.0cm of space] (svd) {奇异值分解\\旋转-伸缩-旋转};
+  \node[obj, below=1.0cm of lin] (dyn) {线性动力系统\\四类运动};
+  \node[obj, below=1.0cm of eig] (iter) {迭代法\\谱半径收敛};
+  \node[obj, below=1.0cm of spec] (group) {矩阵群\\$O(n),U(n),Sp(2n)$};
+
+  \node[theme, below=1.2cm of svd] (p) {平移};
+  \node[theme, right=0.2cm of p] (s) {伸缩};
+  \node[theme, right=0.2cm of s] (r) {旋转};
+  \node[theme, right=0.2cm of r] (c) {守恒};
+  \node[theme, right=0.2cm of c] (sym) {对称};
+  \node[theme, right=0.2cm of sym] (cl) {闭包};
+  \node[theme, right=0.2cm of cl] (per) {周期};
+
+  \draw[arr] (space) -- (lin);
+  \draw[arr] (lin) -- (eig);
+  \draw[arr] (eig) -- (spec);
+
+  \draw[arr] (spec) -- (group);
+  \draw[arr] (space) -- (svd);
+  \draw[arr] (lin) -- (dyn);
+  \draw[arr] (eig) -- (iter);
+\end{tikzpicture}
+\caption{本章结构总览：向量空间、线性变换、特征值分解、谱定理，第二行给出奇异值分解、线性动力系统、迭代法与矩阵群四个并列子结构，并由七大主题贯穿。}
+\label{fig:linear_algebra_overview}
+\end{figure}
+
+\section{\texorpdfstring{向量空间与线性变换}{向量空间与线性变换}}
+
+\subsection{\texorpdfstring{向量空间}{向量空间}}
+
+\begin{definition}[向量空间]\label{def:vector_space}
+设 $V$ 为非空集合，$\mathbb{F}$ 为域（本书通常取 $\mathbb{F} = \mathbb{R}$ 或 $\mathbb{C}$）。若在 $V$ 上定义了矢量加法 $+: V \times V \to V$ 与数量乘法 $\cdot: \mathbb{F} \times V \to V$，且满足下列八条公理，则称 $V$ 为 $\mathbb{F}$ 上的\textbf{向量空间}：
+\begin{enumerate}[label=(\roman*)]
+    \item 加法的结合律：$(\mathbf{u} + \mathbf{v}) + \mathbf{w} = \mathbf{u} + (\mathbf{v} + \mathbf{w})$
+    \item 加法的交换律：$\mathbf{u} + \mathbf{v} = \mathbf{v} + \mathbf{u}$
+    \item 加法单位元：存在 $\mathbf{0} \in V$ 使得 $\mathbf{v} + \mathbf{0} = \mathbf{v}$
+    \item 加法逆元：对每个 $\mathbf{v}$ 存在 $-\mathbf{v}$ 使得 $\mathbf{v} + (-\mathbf{v}) = \mathbf{0}$
+    \item 乘法单位元：$1 \cdot \mathbf{v} = \mathbf{v}$
+    \item 数量乘法的结合律：$\alpha(\beta\mathbf{v}) = (\alpha\beta)\mathbf{v}$
+    \item 数量对矢量的分配律：$\alpha(\mathbf{u} + \mathbf{v}) = \alpha\mathbf{u} + \alpha\mathbf{v}$
+    \item 数量对域加法的分配律：$(\alpha + \beta)\mathbf{v} = \alpha\mathbf{v} + \beta\mathbf{v}$
+\end{enumerate}
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (add) {加法公理\\结合、交换、单位元、逆元};
+  \node[box, fill=orange!12, right=1.2cm of add] (mul) {数量乘法公理\\单位元、结合律};
+  \node[box, fill=green!12, right=1.2cm of mul] (dist) {分配律\\相容性};
+  \node[box, fill=red!8, below=1.0cm of $(add)!0.5!(dist)$] (sym) {三对称中心共存\\$0$（加法）、$1$（乘法）、$i$（旋转）};
+  \draw[arr] (add) -- (sym);
+  \draw[arr] (mul) -- (sym);
+  \draw[arr] (dist) -- (sym);
+\end{tikzpicture}
+\caption{向量空间八条公理与三对称中心：加法给出平移对称，数量乘法给出伸缩对称，分配律保证二者相容。}
+\label{fig:vector_space_axioms}
+\end{figure}
+
+\begin{remark}[向量空间的对称性起源]\label{rem:vector_space_symmetry}
+向量空间的八条公理精确地保证了三种基本对称运算在代数上的合法性。加法的结合律与交换律确保平移运算构成一个阿贝尔群（$0$-对称）；数量乘法的结合律与单位元确保伸缩运算构成一个乘法群作用（$1$-对称）；而分配律则是平移算子与伸缩算子之间相容性的代数表达。向量空间是三个对称中心---$0$（加法单位元）、$1$（数量乘法单位元）与 $i$（旋转方向的生成元）---得以共存的最小代数结构。
+\end{remark}
+
+\begin{definition}[子空间]\label{def:subspace}
+设 $V$ 为向量空间，$W \subseteq V$ 为非空子集。若 $W$ 对矢量加法与数量乘法均封闭，则称 $W$ 为 $V$ 的\textbf{子空间}。子空间自身也是向量空间。其中不变子空间尤为重要---它们是线性变换下封闭的最小子结构，对应于具有独立演化规律的子系统。
+\end{definition}
+
+\begin{proposition}[子空间在平移与伸缩下的封闭性]\label{prop:subspace_closure_symmetry}
+设 $W$ 为 $V$ 的子空间。则 $W$ 对以下运算封闭：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平移}：对任意 $\mathbf{w}_1, \mathbf{w}_2 \in W$，有 $\mathbf{w}_1 + \mathbf{w}_2 \in W$。这反映了梯度（对称中心 $0$）的内部封闭性---子空间内的平移不会离开子空间。
+    \item \textbf{伸缩}：对任意 $\mathbf{w} \in W$ 与 $\alpha \in \mathbb{F}$，有 $\alpha \mathbf{w} \in W$。这反映了散度（对称中心 $1$）的内部封闭性---子空间内的伸缩不会离开子空间。
+    \item \textbf{旋转}：在复向量空间中，若 $W$ 对数量乘法封闭，则乘以单位复数 $e^{i\theta}$ 同样不会离开 $W$。
+\end{enumerate}
+子空间在这三种算子下的封闭性，是它作为一个独立演化子系统的代数基础。
+\end{proposition}
+
+\begin{proof}
+(i)(ii) 直接由子空间的定义（定义 \ref{def:subspace}）得出：$W$ 对矢量加法封闭意味着它对平移封闭，对数量乘法封闭意味着它对伸缩封闭。(iii) 在复向量空间中，乘以单位复数 $e^{i\theta}$ 是取 $\alpha = e^{i\theta}$ 时数量乘法的特例，因此仍由数量乘法的封闭性所保证---旋转不会离开子空间。
+\end{proof}
+
+\begin{definition}[线性相关与线性无关]\label{def:linear_dependence}
+若存在不全为零的标量 $c_1, \dots, c_k$ 使得 $\sum_{i=1}^k c_i \mathbf{v}_i = \mathbf{0}$，则称向量组 $\{\mathbf{v}_1, \dots, \mathbf{v}_k\}$ 是\textbf{线性相关的}；否则称其为\textbf{线性无关的}。在线性无关组中，任一矢量都不能表示为其余矢量的线性组合---每个矢量都提供独立的“方向信息”。
+\end{definition}
+
+\begin{definition}[基与维数]\label{def:basis_dimension}
+向量空间 $V$ 的一个\textbf{基}是一组线性无关的矢量 $\{\mathbf{e}_1, \dots, \mathbf{e}_n\}$，使得 $V$ 中每个矢量都能唯一地表示为这些基矢量的线性组合：
+\[
+\mathbf{v} = \sum_{i=1}^n v_i \mathbf{e}_i.
+\]
+基矢量的个数 $n$ 称为 $V$ 的\textbf{维数}，记作 $\dim V = n$。基的选择对应于“坐标卡”的选择，不同的基给出同一周期结构的不同表示。
+\end{definition}
+
+\begin{definition}[直和分解]\label{def:direct_sum}
+设 $W_1, W_2$ 为 $V$ 的子空间且 $W_1 \cap W_2 = \{\mathbf{0}\}$。则\textbf{直和} $W_1 \oplus W_2 = \{\mathbf{w}_1 + \mathbf{w}_2 : \mathbf{w}_1 \in W_1, \mathbf{w}_2 \in W_2\}$ 是 $V$ 的子空间。若 $V = W_1 \oplus W_2$，则每个 $\mathbf{v} \in V$ 都有唯一分解 $\mathbf{v} = \mathbf{w}_1 + \mathbf{w}_2$。
+
+直和分解是线性系统解耦的基础---当 $V$ 能分解为不变子空间的直和时，系统的演化可在每个子空间上独立分析。
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (v) {$V$\\总维数 $\dim V$};
+  \node[box, fill=orange!12, right=1.2cm of v] (w1) {$W_1$\\$\dim W_1$};
+  \node[box, fill=green!12, right=1.2cm of w1] (w2) {$W_2$\\$\dim W_2$};
+  \node[box, fill=red!8, below=1.0cm of $(w1)!0.5!(w2)$] (inter) {$W_1\cap W_2$\\$\dim(W_1\cap W_2)$};
+  \node[box, fill=purple!8, below=1.0cm of inter] (dim) {维数守恒\\$\dim(W_1+W_2)=\dim W_1+\dim W_2-\dim(W_1\cap W_2)$};
+  \draw[arr] (v) -- (w1);
+  \draw[arr] (v) -- (w2);
+  \draw[arr] (w1) -- (inter);
+  \draw[arr] (w2) -- (inter);
+  \draw[arr] (inter) -- (dim);
+\end{tikzpicture}
+\caption{维数定理的守恒图景：总维数等于各子空间维数之和减去交叠部分。}
+\label{fig:dimension_conservation}
+\end{figure}
+
+\begin{theorem}[维数定理与守恒律]\label{thm:dimension_conservation}
+设 $V$ 为有限维向量空间，$W_1, W_2$ 为其子空间。则
+\[
+\dim(W_1 + W_2) = \dim W_1 + \dim W_2 - \dim(W_1 \cap W_2).
+\]
+特别地，若 $W_1 \cap W_2 = \{\mathbf{0}\}$，则 $\dim(W_1 \oplus W_2) = \dim W_1 + \dim W_2$。
+
+维数定理表达了子空间分解中信息的\textbf{守恒}：总维数（信息总量）在不重叠的分解下保持可加性---各子空间独立自由度之和等于总自由度。
+\end{theorem}
+
+\begin{proof}
+设 $\{\mathbf{u}_1, \dots, \mathbf{u}_k\}$ 为 $W_1 \cap W_2$ 的一组基。分别将其扩充为：
+\[
+\begin{aligned}
+W_1\text{的基}:&\quad \{\mathbf{u}_1, \dots, \mathbf{u}_k, \mathbf{v}_1, \dots, \mathbf{v}_m\}, \\
+W_2\text{的基}:&\quad \{\mathbf{u}_1, \dots, \mathbf{u}_k, \mathbf{w}_1, \dots, \mathbf{w}_n\}, \\
+\mathcal{B}:&\quad \{\mathbf{u}_1, \dots, \mathbf{u}_k, \mathbf{v}_1, \dots, \mathbf{v}_m, \mathbf{w}_1, \dots, \mathbf{w}_n\}.
+\end{aligned}
+\]
+我们断言 $\mathcal{B}$ 是 $W_1 + W_2$ 的一组基。
+
+\textbf{生成}：任意 $\mathbf{x} \in W_1 + W_2$ 可写为 $\mathbf{x} = \mathbf{x}_1 + \mathbf{x}_2$（$\mathbf{x}_1 \in W_1$，$\mathbf{x}_2 \in W_2$），而 $\mathbf{x}_1, \mathbf{x}_2$ 分别是 $W_1, W_2$ 的基的线性组合；因此 $\mathbf{x}$ 是 $\mathcal{B}$ 的线性组合，故 $\mathcal{B}$ 生成 $W_1 + W_2$。
+
+\textbf{线性无关性}：设 $\sum_{i=1}^k \alpha_i \mathbf{u}_i + \sum_{j=1}^m \beta_j \mathbf{v}_j + \sum_{\ell=1}^n \gamma_\ell \mathbf{w}_\ell = \mathbf{0}$。重新排列得 $\mathbf{z} := \sum_{i=1}^k \alpha_i \mathbf{u}_i + \sum_{j=1}^m \beta_j \mathbf{v}_j = -\sum_{\ell=1}^n \gamma_\ell \mathbf{w}_\ell$。左边属于 $W_1$，右边属于 $W_2$，故 $\mathbf{z} \in W_1 \cap W_2$，可写成 $\{\mathbf{u}_i\}$ 的线性组合；又 $\mathbf{z} = -\sum_{\ell} \gamma_\ell \mathbf{w}_\ell$，而 $\{\mathbf{u}_1, \dots, \mathbf{u}_k, \mathbf{w}_1, \dots, \mathbf{w}_n\}$ 是 $W_2$ 的一组基（线性无关），故对所有 $\ell$ 有 $\gamma_\ell = 0$。于是 $\sum_i \alpha_i \mathbf{u}_i + \sum_j \beta_j \mathbf{v}_j = \mathbf{0}$；而 $\{\mathbf{u}_1, \dots, \mathbf{u}_k, \mathbf{v}_1, \dots, \mathbf{v}_m\}$ 是 $W_1$ 的一组基（线性无关），故 $\alpha_i = 0$ 且 $\beta_j = 0$。因此 $\mathcal{B}$ 线性无关。
+
+于是 $\mathcal{B}$ 是 $W_1 + W_2$ 的一组基，含有 $k + m + n$ 个元素。故
+\[
+\dim(W_1 + W_2) = k + m + n = (k+m) + (k+n) - k = \dim W_1 + \dim W_2 - \dim(W_1 \cap W_2).
+\]
+\end{proof}
+
+\subsection{\texorpdfstring{线性变换与矩阵表示}{线性变换与矩阵表示}}
+
+\begin{definition}[线性变换]\label{def:linear_transformation}
+设 $V, W$ 为 $\mathbb{F}$ 上的向量空间。若映射 $T: V \to W$ 对所有 $\mathbf{u}, \mathbf{v} \in V$ 与 $\alpha \in \mathbb{F}$ 满足
+\[
+T(\mathbf{u} + \mathbf{v}) = T(\mathbf{u}) + T(\mathbf{v}), \quad T(\alpha \mathbf{u}) = \alpha T(\mathbf{u}),
+\]
+则当 $V = W$ 时，称 $T$ 为 $V$ 上的\textbf{线性算子}。
+
+线性变换同时保持加法与数量乘法---也就是说，它同时尊重平移算子与伸缩算子。这种双重保持正是线性变换能够作为描述周期结构工具的根本原因。
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (add) {保持加法\\$T(\mathbf u+\mathbf v)=T\mathbf u+T\mathbf v$};
+  \node[box, fill=orange!12, right=1.2cm of add] (mul) {保持数量乘法\\$T(\alpha\mathbf u)=\alpha T\mathbf u$};
+  \node[box, fill=green!12, below=1.0cm of $(add)!0.5!(mul)$] (lin) {线性变换\\同时尊重平移与伸缩};
+  \draw[arr] (add) -- (lin);
+  \draw[arr] (mul) -- (lin);
+\end{tikzpicture}
+\caption{线性变换的双重保持性：同时保持加法（平移）与数量乘法（伸缩）。}
+\label{fig:linear_transformation_property}
+\end{figure}
+
+\begin{definition}[核与像]\label{def:kernel_image}
+线性变换 $T: V \to W$ 的\textbf{核}（零空间）为 $\ker(T) = \{\mathbf{v} \in V : T(\mathbf{v}) = \mathbf{0}\}$。其\textbf{像}（值域）为 $\operatorname{im}(T) = \{T(\mathbf{v}) : \mathbf{v} \in V\}$。
+
+核与像的维数满足\textbf{秩-零化度定理}：
+\[
+\dim \ker(T) + \dim \operatorname{im}(T) = \dim V.
+\]
+
+秩-零化度定理表达了线性变换的\textbf{维数守恒律}：定义域的维数等于“被湮灭的信息”（核的维数）与“被保留的信息”（像的维数）之和。
+\end{definition}
+
+\begin{definition}[矩阵表示]\label{def:matrix_representation}
+设 $T: V \to V$ 为 $n$ 维向量空间上的线性算子，$\mathcal{B} = \{\mathbf{e}_1, \dots, \mathbf{e}_n\}$ 为 $V$ 的一组基。关于基 $\mathcal{B}$ 的 $T$ 的\textbf{矩阵表示}是满足
+\[
+T(\mathbf{e}_j) = \sum_{i=1}^n a_{ij} \mathbf{e}_i
+\]
+的 $n \times n$ 矩阵 $\mathbf{A} = (a_{ij})$。矩阵 $\mathbf{A}$ 的第 $j$ 列是第 $j$ 个基矢量在 $T$ 下的像关于基 $\mathcal{B}$ 的坐标。
+\end{definition}
+
+\begin{definition}[矩阵运算]\label{def:matrix_operations}
+设 $\mathbf{A} = (a_{ij})$ 为 $m \times n$ 矩阵，$\mathbf{B} = (b_{ij})$ 为 $n \times p$ 矩阵。矩阵乘法定义为 $(\mathbf{A}\mathbf{B})_{ik} = \sum_{j=1}^n a_{ij} b_{jk}$。矩阵乘法对应于线性变换的复合。矩阵的\textbf{转置} $\mathbf{A}^{\mathsf T}$ 满足 $(\mathbf{A}^{\mathsf T})_{ij} = a_{ji}$。复矩阵的\textbf{共轭转置} $\mathbf{A}^*$ 满足 $(\mathbf{A}^*)_{ij} = \overline{a_{ji}}$。
+\end{definition}
+
+\begin{property}[矩阵运算的代数性质]\label{ch5_matrix_operation_properties}
+设 $\mathbf{A}, \mathbf{B}, \mathbf{C}$ 为尺寸适当的矩阵，$\alpha \in \mathbb{F}$。矩阵运算满足以下性质：
+\begin{enumerate}[label=(\roman*)]
+    \item 乘法的结合律：$(\mathbf{A}\mathbf{B})\mathbf{C} = \mathbf{A}(\mathbf{B}\mathbf{C})$；
+    \item 乘法对加法的分配律：$\mathbf{A}(\mathbf{B}+\mathbf{C}) = \mathbf{A}\mathbf{B} + \mathbf{A}\mathbf{C}$，$(\mathbf{A}+\mathbf{B})\mathbf{C} = \mathbf{A}\mathbf{C} + \mathbf{B}\mathbf{C}$；
+    \item 转置与共轭转置的反序律：$(\mathbf{A}\mathbf{B})^{\mathsf T} = \mathbf{B}^{\mathsf T}\mathbf{A}^{\mathsf T}$，$(\mathbf{A}\mathbf{B})^* = \mathbf{B}^*\mathbf{A}^*$；
+    \item 二次转置还原：$(\mathbf{A}^{\mathsf T})^{\mathsf T} = \mathbf{A}$，$(\mathbf{A}^*)^* = \mathbf{A}$；
+    \item 标量相容性：$\alpha(\mathbf{A}\mathbf{B}) = (\alpha\mathbf{A})\mathbf{B} = \mathbf{A}(\alpha\mathbf{B})$。
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i) 设 $\mathbf{A}$ 为 $m \times n$ 矩阵，$\mathbf{B}$ 为 $n \times p$ 矩阵，$\mathbf{C}$ 为 $p \times q$ 矩阵。对任意 $1 \le i \le m$、$1 \le \ell \le q$：
+\[
+[(\mathbf{A}\mathbf{B})\mathbf{C}]_{i\ell} = \sum_{k=1}^p (\mathbf{A}\mathbf{B})_{ik} C_{k\ell} = \sum_{k=1}^p \left(\sum_{j=1}^n A_{ij}B_{jk}\right) C_{k\ell} = \sum_{j=1}^n A_{ij}\left(\sum_{k=1}^p B_{jk}C_{k\ell}\right) = [\mathbf{A}(\mathbf{B}\mathbf{C})]_{i\ell}.
+\]
+其中求和次序可交换（有限和）。
+
+(ii) 对任意 $i,k$：
+\[
+[\mathbf{A}(\mathbf{B}+\mathbf{C})]_{ik} = \sum_j A_{ij}(B_{jk}+C_{jk}) = \sum_j A_{ij}B_{jk} + \sum_j A_{ij}C_{jk} = [\mathbf{A}\mathbf{B}]_{ik} + [\mathbf{A}\mathbf{C}]_{ik}.
+\]
+第二条分配律类似。
+
+(iii) 对任意 $i,k$：
+\[
+[(\mathbf{A}\mathbf{B})^{\mathsf T}]_{ik} = [\mathbf{A}\mathbf{B}]_{ki} = \sum_j A_{kj}B_{ji} = \sum_j [\mathbf{A}^{\mathsf T}]_{jk}[\mathbf{B}^{\mathsf T}]_{ij} = \sum_j [\mathbf{B}^{\mathsf T}]_{ij}[\mathbf{A}^{\mathsf T}]_{jk} = [\mathbf{B}^{\mathsf T}\mathbf{A}^{\mathsf T}]_{ik}.
+\]
+共轭转置情形类似，只需取共轭。
+
+(iv) $[(\mathbf{A}^{\mathsf T})^{\mathsf T}]_{ij} = [\mathbf{A}^{\mathsf T}]_{ji} = A_{ij}$。共轭转置情形类似。
+
+(v) $[\alpha(\mathbf{A}\mathbf{B})]_{ik} = \alpha \sum_j A_{ij}B_{jk} = \sum_j (\alpha A_{ij})B_{jk} = [(\alpha\mathbf{A})\mathbf{B}]_{ik}$。同理 $= \sum_j A_{ij}(\alpha B_{jk}) = [\mathbf{A}(\alpha\mathbf{B})]_{ik}$。
+\end{proof}
+
+\begin{definition}[行列式]\label{def:determinant}
+$n \times n$ 矩阵 $\mathbf{A}$ 的\textbf{行列式} $\det(\mathbf{A})$ 是由 $\mathbf{A}$ 的列矢量张成的平行多面体的有向体积。行列式具有乘法性质 $\det(\mathbf{A}\mathbf{B}) = \det(\mathbf{A})\det(\mathbf{B})$。
+
+行列式度量了线性变换对\textbf{相空间体积}的缩放因子---这是散度（对称中心 $1$）（$1$-对称）的矩阵实现。$\det(\mathbf{A}) = 1$ 表示体积守恒（哈密顿系统），$|\det(\mathbf{A})| < 1$ 表示体积收缩（耗散系统），$|\det(\mathbf{A})| > 1$ 表示体积膨胀（反耗散系统）。行列式非零是矩阵可逆的充要条件---可逆性对应于周期演化的时间可逆性。
+\end{definition}
+
+\begin{property}[行列式的运算性质]\label{ch5_determinant_properties}
+设 $\mathbf{A}, \mathbf{B}$ 为 $n \times n$ 矩阵，$\mathbf{P}$ 为可逆矩阵。行列式满足以下性质：
+\begin{enumerate}[label=(\roman*)]
+    \item 乘法性：$\det(\mathbf{A}\mathbf{B}) = \det(\mathbf{A})\det(\mathbf{B})$；
+    \item 转置不变性：$\det(\mathbf{A}^{\mathsf T}) = \det(\mathbf{A})$，$\det(\mathbf{A}^*) = \overline{\det(\mathbf{A})}$；
+    \item 可逆性判据：$\det(\mathbf{A}) \neq 0$ 当且仅当 $\mathbf{A}$ 可逆，且 $\det(\mathbf{A}^{-1}) = 1/\det(\mathbf{A})$；
+    \item 相似不变性：$\det(\mathbf{P}^{-1}\mathbf{A}\mathbf{P}) = \det(\mathbf{A})$；
+    \item 交换一行（或一列）改变符号：交换两行或两列会使行列式的符号反转。
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i) 乘法性是行列式定义的一部分（它可由列矢量的多重线性和交错性推出，这是线性代数中的标准结论）。
+
+(ii) 转置不变性：$\det(\mathbf{A}^{\mathsf T}) = \sum_{\sigma} \operatorname{sgn}(\sigma) \prod_i a_{\sigma(i),i} = \sum_{\sigma} \operatorname{sgn}(\sigma) \prod_i a_{i,\sigma^{-1}(i)} = \det(\mathbf{A})$。共轭转置：$\det(\mathbf{A}^*) = \overline{\det(\mathbf{A})}$。
+
+(iii) 由乘法性，$\det(\mathbf{A})\det(\mathbf{A}^{-1}) = \det(\mathbf{I}) = 1$，故 $\det(\mathbf{A}^{-1}) = 1/\det(\mathbf{A})$。反之，若 $\det(\mathbf{A}) \neq 0$，伴随公式 $\mathbf{A}^{-1} = \operatorname{adj}(\mathbf{A})/\det(\mathbf{A})$ 表明 $\mathbf{A}$ 可逆。
+
+(iv) 由乘法性：$\det(\mathbf{P}^{-1}\mathbf{A}\mathbf{P}) = \det(\mathbf{P}^{-1})\det(\mathbf{A})\det(\mathbf{P}) = \det(\mathbf{A})$。
+
+(v) 交换两行（或两列）会反转置换的符号，故行列式变号。
+\end{proof}
+
+\begin{proposition}[基变换与相似]\label{prop:change_of_basis}
+设 $\mathcal{B}$ 与 $\mathcal{B}'$ 为 $V$ 的两组基，$\mathbf{P}$ 为从 $\mathcal{B}$ 到 $\mathcal{B}'$ 的过渡矩阵。则同一线性算子 $T$ 在这两组基下的矩阵表示 $\mathbf{A}$ 与 $\mathbf{A}'$ 满足相似关系：
+\[
+\mathbf{A}' = \mathbf{P}^{-1} \mathbf{A} \mathbf{P}.
+\]
+相似变换保持特征值---特征值是线性变换的固有属性，不依赖于基的选择。
+\end{proposition}
+
+\begin{proof}
+记 $[\mathbf{v}]_{\mathcal{B}}$ 与 $[\mathbf{v}]_{\mathcal{B}'}$ 分别为同一矢量在两组基下的坐标；过渡矩阵 $\mathbf{P}$ 满足 $[\mathbf{v}]_{\mathcal{B}'} = \mathbf{P}^{-1}[\mathbf{v}]_{\mathcal{B}}$。由矩阵表示的定义，在基 $\mathcal{B}$ 下有 $[T\mathbf{v}]_{\mathcal{B}} = \mathbf{A}[\mathbf{v}]_{\mathcal{B}}$，在基 $\mathcal{B}'$ 下有 $[T\mathbf{v}]_{\mathcal{B}'} = \mathbf{A}'[\mathbf{v}]_{\mathcal{B}'}$。代入坐标变换得
+\[
+\mathbf{A}'[\mathbf{v}]_{\mathcal{B}'} = [T\mathbf{v}]_{\mathcal{B}'} = \mathbf{P}^{-1}[T\mathbf{v}]_{\mathcal{B}} = \mathbf{P}^{-1}\mathbf{A}[\mathbf{v}]_{\mathcal{B}} = \mathbf{P}^{-1}\mathbf{A}\mathbf{P}[\mathbf{v}]_{\mathcal{B}'}.
+\]
+由于 $\mathbf{v}$ 任意，得 $\mathbf{A}' = \mathbf{P}^{-1}\mathbf{A}\mathbf{P}$。特征值的不变性源于特征多项式在相似变换下的不变性。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (A) {基 $\mathcal B$ 下\\矩阵 $\mathbf A$};
+  \node[box, fill=orange!12, right=1.5cm of A] (Ap) {基 $\mathcal B'$ 下\\矩阵 $\mathbf A'$};
+  \node[box, fill=green!12, below=1.0cm of $(A)!0.5!(Ap)$] (P) {过渡矩阵 $\mathbf P$\\$\mathbf A'=\mathbf P^{-1}\mathbf A\mathbf P$};
+  \node[box, fill=red!8, below=1.0cm of P] (inv) {相似不变量\\特征值、行列式、迹、秩};
+  \draw[arr] (A) -- (P);
+  \draw[arr] (Ap) -- (P);
+  \draw[arr] (P) -- (inv);
+\end{tikzpicture}
+\caption{基变换与相似：同一线性算子在两组基下的矩阵相似，特征值等为相似不变量。}
+\label{fig:change_of_basis}
+\end{figure}
+
+\section{\texorpdfstring{不变子空间与特征值分解}{不变子空间与特征值分解}}
+
+\subsection{\texorpdfstring{特征值与特征向量}{特征值与特征向量}}
+
+\begin{definition}[特征值与特征向量]\label{def:eigenvalue_eigenvector}
+设 $T: V \to V$ 为线性算子。若存在非零矢量 $\mathbf{v} \in V$ 与标量 $\lambda \in \mathbb{C}$ 满足
+\[
+T(\mathbf{v}) = \lambda \mathbf{v},
+\]
+则称 $\lambda$ 为 $T$ 的\textbf{特征值}，$\mathbf{v}$ 为相应的\textbf{特征向量}。
+
+特征值 $\lambda$ 描述了一维不变子空间上的演化规律---它是“周期基础”一章中三种基本周期类型在代数上的实现：
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $\lambda \in \mathbb{R}$ 且 $\lambda > 0$，则演化为\textbf{纯平移}---矢量在不变子空间上被拉伸（$\lambda > 1$）或压缩（$0 < \lambda < 1$），方向保持不变。
+    \item 若 $\lambda = e^{i\theta}$ 且 $|\lambda| = 1$，则演化为\textbf{纯旋转}---矢量在不变子空间上旋转而模长不变。当 $\theta/(2\pi) = p/q \in \mathbb{Q}$ 时，产生有限阶的严格旋转周期。
+    \item 若 $\lambda = re^{i\theta}$ 且 $r \neq 1$，则演化为\textbf{旋转与伸缩}的联合作用---矢量在旋转的同时被拉伸或压缩。
+    \item 若 $\lambda < 0$，则演化包含反射（$0$-对称、$C_2$ 对合）---每一步乘以 $-1$ 会产生二阶周期振荡。
+\end{enumerate}
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (real) {$\lambda>0$ 实正\\纯平移};
+  \node[box, fill=orange!12, right=1.0cm of real] (unit) {$|\lambda|=1$\\纯旋转};
+  \node[box, fill=green!12, right=1.0cm of unit] (spiral) {$|\lambda|\neq 1$\\旋转+伸缩};
+  \node[box, fill=red!8, right=1.0cm of spiral] (neg) {$\lambda<0$\\反射/$C_2$};
+  \node[box, fill=purple!8, below=1.0cm of $(unit)!0.5!(spiral)$] (period) {周期类型\\平移、旋转、闭包};
+  \draw[arr] (real) -- (period);
+  \draw[arr] (unit) -- (period);
+  \draw[arr] (spiral) -- (period);
+  \draw[arr] (neg) -- (period);
+\end{tikzpicture}
+\caption{特征值的四类演化：实正拉伸、单位圆旋转、旋转伸缩、负实反射。}
+\label{fig:eigenvalue_motion_types}
+\end{figure}
+
+\begin{definition}[特征子空间与几何重数]\label{def:eigenspace}
+对应于特征值 $\lambda$ 的\textbf{特征子空间}为 $E_\lambda = \{\mathbf{v} \in V : T(\mathbf{v}) = \lambda \mathbf{v}\}$。$E_\lambda$ 的维数 $\dim E_\lambda$ 称为 $\lambda$ 的\textbf{几何重数}。$\lambda$ 作为特征多项式根的重数称为其\textbf{代数重数}。几何重数不超过代数重数。
+
+$E_\lambda$ 是 $V$ 的一个\textbf{不变子空间}---$T(E_\lambda) \subseteq E_\lambda$。每个特征子空间都是系统的一条独立演化通道---不同特征子空间中的矢量在 $T$ 作用下互不混合。几何重数大于 $1$ 意味着该特征值对应于多个独立的演化自由度。
+\end{definition}
+
+\begin{theorem}[特征向量与不变子空间]\label{thm:eigenvector_invariant_subspace}
+设
+\[
+\begin{aligned}
+&\mathbf{v}_1, \dots, \mathbf{v}_k \text{ 分别为 } T \text{ 的对应于互异特征值} \\
+&\lambda_1, \dots, \lambda_k \text{ 的特征向量}.
+\end{aligned}
+\]
+则：
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathbf{v}_1, \dots, \mathbf{v}_k$ 线性无关---对应于不同特征值的演化方向彼此独立。
+    \item 每个特征子空间 $E_{\lambda_i}$ 都是 $T$ 的不变子空间。
+    \item 由特征向量张成的子空间是 $T$ 的不变子空间---其上的演化完全由特征值决定，不同特征子空间之间不存在耦合。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 对 $k$ 归纳。若存在非平凡线性关系 $\sum_{i=1}^k c_i \mathbf{v}_i = \mathbf{0}$，两边作用 $T$ 得 $\sum_{i=1}^k c_i \lambda_i \mathbf{v}_i = \mathbf{0}$。将第一式乘以 $\lambda_k$ 再减去第二式可消去 $\mathbf{v}_k$ 项，得到 $\sum_{i=1}^{k-1} c_i (\lambda_k - \lambda_i) \mathbf{v}_i = \mathbf{0}$。由归纳假设，$\mathbf{v}_1, \dots, \mathbf{v}_{k-1}$ 线性无关，且 $\lambda_k \neq \lambda_i$，故对所有 $i=1,\dots,k-1$ 有 $c_i = 0$。代回得 $c_k = 0$，矛盾。因此这些特征向量线性无关。
+
+(ii) 对任意 $\mathbf{v} \in E_\lambda$，$T(\mathbf{v}) = \lambda \mathbf{v} \in E_\lambda$，故 $E_\lambda$ 是不变子空间。
+
+(iii) 由 (i)，由特征向量张成的子空间是不变子空间的直和，且各特征子空间在 $T$ 下独立演化。
+\end{proof}
+
+\begin{corollary}[特征子空间与周期分量的独立演化]\label{cor:eigenspace_periodic_evolution}
+设线性算子 $T$ 的特征向量构成 $V$ 的一组基。则 $V$ 分解为各特征子空间的直和：$V = \bigoplus_i E_{\lambda_i}$。任意初态 $\mathbf{x}_0 = \sum_i c_i \mathbf{v}_i$ 的演化分解为各特征子空间上的独立演化：$\mathbf{x}_k = T^k \mathbf{x}_0 = \sum_i c_i \lambda_i^k \mathbf{v}_i$。每个特征值 $\lambda_i$ 是第 $i$ 个“频率分量”的演化因子。
+\end{corollary}
+
+\begin{proof}
+由定理 \ref{thm:eigenvector_invariant_subspace}，对应于不同特征值的特征向量线性无关，且每个特征子空间 $E_{\lambda_i}$ 都是 $T$ 的不变子空间。当特征向量构成一组基时，$V = \bigoplus_i E_{\lambda_i}$。对 $\mathbf{x}_0 = \sum_i c_i \mathbf{v}_i$，利用 $T^k \mathbf{v}_i = \lambda_i^k \mathbf{v}_i$ 与 $T$ 的线性性得 $\mathbf{x}_k = \sum_i c_i \lambda_i^k \mathbf{v}_i$。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (x0) {初态\\$\mathbf x_0=\sum_i c_i\mathbf v_i$};
+  \node[box, fill=orange!12, right=1.0cm of x0] (E1) {$E_{\lambda_1}$\\$\lambda_1^k$};
+  \node[box, fill=green!12, right=1.0cm of E1] (E2) {$E_{\lambda_2}$\\$\lambda_2^k$};
+  \node[box, fill=red!8, right=1.0cm of E2] (En) {$\cdots$};
+  \node[box, fill=purple!8, below=1.0cm of $(E1)!0.5!(En)$] (xk) {独立演化\\$\mathbf x_k=\sum_i c_i\lambda_i^k\mathbf v_i$};
+  \draw[arr] (x0) -- (E1);
+  \draw[arr] (x0) -- (E2);
+  \draw[arr] (x0) -- (En);
+  \draw[arr] (E1) -- (xk);
+  \draw[arr] (E2) -- (xk);
+  \draw[arr] (En) -- (xk);
+\end{tikzpicture}
+\caption{特征子空间分解：初态按特征方向分解，各分量独立演化。}
+\label{fig:eigenspace_decomposition}
+\end{figure}
+
+\subsection{\texorpdfstring{对角化与若尔当标准形}{对角化与若尔当标准形}}
+
+\begin{definition}[可对角化算子]\label{def:diagonalisable}
+若 $V$ 存在一组由 $T$ 的特征向量构成的基，则称 $T$ 是\textbf{可对角化的}。在该基下，$T$ 的矩阵表示为对角矩阵：
+\[
+\mathbf{D} = \operatorname{diag}(\lambda_1, \lambda_2, \dots, \lambda_n).
+\]
+算子可对角化的充要条件是：对每个特征值，其代数重数都等于几何重数。
+
+对角化等价于将算子分解为独立的一维不变子空间的直和---这是轨道分解在线性代数中的实现。每个对角元 $\lambda_k$ 是第 $k$ 条“轨道”的演化速率。
+\end{definition}
+
+\begin{definition}[若尔当标准形]\label{def:jordan_form}
+当算子不可对角化时，其最简形式是\textbf{若尔当标准形}：$\mathbf{A} = \mathbf{P} \mathbf{J} \mathbf{P}^{-1}$，其中 $\mathbf{J}$ 是由若尔当块组成的块对角矩阵。每个若尔当块对应于一个特征值；若尔当块的个数等于该特征值的几何重数，各块阶数之和等于其代数重数，最大块阶数等于广义特征向量链的最大长度。
+
+若尔当块的非对角元 $1$ 表示特征子空间之间的耦合---不可对角化的算子无法分解为纯一维不变子空间的直和。若尔当块对应于特征子空间之间的“泄漏”---不同的周期分量通过非对角耦合传递能量。这是拟周期与共振现象的代数原型。
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (diag) {可对角化\\独立一维不变子空间};
+  \node[box, fill=orange!12, right=1.5cm of diag] (jordan) {若尔当标准形\\块对角 + 非对角耦合};
+  \node[box, fill=green!12, below=1.0cm of diag] (dmat) {$\mathbf D=\operatorname{diag}(\lambda_1,\dots,\lambda_n)$};
+  \node[box, fill=red!8, below=1.0cm of jordan] (jmat) {$\mathbf J=\operatorname{diag}(J_{r_1}(\lambda_1),\dots)$};
+  \draw[arr] (diag) -- (dmat);
+  \draw[arr] (jordan) -- (jmat);
+\end{tikzpicture}
+\caption{对角化与若尔当标准形：可对角化时各特征方向独立；若尔当块表示特征子空间之间的耦合。}
+\label{fig:diagonal_jordan}
+\end{figure}
+
+\begin{theorem}[凯莱-哈密顿定理]\label{thm:cayley_hamilton}
+设 $p(\lambda) = \det(\mathbf{A} - \lambda \mathbf{I})$ 为 $\mathbf{A}$ 的特征多项式。则 $p(\mathbf{A}) = \mathbf{0}$---每个矩阵都满足它自身的特征方程。
+
+凯莱-哈密顿定理表达了特征多项式的\textbf{循环闭包性}：矩阵的高次幂可线性地用低次幂表示。这意味着线性动力系统的长期行为完全由特征值决定---高阶演化受特征多项式次数的约束，系统动力学被“锁定”在由特征值张成的有限维子空间之内。
+\end{theorem}
+
+\begin{proof}
+设 $p(\lambda) = \det(\mathbf{A}-\lambda\mathbf{I}) = a_n\lambda^n + a_{n-1}\lambda^{n-1} + \cdots + a_0$，其中 $a_n = (-1)^n$。记 $B(\lambda) = \mathbf{A}-\lambda\mathbf{I}$。由伴随矩阵恒等式
+\[
+B(\lambda)\,\operatorname{adj}(B(\lambda)) = \det(B(\lambda))\,\mathbf{I} = p(\lambda)\,\mathbf{I}.
+\]
+$\operatorname{adj}(B(\lambda))$ 的每个元素都是关于 $\lambda$ 的次数至多为 $n-1$ 的多项式，故可写成矩阵多项式 $\operatorname{adj}(B(\lambda)) = \sum_{k=0}^{n-1}\lambda^k\mathbf{C}_k$，其中 $\mathbf{C}_k$ 为常数矩阵。代入上式得并展开：
+\[
+p(\lambda)\mathbf{I} = \left(\sum_{k=0}^{n-1}\lambda^k\mathbf{C}_k\right)(\mathbf{A}-\lambda\mathbf{I})
+= \mathbf{C}_0\mathbf{A} + \sum_{k=1}^{n-1}\lambda^k(\mathbf{C}_k\mathbf{A}-\mathbf{C}_{k-1}) - \lambda^n\mathbf{C}_{n-1}.
+\]
+比较 $\lambda$ 各次幂的系数，得
+\[
+a_0\mathbf{I} = \mathbf{C}_0\mathbf{A},\qquad a_k\mathbf{I} = \mathbf{C}_k\mathbf{A}-\mathbf{C}_{k-1}\ (1\le k\le n-1),\qquad a_n\mathbf{I} = -\mathbf{C}_{n-1}.
+\]
+将第 $k$ 个方程右乘 $\mathbf{A}^k$ 后逐项相加得
+\[
+p(\mathbf{A}) = \mathbf{C}_0\mathbf{A} + \sum_{k=1}^{n-1}(\mathbf{C}_k\mathbf{A}^{k+1}-\mathbf{C}_{k-1}\mathbf{A}^k) - \mathbf{C}_{n-1}\mathbf{A}^n.
+\]
+右端相邻项两两相消（裂项求和），故 $p(\mathbf{A}) = \mathbf{0}$。
+\end{proof}
+
+\subsection{\texorpdfstring{谱定理}{谱定理}}
+
+\begin{theorem}[谱定理---自伴算子]\label{thm:spectral_theorem_selfadjoint}
+设 $T: V \to V$ 为内积空间上的\textbf{自伴算子}（$T^* = T$）。则：
+\begin{enumerate}[label=(\roman*)]
+    \item $T$ 的所有特征值均为实数。
+    \item 对应于不同特征值的特征向量彼此正交。
+    \item 存在由 $T$ 的特征向量构成的一组 $V$ 的正交规范基---$T$ 可酉对角化。
+\end{enumerate}
+自伴算子的谱定理是\textbf{梯度算子}（$0$-对称）在线性代数中的最高表达：纯实特征值意味着所有演化都是纯平移（拉伸或压缩），不含旋转分量。
+\end{theorem}
+
+\begin{proof}
+(i) 设 $T\mathbf{v} = \lambda \mathbf{v}$，$\mathbf{v} \neq \mathbf{0}$。利用自伴性：
+\[
+\overline{\lambda} \|\mathbf{v}\|^2 = \langle \lambda \mathbf{v}, \mathbf{v} \rangle = \langle T\mathbf{v}, \mathbf{v} \rangle = \langle \mathbf{v}, T\mathbf{v} \rangle = \langle \mathbf{v}, \lambda \mathbf{v} \rangle = \lambda \|\mathbf{v}\|^2.
+\]
+故 $\lambda = \overline{\lambda}$，即 $\lambda \in \mathbb{R}$。
+
+(ii) 设 $T\mathbf{v}_1 = \lambda_1 \mathbf{v}_1$，$T\mathbf{v}_2 = \lambda_2 \mathbf{v}_2$，且 $\lambda_1 \neq \lambda_2$。则
+\[
+\lambda_1 \langle \mathbf{v}_1, \mathbf{v}_2 \rangle = \langle T\mathbf{v}_1, \mathbf{v}_2 \rangle = \langle \mathbf{v}_1, T\mathbf{v}_2 \rangle = \overline{\lambda_2} \langle \mathbf{v}_1, \mathbf{v}_2 \rangle = \lambda_2 \langle \mathbf{v}_1, \mathbf{v}_2 \rangle.
+\]
+由于 $\lambda_1 \neq \lambda_2$，必有 $\langle \mathbf{v}_1, \mathbf{v}_2 \rangle = 0$。
+
+(iii) 对维数 $n = \dim V$ 归纳。当 $n=1$ 时 $V$ 由单个特征向量张成，结论直接成立。假设结论对维数小于 $n$ 的自伴算子成立。由代数基本定理，特征多项式在 $\mathbb{C}$ 中有根，且由 (i) 该根为实数 $\lambda_1$。取单位特征向量 $\mathbf{v}_1 \in V$（$\|\mathbf{v}_1\| = 1$）。令 $W = \operatorname{span}(\mathbf{v}_1)^\perp$。对任意 $\mathbf{w} \in W$，由自伴性 $T^* = T$ 有 $\langle T\mathbf{w}, \mathbf{v}_1 \rangle = \langle \mathbf{w}, T^*\mathbf{v}_1 \rangle = \langle \mathbf{w}, T\mathbf{v}_1 \rangle = \lambda_1 \langle \mathbf{w}, \mathbf{v}_1 \rangle = 0$，故 $T\mathbf{w} \in W$，即 $W$ 是 $T$ 的不变子空间，且 $T|_W$ 仍是自伴算子。由归纳假设，$W$ 有一组由 $T$ 的特征向量构成的正交规范基 $\{\mathbf{v}_2, \dots, \mathbf{v}_n\}$。与 $\mathbf{v}_1$ 合并即得 $V$ 的一组正交规范基。归纳完成。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (sa) {自伴 $T^*=T$};
+  \node[box, fill=orange!12, right=1.2cm of sa] (real) {实特征值\\$\lambda\in\mathbb R$};
+  \node[box, fill=green!12, right=1.2cm of real] (orth) {正交特征基\\$V=\bigoplus E_\lambda$};
+  \node[box, fill=red!8, below=1.0cm of orth] (grad) {梯度算子\\纯平移，无旋转};
+  \draw[arr] (sa) -- (real);
+  \draw[arr] (real) -- (orth);
+  \draw[arr] (orth) -- (grad);
+\end{tikzpicture}
+\caption{自伴谱定理：实特征值、正交特征基，对应梯度算子的纯平移演化。}
+\label{fig:selfadjoint_spectral}
+\end{figure}
+
+\begin{corollary}[自伴谱定理与梯度守恒律]\label{cor:selfadjoint_conservation}
+设 $T$ 为自伴算子。因其所有特征值均为实数，相应的动力系统\textbf{不含旋转周期}---所有演化分量均为纯平移。实特征值的正交特征向量构成一组独立的平移方向，沿每个方向的演化互不影响。
+\end{corollary}
+
+\begin{proof}
+由定理 \ref{thm:spectral_theorem_selfadjoint}，$T$ 的所有特征值均为实数，故它在单位圆上不含非实根 $e^{i\theta}$（$\theta \not\equiv 0 \pmod{\pi}$），因此没有旋转周期。对应于不同特征值的特征向量两两正交，且 $V$ 存在由特征向量构成的正交规范基，故各演化方向彼此独立、互不混合。
+\end{proof}
+
+\begin{example}[$2\times 2$ 对称矩阵的特征分解]\label{ch5_example_eigendecomp_2x2}
+考虑对称矩阵
+\[
+\mathbf{A} = \begin{pmatrix} 3 & 1 \\ 1 & 3 \end{pmatrix}.
+\]
+其特征多项式为 $\det(\mathbf{A}-\lambda\mathbf{I}) = (3-\lambda)^2 - 1 = (\lambda-2)(\lambda-4)$，故特征值为 $\lambda_1 = 4$、$\lambda_2 = 2$（均为实数）。相应的单位特征向量取为 $\mathbf{v}_1 = \frac{1}{\sqrt2}(1,1)^{\mathsf T}$、$\mathbf{v}_2 = \frac{1}{\sqrt2}(1,-1)^{\mathsf T}$，满足 $\langle \mathbf{v}_1, \mathbf{v}_2 \rangle = 0$。谱分解为
+\[
+\mathbf{A} = \mathbf{Q}\mathbf{D}\mathbf{Q}^{\mathsf T}, \qquad \mathbf{Q} = \frac{1}{\sqrt2}\begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix}, \quad \mathbf{D} = \begin{pmatrix} 4 & 0 \\ 0 & 2 \end{pmatrix}.
+\]
+这两个特征方向分别对应于拉伸因子为 $4$ 与 $2$ 的纯平移演化，不含旋转分量。
+\end{example}
+
+\begin{theorem}[谱定理---酉算子]\label{thm:spectral_theorem_unitary}
+设 $U: V \to V$ 为内积空间上的\textbf{酉算子}（$U^* U = U U^* = I$）。则：
+\begin{enumerate}[label=(\roman*)]
+    \item $U$ 的所有特征值模长均为 $1$：$|\lambda| = 1$，即 $\lambda = e^{i\theta}$。
+    \item 对应于不同特征值的特征向量彼此正交。
+    \item 存在由 $U$ 的特征向量构成的一组 $V$ 的正交规范基---$U$ 可酉对角化。
+\end{enumerate}
+酉算子的谱定理是\textbf{旋度算子}（$i$-对称）在线性代数中的最高表达：模为 $1$ 的特征值意味着所有演化都是纯旋转，不含伸缩分量。
+\end{theorem}
+
+\begin{proof}
+(i) 设 $U\mathbf{v} = \lambda \mathbf{v}$，$\mathbf{v} \neq \mathbf{0}$。利用酉性：$\|\mathbf{v}\|^2 = \|U\mathbf{v}\|^2 = |\lambda|^2 \|\mathbf{v}\|^2$。故 $|\lambda| = 1$。
+
+(ii) 设 $U\mathbf{v}_1 = \lambda_1 \mathbf{v}_1$，$U\mathbf{v}_2 = \lambda_2 \mathbf{v}_2$，且 $\lambda_1 \neq \lambda_2$。按本章约定（\cref{def:inner_product_space}：内积对第二个变量线性、对第一个变量共轭线性），$\langle U\mathbf{v}_1, U\mathbf{v}_2 \rangle = \langle \lambda_1 \mathbf{v}_1, \lambda_2 \mathbf{v}_2 \rangle = \overline{\lambda_1} \lambda_2 \langle \mathbf{v}_1, \mathbf{v}_2 \rangle$；另一方面由酉性 $\langle U\mathbf{v}_1, U\mathbf{v}_2 \rangle = \langle \mathbf{v}_1, \mathbf{v}_2 \rangle$，故 $\overline{\lambda_1} \lambda_2 \langle \mathbf{v}_1, \mathbf{v}_2 \rangle = \langle \mathbf{v}_1, \mathbf{v}_2 \rangle$。由于 $|\lambda_1| = |\lambda_2| = 1$ 且 $\lambda_1 \neq \lambda_2$，有 $\overline{\lambda_1} \lambda_2 \neq 1$，故 $\langle \mathbf{v}_1, \mathbf{v}_2 \rangle = 0$。
+
+(iii) 对维数 $n = \dim V$ 归纳。当 $n=1$ 时 $V$ 由单个特征向量张成，结论直接成立。假设结论对维数小于 $n$ 的酉算子成立。由代数基本定理，$U$ 的特征多项式在 $\mathbb{C}$ 中有根 $\lambda_1$（且由 (i) 有 $|\lambda_1| = 1$）；取单位特征向量 $\mathbf{v}_1$。令 $W = \operatorname{span}(\mathbf{v}_1)^\perp$。对任意 $\mathbf{w} \in W$，由 $U\mathbf{v}_1 = \lambda_1\mathbf{v}_1$ 得 $U^*\mathbf{v}_1 = \overline{\lambda_1}\mathbf{v}_1$，故 $\langle U\mathbf{w}, \mathbf{v}_1 \rangle = \langle \mathbf{w}, U^*\mathbf{v}_1 \rangle = \overline{\lambda_1}\langle \mathbf{w}, \mathbf{v}_1 \rangle = 0$，即 $U\mathbf{w} \in W$。因此 $W$ 是 $U$ 的不变子空间，且 $U|_W$ 仍是酉算子。由归纳假设，$W$ 有一组由 $U$ 的特征向量构成的正交规范基 $\{\mathbf{v}_2, \dots, \mathbf{v}_n\}$；与 $\mathbf{v}_1$ 合并即得 $V$ 的一组正交规范基。归纳完成。
+\end{proof}
+
+\begin{corollary}[酉谱定理与旋度守恒律]\label{cor:unitary_conservation}
+设 $U$ 为酉算子。其所有特征值均位于单位圆上，这意味着相应的动力系统\textbf{不含伸缩分量}---所有演化分量均为纯旋转。这一性质保证了酉系统的模长守恒---系统在演化过程中既不膨胀也不收缩。
+\end{corollary}
+
+\begin{proof}
+由定理 \ref{thm:spectral_theorem_unitary}，$U$ 的所有特征值满足 $|\lambda| = 1$，故不存在 $|\lambda| \neq 1$ 的伸缩分量；对任意 $\mathbf{v}$ 有 $\|U\mathbf{v}\| = \|\mathbf{v}\|$，因此模长守恒。
+\end{proof}
+
+\begin{example}[酉谱与 $2\times 2$ 旋转矩阵的有限阶周期]\label{ch5_example_rotation_2x2}
+取角度 $\theta = \pi/3$ 的平面旋转
+\[
+\mathbf{R} = \begin{pmatrix} \cos\frac{\pi}{3} & -\sin\frac{\pi}{3} \\ \sin\frac{\pi}{3} & \cos\frac{\pi}{3} \end{pmatrix}
+= \begin{pmatrix} \tfrac12 & -\tfrac{\sqrt3}{2} \\ \tfrac{\sqrt3}{2} & \tfrac12 \end{pmatrix}.
+\]
+$\mathbf{R}$ 是正交矩阵（因而也是酉矩阵）。其特征多项式 $\det(\mathbf{R}-\lambda\mathbf{I}) = \lambda^2 - \lambda + 1$ 的特征值为 $\lambda = e^{\pm i\pi/3} = \tfrac12 \pm i\tfrac{\sqrt3}{2}$，两者模均为 $1$（印证定理 \ref{thm:spectral_theorem_unitary}）。由于 $\lambda^6 = 1$，有 $\mathbf{R}^6 = \mathbf{I}$：每步旋转 $\pi/3$，经过 $6$ 步后闭合，有限阶为 $6$。
+\end{example}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (uni) {酉算子 $U^*U=I$};
+  \node[box, fill=orange!12, right=1.2cm of uni] (unit) {特征值 $|\lambda|=1$\\$\lambda=e^{i\theta}$};
+  \node[box, fill=green!12, right=1.2cm of unit] (rot) {正交特征基\\纯旋转};
+  \node[box, fill=red!8, below=1.0cm of rot] (finite) {有限阶周期\\$\lambda^p=1\Rightarrow U^p=I$};
+  \draw[arr] (uni) -- (unit);
+  \draw[arr] (unit) -- (rot);
+  \draw[arr] (rot) -- (finite);
+\end{tikzpicture}
+\caption{酉谱定理：单位圆特征值、正交特征基，对应纯旋转与有限阶周期。}
+\label{fig:unitary_spectral}
+\end{figure}
+
+\section{\texorpdfstring{内积空间与正交性}{内积空间与正交性}}
+
+\begin{definition}[内积空间]\label{def:inner_product_space}
+设 $V$ 为 $\mathbb{C}$ 上的向量空间。若映射 $\langle \cdot, \cdot \rangle: V \times V \to \mathbb{C}$ 满足：
+\begin{enumerate}[label=(\roman*)]
+    \item 共轭对称性：$\langle \mathbf{u}, \mathbf{v} \rangle = \overline{\langle \mathbf{v}, \mathbf{u} \rangle}$
+    \item 线性性（对第二个变量）：$\langle \mathbf{u}, \alpha \mathbf{v} + \beta \mathbf{w} \rangle = \alpha \langle \mathbf{u}, \mathbf{v} \rangle + \beta \langle \mathbf{u}, \mathbf{w} \rangle$
+    \item 正定性：$\langle \mathbf{v}, \mathbf{v} \rangle \ge 0$，且等号成立当且仅当 $\mathbf{v} = \mathbf{0}$
+\end{enumerate}
+则称为\textbf{内积}。配备了内积的向量空间称为\textbf{内积空间}。矢量 $\mathbf{v}$ 的\textbf{范数}定义为 $\|\mathbf{v}\| = \sqrt{\langle \mathbf{v}, \mathbf{v} \rangle}$。
+
+内积是“标量与矢量”一章中余弦趋势的代数实现---$\langle \mathbf{u}, \mathbf{v} \rangle$ 度量了两个矢量沿平移方向的“一致性”。
+
+本章统一约定：内积对\textbf{第二个}变量线性、对第一个变量共轭线性，即 $\langle \alpha \mathbf{u} + \beta \mathbf{v}, \mathbf{w} \rangle = \overline{\alpha} \langle \mathbf{u}, \mathbf{w} \rangle + \overline{\beta} \langle \mathbf{v}, \mathbf{w} \rangle$；下文所有推导一律按此约定展开（实内积空间中两种约定无差别）。
+\end{definition}
+
+\begin{definition}[正交性与正交补]\label{def:orthogonal_complement}
+设 $V$ 为内积空间。
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $\langle \mathbf{u}, \mathbf{v} \rangle = 0$，则称 $\mathbf{u}$ 与 $\mathbf{v}$\textbf{正交}，记作 $\mathbf{u} \perp \mathbf{v}$。
+    \item 设 $W \subseteq V$ 为子空间。$W$ 的\textbf{正交补}为 $W^\perp = \{\mathbf{v} \in V : \langle \mathbf{v}, \mathbf{w} \rangle = 0, \forall \mathbf{w} \in W\}$。
+    \item 空间分解：$V = W \oplus W^\perp$---任一矢量都可唯一地分解为 $W$ 中的分量与 $W^\perp$ 中的分量之和。
+\end{enumerate}
+
+正交性对应于两个周期分量之间的\textbf{独立性}---正交分量之间不传递能量，而是独立演化。
+\end{definition}
+
+\begin{proposition}[正交性与守恒律]\label{prop:orthogonality_conservation}
+设 $\mathbf{v}_1, \dots, \mathbf{v}_m$ 为两两正交的非零矢量。则它们的\textbf{能量}（模长平方和）满足可加性：
+\[
+\left\| \sum_{i=1}^m \mathbf{v}_i \right\|^2 = \sum_{i=1}^m \|\mathbf{v}_i\|^2.
+\]
+这是帕塞瓦尔恒等式在一般内积空间中的形式---\textbf{正交分量上的总能量等于各分量能量之和}。
+\end{proposition}
+
+\begin{proof}
+展开模长平方：
+\[
+\left\| \sum_{i=1}^m \mathbf{v}_i \right\|^2 = \sum_{i,j=1}^m \langle \mathbf{v}_i, \mathbf{v}_j \rangle.
+\]
+由正交性，当 $i \neq j$ 时 $\langle \mathbf{v}_i, \mathbf{v}_j \rangle = 0$。对角项给出 $\sum_{i=1}^m \|\mathbf{v}_i\|^2$。
+\end{proof}
+
+\begin{proposition}[正交投影定理]\label{prop:orthogonal_projection}
+设 $W \subseteq V$ 为有限维子空间。对任意 $\mathbf{v} \in V$，存在唯一的矢量 $\mathbf{w} \in W$ 与 $\mathbf{w}^\perp \in W^\perp$ 使得 $\mathbf{v} = \mathbf{w} + \mathbf{w}^\perp$。矢量 $\mathbf{w}$ 称为 $\mathbf{v}$ 在 $W$ 上的\textbf{正交投影}，它是 $W$ 中最接近 $\mathbf{v}$ 的矢量。
+\end{proposition}
+
+\begin{proof}
+设 $\{\mathbf{e}_1, \dots, \mathbf{e}_m\}$ 为 $W$ 的一组正交规范基。正交投影为 $\mathbf{w} = \sum_{i=1}^m \langle \mathbf{v}, \mathbf{e}_i \rangle \mathbf{e}_i$。验证 $\langle \mathbf{v} - \mathbf{w}, \mathbf{e}_i \rangle = 0$ 对所有 $i$ 成立即知 $\mathbf{v} - \mathbf{w} \in W^\perp$。唯一性由正交分解的直和性质保证。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (v) {$\mathbf v$};
+  \node[box, fill=orange!12, right=1.0cm of v] (w) {$\mathbf w\in W$\\正交投影};
+  \node[box, fill=green!12, right=1.0cm of w] (wp) {$\mathbf w^\perp\in W^\perp$};
+  \node[box, fill=red!8, below=1.0cm of $(w)!0.5!(wp)$] (parseval) {帕塞瓦尔\\$\|\mathbf v\|^2=\|\mathbf w\|^2+\|\mathbf w^\perp\|^2$};
+  \draw[arr] (v) -- (w);
+  \draw[arr] (v) -- (wp);
+  \draw[arr] (w) -- (parseval);
+  \draw[arr] (wp) -- (parseval);
+\end{tikzpicture}
+\caption{正交投影与帕塞瓦尔恒等式：总能量等于正交分量能量之和。}
+\label{fig:orthogonal_projection}
+\end{figure}
+
+\subsection{\texorpdfstring{伴随算子与正规算子}{伴随算子与正规算子}}
+
+\begin{definition}[伴随算子]\label{def:adjoint}
+设 $T: V \to V$ 为内积空间上的线性算子。$T$ 的\textbf{伴随算子} $T^*$ 满足对所有 $\mathbf{u}, \mathbf{v} \in V$ 有 $\langle T(\mathbf{u}), \mathbf{v} \rangle = \langle \mathbf{u}, T^*(\mathbf{v}) \rangle$。在正交规范基下，$T^*$ 的矩阵是 $T$ 的矩阵的共轭转置。
+
+伴随算子体现了算子层面的对称运算：自伴算子（$T^* = T$）对应于梯度（对称中心 $0$）中的反射对称（$0$-对称），酉算子（$U^* = U^{-1}$）对应于旋度（对称中心 $i$）中的反演对称（$1$-对称、$i$-对称）。
+\end{definition}
+
+\begin{definition}[正规算子]\label{def:normal_operator}
+若线性算子 $T$ 满足 $T T^* = T^* T$---即 $T$ 与其伴随可交换---则称 $T$ 为\textbf{正规算子}。自伴算子与酉算子都是正规算子的特例。正规算子的谱定理统一了自伴算子与酉算子的谱定理：正规算子可酉对角化，且其特征值可以是任意复数。
+\end{definition}
+
+\begin{lemma}[正规算子特征向量的伴随性质]\label{ch5_lemma_normal_adjoint}
+设 $T$ 为正规算子，$\lambda$ 为 $T$ 的特征值，$\mathbf{v}$ 为相应的特征向量。则：
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathbf{v}$ 也是 $T^*$ 的特征向量，且 $T^*\mathbf{v} = \overline{\lambda}\mathbf{v}$；
+    \item 对任意 $\mathbf{x} \in V$，有 $\|(T-\lambda I)\mathbf{x}\| = \|(T^*-\overline{\lambda}I)\mathbf{x}\|$。
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(ii) 令 $S = T - \lambda I$，则 $S^* = T^* - \overline{\lambda}I$。利用正规性 $TT^* = T^*T$ 展开得
+\[
+SS^* = TT^* - \lambda T^* - \overline{\lambda}T + |\lambda|^2 I = T^*T - \overline{\lambda}T - \lambda T^* + |\lambda|^2 I = S^*S,
+\]
+故 $S$ 也是正规的。于是
+\[
+\|S\mathbf{x}\|^2 = \langle S\mathbf{x}, S\mathbf{x}\rangle = \langle \mathbf{x}, S^*S\mathbf{x}\rangle = \langle \mathbf{x}, SS^*\mathbf{x}\rangle = \langle S^*\mathbf{x}, S^*\mathbf{x}\rangle = \|S^*\mathbf{x}\|^2.
+\]
+(i) 由于 $T\mathbf{v} = \lambda\mathbf{v}$，即 $S\mathbf{v} = \mathbf{0}$，由 (ii) 推得 $S^*\mathbf{v} = \mathbf{0}$，即 $T^*\mathbf{v} = \overline{\lambda}\mathbf{v}$。
+\end{proof}
+
+\begin{theorem}[正规算子的谱定理]\label{thm:spectral_theorem_normal}
+设 $T$ 为复内积空间上的正规算子。则存在由 $T$ 的特征向量构成的一组 $V$ 的正交规范基---$T$ 可酉对角化。
+
+正规算子的谱定理统一了梯度（对称中心 $0$）（自伴算子，实特征值）与旋度（对称中心 $i$）（酉算子，模为 $1$ 的特征值）：正规算子的特征值可同时包含拉伸（实部）与旋转（虚部）两种分量。
+\end{theorem}
+
+\begin{proof}
+对维数 $n = \dim V$ 归纳。当 $n=1$ 时 $V$ 由单个特征向量张成，结论直接成立。假设结论对维数小于 $n$ 的正规算子成立。由代数基本定理，$T$ 有特征值 $\lambda_1$；取相应的单位特征向量 $\mathbf{v}_1$。由引理 \ref{ch5_lemma_normal_adjoint}，$T^*\mathbf{v}_1 = \overline{\lambda_1}\mathbf{v}_1$。令 $W = \operatorname{span}(\mathbf{v}_1)^\perp$。对任意 $\mathbf{w} \in W$，
+\[
+\langle T\mathbf{w}, \mathbf{v}_1 \rangle = \langle \mathbf{w}, T^*\mathbf{v}_1 \rangle = \overline{\lambda_1}\langle \mathbf{w}, \mathbf{v}_1 \rangle = 0,
+\]
+故 $T\mathbf{w} \in W$，即 $W$ 是 $T$ 的不变子空间。同理 $\langle T^*\mathbf{w}, \mathbf{v}_1\rangle = \lambda_1\langle \mathbf{w}, \mathbf{v}_1\rangle = 0$，故 $W$ 也是 $T^*$ 的不变子空间，从而 $T|_W$ 仍是正规的。由归纳假设，$W$ 有一组由 $T$ 的特征向量构成的正交规范基 $\{\mathbf{v}_2, \dots, \mathbf{v}_n\}$；与 $\mathbf{v}_1$ 合并即得 $V$ 的一组正交规范基。归纳完成。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (normal) {正规算子\\$TT^*=T^*T$};
+  \node[box, fill=orange!12, left=1.2cm of normal] (sa) {自伴\\$T^*=T$};
+  \node[box, fill=green!12, right=1.2cm of normal] (uni) {酉\\$U^*U=I$};
+  \node[box, fill=red!8, below=1.0cm of sa] (real) {实特征值\\纯平移};
+  \node[box, fill=purple!8, below=1.0cm of uni] (unit) {单位圆特征值\\纯旋转};
+  \draw[arr] (normal) -- (sa);
+  \draw[arr] (normal) -- (uni);
+  \draw[arr] (sa) -- (real);
+  \draw[arr] (uni) -- (unit);
+\end{tikzpicture}
+\caption{正规算子统一自伴与酉：自伴给实特征值，酉给单位圆特征值。}
+\label{fig:normal_operator}
+\end{figure}
+
+\section{\texorpdfstring{矩阵群与对称性}{矩阵群与对称性}}
+
+\begin{definition}[正交群]\label{def:orthogonal_group}
+\textbf{正交群} $O(n)$ 是满足 $\mathbf{Q}^{\mathsf T} \mathbf{Q} = \mathbf{I}_n$ 的 $n \times n$ 实矩阵构成的群。$O(n)$ 的元素保持矢量的内积：$\langle \mathbf{Q}\mathbf{u}, \mathbf{Q}\mathbf{v} \rangle = \langle \mathbf{u}, \mathbf{v} \rangle$。
+
+正交群是\textbf{梯度算子}（$0$-对称）的矩阵实现---正交变换保持矢量的模长与夹角，对应于空间中的平移与反射。$SO(n)$ 是行列式为 $+1$ 的子群，对应于纯旋转。
+\end{definition}
+
+\begin{definition}[酉群]\label{def:unitary_group}
+\textbf{酉群} $U(n)$ 是满足 $\mathbf{U}^* \mathbf{U} = \mathbf{I}_n$ 的 $n \times n$ 复矩阵构成的群。$U(n)$ 的元素保持复内积。
+
+酉群是\textbf{旋度算子}（$i$-对称）的矩阵实现---酉变换保持复矢量的模长，对应于复空间中的相位旋转。$U(1) = \{e^{i\theta}\}$ 是一维酉群，对应于旋转的具有周期轨道的群。$SU(n)$ 是行列式为 $1$ 的子群，对应于保体积的纯旋转。
+\end{definition}
+
+\begin{definition}[辛群]\label{def:symplectic_group}
+\textbf{辛群} $Sp(2n, \mathbb{R})$ 是满足 $\mathbf{S}^{\mathsf T} \mathbf{J} \mathbf{S} = \mathbf{J}$ 的 $2n \times 2n$ 实矩阵构成的群，其中 $\mathbf{J} = \begin{pmatrix} \mathbf{0} & \mathbf{I}_n \\ -\mathbf{I}_n & \mathbf{0} \end{pmatrix}$ 为标准辛矩阵。
+
+辛群是\textbf{散度算子}（$1$-对称）的矩阵实现---辛变换保持相空间体积（刘维尔定理），对应于哈密顿系统的正则变换。辛矩阵的行列式恒为 $1$。
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (O) {$O(n)$\\实内积};
+  \node[box, fill=orange!12, right=1.2cm of O] (U) {$U(n)$\\复内积};
+  \node[box, fill=green!12, right=1.2cm of U] (Sp) {$Sp(2n)$\\辛形式};
+  \node[box, fill=red!8, below=1.0cm of O] (grad) {梯度\\$0$-对称};
+  \node[box, fill=purple!8, below=1.0cm of U] (curl) {旋度\\$i$-对称};
+  \node[box, fill=cyan!8, below=1.0cm of Sp] (div) {散度\\$1$-对称};
+  \draw[arr] (O) -- (grad);
+  \draw[arr] (U) -- (curl);
+  \draw[arr] (Sp) -- (div);
+\end{tikzpicture}
+\caption{三矩阵群与三算子：正交群对应梯度，酉群对应旋度，辛群对应散度。}
+\label{fig:matrix_groups}
+\end{figure}
+
+\begin{proposition}[三矩阵群与三算子的对应]\label{prop:matrix_groups_grammar}
+正交群、酉群与辛群分别对应于周期数学中三种基本对称群的矩阵实现；每个群保持一种特定的数学结构，并对应于一条守恒律：
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash\hspace{0pt}}p{2.5cm}>{\centering\arraybackslash\hspace{0pt}}p{2.5cm}>{\centering\arraybackslash\hspace{0pt}}p{2cm}>{\centering\arraybackslash\hspace{0pt}}p{2.5cm}>{\centering\arraybackslash\hspace{0pt}}p{2.5cm}}
+\toprule
+矩阵群 & 所保持的结构 & 主导算子 & 对称中心 & 守恒量 \\
+\midrule
+$O(n)$ (正交群) & 实内积 & 梯度 $\nabla$ ($0$-对称) & $e=0$ (加法单位元) & 动量 \\
+$U(n)$ (酉群) & 复内积 & 旋度 $\nabla\times$ ($i$-对称) & $e=1$ (乘法单位元) & 角动量 \\
+$Sp(2n)$ (辛群) & 辛形式 & 散度 $\nabla\cdot$ ($1$-对称) & $e=\lambda$ (伸缩中心) & 相空间体积 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{proposition}
+
+\begin{proof}
+首先验证这三个集合确实构成群。(i) $O(n)$：若 $\mathbf{Q}_1, \mathbf{Q}_2 \in O(n)$，则 $(\mathbf{Q}_1\mathbf{Q}_2)^{\mathsf T}(\mathbf{Q}_1\mathbf{Q}_2) = \mathbf{I}_n$，且 $\mathbf{Q}^{-1} = \mathbf{Q}^{\mathsf T} \in O(n)$，故它对乘法与求逆封闭且含单位元，因而是群；对 $\mathbf{Q} \in O(n)$，有 $\langle \mathbf{Q}\mathbf{u}, \mathbf{Q}\mathbf{v} \rangle = \mathbf{u}^{\mathsf T}\mathbf{Q}^{\mathsf T}\mathbf{Q}\mathbf{v} = \mathbf{u}^{\mathsf T}\mathbf{v} = \langle \mathbf{u}, \mathbf{v} \rangle$，故它保持实内积。(ii) $U(n)$：类似地 $(\mathbf{U}_1\mathbf{U}_2)^*(\mathbf{U}_1\mathbf{U}_2) = \mathbf{I}_n$，$\mathbf{U}^{-1} = \mathbf{U}^* \in U(n)$，它是群，且保持复内积。(iii) $Sp(2n,\mathbb{R})$：若 $\mathbf{S}_i^{\mathsf T}\mathbf{J}\mathbf{S}_i = \mathbf{J}$，则 $(\mathbf{S}_1\mathbf{S}_2)^{\mathsf T}\mathbf{J}(\mathbf{S}_1\mathbf{S}_2) = \mathbf{S}_2^{\mathsf T}\mathbf{J}\mathbf{S}_2 = \mathbf{J}$；对定义方程取行列式得 $(\det\mathbf{S})^2 = 1$，故 $\mathbf{S}$ 可逆，且 $\mathbf{S}^{-1}$ 仍为辛矩阵，因此 $Sp(2n)$ 是群。这三个群分别保持实内积、复内积与辛形式，因而分别对应于动量、角动量与相空间体积这三条守恒律。
+\end{proof}
+
+\begin{corollary}[矩阵群的周期诊断意义]\label{cor:matrix_group_diagnosis}
+由命题 \ref{prop:matrix_groups_grammar} 的三群对应可知，在周期数学的跨学科诊断中，线性系统所属对称群的类型直接指示其周期结构的主导算子：
+\begin{enumerate}[label=(\roman*)]
+    \item 若系统的演化矩阵属于正交群 $O(n)$，则系统具有纯平移或纯旋转周期---$\mathbf{Q}\in O(n)$ 的特征值全部位于单位圆上（模均为 $1$）；其中\textbf{纯对合型}（$C_2$ 周期）恰在特征值全为 $\pm 1$ 时出现，即 $\mathbf{Q}$ 可实对角化且谱含于 $\{+1,-1\}$，这等价于 $\mathbf{Q}^2=\mathbf{I}$。例如 $\theta\notin\pi\mathbb{Z}$ 的旋转 $\begin{pmatrix}\cos\theta&-\sin\theta\\ \sin\theta&\cos\theta\end{pmatrix}\in SO(2)\subseteq O(2)$ 的特征值为 $e^{\pm i\theta}\neq\pm1$，它给出的是纯旋转周期而非对合。
+    \item 若系统的演化矩阵属于酉群 $U(n)$，则系统具有纯旋转周期---特征值全部位于单位圆上，对应于角动量守恒的拟周期或严格周期运动。
+    \item 若系统的演化矩阵属于辛群 $Sp(2n)$，则系统具有伸缩周期---相空间体积守恒，但各分量可能经历旋转与伸缩的联合作用。
+\end{enumerate}
+\emph{注}：上述三条均为单向蕴含——由矩阵所属的对称群推出其周期结构的主导算子，反之不成立。特别地，(i) 不可反读为“$O(n)$ 中矩阵的特征值全为 $\pm 1$”；对合型周期只是 $O(n)$ 的一个特殊情形，一般情形由上面的旋转反例给出。
+\end{corollary}
+
+\begin{proof}
+由命题 \ref{prop:matrix_groups_grammar}：(i) $\mathbf{Q} \in O(n)$ 保持实内积，其特征值为模为 $1$ 的数（实情形下为 $\pm 1$ 或共轭对）；纯对合情形给出 $C_2$ 周期；(ii) $\mathbf{U} \in U(n)$ 的所有特征值位于单位圆上（定理 \ref{thm:spectral_theorem_unitary}），给出纯旋转周期；(iii) $\mathbf{S} \in Sp(2n)$ 保持辛形式，即相空间体积，且各分量可能经历旋转与伸缩的联合作用，给出伸缩周期。
+\end{proof}
+
+\section{\texorpdfstring{洛书矩阵：以 $5$ 为平衡点的 $3\times 3$ 幻方}{洛书矩阵}}
+\label{sec:luoshu_matrix}
+
+本节构造\textbf{洛书矩阵}---由数字 $1$ 至 $9$ 排成的 $3 \times 3$ 幻方。其数学核心在于：幻和为 $15 = 3 \times 5$，中心元素 $5$ 是 $1$ 至 $9$ 的算术平均，且整个矩阵关于中心 $5$ 具有对径反对称结构。洛书矩阵的谱结构同时包含一个纯平移特征方向与一个旋转伸缩不变子空间。
+
+\begin{definition}[洛书矩阵]\label{def:luoshu_matrix}
+\textbf{洛书矩阵}定义为
+\[
+\mathbf{L} := \begin{pmatrix}
+4 & 9 & 2 \\
+3 & 5 & 7 \\
+8 & 1 & 6
+\end{pmatrix}.
+\]
+即，矩阵元素 $L_{ij}$ 由下表给出：
+\[
+\begin{array}{c|ccc}
+ & j=1 & j=2 & j=3 \\ \hline
+i=1 & 4 & 9 & 2 \\
+i=2 & 3 & 5 & 7 \\
+i=3 & 8 & 1 & 6
+\end{array}
+\]
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.8, every node/.style={font=\small}]
+  \draw (0,0) grid (3,3);
+  \node at (0.5,2.5) {4}; \node at (1.5,2.5) {9}; \node at (2.5,2.5) {2};
+  \node at (0.5,1.5) {3}; \node at (1.5,1.5) {5}; \node at (2.5,1.5) {7};
+  \node at (0.5,0.5) {8}; \node at (1.5,0.5) {1}; \node at (2.5,0.5) {6};
+  \node[red] at (1.5,1.5) {5};
+  \draw[->, thick, red] (1.5,1.5) -- (1.5,2.8);
+  \draw[->, thick, red] (1.5,1.5) -- (1.5,0.2);
+  \draw[->, thick, red] (1.5,1.5) -- (0.2,1.5);
+  \draw[->, thick, red] (1.5,1.5) -- (2.8,1.5);
+  \node at (1.5,-0.5) {幻和 $15=3\times 5$，中心平衡点 $5$};
+\end{tikzpicture}
+\caption{洛书矩阵：$3\times 3$ 幻方，中心 $5$ 为平衡点，幻和 $15=3\times 5$。}
+\label{fig:luoshu_matrix}
+\end{figure}
+
+\begin{definition}[行和、列和与对角线和]\label{def:luoshu_line_sums}
+对 $3 \times 3$ 矩阵 $\mathbf{L} = (L_{ij})$，定义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{行和} $r_i := \sum_{j=1}^{3} L_{ij}$（$i = 1, 2, 3$）；
+    \item \textbf{列和} $c_j := \sum_{i=1}^{3} L_{ij}$（$j = 1, 2, 3$）；
+    \item \textbf{主对角线和} $d_+ := L_{11} + L_{22} + L_{33}$；
+    \item \textbf{副对角线和} $d_- := L_{13} + L_{22} + L_{31}$。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[洛书矩阵的幻方性质]\label{prop:luoshu_magic_sum}
+洛书矩阵 $\mathbf{L}$ 满足：所有行和、列和、主对角线和与副对角线和都等于 $15$，即
+\[
+r_1 = r_2 = r_3 = c_1 = c_2 = c_3 = d_+ = d_- = 15 = 3 \times 5.
+\]
+$\mathbf{L}$ 称为\textbf{三阶幻方}，$15$ 称为其\textbf{幻和}。
+\end{proposition}
+
+\begin{proof}
+直接计算：
+\begin{align*}
+r_1 &= 4 + 9 + 2 = 15, \quad r_2 = 3 + 5 + 7 = 15, \quad r_3 = 8 + 1 + 6 = 15; \\
+c_1 &= 4 + 3 + 8 = 15, \quad c_2 = 9 + 5 + 1 = 15, \quad c_3 = 2 + 7 + 6 = 15; \\
+d_+ &= 4 + 5 + 6 = 15, \quad d_- = 2 + 5 + 8 = 15.
+\end{align*}
+全部八条线的和均为 $15 = 3 \times 5$。
+\end{proof}
+
+\begin{definition}[洛书平衡点]\label{def:luoshu_balance_point}
+$\mathbf{L}$ 的中心元素 $L_{22} = 5$ 称为\textbf{洛书平衡点}。
+\end{definition}
+
+\begin{proposition}[平衡点的三重刻画]\label{prop:luoshu_balance_triple}
+洛书平衡点 $5$ 满足以下三个等价的刻画：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{算术中心}：$5 = \dfrac{1 + 2 + \cdots + 9}{9}$，即 $5$ 是 $1$ 至 $9$ 的算术平均；
+    \item \textbf{幻和因子}：$15 = 3 \times 5$，幻和恰好是平衡点的三倍；
+    \item \textbf{对角线均值}：两条对角线的均值均为 $5$，即 $\dfrac{d_+}{3} = \dfrac{d_-}{3} = 5$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\dfrac{1 + 2 + \cdots + 9}{9} = \dfrac{45}{9} = 5$。
+(ii) 由命题 \ref{prop:luoshu_magic_sum}，幻和为 $15 = 3 \times 5$。
+(iii) 由 $d_+ = d_- = 15$ 除以 $3$ 得 $5$。
+\end{proof}
+
+\begin{proposition}[洛书的对径平衡]\label{prop:luoshu_antipodal}
+洛书矩阵关于中心 $5$ 的对径位置元素之和恒为 $10 = 2 \times 5$：
+\[
+L_{11} + L_{33} = 10, \quad L_{22} + L_{22} = 10, \quad L_{33} + L_{11} = 10,
+\]
+\[
+L_{12} + L_{32} = 10, \quad L_{21} + L_{23} = 10, \quad L_{13} + L_{31} = 10.
+\]
+等价地，$\mathbf{L} - 5\mathbf{J}$（其中 $\mathbf{J}$ 为全 1 矩阵）满足对径反对称条件：
+\[
+(\mathbf{L} - 5\mathbf{J})_{ij} = -(\mathbf{L} - 5\mathbf{J})_{4-i, 4-j}, \quad i, j \in \{1, 2, 3\}.
+\]
+\end{proposition}
+
+\begin{proof}
+直接计算全部对径对：
+\[
+4 + 6 = 10, \quad 9 + 1 = 10, \quad 2 + 8 = 10, \quad 3 + 7 = 10, \quad 5 + 5 = 10.
+\]
+对第二个等式，注意 $(\mathbf{L} - 5\mathbf{J})_{11} = 4 - 5 = -1$，$(\mathbf{L} - 5\mathbf{J})_{33} = 6 - 5 = 1$，两者互为相反数；其余对径位置类似。
+\end{proof}
+
+\begin{theorem}[洛书矩阵的特征值与谱结构]\label{thm:luoshu_eigenvalues}
+洛书矩阵 $\mathbf{L}$ 的特征多项式为
+\[
+p(\lambda) = \det(\mathbf{L} - \lambda \mathbf{I}) = -(\lambda - 15)(\lambda^2 + 24).
+\]
+故 $\mathbf{L}$ 的三个特征值为
+\[
+\lambda_1 = 15, \qquad \lambda_{2,3} = \pm 2\sqrt{6}\, i.
+\]
+特征值 $\lambda_1 = 15 = 3 \times 5$ 是正的实特征值，对应于纯平移；$\lambda_{2,3} = \pm 2\sqrt{6} i$ 是一对纯虚共轭对，模为 $|\lambda_{2,3}| = 2\sqrt{6}$，对应于复数域上的旋转与伸缩的联合作用。
+\end{theorem}
+
+\begin{proof}
+计算特征多项式：
+\begin{align*}
+p(\lambda) &= \det \begin{pmatrix} 4 - \lambda & 9 & 2 \\ 3 & 5 - \lambda & 7 \\ 8 & 1 & 6 - \lambda \end{pmatrix} \\
+&= (4 - \lambda)\bigl[(5-\lambda)(6-\lambda) - 7\bigr] - 9\bigl[3(6-\lambda) - 56\bigr] + 2\bigl[3 - 8(5-\lambda)\bigr] \\
+&= (4-\lambda)(\lambda^2 - 11\lambda + 23) + 9(38 + 3\lambda) - 2(37 - 8\lambda) \\
+&= -\lambda^3 + 15\lambda^2 - 24\lambda + 360 \\
+&= -(\lambda - 15)(\lambda^2 + 24).
+\end{align*}
+解 $p(\lambda) = 0$ 得 $\lambda_1 = 15$，$\lambda_{2,3}^2 = -24$，即 $\lambda_{2,3} = \pm 2\sqrt{6}\, i$。
+\end{proof}
+
+\begin{theorem}[洛书矩阵的平移-旋转分解]\label{thm:luoshu_decomposition}
+洛书矩阵 $\mathbf{L}$ 分解为一个纯平移部分与一个旋转伸缩部分之和：
+\[
+\mathbf{L} = \underbrace{5\mathbf{J}}_{\text{平移部分}} + \underbrace{(\mathbf{L} - 5\mathbf{J})}_{\text{旋转伸缩部分}},
+\]
+其中 $\mathbf{J}$ 为全 1 矩阵。这两部分满足：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平移部分} $5\mathbf{J}$：对矢量 $\mathbf{1} = (1,1,1)^{\mathsf T}$ 作用为 $15\mathbf{1}$，而对 $\mathbf{1}^\perp$ 作用为零；即 $5\mathbf{J}$ 的特征值为 $15, 0, 0$。
+    \item \textbf{旋转伸缩部分} $\mathbf{L} - 5\mathbf{J}$：对 $\mathbf{1}$ 作用为零，而在 $\mathbf{1}^\perp$ 上具有旋转伸缩特征值 $\pm 2\sqrt{6}i$。
+\end{enumerate}
+因此 $\mathbf{L}$ 在不变子空间 $\operatorname{span}(\mathbf{1})$ 上为纯平移，在不变子空间 $\mathbf{1}^\perp$ 上为每步转角 $\pi/2$、每步模长放大 $2\sqrt{6}$ 的旋转与伸缩的联合作用（不是纯旋转：纯旋转要求 $|\lambda|=1$，而此处 $|\lambda_{2,3}|=2\sqrt{6}\ne1$）。
+\end{theorem}
+
+\begin{proof}
+\textbf{平移部分}：$5\mathbf{J}$ 将任意矢量 $\mathbf{v}$ 映为 $5(\mathbf{1}^{\mathsf T}\mathbf{v})\mathbf{1}$。故 $5\mathbf{J}\mathbf{1} = 5 \cdot 3\mathbf{1} = 15\mathbf{1}$，且对 $\mathbf{v} \in \mathbf{1}^\perp$（即 $\mathbf{1}^{\mathsf T}\mathbf{v} = 0$）有 $5\mathbf{J}\mathbf{v} = \mathbf{0}$。
+
+\textbf{旋转伸缩部分}：由命题 \ref{prop:luoshu_magic_sum}，每行之和均为 $15$，故 $(\mathbf{L} - 5\mathbf{J})\mathbf{1} = \mathbf{L}\mathbf{1} - 5\mathbf{J}\mathbf{1} = 15\mathbf{1} - 15\mathbf{1} = \mathbf{0}$。因此 $\mathbf{1}$ 位于零空间。
+
+\textbf{特征值一致性}：设 $\mathbf{v} \in \mathbf{1}^\perp$ 为 $\mathbf{L} - 5\mathbf{J}$ 的属于特征值 $\mu$ 的特征向量。则 $\mathbf{L}\mathbf{v} = (5\mathbf{J} + (\mathbf{L} - 5\mathbf{J}))\mathbf{v} = \mathbf{0} + \mu\mathbf{v} = \mu\mathbf{v}$。故 $\mathbf{v}$ 也是 $\mathbf{L}$ 的属于特征值 $\mu$ 的特征向量。由定理 \ref{thm:luoshu_eigenvalues}，$\mathbf{L}$ 在 $\mathbf{1}^\perp$ 上的特征值为 $\pm 2\sqrt{6}i$。直接计算 $\det(\mathbf{L} - 5\mathbf{J} - \lambda I)$ 亦验证 $-\lambda(\lambda^2 + 24)$。
+\end{proof}
+
+\begin{corollary}[洛书平衡点与幻和结构意义]\label{cor:luoshu_grammar}
+洛书矩阵的谱结构揭示了平衡点 $5$ 与幻和 $15$ 在两种算子层面的双重意义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{梯度方面}：$5 = 15/3$ 是沿全 1 方向的纯平移的平均尺度---平移部分 $5\mathbf{J}$ 在 $\mathbf{1}$ 方向上的拉伸因子为 $15$，除以维数 $3$ 即得每分量的平均因子 $5$；
+    \item \textbf{旋度方面}：$5$ 是对径平衡的中心---$\mathbf{L} - 5\mathbf{J}$ 的对径反对称性（命题 \ref{prop:luoshu_antipodal}）以 $5$ 为对称轴；
+    \item \textbf{周期方面}：$\mathbf{L}$ 在 $\mathbf{1}^\perp$ 上具有旋转伸缩特征值 $\pm 2\sqrt{6}i$，对应于该二维实不变子空间上每步转角 $\pi/2$、每步模长放大 $2\sqrt{6}$ 的旋转与伸缩运动；因 $|\lambda_{2,3}|=2\sqrt{6}\ne1$，其轨道不闭合。
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+(i) 由定理 \ref{thm:luoshu_decomposition}，$5\mathbf{J}$ 在 $\mathbf{1}$ 方向上有特征值 $15$；其均值为 $15/3 = 5$。(ii) 由命题 \ref{prop:luoshu_antipodal}，$\mathbf{L} - 5\mathbf{J}$ 关于 $5$ 对径反对称。(iii) 由定理 \ref{thm:luoshu_eigenvalues} 及 $\lambda_{2,3} = \pm 2\sqrt{6}i$，纯虚特征值 $\pm2\sqrt{6}i$ 的模为 $2\sqrt{6}\ne1$，对应每步转角 $\pi/2$、每步模长放大 $2\sqrt{6}$ 的旋转与伸缩运动，轨道不闭合。
+\end{proof}
+
+\begin{example}[洛书矩阵的谱分解]\label{ex:luoshu_spectral}
+洛书矩阵 $\mathbf{L}$ 的三个特征值对应的特征向量如下：
+\begin{enumerate}[label=(\roman*)]
+    \item $\lambda_1 = 15$：特征向量 $\mathbf{v}_1 = \frac{1}{\sqrt{3}}(1,1,1)^{\mathsf T}$（各分量相等）；
+    \item $\lambda_2 = 2\sqrt{6}i$ 与 $\lambda_3 = -2\sqrt{6}i$：特征向量位于 $\mathbf{1}^\perp$ 之内。
+\end{enumerate}
+验证 $\mathbf{v}_1$：$\mathbf{L}\mathbf{v}_1 = \frac{1}{\sqrt{3}}(15, 15, 15)^{\mathsf T} = 15\mathbf{v}_1$。
+
+取 $\mathbf{1}^\perp$ 的一组正交规范基为 $\mathbf{e}_2 = \frac{1}{\sqrt{2}}(1, -1, 0)^{\mathsf T}$、$\mathbf{e}_3 = \frac{1}{\sqrt{6}}(1, 1, -2)^{\mathsf T}$，$\mathbf{L}$ 在 $\mathbf{1}^\perp$ 上的限制 $\mathbf{L}|_{\mathbf{1}^\perp}$ 在该基下的矩阵为
+\[
+\mathbf{L}|_{\mathbf{1}^\perp} = \begin{pmatrix} -\frac{3}{2} & \frac{5\sqrt{3}}{2} \\ -\frac{7\sqrt{3}}{2} & \frac{3}{2} \end{pmatrix}
+\]
+其特征多项式为 $\mu^2 + 24$，根为 $\mu = \pm 2\sqrt{6}\,i$，与完整特征多项式 $-\lambda(\lambda^2 + 24)$ 的非零根一致（$\mathbf{L}$ 在 $\mathbf{1}^\perp$ 上的作用等价于模长 $2\sqrt{6}$、每步转角 $\pi/2$ 的旋转与伸缩）。
+\end{example}
+
+\begin{remark}[洛书矩阵与 $\mathbb{Z}_2 \times \mathbb{Z}_5$ 结构的接口]\label{rem:luoshu_hetu_interface}
+洛书矩阵幻和 $15 = 3 \times 5$ 中的因子 $5$ 在代数上与第 6 章中 $\mathbb{Z}_{10} \cong \mathbb{Z}_2 \times \mathbb{Z}_5$ 的 $\mathbb{Z}_5$ 分量相关：洛书中心 $5$ 对应于 $\mathbb{Z}_5$ 分量的参考点，而洛书的对径平衡（和为 $10 = 2 \times 5$）对应于 $\mathbb{Z}_2$ 的双重交变。洛书矩阵在 $\mathbf{1}^\perp$ 上的复共轭特征值 $\pm 2\sqrt{6}i$ 提供了一个具体实例：该二维实不变子空间上的每一步都是转角 $\pi/2$、模长放大 $2\sqrt{6}$ 的旋转与伸缩，转角与放大因子完全由矩阵的代数结构决定。
+\end{remark}
+
+\section{\texorpdfstring{李群：连续对称群的严格表述}{李群}}
+
+\begin{definition}[李群]\label{def:lie_group}
+\textbf{李群}是装备了群结构 $(G, \cdot)$ 的光滑流形 $G$，使得群运算
+\[
+\mu: G \times G \to G, \quad (g, h) \mapsto g \cdot h, \quad
+\iota: G \to G, \quad g \mapsto g^{-1}
+\]
+都是光滑映射。
+
+李群将“周期基础”一章中群的抽象概念与光滑流形的概念统一起来。周期数学的三种基本变换群---平移群、伸缩群与旋转群---都是李群。
+\end{definition}
+
+\begin{example}[三个变换群都是李群]\label{ex:three_lie_groups}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平移群} $(\mathbb{R}^n, +)$：作为流形它是 $\mathbb{R}^n$，群运算为矢量加法，是光滑的。阿贝尔李群。
+    \item \textbf{伸缩群} $(\mathbb{R}^+, \times)$：作为流形它是正实轴 $(0, \infty)$，群运算为乘法，是光滑的。阿贝尔李群，经由指数映射 $\exp$ 作为李群同构于 $(\mathbb{R}, +)$。
+    \item \textbf{旋转群} $U(1) = \{z \in \mathbb{C} : |z| = 1\}$：作为流形它是圆周 $S^1$，群运算为复数乘法，是光滑的。紧致、连通、阿贝尔李群。
+\end{enumerate}
+\end{example}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (trans) {平移群\\$(\mathbb R^n,+)$};
+  \node[box, fill=orange!12, right=1.2cm of trans] (scale) {伸缩群\\$(\mathbb R^+,\times)$};
+  \node[box, fill=green!12, right=1.2cm of scale] (rot) {旋转群\\$U(1)=S^1$};
+  \node[box, fill=red!8, below=1.0cm of trans] (exp1) {$\exp(X)=X$};
+  \node[box, fill=purple!8, below=1.0cm of scale] (exp2) {$\exp(s)=e^s$};
+  \node[box, fill=cyan!8, below=1.0cm of rot] (exp3) {$\exp(i\theta)=e^{i\theta}$};
+  \draw[arr] (trans) -- (exp1);
+  \draw[arr] (scale) -- (exp2);
+  \draw[arr] (rot) -- (exp3);
+\end{tikzpicture}
+\caption{三变换李群及其指数映射：平移群指数为恒等，伸缩群指数为实指数，旋转群指数为复指数。}
+\label{fig:lie_groups}
+\end{figure}
+
+\begin{proposition}[单参数子群]\label{prop:one_parameter_subgroup}
+设 $G$ 为李群，$X \in T_eG$ 为单位元 $e$ 处的切矢量。则存在唯一的李群同态 $\gamma_X: \mathbb{R} \to G$ 满足 $\dot{\gamma}_X(0) = X$。$\gamma_X$ 称为由 $X$ 生成的\textbf{单参数子群}。它满足
+\[
+\gamma_X(s + t) = \gamma_X(s) \cdot \gamma_X(t), \qquad \forall s, t \in \mathbb{R}.
+\]
+\end{proposition}
+
+\begin{proof}
+这是李群理论的基本定理。存在性由常微分方程的 exist 与唯一性定理保证：$\gamma_X$ 是左不变矢量场 $X^L$（$X^L(g) = dL_g(X)$）的积分曲线。唯一性与同态性质由左不变矢量场的流的性质推出：若 $\gamma_X$ 是满足 $\gamma_X(0) = e$ 的 $X^L$ 的积分曲线，则 $t \mapsto \gamma_X(s+t)$ 与 $t \mapsto \gamma_X(s)\gamma_X(t)$ 都是经过 $t=0$ 处 $\gamma_X(s)$ 的 $X^L$ 的积分曲线，故由唯一性它们相等。
+\end{proof}
+
+\begin{definition}[指数映射]\label{def:exponential_map}
+设 $G$ 为李群。\textbf{指数映射} $\exp: T_eG \to G$ 定义为 $\exp(X) := \gamma_X(1)$，其中 $\gamma_X$ 为 $X$ 生成的单参数子群。指数映射将单位元处的切矢量（无穷小变换）映为一个群元素（有限变换）。
+\end{definition}
+
+\begin{proposition}[三变换群的指数映射]\label{prop:three_exponential_maps}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平移群} $(\mathbb{R}^n, +)$：$T_eG \cong \mathbb{R}^n$，$\exp(X) = X$。单参数子群为 $\gamma_X(t) = tX$。
+    \item \textbf{伸缩群} $(\mathbb{R}^+, \times)$：$T_eG \cong \mathbb{R}$，$\exp(s) = e^s$。单参数子群为 $\gamma_s(t) = e^{st}$。
+    \item \textbf{旋转群} $U(1)$：$T_eG \cong i\mathbb{R} \cong \mathbb{R}$，$\exp(i\theta) = e^{i\theta}$。单参数子群为 $\gamma_{i\theta}(t) = e^{i\theta t}$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 在平移群上，左不变矢量场为常矢量场 $X^L(g) = X$。其积分曲线满足 $\dot{\gamma}(t) = X$、$\gamma(0) = 0$，得 $\gamma(t) = tX$。故 $\exp(X) = \gamma_X(1) = X$。
+
+(ii) 在伸缩群上，单位元 $e = 1$ 处的切矢量 $s \in \mathbb{R}$ 对应于左不变矢量场 $X^L(x) = sx$。积分曲线满足 $\dot{\gamma}(t) = s\gamma(t)$、$\gamma(0) = 1$，得 $\gamma(t) = e^{st}$。故 $\exp(s) = e^s$。
+
+(iii) 在旋转群上，单位元 $e = 1$ 处的切矢量 $i\theta$ 对应于左不变矢量场 $X^L(z) = i\theta z$。积分曲线满足 $\dot{\gamma}(t) = i\theta\gamma(t)$、$\gamma(0) = 1$，得 $\gamma(t) = e^{i\theta t}$。故 $\exp(i\theta) = e^{i\theta}$。
+\end{proof}
+
+\begin{remark}[指数映射与三算子的对应]\label{rem:exponential_grammar}
+指数映射是连接\textbf{无穷小变换}与\textbf{有限变换}的桥梁：
+\begin{itemize}
+    \item 在平移群上 $\exp = \text{id}$：无穷小平移即有限平移---梯度（对称中心 $0$）是“平坦”的，无需取指数。
+    \item 在伸缩群上 $\exp(s) = e^s$：无穷小伸缩 $s$ 经指数映射成为有限伸缩因子 $e^s$---散度（对称中心 $1$）通过取指数而累积。
+    \item 在旋转群上 $\exp(i\theta) = e^{i\theta}$：无穷小转角 $i\theta$ 经指数映射成为单位复数 $e^{i\theta}$---旋度（对称中心 $i$）通过取指数而生成周期。
+\end{itemize}
+\end{remark}
+
+\begin{proposition}[李群的有限阶元素与闭轨道]\label{prop:lie_group_finite_order}
+设 $G$ 为李群，$g = \exp(X) \in G$。若 $g$ 是有限阶元素（$\operatorname{ord}(g) = p < \infty$），则单参数子群 $\gamma_X$ 是周期的，即存在 $T > 0$ 使得 $\gamma_X(T) = e$——由 $g^p=e$ 直接取 $T=p$ 即可；此时 $\gamma_X$ 定义了一个周期为 $p$ 的闭轨道。反向需要额外的算术条件：设 $\gamma_X$ 非常值（$X\ne0$）且有最小正周期 $T_0$，则 $\gamma_X(T)=e$ 当且仅当 $T/T_0\in\mathbb{Z}$，于是由 $g=\gamma_X(1)$ 得
+\[
+\operatorname{ord}(g)<\infty \iff T_0 \text{ 是 } 1 \text{ 的有理部分，即 } 1/T_0\in\mathbb{Q},
+\]
+且此时 $\operatorname{ord}(g)$ 为 $\{n\ge1: n/T_0\in\mathbb{Z}\}$ 的最小元。例如取 $G=U(1)\subset\mathbb{C}^\times$ 与 $X=2\pi i\sqrt2$，则 $\gamma_X(T)=e^{2\pi i\sqrt2\,T}$ 以 $T_0=1/\sqrt2$ 为最小正周期，而 $1/T_0=\sqrt2\notin\mathbb{Q}$，故 $g=e^{2\pi i\sqrt2}$ 的阶为无限——故一般情形下 $\gamma_X$ 的周期性只是 $g$ 有限阶的必要条件。
+\end{proposition}
+
+\begin{proof}
+正向（书中所证的方向：$g$ 有限阶 $\Rightarrow$ $\gamma_X$ 周期）。若 $\operatorname{ord}(g) = p$，则 $g^p = e$，即 $\gamma_X(1)^p = e$。由同态性质，$\gamma_X(p) = \gamma_X(1)^p = e$，故 $\gamma_X$ 在 $t = p$ 处回到单位元，$\gamma_X$ 是周期的，周期为 $p$。
+
+反向不成立，其正确形式如上式。记 $A=\{T>0:\gamma_X(T)=e\}$。由 $\gamma_X$ 为同态，$A$ 对加法与取整倍数封闭；$X\ne0$ 时 $\gamma_X$ 在 $t=0$ 附近取不到 $e$（$\gamma_X$ 在 $t=0$ 的导数非零），故 $A$ 在 $\mathbb{R}_{>0}$ 中离散，其最小元 $T_0$ 存在且 $A=T_0\mathbb{Z}_{>0}$。因此 $g^n=e=\gamma_X(n)$ 当且仅当 $n\in T_0\mathbb{Z}_{>0}$，即 $n/T_0\in\mathbb{Z}$；这样的正整数 $n$ 存在当且仅当 $1/T_0\in\mathbb{Q}$。取 $T_0=1/\sqrt2$（$U(1)$，$X=2\pi i\sqrt2$）时 $1/T_0=\sqrt2\notin\mathbb{Q}$，故 $\operatorname{ord}(g)=\infty$，而 $\gamma_X(1/\sqrt2)=e$。因此「$g$ 有限阶$\Rightarrow\gamma_X$ 周期」成立；反向须补上 $1/T_0\in\mathbb{Q}$ 方可成立，此时 $g$ 的阶为 $1/T_0$ 的分母。
+\end{proof}
+
+\section{\texorpdfstring{李代数：矩阵群的无穷小结构}{李代数：矩阵群的无穷小结构}}
+
+\begin{definition}[李代数]\label{def:lie_algebra}
+设 $\mathbb{F}$ 为域。$\mathbb{F}$ 上的\textbf{李代数}是一个向量空间 $\mathfrak{g}$，配备一个双线性映射 $[\cdot, \cdot]: \mathfrak{g} \times \mathfrak{g} \to \mathfrak{g}$（称为\textbf{李括号}），满足：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{反对称性}：$[X, Y] = -[Y, X]$；
+    \item \textbf{雅可比恒等式}：$[X, [Y, Z]] + [Y, [Z, X]] + [Z, [X, Y]] = 0$。
+\end{enumerate}
+\end{definition}
+
+\begin{remark}[李代数在周期数学中的意义]\label{rem:lie_algebra_periodic_meaning}
+李代数描述了连续对称群的\textbf{无穷小结构}。李代数的元素是无穷小生成元---它们生成单参数子群，而单参数子群又生成闭轨道。李括号 $[X,Y]$ 度量了两个无穷小变换的非交换性---当 $[X,Y] = 0$ 时，由 $X$ 与 $Y$ 生成的变换彼此交换；当 $[X,Y] \neq 0$ 时，它们不能交换。
+\end{remark}
+
+\begin{definition}[矩阵李代数]\label{def:matrix_lie_algebra}
+设 $G \subseteq GL(n, \mathbb{F})$ 为矩阵李群。$G$ 的\textbf{李代数} $\mathfrak{g}$ 是 $G$ 在单位元 $I$ 处的切空间：
+\[
+\mathfrak{g} := T_I G = \{\mathbf{X} \in M_n(\mathbb{F}) : e^{t\mathbf{X}} \in G, \; \forall t \in \mathbb{R}\},
+\]
+李括号为矩阵交换子 $[\mathbf{X}, \mathbf{Y}] = \mathbf{XY} - \mathbf{YX}$。
+\end{definition}
+
+\begin{proposition}[三个基本矩阵李代数]\label{prop:three_matrix_lie_algebras}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{正交李代数} $\mathfrak{o}(n) = \{\mathbf{X} \in M_n(\mathbb{R}) : \mathbf{X}^{\mathsf T} = -\mathbf{X}\}$；
+    \item \textbf{酉李代数} $\mathfrak{u}(n) = \{\mathbf{X} \in M_n(\mathbb{C}) : \mathbf{X}^* = -\mathbf{X}\}$；
+    \item \textbf{辛李代数} $\mathfrak{sp}(2n) = \{\mathbf{X} : \mathbf{X}^{\mathsf T}\mathbf{J} + \mathbf{J}\mathbf{X} = \mathbf{0}\}$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 设 $\mathbf{X} \in \mathfrak{o}(n)$。则对所有 $t$ 有 $e^{t\mathbf{X}} \in O(n)$，即 $(e^{t\mathbf{X}})^{\mathsf T} e^{t\mathbf{X}} = I$。在 $t = 0$ 处求导得 $\mathbf{X}^{\mathsf T} + \mathbf{X} = \mathbf{0}$，故 $\mathbf{X}^{\mathsf T} = -\mathbf{X}$。反之，若 $\mathbf{X}$ 是反对称的，则 $(e^{t\mathbf{X}})^{\mathsf T} e^{t\mathbf{X}} = e^{-t\mathbf{X}} e^{t\mathbf{X}} = I$。
+
+(ii) 设 $\mathbf{X} \in \mathfrak{u}(n)$。由 $(e^{t\mathbf{X}})^* e^{t\mathbf{X}} = I$ 求导得 $\mathbf{X}^* + \mathbf{X} = \mathbf{0}$。
+
+(iii) 设 $\mathbf{X} \in \mathfrak{sp}(2n)$。由 $(e^{t\mathbf{X}})^{\mathsf T} \mathbf{J} e^{t\mathbf{X}} = \mathbf{J}$ 求导得 $\mathbf{X}^{\mathsf T}\mathbf{J} + \mathbf{J}\mathbf{X} = \mathbf{0}$。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (alg) {李代数 $\mathfrak g$\\切空间 $T_IG$};
+  \node[box, fill=orange!12, right=1.2cm of alg] (bracket) {李括号\\$[X,Y]=XY-YX$};
+  \node[box, fill=green!12, right=1.2cm of bracket] (exp) {指数映射\\$e^{tX}\in G$};
+  \node[box, fill=red!8, below=1.0cm of exp] (group) {李群 $G$\\连续对称};
+  \draw[arr] (alg) -- (bracket);
+  \draw[arr] (bracket) -- (exp);
+  \draw[arr] (exp) -- (group);
+\end{tikzpicture}
+\caption{李代数到李群：切空间、李括号与指数映射。}
+\label{fig:lie_algebra}
+\end{figure}
+
+\begin{proposition}[矩阵指数映射的性质]\label{prop:matrix_exponential_properties}
+设 $\mathbf{X} \in M_n(\mathbb{F})$。矩阵指数 $e^{\mathbf{X}}$ 满足：
+\begin{enumerate}[label=(\roman*)]
+    \item $e^{\mathbf{0}} = \mathbf{I}$；
+    \item $e^{\mathbf{X}} e^{-\mathbf{X}} = \mathbf{I}$；
+    \item 若 $\mathbf{XY} = \mathbf{YX}$，则 $e^{\mathbf{X}+\mathbf{Y}} = e^{\mathbf{X}} e^{\mathbf{Y}}$；
+    \item $\det(e^{\mathbf{X}}) = e^{\operatorname{tr}(\mathbf{X})}$；
+    \item 若 $\mathbf{X}$ 是反对称的，则 $e^{\mathbf{X}} \in SO(n)$；
+    \item 若 $\mathbf{X}$ 是斜厄米的，则 $e^{\mathbf{X}} \in U(n)$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 直接代入幂级数定义。
+
+(ii) 由于 $\mathbf{X}$ 与 $-\mathbf{X}$ 可交换，利用 (iii)：$e^{\mathbf{X}} e^{-\mathbf{X}} = e^{\mathbf{X}-\mathbf{X}} = \mathbf{I}$。
+
+(iii) 当 $\mathbf{XY} = \mathbf{YX}$ 时，由二项式定理 $e^{\mathbf{X}} e^{\mathbf{Y}} = \sum_{m} \frac{(\mathbf{X}+\mathbf{Y})^m}{m!} = e^{\mathbf{X}+\mathbf{Y}}$。
+
+(iv) 设 $\mathbf{X}$ 的若尔当标准形的特征值为 $\lambda_1, \dots, \lambda_n$。则 $e^{\mathbf{X}}$ 的特征值为 $e^{\lambda_1}, \dots, e^{\lambda_n}$，故 $\det(e^{\mathbf{X}}) = e^{\sum_i \lambda_i} = e^{\operatorname{tr}(\mathbf{X})}$。
+
+(v) 由 (i)-(iii)，$e^{\mathbf{X}^{\mathsf T}} = (e^{\mathbf{X}})^{\mathsf T}$。若 $\mathbf{X}^{\mathsf T} = -\mathbf{X}$，则 $(e^{\mathbf{X}})^{\mathsf T} = e^{-\mathbf{X}} = (e^{\mathbf{X}})^{-1}$，故 $e^{\mathbf{X}} \in O(n)$。由 (iv)，$\det(e^{\mathbf{X}}) = e^{\operatorname{tr}(\mathbf{X})} = 1$（反对称矩阵的迹为零），故 $e^{\mathbf{X}} \in SO(n)$。
+
+(vi) 类似地，$(e^{\mathbf{X}})^* = e^{-\mathbf{X}} = (e^{\mathbf{X}})^{-1}$，故 $e^{\mathbf{X}} \in U(n)$。
+\end{proof}
+
+\begin{theorem}[李代数与守恒律的对应]\label{thm:lie_algebra_conservation}
+三个基本矩阵李代数的元素通过矩阵指数映射生成矩阵群，分别对应于三条守恒律：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{正交李代数} $\mathfrak{o}(n)$：反对称矩阵生成 $SO(n)$---保持实内积（$0$-对称）。
+    \item \textbf{酉李代数} $\mathfrak{u}(n)$：斜厄米矩阵生成 $U(n)$---保持复内积（角动量守恒、旋度算子、$i$-对称）。
+    \item \textbf{辛李代数} $\mathfrak{sp}(2n)$：生成 $Sp(2n)$---保持辛形式（相空间体积守恒、散度算子、$1$-对称）。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+这直接由命题 \ref{prop:three_matrix_lie_algebras} 与命题 \ref{prop:matrix_exponential_properties} 的 (v)(vi) 得出：$\mathfrak{o}(n)$ 的指数映射落到 $SO(n)$，$\mathfrak{u}(n)$ 的落到 $U(n)$，$\mathfrak{sp}(2n)$ 的落到 $Sp(2n)$。
+\end{proof}
+
+\begin{example}[$\mathfrak{su}(2)$ 与三维旋转]\label{ex:su2_rotation}
+三维旋转群 $SO(3)$ 的李代数为 $\mathfrak{so}(3)$，由 $3 \times 3$ 反对称矩阵组成：
+\[
+\mathfrak{so}(3) = \operatorname{span}\left\{
+\begin{pmatrix} 0 & 0 & 0 \\ 0 & 0 & -1 \\ 0 & 1 & 0 \end{pmatrix},
+\begin{pmatrix} 0 & 0 & 1 \\ 0 & 0 & 0 \\ -1 & 0 & 0 \end{pmatrix},
+\begin{pmatrix} 0 & -1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 0 \end{pmatrix}
+\right\}.
+\]
+三个生成元 $J_x, J_y, J_z$ 满足角动量的对易关系 $[J_x, J_y] = J_z$、$[J_y, J_z] = J_x$、$[J_z, J_x] = J_y$。指数映射 $e^{\theta J_z}$ 给出绕 $z$ 轴转角为 $\theta$ 的旋转矩阵。$\mathfrak{su}(2)$ 同构于 $\mathfrak{so}(3)$，是二重覆盖 $SU(2) \to SO(3)$ 在李代数层面的表达。
+\end{example}
+
+\section{\texorpdfstring{奇异值分解与周期卷积}{奇异值分解与周期卷积}}
+
+\begin{definition}[奇异值分解]\label{def:svd}
+设 $\mathbf{A}$ 为 $m \times n$ 复矩阵。$\mathbf{A}$ 的\textbf{奇异值分解}（SVD）为
+\[
+\mathbf{A} = \mathbf{U} \boldsymbol{\Sigma} \mathbf{V}^*,
+\]
+其中 $\mathbf{U}$ 为 $m \times m$ 酉矩阵，$\mathbf{V}$ 为 $n \times n$ 酉矩阵，$\boldsymbol{\Sigma}$ 为 $m \times n$ 对角矩阵，其对角元 $\sigma_1 \ge \sigma_2 \ge \dots \ge \sigma_r > 0$ 是 $\mathbf{A}$ 的\textbf{奇异值}（$r = \operatorname{rank}(\mathbf{A})$）。
+
+奇异值分解是周期卷积的矩阵实现：$\mathbf{U}$ 的列是输出空间的旋转轴，$\mathbf{V}$ 的列是输入空间的旋转轴，而 $\boldsymbol{\Sigma}$ 的对角元是相应通道的缩放因子。
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (in) {输入空间};
+  \node[box, fill=orange!12, right=1.0cm of in] (V) {$\mathbf V^*$\\旋转};
+  \node[box, fill=green!12, right=1.0cm of V] (S) {$\boldsymbol\Sigma$\\伸缩};
+  \node[box, fill=red!8, right=1.0cm of S] (U) {$\mathbf U$\\旋转};
+  \node[box, fill=purple!8, right=1.0cm of U] (out) {输出空间};
+  \draw[arr] (in) -- (V);
+  \draw[arr] (V) -- (S);
+  \draw[arr] (S) -- (U);
+  \draw[arr] (U) -- (out);
+\end{tikzpicture}
+\caption{奇异值分解的几何意义：旋转-伸缩-旋转。}
+\label{fig:svd_geometry}
+\end{figure}
+
+\begin{proposition}[SVD 与周期卷积四算子的对应]\label{prop:svd_periodic_transform}
+奇异值分解的几何意义精确对应于周期卷积的四算子结构：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{相位算子}（旋转）$\leftrightarrow$ $\mathbf{V}^*$ 与 $\mathbf{U}$：输入/输出空间的旋转轴；
+    \item \textbf{振幅算子}（伸缩）$\leftrightarrow$ $\boldsymbol{\Sigma}$：每个通道由奇异值 $\sigma_i$ 独立缩放；
+    \item \textbf{频率算子}（平移）$\leftrightarrow$ 循环矩阵的 DFT 对角化：当 $\mathbf{A}$ 为循环矩阵时，$\mathbf{U} = \mathbf{F}_N^* \operatorname{diag}(e^{i\phi_k})$、$\mathbf{V} = \mathbf{F}_N^*$、$\boldsymbol{\Sigma} = \operatorname{diag}(|\hat{a}_0|, \dots, |\hat{a}_{N-1}|)$，其中 $\hat{a}_k = |\hat{a}_k| e^{i\phi_k}$；
+    \item \textbf{周期算子}（定长）$\leftrightarrow$ 块循环结构：嵌套周期系统对应于块循环矩阵，其 SVD 按周期类别分层进行。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i)(ii) 直接由奇异值分解的定义（定义 \ref{def:svd}）读出：$\mathbf{A} = \mathbf{U}\boldsymbol{\Sigma}\mathbf{V}^*$ 的作用先是在输入空间作旋转 $\mathbf{V}^*$，然后由各奇异值 $\sigma_i$ 对各通道独立缩放，最后在输出空间作旋转 $\mathbf{U}$。
+
+(iii) 设 $\mathbf{A}$ 为第一行为 $\mathbf{a} = (a_0, a_1, \dots, a_{N-1})$ 的循环矩阵；其第 $j$ 列由 $\mathbf{a}$ 循环移位得到，故 $\mathbf{A}$ 与循环移位算子可交换，从而被 DFT 矩阵 $\mathbf{F}_N$ 酉对角化：
+\[
+\mathbf{A} = \mathbf{F}_N^* \operatorname{diag}(\hat{a}_0, \hat{a}_1, \dots, \hat{a}_{N-1})\, \mathbf{F}_N, \qquad \hat{a}_k = \sum_{j=0}^{N-1} a_j e^{-2\pi i jk/N}.
+\]
+将每个 $\hat{a}_k = |\hat{a}_k| e^{i\phi_k}$ 写成模与相位得
+\[
+\mathbf{A} = \bigl(\mathbf{F}_N^* \operatorname{diag}(e^{i\phi_k})\bigr)\, \operatorname{diag}(|\hat{a}_0|, \dots, |\hat{a}_{N-1}|)\, \mathbf{F}_N,
+\]
+这正是 $\mathbf{A}$ 的 SVD 形式。
+
+(iv) 嵌套周期系统对应于块循环矩阵，其 DFT 对角化推广为块 DFT，奇异值按周期类别分层给出。
+\end{proof}
+
+\begin{proposition}[奇异值与守恒量]\label{prop:svd_conservation}
+矩阵 $\mathbf{A}$ 的奇异值满足以下守恒性质：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Frobenius 范数守恒}：$\|\mathbf{A}\|_F^2 = \sum_{i=1}^r \sigma_i^2$---矩阵的“总能量”等于奇异值平方和；这是帕塞瓦尔恒等式的矩阵版本。
+    \item \textbf{秩守恒}：$\operatorname{rank}(\mathbf{A}) = r$，等于非零奇异值的个数。
+    \item \textbf{行列式守恒}（方阵情形）：$|\det(\mathbf{A})| = \prod_{i=1}^n \sigma_i$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由 $\mathbf{A} = \mathbf{U}\boldsymbol{\Sigma}\mathbf{V}^*$ 及酉不变性，$\|\mathbf{A}\|_F^2 = \operatorname{tr}(\mathbf{A}^*\mathbf{A}) = \operatorname{tr}(\mathbf{V}\boldsymbol{\Sigma}^*\boldsymbol{\Sigma}\mathbf{V}^*) = \operatorname{tr}(\boldsymbol{\Sigma}^*\boldsymbol{\Sigma}) = \sum_{i=1}^r \sigma_i^2$。
+
+(ii) 由于 $\mathbf{U}, \mathbf{V}$ 可逆，$\operatorname{rank}(\mathbf{A}) = \operatorname{rank}(\boldsymbol{\Sigma})$，而 $\boldsymbol{\Sigma}$ 的秩恰为其非零对角元的个数 $r$。
+
+(iii) 在方阵情形下，取行列式得 $\det(\mathbf{A}) = \det(\mathbf{U})\det(\boldsymbol{\Sigma})\det(\mathbf{V}^*)$；由于 $\mathbf{U}, \mathbf{V}$ 为酉矩阵，$|\det(\mathbf{U})| = |\det(\mathbf{V}^*)| = 1$，故 $|\det(\mathbf{A})| = |\det(\boldsymbol{\Sigma})| = \prod_{i=1}^n \sigma_i$。
+\end{proof}
+
+\begin{example}[$2\times 2$ 矩阵的奇异值分解]\label{ch5_example_svd_2x2}
+考虑矩阵 $\mathbf{A} = \begin{pmatrix} 0 & 3 \\ 4 & 0 \end{pmatrix}$。计算得 $\mathbf{A}^{\mathsf T}\mathbf{A} = \begin{pmatrix} 16 & 0 \\ 0 & 9 \end{pmatrix}$，其特征值为 $16, 9$，故奇异值为 $\sigma_1 = 4 \ge \sigma_2 = 3$。取
+\[
+\mathbf{U} = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}, \qquad \boldsymbol{\Sigma} = \begin{pmatrix} 4 & 0 \\ 0 & 3 \end{pmatrix}, \qquad \mathbf{V} = \mathbf{I}_2,
+\]
+有 $\mathbf{U}\boldsymbol{\Sigma}\mathbf{V}^{\mathsf T} = \mathbf{A}$。验证守恒量：$|\det\mathbf{A}| = 12 = \sigma_1\sigma_2$，$\|\mathbf{A}\|_F^2 = 25 = \sigma_1^2 + \sigma_2^2$。
+\end{example}
+
+\begin{definition}[伪逆与最小二乘]\label{def:pseudoinverse}
+设 $\mathbf{A} = \mathbf{U} \boldsymbol{\Sigma} \mathbf{V}^*$ 为一个 SVD。$\mathbf{A}$ 的\textbf{摩尔-彭罗斯伪逆}为 $\mathbf{A}^+ = \mathbf{V} \boldsymbol{\Sigma}^+ \mathbf{U}^*$，其中 $\boldsymbol{\Sigma}^+$ 是对角元为 $1/\sigma_i$（$\sigma_i > 0$）或 $0$（$\sigma_i = 0$）的对角矩阵。伪逆给出不相容线性方程组 $\mathbf{A}\mathbf{x} = \mathbf{b}$ 的最小二乘解：$\mathbf{x} = \mathbf{A}^+ \mathbf{b}$ 使 $\|\mathbf{A}\mathbf{x} - \mathbf{b}\|^2$ 最小。
+\end{definition}
+
+\section{\texorpdfstring{线性系统的周期结构}{线性系统的周期结构}}
+
+\begin{definition}[线性动力系统]\label{def:linear_dynamical_system}
+\textbf{离散线性动力系统}形如 $\mathbf{x}_{k+1} = \mathbf{A} \mathbf{x}_k$。\textbf{连续线性动力系统}形如 $\frac{d\mathbf{x}}{dt} = \mathbf{B} \mathbf{x}$。这两个系统通过矩阵指数相联系：连续系统的解为 $\mathbf{x}(t) = e^{\mathbf{B}t} \mathbf{x}(0)$，在取时间步长 $\Delta t$ 离散化后对应于 $\mathbf{A} = e^{\mathbf{B}\Delta t}$。
+\end{definition}
+
+\begin{proposition}[线性系统的周期解]\label{prop:linear_system_periodic_solution}
+设 $\mathbf{A}$ 的特征值为 $\lambda_1, \dots, \lambda_n$。离散系统 $\mathbf{x}_{k+1} = \mathbf{A} \mathbf{x}_k$ 存在周期为 $p$ 的周期解（即对所有 $k$ 有 $\mathbf{x}_{k+p} = \mathbf{x}_k$），当且仅当存在满足 $\lambda_j^p = 1$ 的特征值 $\lambda_j$，且初值位于这些特征值的特征子空间的直和 $\bigoplus_{\lambda_j^p=1}E_{\lambda_j}$ 中。此处不需要 $\mathbf{A}$ 可对角化：所需的是上述直和分解，它对任意 $\mathbf{A}$ 成立。
+\end{proposition}
+
+\begin{proof}
+($\Leftarrow$) 若 $\mathbf{x}_0$ 属于某个满足 $\lambda_j^p = 1$ 的特征子空间 $E_{\lambda_j}$，则 $\mathbf{x}_k = \mathbf{A}^k\mathbf{x}_0 = \lambda_j^k\mathbf{x}_0$，故 $\mathbf{x}_p = \lambda_j^p\mathbf{x}_0 = \mathbf{x}_0$，即 $\mathbf{x}_{k+p}=\mathbf{x}_k$ 对所有 $k$ 成立；对直和中的一般 $\mathbf{x}_0$ 逐分量相加即得。
+
+($\Rightarrow$) 设 $\mathbf{x}_{k+p}=\mathbf{x}_k$ 对所有 $k$ 成立，则 $\mathbf{x}_p=\mathbf{x}_0$，即 $(\mathbf{A}^p-\mathbf{I})\mathbf{x}_0=\mathbf{0}$。若 $\mathbf{x}_0\ne\mathbf{0}$，则 $1$ 是 $\mathbf{A}^p$ 的特征值；$\mathbf{A}^p$ 的特征值是 $\mathbf{A}$ 的特征值的 $p$ 次幂，故某特征值 $\lambda_j$ 满足 $\lambda_j^p=1$，第一个断言成立。为看出 $\mathbf{x}_0$ 落在直和中，令
+\[
+q(x)=\prod_{\lambda_j^p=1}(x-\lambda_j),\qquad h(x)=\prod_{\lambda_j^p\ne1}(x-\lambda_j),
+\]
+两个乘积的根互异、合起来正是 $x^p-1$ 的全部根，故 $\mathbf{A}^p-\mathbf{I}=q(\mathbf{A})h(\mathbf{A})$ 且 $\gcd(q,h)=1$（$q$ 与 $h$ 无公共根，各因子幂次皆为 $1$）。由互素情形的核分解定理，
+\[
+\ker\bigl(q(\mathbf{A})h(\mathbf{A})\bigr)=\ker q(\mathbf{A})\oplus\ker h(\mathbf{A}),
+\]
+故 $\mathbf{x}_0=\mathbf{x}_0^{q}+\mathbf{x}_0^{h}$。又 $q$ 的根恰为满足 $\lambda_j^p=1$ 的 $\lambda_j$，同样的核分解逐个因子进行即得 $\ker q(\mathbf{A})=\bigoplus_{\lambda_j^p=1}\ker(\mathbf{A}-\lambda_j\mathbf{I})=\bigoplus_{\lambda_j^p=1}E_{\lambda_j}$。综上 $\mathbf{x}_0\in\bigoplus_{\lambda_j^p=1}E_{\lambda_j}$（当 $\mathbf{x}_0=\mathbf{0}$ 时该式亦平凡成立）。整个论证只用到互素多项式的核分解，未假设 $\mathbf{A}$ 可对角化。
+\end{proof}
+
+\begin{theorem}[线性系统的周期守恒律]\label{thm:linear_system_conservation}
+设 $\mathbf{A}$ 为离散线性系统的演化矩阵。系统的守恒量由 $\mathbf{A}$ 的谱性质决定：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{模长平方守恒}：若 $\mathbf{A}$ 为酉矩阵，则对所有 $k$ 有 $\|\mathbf{x}_k\|^2 = \|\mathbf{x}_0\|^2$（旋度（对称中心 $i$）中角动量守恒的离散实现）。
+    \item \textbf{体积守恒}：若 $|\det(\mathbf{A})| = 1$，则相空间体积守恒（散度（对称中心 $1$）中尺度荷守恒的离散实现）。
+    \item \textbf{动量守恒}：若 $\mathbf{A}$ 有特征值 $\lambda = 1$，则相应特征子空间中的分量在演化下保持不变（梯度（对称中心 $0$）中动量守恒的离散实现）。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) $\|\mathbf{x}_{k+1}\|^2 = \langle \mathbf{A}\mathbf{x}_k, \mathbf{A}\mathbf{x}_k \rangle = \langle \mathbf{x}_k, \mathbf{A}^*\mathbf{A}\mathbf{x}_k \rangle = \|\mathbf{x}_k\|^2$。由归纳可得。
+
+(ii) 相空间体积的变换因子为 $|\det(\mathbf{A})|$。
+
+(iii) 若 $\mathbf{A}\mathbf{v} = \mathbf{v}$，则对 $\mathbf{x}_0 = c\mathbf{v}$ 有对所有 $k$ 成立 $\mathbf{x}_k = c\mathbf{v}$。
+\end{proof}
+
+\begin{corollary}[线性系统的谱分析与周期分解]\label{cor:linear_system_spectral_period}
+设 $\mathbf{A}$ 为离散线性系统 $\mathbf{x}_{k+1} = \mathbf{A}\mathbf{x}_k$ 的演化矩阵。任意线性动力系统的解都可分解为以下四类运动的叠加：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{指数衰减/增长}（$|\lambda_j| < 1$ 或 $|\lambda_j| > 1$）：散度算子主导---相空间体积收缩或膨胀。
+    \item \textbf{周期振荡}（$|\lambda_j| = 1$，$\lambda_j \neq \pm 1$）：旋度算子主导---纯旋转，模长守恒。
+    \item \textbf{稳态}（$\lambda_j = 1$）：梯度算子主导---平衡点，平移不变。
+    \item \textbf{二阶振荡}（$\lambda_j = -1$）：梯度（对称中心 $0$）与旋度（对称中心 $i$）之间的边界---产生二阶周期性（$C_2$ 对合）。
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+由推论 \ref{cor:eigenspace_periodic_evolution}，将初态按特征子空间分解为 $\mathbf{x}_0 = \sum_j c_j \mathbf{v}_j$，则 $\mathbf{x}_k = \sum_j c_j \lambda_j^k \mathbf{v}_j$。按每个特征值 $\lambda_j$ 的模与辐角分类即得结论。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (decay) {$|\lambda|<1$\\衰减};
+  \node[box, fill=orange!12, right=1.0cm of decay] (osc) {$|\lambda|=1,\lambda\neq\pm1$\\周期振荡};
+  \node[box, fill=green!12, right=1.0cm of osc] (steady) {$\lambda=1$\\稳态};
+  \node[box, fill=red!8, right=1.0cm of steady] (neg) {$\lambda=-1$\\二阶振荡};
+  \node[box, fill=purple!8, below=1.0cm of $(osc)!0.5!(steady)$] (class) {四类运动叠加\\谱分解};
+  \draw[arr] (decay) -- (class);
+  \draw[arr] (osc) -- (class);
+  \draw[arr] (steady) -- (class);
+  \draw[arr] (neg) -- (class);
+\end{tikzpicture}
+\caption{线性系统谱分解的四类运动：衰减、周期振荡、稳态、二阶振荡。}
+\label{fig:linear_system_spectral}
+\end{figure}
+
+\section{\texorpdfstring{线性系统的迭代法}{线性系统的迭代法}}
+
+\begin{definition}[迭代法的基本框架]\label{def:iterative_method}
+对于大型稀疏线性方程组 $\mathbf{A}\mathbf{x} = \mathbf{b}$，将 $\mathbf{A}$ 分裂为 $\mathbf{A} = \mathbf{M} - \mathbf{N}$（$\mathbf{M}$ 可逆且易于求逆）。迭代格式为
+\[
+\mathbf{x}_{k+1} = \mathbf{M}^{-1} \mathbf{N} \mathbf{x}_k + \mathbf{M}^{-1} \mathbf{b}.
+\]
+迭代矩阵为 $\mathbf{G} = \mathbf{M}^{-1} \mathbf{N}$。迭代收敛当且仅当 $\rho(\mathbf{G}) < 1$（谱半径小于 $1$）。
+
+迭代法是离散动力系统的实例---迭代矩阵 $\mathbf{G}$ 的特征值决定了收敛速率与振荡模式。
+\end{definition}
+
+\begin{definition}[雅可比迭代]\label{def:jacobi_iteration}
+取 $\mathbf{M} = \mathbf{D}$（$\mathbf{A}$ 的对角部分），$\mathbf{N} = -(\mathbf{L} + \mathbf{U})$（严格下三角与上三角部分）。雅可比迭代是完全并行的---每个分量的更新与其余分量的当前值无关。
+\end{definition}
+
+\begin{definition}[高斯-赛德尔迭代]\label{def:gauss_seidel}
+取 $\mathbf{M} = \mathbf{D} + \mathbf{L}$，$\mathbf{N} = -\mathbf{U}$。高斯-赛德尔迭代使用最新算出的分量值---它具有因果性。它通常比雅可比迭代收敛更快，但难以并行化。
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (split) {$\mathbf A=\mathbf M-\mathbf N$};
+  \node[box, fill=orange!12, right=1.2cm of split] (iter) {$\mathbf x_{k+1}=\mathbf M^{-1}\mathbf N\mathbf x_k+\mathbf M^{-1}\mathbf b$};
+  \node[box, fill=green!12, right=1.2cm of iter] (G) {迭代矩阵\\$\mathbf G=\mathbf M^{-1}\mathbf N$};
+  \node[box, fill=red!8, below=1.0cm of G] (conv) {收敛判据\\$\rho(\mathbf G)<1$};
+  \draw[arr] (split) -- (iter);
+  \draw[arr] (iter) -- (G);
+  \draw[arr] (G) -- (conv);
+\end{tikzpicture}
+\caption{迭代法框架：矩阵分裂、迭代矩阵与谱半径收敛判据。}
+\label{fig:iterative_method}
+\end{figure}
+
+\begin{theorem}[迭代收敛的充要条件]\label{thm:iteration_convergence}
+迭代 $\mathbf{x}_{k+1} = \mathbf{G} \mathbf{x}_k + \mathbf{c}$ 对任意初值收敛，当且仅当迭代矩阵 $\mathbf{G}$ 的谱半径满足 $\rho(\mathbf{G}) = \max_i |\lambda_i(\mathbf{G})| < 1$。若 $\mathbf{A}$ 严格对角占优，则雅可比迭代与高斯-赛德尔迭代均收敛。
+\end{theorem}
+
+\begin{proof}
+迭代的不动点 $\mathbf{x}_*$ 满足 $\mathbf{x}_* = \mathbf{G}\mathbf{x}_* + \mathbf{c}$，误差 $\mathbf{e}_k = \mathbf{x}_k - \mathbf{x}_*$ 满足 $\mathbf{e}_k = \mathbf{G}^k \mathbf{e}_0$。
+
+先证谱半径条件。设 $\mathbf{G} = \mathbf{P}\mathbf{J}\mathbf{P}^{-1}$ 为若尔当分解。每个若尔当块 $J_r(\lambda)$ 的 $k$ 次幂的元素为 $\binom{k}{j}\lambda^{k-j}$（$0 \le j < r$）；当 $|\lambda| < 1$ 时，对每个 $j$ 有 $\binom{k}{j}|\lambda|^{k-j} \to 0$。故当 $\rho(\mathbf{G}) < 1$ 时 $\mathbf{G}^k \to 0$，迭代收敛。反之，若迭代对任意初值收敛，则 $\mathbf{G}^k \to 0$；取 $\mathbf{G}$ 的特征值 $\lambda$ 与特征向量 $\mathbf{v}$，由 $\mathbf{G}^k\mathbf{v} = \lambda^k\mathbf{v} \to 0$ 得 $|\lambda| < 1$，故 $\rho(\mathbf{G}) < 1$。
+
+再证严格对角占优情形下的收敛性。雅可比迭代矩阵 $\mathbf{G}_J = -\mathbf{D}^{-1}(\mathbf{L}+\mathbf{U})$ 满足 $\|\mathbf{G}_J\|_\infty = \max_i \sum_{j \neq i}|a_{ij}/a_{ii}| < 1$，故 $\rho(\mathbf{G}_J) \le \|\mathbf{G}_J\|_\infty < 1$，雅可比迭代收敛。对高斯-赛德尔迭代矩阵 $\mathbf{G}_{GS} = -(\mathbf{D}+\mathbf{L})^{-1}\mathbf{U}$，设 $\mathbf{G}_{GS}\mathbf{x} = \lambda\mathbf{x}$ 且 $|\lambda| \ge 1$，并取 $|x_m| = \max_i |x_i|$；由第 $m$ 个分量的方程得 $|a_{mm}||x_m| \le \sum_{j\neq m}|a_{mj}||x_m|$，与严格对角占优矛盾。故 $\rho(\mathbf{G}_{GS}) < 1$，高斯-赛德尔迭代收敛。
+\end{proof}
+
+\begin{remark}[洛书矩阵与迭代法的比较]\label{rem:luoshu_iteration}
+洛书矩阵 $\mathbf{L}$ 的谱半径为 $\rho(\mathbf{L}) = 2\sqrt{6} \approx 4.899 > 1$，故 $\mathbf{L}$ 作为迭代矩阵不收敛。这从谱结构表明：洛书矩阵在 $\mathbf{1}^\perp$ 上的旋转伸缩特征值 $\pm 2\sqrt{6}i$ 的模大于 $1$，产生发散振荡---这是一种由旋度（对称中心 $i$）主导的非收敛行为。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  theme/.style={draw, rounded corners, fill=green!10, minimum width=1.2cm, minimum height=0.55cm, align=center, font=\footnotesize},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[theme] (p) at (0,0) {平移};
+  \node[theme, right=0.3cm of p] (s) {伸缩};
+  \node[theme, right=0.3cm of s] (r) {旋转};
+  \node[theme, right=0.3cm of r] (c) {守恒};
+  \node[theme, right=0.3cm of c] (sym) {对称};
+  \node[theme, right=0.3cm of sym] (cl) {闭包};
+  \node[theme, right=0.3cm of cl] (per) {周期};
+  \node[draw, dashed, rounded corners, fit=(p)(per), inner sep=6pt] (box) {};
+  \node[below=0.1cm of box, font=\footnotesize] {七大主题贯穿线性代数};
+\end{tikzpicture}
+\caption{本章七大主题：平移、伸缩、旋转、守恒、对称、闭包、周期。}
+\label{fig:linear_algebra_themes}
+\end{figure}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash\hspace{0pt}}p{3.1cm}>{\centering\arraybackslash\hspace{0pt}}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 平移矩阵与循环移位：实特征值的拉伸/压缩（定义 \ref{def:eigenvalue_eigenvector}）、循环矩阵的 DFT 对角化（命题 \ref{prop:svd_periodic_transform}）；洛书矩阵的纯平移部分（定理 \ref{thm:luoshu_decomposition}） \\
+伸缩 & 对角缩放与奇异值：对角矩阵（定义 \ref{def:diagonalisable}）、SVD 的 $\boldsymbol{\Sigma}$（定义 \ref{def:svd}）、由行列式度量的体积缩放（定义 \ref{def:determinant}） \\
+旋转 & 正交矩阵与酉矩阵：模为 $1$ 的特征值（定理 \ref{thm:spectral_theorem_unitary}）、平面旋转与有限阶周期性（例 \ref{ch5_example_rotation_2x2}）；洛书矩阵的旋转伸缩部分（定理 \ref{thm:luoshu_decomposition}） \\
+守恒 & Frobenius 范数、行列式与秩：能量守恒 $\sum_i \sigma_i^2$（命题 \ref{prop:svd_conservation}）、维数守恒（定理 \ref{thm:dimension_conservation}） \\
+对称 & 矩阵群 $O(n)/U(n)/Sp(2n)$：$0$-对称、$i$-对称与 $1$-对称的矩阵实现（命题 \ref{prop:matrix_groups_grammar}）；洛书矩阵的对径反对称性（命题 \ref{prop:luoshu_antipodal}） \\
+闭包 & 满足 $\lambda^p = 1$ 的有限阶周期解：位于单位根上的特征值、$C_p$ 循环结构（命题 \ref{prop:linear_system_periodic_solution}）；洛书矩阵的旋转伸缩部分为旋转与伸缩的联合作用（推论 \ref{cor:luoshu_grammar}） \\
+周期 & 线性系统的周期结构：谱分解中的四类运动（推论 \ref{cor:linear_system_spectral_period}）、迭代收敛与稳态（定理 \ref{thm:iteration_convergence}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明维数定理（定理 \ref{thm:dimension_conservation}）：
+    设 $V$ 为有限维向量空间，$W_1,W_2$ 为其子空间，则
+    \[
+    \dim(W_1+W_2)=\dim W_1+\dim W_2-\dim(W_1\cap W_2).
+    \]
+    请通过构造 $W_1\cap W_2$ 的基并分别扩充为 $W_1$、$W_2$ 的基，
+    证明扩充后的并集是 $W_1+W_2$ 的基。
+    进一步说明：维数定理表达了子空间分解中信息的\textbf{守恒}。
+
+    \item 根据定义 \ref{def:eigenvalue_eigenvector}，说明特征值 $\lambda$ 如何描述一维不变子空间上的演化规律：
+    \begin{enumerate}[label=(\roman*)]
+        \item $\lambda\in\mathbb{R}$ 且 $\lambda>0$ 对应纯平移（拉伸或压缩）；
+        \item $|\lambda|=1$ 且 $\lambda=e^{i\theta}$ 对应纯旋转；
+        \item $|\lambda|\neq1$ 对应旋转与伸缩的联合作用；
+        \item $\lambda<0$ 包含反射，产生二阶周期振荡。
+    \end{enumerate}
+    请各举一个 $2\times2$ 矩阵例子，并计算其相图或轨道形态。
+
+    \item 证明推论 \ref{cor:eigenspace_periodic_evolution}：
+    若线性算子 $T$ 的特征向量构成 $V$ 的一组基，则任意初态
+    $\mathbf{x}_0=\sum_i c_i\mathbf{v}_i$ 的演化分解为各特征子空间上的独立演化：
+    \[
+    \mathbf{x}_k=T^k\mathbf{x}_0=\sum_i c_i\lambda_i^k\mathbf{v}_i.
+    \]
+    请说明每个特征值 $\lambda_i$ 如何充当第 $i$ 个“频率分量”的演化因子。
+
+    \item 验证例 \ref{ch5_example_eigendecomp_2x2} 中对称矩阵
+    \[
+    \mathbf{A}=\begin{pmatrix}3&1\\1&3\end{pmatrix}
+    \]
+    的特征分解：
+    \begin{enumerate}[label=(\roman*)]
+        \item 求特征多项式与特征值；
+        \item 求对应的单位特征向量并验证正交性；
+        \item 写出谱分解 $\mathbf{A}=\mathbf{Q}\mathbf{D}\mathbf{Q}^{\mathsf T}$；
+        \item 说明两个特征方向分别对应拉伸因子为 $4$ 与 $2$ 的纯平移演化。
+    \end{enumerate}
+
+    \item 证明自伴算子的谱定理（定理 \ref{thm:spectral_theorem_selfadjoint}）：
+    自伴算子的所有特征值均为实数，不同特征值的特征向量正交，
+    且存在由特征向量构成的正交规范基。
+    请用归纳法完成存在性证明，并说明推论 \ref{cor:selfadjoint_conservation}
+    中“自伴谱定理与梯度守恒律”的对应关系。
+
+    \item 验证例 \ref{ch5_example_rotation_2x2} 中旋转矩阵
+    \[
+    \mathbf{R}=\begin{pmatrix}
+    \cos\frac{\pi}{3}&-\sin\frac{\pi}{3}\\[2pt]
+    \sin\frac{\pi}{3}&\phantom{-}\cos\frac{\pi}{3}
+    \end{pmatrix}
+    \]
+    的特征值与有限阶周期：
+    \begin{enumerate}[label=(\roman*)]
+        \item 求特征多项式与特征值；
+        \item 验证特征值模均为 $1$；
+        \item 证明 $\mathbf{R}^6=\mathbf{I}$，并解释为什么最小周期为 $6$。
+    \end{enumerate}
+
+    \item 证明酉算子的谱定理（定理 \ref{thm:spectral_theorem_unitary}）：
+    酉算子的所有特征值模长均为 $1$，不同特征值的特征向量正交，
+    且存在由特征向量构成的正交规范基。
+    请说明推论 \ref{cor:unitary_conservation}
+    中“酉谱定理与旋度守恒律”的对应关系。
+
+    \item 证明正规算子的谱定理（定理 \ref{thm:spectral_theorem_normal}）：
+    复内积空间上的正规算子可酉对角化。
+    请说明该定理如何统一自伴算子（实特征值，纯平移）
+    与酉算子（单位圆特征值，纯旋转）的谱定理。
+
+    \item 验证正交投影定理（命题 \ref{prop:orthogonal_projection}）与帕塞瓦尔恒等式
+    （命题 \ref{prop:orthogonality_conservation}）：
+    设 $W\subseteq V$ 为有限维子空间，$\mathbf{v}\in V$，
+    则存在唯一分解 $\mathbf{v}=\mathbf{w}+\mathbf{w}^\perp$，
+    且 $\|\mathbf{v}\|^2=\|\mathbf{w}\|^2+\|\mathbf{w}^\perp\|^2$。
+    请用正交规范基写出投影 $\mathbf{w}$ 的显式表达式。
+
+    \item 根据命题 \ref{prop:matrix_groups_grammar}，说明正交群 $O(n)$、
+    酉群 $U(n)$、辛群 $Sp(2n)$ 分别保持实内积、复内积与辛形式，
+    并分别对应梯度、旋度、散度。
+    请各举一个矩阵例子，验证其所属群的保持性质。
+
+    \item 验证洛书矩阵的幻方性质（命题 \ref{prop:luoshu_magic_sum}）：
+    \[
+    \mathbf{L}=\begin{pmatrix}4&9&2\\3&5&7\\8&1&6\end{pmatrix}
+    \]
+    的所有行和、列和、主对角线和与副对角线和均为 $15$。
+    进一步证明对径配平（命题 \ref{prop:luoshu_antipodal}）：
+    关于中心 $5$ 的对径位置元素之和恒为 $10$。
+
+    \item 证明洛书矩阵的谱结构（定理 \ref{thm:luoshu_eigenvalues}）：
+    \[
+    p(\lambda)=\det(\mathbf{L}-\lambda\mathbf{I})
+    =-(\lambda-15)(\lambda^2+24).
+    \]
+    求三个特征值 $\lambda_1=15$、$\lambda_{2,3}=\pm2\sqrt{6}i$，
+    并利用平移-旋转分解（定理 \ref{thm:luoshu_decomposition}）
+    说明 $\mathbf{L}$ 在 $\operatorname{span}(\mathbf{1})$ 上为纯平移，
+    在 $\mathbf{1}^\perp$ 上为每步转角 $\pi/2$、每步模长放大 $2\sqrt{6}$ 的旋转与伸缩的联合作用（因 $|\lambda_{2,3}|=2\sqrt{6}\ne1$，该二维实不变子空间上的轨道按 $\mathbf{L}$ 的迭代不闭合）。
+
+    \item 证明奇异值分解（定义 \ref{def:svd}）的几何意义：
+    $\mathbf{A}=\mathbf{U}\boldsymbol{\Sigma}\mathbf{V}^*$ 对应“旋转-伸缩-旋转”。
+    并验证奇异值守恒（命题 \ref{prop:svd_conservation}）：
+    \[
+    \|\mathbf{A}\|_F^2=\sum_{i=1}^{r}\sigma_i^2,\qquad
+    |\det(\mathbf{A})|=\prod_{i=1}^{n}\sigma_i.
+    \]
+    请计算例 \ref{ch5_example_svd_2x2} 中矩阵
+    $\mathbf{A}=\begin{pmatrix}0&3\\4&0\end{pmatrix}$ 的奇异值分解。
+
+    \item 证明线性系统周期解的存在性判据（命题 \ref{prop:linear_system_periodic_solution}）：
+    离散系统 $\mathbf{x}_{k+1}=\mathbf{A}\mathbf{x}_k$ 存在周期为 $p$ 的周期解，
+    当且仅当存在满足 $\lambda_j^p=1$ 的特征值 $\lambda_j$，
+    且初值位于相应的特征子空间中。
+    进一步证明线性系统的周期守恒律（定理 \ref{thm:linear_system_conservation}）：
+    酉矩阵保持模长平方守恒，$|\det\mathbf{A}|=1$ 保持体积守恒，
+    特征值 $\lambda=1$ 对应动量守恒。
+
+    \item 根据迭代法框架（定义 \ref{def:iterative_method}）与收敛定理（定理 \ref{thm:iteration_convergence}），
+    说明迭代 $\mathbf{x}_{k+1}=\mathbf{G}\mathbf{x}_k+\mathbf{c}$ 对任意初值收敛
+    当且仅当谱半径 $\rho(\mathbf{G})<1$。
+    请计算洛书矩阵 $\mathbf{L}$ 的谱半径，并说明为什么它作为迭代矩阵不收敛
+    （参见注 \ref{rem:luoshu_iteration}）。
+
+    \item 综合题：结合谱定理（定理 \ref{thm:spectral_theorem_selfadjoint}、\ref{thm:spectral_theorem_unitary}）、
+    矩阵群与三算子对应（命题 \ref{prop:matrix_groups_grammar}）
+    以及洛书矩阵的平移-旋转分解（定理 \ref{thm:luoshu_decomposition}），
+    讨论线性代数中“谱分解”如何体现周期数学的三大对称中心——
+    加法对称中心 $0$、乘法对称中心 $1$、旋转对称中心 $i$。
+    请分别指出哪些特征值对应纯平移，哪些对应纯旋转，哪些对应伸缩与旋转的联合作用。
+\end{enumerate}
+

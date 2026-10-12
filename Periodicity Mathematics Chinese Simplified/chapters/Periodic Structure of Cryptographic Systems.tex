@@ -1,0 +1,788 @@
+\chapter{密码系统之周期结构}
+\label{chap:crypto-periodic}
+\markboth{密码系统之周期结构}{密码系统之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:crypto_ps_hook}
+本章判定研究目标是否具有周期性、确定其周期类型、以及查找最小正周期时，一律引用「周期系统」章：
+周期性判据见 \cref{thm:ps_periodicity_decision}，
+周期类型判别见 \cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}，
+最小正周期查找见 \cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}，
+由数据构建周期级数与周转圆组见 \cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}。
+\end{remark}
+
+\begin{remark}[本章定位：按「周期系统」章五步接口展开]\label{rem:crypto_chapter_positioning}
+密码系统之周期结构研究密码学中周期性、准周期性和迭代结构的数学表征与安全应用。本章不另立周期性判据，而是把密码系统接入「周期系统」章规定的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把序列密码的状态平移、分组密码的轮函数迭代、公钥密码的循环群标量乘法化为离散动力系统，引用 \cref{thm:ps_periodicity_decision} 判定是否具有周期性，并确定周期类型；
+    \item \textbf{构建}：由密钥流、轮函数状态与群元素构建振幅级数、频率级数、相位级数，组装为密码周转圆组；
+    \item \textbf{调节}：用线性复杂度、分支数、群的阶等安全指标动态调节周转圆组；
+    \item \textbf{卷积}：在密码周转圆组上引入振幅卷积、相位卷积、频率卷积，并与自相关、Walsh 谱、差分分布表、线性逼近表衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成密码周期诊断流程。
+\end{enumerate}
+本章使用的密码学知识包括：密码系统五元组、线性反馈移位寄存器、\(m\)-序列、Berlekamp--Massey 算法、分组密码轮函数、混淆与扩散、差分密码分析、线性密码分析、模幂运算、离散对数问题、RSA、ElGamal、椭圆曲线标量乘法、ECDLP、Pohlig--Hellman 攻击、MOV 攻击、TLS 1.3 三层密码体系。
+\end{remark}
+
+\begin{remark}[本章七主题导引]\label{rem:crypto_seven_themes}
+平移——LFSR 的状态平移与密钥流周期（\cref{def:lfsr}，\(m\)-序列周期 \(2^L-1\)）；
+缩放——分组密码轮函数的迭代与扩散率（\cref{def:block_cipher_round_function}、\cref{def:confusion_diffusion}）；
+旋转——模幂运算与椭圆曲线点乘的循环群标量乘法（\cref{def:modular_exponentiation_period}、\cref{def:elliptic_curve_period}）；
+平衡——线性复杂度 \(L\)、分支数、群的阶 \(n\) 三种结构不变量（\cref{thm:crypto_invariants}）；
+对称——三层特殊元素：全零状态、恒等映射、单位元（\cref{thm:crypto_three_layer_structure}）；
+闭合——加密--解密的互逆闭合 \(D_k(E_k(m))=m\)（\cref{def:cryptosystem}）；
+周期——\(m\)-序列周期、轮函数迭代深度、循环群阶的标量乘法周期（\cref{def:crypto_periodic_structure}）。
+\end{remark}
+
+\section{密码目标的周期性判定：接入「周期系统」章第一步}
+\label{sec:crypto_periodicity_decision}
+
+\subsection{密码目标、判定输入与判定映射}
+
+\begin{definition}[密码目标与判定输入]\label{def:crypto_target}
+一个\textbf{密码目标}是指下列对象之一：
+\begin{enumerate}[label=(\roman*)]
+    \item 一个序列密码的密钥流生成器，其状态空间为 \(\mathbb F_2^L\)，状态平移为 \(\mathcal T\)；
+    \item 一个分组密码的轮函数迭代系统，其状态空间为 \(\mathbb F_2^n\)，轮函数为 \(F_{k_i}\)；
+    \item 一个公钥密码的循环群标量乘法系统，其状态空间为有限循环群 \(G\)，标量乘法为 \(x\mapsto g^x\) 或 \(k\mapsto [k]P\)；
+    \item 一个由上述系统产生的密钥流、密文序列或群元素序列。
+\end{enumerate}
+密码目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal D_{\mathrm{C}}=(\mathcal S,\Phi),
+\]
+其中 \(\mathcal S\) 是状态空间或序列空间，\(\Phi:\mathcal S\to\mathcal S\) 是状态平移、轮函数或标量乘法诱导的演化映射。若 \(\mathcal S\) 为有限集，称目标为\textbf{有限密码目标}；若 \(\mathcal S\) 为无限集，称目标为\textbf{无限密码目标}。
+\end{definition}
+
+\begin{definition}[密码判定映射]\label{def:crypto_periodization}
+设密码目标由判定输入 \(\mathcal D_{\mathrm{C}}=(\mathcal S,\Phi)\) 给出。若目标的状态或输出由 \(\Phi\) 的迭代生成，即存在 \(x_0\in\mathcal S\) 使
+\[
+x_t=\Phi^t(x_0),\qquad t\in\mathbb N,
+\]
+则称 \(\Phi\) 为目标的\textbf{密码判定映射}。此时密码目标化为离散动力系统 \((\mathcal S,\Phi)\)，可直接套用「周期基础」章与「周期系统」章的判据。
+\end{definition}
+
+\begin{theorem}[密码周期性判定定理]\label{thm:crypto_periodicity_decision}
+设密码目标的判定映射为 \(\Phi\)，且 \((\mathcal S,\Phi)\) 为离散动力系统。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 \(m\in\mathbb N^+\) 使 \(\Phi^m=\mathrm{id}\)，则目标为一致周期密码系统；每条状态轨道闭合，且轨道长度整除 \(m\)。
+    \item \textbf{判定等价}：目标为一致周期密码系统当且仅当 \(\operatorname{ord}(\Phi)<\infty\)。
+    \item \textbf{逐点判据}：目标在状态 \(x_0\) 处的轨道闭合当且仅当 \(x_0\) 为周期点；此时轨道长度即该点处的周期。
+    \item \textbf{不可省略性}：守恒量与对称群的合取不能替代 \(\operatorname{ord}(\Phi)<\infty\)；准周期密码目标不属于周期密码系统。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:crypto_periodicity_decision} 是「周期系统」章 \cref{thm:ps_periodicity_decision} 的领域实例化：
+只需把判定映射 $f$ 与演化群替换为本章的 $\Phi$，(A) 充分判定、(B) 判定等价、(C) 逐点判据、
+(D) 不可省略性四条即逐条成立。依 \cref{rem:ps_applications_hook} 的约定，此处不再重复展开。
+\end{proof}
+
+\begin{corollary}[密码周期类型]\label{cor:crypto_period_type}
+经 \cref{thm:crypto_periodicity_decision} 判定后，密码目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 \(m_0=1\)，状态为不动点（如 LFSR 全零状态）；
+    \item \textbf{严格周期型}：\(1<m_0<\infty\)，状态严格周期（如 \(m\)-序列状态轨道）；
+    \item \textbf{一致周期型}：\(\operatorname{ord}(\Phi)=m<\infty\)，所有轨道长度整除 \(m\)；
+    \item \textbf{准周期型}：\(\operatorname{ord}(\Phi)=\infty\)，轨道不闭合但在紧致承载结构上稠密；
+    \item \textbf{最终周期型}：存在 \(N\)，使 \(t\ge N\) 后目标为周期；
+    \item \textbf{离散周期型}：承载结构为 \(\mathbb Z\)，且归一化周期比 \(\rho=T_x/\Delta x\in\mathbb Q\)。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，残差按 \(e^{-\kappa t}\) 衰减（见 \cref{def:ps_period_type}(vii)）。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于周期密码系统；(iv) 不属于周期密码系统，但可用有界逼近工具处理；(v) 只在稳定阶段是周期密码系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期密码系统，只在稳定阶段可用有界逼近工具处理。
+\end{corollary}
+
+\begin{proof}
+逐条由 \cref{thm:crypto_periodicity_decision} 与「周期系统」章 \cref{def:ps_period_type} 代入密码目标即得。
+\end{proof}
+
+\begin{lemma}[LFSR 的周期判定]\label{lem:lfsr_period}
+设长度为 \(L\) 的 LFSR 的状态平移为 \(\mathcal T\)，反馈多项式为 \(C(x)\)。则：
+\begin{enumerate}[label=(\roman*)]
+    \item \(\mathcal T\) 是 \(\mathbb F_2^L\) 上的线性变换，其矩阵表示 \(A\) 为伴随矩阵；
+    \item \(\mathcal T\) 的周期 \(p\) 是使 \(A^p=I\) 的最小正整数；
+    \item 若 \(C(x)\) 为本原多项式，则非零初始状态的周期为 \(2^L-1\)；
+    \item 全零状态是 \(\mathcal T\) 的唯一不动点，且非零轨道永不经过全零状态。
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(i) 状态平移
+\[
+\mathcal T(s_0,\dots,s_{L-1})=(s_1,\dots,s_{L-1},f(s_0,\dots,s_{L-1}))
+\]
+是线性映射，其矩阵为
+\[
+A=\begin{pmatrix}
+0&1&0&\cdots&0\\
+0&0&1&\cdots&0\\
+\vdots&\vdots&\vdots&\ddots&\vdots\\
+0&0&0&\cdots&1\\
+c_0&c_1&c_2&\cdots&c_{L-1}
+\end{pmatrix}.
+\]
+其特征多项式为 \(C(x)\)。
+(ii) 周期定义为 \(A^p=I\) 的最小正整数 \(p\)。
+(iii) 当 \(C(x)\) 为本原多项式时，\(A\) 是乘法群 \(\mathbb F_{2^L}^*\) 的生成元，阶为 \(2^L-1\)。
+(iv) \(A\mathbf 0=\mathbf 0\)，且若 \(A^t s=\mathbf 0\) 则 \(s=\mathbf 0\)，故非零轨道不经过全零状态。
+\end{proof}
+
+\begin{definition}[密码最小正周期算法]\label{def:crypto_minimal_period_algorithm}
+\textbf{输入}：密码目标样本 \(x_0,\dots,x_{N-1}\)，容差 \(\varepsilon\ge0\)。
+\textbf{输出}：最小正周期 \(T_0\)，或判定“不周期”。
+\textbf{步骤}：
+\begin{enumerate}[label=(\arabic*)]
+    \item 取候选集 \(\mathcal P=\{T\in\mathbb N^+:2T\le N\}\)，按 \(T\) 递增遍历；
+    \item 对每个 \(T\) 计算最大偏差
+    \[
+    E(T)=\max_{0\le n<N-T}\|x_{n+T}-x_n\|;
+    \]
+    \item 输出首个满足 \(E(T)\le\varepsilon\) 的 \(T\) 作为 \(T_0\)；若遍历完毕无解，输出“不周期”；
+    \item 公度性校核：以 \(\rho=T_x/\Delta x\)（\(\rho=p/q\) 既约时 \(T_0=p\)；另记 \(\ell=T_0\Delta x=qT_x\) 为 \(T_0\) 个采样点对应的连续时长）与「离散采样逼近、同余角与置闰」章 \cref{prop:commensurability_periodicity_parallel}、\cref{cor:sampling_period_relation_parallel} 核对 \(T_0\) 与连续周期 \(T_x\) 的换算关系。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[密码最小正周期算法的正确性]\label{thm:crypto_minimal_period_correctness}
+\begin{enumerate}[label=(\roman*)]
+    \item 若样本为严格周期序列且 \(\varepsilon=0\)、\(N\ge2T_0\)，则算法输出其离散基本周期 \(T_0\)。
+    \item 若样本由基本周期为 \(T_x\) 的连续密码目标以采样间隔 \(\Delta x\) 采样得到，且归一化周期比 \(\rho=T_x/\Delta x=p/q\) 既约，则算法输出 \(T_0=p\)。
+    \item 若 \(\rho\notin\mathbb Q\)，则不存在真周期：对任何 \(T\in\mathbb N^+\) 都有 \(E(T)>0\)。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:crypto_minimal_period_correctness} 直接沿用「离散采样逼近、同余角与置闰」章的两条结论：
+(i) 由 \cref{def:discrete_fundamental_period}，$T_0$ 为最小正周期故 $E(T_0)=0$，而 $T<T_0$ 时 $E(T)>0$，
+算法按 $T$ 递增遍历，首个满足 $E(T)=0$ 者即 $T_0$；
+(ii)(iii) 分别由 \cref{prop:commensurability_periodicity_parallel}(ii)(iii) 代入即得。完整论证见该章。
+\end{proof}
+
+\begin{example}[LFSR 周期判定实例]\label{ex:crypto_lfsr_period}
+取 \(L=4\)，本原多项式 \(C(x)=1+x+x^4\)。由 \cref{lem:lfsr_period}，非零初始状态周期为 \(2^4-1=15\)。取初始状态 \((1,0,0,0)\)，状态轨道长度为 \(15\)，输出 \(m\)-序列周期为 \(15\)。
+\end{example}
+
+\begin{example}[RSA 模幂的周期判定]\label{ex:rsa_period}
+RSA 中 \(g^x\bmod N\) 的周期为 \(\operatorname{ord}_N(g)\)，整除 \(\phi(N)\)。若 \(g\) 为模 \(N\) 的原根，则周期为 \(\phi(N)\)。由 \cref{thm:crypto_periodicity_decision}，该目标为严格周期型；但攻击者无法从 \(N\) 直接恢复 \(\phi(N)\)，故周期本身不可公开计算。
+\end{example}
+
+\begin{remark}[密码不变量不保证周期安全]\label{rem:crypto_invariant_not_period}
+密码系统的不变量是周期结构的辅助条件，但不构成安全性的充分条件。例如，一个 LFSR 具有最大周期 \(2^L-1\)，但 Berlekamp--Massey 算法仍可从 \(2L\) 个连续比特恢复整个序列。密码周期结构的判定必须依赖 \cref{thm:crypto_periodicity_decision} 或 \cref{lem:lfsr_period} 等具体判据，并与攻击模型结合。
+\end{remark}
+
+\section{密码周期级数与周转圆组的构建：接入「周期系统」章第二步}
+\label{sec:crypto_series_construction}
+
+\begin{definition}[密码振幅级数、频率级数、相位级数]\label{def:crypto_series}
+设密码目标的状态或输出序列为 \(\{z_t\}\)。若其可写为
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+则称
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+分别为密码目标的\textbf{振幅级数}、\textbf{频率级数}与\textbf{相位级数}。三者与「级数与卷积」章 \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} 一致。
+\end{definition}
+
+\begin{definition}[密码周转圆组]\label{def:crypto_epicycle_group}
+设密码目标的周期级数由振幅级数 \(\{A_k\}\)、频率级数 \(\{\omega_k\}\) 与相位级数 \(\{\phi_k\}\) 给出。对每个 \(k\) 定义周转圆
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+其集合
+\[
+\mathfrak E_{\mathrm{C}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+称为密码目标的\textbf{周转圆组}。其叠加即密码周期级数
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[由密码数据构建周期级数]\label{thm:crypto_series_reconstruction}
+设密码目标的输出序列 \(\{z_t\}\) 为有限周期序列，周期为 \(N\)。则：
+\begin{enumerate}[label=(\roman*)]
+    \item \(\{z_t\}\) 可展开为离散傅里叶级数
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item 振幅级数由 \(|c_k|\) 给出，相位级数由 \(\arg c_k\) 给出，频率级数由 \(2\pi k/N\) 给出；
+    \item 若 \(\{z_t\}\) 为 \(m\)-序列，则其自相关函数为二值函数，功率谱在非零频率处平坦。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 有限周期序列的离散傅里叶级数是标准结论：基函数 \(\{e^{i2\pi kt/N}\}_{k=0}^{N-1}\) 构成 \(\mathbb C^N\) 的正交基。
+(ii) 由 \(c_k=A_k e^{i\phi_k}\) 直接读出。
+(iii) \(m\)-序列的二值自相关由 \cref{ch16_mseq_autocorrelation} 给出；其功率谱为自相关的傅里叶变换，非零频率处为常数 \(N+1\)。
+\end{proof}
+
+\begin{definition}[密码系统五元组]\label{def:cryptosystem}
+一个\textbf{密码系统}是一个五元组 \((\mathcal P,\mathcal C,\mathcal K,\mathcal E,\mathcal D)\)，其中：
+\begin{enumerate}[label=(\roman*)]
+    \item \(\mathcal P\) 是\textbf{明文空间}；
+    \item \(\mathcal C\) 是\textbf{密文空间}；
+    \item \(\mathcal K\) 是\textbf{密钥空间}；
+    \item \(\mathcal E=\{E_k:\mathcal P\to\mathcal C\mid k\in\mathcal K\}\) 是\textbf{加密函数族}；
+    \item \(\mathcal D=\{D_k:\mathcal C\to\mathcal P\mid k\in\mathcal K\}\) 是\textbf{解密函数族}，满足 \(D_k(E_k(m))=m\)。
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[密码系统的周期结构]\label{def:crypto_periodic_structure}
+密码系统的\textbf{周期结构}分为三种基本类型：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{状态周期}：密钥流序列的周期性，由生成器内部状态空间的大小和反馈多项式结构决定；特殊元素为 LFSR 的全零状态。
+    \item \textbf{迭代结构}：分组密码轮函数的自相似性，每轮加密具有相同代数结构；特殊元素为零密钥下的恒等映射。
+    \item \textbf{循环群标量乘法周期}：模幂运算 \(g^x\bmod p\) 在指数 \(x\) 上的周期性，椭圆曲线点乘 \([k]P\) 在标量 \(k\) 上的周期性；特殊元素为群的单位元。
+\end{enumerate}
+\end{definition}
+
+\subsection{序列密码的状态周期}
+
+\begin{definition}[线性反馈移位寄存器]\label{def:lfsr}
+一个长度为 \(L\) 的\textbf{线性反馈移位寄存器}（LFSR）由以下组件构成：
+\begin{enumerate}[label=(\roman*)]
+    \item \(L\) 个寄存器单元 \(s_0,\dots,s_{L-1}\in\mathbb F_2\)；
+    \item 反馈系数 \(c_0,\dots,c_{L-1}\in\mathbb F_2\)，反馈函数
+    \[
+    f(s_0,\dots,s_{L-1})=\bigoplus_{i=0}^{L-1}c_i s_i.
+    \]
+\end{enumerate}
+每个时钟周期的\textbf{状态平移}为
+\[
+\mathcal T(s_0,\dots,s_{L-1})=(s_1,\dots,s_{L-1},f(s_0,\dots,s_{L-1})).
+\]
+输出密钥流比特为 \(z_t=s_0\)。反馈多项式
+\[
+C(x)=1+c_1x+\dots+c_{L-1}x^{L-1}+x^L
+\]
+完全决定 LFSR 的周期结构。当 \(C(x)\) 为本原多项式时，非零初始状态生成最大周期 \(2^L-1\)，称为 \textbf{\(m\)-序列}。
+\end{definition}
+
+\begin{proposition}[LFSR 的代数性质]\label{prop:lfsr_algebraic_properties}
+LFSR 的状态平移 \(\mathcal T\) 满足：
+\begin{enumerate}[label=(\roman*)]
+    \item \(\mathcal T\) 是 \(\mathbb F_2^L\) 上的线性变换，矩阵表示 \(A\) 为伴随矩阵；
+    \item LFSR 的周期是使 \(\mathcal T^p=\operatorname{id}\) 的最小正整数 \(p\)。对于 \(m\)-序列，\(p=2^L-1\)；
+    \item 线性复杂度 \(L\) 在状态平移下保持不变；\(m\)-序列的线性复杂度等于 LFSR 级数 \(L\)；
+    \item 全零状态是唯一不动点，非零轨道永不经过全零状态。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由 \cref{lem:lfsr_period}(i)。
+(ii) 由 \cref{lem:lfsr_period}(ii)(iii)。
+(iii) 线性复杂度是生成序列所需最短 LFSR 长度。Berlekamp--Massey 算法从 \(2L\) 个连续比特恢复等价 LFSR，故 \(L\) 是可提取的不变量。
+(iv) 由 \cref{lem:lfsr_period}(iv)。
+\end{proof}
+
+\begin{definition}[\(m\)-序列的自相关函数]\label{def:m_sequence_autocorrelation}
+设 \(\{z_t\}_{t=0}^{N-1}\) 为 \(m\)-序列（\(N=2^L-1\)），取值为 \(\{+1,-1\}\)。其归一化自相关函数为
+\[
+\rho(h)=\frac1N\sum_{t=0}^{N-1}z_t z_{t+h}=
+\begin{cases}
+1,&h\equiv0\pmod N,\\
+-1/N,&h\not\equiv0\pmod N.
+\end{cases}
+\]
+\end{definition}
+
+\begin{lemma}[\(m\)-序列的二值自相关]\label{ch16_mseq_autocorrelation}
+设 \(\{z_t\}\) 为 \(m\)-序列（\(N=2^L-1\)）。则
+\[
+\rho(h)=\frac1N\sum_{t=0}^{N-1}z_t z_{t+h}=
+\begin{cases}
+1,&h\equiv0\pmod N,\\
+-1/N,&h\not\equiv0\pmod N.
+\end{cases}
+\]
+\end{lemma}
+
+\begin{proof}
+由 \(m\)-序列的移位--相加性质：对 \(h\not\equiv0\pmod N\)，\(\{z_t\oplus z_{t+h}\}\) 仍是同一 \(m\)-序列的移位。记 \(z_t=(-1)^{s_t}\)，则
+\[
+z_t z_{t+h}=(-1)^{s_t+s_{t+h}}=(-1)^{s_t\oplus s_{t+h}}.
+\]
+在一周期内 \(+1\) 与 \(-1\) 的个数分别为 \((N-1)/2\) 与 \((N+1)/2\)，故
+\[
+\sum_t z_t z_{t+h}=\frac{N-1}{2}-\frac{N+1}{2}=-1,
+\]
+归一化得 \(\rho(h)=-1/N\)；\(h\equiv0\) 时 \(\rho(0)=1\)。
+\end{proof}
+
+\begin{example}[\(L=4\) 的 \(m\)-序列具体计算]\label{ex:mseq_L4}
+取 \(L=4\)，本原多项式 \(C(x)=1+x+x^4\)。从非零初始状态 \((1,0,0,0)\) 出发，状态周期为 \(15\)。输出 \(m\)-序列为
+\[
+100010011010111\cdots
+\]
+取值为 \(\{+1,-1\}\) 后为
+\[
+(+1,-1,-1,-1,+1,-1,-1,+1,+1,-1,+1,-1,+1,+1,+1).
+\]
+\(+1\) 有 \(8\) 个，\(-1\) 有 \(7\) 个，符合平衡性。
+\end{example}
+
+\begin{definition}[序列密码的周期攻击]\label{def:stream_cipher_period_attack}
+序列密码的安全性依赖于密钥流序列的状态周期。若周期 \(p\) 过短，攻击者可通过以下方式破解：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{周期检测}：计算密文自相关函数，在 \(h=p\) 处出现峰值；
+    \item \textbf{线性复杂度攻击}：Berlekamp--Massey 算法从 \(2L\) 个连续比特恢复等价 LFSR；
+    \item \textbf{相关攻击}：利用各 LFSR 输出与密钥流之间的相关性逐个攻破。
+\end{enumerate}
+\end{definition}
+
+\begin{remark}[序列密码的安全性准则（工程经验）]\label{prop:stream_cipher_security}
+基于状态周期的分析，序列密码的安全设计应遵循：
+\begin{enumerate}[label=(\roman*)]
+    \item 状态周期最大化：周期至少为 \(2^{128}\)；
+    \item 线性复杂度最大化：线性复杂度接近周期；
+    \item 自相关最小化：非零位移自相关尽可能接近零。
+\end{enumerate}
+\textbf{状态说明}：上述条款是工程经验准则，不是数学命题；引用时请按经验结论对待。
+\end{remark}
+
+\subsection{分组密码的迭代结构}
+
+\begin{definition}[分组密码的轮函数]\label{def:block_cipher_round_function}
+\textbf{分组密码}通过迭代轮函数 \(F_k:\mathbb F_2^n\to\mathbb F_2^n\) 实现加密。设轮数为 \(R\)，轮密钥为 \(k_1,\dots,k_R\)，加密过程为
+\[
+C=F_{k_R}\circ F_{k_{R-1}}\circ\cdots\circ F_{k_1}(P),
+\]
+其中 \(P\in\mathbb F_2^n\) 为明文分组，\(C\in\mathbb F_2^n\) 为密文分组。
+\end{definition}
+
+\begin{definition}[混淆与扩散]\label{def:confusion_diffusion}
+Shannon 提出的\textbf{混淆}与\textbf{扩散}是分组密码设计的两个基本原则：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{混淆}：使密文与密钥之间的统计关系尽可能复杂，主要通过非线性 S 盒实现；
+    \item \textbf{扩散}：使单个明文比特的改变传播到尽可能多的密文比特，主要通过线性置换层实现。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[分组密码的迭代结构]\label{prop:block_cipher_iteration_structure}
+分组密码的轮函数迭代具有以下结构性质：
+\begin{enumerate}[label=(\roman*)]
+    \item 每轮加密 \(F_{k_i}\) 由轮密钥 \(k_i\) 参数化，\(E_k=F_{k_R}\circ\cdots\circ F_{k_1}\)；
+    \item 轮数 \(R\) 是迭代深度参数，决定混淆和扩散的累积效果；
+    \item 分支数是扩散层的结构不变量。AES 的 MixColumns 分支数为 \(5\)，满扩散在 \(2\) 轮后达到；
+    \item 零密钥下单轮加密的特殊元素为恒等映射。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 每轮可分解为 \(F_{k_i}(x)=L(S(x\oplus k_i))\)，其中 \(S\) 为 S 盒，\(L\) 为线性置换。
+(ii) 轮数 \(R\) 直接控制迭代深度。AES-128 使用 \(R=10\)，AES-256 使用 \(R=14\)。
+(iii) AES 的 MixColumns 分支数为 \(5\)：输入改变 \(1\) 字节，输出至少改变 \(4\) 字节。分支数在轮函数复合下具有叠加性质。
+(iv) 零密钥时 \(F_0=\operatorname{id}\)。
+\end{proof}
+
+\begin{example}[AES 的扩散具体计算]\label{ex:aes_diffusion}
+AES-128 单轮变换：输入状态矩阵仅 \((1,1)\) 位置为 \(01\)。第 1 轮后 SubBytes 使 \(01\mapsto7C\)，ShiftRows 移动活跃字节，MixColumns 将单字节活跃扩展为整列活跃，活跃字节数变为 \(4\)。第 2 轮后活跃字节数扩展至 \(16\)，达到满扩散。
+\end{example}
+
+\begin{definition}[分组密码的周期攻击]\label{def:block_cipher_period_attack}
+分组密码的安全性依赖于轮函数的迭代结构。主要攻击方式包括：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{差分密码分析}：利用输入差分与输出差分的传播规律，概率按乘积律衰减；
+    \item \textbf{线性密码分析}：利用线性逼近的偏差，偏差按乘积律衰减；
+    \item \textbf{积分攻击}：利用特定输入结构的代数演化。
+\end{enumerate}
+\end{definition}
+
+\begin{remark}[分组密码的安全性准则（工程经验）]\label{prop:block_cipher_security}
+基于迭代结构的分析，分组密码的安全设计应遵循：
+\begin{enumerate}[label=(\roman*)]
+    \item 轮数充分性：差分/线性特征传播概率远小于随机置换概率；
+    \item S 盒非线性度最大化；
+    \item 扩散层分支数最大化；
+    \item 轮密钥独立性。
+\end{enumerate}
+\textbf{状态说明}：上述条款是工程经验准则，不是数学命题；引用时请按经验结论对待。
+\end{remark}
+
+\subsection{公钥密码的循环群结构}
+
+\begin{definition}[模幂运算的周期结构]\label{def:modular_exponentiation_period}
+设 \(G\) 为有限循环群，\(g\in G\) 为生成元，\(|G|=n\)。\textbf{模幂运算}定义为
+\[
+E(x)=g^x,\qquad x\in\mathbb Z_n.
+\]
+其结构性质：
+\begin{enumerate}[label=(\roman*)]
+    \item 循环群标量乘法：\(g^{x+1}=g\cdot g^x\)；
+    \item 周期为 \(n\)：\(g^{x+n}=g^x\)；
+    \item 特殊元素为单位元 \(e=g^0\)；
+    \item 不变量为群的阶 \(n\)。RSA 中 \(n=\phi(N)=(p-1)(q-1)\)；ElGamal 中 \(n=q\)；椭圆曲线中 \(n\) 为曲线阶。
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[离散对数问题]\label{def:discrete_logarithm_problem}
+\textbf{离散对数问题}（DLP）：给定 \(g\) 和 \(h=g^x\)，求 \(x\bmod n\)。模幂运算 \(x\mapsto g^x\) 容易计算，但逆运算在经典计算模型下困难。
+\end{definition}
+
+\begin{proposition}[公钥密码的结构性质]\label{prop:public_key_structure}
+公钥密码的模幂运算具有以下结构性质：
+\begin{enumerate}[label=(\roman*)]
+    \item 加密操作是明文在循环群中的标量乘法；
+    \item 解密依赖于私钥 \(d\)，满足 \(ed\equiv1\pmod{\phi(N)}\)；
+    \item 不变量为模数 \(N\) 和阶 \(\phi(N)\)；
+    \item 特殊元素为单位元 \(1\)。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+RSA 正确性：\(ed=1+k\phi(N)\)。若 \(\gcd(m,N)=1\)，由欧拉定理 \(m^{\phi(N)}\equiv1\pmod N\)，故
+\[
+D(C)=C^d\equiv m^{ed}=m(m^{\phi(N)})^k\equiv m\pmod N.
+\]
+若 \(\gcd(m,N)\neq1\)，由中国剩余定理分别模 \(p,q\) 验证，合并得 \(m^{ed}\equiv m\pmod N\)。故 \(D\circ E=E\circ D=\operatorname{id}\)。
+\end{proof}
+
+\begin{definition}[椭圆曲线的周期结构]\label{def:elliptic_curve_period}
+设 \(E\) 为有限域 \(\mathbb F_q\) 上的椭圆曲线，\(E(\mathbb F_q)\) 为有限阿贝尔群。点 \(P\) 的阶为最小正整数 \(n\) 使 \([n]P=\mathcal O\)。标量乘法为
+\[
+[k]P=\underbrace{P+\cdots+P}_{k\text{ 次}}.
+\]
+ECDLP：给定 \(P\) 和 \(Q=[k]P\)，求 \(k\bmod n\)。
+\end{definition}
+
+\begin{remark}[椭圆曲线密码的安全性条件（工程经验）]\label{prop:ecc_security}
+椭圆曲线密码的安全性由以下条件保证：
+\begin{enumerate}[label=(\roman*)]
+    \item 阶的素性：\(n\) 应包含大素因子，防止 Pohlig--Hellman 攻击；
+    \item 嵌入次数：\(k\) 应足够大，防止 MOV 攻击；
+    \item 扭曲线安全性。
+\end{enumerate}
+\textbf{状态说明}：上述条款是工程经验准则，不是数学命题；引用时请按经验结论对待。
+\end{remark}
+
+\section{密码周转圆组的动态调节：接入「周期系统」章第三步}
+\label{sec:crypto_adaptive}
+
+\begin{definition}[密码周转圆组的动态调节]\label{def:crypto_adaptive_adjustment}
+设当前密码周转圆组为 \(\mathfrak E^{(j)}\)，部分和
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+残差 \(r^{(j)}=z-z^{(j)}\)。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 \(\|r^{(j)}\|^2>\delta\)，则依残差周期图峰值新增一个周转圆：
+    \[
+    \mathfrak E^{(j+1)}=\mathfrak E^{(j)}\cup\{(\hat A,\hat\omega,\hat\phi)\},\qquad
+    \hat\omega=\arg\max_\omega|\widehat{z_r}(\omega)|;
+    \]
+    \item \textbf{参数调节}：对已有周转圆参数按正则化最小二乘或安全指标更新：
+    \[
+    (A_k,\phi_k)\leftarrow\arg\min_{A,\phi}\sum_n\left|z(n)-\sum_kA_ke^{i(\omega_kn+\phi_k)}\right|^2.
+    \]
+\end{enumerate}
+在密码系统中，数量调节对应增加 LFSR 级数、增加轮数或增加群阶的素因子；参数调节对应调整反馈多项式、S 盒或曲线参数，使安全指标单调提升。
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:crypto_adaptive_growth}
+按 \cref{def:crypto_adaptive_adjustment}(i) 加入残差主频分量后，残差能量单调不增：
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+等号成立当且仅当残差在被选频率上无能量。
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:crypto_adaptive_growth} 与「周期系统」章 \cref{def:ps_adaptive_adjustment} 的动态调节机制一致：
+新增周转圆即把 $r^{(j)}$ 沿 $\hat\omega$ 的分量从残差中移出，由正交分解
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{被移出的分量}\|^2$ 即得不等式，
+等号当且仅当被移出分量的范数为零。完整论证见该处。
+\end{proof}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:crypto_adaptive_convergence}
+设密码目标为长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值有限周期序列}且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得密码周转圆组即目标的精确傅里叶数据；若序列为\textbf{复值}，则相应步数为至多 $T_0$ 步。
+\end{theorem}
+
+\begin{proof}
+长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值}有限周期序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波（含常数项）上完备；\textbf{复值}序列则需 $T_0$ 个分量。每步按 \cref{prop:crypto_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。
+\end{proof}
+
+\begin{definition}[安全指标调节]\label{def:crypto_security_metric_adjustment}
+设密码目标的安全指标为
+\[
+\mathcal I=(\mathcal I_{\mathrm{平移}},\mathcal I_{\mathrm{缩放}},\mathcal I_{\mathrm{旋转}})
+=(\text{线性复杂度 }L,\ \text{分支数 }\mathcal B,\ \text{群的阶 }n\text{ 的最大素因子}).
+\]
+\textbf{安全指标调节}为：在参数空间 $\Theta$ 中每步选取使 $\mathcal I(\theta)$ 按字典序\textbf{严格递减}（极小化）的邻近参数 $\theta$；若不存在这样的邻近参数，则停止——此时 $\theta$ 为\textbf{局部最优}参数。
+\end{definition}
+
+\begin{proposition}[安全指标调节的有限收敛]\label{prop:crypto_security_metric_convergence}
+设参数空间 $\Theta$ 有限，且每次调节使 $\mathcal I$ 按字典序\textbf{严格递减}。则调节在有限步内终止于局部最优参数。
+\end{proposition}
+
+\begin{proof}
+$\Theta$ 有限，$\mathcal I$ 取值有限。字典序在有限值集上是良基的，故字典序严格递减的序列不能无限延续，调节在有限步终止。终止时不存在使 $\mathcal I$ 按字典序严格递减的邻近参数，即局部最优。这里必须按\textbf{整条字典序}给出单调性：若只要求「某一分量严格增加／减小」，则 $(2,1)\to(1,2)\to(2,1)$ 这类循环无法排除，有限终止性不成立。
+\end{proof}
+
+\begin{remark}[动态调节的边界]\label{rem:crypto_adaptive_boundary}
+\cref{thm:crypto_adaptive_convergence} 依赖有限周期序列。对无限周期或准周期密码目标，不存在有限周转圆组精确表示，只能作有界逼近。安全指标调节不保证全局最优，也不保证计算安全；计算安全依赖具体攻击模型与计算假设。
+\end{remark}
+
+\section{密码卷积：接入「周期系统」章第四步}
+\label{sec:crypto_convolution}
+
+\begin{definition}[密码振幅卷积、相位卷积与频率卷积]\label{def:crypto_convolution_types}
+设两个密码周转圆组为
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+定义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅卷积}：\(\mathbb A_{mn}=A_nB_m\)；
+    \item \textbf{相位卷积}：\(\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}\)；
+    \item \textbf{频率卷积}：\(\mathbb F_{mn}=\omega_n\nu_m\)；
+    \item \textbf{趋势卷积}：\(\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}\)。
+\end{enumerate}
+这与「级数与卷积」章 \cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution}、\cref{def:tendency_convolution} 一致。
+\end{definition}
+
+\begin{theorem}[三类卷积在密码周转圆组上的作用]\label{thm:crypto_convolution_action}
+设两个密码目标的周转圆组分别为 \(\mathfrak E\) 与 \(\mathfrak E'\)。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 振幅卷积只作用于半径；
+    \item 相位卷积只作用于相位；
+    \item 频率卷积只作用于转速；
+    \item 趋势卷积同时保留振幅与相位。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:crypto_convolution_types} 直接读出。
+\end{proof}
+
+\begin{proposition}[自相关与趋势卷积]\label{prop:crypto_autocorr_phase_convolution}
+设 \(\{z_t\}\) 为周期序列，其自相关函数为
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+在密码周转圆组语言中，自相关函数是趋势卷积在对角线上的投影：
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:crypto_autocorr_phase_convolution} 是「周期系统」章 \cref{thm:ps_convolution_action} 的卷积作用结论在本领域的实现：
+将 $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ 代入自相关定义，由正交性消去全部非对角交叉项，只保留趋势卷积的对角线项
+（三类卷积的因式分解，\cref{prop:ps_convolution_factorization}），即得 $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$。
+完整展开见该处。
+\end{proof}
+
+\begin{definition}[Walsh 谱与线性逼近表]\label{def:walsh_lat}
+设 \(S:\mathbb F_2^n\to\mathbb F_2^n\) 为 S 盒。其\textbf{线性逼近表}（LAT）为
+\[
+\operatorname{LAT}(a,b)=\#\{x\in\mathbb F_2^n:a\cdot x=b\cdot S(x)\}-2^{n-1}.
+\]
+Walsh 谱是 \(\operatorname{LAT}\) 的傅里叶变换的 $2$ 倍：$W(a,b)=2\operatorname{LAT}(a,b)$，与 \(\operatorname{LAT}\) 取自同一张表、只差常数因子。线性密码分析利用 \(\operatorname{LAT}\) 的非零偏差。
+\end{definition}
+
+\begin{proposition}[LAT 与相位卷积]\label{prop:lat_phase_convolution}
+S 盒的 LAT 可表示为输入相位与输出相位的相位卷积：
+\[
+\operatorname{LAT}(a,b)=\frac12\sum_x e^{i\pi(a\cdot x-b\cdot S(x))}.
+\]
+因此线性密码分析中的偏差累积等价于相位卷积的逐轮复合。
+\end{proposition}
+
+\begin{proof}
+由 \(e^{i\pi u}=(-1)^u\)，有
+\[
+\sum_x e^{i\pi(a\cdot x-b\cdot S(x))}
+=\#\{x:a\cdot x=b\cdot S(x)\}-\#\{x:a\cdot x\neq b\cdot S(x)\}
+=2\operatorname{LAT}(a,b).
+\]
+故 LAT 是相位卷积的实部的一半。
+\end{proof}
+
+\begin{definition}[差分分布表]\label{def:ddt}
+设 \(S:\mathbb F_2^n\to\mathbb F_2^n\) 为 S 盒。其\textbf{差分分布表}（DDT）为
+\[
+\operatorname{DDT}(\Delta,\nabla)=\#\{x:S(x\oplus\Delta)\oplus S(x)=\nabla\}.
+\]
+差分密码分析利用 DDT 的高概率条目。
+\end{definition}
+
+\begin{proposition}[DDT 与振幅卷积]\label{prop:ddt_amplitude_convolution}
+DDT 可视为输入差分与输出差分的振幅卷积：
+\[
+\operatorname{DDT}(\Delta,\nabla)=\sum_x \mathbf 1_{\{S(x\oplus\Delta)\oplus S(x)=\nabla\}}.
+\]
+在周期卷积语言中，DDT 对应振幅卷积在差分对上的投影。
+\end{proposition}
+
+\begin{proof}
+直接由定义展开即得。
+\end{proof}
+
+\begin{remark}[密码卷积与周期卷积的关系]\label{rem:crypto_convolution_relation}
+密码卷积不是新的卷积运算，而是「级数与卷积」章周期卷积在密码周转圆组上的实例。自相关是趋势卷积在对角线上的投影；Walsh 谱（$W(a,b)=2\operatorname{LAT}(a,b)$，与 LAT 只差常数因子 $2$）与 LAT 是相位卷积在密码分析中的具体表现；DDT 是振幅卷积在密码分析中的具体表现。
+\end{remark}
+
+\section{与离散采样、调和分析、时序分析的整合：接入「周期系统」章第五步}
+\label{sec:crypto_integration}
+
+\begin{definition}[密码周期诊断流程]\label{def:crypto_periodic_diagnosis}
+对于给定密码系统，使用周期数学框架进行安全性诊断：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平移层诊断}（序列密码）：计算密钥流自相关函数和线性复杂度剖面；
+    \item \textbf{缩放层诊断}（分组密码）：计算 S 盒 DDT 和 LAT，验证扩散层分支数；
+    \item \textbf{旋转层诊断}（公钥密码）：分解模数 \(N\) 或计算椭圆曲线阶 \(n\) 的素因子，验证嵌入次数；
+    \item \textbf{总体安全性评估}：将三层安全指标代入组合周期模型，评估安全强度。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[密码周期诊断流程与三章接口]\label{thm:crypto_diagnosis_integration}
+\cref{def:crypto_periodic_diagnosis} 的四个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}、\cref{thm:intercalation_leakage_suppression}；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}、\cref{prop:twelve_to_six}；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}、\cref{def:ts_window_validation}。
+\end{enumerate}
+因此密码周期诊断不是独立方法，而是周期数学统一工具链在密码系统上的应用。
+\end{theorem}
+
+\begin{proof}
+逐条对应：
+(i) 平移层诊断需要采样与谱估计；
+(ii) 频率分解与相位核见调和分析章；
+(iii) 周期图峰值、Fisher 检验与窗函数验证见时序分析章。
+故诊断流程由三章工具链合成。
+\end{proof}
+
+\begin{remark}[整合后的操作顺序]\label{rem:crypto_integration_order}
+实际诊断建议顺序为：先判定密码目标是否周期（\cref{thm:crypto_periodicity_decision}）；再构建密钥流或状态的傅里叶数据与周转圆组（\cref{thm:crypto_series_reconstruction}）；再用安全指标调节与动态调节优化参数（\cref{thm:crypto_adaptive_convergence}、\cref{prop:crypto_security_metric_convergence}）；再作密码卷积与自相关、LAT、DDT 分析（\cref{prop:crypto_autocorr_phase_convolution}、\cref{prop:lat_phase_convolution}、\cref{prop:ddt_amplitude_convolution}）；最后按 \cref{def:crypto_periodic_diagnosis} 输出诊断。
+\end{remark}
+
+\section{密码系统的分层结构与结构不变量}
+\label{sec:crypto_layers_and_invariants}
+
+\begin{theorem}[密码系统的三层结构]\label{thm:crypto_three_layer_structure}
+密码系统的三个主要分支——序列密码、分组密码、公钥密码——构成嵌套的三层周期结构：
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}}
+\toprule
+密码层级 & 典型构造 & 主导操作 & 特殊元素 & 不变量 \\
+\midrule
+序列密码 & LFSR、NLFSR & 状态平移 & 全零状态 & 线性复杂度 \(L\) \\
+分组密码 & SPN、Feistel & 迭代 & 恒等映射 & 分支数 \\
+公钥密码 & RSA、ECC & 循环群标量乘法 & 单位元 & 群的阶 \(n\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+三层之间通过密钥传递耦合：公钥密码用于安全传输会话密钥，会话密钥驱动分组密码，分组密码输出可作为序列密码初始状态。
+\end{theorem}
+
+\begin{proof}
+三层的独立性由各层不变量的独立性保证：线性复杂度 \(L\)、分支数、群的阶 \(n\) 是三个独立参数。三层的耦合通过密钥传递实现：主密钥 \(\to\) 公钥/私钥对 \(\to\) 会话密钥 \(\to\) 密钥流初始状态。
+\end{proof}
+
+\begin{example}[TLS 1.3 中的三层密码体系]\label{ex:tls_layers}
+TLS 1.3 典型使用三层密码体系：
+\begin{enumerate}[label=(\roman*)]
+    \item 公钥层：ECDHE 使用 X25519 曲线；
+    \item 分组密码层：AES-128-GCM，轮数 \(R=10\)，分组长度 \(128\) 比特；
+    \item 序列密码层：ChaCha20，周期 \(2^{256}\)。
+\end{enumerate}
+三层密钥通过 HKDF 从共享密钥派生。
+\end{example}
+
+\begin{theorem}[密码系统的三种结构不变量]\label{thm:crypto_invariants}
+密码系统的安全性依赖于三种结构不变量的维持：
+\begin{enumerate}[label=(\roman*)]
+    \item 线性复杂度（平移层）：密钥流序列的线性复杂度 \(L\) 在 Berlekamp--Massey 攻击下可恢复；
+    \item 分支数（缩放层）：分组密码扩散层分支数在轮函数迭代中保持，差分/线性特征概率按乘积律传播；
+    \item 群的阶（旋转层）：公钥密码中循环群的阶 \(n\) 是核心不变量，离散对数困难性等价于从群元素恢复标量的困难性。
+\end{enumerate}
+三种不变量的破缺导致对应密码系统的攻破：
+\begin{enumerate}[label=(\roman*)]
+    \item 线性复杂度破缺 \(\to\) Berlekamp--Massey 攻击恢复密钥流；
+    \item 分支数破缺 \(\to\) 差分/线性攻击恢复密钥；
+    \item 阶的不变量破缺 \(\to\) Pohlig--Hellman 攻击或 MOV 攻击恢复私钥。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 线性复杂度 \(L\) 是平移层不变量。Berlekamp--Massey 算法仅需 \(2L\) 个连续比特即可恢复等价 LFSR。若局部密钥流泄露导致 \(L\) 降至 \(L'<L\)，则平移层不变性被破坏。
+(ii) 分支数刻画差分特征传播能力。设差分特征概率
+\[
+p=\prod_{i=1}^{R}p_i.
+\]
+若轮数 \(R\) 不足，\(p\) 未充分衰减，攻击者可利用高概率差分特征恢复密钥。
+(iii) 设群阶
+\[
+n=\prod_i p_i^{e_i}.
+\]
+Pohlig--Hellman 攻击在每一素数幂子群上分别求解 DLP，再通过中国剩余定理合成，复杂度
+\[
+O\left(\sum_i e_i(\log n+\sqrt{p_i})\right).
+\]
+若最大素因子过小，DLP 可被高效求解。MOV 攻击利用椭圆曲线嵌入次数 \(k\)，将 ECDLP 约化为 \(\mathbb F_{q^k}^*\) 上的 DLP；若 \(k\) 过小，攻击可行。
+\end{proof}
+
+\begin{remark}[密码系统设计原则（工程经验）]\label{cor:crypto_design}
+密码系统的安全设计可统一表述为三类结构不变量的最大化原则：
+\begin{enumerate}[label=(\roman*)]
+    \item 平移层不变量最大化：线性复杂度 \(L\) 达到周期量级；
+    \item 缩放层不变量最大化：扩散层分支数达到最大；
+    \item 旋转层不变量最大化：群的阶 \(n\) 为素数或包含大素因子，嵌入次数 \(k>20\)。
+\end{enumerate}
+\textbf{状态说明}：上述条款是工程经验准则，不是数学命题；引用时请按经验结论对待。
+\end{remark}
+
+\begin{example}[LFSR 序列的线性复杂度诊断]\label{ex:lfsr_diagnosis}
+考虑长度 \(L=32\) 的 LFSR，反馈多项式为本原多项式。从非零初始状态出发：
+\begin{enumerate}[label=(\roman*)]
+    \item 前 \(64\) 个比特：Berlekamp--Massey 算法给出 \(L=32\)；
+    \item 第 \(1000\) 个比特处：线性复杂度保持 \(32\)；
+    \item 第 \(10^6\) 个比特处：剖面保持水平。
+\end{enumerate}
+若使用非线性组合生成器（如 Geffe 生成器），线性复杂度理论上可达 \(L_1L_2+L_2L_3+L_1L_3\)。
+\end{example}
+
+\begin{remark}[与全书的衔接]\label{rem:crypto_book_interface}
+本章建立的密码系统周期结构理论是周期数学在密码学中的应用。它将周期数学的对称性与不变量框架、相似度与趋势、流与势、周期卷积、三层嵌套结构统一应用于密码系统的分析与设计。序列密码（状态周期）、分组密码（迭代结构）、公钥密码（循环群标量乘法）的三位一体，与周期数学的三个基本操作对应；密码系统的安全性依赖于三种结构不变量的维持，密码系统的攻破对应于相应不变量的破缺。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & LFSR 的状态平移（\cref{def:lfsr}）：\(m\)-序列周期 \(2^L-1\) 与二值自相关（\cref{ch16_mseq_autocorrelation}、\cref{ex:mseq_L4}） \\
+缩放 & 分组密码轮函数的迭代（\cref{def:block_cipher_round_function}）；混淆与扩散（\cref{def:confusion_diffusion}）；分支数（\cref{prop:block_cipher_iteration_structure}、\cref{ex:aes_diffusion}） \\
+旋转 & 模幂运算 \(x\mapsto g^x\)（\cref{def:modular_exponentiation_period}）；椭圆曲线标量乘法 \([k]P\)（\cref{def:elliptic_curve_period}） \\
+平衡 & 线性复杂度 \(L\)、分支数、群的阶 \(n\) 三种结构不变量（\cref{thm:crypto_invariants}） \\
+对称 & 三层特殊元素：全零状态、恒等映射、单位元（\cref{thm:crypto_three_layer_structure}、\cref{ex:tls_layers}） \\
+闭合 & 加密--解密互逆闭合 \(D_k(E_k(m))=m\)（\cref{def:cryptosystem}）；RSA 的 \(D\circ E=\operatorname{id}\)（\cref{prop:public_key_structure} 证明） \\
+周期 & 密钥流状态周期、轮函数迭代深度、循环群阶的标量乘法周期（\cref{def:crypto_periodic_structure}）；周期诊断（\cref{def:crypto_periodic_diagnosis}、\cref{ex:lfsr_diagnosis}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{密码周期性判定定理}（\ref{thm:crypto_periodicity_decision}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 验证\textbf{数量调节的单调性}（\ref{prop:crypto_adaptive_growth}）的前提在本章领域对象上成立，并给出一个不满足前提的反例。
+
+    \item 考察\textbf{密码周期诊断流程与三章接口}（\ref{thm:crypto_diagnosis_integration}）在参数退化时的行为，说明结论如何随之退化。
+
+    \item 说明\textbf{\(m\)-序列的二值自相关}（\ref{ch16_mseq_autocorrelation}）与「周期系统」章相应通用结论的关系（是一致、特例还是需要附加条件）。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{thm:crypto_periodicity_decision}、\ref{prop:crypto_adaptive_growth}、\ref{thm:crypto_diagnosis_integration}、\ref{ch16_mseq_autocorrelation}。
+\end{enumerate}
+
+

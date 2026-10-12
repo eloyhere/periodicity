@@ -1,0 +1,1522 @@
+\chapter{微分方程与解析}
+\label{chap:diffeq_complex}
+\markboth{微分方程与解析}{微分方程与解析}
+
+\begin{remark}[本章定位]\label{rem:diffeq_chapter_positioning}
+本章将“函数与极限”章建立的分析工具与“级数与卷积”章建立的级数/卷积框架，系统地应用于四类分析对象：\textbf{微分方程}（方向场的积分曲线）、\textbf{复分析}（复平面上的解析函数）、\textbf{复解析}（全纯性、幂级数展开、留数）与\textbf{四元数分析与解析}（非交换空间中的指数映射与旋转表示）。核心主题是：微分方程是方向场的积分曲线；积分方程是趋势核的卷积方程；守恒律与首次积分是周期轨道存在的约束条件；Floquet 理论是平移周期在微分方程中的直接实现；复分析与复解析把方向-趋势对偶在复平面中重建；四元数解析则把这一对偶提升到非交换代数，通过指数映射与共轭作用实现三维旋转。
+
+本章最后引入梯度、散度、旋度三个基本微分算子，并建立三者之间的代数恒等式；三者的前提、适用范围与边界条件统一在「矢量分析」章中给出（\cref{sec:trans_scale_rotate}）。
+
+\textbf{关于幂级数与洛朗级数}：泰勒级数、洛朗级数、Cauchy–Hadamard 收敛半径公式等一般级数理论已在第~\ref{chap:series_conv}~章「级数与卷积」中系统建立（\cref{def:taylor_series,def:laurent_series,thm:cauchy_hadamard,thm:laurent_expansion}）。本章不复述这些一般理论，只在复分析语境下使用其结论，并聚焦于复分析特有的内容——解析函数的局部展开、零点孤立性、孤立奇点分类与留数定理。
+
+\textbf{本章七主题导引}：平移——周期系数微分方程与 Floquet 理论（\S\ref{sec:floquet}）、复指数函数的 $2\pi i$-周期（命题 \ref{prop:complex_exp_periodicity}）；缩放——耗散系统与体积收缩（\S\ref{sec:three_operators}）、复数的模长伸缩；旋转——哈密顿系统与环量（\S\ref{sec:three_operators}）、复变函数的旋转周期、四元数旋转的共轭作用（\S\ref{sec:quaternion_analysis}）；守恒——首次积分（\S\ref{sec:first_integrals}）、诺特型对应（命题 \ref{prop:noether_ode}）、Liouville 公式（命题 \ref{prop:liouville_formula}）、复解析的刚性（\S\ref{sec:complex_analysis}）；对称——三种算子系统的分类（定理 \ref{thm:three_operator_periodic}）、复共轭对称、四元数共轭对称；闭合——极限环与 Poincaré-Bendixson 定理（\S\ref{sec:ode_phase}）、柯西积分定理的闭合环路（\S\ref{sec:cauchy_theory}）；周期——Floquet 乘子（\S\ref{sec:floquet}）、复指数的虚周期、四元数指数的 $2\pi$-周期。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  font=\small,
+  obj/.style={draw, rounded corners, fill=blue!8, minimum width=2.5cm, minimum height=0.8cm, align=center},
+  theme/.style={draw, rounded corners, fill=green!10, minimum width=1.4cm, minimum height=0.6cm, align=center, font=\footnotesize},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[obj] (ode) {微分方程\\方向场积分曲线};
+  \node[obj, right=1.0cm of ode] (ca) {复分析\\方向-趋势对偶};
+  \node[obj, right=1.0cm of ca] (res) {复解析\\展开与留数};
+  \node[obj, right=1.0cm of res] (quat) {四元数\\非交换旋转};
+  \node[theme, below=1.2cm of ode] (p) {平移};
+  \node[theme, right=0.3cm of p] (s) {缩放};
+  \node[theme, right=0.3cm of s] (r) {旋转};
+  \node[theme, right=0.3cm of r] (c) {守恒};
+  \node[theme, right=0.3cm of c] (sym) {对称};
+  \node[theme, right=0.3cm of sym] (cl) {闭合};
+  \node[theme, right=0.3cm of cl] (per) {周期};
+  \node[draw, dashed, rounded corners, fit=(p)(per), inner sep=6pt] (themes) {};
+  \node[below=0.1cm of themes, font=\footnotesize] {七主题贯穿四类对象};
+  \foreach \x in {ode,ca,res,quat} {
+    \draw[arr] (\x.south) -- ++(0,-0.35);
+  }
+  \draw[arr] (themes.north) -- ++(0,0.35);
+\end{tikzpicture}
+\caption{本章结构总览：四类分析对象与七主题的对应关系。}
+\label{fig:diffeq_chapter_overview}
+\end{figure}
+
+\section{常微分方程：方向场的积分曲线}\label{sec:ode_basic}
+
+\subsection{基本定义与存在唯一性}
+
+\begin{definition}[常微分方程]\label{def:ode}
+设 $y: \mathbb{R} \to \mathbb{R}^n$ 为未知向量值函数。一个\textbf{$n$ 维一阶常微分方程组}为
+\[
+\frac{dy}{dt} = \mathbf{F}(t, y),
+\]
+其中 $\mathbf{F}: \mathbb{R} \times \mathbb{R}^n \to \mathbb{R}^n$ 是给定的向量场。若 $\mathbf{F}$ 不显含 $t$，则称该方程为\textbf{自治}的。若 $\mathbf{F}(t+T, y) = \mathbf{F}(t, y)$，则称为\textbf{周期驱动系统}。
+
+\textbf{解的定义}：函数 $y: I \to \mathbb{R}^n$（$I$ 为区间）称为方程在 $I$ 上的\textbf{解}，若 $y$ 在 $I$ 上可微且对每个 $t \in I$ 有 $y'(t) = \mathbf{F}(t, y(t))$。
+\end{definition}
+
+\begin{definition}[初值问题]\label{def:ivp}
+给定 $(t_0, y_0) \in \mathbb{R} \times \mathbb{R}^n$，\textbf{初值问题}（IVP）为
+\[
+\frac{dy}{dt} = \mathbf{F}(t, y), \qquad y(t_0) = y_0.
+\]
+$y_0$ 称为\textbf{初值}或\textbf{初始条件}。
+\end{definition}
+
+\begin{definition}[Lipschitz 条件]\label{def:lipschitz}
+设 $\mathbf{F}: D \subseteq \mathbb{R} \times \mathbb{R}^n \to \mathbb{R}^n$。称 $\mathbf{F}$ 在 $D$ 上关于 $y$ 满足 \textbf{Lipschitz 条件}（Lipschitz 常数为 $L > 0$），若对任意 $(t, y_1), (t, y_2) \in D$，
+\[
+\|\mathbf{F}(t, y_1) - \mathbf{F}(t, y_2)\| \le L\|y_1 - y_2\|.
+\]
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  node distance=0.8cm and 1.0cm,
+  box/.style={draw, rounded corners, fill=orange!10, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box] (ivp) {初值问题\\$\dot y=\mathbf F(t,y),\;y(t_0)=y_0$};
+  \node[box, right=of ivp] (int) {等价积分方程\\$y=y_0+\int_{t_0}^t \mathbf F(s,y(s))ds$};
+  \node[box, right=of int] (pic) {Picard 迭代\\$y_{n+1}=y_0+\int \mathbf F(s,y_n)ds$};
+  \node[box, below=of pic] (conv) {一致收敛\\$\sum \|y_{n+1}-y_n\|<\infty$};
+  \node[box, left=of conv] (exist) {存在唯一解\\Picard--Lindelöf};
+  \node[box, left=of exist] (gron) {Gronwall 不等式\\控制扰动增长};
+  \draw[arr] (ivp) -- (int);
+  \draw[arr] (int) -- (pic);
+  \draw[arr] (pic) -- (conv);
+  \draw[arr] (conv) -- (exist);
+  \draw[arr] (exist) -- (gron);
+\end{tikzpicture}
+\caption{Picard--Lindelöf 存在唯一性证明路线图：初值问题转化为积分方程，经 Picard 迭代与一致收敛得到解，最后用 Gronwall 不等式证明唯一性。}
+\label{fig:picard_flow}
+\end{figure}
+
+\begin{lemma}[Gronwall 不等式]\label{lem:gronwall}
+设 $\varphi: [t_0, t_0+\alpha] \to [0, \infty)$ 连续，满足
+\[
+\varphi(t) \le \varphi_0 + \int_{t_0}^t \beta \varphi(s)\,ds, \qquad t \in [t_0, t_0+\alpha],
+\]
+其中 $\varphi_0 \ge 0$，$\beta \ge 0$ 为常数。则
+\[
+\varphi(t) \le \varphi_0\, e^{\beta(t-t_0)}, \qquad t \in [t_0, t_0+\alpha].
+\]
+对称地，若 $\varphi(t) \le \varphi_0 + \int_t^{t_0} \beta \varphi(s)\,ds$（$t \le t_0$），则 $\varphi(t) \le \varphi_0 e^{\beta(t_0-t)}$。
+\end{lemma}
+
+\begin{proof}
+定义 $\Phi(t) = \varphi_0 + \int_{t_0}^t \beta \varphi(s)\,ds$。则 $\Phi$ 连续可导，$\Phi' = \beta \varphi \le \beta \Phi$，且 $\Phi(t_0) = \varphi_0$。令 $\Psi(t) = \Phi(t) e^{-\beta(t-t_0)}$，则 $\Psi'(t) = (\Phi'(t) - \beta\Phi(t)) e^{-\beta(t-t_0)} \le 0$，故 $\Psi(t) \le \Psi(t_0) = \varphi_0$，即 $\Phi(t) \le \varphi_0 e^{\beta(t-t_0)}$。由 $\varphi(t) \le \Phi(t)$ 即得。左向情形由 $t \mapsto -t$ 换元后同理。
+\end{proof}
+
+\begin{theorem}[Picard-Lindelöf 存在唯一性定理]\label{thm:picard_lindelof}
+设 $\mathbf{F}(t, y)$ 在区域 $D = \{(t, y) : |t-t_0| \le a, \|y - y_0\| \le b\}$ 上连续，且对 $y$ 满足 Lipschitz 条件（\cref{def:lipschitz}，Lipschitz 常数为 $L$）。则初值问题 $\frac{dy}{dt} = \mathbf{F}(t, y)$，$y(t_0) = y_0$ 在区间 $|t-t_0| \le \alpha$ 上存在唯一解，其中 $\alpha = \min(a, b/M)$，$M = \max_{(t,y)\in D} \|\mathbf{F}(t,y)\|$。
+\end{theorem}
+
+\begin{proof}
+\textbf{步骤 1：转化为积分方程}。初值问题等价于积分方程
+\[
+y(t) = y_0 + \int_{t_0}^t \mathbf{F}(s, y(s))\,ds.
+\]
+（若 $y$ 是微分方程的解，积分两端即得积分方程；若 $y$ 满足积分方程，由微积分基本定理求导即得微分方程。）
+
+\textbf{步骤 2：Picard 迭代}。定义迭代序列：
+\[
+y_0(t) = y_0, \qquad y_{n+1}(t) = y_0 + \int_{t_0}^t \mathbf{F}(s, y_n(s))\,ds.
+\]
+需验证 $y_n(t)$ 在 $|t-t_0| \le \alpha$ 上有定义且 $\|y_n(t) - y_0\| \le b$。用归纳法：$n=0$ 时 $\|y_0(t)-y_0\|=0\le b$，成立。设 $\|y_n(t) - y_0\| \le b$，则
+\[
+\|y_{n+1}(t) - y_0\| \le \int_{t_0}^t \|\mathbf{F}(s, y_n(s))\|\,ds \le M |t - t_0| \le M\alpha \le b.
+\]
+
+\textbf{步骤 3：证明迭代序列收敛}。估计 $\|y_{n+1}(t) - y_n(t)\|$。由 Lipschitz 条件，
+\[
+\|y_{n+1}(t) - y_n(t)\| \le \int_{t_0}^t L\|y_n(s) - y_{n-1}(s)\|\,ds.
+\]
+归纳证明
+\[
+\|y_{n+1}(t) - y_n(t)\| \le \frac{M L^n |t - t_0|^{n+1}}{(n+1)!}.
+\]
+基步 $n=0$：$\|y_1(t) - y_0\| \le M|t-t_0|$。归纳步：假设对 $n-1$ 成立，则
+\[
+\|y_{n+1} - y_n\| \le \int_{t_0}^t L \cdot \frac{M L^{n-1} |s-t_0|^n}{n!}\,ds = \frac{M L^n |t-t_0|^{n+1}}{(n+1)!}.
+\]
+故级数 $\sum_{n=0}^{\infty} \|y_{n+1} - y_n\|$ 收敛（与指数级数比较），函数列 $\{y_n\}$ 在 $|t-t_0| \le \alpha$ 上一致收敛于某连续函数 $y$。
+
+\textbf{步骤 4：极限是解}。在迭代公式中取极限（积分与极限可交换，由一致收敛性），得
+\[
+y(t) = y_0 + \int_{t_0}^t \mathbf{F}(s, y(s))\,ds.
+\]
+
+\textbf{步骤 5：唯一性}。设 $y_1, y_2$ 是两个解，$\delta(t) = \|y_1(t) - y_2(t)\|$。由 Lipschitz 条件，
+\[
+\delta(t) \le \int_{t_0}^t L\delta(s)\,ds \qquad (t \ge t_0).
+\]
+对 $\varphi(t) = \delta(t)$、$\varphi_0 = 0$、$\beta = L$ 应用 Gronwall 不等式（引理 \ref{lem:gronwall}），得 $\delta(t) \le 0$，即 $\delta(t) = 0$。$t \le t_0$ 情形同理。故 $y_1 = y_2$。
+\end{proof}
+
+\begin{proposition}[解对初值的连续依赖性]\label{prop:continuous_dependence}
+设 $\mathbf{F}(t, y)$ 满足 Lipschitz 条件（Lipschitz 常数为 $L$）。则解 $y(t; t_0, y_0)$ 对初值 $y_0$ 连续依赖：
+\[
+\|y(t; t_0, y_0) - y(t; t_0, \tilde{y}_0)\| \le e^{L|t-t_0|} \|y_0 - \tilde{y}_0\|.
+\]
+\end{proposition}
+
+\begin{proof}
+设 $y_1(t) = y(t; t_0, y_0)$，$y_2(t) = y(t; t_0, \tilde{y}_0)$，$\delta(t) = \|y_1(t) - y_2(t)\|$。由 Lipschitz 条件，
+\[
+\delta(t) \le \|y_0 - \tilde{y}_0\| + \int_{t_0}^t L\delta(s)\,ds \qquad (t \ge t_0).
+\]
+对 $\varphi(t) = \delta(t)$、$\varphi_0 = \|y_0 - \tilde{y}_0\|$、$\beta = L$ 应用 Gronwall 不等式（引理 \ref{lem:gronwall}），得
+\[
+\delta(t) \le \|y_0 - \tilde{y}_0\|\, e^{L(t-t_0)}.
+\]
+$t \le t_0$ 情形由左向 Gronwall 不等式同理给出 $\delta(t) \le \|y_0 - \tilde{y}_0\| e^{L(t_0-t)}$。合并得 $\delta(t) \le \|y_0 - \tilde{y}_0\| e^{L|t-t_0|}$。
+\end{proof}
+
+\begin{property}[解对参数的可微依赖性]\label{prop:solution_smooth_dependence}
+设 $\mathbf{F}(t, y, \mu)$ 关于 $(y, \mu)$ 满足 Lipschitz 条件，且 $\partial \mathbf{F}/\partial \mu$ 连续。则解 $y(t; \mu)$ 对参数 $\mu$ 可微，其变分 $\partial y/\partial \mu$ 满足\textbf{变分方程}
+\[
+\frac{d}{dt}\frac{\partial y}{\partial \mu} = \frac{\partial \mathbf{F}}{\partial y}\frac{\partial y}{\partial \mu} + \frac{\partial \mathbf{F}}{\partial \mu}, \qquad \frac{\partial y}{\partial \mu}(t_0) = 0.
+\]
+\end{property}
+
+\subsection{线性常微分方程}
+
+\begin{definition}[一阶线性齐次系统]\label{def:linear_homogeneous_ode}
+一阶线性齐次常微分方程的形式为 $\frac{dy}{dt} = A(t) y$。其解可写为 $y(t) = \Phi(t, t_0) y_0$，其中 $\Phi(t, t_0)$ 是\textbf{状态转移矩阵}，满足 $\frac{d}{dt}\Phi(t, t_0) = A(t)\Phi(t, t_0)$，$\Phi(t_0, t_0) = I$。当 $A$ 是常数矩阵时，$\Phi(t, 0) = e^{At}$。
+\end{definition}
+
+\begin{property}[状态转移矩阵的基本性质]\label{prop:stm_properties}
+状态转移矩阵 $\Phi(t, t_0)$ 满足：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{可逆性}：$\Phi(t, t_0)$ 对任意 $t$ 可逆，$\Phi^{-1}(t, t_0) = \Phi(t_0, t)$。
+    \item \textbf{链式性}：$\Phi(t_2, t_0) = \Phi(t_2, t_1)\Phi(t_1, t_0)$。
+    \item \textbf{指数形式}：若 $A(t)$ 与 $\int_{t_0}^t A(s)\,ds$ 交换（例如 $A$ 为常数），则 $\Phi(t, t_0) = \exp\left(\int_{t_0}^t A(s)\,ds\right)$。一般情形此式不成立。
+\end{enumerate}
+\end{property}
+
+\begin{definition}[一阶线性非齐次系统]\label{def:linear_inhomogeneous_ode}
+形式为 $\frac{dy}{dt} = A(t) y + \mathbf{b}(t)$。其通解为
+\[
+y(t) = \Phi(t, t_0) y_0 + \int_{t_0}^t \Phi(t, s) \mathbf{b}(s)\,ds.
+\]
+齐次解是\textbf{方向部分}，特解积分是\textbf{趋势部分}。
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=6pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (h) {齐次解\\$\Phi(t,t_0)y_0$\\方向部分};
+  \node[box, fill=orange!12, right=2.5cm of h] (p) {特解积分\\$\int_{t_0}^t \Phi(t,s)\mathbf b(s)ds$\\趋势部分};
+  \node[box, fill=green!12, below=1.2cm of $(h)!0.5!(p)$] (tot) {非齐次通解\\$y(t)=$ 方向 $+$ 趋势};
+  \draw[arr] (h) -- (tot);
+  \draw[arr] (p) -- (tot);
+\end{tikzpicture}
+\caption{线性非齐次系统的解分解：齐次解给出方向部分，特解积分给出趋势部分。}
+\label{fig:linear_ode_decomposition}
+\end{figure}
+
+\begin{proposition}[Liouville 公式——相空间体积的演化]\label{prop:liouville_formula}
+设 $\Phi(t, t_0)$ 是 $\frac{dy}{dt} = A(t) y$ 的状态转移矩阵。则
+\[
+\det \Phi(t, t_0) = \exp\left( \int_{t_0}^t \operatorname{tr} A(s) \, ds \right).
+\]
+$\operatorname{tr} A(t) = \nabla \cdot \mathbf{F}(t, y)$ 是向量场的散度。当 $\operatorname{tr} A(t) = 0$ 时，相空间体积守恒。
+\end{proposition}
+
+\begin{proof}
+由 Jacobi 公式，对任意可逆矩阵函数 $X(t)$，
+\[
+\frac{d}{dt} \det X(t) = \det X(t) \cdot \operatorname{tr}\!\left( X(t)^{-1} \frac{dX(t)}{dt} \right).
+\]
+应用于 $\Phi(t, t_0)$：$\frac{d\Phi}{dt} = A(t)\Phi$，故
+\[
+\frac{d}{dt} \det \Phi = \det \Phi \cdot \operatorname{tr}(A(t)).
+\]
+这是一阶线性标量微分方程，其解为
+\[
+\det \Phi(t, t_0) = \det \Phi(t_0, t_0) \cdot \exp\left( \int_{t_0}^t \operatorname{tr}A(s)\,ds \right) = \exp\left( \int_{t_0}^t \operatorname{tr}A(s)\,ds \right),
+\]
+因为 $\Phi(t_0, t_0) = I$，$\det I = 1$。
+\end{proof}
+
+\begin{theorem}[常系数线性系统的指数解]\label{thm:constant_coefficient_exponential}
+设 $A \in \mathbb{R}^{n \times n}$。系统 $\dot{y} = A y$ 满足初值 $y(0) = y_0$ 的唯一解为
+\[
+y(t) = e^{At} y_0, \qquad e^{At} := \sum_{k=0}^{\infty} \frac{(At)^k}{k!}.
+\]
+\end{theorem}
+
+\begin{proof}
+级数 $\sum_k (At)^k/k!$ 对每个 $t$ 绝对收敛（由 $\|A\|$ 的指数级数控制）。逐项求导得
+\[
+\frac{d}{dt}\sum_{k=0}^{\infty}\frac{(At)^k}{k!} = \sum_{k=1}^{\infty} A \frac{(At)^{k-1}}{(k-1)!} = A e^{At}.
+\]
+故 $y(t) = e^{At}y_0$ 是解；由 Picard-Lindelöf 唯一性（\cref{thm:picard_lindelof}）即得唯一性。
+\end{proof}
+
+\subsection{相图与轨道}\label{sec:ode_phase}
+
+\begin{definition}[相图与轨道]\label{def:phase_portrait}
+自治系统 $\frac{dy}{dt} = \mathbf{F}(y)$ 的\textbf{相图}是相空间中所有解曲线的集合。每条解曲线称为一条\textbf{轨道}。周期轨道是闭合轨道。
+\end{definition}
+
+\begin{theorem}[常系数二维线性系统的相图分类]\label{thm:linear_phase_portrait}
+考虑 $\frac{dy}{dt} = A y$（$A \in \mathbb{R}^{2 \times 2}$），特征值为 $\lambda_1, \lambda_2$。
+\begin{enumerate}[label=(\roman*)]
+    \item $\lambda_1, \lambda_2 \in \mathbb{R}$，同号：\textbf{结点}。
+    \item $\lambda_1, \lambda_2 \in \mathbb{R}$，异号：\textbf{鞍点}。
+    \item $\lambda_{1,2} = \alpha \pm i\beta$（$\beta \neq 0$）：\textbf{焦点}。
+    \item $\lambda_{1,2} = \pm i\beta$（纯虚数）：\textbf{中心}。
+\end{enumerate}
+\end{theorem}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.75, arr/.style={->, thick, >=stealth}]
+  % 结点
+  \begin{scope}[shift={(0,0)}]
+    \draw[->] (-1.5,0)--(1.5,0); \draw[->] (0,-1.5)--(0,1.5);
+    \foreach \a in {0.2,0.5,0.8} {
+      \draw[arr] (\a,0.2) .. controls (0.5,0.5) .. (0.2,\a);
+      \draw[arr] (-\a,-0.2) .. controls (-0.5,-0.5) .. (-0.2,-\a);
+    }
+    \node at (0,-1.9) {结点};
+  \end{scope}
+  % 鞍点
+  \begin{scope}[shift={(4,0)}]
+    \draw[->] (-1.5,0)--(1.5,0); \draw[->] (0,-1.5)--(0,1.5);
+    \draw[arr] (-1.2,-1.2) -- (-0.2,-0.2);
+    \draw[arr] (1.2,1.2) -- (0.2,0.2);
+    \draw[arr] (-1.2,1.2) -- (-0.2,0.2);
+    \draw[arr] (1.2,-1.2) -- (0.2,-0.2);
+    \node at (0,-1.9) {鞍点};
+  \end{scope}
+  % 焦点
+  \begin{scope}[shift={(8,0)}]
+    \draw[->] (-1.5,0)--(1.5,0); \draw[->] (0,-1.5)--(0,1.5);
+    \draw[arr] (1.2,0) .. controls (0.8,0.8) and (0.3,0.8) .. (0,0.5);
+    \draw[arr] (0,1.2) .. controls (-0.8,0.8) and (-0.8,0.3) .. (-0.5,0);
+    \draw[arr] (-1.2,0) .. controls (-0.8,-0.8) and (-0.3,-0.8) .. (0,-0.5);
+    \draw[arr] (0,-1.2) .. controls (0.8,-0.8) and (0.8,-0.3) .. (0.5,0);
+    \node at (0,-1.9) {焦点};
+  \end{scope}
+  % 中心
+  \begin{scope}[shift={(12,0)}]
+    \draw[->] (-1.5,0)--(1.5,0); \draw[->] (0,-1.5)--(0,1.5);
+    \draw[arr] (0,0) circle (0.9);
+    \draw[arr] (0,0) circle (0.5);
+    \node at (0,-1.9) {中心};
+  \end{scope}
+\end{tikzpicture}
+\caption{二维常系数线性系统的四类相图：结点、鞍点、焦点、中心。}
+\label{fig:phase_portrait_classification}
+\end{figure}
+
+\begin{proof}
+\textbf{(i) 结点}：设 $\lambda_1, \lambda_2 > 0$（负的情形类似）。经过线性坐标变换，系统化为 $\dot{u} = \lambda_1 u$，$\dot{v} = \lambda_2 v$，解为 $u(t) = u_0 e^{\lambda_1 t}$，$v(t) = v_0 e^{\lambda_2 t}$。消去 $t$ 得轨道方程 $v = C u^{\lambda_2/\lambda_1}$（当 $v_0 \neq 0$）。当 $t \to \infty$ 时，所有轨道趋于原点；当 $t \to -\infty$ 时，轨道远离原点。轨道呈抛物线形（或直线，当 $u_0 = 0$ 或 $v_0 = 0$ 时）。
+
+\textbf{(ii) 鞍点}：设 $\lambda_1 > 0 > \lambda_2$。解为 $u = u_0 e^{\lambda_1 t}$，$v = v_0 e^{\lambda_2 t}$。当 $t \to \infty$ 时，$u \to \infty$ 而 $v \to 0$；当 $t \to -\infty$ 时，$u \to 0$ 而 $v \to \infty$。轨道为双曲线形。
+
+\textbf{(iii) 焦点}：设 $\lambda = \alpha \pm i\beta$，$\alpha, \beta \neq 0$。在极坐标中，解为 $r(t) = r_0 e^{\alpha t}$，$\theta(t) = \theta_0 + \beta t$。轨道是螺旋线：$\alpha > 0$ 时向外螺旋（不稳定焦点），$\alpha < 0$ 时向内螺旋（稳定焦点）。
+
+\textbf{(iv) 中心}：$\lambda = \pm i\beta$。解为 $r(t) = r_0$（常数），$\theta(t) = \theta_0 + \beta t$。轨道是同心圆（或在一般线性坐标变换下为同心椭圆），闭合但不孤立（不是极限环）。
+\end{proof}
+
+\begin{definition}[平衡点的稳定性]\label{def:equilibrium_stability}
+设 $\mathbf{y}^*$ 是自治系统的平衡点。其稳定性由 Jacobi 矩阵 $J = D\mathbf{F}(\mathbf{y}^*)$ 的特征值决定：
+\begin{enumerate}[label=(\roman*)]
+    \item 所有特征值实部为负：\textbf{渐近稳定}（吸引子）。
+    \item 存在实部为正的特征值：\textbf{不稳定}。
+    \item 所有特征值实部为零：线性化系统是中心型，需要高阶分析。
+\end{enumerate}
+若所有特征值实部非零，则称平衡点为\textbf{双曲平衡点}。
+\end{definition}
+
+\begin{theorem}[Hartman-Grobman 定理]\label{thm:hartman_grobman}
+设 $\mathbf{y}^*$ 是自治系统的双曲平衡点。则存在 $\mathbf{y}^*$ 的邻域，在该邻域内原非线性系统与线性化系统 $\frac{d\mathbf{z}}{dt} = J\mathbf{z}$ 拓扑共轭。
+\end{theorem}
+
+\begin{proof}
+\textbf{证明超出本章范围}。这是动力系统理论中的深层定理，其完整证明需要流形上的拓扑方法（见 Perko, \textit{Differential Equations and Dynamical Systems}, 3rd ed., Springer, 2001, \S{}2.8）。核心思想是构造一个同胚 $H$ 使 $H \circ \Phi_t = e^{Jt} \circ H$ 在平衡点邻域内成立，其中 $\Phi_t$ 是非线性流，$e^{Jt}$ 是线性化流。构造过程使用压缩映射原理在函数空间中求解函数方程。
+\end{proof}
+
+\begin{definition}[极限环]\label{def:limit_cycle}
+\textbf{极限环}是自治非线性系统的孤立周期轨道。极限环是\textbf{体积收缩与膨胀的动态平衡}在耗散系统中的周期实现：轨道的闭合性由能量输入与耗散的动态平衡维持，而非由全局守恒量保证。
+\end{definition}
+
+\begin{theorem}[Poincaré-Bendixson 定理]\label{thm:poincare_bendixson}
+设 $\frac{dy}{dt} = \mathbf{F}(y)$ 是平面自治系统，其正向有界轨道不趋于任何平衡点。则该轨道的 $\omega$-极限集必为极限环。
+\end{theorem}
+
+\begin{proof}
+\textbf{证明超出本章范围}。这是平面动力系统理论的经典结果（见 Perko, \textit{Differential Equations and Dynamical Systems}, 3rd ed., Springer, 2001, \S{}3.7）。证明的关键是：在平面中，闭合曲线（Jordan 曲线）将平面分为内外两部分，轨道不能自交（由唯一性定理），因此 $\omega$-极限集具有特殊的拓扑结构。若 $\omega$-极限集不含平衡点，则它必为闭合轨道。
+\end{proof}
+
+\begin{example}[van der Pol 振子——自激振荡的极限环]\label{ex:van_der_pol}
+van der Pol 方程 $\ddot{x} + \mu(x^2-1)\dot{x} + x = 0$（$\mu > 0$）。当 $|x| < 1$ 时，阻尼为负（能量注入）；当 $|x| > 1$ 时，阻尼为正（能量耗散）。系统存在唯一的稳定极限环。
+\end{example}
+
+\begin{example}[Duffing 振子——周期驱动的非线性共振]\label{ex:duffing}
+Duffing 方程 $\ddot{x} + \delta \dot{x} + \alpha x + \beta x^3 = \gamma \cos \omega t$。在 $\gamma$-$\omega$ 参数平面中存在 Arnold 舌。
+\end{example}
+
+\subsection{守恒律与首次积分}\label{sec:first_integrals}
+
+\begin{definition}[首次积分]\label{def:first_integral}
+设 $\frac{dy}{dt} = \mathbf{F}(y)$ 为自治系统。函数 $I: \mathbb{R}^n \to \mathbb{R}$ 称为\textbf{首次积分}，若沿任意解曲线 $y(t)$，$I(y(t))$ 为常数——即 $\frac{d}{dt} I(y(t)) = \nabla I(y) \cdot \mathbf{F}(y) = 0$。
+
+首次积分就是微分方程的\textbf{守恒量}。
+\end{definition}
+
+\begin{proposition}[首次积分与轨道约束]\label{prop:first_integral_orbit}
+若系统具有 $k$ 个独立的首次积分 $I_1, \dots, I_k$，则解被约束在 $(n-k)$ 维不变流形上。当 $k = n-1$ 时，轨道完全由首次积分确定。
+\end{proposition}
+
+\begin{proof}
+独立首次积分给出的水平集
+\[
+\mathcal{M} = \{y \in \mathbb{R}^n : I_1(y) = c_1, \dots, I_k(y) = c_k\}.
+\]
+由隐函数定理（当 $\nabla I_1, \dots, \nabla I_k$ 线性无关时），$\mathcal{M}$ 是 $n-k$ 维子流形。解曲线始终位于 $\mathcal{M}$ 上（因为每个 $I_j$ 沿解曲线为常数），故 $\mathcal{M}$ 是不变流形。当 $k = n-1$ 时，$\mathcal{M}$ 是 $1$ 维流形，解曲线完全由 $\mathcal{M}$ 确定（轨道就是 $\mathcal{M}$ 的连通分支）。
+\end{proof}
+
+\begin{proposition}[诺特型对应——单参数对称群给出首次积分]\label{prop:noether_ode}
+设系统 $\frac{dy}{dt} = \mathbf{F}(y)$ 在单参数变换群 $\{\phi_s\}_{s \in \mathbb{R}}$ 的作用下不变，即 $\phi_s \circ \Phi_t = \Phi_t \circ \phi_s$ 对所有 $s, t$ 成立（$\Phi_t$ 为系统的流）。设 $\xi$ 为 $\phi_s$ 在 $s=0$ 处的无穷小生成元，即 $\xi(y) = \frac{d}{ds}\big|_{s=0} \phi_s(y)$。若存在光滑函数 $I: \mathbb{R}^n \to \mathbb{R}$ 使得 $\xi = J \nabla I$（$J$ 为非退化反对称矩阵，即辛结构），则 $I$ 是系统的首次积分。
+\end{proposition}
+
+\begin{proof}
+由不变性 $\phi_s \circ \Phi_t = \Phi_t \circ \phi_s$，对 $s$ 在 $s=0$ 处求导得 $[\xi, \mathbf{F}] = 0$，即李括号为零。若 $\xi = J\nabla I$，则 $\nabla I$ 满足
+\[
+\frac{d}{dt} I(y(t)) = \nabla I \cdot \mathbf{F} = (J^{-1}\xi) \cdot \mathbf{F}.
+\]
+由 $[\xi, \mathbf{F}] = 0$ 与 $J$ 反对称性可推出 $\nabla I \cdot \mathbf{F} = 0$（详见 Arnold, \textit{Mathematical Methods of Classical Mechanics}, 2nd ed., Springer, 1989, \S{}38）。故 $I$ 是首次积分。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, fill=green!8, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box] (sym) {单参数对称群\\$\phi_s\circ\Phi_t=\Phi_t\circ\phi_s$};
+  \node[box, right=1.2cm of sym] (xi) {无穷小生成元\\$\xi=\frac{d}{ds}\big|_{s=0}\phi_s$};
+  \node[box, right=1.2cm of xi] (J) {辛结构\\$\xi=J\nabla I$};
+  \node[box, below=1.0cm of J] (cons) {首次积分\\$\frac{d}{dt}I(y(t))=0$};
+  \draw[arr] (sym) -- (xi);
+  \draw[arr] (xi) -- (J);
+  \draw[arr] (J) -- (cons);
+\end{tikzpicture}
+\caption{诺特型对应：连续对称性给出首次积分。}
+\label{fig:noether_ode}
+\end{figure}
+
+\begin{example}[经典力学中的首次积分]\label{ex:classical_first_integrals}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{能量守恒}：保守力场中总机械能 $E = \frac{1}{2}m\|\dot{\mathbf{r}}\|^2 + V(\mathbf{r})$ 是首次积分。对应时间平移不变性。
+    \item \textbf{角动量守恒}：有心力场中角动量 $\mathbf{L} = m \mathbf{r} \times \dot{\mathbf{r}}$ 是首次积分。对应旋转对称性。
+    \item \textbf{动量守恒}：某方向不受外力时该方向动量分量是首次积分。对应空间平移对称性。
+\end{enumerate}
+\end{example}
+
+\section{周期系数微分方程与 Floquet 理论}\label{sec:floquet}
+
+\begin{definition}[周期系数线性系统]\label{def:periodic_coefficient_system}
+设 $A(t)$ 满足 $A(t+T) = A(t)$ 对所有 $t$ 成立。系统 $\frac{dy}{dt} = A(t) y$ 称为\textbf{周期系数线性系统}。
+\end{definition}
+
+\begin{theorem}[Floquet 定理]\label{thm:floquet}
+设 $\Phi(t)$ 是周期系数线性系统的基本解矩阵。则存在非奇异的 $T$-周期矩阵 $P(t)$ 和常数矩阵 $B$，使得
+\[
+\Phi(t) = P(t) e^{Bt}.
+\]
+矩阵 $M = \Phi(T, 0)$ 称为\textbf{单值矩阵}，其特征值 $\rho_1, \dots, \rho_n$ 称为\textbf{Floquet 乘子}。
+\end{theorem}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=6pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (per) {周期系数系统\\$\dot y=A(t)y,\;A(t+T)=A(t)$};
+  \node[box, fill=orange!12, right=1.5cm of per] (M) {单值矩阵\\$M=\Phi(T,0)$};
+  \node[box, fill=green!12, right=1.5cm of M] (rho) {Floquet 乘子\\$\rho=e^{\lambda T}$};
+  \node[box, fill=red!8, below=1.2cm of rho] (stab) {稳定性判据\\$|\rho|<1$ 衰减；$|\rho|=1$ 周期/旋转};
+  \draw[arr] (per) -- (M);
+  \draw[arr] (M) -- (rho);
+  \draw[arr] (rho) -- (stab);
+\end{tikzpicture}
+\caption{Floquet 理论逻辑链：周期系数系统 $\to$ 单值矩阵 $\to$ Floquet 乘子 $\to$ 稳定性与周期解。}
+\label{fig:floquet_flow}
+\end{figure}
+
+\begin{proof}
+定义 $M = \Phi(T, 0)$。由周期性 $A(t+T) = A(t)$，验证 $\Phi(t+T, 0)$ 也是基本解矩阵：$\frac{d}{dt}\Phi(t+T, 0) = A(t+T)\Phi(t+T, 0) = A(t)\Phi(t+T, 0)$，且 $\Phi(T, 0) = M$ 非奇异。因此 $\Phi(t+T, 0) = \Phi(t, 0) M$（两个基本解矩阵差一个常数矩阵倍）。
+
+定义 $B = \frac{1}{T} \log M$（矩阵对数存在，因为 $M$ 非奇异；若 $M$ 有负实特征值，$\log M$ 可能是复矩阵，此时 $B$ 为复矩阵，$P(t)$ 为复 $T$-周期矩阵）。定义 $P(t) = \Phi(t, 0) e^{-Bt}$。验证 $P(t)$ 是 $T$-周期的：
+\[
+P(t+T) = \Phi(t+T, 0) e^{-B(t+T)} = \Phi(t, 0) M e^{-BT} e^{-Bt} = \Phi(t, 0) e^{-Bt} = P(t),
+\]
+其中用到了 $e^{-BT} = e^{-\log M} = M^{-1}$。因此 $\Phi(t) = P(t) e^{Bt}$。
+\end{proof}
+
+\begin{corollary}[Floquet 乘子与周期解的稳定性]\label{cor:floquet_stability}
+\begin{enumerate}[label=(\roman*)]
+    \item $\rho = 1$：系统存在 $T$-周期解。
+    \item $\rho = -1$：系统存在 $2T$-周期解（倍周期分岔）。
+    \item $\rho = e^{i 2\pi p/q}$：系统存在 $qT$-周期解。
+    \item 所有 $|\rho_i| < 1$（$i \neq 1$，$\rho_1 = 1$）：该周期解渐近稳定。
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+单值矩阵的特征值 $\rho$ 与 Floquet 指数 $\lambda$ 的关系为 $\rho = e^{\lambda T}$（因为 $M = e^{BT}$，$B$ 的特征值为 $\lambda$）。
+
+(i) $\rho = 1 \iff \lambda = 2\pi i k/T$（$k \in \mathbb{Z}$）。对应的解在时间平移 $T$ 下保持不变，即 $T$-周期解。
+
+(ii) $\rho = -1 \iff \lambda = \pi i(2k+1)/T$。对应的解在时间平移 $2T$ 下保持不变（$e^{\lambda \cdot 2T} = e^{2\pi i(2k+1)} = 1$），即 $2T$-周期解。
+
+(iii) $\rho = e^{2\pi i p/q}$（$p/q$ 既约）$\iff \lambda T = 2\pi i p/q + 2\pi i k$。对应的解在时间平移 $qT$ 下保持不变，即 $qT$-周期解。
+
+(iv) $|\rho| < 1 \iff \operatorname{Re}\lambda < 0$。对应的 Floquet 分量指数衰减。若除 $\rho_1 = 1$ 外所有 $|\rho_i| < 1$，则该周期解的扰动分量都衰减，周期解渐近稳定。
+\end{proof}
+
+\begin{proposition}[Floquet 乘子与三种算子的对应]\label{prop:floquet_operator}
+单值矩阵 $M$ 的特征值分解对应三种算子：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{旋转部分}：$|\rho_i| = 1$ 的乘子对应纯旋转。
+    \item \textbf{缩放部分}：$|\rho_i| \neq 1$ 的乘子对应缩放。
+    \item \textbf{平移部分}：周期 $T$ 本身承载平移对称性。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+由推论 \ref{cor:floquet_stability} 的证明，$|\rho| = 1 \iff \operatorname{Re}\lambda = 0$，Floquet 分量既不增长也不衰减，在不变环面上纯旋转。$|\rho| \neq 1 \iff \operatorname{Re}\lambda \neq 0$，Floquet 分量按指数增长或衰减，其倍率即体积的缩放因子。周期 $T$ 是时间平移对称性的参数。
+\end{proof}
+
+\begin{example}[Hill 方程——周期驱动振子]\label{ex:hill_equation}
+Hill 方程 $\ddot{y} + p(t) y = 0$（$p(t+T) = p(t)$）。当 $p(t) = \omega_0^2 + \varepsilon \cos \omega t$ 时退化为 Mathieu 方程。Hill 方程写成 $\dot y=A(t)y$ 时 $\operatorname{tr}A\equiv0$，由 Liouville 公式（命题 \ref{prop:liouville_formula}）得 $\det\Phi(T,0)=1$，故其 Floquet 乘子满足 $\rho_1 \rho_2 = 1$。
+\end{example}
+
+\begin{example}[Mathieu 方程与参数共振]\label{ex:mathieu}
+Mathieu 方程 $\ddot{y} + (\delta + \varepsilon \cos 2t) y = 0$（周期 $T = \pi$）。在 $\delta$-$\varepsilon$ 参数平面中，稳定区和不稳定区交替出现。
+\end{example}
+
+\section{偏微分方程基础}\label{sec:pde_basic}
+
+\begin{definition}[偏微分方程]\label{def:pde}
+设 $u: \mathbb{R}^n \to \mathbb{R}$ 为未知函数。一个\textbf{$k$ 阶偏微分方程}是包含 $u$ 及其直到 $k$ 阶偏导数的方程。
+\end{definition}
+
+\begin{definition}[波动方程]\label{def:wave_equation}
+\textbf{波动方程}为
+\[
+\frac{\partial^2 u}{\partial t^2} - c^2 \nabla^2 u = 0.
+\]
+其通解为 $u(\mathbf{x}, t) = f(\mathbf{x} \cdot \mathbf{n} - ct) + g(\mathbf{x} \cdot \mathbf{n} + ct)$。
+\end{definition}
+
+\begin{definition}[热传导方程]\label{def:heat_equation}
+\textbf{热传导方程}为
+\[
+\frac{\partial u}{\partial t} - \alpha \nabla^2 u = 0.
+\]
+各傅里叶分量按指数衰减：$c_n(t) = c_n(0) e^{-\alpha (2\pi n/T)^2 t}$。
+\end{definition}
+
+\begin{definition}[拉普拉斯方程]\label{def:laplace_equation}
+\textbf{拉普拉斯方程}为 $\nabla^2 u = 0$。其解称为\textbf{调和函数}。
+\end{definition}
+
+\begin{proposition}[常系数线性偏微分方程的傅里叶解法]\label{prop:pde_fourier_solution}
+对于具有周期边界条件的常系数线性偏微分方程，傅里叶变换将其转化为代数方程或常微分方程。设 $u(\mathbf{x}, t) = \sum_{\mathbf{k}} \hat{u}_{\mathbf{k}}(t) e^{i \mathbf{k} \cdot \mathbf{x}}$，每个波矢 $\mathbf{k}$ 的分量独立演化。
+\end{proposition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, fill=blue!8, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box] (pde) {常系数线性 PDE\\周期边界};
+  \node[box, right=1.2cm of pde] (fourier) {傅里叶展开\\$u=\sum_{\mathbf k}\hat u_{\mathbf k}(t)e^{i\mathbf k\cdot\mathbf x}$};
+  \node[box, right=1.2cm of fourier] (ode) {各模态独立 ODE\\$\hat u_{\mathbf k}(t)$};
+  \node[box, below=1.0cm of ode] (sol) {合成解\\$u(\mathbf x,t)=\sum_{\mathbf k}\hat u_{\mathbf k}(t)e^{i\mathbf k\cdot\mathbf x}$};
+  \draw[arr] (pde) -- (fourier);
+  \draw[arr] (fourier) -- (ode);
+  \draw[arr] (ode) -- (sol);
+\end{tikzpicture}
+\caption{常系数线性偏微分方程的傅里叶解法：空间导数化为乘法，各波矢模态独立演化。}
+\label{fig:pde_fourier_flow}
+\end{figure}
+
+\begin{proof}
+将 $u(\mathbf{x}, t) = \sum_{\mathbf{k}} \hat{u}_{\mathbf{k}}(t) e^{i \mathbf{k} \cdot \mathbf{x}}$ 代入偏微分方程。对常系数线性算子 $\mathcal{L}(\partial_{\mathbf{x}}, \partial_t)$，其作用于 $e^{i\mathbf{k}\cdot\mathbf{x}}$ 的结果为 $\mathcal{L}(i\mathbf{k}, \partial_t) e^{i\mathbf{k}\cdot\mathbf{x}}$（傅里叶变换将空间导数 $\partial_{x_j}$ 化为乘法 $ik_j$）。由傅里叶基的正交性，各 $\mathbf{k}$ 分量独立，每个 $\hat{u}_{\mathbf{k}}(t)$ 满足一个常微分方程。
+\end{proof}
+
+\begin{example}[热传导方程的傅里叶解法]\label{ex:heat_fourier}
+对 $\frac{\partial u}{\partial t} = \alpha \nabla^2 u$，代入傅里叶级数得 $\frac{d \hat{u}_{\mathbf{k}}}{dt} = -\alpha |\mathbf{k}|^2 \hat{u}_{\mathbf{k}}$，解得 $\hat{u}_{\mathbf{k}}(t) = \hat{u}_{\mathbf{k}}(0) e^{-\alpha |\mathbf{k}|^2 t}$。
+\end{example}
+
+\begin{example}[波动方程的傅里叶解法]\label{ex:wave_fourier}
+对 $\frac{\partial^2 u}{\partial t^2} = c^2 \nabla^2 u$，代入傅里叶级数得 $\frac{d^2 \hat{u}_{\mathbf{k}}}{dt^2} = -c^2 |\mathbf{k}|^2 \hat{u}_{\mathbf{k}}$，解得 $\hat{u}_{\mathbf{k}}(t) = A_{\mathbf{k}} e^{i c |\mathbf{k}| t} + B_{\mathbf{k}} e^{-i c |\mathbf{k}| t}$。
+\end{example}
+
+\section{格林函数与积分方程}\label{sec:green_integral}
+
+\begin{definition}[格林函数]\label{def:green_function}
+对于线性微分算子 $\mathcal{L}$，其\textbf{格林函数} $G(\mathbf{x}, \boldsymbol{\xi})$ 满足
+\[
+\mathcal{L} G(\mathbf{x}, \boldsymbol{\xi}) = \delta(\mathbf{x} - \boldsymbol{\xi}).
+\]
+非齐次方程 $\mathcal{L} u = f$ 的解为
+\[
+u(\mathbf{x}) = \int G(\mathbf{x}, \boldsymbol{\xi}) f(\boldsymbol{\xi}) d\boldsymbol{\xi} = (G * f)(\mathbf{x}).
+\]
+\end{definition}
+
+\begin{remark}[格林函数的存在性]\label{rem:green_existence}
+格林函数存在当且仅当齐次方程 $\mathcal{L} u = 0$（在给定边界条件下）只有零解。这是 Fredholm 择一定理（定理 \ref{thm:fredholm_alternative}）的直接推论：若 $\mathcal{L}$ 的核非平凡，则 $\mathcal{L}$ 不可逆，格林函数不存在。
+\end{remark}
+
+\begin{example}[拉普拉斯算子的基本解]\label{ex:laplace_green}
+三维拉普拉斯算子的基本解为 $G(\mathbf{x}) = -\frac{1}{4\pi |\mathbf{x}|}$（满足 $\nabla^2 G = \delta(\mathbf{x})$）。这与平方反比定律完全一致。
+\end{example}
+
+\begin{example}[热传导算子的基本解]\label{ex:heat_green}
+一维热传导算子的基本解为 $G(x, t) = \frac{1}{\sqrt{4\pi\alpha t}} e^{-x^2/(4\alpha t)}$。热传导方程的解是初始条件与高斯核的卷积。
+\end{example}
+
+\begin{definition}[Fredholm 积分方程]\label{def:fredholm_integral_equation}
+\textbf{第二类 Fredholm 积分方程}为
+\[
+u(x) - \lambda \int_a^b K(x, y) u(y) \, dy = f(x).
+\]
+当 $K(x, y) = K(x-y)$（卷积核）时，Fredholm 方程可通过傅里叶变换对角化。
+\end{definition}
+
+\begin{definition}[Volterra 积分方程]\label{def:volterra_integral_equation}
+\textbf{第二类 Volterra 积分方程}为
+\[
+u(x) - \lambda \int_a^x K(x, y) u(y) \, dy = f(x).
+\]
+Volterra 方程对应于因果累积——积分只依赖于过去的值。
+\end{definition}
+
+\begin{theorem}[Fredholm 择一定理]\label{thm:fredholm_alternative}
+对于具有连续核的 Fredholm 积分方程，以下二者恰有一个成立：
+\begin{enumerate}[label=(\roman*)]
+    \item 对任意 $f$，方程有唯一解。
+    \item 齐次方程 $u - \lambda Ku = 0$ 有非零解。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\textbf{证明超出本章范围}。这是紧算子谱理论的基本定理（见 Conway, \textit{A Course in Functional Analysis}, 2nd ed., Springer, 1990, \S{}VII.6）。核心事实是：连续核积分算子 $K$ 是紧算子，其谱由至多可数个趋于零的特征值构成。若 $\lambda^{-1}$ 不是 $K$ 的特征值，则 $(I - \lambda K)$ 可逆，方程有唯一解；若 $\lambda^{-1}$ 是特征值，则齐次方程有非零解。
+\end{proof}
+
+\begin{proposition}[积分方程与微分方程的等价性]\label{prop:integral_differential_equivalence}
+带有初始条件的常微分方程初值问题等价于 Volterra 积分方程；带有边界条件的常微分方程边值问题等价于 Fredholm 积分方程。
+\end{proposition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (ivp) {初值问题\\$\dot y=F(t,y),y(t_0)=y_0$};
+  \node[box, fill=orange!12, right=1.5cm of ivp] (vol) {Volterra 积分方程\\$y=y_0+\int_{t_0}^t F(s,y(s))ds$};
+  \node[box, fill=green!12, below=1.2cm of ivp] (bvp) {边值问题\\$\mathcal L u=f$ + 边界条件};
+  \node[box, fill=red!8, right=1.5cm of bvp] (fred) {Fredholm 积分方程\\$u-\lambda Ku=f$};
+  \draw[arr] (ivp) -- (vol);
+  \draw[arr] (bvp) -- (fred);
+\end{tikzpicture}
+\caption{微分方程与积分方程的等价关系：初值问题对应 Volterra 方程，边值问题对应 Fredholm 方程。}
+\label{fig:integral_differential_equivalence}
+\end{figure}
+
+\begin{proof}
+初值问题 $\frac{dy}{dt} = F(t,y)$，$y(t_0) = y_0$ 等价于 $y(t) = y_0 + \int_{t_0}^t F(s, y(s))\,ds$——这是第二类 Volterra 方程（核 $K(t,s) = F$ 的线性化）。这一等价性在定理 \ref{thm:picard_lindelof} 的证明步骤 1 中已建立。
+
+边值问题经格林函数（定义 \ref{def:green_function}）表示：$u = G * f$，即 $u(x) = \int G(x,\xi)f(\xi)d\xi$。将其改写为 $u - \lambda K u = f$ 的形式（$K$ 为格林函数对应的积分算子），即为第二类 Fredholm 方程。
+\end{proof}
+
+\section{复分析基础}\label{sec:complex_analysis}
+
+\subsection{复数的代数与几何}
+
+\begin{definition}[复数域]\label{def:complex_field}
+设 $\mathbb{C} = \{(a, b) : a, b \in \mathbb{R}\}$，配备加法 $(a,b)+(c,d) = (a+c, b+d)$ 与乘法 $(a,b)(c,d) = (ac - bd, ad + bc)$。记 $i = (0,1)$，则每个复数可写为 $z = a + bi$。
+\end{definition}
+
+\begin{property}[复数域的基本性质]\label{prop:complex_field_props}
+\begin{enumerate}[label=(\roman*)]
+    \item $(\mathbb{C}, +, \times)$ 是域，加法的单位元为 $0$，乘法的单位元为 $1$。
+    \item $i^2 = -1$，且 $\mathbb{C} = \mathbb{R}[i] \cong \mathbb{R}[x]/(x^2+1)$。
+    \item \textbf{共轭}：$\overline{a+bi} = a - bi$。满足 $\overline{z+w} = \bar z + \bar w$，$\overline{zw} = \bar z \bar w$。
+    \item \textbf{模长}：$|z| = \sqrt{z\bar z} = \sqrt{a^2+b^2}$。满足 $|zw| = |z||w|$（乘性），$|z+w| \le |z|+|w|$（三角不等式）。
+    \item \textbf{极形式}：非零 $z = re^{i\theta}$，其中 $r = |z| > 0$，$\theta = \arg z \in \mathbb{R}/(2\pi\mathbb{Z})$ 是辐角。
+\end{enumerate}
+\end{property}
+
+\begin{definition}[复平面上的三种对称中心]\label{def:complex_centres}
+复平面上有三个内蕴对称中心：
+\begin{enumerate}[label=(\roman*)]
+    \item $0$（加法单位元）：加法反射 $z \mapsto -z$ 的不动点。
+    \item $1$（乘法单位元）：乘法取逆 $\sigma_1(z) = 1/z$ 的不动点之一。
+    \item $i$（虚数单位）：$i$-对合 $\sigma_i(z) = i z^{-1}$ 的\textbf{对称中心}（$\sigma_i = R_{\pi/2}\circ\sigma_1$ 的复合中心），$\sigma_i$ 的不动点为 $z = \pm\frac{\sqrt2}{2}(1+i)$；$i^4 = 1$ 生成 $C_4$。
+\end{enumerate}
+\end{definition}
+
+\subsection{复数列与复变函数的极限}
+
+\begin{definition}[复数列极限]\label{def:complex_seq_limit}
+设 $\{z_n\}$ 为复数列，$L \in \mathbb{C}$。称 $\lim z_n = L$，如果
+\[
+\forall \varepsilon > 0,\; \exists N \in \mathbb{N},\; \forall n > N,\; |z_n - L| < \varepsilon.
+\]
+\end{definition}
+
+\begin{proposition}[复数列收敛的充要条件]\label{prop:complex_seq_convergence}
+复数列 $\{z_n\}$ 收敛于 $L = a+bi$ 当且仅当实部和虚部分别收敛。
+\end{proposition}
+
+\begin{proof}
+设 $z_n = x_n + iy_n$，$L = a + bi$。
+
+\textbf{必要性}：若 $z_n \to L$，则对任意 $\varepsilon > 0$，存在 $N$ 使 $n > N$ 时 $|z_n - L| < \varepsilon$。由于
+\[
+|x_n - a| \le \sqrt{(x_n-a)^2 + (y_n-b)^2} = |z_n - L| < \varepsilon,
+\]
+故 $x_n \to a$。同理 $y_n \to b$。
+
+\textbf{充分性}：若 $x_n \to a$ 且 $y_n \to b$，则对任意 $\varepsilon > 0$，存在 $N_1, N_2$ 使 $n > N_1$ 时 $|x_n - a| < \varepsilon/\sqrt{2}$，$n > N_2$ 时 $|y_n - b| < \varepsilon/\sqrt{2}$。取 $N = \max\{N_1, N_2\}$，则 $n > N$ 时
+\[
+|z_n - L| = \sqrt{(x_n-a)^2 + (y_n-b)^2} < \sqrt{\varepsilon^2/2 + \varepsilon^2/2} = \varepsilon.
+\]
+\end{proof}
+
+\begin{property}[复数列的 Cauchy 判据与完备性]\label{prop:complex_cauchy}
+$\mathbb{C}$ 是完备的：复数列收敛当且仅当它是 Cauchy 序列。即 $\{z_n\}$ 收敛 $\iff$ 对任意 $\varepsilon > 0$ 存在 $N$ 使 $m, n > N$ 时 $|z_m - z_n| < \varepsilon$。
+\end{property}
+
+\begin{proof}
+（$\Rightarrow$）若 $z_n \to L$，则 $|z_m - z_n| \le |z_m - L| + |L - z_n| \to 0$。
+
+（$\Leftarrow$）若 $\{z_n\}$ 是 Cauchy 序列，则由 $|x_m - x_n| \le |z_m - z_n|$ 知 $\{x_n\}$ 是 Cauchy 实数列，由 $\mathbb{R}$ 完备性收敛到 $a$；同理 $\{y_n\}$ 收敛到 $b$。由 \cref{prop:complex_seq_convergence}，$z_n \to a+bi$。
+\end{proof}
+
+\begin{definition}[复变函数的极限与连续性]\label{def:complex_limit}
+设 $f: \mathbb{C} \supseteq D \to \mathbb{C}$。称 $\lim_{z\to z_0} f(z) = L$，如果
+\[
+\forall \varepsilon > 0,\; \exists \delta > 0,\; \forall z \in D,\; 0 < |z - z_0| < \delta \implies |f(z) - L| < \varepsilon.
+\]
+若 $\lim_{z\to z_0} f(z) = f(z_0)$，则称 $f$ 在 $z_0$ 处连续。
+\end{definition}
+
+\subsection{复导数与解析函数}\label{sec:analytic_functions}
+
+\begin{definition}[复导数]\label{def:complex_derivative}
+设 $f: \mathbb{C} \supseteq D \to \mathbb{C}$，$z_0 \in D$。若极限
+\[
+f'(z_0) := \lim_{h \to 0} \frac{f(z_0 + h) - f(z_0)}{h}
+\]
+存在且有限，则称 $f$ 在 $z_0$ 处\textbf{复可导}。$h \in \mathbb{C}$ 可以沿任意路径趋于 $0$。
+\end{definition}
+
+\begin{definition}[解析函数]\label{def:analytic_function}
+若 $f$ 在开集 $U \subseteq \mathbb{C}$ 上每一点都复可导，则称 $f$ 在 $U$ 上\textbf{解析}（或称\textbf{全纯}）。若 $f$ 在 $z_0$ 的某邻域内解析，则称 $f$ 在 $z_0$ 处解析。
+\end{definition}
+
+\begin{definition}[整函数]\label{def:entire_function}
+在整个 $\mathbb{C}$ 上解析的函数称为\textbf{整函数}。例如 $e^z$、$\sin z$、$\cos z$ 与所有多项式都是整函数。
+\end{definition}
+
+\begin{theorem}[柯西-黎曼方程]\label{thm:cauchy_riemann}
+设 $f(z) = u(x,y) + i v(x,y)$。若 $f$ 在 $z_0$ 处复可导，则
+\[
+\frac{\partial u}{\partial x} = \frac{\partial v}{\partial y}, \quad \frac{\partial u}{\partial y} = -\frac{\partial v}{\partial x}.
+\]
+\end{theorem}
+
+\begin{proof}
+考虑 $h \to 0$ 沿实轴方向（$h = \Delta x$，$\Delta y = 0$）：
+\[
+f'(z_0) = \lim_{\Delta x \to 0} \frac{f(x_0+\Delta x, y_0) - f(x_0, y_0)}{\Delta x} = \frac{\partial u}{\partial x}(x_0,y_0) + i\frac{\partial v}{\partial x}(x_0,y_0).
+\]
+沿虚轴方向（$h = i\Delta y$，$\Delta x = 0$）：
+\[
+f'(z_0) = \lim_{\Delta y \to 0} \frac{f(x_0, y_0+\Delta y) - f(x_0, y_0)}{i\Delta y} = \frac{1}{i}\left(\frac{\partial u}{\partial y} + i\frac{\partial v}{\partial y}\right) = \frac{\partial v}{\partial y} - i\frac{\partial u}{\partial y}.
+\]
+由于 $f$ 复可导，两个极限必须相等。比较实部和虚部：
+\[
+\frac{\partial u}{\partial x} = \frac{\partial v}{\partial y}, \qquad \frac{\partial v}{\partial x} = -\frac{\partial u}{\partial y}.
+\]
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (diff) {复可导\\$f'(z_0)$ 存在};
+  \node[box, fill=orange!12, right=1.2cm of diff] (cr) {柯西--黎曼方程\\$u_x=v_y,\;u_y=-v_x$};
+  \node[box, fill=green!12, right=1.2cm of cr] (analytic) {解析/全纯\\开集上处处复可导};
+  \node[box, fill=red!8, below=1.0cm of cr] (harmonic) {实部与虚部调和\\$\nabla^2u=\nabla^2v=0$};
+  \draw[arr] (diff) -- (cr);
+  \draw[arr] (cr) -- (analytic);
+  \draw[arr] (cr) -- (harmonic);
+\end{tikzpicture}
+\caption{复可导、柯西--黎曼方程、解析性与调和性之间的关系。}
+\label{fig:cr_analytic_harmonic}
+\end{figure}
+
+\begin{remark}[柯西-黎曼方程与旋度为零]\label{rem:cr_curl_zero}
+考虑矢量场 $\mathbf{F} = (u, -v)$。其二维旋度为
+\[
+\frac{\partial(-v)}{\partial x} - \frac{\partial u}{\partial y} = -\frac{\partial v}{\partial x} - \frac{\partial u}{\partial y} = 0
+\]
+（由柯西-黎曼方程）。因此\textbf{解析函数对应于无旋场}。同理，矢量场 $\mathbf{G} = (u, v)$ 的散度为 $\partial u/\partial x + \partial v/\partial y = 2\partial u/\partial x$，一般不为零。解析函数的这一结构是复分析与矢量分析的交汇点。
+\end{remark}
+
+\begin{corollary}[解析函数的实部与虚部都是调和函数]\label{cor:harmonic_parts}
+若 $f = u + iv$ 在开集 $U$ 上解析，则 $u$ 与 $v$ 都是调和函数：
+\[
+\nabla^2 u = 0, \qquad \nabla^2 v = 0.
+\]
+反之，若 $u$ 在单连通区域上调和，则存在其\textbf{调和共轭} $v$ 使 $u + iv$ 解析。
+\end{corollary}
+
+\begin{proof}
+由柯西-黎曼方程 $u_x = v_y$、$u_y = -v_x$，若 $f$ 二阶连续可微（将在 \cref{thm:cauchy_integral_formula} 中由 Cauchy 积分公式自动保证），则
+\[
+u_{xx} = (v_y)_x = v_{yx} = v_{xy} = (-u_y)_y = -u_{yy},
+\]
+故 $u_{xx} + u_{yy} = 0$。同理 $v$ 调和。
+\end{proof}
+
+\begin{proposition}[复指数函数的周期性与导数]\label{prop:complex_exp_periodicity}
+$f(z) = e^z = e^x(\cos y + i\sin y)$ 在整个复平面上解析，$f'(z) = e^z$，且 $e^{z + 2\pi i} = e^z$。
+\end{proposition}
+
+\begin{proof}
+\textbf{导数}：由 $e^z = e^x(\cos y + i\sin y)$，验证柯西-黎曼方程：$u = e^x\cos y$，$v = e^x\sin y$。$\frac{\partial u}{\partial x} = e^x\cos y$，$\frac{\partial v}{\partial y} = e^x\cos y$，两者相等；$\frac{\partial u}{\partial y} = -e^x\sin y$，$-\frac{\partial v}{\partial x} = -e^x\sin y$，两者相等。由柯西-黎曼方程，$e^z$ 复可导，且 $f'(z) = \frac{\partial u}{\partial x} + i\frac{\partial v}{\partial x} = e^x\cos y + ie^x\sin y = e^z$。
+
+\textbf{周期性}：$e^{z+2\pi i} = e^x e^{i(y+2\pi)} = e^x e^{iy} e^{2\pi i} = e^z$，因为 $e^{2\pi i} = \cos(2\pi) + i\sin(2\pi) = 1$。
+\end{proof}
+
+\begin{example}[复初等函数的定义]\label{ex:elementary_complex_functions}
+\begin{enumerate}[label=(\roman*)]
+    \item $\sin z = \dfrac{e^{iz} - e^{-iz}}{2i}$，$\cos z = \dfrac{e^{iz} + e^{-iz}}{2}$。都是整函数，且周期性为 $2\pi$。
+    \item $\tan z = \sin z / \cos z$ 在 $\cos z \neq 0$ 处解析，零点是 $\{z = \pi/2 + k\pi\}$。
+    \item $\log z = \ln|z| + i\arg z$ 是多值函数；取主值分支 $\operatorname{Log}$ 后，在 $\mathbb{C} \setminus (-\infty, 0]$ 上解析。
+    \item $z^\alpha = e^{\alpha \operatorname{Log} z}$（$\alpha \notin \mathbb{Z}$）是多值函数，零点与极点取决于 $\alpha$。
+\end{enumerate}
+\end{example}
+
+\section{柯西积分理论}\label{sec:cauchy_theory}
+
+\begin{lemma}[平面格林公式（前向引用）]\label{lem:green_forward}
+设 $P, Q \in C^1(\overline{D_\gamma})$，$\gamma$ 为分段光滑的简单闭曲线，$D_\gamma$ 为其所围区域。则
+\[
+\oint_\gamma (P\,dx + Q\,dy) = \iint_{D_\gamma}\left( \frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y} \right) dx\,dy .
+\]
+\textbf{本引理的独立证明在「矢量分析」章（定理 \ref{thm:green_plane}）}。本节先予引用，属\textbf{前向引用}：读者可先接受该结论，或按注 \ref{rem:cauchy_without_green} 改走不含前向依赖的路线。
+\end{lemma}
+
+\begin{remark}[柯西积分定理的两条证明路线]\label{rem:cauchy_without_green}
+定理 \ref{thm:cauchy_integral} 有两条标准证明路线。其一是本节采用的\textbf{格林公式路线}：把环路积分化为两个二重积分，再由柯西–黎曼方程使被积函数处处为零。该路线要求 $f'$ 连续，并要求区域具有分段光滑边界（引理 \ref{lem:green_forward} 的前提）。其二是 \textbf{Goursat 的分割法}：对路径所围区域作三角剖分，把大回路上的积分拆成小三角形上的积分，逐片作估计并令剖分加密，仅需 $f$ 在区域上可导而不需 $f'$ 连续；该路线\textbf{不使用格林公式}，因而完全避免前向依赖。本书采用前者，是为与「通量–环流」的物理图像保持一致；两条路线结论相同。
+\end{remark}
+
+\begin{theorem}[柯西积分定理]\label{thm:cauchy_integral}
+设 $f$ 在单连通区域 $D$ 上解析，$\gamma$ 是 $D$ 内的一条闭合路径。则
+\[
+\oint_\gamma f(z)\,dz = 0.
+\]
+\end{theorem}
+
+\begin{proof}
+设 $f = u + iv$，$dz = dx + i\,dy$。将环路积分展开为实积分：
+\[
+\oint_\gamma f(z)\,dz = \oint_\gamma (u + iv)(dx + i\,dy) = \oint_\gamma (u\,dx - v\,dy) + i \oint_\gamma (v\,dx + u\,dy).
+\]
+由引理 \ref{lem:green_forward}（平面格林公式；其独立证明见「矢量分析」章定理 \ref{thm:green_plane}，此处为前向引用），对 $D$ 内闭合路径 $\gamma$ 与所围区域 $D_\gamma$，取 $(P,Q) = (u,-v)$ 与 $(P,Q) = (v,u)$，分别得
+\[
+\oint_\gamma (u\,dx - v\,dy) = -\iint_{D_\gamma} \left( \frac{\partial v}{\partial x} + \frac{\partial u}{\partial y} \right) dx\,dy,
+\]
+\[
+\oint_\gamma (v\,dx + u\,dy) = \iint_{D_\gamma} \left( \frac{\partial u}{\partial x} - \frac{\partial v}{\partial y} \right) dx\,dy.
+\]
+由柯西-黎曼方程（定理 \ref{thm:cauchy_riemann}），$\frac{\partial v}{\partial x} + \frac{\partial u}{\partial y} = 0$ 且 $\frac{\partial u}{\partial x} - \frac{\partial v}{\partial y} = 0$，故两个二重积分均为零，两个环路积分均为零，从而 $\oint_\gamma f(z)\,dz = 0$。
+\end{proof}
+
+\begin{theorem}[柯西积分公式]\label{thm:cauchy_integral_formula}
+设 $f$ 在闭合路径 $\gamma$ 内部解析，$z_0$ 为 $\gamma$ 内部的一点。则
+\[
+f(z_0) = \frac{1}{2\pi i} \oint_\gamma \frac{f(z)}{z - z_0}\,dz.
+\]
+\end{theorem}
+
+\begin{proof}
+在 $D \setminus \{z_0\}$ 上，被积函数 $f(z)/(z-z_0)$ 解析。以 $z_0$ 为中心取小圆 $\gamma_\varepsilon$（半径 $\varepsilon$），由柯西积分定理（定理 \ref{thm:cauchy_integral}）将 $\gamma$ 变形为 $\gamma_\varepsilon$：
+\[
+\oint_\gamma \frac{f(z)}{z-z_0}\,dz = \oint_{\gamma_\varepsilon} \frac{f(z)}{z-z_0}\,dz.
+\]
+在 $\gamma_\varepsilon$ 上，参数化 $z = z_0 + \varepsilon e^{i\theta}$（$\theta: 0 \to 2\pi$），$dz = i\varepsilon e^{i\theta}d\theta$：
+\[
+\oint_{\gamma_\varepsilon} \frac{f(z)}{z-z_0}\,dz = \int_0^{2\pi} \frac{f(z_0 + \varepsilon e^{i\theta})}{\varepsilon e^{i\theta}} \cdot i\varepsilon e^{i\theta}\,d\theta = i\int_0^{2\pi} f(z_0 + \varepsilon e^{i\theta})\,d\theta.
+\]
+由 $f$ 在 $z_0$ 处的连续性，$\lim_{\varepsilon \to 0} f(z_0 + \varepsilon e^{i\theta}) = f(z_0)$ 对 $\theta$ 一致（因 $f$ 连续），故
+\[
+i\int_0^{2\pi} f(z_0 + \varepsilon e^{i\theta})\,d\theta \to i\int_0^{2\pi} f(z_0)\,d\theta = 2\pi i f(z_0).
+\]
+因此 $f(z_0) = \frac{1}{2\pi i}\oint_\gamma \frac{f(z)}{z-z_0}dz$。
+\end{proof}
+
+\begin{corollary}[解析函数的无穷可微性]\label{cor:analytic_infinitely_differentiable}
+若 $f$ 在开集 $U$ 上解析，则 $f$ 在 $U$ 上无穷次复可导，且其 $n$ 阶导数满足
+\[
+f^{(n)}(z_0) = \frac{n!}{2\pi i} \oint_\gamma \frac{f(z)}{(z - z_0)^{n+1}}\,dz, \qquad n = 0, 1, 2, \dots
+\]
+其中 $\gamma$ 是包围 $z_0$ 且在 $U$ 内的正向简单闭曲线。
+\end{corollary}
+
+\begin{proof}
+对柯西积分公式关于 $z_0$ 形式求导，由积分号下求导（由一致收敛保证）即得。
+\end{proof}
+
+\begin{theorem}[刘维尔定理]\label{thm:liouville}
+若 $f$ 是有界整函数，则 $f$ 是常值函数。
+\end{theorem}
+
+\begin{proof}
+设 $|f(z)| \le M$ 对所有 $z \in \mathbb{C}$ 成立。对任意 $z_0 \in \mathbb{C}$ 与任意 $R > 0$，由 \cref{cor:analytic_infinitely_differentiable} 取 $n = 1$，沿以 $z_0$ 为心、半径 $R$ 的圆 $\gamma_R$：
+\[
+|f'(z_0)| \le \frac{1}{2\pi} \oint_{\gamma_R} \frac{|f(z)|}{|z-z_0|^2}\,|dz| \le \frac{1}{2\pi} \cdot \frac{M}{R^2} \cdot 2\pi R = \frac{M}{R}.
+\]
+令 $R \to \infty$ 得 $f'(z_0) = 0$。故 $f$ 处处导数为零，$f$ 为常值。
+\end{proof}
+
+\begin{corollary}[代数基本定理]\label{cor:fundamental_theorem_algebra}
+任何非常数复系数多项式在 $\mathbb{C}$ 中有根。
+\end{corollary}
+
+\begin{proof}
+设 $p(z)$ 为无根的非常数多项式。则 $1/p(z)$ 是整函数。当 $|z| \to \infty$ 时 $|p(z)| \to \infty$，故 $1/p(z)$ 有界。由刘维尔定理（\cref{thm:liouville}），$1/p$ 是常值，从而 $p$ 是常值，与假设矛盾。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (cauchy) {柯西积分定理\\$\oint_\gamma f\,dz=0$};
+  \node[box, fill=orange!12, right=1.2cm of cauchy] (formula) {柯西积分公式\\$f(z_0)=\frac1{2\pi i}\oint\frac{f(z)}{z-z_0}dz$};
+  \node[box, fill=green!12, right=1.2cm of formula] (diff) {无穷可微\\$f^{(n)}(z_0)=\frac{n!}{2\pi i}\oint\frac{f(z)}{(z-z_0)^{n+1}}dz$};
+  \node[box, fill=red!8, below=1.0cm of diff] (liouville) {刘维尔定理\\有界整函数为常值};
+  \node[box, fill=purple!8, below=1.0cm of liouville] (fta) {代数基本定理\\非常数多项式有根};
+  \draw[arr] (cauchy) -- (formula);
+  \draw[arr] (formula) -- (diff);
+  \draw[arr] (diff) -- (liouville);
+  \draw[arr] (liouville) -- (fta);
+\end{tikzpicture}
+\caption{柯西积分理论的逻辑链：积分定理、积分公式、无穷可微性、刘维尔定理与代数基本定理。}
+\label{fig:cauchy_theory_flow}
+\end{figure}
+
+\section{解析函数的局部展开与留数}\label{sec:analytic_expansion_residue}
+
+\begin{remark}[与「级数与卷积」章的接口]\label{rem:expansion_series_interface}
+泰勒级数与洛朗级数的一般理论已在第~\ref{chap:series_conv}~章「级数与卷积」中系统建立：泰勒级数的定义与收敛条件见 \cref{def:taylor_series}、\cref{thm:taylor_lagrange}；洛朗级数的定义见 \cref{def:laurent_series}；洛朗展开定理见 \cref{thm:laurent_expansion}；Cauchy–Hadamard 收敛半径公式见 \cref{thm:cauchy_hadamard}。本节不再重复这些一般理论，只给出它们在复分析语境下的直接应用：解析函数的 Taylor 展开、零点孤立性、孤立奇点分类与留数定理。
+\end{remark}
+
+\begin{theorem}[解析函数的 Taylor 展开]\label{thm:taylor_expansion_complex}
+若 $f$ 在圆盘 $D(z_0, R)$ 上解析，则对每个 $z \in D(z_0, R)$，
+\[
+f(z) = \sum_{n=0}^{\infty} \frac{f^{(n)}(z_0)}{n!}(z-z_0)^n,
+\]
+且收敛半径由 Cauchy–Hadamard 公式（第~\ref{chap:series_conv}~章 \cref{thm:cauchy_hadamard}）给出。
+\end{theorem}
+
+\begin{proof}
+由柯西积分公式，对任意 $|z - z_0| < r < R$ 与 $|\zeta - z_0| = r$，
+\[
+f(z) = \frac{1}{2\pi i} \oint_{|\zeta - z_0| = r} \frac{f(\zeta)}{\zeta - z}\,d\zeta.
+\]
+将 $1/(\zeta - z) = 1/(\zeta - z_0) \cdot 1/(1 - (z - z_0)/(\zeta - z_0))$ 展开为几何级数，代入并逐项积分即得。
+\end{proof}
+
+\begin{corollary}[解析函数的零点孤立性]\label{cor:zero_isolated}
+若 $f$ 在连通开集 $U$ 上解析且不恒为零，则 $f$ 的零点集在 $U$ 中没有聚点。等价地，若 $f$ 在 $U$ 内某个\textbf{互异}的点列 $\{z_n\}$（$z_n \to z_0 \in U$）上为零，则 $f \equiv 0$。
+\end{corollary}
+
+\begin{proof}
+反设零点有聚点 $z_0 \in U$。由 Taylor 展开（\cref{thm:taylor_expansion_complex}），$f$ 在 $z_0$ 附近可展开。若展开式非零，则存在最小 $k \ge 0$ 使 $a_k \ne 0$，在 $z_0$ 附近 $f(z) = (z-z_0)^k g(z)$（$g(z_0) \ne 0$）。由 $g$ 连续，$g \ne 0$ 在 $z_0$ 的某邻域内，故 $f \ne 0$ 在该邻域内除 $z_0$ 外，与零点有聚点矛盾。故 $a_k = 0$ 对一切 $k$，$f \equiv 0$。
+\end{proof}
+
+\begin{definition}[孤立奇点的分类]\label{def:singularity_types}
+设 $f$ 在 $0 < |z-z_0| < R$ 上解析，$z_0$ 为其孤立奇点。由洛朗展开 $\sum_{n=-\infty}^{\infty} a_n (z-z_0)^n$（洛朗展开的存在性见第~\ref{chap:series_conv}~章 \cref{thm:laurent_expansion}）：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{可去奇点}：所有 $a_n = 0$（$n < 0$）。
+    \item \textbf{$m$ 阶极点}：$a_{-m} \neq 0$ 且 $a_n = 0$（$n < -m$）。
+    \item \textbf{本质奇点}：有无穷多个 $n < 0$ 使 $a_n \neq 0$。
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[留数]\label{def:residue}
+设 $z_0$ 是 $f$ 的孤立奇点。$f$ 在 $z_0$ 处的\textbf{留数}为洛朗展开中 $(z-z_0)^{-1}$ 项的系数：
+\[
+\operatorname{Res}(f, z_0) = a_{-1} = \frac{1}{2\pi i} \oint_\gamma f(z)\,dz,
+\]
+其中 $\gamma$ 是 $z_0$ 附近的小正向圆。
+\end{definition}
+
+\begin{theorem}[留数定理]\label{thm:residue_theorem}
+设 $f$ 在单连通区域 $D$ 内除有限个孤立奇点 $z_1, \dots, z_m$ 外解析，$\gamma$ 是 $D$ 内包围所有 $z_k$ 的正向简单闭曲线。则
+\[
+\oint_\gamma f(z)\,dz = 2\pi i \sum_{k=1}^{m} \operatorname{Res}(f, z_k).
+\]
+\end{theorem}
+
+\begin{proof}
+在每个 $z_k$ 附近取小圆 $\gamma_k$，使这些小圆互不相交且都在 $\gamma$ 内。由柯西积分定理，$\oint_\gamma f = \sum_k \oint_{\gamma_k} f$。每个 $\oint_{\gamma_k} f = 2\pi i \operatorname{Res}(f, z_k)$（由留数定义）。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (rem) {可去奇点\\$a_n=0\;(n<0)$};
+  \node[box, fill=orange!12, right=1.0cm of rem] (pole) {$m$ 阶极点\\$a_{-m}\neq0$};
+  \node[box, fill=red!8, right=1.0cm of pole] (ess) {本质奇点\\无穷多负幂项};
+  \node[box, fill=green!12, below=1.2cm of pole] (res) {留数\\$\operatorname{Res}(f,z_0)=a_{-1}$};
+  \node[box, fill=purple!8, below=1.0cm of res] (thm) {留数定理\\$\oint_\gamma f=2\pi i\sum_k\operatorname{Res}(f,z_k)$};
+  \draw[arr] (rem) -- (res);
+  \draw[arr] (pole) -- (res);
+  \draw[arr] (ess) -- (res);
+  \draw[arr] (res) -- (thm);
+\end{tikzpicture}
+\caption{孤立奇点分类与留数定理：负幂项结构决定奇点类型，$a_{-1}$ 决定留数。}
+\label{fig:singularity_residue}
+\end{figure}
+
+\begin{example}[留数计算：三种情形]\label{ex:residue_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{简单极点}：若 $f(z) = g(z)/(z-z_0)$，$g(z_0) \ne 0$，则 $\operatorname{Res}(f, z_0) = g(z_0)$。
+    \item \textbf{$m$ 阶极点}：$\operatorname{Res}(f, z_0) = \frac{1}{(m-1)!} \lim_{z \to z_0} \frac{d^{m-1}}{dz^{m-1}}\left[(z-z_0)^m f(z)\right]$。
+    \item \textbf{两个函数之商}：若 $f = g/h$，$h(z_0) = 0$，$h'(z_0) \ne 0$，$g(z_0) \ne 0$，则 $\operatorname{Res}(f, z_0) = g(z_0)/h'(z_0)$。
+\end{enumerate}
+\end{example}
+
+\section{四元数分析与解析}\label{sec:quaternion_analysis}
+
+\subsection{四元数的代数结构}
+
+\begin{definition}[四元数代数]\label{def:quaternion_algebra}
+\textbf{四元数代数} $\mathbb{H}$ 是 $\mathbb{R}$ 上的四维结合代数，以 $\{1, i, j, k\}$ 为基，乘法由以下关系双线性延拓：
+\[
+i^2 = j^2 = k^2 = ijk = -1,
+\]
+以及由此导出的 $ij = k$、$ji = -k$、$jk = i$、$kj = -i$、$ki = j$、$ik = -j$。四元数写为 $q = a + bi + cj + dk$（$a, b, c, d \in \mathbb{R}$）。
+\end{definition}
+
+\begin{property}[四元数的基本代数性质]\label{prop:quaternion_basic_props}
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathbb{H}$ 是\textbf{可除代数}（除环）：每个非零元有乘法逆元。
+    \item $\mathbb{H}$ \textbf{非交换}：$ij \neq ji$。一般 $q_1 q_2 \neq q_2 q_1$。
+    \item \textbf{共轭}：$\bar q = a - bi - cj - dk$。满足 $\overline{pq} = \bar q \bar p$（反自同构）。
+    \item \textbf{模长}：$|q| = \sqrt{q\bar q} = \sqrt{a^2 + b^2 + c^2 + d^2}$，满足乘性 $|pq| = |p||q|$。
+    \item \textbf{逆元}：$q^{-1} = \bar q/|q|^2$（$q \ne 0$）。
+    \item \textbf{分解}：$q = \operatorname{Sc}(q) + \operatorname{Vec}(q)$，其中 $\operatorname{Sc}(q) = a$ 是标量部分，$\operatorname{Vec}(q) = bi + cj + dk$ 是向量部分。
+\end{enumerate}
+\end{property}
+
+\begin{definition}[纯虚四元数与单位球面]\label{def:pure_imaginary}
+称 $q \in \mathbb{H}$ 为\textbf{纯虚四元数}，若 $\operatorname{Sc}(q) = 0$。纯虚四元数空间记作 $\operatorname{Im}(\mathbb{H}) \cong \mathbb{R}^3$。\textbf{单位四元数群}为
+\[
+S^3 = \{q \in \mathbb{H} : |q| = 1\},
+\]
+它在四元数乘法下构成群，同构于 $SU(2)$。
+\end{definition}
+
+\subsection{四元数的极限与连续性}
+
+\begin{definition}[四元数极限]\label{def:quaternion_limit}
+设 $f: \mathbb{H} \supseteq D \to \mathbb{H}$，$q_0 \in \overline{D}$。称 $\lim_{q\to q_0} f(q) = L$，如果
+\[
+\forall \varepsilon > 0,\; \exists \delta > 0,\; \forall q \in D,\; 0 < |q - q_0| < \delta \implies |f(q) - L| < \varepsilon.
+\]
+若 $\lim_{q \to q_0} f(q) = f(q_0)$，则称 $f$ 在 $q_0$ 处连续。
+\end{definition}
+
+\begin{proposition}[四元数极限的坐标刻画]\label{prop:quaternion_limit_coordinate}
+将 $q = q_0 + h$、$h = h_0 + h_1 i + h_2 j + h_3 k$、$f = f_0 + f_1 i + f_2 j + f_3 k$。$\lim_{h \to 0} f(q_0 + h) = L$ 当且仅当四个实分量极限分别成立。
+\end{proposition}
+
+\begin{proof}
+与复数列收敛（\cref{prop:complex_seq_convergence}）同理：四元数模长 $|h| = \sqrt{h_0^2 + h_1^2 + h_2^2 + h_3^2}$ 控制各分量的绝对值，反之亦然。
+\end{proof}
+
+\subsection{四元数导数与解析性}
+
+\begin{definition}[四元数导数]\label{def:quaternion_derivative}
+设 $f: \mathbb{H} \supseteq D \to \mathbb{H}$，$q_0 \in D$。若极限
+\[
+f'(q_0) := \lim_{h \to 0} [f(q_0 + h) - f(q_0)] \cdot h^{-1}
+\]
+存在，则称 $f$ 在 $q_0$ 处\textbf{右可导}。类似地，若极限
+\[
+{}'f(q_0) := \lim_{h \to 0} h^{-1} \cdot [f(q_0 + h) - f(q_0)]
+\]
+存在，则称 $f$ 在 $q_0$ 处\textbf{左可导}。由于四元数乘法非交换，左导数和右导数一般不相等。
+\end{definition}
+
+\begin{definition}[四元数解析函数]\label{def:quaternion_analytic}
+若 $f$ 在开集 $U \subseteq \mathbb{H}$ 上处处右可导（或处处左可导），则称 $f$ 在 $U$ 上\textbf{右解析}（或\textbf{左解析}）。这里的“右解析”只表示差商可导，它与按 Cauchy-Riemann-Fueter 方程定义的\textbf{正则}（regular）性不是同一条件，二者的关系见 \cref{rem:quaternion_analytic_difference}。
+\end{definition}
+
+\begin{remark}[与复解析的结构性差异]\label{rem:quaternion_analytic_difference}
+与复解析函数不同，四元数解析函数\textbf{极其稀少}。这里必须区分两个不同的条件。设 $f = f_0 + f_1 i + f_2 j + f_3 k$，并记 $e_1 = i$、$e_2 = j$、$e_3 = k$。
+
+\textbf{(a) 差商可导}（即定义 \ref{def:quaternion_analytic} 的右可导）等价于
+\[
+\frac{\partial f}{\partial x_\mu} = \Bigl(\frac{\partial f}{\partial x_0}\Bigr) e_\mu, \qquad \mu = 1, 2, 3,
+\]
+即三个分量方程。
+
+\textbf{(b) Cauchy-Riemann-Fueter 方程组}刻画的是另一类对象，即\textbf{正则}（regular）函数：
+\[
+\frac{\partial f}{\partial \bar q} := \frac{\partial f}{\partial x_0} + i\frac{\partial f}{\partial x_1} + j\frac{\partial f}{\partial x_2} + k\frac{\partial f}{\partial x_3} = 0,
+\]
+即四个分量函数满足一阶线性偏微分方程组。
+
+两个条件\textbf{并不等价}：$f(q) = q$ 按差商定义右可导（$[h]h^{-1} \equiv 1$），但 $\partial f/\partial\bar q = 1 + i\cdot i + j\cdot j + k\cdot k = -2 \neq 0$，不满足 CRF 方程；反之 $f(q) = x_0 + x_1 i$ 满足 $\partial f/\partial\bar q = 1 + i\cdot i = 0$，却不右可导（此时 $\partial_{x_2}f = 0$，而 $(\partial_{x_0}f)e_2 = j \neq 0$，违反 (a)）。因此“右解析”指差商可导，而 CRF 方程刻画的正则函数类是另一类对象。
+
+CRF 方程含四个一阶方程，比复数情形（两个方程）严格得多，因而由它刻画的正则函数的结构远不如复解析函数丰富。四元数幂级数 $\sum q^n a_n$、四元数多项式与 $(q-q_0)^n$ 型局部展开都属于另一函数类，即 \textbf{slice 正则}函数类，而非 Fueter 正则类：单项 $q^n a_n$（$n\ge 1$）满足 $\partial(q^n a_n)/\partial\bar q=-2a_n\neq 0$；两个函数类的分工见「四元数分析」章（\S\ref{sec:q_slice_vs_fueter}）。
+\end{remark}
+
+\subsection{四元数指数与旋转}
+
+\begin{proposition}[四元数指数函数的旋转周期性]\label{prop:quaternion_exp_rotation}
+对任意纯虚单位四元数 $\mathbf{u}$（$\mathbf{u}^2 = -1$），
+\[
+e^{\mathbf{u}\theta} = \cos\theta + \mathbf{u}\sin\theta
+\]
+满足 $e^{\mathbf{u}(\theta + 2\pi)} = e^{\mathbf{u}\theta}$。对于不同的旋转轴 $\mathbf{u}_1 \neq \mathbf{u}_2$，$e^{\mathbf{u}_1\theta_1}$ 与 $e^{\mathbf{u}_2\theta_2}$ 的乘积一般不可交换。
+\end{proposition}
+
+\begin{proof}
+\textbf{欧拉公式}：由 $\mathbf{u}^2 = -1$，对指数函数的幂级数展开：
+\[
+e^{\mathbf{u}\theta} = \sum_{k=0}^{\infty} \frac{(\mathbf{u}\theta)^k}{k!} = \sum_{j=0}^{\infty} \frac{(\mathbf{u}\theta)^{2j}}{(2j)!} + \sum_{j=0}^{\infty} \frac{(\mathbf{u}\theta)^{2j+1}}{(2j+1)!}.
+\]
+由于 $\mathbf{u}^{2j} = (-1)^j$，$\mathbf{u}^{2j+1} = (-1)^j\mathbf{u}$，
+\[
+e^{\mathbf{u}\theta} = \sum_{j=0}^{\infty} \frac{(-1)^j\theta^{2j}}{(2j)!} + \mathbf{u}\sum_{j=0}^{\infty} \frac{(-1)^j\theta^{2j+1}}{(2j+1)!} = \cos\theta + \mathbf{u}\sin\theta.
+\]
+
+\textbf{周期性}：$e^{\mathbf{u}(\theta+2\pi)} = \cos(\theta+2\pi) + \mathbf{u}\sin(\theta+2\pi) = \cos\theta + \mathbf{u}\sin\theta = e^{\mathbf{u}\theta}$。
+
+\textbf{非交换性}：若 $\mathbf{u}_1 \neq \mathbf{u}_2$，则 $\mathbf{u}_1\mathbf{u}_2 \neq \mathbf{u}_2\mathbf{u}_1$（两个不同的纯虚单位四元数的乘积是反交换的：$\mathbf{u}_1\mathbf{u}_2 = -\mathbf{u}_2\mathbf{u}_1$）。因此
+\[
+e^{\mathbf{u}_1\theta_1} e^{\mathbf{u}_2\theta_2} = (\cos\theta_1 + \mathbf{u}_1\sin\theta_1)(\cos\theta_2 + \mathbf{u}_2\sin\theta_2)
+\]
+\[
+= \cos\theta_1\cos\theta_2 + \mathbf{u}_1\sin\theta_1\cos\theta_2 + \mathbf{u}_2\cos\theta_1\sin\theta_2 + \mathbf{u}_1\mathbf{u}_2\sin\theta_1\sin\theta_2,
+\]
+而 $e^{\mathbf{u}_2\theta_2} e^{\mathbf{u}_1\theta_1}$ 中 $\mathbf{u}_1\mathbf{u}_2$ 被替换为 $\mathbf{u}_2\mathbf{u}_1 = -\mathbf{u}_1\mathbf{u}_2$，两者一般不相等。
+\end{proof}
+
+\begin{theorem}[四元数旋转的共轭表示]\label{thm:quaternion_rotation_conjugation}
+对单位四元数 $q \in S^3$ 与纯虚四元数 $v \in \operatorname{Im}(\mathbb{H}) \cong \mathbb{R}^3$，映射
+\[
+\rho_q(v) = q v q^{-1}
+\]
+是 $\mathbb{R}^3$ 中的旋转。映射 $\Pi: S^3 \to SO(3)$，$q \mapsto \rho_q$ 是二重覆盖，$\ker \Pi = \{\pm 1\}$。
+\end{theorem}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (s3) {$S^3\subset\mathbb H$\\单位四元数};
+  \node[box, fill=orange!12, right=1.5cm of s3] (so3) {$SO(3)$\\三维旋转};
+  \node[box, fill=green!12, below=1.0cm of $(s3)!0.5!(so3)$] (cover) {二重覆盖\\$\Pi(q)=\Pi(-q)$};
+  \node[box, fill=red!8, below=1.0cm of cover] (rod) {Rodrigues 公式\\$\rho_q(v)=q v q^{-1}$};
+  \draw[arr] (s3) -- node[above,font=\footnotesize]{$\Pi$} (so3);
+  \draw[arr] (cover) -- (s3);
+  \draw[arr] (cover) -- (so3);
+  \draw[arr] (rod) -- (cover);
+\end{tikzpicture}
+\caption{单位四元数到三维旋转的二重覆盖：$S^3\to SO(3)$，$\ker\Pi=\{\pm1\}$。}
+\label{fig:quaternion_cover}
+\end{figure}
+
+\begin{proof}
+\textbf{纯虚性保持}：$\overline{qvq^{-1}} = \bar q^{-1} \bar v \bar q = q(-v)q^{-1} = -qvq^{-1}$，故 $\rho_q(v)$ 是纯虚四元数。
+
+\textbf{模长保持}：$|\rho_q(v)| = |q||v||q^{-1}| = |v|$。
+
+\textbf{Rodrigues 公式}：将 $q = \cos(\theta/2) + \mathbf{u}\sin(\theta/2)$（$\mathbf{u}$ 单位纯虚），$v$ 分解为 $v_\parallel + v_\perp$（分别平行与垂直于 $\mathbf{u}$）。直接计算得
+\[
+qvq^{-1} = v_\parallel + \cos\theta\,v_\perp + \sin\theta\,(\mathbf{u}\times v_\perp),
+\]
+这正是绕轴 $\mathbf{u}$ 旋转角 $\theta$ 的 Rodrigues 公式。
+
+\textbf{二重覆盖}：$\rho_q = \rho_{-q}$，故映射不下延到 $S^3$ 到 $SO(3)$ 的双射；又任一 $SO(3)$ 元素由 Rodrigues 公式唯一对应一对 $\pm q$，故 $\Pi$ 是二重覆盖。
+\end{proof}
+
+\begin{property}[单位四元数群的子群分类]\label{prop:quaternion_finite_subgroups}
+$S^3 \cong SU(2)$ 的有限子群分类为：
+\begin{enumerate}[label=(\roman*)]
+    \item 循环群 $C_n$（$n \ge 1$）。
+    \item 二面体群 $D_n$（$n \ge 2$）。
+    \item 四面体群 $2T$（24 阶）。
+    \item 八面体群 $2O$（48 阶）。
+    \item 二十面体群 $2I$（120 阶）。
+\end{enumerate}
+这些有限群在三维旋转群 $SO(3)$ 下的像分别为 $C_n$、$D_n$、$T$、$O$、$I$——即柏拉图立体的旋转对称群。
+\end{property}
+
+\section{梯度、旋度与散度：三大微分算子}\label{sec:three_operators}
+\label{sec:grad_curl_div}
+
+\begin{definition}[梯度]\label{def:gradient}
+设 $f: \mathbb{R}^n \to \mathbb{R}$ 在点 $\mathbf{x}$ 处可微。$f$ 的\textbf{梯度}为
+\[
+\nabla f(\mathbf{x}) := \left( \frac{\partial f}{\partial x_1}, \dots, \frac{\partial f}{\partial x_n} \right).
+\]
+梯度对应\textbf{平移方向（$0$-对称）}。梯度的旋度恒为零：$\nabla \times (\nabla f) = \mathbf{0}$。
+\end{definition}
+
+\begin{definition}[散度]\label{def:divergence}
+设 $\mathbf{F}: \mathbb{R}^n \to \mathbb{R}^n$ 在点 $\mathbf{x}$ 处可微。$\mathbf{F}$ 的\textbf{散度}为
+\[
+\nabla \cdot \mathbf{F}(\mathbf{x}) := \frac{\partial F_1}{\partial x_1} + \cdots + \frac{\partial F_n}{\partial x_n}.
+\]
+散度对应\textbf{比例方向（$1$-对称）}。散度度量体积变化率：$\nabla \cdot \mathbf{F} > 0$ 表示局部膨胀，$\nabla \cdot \mathbf{F} < 0$ 表示局部收缩。
+\end{definition}
+
+\begin{definition}[旋度]\label{def:curl}
+设 $\mathbf{F}: \mathbb{R}^3 \to \mathbb{R}^3$ 在点 $\mathbf{x}$ 处可微。$\mathbf{F}$ 的\textbf{旋度}为
+\[
+\nabla \times \mathbf{F} := \left( \frac{\partial F_z}{\partial y} - \frac{\partial F_y}{\partial z},\; \frac{\partial F_x}{\partial z} - \frac{\partial F_z}{\partial x},\; \frac{\partial F_y}{\partial x} - \frac{\partial F_x}{\partial y} \right).
+\]
+旋度对应\textbf{旋转方向（$i$-对称）}。旋度的散度恒为零：$\nabla \cdot (\nabla \times \mathbf{F}) = 0$。
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=6pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (grad) {梯度 $\nabla f$\\平移方向 / $0$-对称};
+  \node[box, fill=orange!12, right=1.5cm of grad] (curl) {旋度 $\nabla\times\mathbf F$\\旋转方向 / $i$-对称};
+  \node[box, fill=green!12, right=1.5cm of curl] (div) {散度 $\nabla\cdot\mathbf F$\\比例方向 / $1$-对称};
+  \node[box, fill=red!8, below=1.2cm of curl] (ident) {代数恒等式\\$\nabla\times(\nabla f)=0$，$\nabla\cdot(\nabla\times\mathbf F)=0$};
+  \draw[arr] (grad) -- (ident);
+  \draw[arr] (curl) -- (ident);
+  \draw[arr] (div) -- (ident);
+\end{tikzpicture}
+\caption{三大微分算子与三种对称中心的对应，以及两个基本代数恒等式。}
+\label{fig:three_operators}
+\end{figure}
+
+\begin{remark}[三个算子的方向-趋势属性]\label{rem:three_operators_direction_trend}
+由 \cref{def:gradient}、\cref{def:divergence}、\cref{def:curl} 的定义直接得到三个算子与三种对称中心的对应：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{梯度}提取标量场的方向——纯方向算子（$0$-对称）。
+    \item \textbf{旋度}提取矢量场的旋转方向——纯旋转方向算子（$i$-对称）。
+    \item \textbf{散度}生成矢量场的趋势——方向-趋势综合算子（$1$-对称）。
+\end{enumerate}
+三者之间的代数关系——梯度的旋度为零、旋度的散度为零——反映了三种对称中心的层级结构。这一对应在「矢量分析」章中将以极限刻画的形式独立给出（\cref{prop:gradient_directional,prop:divergence_flux_density,prop:curl_circulation_density}）。
+\end{remark}
+
+\begin{definition}[梯度系统——梯度（对称中心 $0$）]\label{def:gradient_system}
+若存在势函数 $V$，使得 $\frac{dy}{dt} = -\nabla V(y)$，则称该系统为\textbf{梯度系统}。梯度系统满足：
+\begin{enumerate}[label=(\roman*)]
+    \item $V(y(t))$ 沿解曲线单调不增。
+    \item 所有有界解趋于平衡点，不存在周期轨道。
+    \item 旋度恒为零：$\nabla \times (-\nabla V) = \mathbf{0}$。
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[哈密顿系统——旋度（对称中心 $i$）]\label{def:hamiltonian_system}
+设 $H: \mathbb{R}^{2n} \to \mathbb{R}$ 为哈密顿函数。\textbf{哈密顿系统}为
+\[
+\frac{dq}{dt} = \frac{\partial H}{\partial p}, \quad \frac{dp}{dt} = -\frac{\partial H}{\partial q}.
+\]
+哈密顿系统满足：$H$ 是首次积分；相空间体积守恒（$\nabla \cdot \mathbf{F} = 0$）。
+\end{definition}
+
+\begin{definition}[耗散系统——散度（对称中心 $1$）]\label{def:dissipative_system}
+若 $\frac{dy}{dt} = \mathbf{F}(y)$ 满足 $\nabla \cdot \mathbf{F} < 0$（在某区域内），则称该系统为\textbf{耗散系统}。耗散系统的长期行为趋向于低维吸引子。
+\end{definition}
+
+\begin{theorem}[三种算子系统的周期轨道特征]\label{thm:three_operator_periodic}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{梯度系统}：无周期轨道（仅有平衡点）。
+    \item \textbf{哈密顿系统}：周期轨道存在于不变环面上（可积情形）。
+    \item \textbf{耗散系统}：周期轨道以极限环形式存在。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 设梯度系统存在非平凡周期轨道 $\gamma$（参数化为 $y(t)$，$y(t+T) = y(t)$）。沿 $\gamma$ 积分一周，势函数 $V$ 的净变化为
+\[
+V(y(T)) - V(y(0)) = \int_0^T \frac{d}{dt}V(y(t))\,dt = \int_0^T \nabla V(y(t)) \cdot \dot{y}(t)\,dt.
+\]
+由 $\dot{y} = -\nabla V$，
+\[
+= \int_0^T \nabla V \cdot (-\nabla V)\,dt = -\int_0^T \|\nabla V(y(t))\|^2\,dt.
+\]
+非平凡周期轨道上 $\nabla V$ 不恒为零（若 $\nabla V \equiv 0$，则 $\dot{y} \equiv 0$，轨道退化为平衡点），故 $\int_0^T \|\nabla V\|^2 dt > 0$，从而 $V(y(T)) < V(y(0))$。但由周期性 $y(T) = y(0)$，$V(y(T)) = V(y(0))$，矛盾。
+
+(ii) 可积哈密顿系统由刘维尔-阿诺德定理保证：$n$ 个独立且对合的首次积分给出 $n$ 维不变环面，运动在环面上准周期进行（完整证明见 Arnold, \textit{Mathematical Methods of Classical Mechanics}, 2nd ed., Springer, 1989, \S{}49-50）。
+
+(iii) 由 Poincaré-Bendixson 定理（定理 \ref{thm:poincare_bendixson}），平面耗散系统的正向有界轨道若不趋于平衡点，其 $\omega$-极限集为极限环。
+\end{proof}
+
+\section{守恒律的微分方程表述}\label{sec:conservation_laws_pde}
+
+\begin{definition}[守恒律的微分形式]\label{def:conservation_law_differential}
+设 $u(\mathbf{x}, t)$ 是守恒量密度，$\mathbf{J}(\mathbf{x}, t)$ 是通量。\textbf{守恒律的微分形式}为
+\[
+\frac{\partial u}{\partial t} + \nabla \cdot \mathbf{J} = 0.
+\]
+\end{definition}
+
+\begin{example}[三类经典守恒律]\label{ex:three_conservation_laws}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{质量守恒（连续性方程）}：$\frac{\partial \rho}{\partial t} + \nabla \cdot (\rho \mathbf{v}) = 0$。
+    \item \textbf{动量守恒（Navier-Stokes 方程）}：$\frac{\partial (\rho \mathbf{v})}{\partial t} + \nabla \cdot (\rho \mathbf{v} \otimes \mathbf{v}) = -\nabla p + \nabla \cdot \boldsymbol{\tau} + \mathbf{f}$。
+    \item \textbf{能量守恒}：$\frac{\partial (\rho E)}{\partial t} + \nabla \cdot (\rho E \mathbf{v} + \mathbf{q}) = \dot{Q}$。
+\end{enumerate}
+\end{example}
+
+\begin{remark}[与全书的统一]\label{rem:diffeq_complex_unity}
+本章把分析工具组织为四条平行的结构：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{微分方程}：以方向场为对象，研究演化轨道的存在性、唯一性、稳定性与周期性。
+    \item \textbf{复分析}：以复平面为舞台，把方向（柯西-黎曼方程的实部）与趋势（虚部）耦合为全纯结构。
+    \item \textbf{复解析}：以级数展开为工具，把解析函数分类为可去奇点、极点、本质奇点，并以留数定理计算闭合路径积分。
+    \item \textbf{四元数分析与解析}：以非交换代数为背景，通过指数映射与共轭作用实现三维旋转，是复分析在非交换几何中的自然推广。
+\end{enumerate}
+四条线索通过共同的代数结构（循环群 $C_n$、圆群 $U(1)$、单位球面 $S^3$）连接：微分方程的周期轨道、复指数的 $2\pi i$-周期、单位根群的离散旋转、四元数指数的 $2\pi$-周期——它们是同一有限阶作用在四个层面的实现（“周期基础”章定理 \ref{thm:finite_order_orbit}）。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=5pt, font=\small},
+  arr/.style={->, thick, >=stealth}
+]
+  \node[box, fill=blue!8] (ode) {微分方程\\方向场积分曲线};
+  \node[box, fill=orange!12, right=1.0cm of ode] (ca) {复分析\\全纯结构};
+  \node[box, fill=green!12, right=1.0cm of ca] (res) {复解析\\展开与留数};
+  \node[box, fill=red!8, right=1.0cm of res] (quat) {四元数\\非交换旋转};
+  \node[box, fill=purple!8, below=1.2cm of $(ca)!0.5!(res)$] (common) {共同代数结构\\$C_n,\;U(1),\;S^3$};
+  \draw[arr] (common) -- (ode);
+  \draw[arr] (common) -- (ca);
+  \draw[arr] (common) -- (res);
+  \draw[arr] (common) -- (quat);
+\end{tikzpicture}
+\caption{本章四条平行结构通过共同的周期代数结构相连接。}
+\label{fig:diffeq_unity}
+\end{figure}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 周期系数微分方程与 Floquet 理论（\S\ref{sec:floquet}）；复指数函数的 $2\pi i$-周期（命题 \ref{prop:complex_exp_periodicity}）；四元数指数的 $2\pi$-周期（命题 \ref{prop:quaternion_exp_rotation}） \\
+缩放 & 耗散系统与体积收缩（\S\ref{sec:three_operators}）；Liouville 公式的相空间体积演化（命题 \ref{prop:liouville_formula}）；复数模长乘性 $|pq| = |p||q|$（命题 \ref{prop:complex_field_props}） \\
+旋转 & 哈密顿系统与环量（\S\ref{sec:three_operators}）；四元数旋转的共轭表示（定理 \ref{thm:quaternion_rotation_conjugation}）；复变函数的旋转周期（命题 \ref{prop:complex_exp_periodicity}） \\
+守恒 & 首次积分（\S\ref{sec:first_integrals}）；诺特型对应（命题 \ref{prop:noether_ode}）；Liouville 公式（命题 \ref{prop:liouville_formula}）；复解析的零点孤立性（推论 \ref{cor:zero_isolated}） \\
+对称 & 三种算子系统的分类（定理 \ref{thm:three_operator_periodic}）；四元数共轭 $\overline{pq} = \bar q \bar p$ 的反自同构对称（命题 \ref{prop:quaternion_basic_props}）；复数共轭对称 \\
+闭合 & 极限环（定义 \ref{def:limit_cycle}）与 Poincaré-Bendixson 定理（定理 \ref{thm:poincare_bendixson}）；柯西积分定理的闭合环路（定理 \ref{thm:cauchy_integral}）；留数定理的闭合积分（定理 \ref{thm:residue_theorem}） \\
+周期 & Floquet 乘子与周期解的稳定性（推论 \ref{cor:floquet_stability}）；复指数函数的周期；四元数指数函数的旋转周期（命题 \ref{prop:quaternion_exp_rotation}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明 Gronwall 不等式（引理 \ref{lem:gronwall}）：
+    设 $\varphi:[t_0,t_0+\alpha]\to[0,\infty)$ 连续，满足
+    \[
+    \varphi(t)\le\varphi_0+\int_{t_0}^{t}\beta\varphi(s)\,ds,
+    \]
+    其中 $\varphi_0\ge0$，$\beta\ge0$。则
+    \[
+    \varphi(t)\le\varphi_0e^{\beta(t-t_0)}.
+    \]
+    请写出构造辅助函数 $\Phi(t)$ 并证明 $\Phi(t)e^{-\beta(t-t_0)}$ 单调不增的完整细节。
+
+    \item 证明 Picard--Lindelöf 存在唯一性定理（定理 \ref{thm:picard_lindelof}）中的两个关键步骤：
+    \begin{enumerate}[label=(\roman*)]
+        \item 迭代序列 $\{y_n\}$ 的一致收敛性，即估计
+              \[
+              \|y_{n+1}(t)-y_n(t)\|\le\frac{ML^n|t-t_0|^{n+1}}{(n+1)!};
+              \]
+        \item 唯一性，即利用 Gronwall 不等式证明两解之差恒为零。
+    \end{enumerate}
+
+    \item 证明解对初值的连续依赖（命题 \ref{prop:continuous_dependence}）：
+    \[
+    \|y(t;t_0,y_0)-y(t;t_0,\tilde{y}_0)\|\le e^{L|t-t_0|}\|y_0-\tilde{y}_0\|.
+    \]
+    并说明为什么这一结论在数值计算中意味着初值误差不会立即被放大，
+    而是以指数速率 $e^{L|t-t_0|}$ 增长。
+
+    \item 证明 Liouville 公式（命题 \ref{prop:liouville_formula}）：
+    对 $\dot{y}=A(t)y$ 的状态转移矩阵 $\Phi(t,t_0)$，有
+    \[
+    \det\Phi(t,t_0)=\exp\left(\int_{t_0}^{t}\operatorname{tr}A(s)\,ds\right).
+    \]
+    请写出 Jacobi 公式的推导，并说明当 $\operatorname{tr}A(t)=0$ 时相空间体积守恒。
+
+    \item 证明常系数线性系统的指数解（定理 \ref{thm:constant_coefficient_exponential}）：
+    $\dot{y}=Ay$ 满足 $y(0)=y_0$ 的唯一解为 $y(t)=e^{At}y_0$。
+    请验证 $e^{At}$ 的级数定义绝对收敛、逐项求导合法，
+    并结合 Picard--Lindelöf 定理说明唯一性。
+
+    \item 根据定理 \ref{thm:linear_phase_portrait}，判断下列 $2\times2$ 矩阵所对应相图的类型：
+    \begin{enumerate}[label=(\roman*)]
+        \item $A_1=\begin{pmatrix}2&0\\0&3\end{pmatrix}$；
+        \item $A_2=\begin{pmatrix}1&0\\0&-1\end{pmatrix}$；
+        \item $A_3=\begin{pmatrix}-1&1\\-1&-1\end{pmatrix}$；
+        \item $A_4=\begin{pmatrix}0&1\\-1&0\end{pmatrix}$。
+    \end{enumerate}
+    分别计算特征值，指出结点、鞍点、焦点、中心四种类型各对应哪一个矩阵。
+
+    \item 证明命题 \ref{prop:first_integral_orbit}：
+    若自治系统具有 $k$ 个独立首次积分，则解被约束在 $(n-k)$ 维不变流形上。
+    请用隐函数定理说明水平集是子流形，
+    并讨论当 $k=n-1$ 时轨道如何被完全确定。
+
+    \item 验证经典力学中的三个首次积分（例 \ref{ex:classical_first_integrals}）：
+    \begin{enumerate}[label=(\roman*)]
+        \item 保守力场中的总机械能 $E=\frac12m\|\dot{\mathbf{r}}\|^2+V(\mathbf{r})$；
+        \item 有心力场中的角动量 $\mathbf{L}=m\mathbf{r}\times\dot{\mathbf{r}}$；
+        \item 某方向不受外力时该方向的动量分量。
+    \end{enumerate}
+    请分别验证 $\frac{d}{dt}E=0$、$\frac{d}{dt}\mathbf{L}=\mathbf{0}$ 与 $\frac{d}{dt}p_i=0$，
+    并指出它们分别对应时间平移、旋转与空间平移对称性。
+
+    \item 证明 Floquet 定理（定理 \ref{thm:floquet}）：
+    对周期系数线性系统，存在非奇异 $T$-周期矩阵 $P(t)$ 与常数矩阵 $B$，
+    使 $\Phi(t)=P(t)e^{Bt}$。
+    请验证 $P(t+T)=P(t)$，并说明为什么 $\log M$ 可能取复矩阵值。
+
+    \item 证明 Floquet 乘子与周期解的稳定性判据（推论 \ref{cor:floquet_stability}）：
+    \begin{enumerate}[label=(\roman*)]
+        \item $\rho=1$ 对应 $T$-周期解；
+        \item $\rho=-1$ 对应 $2T$-周期解；
+        \item $\rho=e^{i2\pi p/q}$ 对应 $qT$-周期解；
+        \item 除 $\rho_1=1$ 外所有 $|\rho_i|<1$ 时该周期解渐近稳定。
+    \end{enumerate}
+
+    \item 证明柯西--黎曼方程（定理 \ref{thm:cauchy_riemann}）：
+    若 $f(z)=u(x,y)+iv(x,y)$ 在 $z_0$ 处复可导，则
+    \[
+    \frac{\partial u}{\partial x}=\frac{\partial v}{\partial y},\qquad
+    \frac{\partial u}{\partial y}=-\frac{\partial v}{\partial x}.
+    \]
+    请分别沿实轴与虚轴方向计算 $f'(z_0)$，并比较实部与虚部。
+
+    \item 证明柯西积分定理（定理 \ref{thm:cauchy_integral}）：
+    若 $f$ 在单连通区域 $D$ 上解析，$\gamma$ 是 $D$ 内闭合路径，则
+    \[
+    \oint_\gamma f(z)\,dz=0.
+    \]
+    请写出利用平面格林公式（引理 \ref{lem:green_forward}）与柯西--黎曼方程
+    将环路积分化为二重积分的完整过程。
+
+    \item 证明柯西积分公式（定理 \ref{thm:cauchy_integral_formula}）：
+    \[
+    f(z_0)=\frac{1}{2\pi i}\oint_\gamma\frac{f(z)}{z-z_0}\,dz.
+    \]
+    请以 $z_0$ 为心取小圆 $\gamma_\varepsilon$，
+    将 $\gamma$ 上的积分变形到 $\gamma_\varepsilon$ 上，并计算极限。
+
+    \item 证明刘维尔定理（定理 \ref{thm:liouville}）：
+    有界整函数必为常值。
+    请利用柯西积分公式的导数形式估计 $|f'(z_0)|$，
+    并说明为什么该估计随半径 $R\to\infty$ 趋于零。
+    进一步用它证明代数基本定理（推论 \ref{cor:fundamental_theorem_algebra}）。
+
+    \item 根据定义 \ref{def:singularity_types}，判断下列函数在指定点处的奇点类型，
+    并计算其留数（定义 \ref{def:residue}）：
+    \begin{enumerate}[label=(\roman*)]
+        \item $f(z)=\dfrac{\sin z}{z}$ 在 $z_0=0$ 处；
+        \item $f(z)=\dfrac{1}{z^2(z-1)}$ 在 $z_0=0$ 处；
+        \item $f(z)=e^{1/z}$ 在 $z_0=0$ 处；
+        \item $f(z)=\dfrac{1}{z^2+1}$ 在 $z_0=i$ 处。
+    \end{enumerate}
+
+    \item 证明留数定理（定理 \ref{thm:residue_theorem}）：
+    设 $f$ 在单连通区域 $D$ 内除有限个孤立奇点 $z_1,\dots,z_m$ 外解析，
+    $\gamma$ 是包围所有 $z_k$ 的正向简单闭曲线，则
+    \[
+    \oint_\gamma f(z)\,dz=2\pi i\sum_{k=1}^{m}\operatorname{Res}(f,z_k).
+    \]
+    请利用柯西积分定理将 $\gamma$ 上的积分分解为围绕各奇点的小圆积分之和。
+
+    \item 写出四元数乘法规则
+    \[
+    i^2=j^2=k^2=ijk=-1,\quad ij=k,\;ji=-k,\;jk=i,\;kj=-i,\;ki=j,\;ik=-j,
+    \]
+    并验证：
+    \begin{enumerate}[label=(\roman*)]
+        \item 四元数单位球面 $S^3$ 在乘法下构成群；
+        \item 共轭映射满足 $\overline{pq}=\overline{q}\,\overline{p}$；
+        \item 模长满足 $|pq|=|p||q|$。
+    \end{enumerate}
+
+    \item 证明四元数旋转的共轭表示（定理 \ref{thm:quaternion_rotation_conjugation}）：
+    对单位四元数 $q\in S^3$ 与纯虚四元数 $v$，映射
+    \[
+    \rho_q(v)=qvq^{-1}
+    \]
+    是 $\mathbb{R}^3$ 中的旋转，且
+    \[
+    \rho_q(v)=v_\parallel+\cos\theta\,v_\perp+\sin\theta(\mathbf{u}\times v_\perp).
+    \]
+    请写出将 $v$ 分解为平行与垂直分量的完整推导。
+
+    \item 证明两个基本恒等式（命题 \ref{prop:three_operator_identities}）：
+    \[
+    \nabla\times(\nabla f)=\mathbf{0},\qquad
+    \nabla\cdot(\nabla\times\mathbf{F})=0.
+    \]
+    请用 Levi-Civita 符号 $\epsilon_{ijk}$ 与 Clairaut 定理
+    （引理 \ref{lem:clairaut}）完成证明，并说明 $C^2$ 假设的必要性
+    （可参考反例 \ref{ex:clairaut_failure}）。
+
+    \item 综合题：说明“守恒律 $\to$ 对称性 $\to$ 闭合轨道 $\to$ 周期”这条主链
+    在微分方程语境下的具体表现。
+    请结合首次积分（定义 \ref{def:first_integral}）、诺特型对应（命题 \ref{prop:noether_ode}）、
+    哈密顿系统（定义 \ref{def:hamiltonian_system}）与 Floquet 理论（\S\ref{sec:floquet}），
+    讨论守恒与对称在微分方程中如何帮助发现周期解，
+    并指出真正直接产生周期的代数条件是什么。
+\end{enumerate}
+

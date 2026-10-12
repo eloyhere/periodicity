@@ -1,0 +1,788 @@
+\chapter{Periodic Structure of Cryptographic Systems}
+\label{chap:crypto-periodic}
+\markboth{Periodic Structure of Cryptographic Systems}{Periodic Structure of Cryptographic Systems}
+
+\begin{remark}[Periodicity decision for the target of this chapter (citation)]\label{rem:crypto_ps_hook}
+When this chapter decides whether a research target is periodic, determines its period type, or seeks its minimal positive period, reference is always made to the `Periodic Systems' chapter:
+for the periodicity criterion see \cref{thm:ps_periodicity_decision},
+for the discrimination of period types see \cref{def:ps_period_type}, \cref{prop:ps_type_discrimination},
+for the search for the minimal positive period see \cref{def:ps_minimal_period_algorithm}, \cref{thm:ps_minimal_period_correctness},
+and for the construction of period series and epicycle groups from data see \cref{thm:ps_series_reconstruction}, \cref{def:ps_epicycle_group}.
+\end{remark}
+
+\begin{remark}[Positioning of this chapter: developed along the five-step interface of the `Periodic Systems' chapter]\label{rem:crypto_chapter_positioning}
+The periodic structure of cryptographic systems studies the mathematical characterisation and the security applications of periodicity, quasi-periodicity and iterative structure in cryptography. This chapter does not establish a separate periodicity criterion; instead it connects cryptographic systems to the five-step interface prescribed by the `Periodic Systems' chapter:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{Decision}: reduce the state translation of stream ciphers, the round-function iteration of block ciphers and the cyclic-group scalar multiplication of public-key cryptography to discrete dynamical systems, invoke \cref{thm:ps_periodicity_decision} to decide whether they are periodic, and determine the period type;
+    \item \textbf{Construction}: build the amplitude series, the frequency series and the phase series from the keystream, the round-function states and the group elements, and assemble them into the cryptographic epicycle group;
+    \item \textbf{Adjustment}: dynamically adjust the epicycle group by such security metrics as the linear complexity, the branch number and the order of the group;
+    \item \textbf{Convolution}: introduce amplitude convolution, phase convolution and frequency convolution on the cryptographic epicycle group, and link them to autocorrelation, the Walsh spectrum, the difference distribution table and the linear approximation table;
+    \item \textbf{Integration}: connect to the tool chains of the three chapters `Discrete Sampling and Intercalation of Periodic Signals', `Harmonic Analysis' and `Time Series Analysis', forming a cryptographic periodicity diagnostic procedure.
+\end{enumerate}
+The cryptographic knowledge used in this chapter includes: the cryptosystem quintuple, linear feedback shift registers, \(m\)-sequences, the Berlekamp--Massey algorithm, the round function of block ciphers, confusion and diffusion, differential cryptanalysis, linear cryptanalysis, modular exponentiation, the discrete logarithm problem, RSA, ElGamal, elliptic-curve scalar multiplication, ECDLP, the Pohlig--Hellman attack, the MOV attack, and the three-layer cryptographic system of TLS 1.3.
+\end{remark}
+
+\begin{remark}[Guide to the seven themes of this chapter]\label{rem:crypto_seven_themes}
+Translation---the state translation of the LFSR and the keystream period (\cref{def:lfsr}, the \(m\)-sequence period \(2^L-1\));
+Scaling---the iteration of the block-cipher round function and the diffusion rate (\cref{def:block_cipher_round_function}, \cref{def:confusion_diffusion});
+Rotation---modular exponentiation and the cyclic-group scalar multiplication of elliptic-curve point multiplication (\cref{def:modular_exponentiation_period}, \cref{def:elliptic_curve_period});
+Balance---the three structural invariants: the linear complexity \(L\), the branch number and the order of the group \(n\) (\cref{thm:crypto_invariants});
+Symmetry---three layers of special elements: the all-zero state, the identity map and the identity element (\cref{thm:crypto_three_layer_structure});
+Closure---the mutually inverse closure of encryption and decryption \(D_k(E_k(m))=m\) (\cref{def:cryptosystem});
+Period---the \(m\)-sequence period, the iteration depth of the round function, and the scalar-multiplication period of the cyclic group order (\cref{def:crypto_periodic_structure}).
+\end{remark}
+
+\section{Periodicity decision for cryptographic targets: connection to step one of the `Periodic Systems' chapter}
+\label{sec:crypto_periodicity_decision}
+
+\subsection{Cryptographic targets, decision input and decision map}
+
+\begin{definition}[Cryptographic target and decision input]\label{def:crypto_target}
+A \textbf{cryptographic target} is one of the following objects:
+\begin{enumerate}[label=(\roman*)]
+    \item a keystream generator of a stream cipher, whose state space is \(\mathbb F_2^L\) and whose state translation is \(\mathcal T\);
+    \item a round-function iteration system of a block cipher, whose state space is \(\mathbb F_2^n\) and whose round function is \(F_{k_i}\);
+    \item a cyclic-group scalar multiplication system of public-key cryptography, whose state space is a finite cyclic group \(G\) and whose scalar multiplication is \(x\mapsto g^x\) or \(k\mapsto [k]P\);
+    \item a keystream, a ciphertext sequence or a sequence of group elements produced by one of the above systems.
+\end{enumerate}
+The \textbf{decision input} of a cryptographic target is the pair
+\[
+\mathcal D_{\mathrm{C}}=(\mathcal S,\Phi),
+\]
+where \(\mathcal S\) is the state space or the sequence space and \(\Phi:\mathcal S\to\mathcal S\) is the evolution map induced by the state translation, the round function or the scalar multiplication. If \(\mathcal S\) is a finite set, the target is called a \textbf{finite cryptographic target}; if \(\mathcal S\) is an infinite set, the target is called an \textbf{infinite cryptographic target}.
+\end{definition}
+
+\begin{definition}[Cryptographic decision map]\label{def:crypto_periodization}
+Let a cryptographic target be given by the decision input \(\mathcal D_{\mathrm{C}}=(\mathcal S,\Phi)\). If the states or the output of the target are generated by iteration of \(\Phi\), that is, if there exists \(x_0\in\mathcal S\) such that
+\[
+x_t=\Phi^t(x_0),\qquad t\in\mathbb N,
+\]
+then \(\Phi\) is called the \textbf{cryptographic decision map} of the target. In this case the cryptographic target is reduced to the discrete dynamical system \((\mathcal S,\Phi)\), to which the criteria of the `Operations and Periodicity' chapter and of the `Periodic Systems' chapter may be applied directly.
+\end{definition}
+
+\begin{theorem}[Cryptographic periodicity decision theorem]\label{thm:crypto_periodicity_decision}
+Let the decision map of a cryptographic target be \(\Phi\), and let \((\mathcal S,\Phi)\) be a discrete dynamical system. Then:
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{Sufficient decision}: if there exists \(m\in\mathbb N^+\) such that \(\Phi^m=\mathrm{id}\), then the target is a uniformly periodic cryptosystem; every state orbit is closed, and the orbit length divides \(m\).
+    \item \textbf{Equivalence of the decision}: the target is a uniformly periodic cryptosystem if and only if \(\operatorname{ord}(\Phi)<\infty\).
+    \item \textbf{Pointwise criterion}: the orbit of the target at the state \(x_0\) is closed if and only if \(x_0\) is a periodic point; the orbit length is then the period at that point.
+    \item \textbf{Non-omissibility}: the conjunction of conserved quantities and the symmetry group cannot replace \(\operatorname{ord}(\Phi)<\infty\); a quasi-periodic cryptographic target is not a periodic cryptosystem.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:crypto_periodicity_decision} of this chapter is the domain instantiation of \cref{thm:ps_periodicity_decision} in the `Periodic Systems' chapter:
+one need only replace the decision map $f$ and the evolution group by the $\Phi$ of this chapter, and the four clauses (A) sufficient decision, (B) equivalence of the decision, (C) pointwise criterion and
+(D) non-omissibility hold one by one. By the convention of \cref{rem:ps_applications_hook}, they are not expanded again here.
+\end{proof}
+
+\begin{corollary}[Cryptographic period types]\label{cor:crypto_period_type}
+After the decision of \cref{thm:crypto_periodicity_decision}, a cryptographic target falls into one of the following types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Trivially periodic type}: the minimal period is \(m_0=1\), and the state is a fixed point (such as the all-zero state of an LFSR);
+    \item \textbf{Strictly periodic type}: \(1<m_0<\infty\), and the state is strictly periodic (such as the state orbit of an \(m\)-sequence);
+    \item \textbf{Uniformly periodic type}: \(\operatorname{ord}(\Phi)=m<\infty\), and all orbit lengths divide \(m\);
+    \item \textbf{Quasi-periodic type}: \(\operatorname{ord}(\Phi)=\infty\), the orbits are not closed but are dense on a compact carrier structure;
+    \item \textbf{Eventually periodic type}: there exists \(N\) such that the target is periodic for \(t\ge N\);
+    \item \textbf{Discretely periodic type}: the carrier structure is \(\mathbb Z\), and the normalised period ratio \(\rho=T_x/\Delta x\in\mathbb Q\).
+    \item \textbf{Asymptotically periodic (damped) type}: the orbit is not closed, but tends asymptotically to a closed orbit or to a fixed point, the residual decaying as \(e^{-\kappa t}\) (see \cref{def:ps_period_type}(vii)).
+\end{enumerate}
+Among these, (i)--(iii) and (vi) belong to periodic cryptosystems; (iv) does not belong to periodic cryptosystems, but can be handled by bounded-approximation tools; (v) is a periodic cryptosystem only in its stable stage; (vii), like (iv), is a type in the limiting sense; it is not a periodic cryptosystem and can be handled with bounded-approximation tools only in its stable stage.
+\end{corollary}
+
+\begin{proof}
+Each clause follows by substituting the cryptographic target into \cref{thm:crypto_periodicity_decision} and \cref{def:ps_period_type} of the `Periodic Systems' chapter.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for the LFSR]\label{lem:lfsr_period}
+Let the state translation of an LFSR of length \(L\) be \(\mathcal T\), with feedback polynomial \(C(x)\). Then:
+\begin{enumerate}[label=(\roman*)]
+    \item \(\mathcal T\) is a linear transformation on \(\mathbb F_2^L\), whose matrix representation \(A\) is the companion matrix;
+    \item the period \(p\) of \(\mathcal T\) is the least positive integer such that \(A^p=I\);
+    \item if \(C(x)\) is a primitive polynomial, then the period of every non-zero initial state is \(2^L-1\);
+    \item the all-zero state is the unique fixed point of \(\mathcal T\), and no non-zero orbit ever passes through the all-zero state.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(i) The state translation
+\[
+\mathcal T(s_0,\dots,s_{L-1})=(s_1,\dots,s_{L-1},f(s_0,\dots,s_{L-1}))
+\]
+is a linear map, with matrix
+\[
+A=\begin{pmatrix}
+0&1&0&\cdots&0\\
+0&0&1&\cdots&0\\
+\vdots&\vdots&\vdots&\ddots&\vdots\\
+0&0&0&\cdots&1\\
+c_0&c_1&c_2&\cdots&c_{L-1}
+\end{pmatrix}.
+\]
+Its characteristic polynomial is \(C(x)\).
+(ii) The period is defined as the least positive integer \(p\) such that \(A^p=I\).
+(iii) When \(C(x)\) is a primitive polynomial, \(A\) is a generator of the multiplicative group \(\mathbb F_{2^L}^*\), of order \(2^L-1\).
+(iv) \(A\mathbf 0=\mathbf 0\), and if \(A^t s=\mathbf 0\) then \(s=\mathbf 0\); hence no non-zero orbit passes through the all-zero state.
+\end{proof}
+
+\begin{definition}[Cryptographic minimal positive period algorithm]\label{def:crypto_minimal_period_algorithm}
+\textbf{Input}: samples \(x_0,\dots,x_{N-1}\) of a cryptographic target, and a tolerance \(\varepsilon\ge0\).
+\textbf{Output}: the minimal positive period \(T_0\), or the verdict `not periodic'.
+\textbf{Steps}:
+\begin{enumerate}[label=(\arabic*)]
+    \item take the candidate set \(\mathcal P=\{T\in\mathbb N^+:2T\le N\}\) and traverse it in increasing order of \(T\);
+    \item for each \(T\) compute the maximal deviation
+    \[
+    E(T)=\max_{0\le n<N-T}\|x_{n+T}-x_n\|;
+    \]
+    \item output the first \(T\) satisfying \(E(T)\le\varepsilon\) as \(T_0\); if the traversal is exhausted with no solution, output `not periodic';
+    \item commensurability check: use \(\rho=T_x/\Delta x\) (with \(T_0=p\) when \(\rho=p/q\) is in lowest terms; write \(\ell=T_0\Delta x=qT_x\) for the continuous span corresponding to \(T_0\) sampling points) together with \cref{prop:commensurability_periodicity_parallel}, \cref{cor:sampling_period_relation_parallel} of the `Discrete Sampling and Intercalation of Periodic Signals' chapter to verify the conversion relation between \(T_0\) and the continuous period \(T_x\).
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[Correctness of the cryptographic minimal positive period algorithm]\label{thm:crypto_minimal_period_correctness}
+\begin{enumerate}[label=(\roman*)]
+    \item If the samples form a strictly periodic sequence, and \(\varepsilon=0\), \(N\ge2T_0\), then the algorithm outputs the discrete fundamental period \(T_0\).
+    \item If the samples are obtained by sampling a continuous cryptographic target of fundamental period \(T_x\) at sampling interval \(\Delta x\), and the normalised period ratio \(\rho=T_x/\Delta x=p/q\) is in lowest terms, then the algorithm outputs \(T_0=p\).
+    \item If \(\rho\notin\mathbb Q\), then no true period exists: \(E(T)>0\) for every \(T\in\mathbb N^+\).
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:crypto_minimal_period_correctness} of this chapter follows directly from two conclusions of the `Discrete Sampling and Intercalation of Periodic Signals' chapter:
+(i) by \cref{def:discrete_fundamental_period}, $T_0$ is the minimal positive period, hence $E(T_0)=0$, whilst (T)>0$ for <T_0$;
+since the algorithm traverses in increasing order of $T$, the first one satisfying $E(T)=0$ is $T_0$;
+(ii)(iii) follow by substitution from \cref{prop:commensurability_periodicity_parallel}(ii)(iii). The complete argument is given in that chapter.
+\end{proof}
+
+\begin{example}[Example of an LFSR periodicity decision]\label{ex:crypto_lfsr_period}
+Take \(L=4\) and the primitive polynomial \(C(x)=1+x+x^4\). By \cref{lem:lfsr_period}, the period of every non-zero initial state is \(2^4-1=15\). Taking the initial state \((1,0,0,0)\), the state orbit has length \(15\), and the output \(m\)-sequence has period \(15\).
+\end{example}
+
+\begin{example}[Periodicity decision for RSA modular exponentiation]\label{ex:rsa_period}
+In RSA the period of \(g^x\bmod N\) is \(\operatorname{ord}_N(g)\), which divides \(\phi(N)\). If \(g\) is a primitive root modulo \(N\), the period is \(\phi(N)\). By \cref{thm:crypto_periodicity_decision}, this target is of strictly periodic type; but an attacker cannot recover \(\phi(N)\) directly from \(N\), so the period itself cannot be computed publicly.
+\end{example}
+
+\begin{remark}[Cryptographic invariants do not guarantee period security]\label{rem:crypto_invariant_not_period}
+The invariants of a cryptosystem are auxiliary conditions on the periodic structure, but they do not constitute a sufficient condition for security. For example, an LFSR has maximal period \(2^L-1\), yet the Berlekamp--Massey algorithm can still recover the entire sequence from \(2L\) consecutive bits. The decision of the periodic structure of a cryptosystem must rely on concrete criteria such as \cref{thm:crypto_periodicity_decision} or \cref{lem:lfsr_period}, combined with an attack model.
+\end{remark}
+
+\section{Construction of the cryptographic period series and epicycle group: connection to step two of the `Periodic Systems' chapter}
+\label{sec:crypto_series_construction}
+
+\begin{definition}[Cryptographic amplitude, frequency and phase series]\label{def:crypto_series}
+Let the state or output sequence of a cryptographic target be \(\{z_t\}\). If it can be written as
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+then
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+are called respectively the \textbf{amplitude series}, the \textbf{frequency series} and the \textbf{phase series} of the cryptographic target. The three agree with \cref{def:amplitude_series}, \cref{def:frequency_series}, \cref{def:phase_series} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{definition}[Cryptographic epicycle group]\label{def:crypto_epicycle_group}
+Let the period series of a cryptographic target be given by the amplitude series \(\{A_k\}\), the frequency series \(\{\omega_k\}\) and the phase series \(\{\phi_k\}\). For each \(k\) define the epicycle
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+whose collection
+\[
+\mathfrak E_{\mathrm{C}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+is called the \textbf{epicycle group} of the cryptographic target. Its superposition is the cryptographic period series
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[Construction of period series from cryptographic data]\label{thm:crypto_series_reconstruction}
+Let the output sequence \(\{z_t\}\) of a cryptographic target be a finite periodic sequence of period \(N\). Then:
+\begin{enumerate}[label=(\roman*)]
+    \item \(\{z_t\}\) can be expanded as a discrete Fourier series
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item the amplitude series is given by \(|c_k|\), the phase series by \(\arg c_k\), and the frequency series by \(2\pi k/N\);
+    \item if \(\{z_t\}\) is an \(m\)-sequence, then its autocorrelation function is two-valued, and the power spectrum is flat at non-zero frequencies.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) The discrete Fourier series of a finite periodic sequence is a standard result: the basis functions \(\{e^{i2\pi kt/N}\}_{k=0}^{N-1}\) form an orthogonal basis of \(\mathbb C^N\).
+(ii) This is read off directly from \(c_k=A_k e^{i\phi_k}\).
+(iii) The two-valued autocorrelation of an \(m\)-sequence is given by \cref{ch16_mseq_autocorrelation}; its power spectrum is the Fourier transform of the autocorrelation, and is the constant \(N+1\) at non-zero frequencies.
+\end{proof}
+
+\begin{definition}[Cryptosystem]\label{def:cryptosystem}
+A \textbf{cryptosystem} is a quintuple \((\mathcal P,\mathcal C,\mathcal K,\mathcal E,\mathcal D)\), where:
+\begin{enumerate}[label=(\roman*)]
+    \item \(\mathcal P\) is the \textbf{plaintext space};
+    \item \(\mathcal C\) is the \textbf{ciphertext space};
+    \item \(\mathcal K\) is the \textbf{key space};
+    \item \(\mathcal E=\{E_k:\mathcal P\to\mathcal C\mid k\in\mathcal K\}\) is the \textbf{family of encryption functions};
+    \item \(\mathcal D=\{D_k:\mathcal C\to\mathcal P\mid k\in\mathcal K\}\) is the \textbf{family of decryption functions}, satisfying \(D_k(E_k(m))=m\).
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Periodic structure of a cryptosystem]\label{def:crypto_periodic_structure}
+The \textbf{periodic structure} of a cryptosystem falls into three basic types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{State period}: the periodicity of the keystream sequence, determined by the size of the generator's internal state space and by the structure of the feedback polynomial; the special element is the all-zero state of the LFSR.
+    \item \textbf{Iterative structure}: the self-similarity of the round function of a block cipher, every round of encryption having the same algebraic structure; the special element is the identity map under a zero key.
+    \item \textbf{Cyclic-group scalar multiplication period}: the periodicity of the modular exponentiation \(g^x\bmod p\) in the exponent \(x\), and the periodicity of the elliptic-curve point multiplication \([k]P\) in the scalar \(k\); the special element is the identity element of the group.
+\end{enumerate}
+\end{definition}
+
+\subsection{State period of stream ciphers}
+
+\begin{definition}[Linear feedback shift register]\label{def:lfsr}
+A \textbf{linear feedback shift register} (LFSR) of length \(L\) consists of the following components:
+\begin{enumerate}[label=(\roman*)]
+    \item \(L\) register cells \(s_0,\dots,s_{L-1}\in\mathbb F_2\);
+    \item feedback coefficients \(c_0,\dots,c_{L-1}\in\mathbb F_2\), with feedback function
+    \[
+    f(s_0,\dots,s_{L-1})=\bigoplus_{i=0}^{L-1}c_i s_i.
+    \]
+\end{enumerate}
+The \textbf{state translation} at each clock cycle is
+\[
+\mathcal T(s_0,\dots,s_{L-1})=(s_1,\dots,s_{L-1},f(s_0,\dots,s_{L-1})).
+\]
+The output keystream bit is \(z_t=s_0\). The feedback polynomial
+\[
+C(x)=1+c_1x+\dots+c_{L-1}x^{L-1}+x^L
+\]
+completely determines the periodic structure of the LFSR. When \(C(x)\) is a primitive polynomial, every non-zero initial state generates the maximal period \(2^L-1\), which is called an \textbf{\(m\)-sequence}.
+\end{definition}
+
+\begin{proposition}[Algebraic properties of the LFSR]\label{prop:lfsr_algebraic_properties}
+The state translation \(\mathcal T\) of an LFSR satisfies:
+\begin{enumerate}[label=(\roman*)]
+    \item \(\mathcal T\) is a linear transformation on \(\mathbb F_2^L\), and the matrix representation \(A\) is the companion matrix;
+    \item the period of the LFSR is the least positive integer \(p\) such that \(\mathcal T^p=\operatorname{id}\). For an \(m\)-sequence, \(p=2^L-1\);
+    \item the linear complexity \(L\) is invariant under the state translation; the linear complexity of an \(m\)-sequence equals the number of LFSR stages \(L\);
+    \item the all-zero state is the unique fixed point, and no non-zero orbit ever passes through the all-zero state.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) By \cref{lem:lfsr_period}(i).
+(ii) By \cref{lem:lfsr_period}(ii)(iii).
+(iii) The linear complexity is the length of the shortest LFSR needed to generate a sequence. The Berlekamp--Massey algorithm recovers an equivalent LFSR from \(2L\) consecutive bits, so \(L\) is an extractable invariant.
+(iv) By \cref{lem:lfsr_period}(iv).
+\end{proof}
+
+\begin{definition}[Autocorrelation function of an \(m\)-sequence]\label{def:m_sequence_autocorrelation}
+Let \(\{z_t\}_{t=0}^{N-1}\) be an \(m\)-sequence (\(N=2^L-1\)) taking values in \(\{+1,-1\}\). Its normalised autocorrelation function is
+\[
+\rho(h)=\frac1N\sum_{t=0}^{N-1}z_t z_{t+h}=
+\begin{cases}
+1,&h\equiv0\pmod N,\\
+-1/N,&h\not\equiv0\pmod N.
+\end{cases}
+\]
+\end{definition}
+
+\begin{lemma}[Two-valued autocorrelation of an \(m\)-sequence]\label{ch16_mseq_autocorrelation}
+Let \(\{z_t\}\) be an \(m\)-sequence (\(N=2^L-1\)). Then
+\[
+\rho(h)=\frac1N\sum_{t=0}^{N-1}z_t z_{t+h}=
+\begin{cases}
+1,&h\equiv0\pmod N,\\
+-1/N,&h\not\equiv0\pmod N.
+\end{cases}
+\]
+\end{lemma}
+
+\begin{proof}
+By the shift-and-add property of \(m\)-sequences: for \(h\not\equiv0\pmod N\), \(\{z_t\oplus z_{t+h}\}\) is again a shift of the same \(m\)-sequence. Writing \(z_t=(-1)^{s_t}\), we have
+\[
+z_t z_{t+h}=(-1)^{s_t+s_{t+h}}=(-1)^{s_t\oplus s_{t+h}}.
+\]
+Within one period the numbers of \(+1\) and \(-1\) are \((N-1)/2\) and \((N+1)/2\) respectively, so
+\[
+\sum_t z_t z_{t+h}=\frac{N-1}{2}-\frac{N+1}{2}=-1,
+\]
+and normalisation gives \(\rho(h)=-1/N\); for \(h\equiv0\), \(\rho(0)=1\).
+\end{proof}
+
+\begin{example}[Concrete computation of an \(m\)-sequence with \(L=4\)]\label{ex:mseq_L4}
+Take \(L=4\) and the primitive polynomial \(C(x)=1+x+x^4\). Starting from the non-zero initial state \((1,0,0,0)\), the state period is \(15\). The output \(m\)-sequence is
+\[
+100010011010111\cdots
+\]
+and, after passing to the values \(\{+1,-1\}\), it is
+\[
+(+1,-1,-1,-1,+1,-1,-1,+1,+1,-1,+1,-1,+1,+1,+1).
+\]
+There are \(8\) occurrences of \(+1\) and \(7\) of \(-1\), in accordance with the balance property.
+\end{example}
+
+\begin{definition}[Periodic attack on stream ciphers]\label{def:stream_cipher_period_attack}
+The security of a stream cipher depends on the state period of the keystream sequence. If the period \(p\) is too short, an attacker can break it in the following ways:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Period detection}: compute the autocorrelation function of the ciphertext, which exhibits a peak at \(h=p\);
+    \item \textbf{Linear complexity attack}: the Berlekamp--Massey algorithm recovers an equivalent LFSR from \(2L\) consecutive bits;
+    \item \textbf{Correlation attack}: exploit the correlation between the outputs of the individual LFSRs and the keystream to break them one by one.
+\end{enumerate}
+\end{definition}
+
+\begin{remark}[Security criteria for stream ciphers (engineering practice)]\label{prop:stream_cipher_security}
+On the basis of the analysis of the state period, the secure design of a stream cipher should observe:
+\begin{enumerate}[label=(\roman*)]
+    \item maximisation of the state period: the period should be at least \(2^{128}\);
+    \item maximisation of the linear complexity: the linear complexity should approach the period;
+    \item minimisation of the autocorrelation: the autocorrelation at non-zero shifts should be as close to zero as possible.
+\end{enumerate}
+\textbf{Status note}: the clauses above are engineering rules of thumb, not mathematical propositions; when cited they should be treated as empirical conclusions.
+\end{remark}
+
+\subsection{Iterative structure of block ciphers}
+
+\begin{definition}[Round function of a block cipher]\label{def:block_cipher_round_function}
+A \textbf{block cipher} encrypts by iterating a round function \(F_k:\mathbb F_2^n\to\mathbb F_2^n\). Let the number of rounds be \(R\) and the round keys be \(k_1,\dots,k_R\); the encryption process is
+\[
+C=F_{k_R}\circ F_{k_{R-1}}\circ\cdots\circ F_{k_1}(P),
+\]
+where \(P\in\mathbb F_2^n\) is the plaintext block and \(C\in\mathbb F_2^n\) is the ciphertext block.
+\end{definition}
+
+\begin{definition}[Confusion and diffusion]\label{def:confusion_diffusion}
+The \textbf{confusion} and \textbf{diffusion} proposed by Shannon are the two basic principles of block-cipher design:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Confusion}: make the statistical relation between the ciphertext and the key as complex as possible, mainly by means of non-linear S-boxes;
+    \item \textbf{Diffusion}: make a change in a single plaintext bit propagate to as many ciphertext bits as possible, mainly by means of a linear permutation layer.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Iterative structure of block ciphers]\label{prop:block_cipher_iteration_structure}
+The round-function iteration of a block cipher has the following structural properties:
+\begin{enumerate}[label=(\roman*)]
+    \item each round of encryption \(F_{k_i}\) is parameterised by the round key \(k_i\), and \(E_k=F_{k_R}\circ\cdots\circ F_{k_1}\);
+    \item the number of rounds \(R\) is the iteration-depth parameter, which determines the cumulative effect of confusion and diffusion;
+    \item the branch number is a structural invariant of the diffusion layer. The MixColumns branch number of AES is \(5\), and full diffusion is reached after \(2\) rounds;
+    \item under a zero key the special element of one round of encryption is the identity map.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) Each round can be decomposed as \(F_{k_i}(x)=L(S(x\oplus k_i))\), where \(S\) is the S-box and \(L\) is a linear permutation.
+(ii) The number of rounds \(R\) directly controls the iteration depth. AES-128 uses \(R=10\), AES-256 uses \(R=14\).
+(iii) The MixColumns branch number of AES is \(5\): a change of \(1\) byte in the input changes at least \(4\) bytes in the output. The branch number has an additive property under composition of round functions.
+(iv) With a zero key, \(F_0=\operatorname{id}\).
+\end{proof}
+
+\begin{example}[Concrete computation of AES diffusion]\label{ex:aes_diffusion}
+Single-round transformation of AES-128: only the \((1,1)\) entry of the input state matrix is \(01\). After round 1, SubBytes sends \(01\mapsto7C\), ShiftRows moves the active byte, and MixColumns expands the single active byte into a whole active column, the number of active bytes becoming \(4\). After round 2 the number of active bytes expands to \(16\), reaching full diffusion.
+\end{example}
+
+\begin{definition}[Periodic attack on block ciphers]\label{def:block_cipher_period_attack}
+The security of a block cipher depends on the iterative structure of the round function. The main attacks include:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Differential cryptanalysis}: exploit the propagation law of input and output differences, whose probability decays according to the product law;
+    \item \textbf{Linear cryptanalysis}: exploit the bias of a linear approximation, which decays according to the product law;
+    \item \textbf{Integral attack}: exploit the algebraic evolution of a specific input structure.
+\end{enumerate}
+\end{definition}
+
+\begin{remark}[Security criteria for block ciphers (engineering practice)]\label{prop:block_cipher_security}
+On the basis of the analysis of the iterative structure, the secure design of a block cipher should observe:
+\begin{enumerate}[label=(\roman*)]
+    \item sufficiency of the number of rounds: the propagation probability of differential/linear characteristics is far smaller than the probability for a random permutation;
+    \item maximisation of S-box non-linearity;
+    \item maximisation of the branch number of the diffusion layer;
+    \item independence of the round keys.
+\end{enumerate}
+\textbf{Status note}: the clauses above are engineering rules of thumb, not mathematical propositions; when cited they should be treated as empirical conclusions.
+\end{remark}
+
+\subsection{Cyclic group structure of public-key cryptography}
+
+\begin{definition}[Periodic structure of modular exponentiation]\label{def:modular_exponentiation_period}
+Let \(G\) be a finite cyclic group, \(g\in G\) a generator, and \(|G|=n\). \textbf{Modular exponentiation} is defined by
+\[
+E(x)=g^x,\qquad x\in\mathbb Z_n.
+\]
+Its structural properties:
+\begin{enumerate}[label=(\roman*)]
+    \item cyclic-group scalar multiplication: \(g^{x+1}=g\cdot g^x\);
+    \item period \(n\): \(g^{x+n}=g^x\);
+    \item the special element is the identity element \(e=g^0\);
+    \item the invariant is the order of the group \(n\). In RSA \(n=\phi(N)=(p-1)(q-1)\); in ElGamal \(n=q\); for an elliptic curve \(n\) is the order of the curve.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Discrete logarithm problem]\label{def:discrete_logarithm_problem}
+The \textbf{discrete logarithm problem} (DLP): given \(g\) and \(h=g^x\), find \(x\bmod n\). The modular exponentiation \(x\mapsto g^x\) is easy to compute, but the inverse operation is hard in the classical model of computation.
+\end{definition}
+
+\begin{proposition}[Structural properties of public-key cryptography]\label{prop:public_key_structure}
+The modular exponentiation of public-key cryptography has the following structural properties:
+\begin{enumerate}[label=(\roman*)]
+    \item the encryption operation is the scalar multiplication of the plaintext in a cyclic group;
+    \item decryption depends on the private key \(d\), satisfying \(ed\equiv1\pmod{\phi(N)}\);
+    \item the invariants are the modulus \(N\) and the order \(\phi(N)\);
+    \item the special element is the identity element \(1\).
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+RSA correctness: \(ed=1+k\phi(N)\). If \(\gcd(m,N)=1\), then by Euler's theorem \(m^{\phi(N)}\equiv1\pmod N\), so
+\[
+D(C)=C^d\equiv m^{ed}=m(m^{\phi(N)})^k\equiv m\pmod N.
+\]
+If \(\gcd(m,N)\neq1\), verify modulo \(p\) and \(q\) separately by the Chinese remainder theorem, and combine to obtain \(m^{ed}\equiv m\pmod N\). Hence \(D\circ E=E\circ D=\operatorname{id}\).
+\end{proof}
+
+\begin{definition}[Periodic structure of elliptic curves]\label{def:elliptic_curve_period}
+Let \(E\) be an elliptic curve over the finite field \(\mathbb F_q\), and let \(E(\mathbb F_q)\) be a finite abelian group. The order of a point \(P\) is the least positive integer \(n\) such that \([n]P=\mathcal O\). The scalar multiplication is
+\[
+[k]P=\underbrace{P+\cdots+P}_{k\text{ times}}.
+\]
+ECDLP: given \(P\) and \(Q=[k]P\), find \(k\bmod n\).
+\end{definition}
+
+\begin{remark}[Security conditions for elliptic-curve cryptography (engineering practice)]\label{prop:ecc_security}
+The security of elliptic-curve cryptography is guaranteed by the following conditions:
+\begin{enumerate}[label=(\roman*)]
+    \item primality of the order: \(n\) should contain a large prime factor, so as to prevent the Pohlig--Hellman attack;
+    \item embedding degree: \(k\) should be sufficiently large, so as to prevent the MOV attack;
+    \item security of the twisted curve.
+\end{enumerate}
+\textbf{Status note}: the clauses above are engineering rules of thumb, not mathematical propositions; when cited they should be treated as empirical conclusions.
+\end{remark}
+
+\section{Dynamic adjustment of the cryptographic epicycle group: connection to step three of the `Periodic Systems' chapter}
+\label{sec:crypto_adaptive}
+
+\begin{definition}[Dynamic adjustment of the cryptographic epicycle group]\label{def:crypto_adaptive_adjustment}
+Let the current cryptographic epicycle group be \(\mathfrak E^{(j)}\), with partial sum
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+and residual \(r^{(j)}=z-z^{(j)}\). \textbf{Dynamic adjustment} consists of two rules:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Quantity adjustment}: if the residual energy \(\|r^{(j)}\|^2>\delta\), add one new epicycle according to the peak of the residual periodogram:
+    \[
+    \mathfrak E^{(j+1)}=\mathfrak E^{(j)}\cup\{(\hat A,\hat\omega,\hat\phi)\},\qquad
+    \hat\omega=\arg\max_\omega|\widehat{z_r}(\omega)|;
+    \]
+    \item \textbf{Parameter adjustment}: update the parameters of the existing epicycles by regularised least squares or by the security metrics:
+    \[
+    (A_k,\phi_k)\leftarrow\arg\min_{A,\phi}\sum_n\left|z(n)-\sum_kA_ke^{i(\omega_kn+\phi_k)}\right|^2.
+    \]
+\end{enumerate}
+In a cryptosystem, quantity adjustment corresponds to increasing the number of LFSR stages, the number of rounds or the prime factors of the group order; parameter adjustment corresponds to adjusting the feedback polynomial, the S-box or the curve parameters, so that the security metrics are monotonically improved.
+\end{definition}
+
+\begin{proposition}[Monotonicity of quantity adjustment]\label{prop:crypto_adaptive_growth}
+After the dominant residual frequency component is added as in \cref{def:crypto_adaptive_adjustment}(i), the residual energy is monotonically non-increasing:
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+with equality if and only if the residual has no energy at the selected frequency.
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:crypto_adaptive_growth} of this chapter agrees with the dynamic adjustment mechanism of \cref{def:ps_adaptive_adjustment} in the `Periodic Systems' chapter:
+adding an epicycle removes the component of $r^{(j)}$ along $\hat\omega$ from the residual, and the orthogonal decomposition
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{the removed component}\|^2$ gives the inequality,
+with equality if and only if the norm of the removed component is zero. The complete argument is given there.
+\end{proof}
+
+\begin{theorem}[Convergence of dynamic adjustment]\label{thm:crypto_adaptive_convergence}
+Let the cryptographic target be a \textbf{real-valued finite periodic sequence} of length $T_0$ ($T_0\in\mathbb N$) and let $\delta=0$. Then after at most $\lfloor T_0/2\rfloor+1$ steps of dynamic adjustment the residual is zero, and the resulting cryptographic epicycle group is the exact Fourier data of the target; for a \textbf{complex-valued} sequence the corresponding number of steps is at most $T_0$.
+\end{theorem}
+
+\begin{proof}
+The discrete Fourier series of a \textbf{real-valued} finite periodic sequence of length $T_0$ ($T_0\in\mathbb N$) is complete on $\lfloor T_0/2\rfloor+1$ harmonics (including the constant term); a \textbf{complex-valued} sequence requires $T_0$ components. At each step one dominant frequency component of the residual is extracted as in \cref{prop:crypto_adaptive_growth} and the residual energy decreases strictly, so after finitely many steps the residual is zero.
+\end{proof}
+
+\begin{definition}[Security-metric adjustment]\label{def:crypto_security_metric_adjustment}
+Let the security metric of a cryptographic target be
+\[
+\mathcal I=(\mathcal I_{\mathrm{translation}},\mathcal I_{\mathrm{scaling}},\mathcal I_{\mathrm{rotation}})
+=(\text{linear complexity }L,\ \text{branch number }\mathcal B,\ \text{largest prime factor of the group order }n).
+\]
+\textbf{Security-metric adjustment} is: at each step choose a neighbouring parameter $\theta$ in the parameter space $\Theta$ for which $\mathcal I(\theta)$ is \textbf{strictly decreasing} in the lexicographic order (minimisation); if no such neighbouring parameter exists, the process stops---then $\theta$ is a \textbf{locally optimal} parameter.
+\end{definition}
+
+\begin{proposition}[Finite convergence of security-metric adjustment]\label{prop:crypto_security_metric_convergence}
+Let the parameter space $\Theta$ be finite and let each adjustment make $\mathcal I$ \textbf{strictly decreasing} in the lexicographic order. Then the adjustment terminates after finitely many steps at a locally optimal parameter.
+\end{proposition}
+
+\begin{proof}
+$\Theta$ is finite, so $\mathcal I$ takes finitely many values. The lexicographic order is well-founded on a finite set of values, so a strictly lexicographically decreasing sequence cannot continue indefinitely and the process terminates after finitely many steps. At termination there is no neighbouring parameter making $\mathcal I$ strictly lexicographically decreasing, that is, the parameter is locally optimal. Monotonicity must be imposed on the \textbf{whole lexicographic order}: if only `some component strictly increases or decreases' is required, cycles such as $(2,1)\to(1,2)\to(2,1)$ cannot be excluded and finite termination fails.
+\end{proof}
+
+\begin{remark}[Boundaries of dynamic adjustment]\label{rem:crypto_adaptive_boundary}
+\cref{thm:crypto_adaptive_convergence} relies on finite periodic sequences. For infinite-period or quasi-periodic cryptographic targets, no finite epicycle group represents them exactly, and only bounded approximation is possible. Security-metric adjustment does not guarantee global optimality, nor does it guarantee computational security; computational security depends on the concrete attack model and computational assumptions.
+\end{remark}
+
+\section{Cryptographic convolution: connection to step four of the `Periodic Systems' chapter}
+\label{sec:crypto_convolution}
+
+\begin{definition}[Cryptographic amplitude, phase and frequency convolutions]\label{def:crypto_convolution_types}
+Let two cryptographic epicycle groups be
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+Define:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Amplitude convolution}: \(\mathbb A_{mn}=A_nB_m\);
+    \item \textbf{Phase convolution}: \(\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}\);
+    \item \textbf{Frequency convolution}: \(\mathbb F_{mn}=\omega_n\nu_m\);
+    \item \textbf{Trend convolution}: \(\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}\).
+\end{enumerate}
+This agrees with \cref{def:amplitude_convolution}, \cref{def:phase_convolution}, \cref{def:frequency_convolution}, \cref{def:tendency_convolution} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{theorem}[Action of the three convolutions on the cryptographic epicycle group]\label{thm:crypto_convolution_action}
+Let the epicycle groups of two cryptographic targets be \(\mathfrak E\) and \(\mathfrak E'\) respectively. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item amplitude convolution acts only on the radius;
+    \item phase convolution acts only on the phase;
+    \item frequency convolution acts only on the rotational speed;
+    \item trend convolution preserves both amplitude and phase.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+This is read off directly from \cref{def:crypto_convolution_types}.
+\end{proof}
+
+\begin{proposition}[Autocorrelation and trend convolution]\label{prop:crypto_autocorr_phase_convolution}
+Let \(\{z_t\}\) be a periodic sequence, with autocorrelation function
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+In the language of the cryptographic epicycle group, the autocorrelation function is the projection of the trend convolution onto the diagonal:
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:crypto_autocorr_phase_convolution} of this chapter is the realisation in this domain of the convolution-action conclusion of \cref{thm:ps_convolution_action} in the `Periodic Systems' chapter:
+substituting $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ into the definition of the autocorrelation, cancelling all off-diagonal cross terms by orthogonality and retaining only the diagonal term of the trend convolution
+(the factorisation of the three convolutions, \cref{prop:ps_convolution_factorization}), which yields $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$.
+The full expansion is given there.
+\end{proof}
+
+\begin{definition}[Walsh spectrum and linear approximation table]\label{def:walsh_lat}
+Let \(S:\mathbb F_2^n\to\mathbb F_2^n\) be an S-box. Its \textbf{linear approximation table} (LAT) is
+\[
+\operatorname{LAT}(a,b)=\#\{x\in\mathbb F_2^n:a\cdot x=b\cdot S(x)\}-2^{n-1}.
+\]
+The Walsh spectrum is twice the Fourier transform of \(\operatorname{LAT}\): \(W(a,b)=2\operatorname{LAT}(a,b)\), so the two are read off the same table and differ only by a constant factor. Linear cryptanalysis exploits the non-zero bias of \(\operatorname{LAT}\).
+\end{definition}
+
+\begin{proposition}[The LAT and phase convolution]\label{prop:lat_phase_convolution}
+The LAT of an S-box can be expressed as the phase convolution of the input phase and the output phase:
+\[
+\operatorname{LAT}(a,b)=\frac12\sum_x e^{i\pi(a\cdot x-b\cdot S(x))}.
+\]
+Hence the accumulation of bias in linear cryptanalysis is equivalent to the round-by-round composition of phase convolution.
+\end{proposition}
+
+\begin{proof}
+Since \(e^{i\pi u}=(-1)^u\), we have
+\[
+\sum_x e^{i\pi(a\cdot x-b\cdot S(x))}
+=\#\{x:a\cdot x=b\cdot S(x)\}-\#\{x:a\cdot x\neq b\cdot S(x)\}
+=2\operatorname{LAT}(a,b).
+\]
+Hence the LAT is one half of the real form of phase convolution.
+\end{proof}
+
+\begin{definition}[Difference distribution table]\label{def:ddt}
+Let \(S:\mathbb F_2^n\to\mathbb F_2^n\) be an S-box. Its \textbf{difference distribution table} (DDT) is
+\[
+\operatorname{DDT}(\Delta,\nabla)=\#\{x:S(x\oplus\Delta)\oplus S(x)=\nabla\}.
+\]
+Differential cryptanalysis exploits the high-probability entries of the DDT.
+\end{definition}
+
+\begin{proposition}[The DDT and amplitude convolution]\label{prop:ddt_amplitude_convolution}
+The DDT can be regarded as the amplitude convolution of the input difference and the output difference:
+\[
+\operatorname{DDT}(\Delta,\nabla)=\sum_x \mathbf 1_{\{S(x\oplus\Delta)\oplus S(x)=\nabla\}}.
+\]
+In the language of periodic convolution, the DDT corresponds to the projection of amplitude convolution onto difference pairs.
+\end{proposition}
+
+\begin{proof}
+This follows directly by expanding the definition.
+\end{proof}
+
+\begin{remark}[Relation between cryptographic convolution and periodic convolution]\label{rem:crypto_convolution_relation}
+Cryptographic convolution is not a new convolution operation but an instance of the periodic convolution of the `Series and Convolution' chapter on the cryptographic epicycle group. Autocorrelation is the projection of the trend convolution onto the diagonal; the Walsh spectrum ($W(a,b)=2\operatorname{LAT}(a,b)$, differing from the LAT only by the constant factor $2$) and the LAT are the concrete manifestations in cryptanalysis of phase convolution; the DDT is the concrete manifestation in cryptanalysis of amplitude convolution.
+\end{remark}
+
+\section{Integration with discrete sampling, harmonic analysis and time series analysis: connection to step five of the `Periodic Systems' chapter}
+\label{sec:crypto_integration}
+
+\begin{definition}[Periodic diagnosis of cryptographic systems]\label{def:crypto_periodic_diagnosis}
+For a given cryptosystem, carry out a security diagnosis using the framework of periodic mathematics:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Translation-layer diagnosis} (stream ciphers): compute the autocorrelation function of the keystream and the linear complexity profile;
+    \item \textbf{Scaling-layer diagnosis} (block ciphers): compute the DDT and the LAT of the S-box, and verify the branch number of the diffusion layer;
+    \item \textbf{Rotation-layer diagnosis} (public-key cryptography): factor the modulus \(N\) or compute the prime factors of the elliptic-curve order \(n\), and verify the embedding degree;
+    \item \textbf{Overall security assessment}: substitute the three layers of security metrics into the composite-period model and assess the security strength.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[The cryptographic periodicity diagnostic procedure and its interfaces with three chapters]\label{thm:crypto_diagnosis_integration}
+The four steps of \cref{def:crypto_periodic_diagnosis} connect respectively to:
+\begin{enumerate}[label=(\roman*)]
+    \item the `Discrete Sampling and Intercalation of Periodic Signals' chapter: \cref{def:uniform_sampling_parallel}, \cref{thm:nyquist_shannon_parallel}, \cref{thm:intercalation_leakage_suppression};
+    \item the `Harmonic Analysis' chapter: \cref{def:fourier_series}, \cref{thm:parseval_fourier}, \cref{prop:twelve_to_six};
+    \item the `Time Series Analysis' chapter: \cref{def:ts_period_detection}, \cref{prop:ts_period_significance}, \cref{def:ts_window_validation}.
+\end{enumerate}
+Hence the cryptographic periodicity diagnosis is not an independent method but an application of the unified tool chain of periodic mathematics to cryptosystems.
+\end{theorem}
+
+\begin{proof}
+Item-by-item correspondence:
+(i) translation-layer diagnosis requires sampling and spectral estimation;
+(ii) frequency decomposition and phase kernels are found in the harmonic analysis chapter;
+(iii) periodogram peaks, Fisher's test and window-function validation are found in the time series analysis chapter.
+Hence the diagnostic procedure is assembled from the tool chains of the three chapters.
+\end{proof}
+
+\begin{remark}[Order of operations after integration]\label{rem:crypto_integration_order}
+The recommended order for an actual diagnosis is: first decide whether the cryptographic target is periodic (\cref{thm:crypto_periodicity_decision}); then construct the Fourier data of the keystream or the state and the epicycle group (\cref{thm:crypto_series_reconstruction}); then optimise the parameters by security-metric adjustment and dynamic adjustment (\cref{thm:crypto_adaptive_convergence}, \cref{prop:crypto_security_metric_convergence}); then perform cryptographic convolution and autocorrelation, LAT and DDT analysis (\cref{prop:crypto_autocorr_phase_convolution}, \cref{prop:lat_phase_convolution}, \cref{prop:ddt_amplitude_convolution}); and finally output the diagnosis as in \cref{def:crypto_periodic_diagnosis}.
+\end{remark}
+
+\section{Layered structure and structural invariants of cryptosystems}
+\label{sec:crypto_layers_and_invariants}
+
+\begin{theorem}[Three-layer structure of cryptographic systems]\label{thm:crypto_three_layer_structure}
+The three main branches of cryptography---stream ciphers, block ciphers and public-key cryptography---constitute a nested three-layer periodic structure:
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}}
+\toprule
+Cryptographic layer & Typical construction & Dominant operation & Special element & Invariant \\
+\midrule
+Stream cipher & LFSR, NLFSR & State translation & All-zero state & Linear complexity \(L\) \\
+Block cipher & SPN, Feistel & Iteration & Identity map & Branch number \\
+Public-key cryptography & RSA, ECC & Cyclic-group scalar multiplication & Identity element & Order of the group \(n\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+The three layers are coupled through key transfer: public-key cryptography is used to transmit the session key securely, the session key drives the block cipher, and the output of the block cipher can serve as the initial state of a stream cipher.
+\end{theorem}
+
+\begin{proof}
+The independence of the three layers is guaranteed by the independence of their invariants: the linear complexity \(L\), the branch number and the order of the group \(n\) are three independent parameters. The coupling of the three layers is realised through key transfer: master key \(\to\) public/private key pair \(\to\) session key \(\to\) initial state of the keystream.
+\end{proof}
+
+\begin{example}[Three-layer cryptographic system in TLS 1.3]\label{ex:tls_layers}
+TLS 1.3 typically uses a three-layer cryptographic system:
+\begin{enumerate}[label=(\roman*)]
+    \item public-key layer: ECDHE uses the X25519 curve;
+    \item block-cipher layer: AES-128-GCM, with \(R=10\) rounds and a block length of \(128\) bits;
+    \item stream-cipher layer: ChaCha20, with period \(2^{256}\).
+\end{enumerate}
+The keys of the three layers are derived from the shared secret by HKDF.
+\end{example}
+
+\begin{theorem}[Three structural invariants of cryptographic systems]\label{thm:crypto_invariants}
+The security of a cryptosystem depends on the maintenance of three structural invariants:
+\begin{enumerate}[label=(\roman*)]
+    \item linear complexity (translation layer): the linear complexity \(L\) of the keystream sequence is recoverable under the Berlekamp--Massey attack;
+    \item branch number (scaling layer): the branch number of the block-cipher diffusion layer is preserved under iteration of the round function, and the probability of a differential/linear characteristic propagates according to the product law;
+    \item order of the group (rotation layer): in public-key cryptography the order \(n\) of the cyclic group is the core invariant, and the hardness of the discrete logarithm is equivalent to the hardness of recovering the scalar from a group element.
+\end{enumerate}
+The breaking of the three invariants leads to the breaking of the corresponding cryptosystem:
+\begin{enumerate}[label=(\roman*)]
+    \item breaking of the linear complexity \(\to\) the Berlekamp--Massey attack recovers the keystream;
+    \item breaking of the branch number \(\to\) a differential/linear attack recovers the key;
+    \item breaking of the order invariant \(\to\) the Pohlig--Hellman attack or the MOV attack recovers the private key.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) The linear complexity \(L\) is the translation-layer invariant. The Berlekamp--Massey algorithm recovers an equivalent LFSR from just \(2L\) consecutive bits. If a local leak of the keystream lowers \(L\) to \(L'<L\), the translation-layer invariance is destroyed.
+(ii) The branch number characterises the propagation capability of a differential characteristic. Let the probability of the differential characteristic be
+\[
+p=\prod_{i=1}^{R}p_i.
+\]
+If the number of rounds \(R\) is insufficient, \(p\) has not decayed sufficiently, and an attacker can recover the key using a high-probability differential characteristic.
+(iii) Let the group order be
+\[
+n=\prod_i p_i^{e_i}.
+\]
+The Pohlig--Hellman attack solves the DLP separately on each prime-power subgroup and then combines the results by the Chinese remainder theorem, with complexity
+\[
+O\left(\sum_i e_i(\log n+\sqrt{p_i})\right).
+\]
+If the largest prime factor is too small, the DLP can be solved efficiently. The MOV attack uses the embedding degree \(k\) of the elliptic curve to reduce ECDLP to the DLP over \(\mathbb F_{q^k}^*\); if \(k\) is too small, the attack is feasible.
+\end{proof}
+
+\begin{remark}[Design principles for cryptographic systems (engineering practice)]\label{cor:crypto_design}
+The secure design of a cryptosystem can be stated uniformly as the principle of maximising three structural invariants:
+\begin{enumerate}[label=(\roman*)]
+    \item maximisation of the translation-layer invariant: the linear complexity \(L\) reaches the order of magnitude of the period;
+    \item maximisation of the scaling-layer invariant: the branch number of the diffusion layer reaches its maximum;
+    \item maximisation of the rotation-layer invariant: the order of the group \(n\) is prime or contains a large prime factor, and the embedding degree \(k>20\).
+\end{enumerate}
+\textbf{Status note}: the clauses above are engineering rules of thumb, not mathematical propositions; when cited they should be treated as empirical conclusions.
+\end{remark}
+
+\begin{example}[Linear complexity diagnosis of an LFSR sequence]\label{ex:lfsr_diagnosis}
+Consider an LFSR of length \(L=32\) whose feedback polynomial is primitive. Starting from a non-zero initial state:
+\begin{enumerate}[label=(\roman*)]
+    \item the first \(64\) bits: the Berlekamp--Massey algorithm gives \(L=32\);
+    \item at the \(1000\)th bit: the linear complexity remains \(32\);
+    \item at the \(10^6\)th bit: the profile remains flat.
+\end{enumerate}
+If a non-linear combining generator is used (such as the Geffe generator), the linear complexity can in theory reach \(L_1L_2+L_2L_3+L_1L_3\).
+\end{example}
+
+\begin{remark}[Connection with the rest of the book]\label{rem:crypto_book_interface}
+The theory of the periodic structure of cryptographic systems established in this chapter is an application of periodic mathematics in cryptography. It applies the symmetry and invariant framework, similarity and tendency, flow and potential, periodic convolution, and the three-layer nested structure of periodic mathematics uniformly to the analysis and design of cryptosystems. The trinity of stream ciphers (state period), block ciphers (iterative structure) and public-key cryptography (cyclic-group scalar multiplication) corresponds to the three basic operations of periodic mathematics; the security of a cryptosystem depends on the maintenance of three structural invariants, and the breaking of a cryptosystem corresponds to the breaking of the corresponding invariant.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & The state translation of the LFSR (\cref{def:lfsr}): the \(m\)-sequence period \(2^L-1\) and the two-valued autocorrelation (\cref{ch16_mseq_autocorrelation}, \cref{ex:mseq_L4}) \\
+Scaling & The iteration of the block-cipher round function (\cref{def:block_cipher_round_function}); confusion and diffusion (\cref{def:confusion_diffusion}); the branch number (\cref{prop:block_cipher_iteration_structure}, \cref{ex:aes_diffusion}) \\
+Rotation & Modular exponentiation \(x\mapsto g^x\) (\cref{def:modular_exponentiation_period}); elliptic-curve scalar multiplication \([k]P\) (\cref{def:elliptic_curve_period}) \\
+Balance & The three structural invariants: the linear complexity \(L\), the branch number and the order of the group \(n\) (\cref{thm:crypto_invariants}) \\
+Symmetry & Three layers of special elements: the all-zero state, the identity map and the identity element (\cref{thm:crypto_three_layer_structure}, \cref{ex:tls_layers}) \\
+Closure & The mutually inverse closure of encryption and decryption \(D_k(E_k(m))=m\) (\cref{def:cryptosystem}); \(D\circ E=\operatorname{id}\) for RSA (proof of \cref{prop:public_key_structure}) \\
+Period & The keystream state period, the iteration depth of the round function, and the scalar-multiplication period of the cyclic group order (\cref{def:crypto_periodic_structure}); periodic diagnosis (\cref{def:crypto_periodic_diagnosis}, \cref{ex:lfsr_diagnosis}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the \textbf{cryptographic periodicity decision theorem} of this chapter (\ref{thm:crypto_periodicity_decision}). Hint: first write down the decision map and the evolution group of this chapter's target, then apply the proof structure of the general criterion of the `Periodic Systems' chapter.
+
+    \item Verify that the hypotheses of \textbf{monotonicity of quantity adjustment} (\ref{prop:crypto_adaptive_growth}) hold for the domain objects of this chapter, and give a counterexample in which the hypotheses fail.
+
+    \item Examine the behaviour of the \textbf{cryptographic periodicity diagnostic procedure and its interfaces with three chapters} (\ref{thm:crypto_diagnosis_integration}) under degeneracy of the parameters, and explain how the conclusion degenerates accordingly.
+
+    \item Explain the relation between the \textbf{two-valued autocorrelation of an \(m\)-sequence} (\ref{ch16_mseq_autocorrelation}) and the corresponding general conclusion of the `Periodic Systems' chapter (whether they agree, whether it is a special case, or whether additional conditions are required).
+
+    \item Using the seven-theme comparison table of this chapter, identify the concrete carriers in this chapter of the three themes \textbf{translation}, \textbf{scaling} and \textbf{rotation}, and give one example of domain data for each.
+
+    \item Synthesis: restate the diagnostic procedure of this chapter using the five-step standard interface of the `Periodic Systems' chapter (Table \ref{tab:ps_five_steps}), noting one by one the theorem of this chapter on which each step depends: \ref{thm:crypto_periodicity_decision}, \ref{prop:crypto_adaptive_growth}, \ref{thm:crypto_diagnosis_integration}, \ref{ch16_mseq_autocorrelation}.
+\end{enumerate}
+
+

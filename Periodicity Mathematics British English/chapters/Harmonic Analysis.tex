@@ -1,0 +1,1529 @@
+\chapter{Harmonic Analysis}
+\label{chap:harmonic}
+\label{chap:harmonic-analysis}
+\markboth{Harmonic Analysis}{Harmonic Analysis}
+
+\begin{remark}[Positioning of this chapter]\label{rem:harmonic_chapter_positioning}
+Harmonic analysis is the mathematical theory that studies how periodic structures are transformed and compared between different observation scales. Building on the `Series and Convolution' chapter (convolution, Fourier series, periodic transforms) and the `Periodic Functions and Groups with Periodic Orbits' chapter (phase operators, convolution), this chapter accomplishes the following work:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{A complete theory of Fourier series and the Fourier transform}: definitions, orthogonality, the Parseval identity, the convolution theorem, together with the algebraic foundations of the discrete Fourier transform and the fast Fourier transform.
+    \item \textbf{A unification of the classical integral transforms}: the Fourier transform, the Laplace transform, the Mellin transform, the wavelet transform and the Hilbert transform as harmonic analysis on groups.
+    \item \textbf{Phase kernels and similarity}: the form of the cosine kernel and the sine kernel at the component level, and their relation to the inner product/outer product at the vector level.
+    \item \textbf{Power spectrum and circular convolution}: the squared modulus of the Fourier coefficients, the Parseval identity, and the circular convolution theorem.
+\end{enumerate}
+The sections of this chapter follow a uniform logical order: \textbf{definition $\to$ proposition $\to$ lemma $\to$ theorem $\to$ proof $\to$ corollary $\to$ property $\to$ example $\to$ remark}.
+
+\textbf{Guide to the seven themes of this chapter}: Translation---the frequency operator (the delay phase factor $e^{i\nu\tau}$ and beat-frequency localisation); Scaling---the amplitude operator and the weighted kernel system; Rotation---the phase operator (complex phase kernel); Conservation---the power spectrum (the classical limit of the periodic trend spectrum); Symmetry---conjugate symmetry and window--kernel duality; Closure---closure of the degeneration chain; Period---the period operator $\Theta_{p,q}$ of cross-period interaction.
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=0.9cm and 1.1cm,
+  hub/.style={draw, very thick, rounded corners, align=center, minimum width=2.6cm, minimum height=1.0cm, fill=orange!15, font=\small},
+  seg/.style={draw, rounded corners, align=center, minimum width=2.4cm, minimum height=0.85cm, fill=blue!8, font=\small},
+  arr/.style={-{Stealth[length=2.2mm]}, thick}]
+\node[hub] (hub) {Harmonic analysis on groups};
+\node[seg, fill=green!12, above left=of hub] (u1) {$U(1)$\\Fourier series};
+\node[seg, fill=cyan!12, above right=of hub] (r) {$\mathbb{R}$\\Fourier transform};
+\node[seg, fill=yellow!16, left=of hub] (zp) {$\mathbb{Z}/N\mathbb{Z}$\\DFT/FFT};
+\node[seg, fill=purple!12, right=of hub] (aff) {$\mathbb{R}\rtimes\mathbb{R}^+$\\wavelet transform};
+\node[seg, fill=red!10, below left=of hub] (mellin) {$\mathbb{R}^+$\\Mellin transform};
+\node[seg, fill=orange!10, below right=of hub] (laplace) {with damping\\Laplace};
+\foreach \x in {u1,r,zp,aff,mellin,laplace}
+  \draw[arr] (hub) -- (\x);
+\node[align=center, font=\small] at (0,-5.0) {Unified framework of harmonic analysis: Fourier transforms on different groups $G$ give different classical integral transforms};
+\end{tikzpicture}
+\caption{Unified framework of harmonic analysis: the Fourier transform on a group, according to the different choices of the group $G$, gives the Fourier series, the Fourier transform, the DFT, the wavelet transform, the Mellin transform, the Laplace transform and other classical transforms.}
+\label{fig:harmonic_unified}
+\end{figure}
+
+\section{\texorpdfstring{Roots of unity and cyclic group representations}{Roots of unity and cyclic group representations}}
+\label{sec:unit_roots_cyclic_rep}
+
+\begin{definition}[Roots of unity]\label{def:PPO}
+For any $T \in \mathbb{N}^+$, its $T$-th roots of unity are $z_k^{(T)} = e^{i2\pi k/T}$ ($k = 0, 1, \dots, T-1$). All $T$ of the $T$-th roots of unity form the set
+\[
+\mathcal{P}_T = \{\mathcal{O}_k^{(T)} = e^{i2\pi k/T} \mid k = 0, 1, \dots, T-1\}.
+\]
+\end{definition}
+
+\begin{proposition}[Cyclic structure of the group of roots of unity]\label{prop:PPO_group}
+The set $\mathcal{P}_T$ forms a cyclic group $C_T$ under complex multiplication, and is in one-to-one correspondence with the irreducible representations of $C_T$. Multiplication satisfies $\mathcal{O}_a^{(T)} \cdot \mathcal{O}_b^{(T)} = \mathcal{O}_{(a+b) \bmod T}^{(T)}$.
+\end{proposition}
+
+\begin{proof}
+The elements of $\mathcal{P}_T$ are the $T$-th roots of unity on the unit circle.
+
+Closure: for any $\mathcal{O}_a, \mathcal{O}_b \in \mathcal{P}_T$,
+\[
+\mathcal{O}_a \cdot \mathcal{O}_b
+= e^{i2\pi(a+b)/T}
+= \mathcal{O}_{(a+b)\bmod T} \in \mathcal{P}_T.
+\]
+
+The identity element is $\mathcal{O}_0 = 1$;
+the inverse element is
+\[
+\mathcal{O}_k^{-1}
+= e^{-i2\pi k/T}
+= \mathcal{O}_{(T-k)\bmod T}.
+\]
+
+Hence $\mathcal{P}_T$ forms a group, is generated by $\mathcal{O}_1$,
+has order $T$, and is isomorphic to the cyclic group $C_T$.
+
+By the classification of the irreducible representations of $C_T$,
+$C_T$ has exactly $T$ one-dimensional irreducible representations
+\[
+\rho_k(g^m) = e^{i2\pi km/T},
+\]
+whose value at the generator is $\rho_k(g) = \mathcal{O}_k^{(T)}$,
+in one-to-one correspondence with the elements of $\mathcal{P}_T$.
+\end{proof}
+
+\begin{proposition}[Schur orthogonality relations]\label{prop:schur_orthogonality}
+Let $G$ be a finite group and let $\rho,\sigma$ be irreducible unitary representations of dimensions $d_\rho,d_\sigma$ respectively. Then the matrix coefficients satisfy
+\[
+\frac{1}{|G|}\sum_{g\in G}\rho_{ij}(g)\,\overline{\sigma_{kl}(g)}
+=\frac{\delta_{\rho\sigma}\,\delta_{ik}\,\delta_{jl}}{d_\rho}.
+\]
+In particular, the characters satisfy
+\[
+\langle\chi_\rho,\chi_\sigma\rangle:=\frac{1}{|G|}\sum_{g\in G}\chi_\rho(g)\overline{\chi_\sigma(g)}=\delta_{\rho\sigma}.
+\]
+\end{proposition}
+
+\begin{proof}
+For a $d_\sigma\times d_\rho$ matrix $M$ construct
+\[
+T=\frac{1}{|G|}\sum_{g\in G}\rho(g)\,M\,\sigma(g)^{-1}.
+\]
+For any $h$, $\rho(h)T=T\sigma(h)$, so $T$ is an intertwining operator from $\rho$ to $\sigma$. When $\rho\not\cong\sigma$, Schur's lemma gives $T=0$; when $\rho=\sigma$, $T=\lambda I$, and taking traces gives $\lambda=\operatorname{tr}(M)/d_\rho$. Taking $M$ to be a matrix unit yields the result.
+\end{proof}
+
+\begin{definition}[Regular representation and DFT diagonalisation]\label{def:regular_representation_dft}
+The regular representation $\rho_{\text{reg}}$ of $C_T$ acts on the $T$-dimensional group algebra, and its matrices are $T \times T$ cyclic shift matrices. The DFT matrix $\mathbf{F}_T$ (with entries $F_T[m,n] = \frac{1}{\sqrt{T}} e^{-i2\pi mn/T}$) unitarily diagonalises the regular representation:
+\[
+\mathbf{F}_T^\dagger \cdot \rho_{\text{reg}}(g) \cdot \mathbf{F}_T = \operatorname{diag}(\mathcal{O}_0^{(T)}, \mathcal{O}_1^{(T)}, \dots, \mathcal{O}_{T-1}^{(T)}).
+\]
+\end{definition}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.2,>=stealth]
+        \draw[gray, thin] (0,0) circle (2.5cm);
+        \draw[->, gray] (-3.0,0) -- (3.0,0) node[right] {$\operatorname{Re}$};
+        \draw[->, gray] (0,-3.0) -- (0,3.0) node[above] {$\operatorname{Im}$};
+        \foreach \k in {0,1,...,7}
+        {
+            \filldraw[blue] ({360/8*\k}:2.5cm) circle (2pt);
+        }
+        \draw[->, red, thick] (0,0) -- ({360/8*1}:2.5cm) node[midway, above right, font=\footnotesize] {$\mathcal{O}_1^{(8)}$};
+        \node[font=\footnotesize] at (0, -3.5) {$\mathcal{P}_8 = \{e^{i2\pi k/8} : k=0,\dots,7\}$: the 8 irreducible representations of $C_8$};
+    \end{tikzpicture}
+    \caption{The 8 irreducible representations of $C_8$ are distributed uniformly on the unit circle.}
+    \label{fig:PPO_C8}
+\end{figure}
+
+\begin{remark}[Roots of unity, regular polygons and discrete rotational symmetry]\label{rem:unit_root_geometry}
+The geometric image of $\mathcal{P}_T$ is the set of vertices of the regular $T$-gon inscribed in the unit circle. Its convex hull is a symmetric regular polygon, and $C_T$ acts on this polygon as a rotation group. Hence $\mathcal{P}_T$ is an algebraic representation of discrete rotational symmetry, and is also the complex-exponential counterpart of the DFT sampling lattice $\{2\pi k/T\}$ of this chapter.
+\end{remark}
+
+\section{\texorpdfstring{Orbit decomposition and synthesis}{Orbit decomposition and synthesis}}\label{sec:orbit_decomposition_synthesis}
+
+\begin{definition}[Orbit decomposition]\label{def:orbit_decomposition}
+Let $G$ be a locally compact group and let $f \in L^2(G)$. The \textbf{orbit decomposition} of $f$ is the orthogonal projection of $f$ onto the irreducible subrepresentations of the left regular representation $\lambda$ of $G$:
+\[f = \sum_{\rho \in \widehat{G}} f_\rho,\]
+where $f_\rho$ is the component of $f$ in the $\rho$-equivariant subspace.
+\end{definition}
+
+\begin{definition}[Orbit synthesis]\label{def:orbit_synthesis}
+Given bounded operators $\{T_\rho\}_{\rho \in \widehat{G}}$ on the individual orbit components, \textbf{orbit synthesis} is the recombination of the acted-upon components into a function: $T f = \sum_{\rho \in \widehat{G}} T_\rho f_\rho$.
+\end{definition}
+
+\begin{lemma}[Orthogonality of irreducible subspaces]\label{lem:irreducible_orthogonality}
+Let $\rho, \sigma$ be two non-isomorphic irreducible unitary representations of $G$, and let $V_\rho, V_\sigma$ be the corresponding equivariant subspaces of their representation spaces in $L^2(G)$. Then $V_\rho \perp V_\sigma$ (with respect to the $L^2$ inner product).
+\end{lemma}
+
+\begin{proof}
+Let $u \in V_\rho$ and $v \in V_\sigma$. By Schur's lemma, the only intertwining operator between $V_\rho$ and $V_\sigma$ is the zero operator. Consider the inner product $\langle \lambda(g)u, \lambda(g)v \rangle$: since $\lambda(g)$ is a unitary operator, $\langle \lambda(g)u, \lambda(g)v \rangle = \langle u, v \rangle$. If $\langle u, v \rangle \neq 0$, then $v \mapsto \langle u, v \rangle$ induces a non-zero intertwining operator, a contradiction. Hence $\langle u, v \rangle = 0$.
+\end{proof}
+
+\begin{proposition}[Diagonalisation property of orbit decomposition]\label{prop:orbit_diagonalisation}
+Under orbit decomposition the group action $\lambda(g)$ is diagonalised. Each irreducible orbit evolves independently under the group action, without interfering with the others.
+\end{proposition}
+
+\begin{proof}
+By Definition \ref{def:orbit_decomposition}, $f = \sum_\rho f_\rho$ with $f_\rho \in V_\rho$. For any $g \in G$,
+\[
+\lambda(g) f = \sum_\rho \lambda(g) f_\rho.
+\]
+Since $V_\rho$ is an invariant subspace of $\lambda(g)$ ($\lambda(g) V_\rho \subseteq V_\rho$), we have $\lambda(g) f_\rho \in V_\rho$. By Lemma \ref{lem:irreducible_orthogonality}, the subspaces $V_\rho$ are pairwise orthogonal, so
+\[
+(\lambda(g) f)_\rho = \lambda(g) f_\rho.
+\]
+That is, the group action acts independently orbit by orbit, and diagonalisation holds.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.95]
+% Left: the function f
+\draw[fill=blue!10, rounded corners] (-3.5,-2.0) rectangle (-1.5,2.0);
+\node at (-2.5,1.6) {$L^2(G)$};
+\node at (-2.5,0.5) {$f$};
+% Right: orbit components
+\draw[fill=green!10, rounded corners] (0.5,1.2) rectangle (4.5,2.0);
+\node at (2.5,1.6) {$\rho_1$ equivariant subspace $V_{\rho_1}$};
+\draw[fill=orange!10, rounded corners] (0.5,0.0) rectangle (4.5,0.8);
+\node at (2.5,0.4) {$\rho_2$ equivariant subspace $V_{\rho_2}$};
+\draw[fill=red!10, rounded corners] (0.5,-1.2) rectangle (4.5,-0.4);
+\node at (2.5,-0.8) {$\rho_3$ equivariant subspace $V_{\rho_3}$};
+% Arrows
+\draw[->, very thick] (-1.4,0.5) -- (0.4,1.6);
+\draw[->, very thick] (-1.4,0.0) -- (0.4,0.4);
+\draw[->, very thick] (-1.4,-0.5) -- (0.4,-0.8);
+\node[align=center, font=\small] at (0.5,-2.6) {Orbit decomposition: $f=\sum_\rho f_\rho$, the components are mutually orthogonal and the group action acts on each independently};
+\end{tikzpicture}
+\caption{Schematic of orbit decomposition: the function $f\in L^2(G)$ is decomposed according to the orthogonal equivariant subspaces of the irreducible representations, the components being orthogonal and the group action acting on each independently.}
+\label{fig:orbit_decomposition}
+\end{figure}
+
+\begin{corollary}[Orbit decomposition of convolution operators]\label{cor:convolution_orbit_decomp}
+Let $K \in L^1(G)$. The convolution operator $C_K f = K * f$ is completely diagonalised under orbit decomposition: $(C_K f)_\rho = \hat{K}(\rho) f_\rho$, where $\hat{K}(\rho)$ is the operator-valued Fourier coefficient.
+\end{corollary}
+
+\begin{proof}
+By Proposition \ref{prop:orbit_diagonalisation}, $\lambda(g)$ is diagonalised orbit by orbit. The convolution operator $C_K = \int_G K(g) \lambda(g) dg$ is a linear combination of the $\lambda(g)$, so it too acts independently on each $V_\rho$. By Schur's lemma, the restriction of $C_K$ to the irreducible subspace $V_\rho$ is the scalar operator $\hat{K}(\rho) \cdot \operatorname{id}_{V_\rho}$ (since $C_K$ commutes with every $\lambda(g)$, and the only operators on $V_\rho$ commuting with all of them are scalars). Hence $(C_K f)_\rho = \hat{K}(\rho) f_\rho$.
+\end{proof}
+
+\section{\texorpdfstring{Classical integral transforms}{Classical integral transforms}}
+
+Classical integral transforms map time-domain signals to the frequency domain and extract spectral components. This section establishes the rigorous theory of the Fourier series, the Fourier transform, the discrete Fourier transform, the fast Fourier transform, the Laplace transform, the Mellin transform, the wavelet transform and the Hilbert transform.
+
+\subsection{\texorpdfstring{Fourier series: harmonic analysis on $U(1)$}{Fourier series}}
+
+\begin{definition}[Fourier series]\label{def:fourier_series}
+For a square-integrable periodic function $f(t+T)=f(t)$ on $U(1)$, the expansion
+\[f(t) = \sum_{n=-\infty}^{\infty} c_n e^{i 2\pi n t / T},\]
+holds, where $c_n = \frac{1}{T} \int_0^T f(t) e^{-i 2\pi n t / T} dt$. Each basis function $e^{i 2\pi n t / T}$ is a one-dimensional irreducible representation of $U(1)$.
+\end{definition}
+
+\begin{proposition}[Relation between the Fourier coefficients and the parameters of the harmonic components]\label{prop:fourier_epicycle}
+Let the Fourier series of the periodic function $f(t)$ be $f(t) = \sum_{n=-\infty}^{\infty} c_n e^{i n \omega_0 t}$ with $\omega_0 = 2\pi/T$. Then the $n$-th harmonic component has radius $A_n = 2|c_n|$ ($n \ge 1$), angular velocity $\omega_n = n\omega_0$, initial argument $\phi_n = \arg(c_n)$ and angular momentum $L_n = 4m_n |c_n|^2 n\omega_0$.
+\end{proposition}
+
+\begin{proof}
+The Fourier coefficients of a real signal satisfy $c_{-n} = \overline{c_n}$, so
+\[
+c_n e^{in\omega_0 t} + c_{-n} e^{-in\omega_0 t} = 2|c_n| \cos(n\omega_0 t + \arg c_n).
+\]
+Hence $A_n = 2|c_n|$, $\omega_n = n\omega_0$ and $\phi_n = \arg(c_n)$. Substituting into the angular momentum formula gives $L_n = 4m_n |c_n|^2 n\omega_0$.
+\end{proof}
+
+\begin{theorem}[Parseval identity]\label{thm:parseval_fourier}
+Let $f \in L^2([0,T])$ with Fourier coefficients $c_n$. Then
+\[\frac{1}{T}\int_0^T |f(t)|^2 dt = \sum_{n=-\infty}^{\infty} |c_n|^2.\]
+\end{theorem}
+
+\begin{proof}
+Substitute the Fourier series and use the orthogonality relation $\frac{1}{T}\int_0^T e^{i 2\pi (n-m)t / T} dt = \delta_{nm}$; all cross terms vanish.
+\end{proof}
+
+\begin{property}[Convergence of the Fourier series]\label{prop:fourier_series_convergence}
+\begin{enumerate}[label=(\roman*)]
+    \item If $f\in C^1$, then the Fourier series converges uniformly to $f$;
+    \item if $f\in L^2$, then the Fourier series converges in the $L^2$ norm;
+    \item if $f$ has only finitely many discontinuities and the left and right limits exist, then the Fourier series converges at every point to $(f(t^+)+f(t^-))/2$ (Dirichlet's theorem).
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i) Integration by parts gives $|c_n|\le C/|n|^2$, and the series converges absolutely and uniformly. (ii) By Bessel's inequality and the completeness of $L^2$. (iii) The standard Dirichlet-kernel argument.
+\end{proof}
+
+\subsection{\texorpdfstring{Fourier transform: harmonic analysis on $\mathbb{R}$}{Fourier transform}}
+
+\begin{definition}[Fourier transform]\label{def:fourier_transform}
+For $f \in L^1(\mathbb{R}) \cap L^2(\mathbb{R})$,
+\[\hat{f}(\omega) = \int_{-\infty}^{\infty} f(t) e^{-i\omega t} dt.\]
+\end{definition}
+
+\begin{property}[Basic properties of the Fourier transform]\label{prop:fourier_properties}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Linearity}: $\mathcal{F}\{\alpha f + \beta g\} = \alpha \hat{f} + \beta \hat{g}$.
+    \item \textbf{Translation}: $\mathcal{F}\{f(t-a)\}(\omega) = e^{-i\omega a}\hat{f}(\omega)$.
+    \item \textbf{Convolution}: $\mathcal{F}\{f * g\} = \hat{f} \cdot \hat{g}$.
+    \item \textbf{Differentiation}: $\mathcal{F}\{f'(t)\}(\omega) = i\omega \hat{f}(\omega)$.
+    \item \textbf{Parseval}: $\int_{-\infty}^{\infty} |f(t)|^2 dt = \frac{1}{2\pi}\int_{-\infty}^{\infty} |\hat{f}(\omega)|^2 d\omega$.
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i) By the linearity of the integral. (ii) Substitute $u = t - a$: $\int f(t-a)e^{-i\omega t}dt = e^{-i\omega a}\int f(u)e^{-i\omega u}du$. (iii) Fubini's theorem interchanges the order of integration. (iv) Integration by parts ($f$ vanishes at infinity). (v) By (iii) and the value of the inverse Fourier transform at $t=0$.
+\end{proof}
+
+\begin{theorem}[Plancherel theorem]\label{thm:plancherel}
+The Fourier transform $\mathcal{F}:L^1\cap L^2(\mathbb{R})\to L^2(\mathbb{R})$ extends uniquely to a unitary operator on $L^2(\mathbb{R})$. That is, for any $f,g\in L^2(\mathbb{R})$,
+\[
+\langle f,g\rangle = \frac{1}{2\pi}\langle \hat{f},\hat{g}\rangle,\qquad
+\|f\|_{L^2}^2 = \frac{1}{2\pi}\|\hat f\|_{L^2}^2.
+\]
+\end{theorem}
+
+\begin{proof}
+For $f,g\in L^1\cap L^2$, the Parseval identity gives $\|f\|^2=\frac{1}{2\pi}\|\hat f\|^2$. Since $L^1\cap L^2$ is dense in $L^2$, the Fourier transform extends to an isometry on $L^2$. Composing with the inverse transform gives unitarity.
+\end{proof}
+
+\begin{theorem}[Uncertainty principle]\label{thm:uncertainty}
+Let $f\in L^2(\mathbb{R})$ with $\|f\|_2=1$. Then
+\[
+\Delta t\,\Delta\omega\ \ge\ \frac12,
+\]
+where $\Delta t^2=\int t^2|f(t)|^2dt$ and $\Delta\omega^2=\frac{1}{2\pi}\int\omega^2|\hat f(\omega)|^2d\omega$ (the origin being taken as the centre).
+\end{theorem}
+
+\begin{proof}
+Integration by parts gives $1=\int|f|^2 = -2\operatorname{Re}\int t f'(t)\overline{f(t)}dt$. Applying Cauchy--Schwarz:
+\[
+1\le 2\|tf(t)\|_2\cdot\|f'(t)\|_2.
+\]
+The result follows from $\|f'\|_2^2=\frac{1}{2\pi}\|\omega\hat f\|_2^2$.
+\end{proof}
+
+\begin{definition}[Schwartz space and tempered distributions]\label{def:schwartz}
+The \textbf{Schwartz space} $\mathcal{S}(\mathbb{R})$ is the set of all $C^\infty$ functions satisfying
+\[
+\sup_{t\in\mathbb{R}}|t^m f^{(n)}(t)|<\infty,\qquad \forall m,n\in\mathbb{N}
+\]
+The continuous linear functionals on it are called \textbf{tempered distributions} and are denoted $\mathcal{S}'(\mathbb{R})$. The Fourier transform is well defined and invertible on both $\mathcal{S}$ and $\mathcal{S}'$.
+\end{definition}
+
+\begin{property}[Fourier invariance of Schwartz space]\label{prop:schwartz_invariance}
+The Fourier transform $\mathcal{F}$ is a linear homeomorphism of $\mathcal{S}(\mathbb{R})$ onto itself, and $\mathcal{F}^4=\operatorname{id}$. In particular, the Gaussian function $e^{-t^2/2}$ is a fixed point of $\mathcal{F}$ (eigenvalue $1$).
+\end{property}
+
+\begin{proof}
+Since $t^m f^{(n)}\mapsto i^n\partial_\omega^m\hat f(\omega)$ (up to a constant), the Schwartz seminorms are equivalent under $\mathcal{F}$. The identity $\mathcal{F}^4$ follows from Fourier inversion. The invariance of the Gaussian function follows from completing the square in the Gaussian integral.
+\end{proof}
+
+\subsection{\texorpdfstring{Discrete Fourier transform: harmonic analysis on $\mathbb{Z}_N$}{Discrete Fourier transform}}
+
+\begin{definition}[DFT]\label{def:dft}
+\[F[k] = \sum_{n=0}^{N-1} f[n] e^{-i 2\pi kn / N}, \quad k = 0,1,\dots,N-1.\]
+\end{definition}
+
+\begin{proposition}[Unitarity of the DFT matrix]\label{prop:dft_unitary}
+The DFT matrix $\mathbf{F}_N$ is unitary: $\mathbf{F}_N^\dagger \mathbf{F}_N = \mathbf{I}_N$.
+\end{proposition}
+
+\begin{proof}
+$(\mathbf{F}_N^\dagger \mathbf{F}_N)_{m,n} = \frac{1}{N}\sum_{k=0}^{N-1} e^{i2\pi k(m-n)/N} = \delta_{mn}$ (summation of a geometric series).
+\end{proof}
+
+\begin{lemma}[Periodicity lemma for the DFT]\label{lem:dft_periodicity}
+Let $f[n]$ be a function on $C_N$ with DFT $F[k]$. Then $F[k+N] = F[k]$ for all $k$, and $F[-k] = F[N-k]$ (conjugate symmetry: when $f$ is a real sequence, $F[-k] = \overline{F[k]}$).
+\end{lemma}
+
+\begin{proof}
+$F[k+N] = \sum_n f[n] e^{-i2\pi(k+N)n/N} = \sum_n f[n] e^{-i2\pi kn/N} e^{-i2\pi n} = F[k]$. Conjugate symmetry is verified directly from the definition.
+\end{proof}
+
+\subsection{\texorpdfstring{Fast Fourier transform (FFT)}{Fast Fourier transform}}
+
+\begin{theorem}[Radix-2 FFT]\label{thm:radix2_fft}
+Let $N = 2^k$. The DFT can be decomposed into two DFTs of length $N/2$, with time complexity $O(N\log_2 N)$.
+\end{theorem}
+
+\begin{proof}
+Grouping by even and odd indices and using $e^{-i2\pi k(2n)/N} = e^{-i2\pi kn/(N/2)}$, the recursion $T(2^k) = 2T(2^{k-1}) + O(2^k)$ follows, whose solution is $T(N) = O(N\log_2 N)$.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.85]
+% Butterfly diagram
+\node[draw, circle, fill=blue!15, minimum size=0.6cm] (a0) at (0,1.5) {$a_0$};
+\node[draw, circle, fill=blue!15, minimum size=0.6cm] (a1) at (0,0.5) {$a_1$};
+\node[draw, circle, fill=blue!15, minimum size=0.6cm] (a2) at (0,-0.5) {$a_2$};
+\node[draw, circle, fill=blue!15, minimum size=0.6cm] (a3) at (0,-1.5) {$a_3$};
+\node[draw, circle, fill=orange!15, minimum size=0.6cm] (b0) at (2.5,1.5) {};
+\node[draw, circle, fill=orange!15, minimum size=0.6cm] (b1) at (2.5,0.5) {};
+\node[draw, circle, fill=orange!15, minimum size=0.6cm] (b2) at (2.5,-0.5) {};
+\node[draw, circle, fill=orange!15, minimum size=0.6cm] (b3) at (2.5,-1.5) {};
+\node[draw, circle, fill=green!15, minimum size=0.6cm] (c0) at (5,1.5) {$F_0$};
+\node[draw, circle, fill=green!15, minimum size=0.6cm] (c1) at (5,0.5) {$F_2$};
+\node[draw, circle, fill=green!15, minimum size=0.6cm] (c2) at (5,-0.5) {$F_1$};
+\node[draw, circle, fill=green!15, minimum size=0.6cm] (c3) at (5,-1.5) {$F_3$};
+% Connections
+\draw[->] (a0) -- (b0);
+\draw[->] (a1) -- (b0);
+\draw[->] (a2) -- (b1);
+\draw[->] (a3) -- (b1);
+\draw[->] (a0) -- (b2);
+\draw[->] (a1) -- (b2);
+\draw[->] (a2) -- (b3);
+\draw[->] (a3) -- (b3);
+\draw[->] (b0) -- (c0);
+\draw[->] (b1) -- (c0);
+\draw[->] (b0) -- (c1);
+\draw[->] (b1) -- (c1);
+\draw[->] (b2) -- (c2);
+\draw[->] (b3) -- (c2);
+\draw[->] (b2) -- (c3);
+\draw[->] (b3) -- (c3);
+% Stage labels
+\node[font=\footnotesize] at (0,2.3) {input};
+\node[font=\footnotesize] at (2.5,2.3) {first layer};
+\node[font=\footnotesize] at (5,2.3) {output};
+\node[align=center, font=\small] at (2.5,-3.0) {Radix-2 FFT butterfly diagram ($N=4$): even--odd grouping recursion, complexity $O(N\log_2 N)$};
+\end{tikzpicture}
+\caption{Radix-2 FFT butterfly diagram ($N=4$): the input is grouped by even and odd indices, and two layers of butterfly operations yield the DFT output.}
+\label{fig:fft_butterfly}
+\end{figure}
+
+\begin{theorem}[Radix-$p$ FFT]\label{thm:radix_p_fft}
+Let $N = p^k$ ($p = 3,5,7$). The DFT can be decomposed by the Radix-$p$ algorithm into $p$ DFTs of length $N/p$, with time complexity $O(N\log_p N)$.
+\end{theorem}
+
+\begin{proof}
+Grouping by residue classes modulo $p$ gives the recursion $T(p^k) = pT(p^{k-1}) + O(p^k)$, whose solution is $O(N\log_p N)$.
+\end{proof}
+
+\begin{proposition}[The Bluestein algorithm---the DFT for arbitrary $N$]\label{prop:bluestein}
+The DFT can be rewritten in convolution form: $F[k] = e^{-i\pi k^2/N} \sum_{n=0}^{N-1} (f[n] e^{-i\pi n^2/N}) e^{i\pi (k-n)^2/N}$, and the convolution can be computed by FFT to realise the DFT for arbitrary $N$, with time complexity $O(N\log N)$.
+\end{proposition}
+
+\begin{proof}
+Substituting the identity $kn = \frac{1}{2}(k^2 + n^2 - (k-n)^2)$ into the definition of the DFT yields the result.
+\end{proof}
+
+\subsection{\texorpdfstring{Laplace transform and Mellin transform}{Laplace transform and Mellin transform}}
+
+\begin{definition}[Laplace transform]\label{def:laplace}
+\[\mathcal{L}\{f\}(s) = \int_0^\infty f(t) e^{-st} dt, \quad s = \sigma + i\omega.\]
+\end{definition}
+
+\begin{proposition}[Relation between the Laplace transform and the Fourier transform]\label{prop:laplace_fourier}
+$\mathcal{L}\{f\}(s) = \mathcal{F}\{f(t) e^{-\sigma t}\}(\omega)$, where $s = \sigma + i\omega$.
+\end{proposition}
+
+\begin{proof}
+$\mathcal{L}\{f\}(s) = \int_0^\infty f(t)e^{-\sigma t}e^{-i\omega t}dt = \mathcal{F}\{f(t)e^{-\sigma t}\}(\omega)$.
+\end{proof}
+
+\begin{definition}[Mellin transform]\label{def:mellin}
+\[\mathcal{M}\{f\}(s) = \int_0^\infty f(x) x^{s-1} dx.\]
+\end{definition}
+
+\begin{proposition}[Relation between the Mellin transform and the Fourier transform]\label{prop:mellin_fourier}
+With the substitution $x = e^t$ and $f(x) = g(t)$, we have $\mathcal{M}\{f\}(s) = \mathcal{F}\{g\}(is)$.
+\end{proposition}
+
+\begin{proof}
+$dx = e^t dt$ and $x^{s-1} = e^{(s-1)t}$, so $\mathcal{M}\{f\}(s) = \int_{-\infty}^{\infty} g(t)e^{st}dt = \mathcal{F}\{g\}(is)$.
+\end{proof}
+
+\subsection{\texorpdfstring{Wavelet transform and Hilbert transform}{Wavelet transform and Hilbert transform}}
+
+\begin{definition}[Wavelet transform]\label{def:wavelet_transform}
+\[W_f(a,b) = \frac{1}{\sqrt{|a|}} \int_{-\infty}^{\infty} f(t) \overline{\psi\left(\frac{t-b}{a}\right)} dt.\]
+\end{definition}
+
+\begin{proposition}[Group-representation-theoretic basis of the wavelet transform]\label{prop:wavelet_group}
+The wavelet transform is harmonic analysis on the affine group $\mathbb{R} \rtimes \mathbb{R}^+$.
+\end{proposition}
+
+\begin{proof}
+The representation $\pi_{(a,b)}\psi(t) = |a|^{-1/2}\psi((t-b)/a)$ of the affine group covers translation and scaling, and the wavelet transform is $W_f(a,b) = \langle f, \pi_{(a,b)}\psi \rangle$.
+\end{proof}
+
+\begin{definition}[Hilbert transform]\label{def:hilbert}
+\[\mathcal{H}\{f\}(t) = \frac{1}{\pi} \operatorname{p.v.} \int_{-\infty}^{\infty} \frac{f(\tau)}{t-\tau} d\tau.\]
+\end{definition}
+
+\begin{proposition}[Analytic signal and instantaneous parameters]\label{prop:analytic_signal}
+The analytic signal $f_a(t) = f(t) + i\mathcal{H}\{f\}(t)$ has instantaneous amplitude $|f_a(t)|$, instantaneous phase $\arg(f_a(t))$ and instantaneous frequency $d\phi/dt$.
+\end{proposition}
+
+\begin{proof}
+For a single-frequency component $\mathcal{H}\{\cos\omega t\} = \sin\omega t$, the analytic signal is $e^{i\omega t}$. A general signal is verified component by component via its Fourier decomposition.
+\end{proof}
+
+\begin{definition}[Gabor transform (short-time Fourier transform)]\label{def:gabor}
+Let $g$ be a window function. The \textbf{Gabor transform} is
+\[
+\mathcal{G}_f(\tau,\omega)=\int_{-\infty}^{\infty}f(t)\overline{g(t-\tau)}e^{-i\omega t}dt.
+\]
+The Gabor transform is harmonic analysis on the Heisenberg group $\mathbb{R}\rtimes\mathbb{R}$.
+\end{definition}
+
+\begin{theorem}[Reconstruction formula for the Gabor transform]\label{thm:gabor_reconstruction}
+Let $g$ be a window function with Gabor frame bounds $A,B>0$. Then
+\[
+f = \frac{1}{\langle g,\gamma\rangle}\int\int\mathcal{G}_f(\tau,\omega)\pi_{(\tau,\omega)}\gamma\,d\tau d\omega,
+\]
+where $\gamma$ is the dual window.
+\end{theorem}
+
+\begin{proof}
+By the standard reconstruction formula of Gabor frame theory. Taking the dual window $\gamma$ so that $\langle g,\gamma\rangle\ne 0$, any frame $\{\pi_{(\tau,\omega)}g\}$ yields a reconstruction.
+\end{proof}
+
+\section{\texorpdfstring{Similarity and trend: real and imaginary parts of the phase kernel}{Similarity and trend}}
+
+\begin{proposition}[The 6 complex phase kernels and their real and imaginary parts]\label{prop:twelve_to_six}
+Define the 6 complex phase kernels
+\[
+S^{(1)} = e^{i\theta}, \quad S^{(2)} = e^{i\phi}, \quad S^{(3)} = e^{i2\theta},
+\]
+\[
+S^{(4)} = e^{i2\phi}, \quad S^{(5)} = e^{i\theta/2}, \quad S^{(6)} = e^{i\phi/2},
+\]
+where $\theta = \alpha - \beta$ and $\phi = \alpha + \beta$. Then the real part of $S^{(d)}$ is a cosine kernel and the imaginary part is a sine kernel:
+\[
+\operatorname{Re} S^{(d)} = \cos(\cdot), \qquad \operatorname{Im} S^{(d)} = \sin(\cdot).
+\]
+\end{proposition}
+
+\begin{proof}
+This follows directly from Euler's formula $e^{iu} = \cos u + i\sin u$.
+\end{proof}
+
+\begin{remark}[Relation of the phase kernel to the inner and outer products]\label{rem:phase_kernel_inner_outer}
+At the vector level, the real part $\cos(\alpha-\beta)$ of the phase kernel $S^{(1)} = e^{i(\alpha-\beta)}$ is related to the inner product by
+\[
+\mathbf{a} \cdot \mathbf{b} = \|\mathbf{a}\| \|\mathbf{b}\| \cos(\alpha - \beta),
+\]
+and the imaginary part $\sin(\alpha-\beta)$ is related to the modulus of the outer product by
+\[
+\|\mathbf{a} \times \mathbf{b}\| = \|\mathbf{a}\| \|\mathbf{b}\| \sin(\alpha - \beta).
+\]
+At the component level, the product of the amplitudes of two Fourier components multiplied by the phase kernel is the coupling coefficient of that pair of components.
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+% Vectors a and b
+\draw[->, very thick, blue] (0,0) -- (2.4,1.0) node[above right, font=\footnotesize] {$\mathbf{a}$};
+\draw[->, very thick, red] (0,0) -- (1.4,1.6) node[above left, font=\footnotesize] {$\mathbf{b}$};
+\draw[->, gray, dashed] (1.4,1.6) -- (2.4,1.0);
+% Included angle
+\draw[->, orange, thick] (0.8,0) arc (0:41:0.8);
+\node[orange, font=\footnotesize] at (1.0,0.4) {$\alpha-\beta$};
+% Projection
+\draw[dashed, green!60!black] (1.4,1.6) -- (1.8,0.75);
+\node[green!60!black, font=\footnotesize] at (1.6,0.9) {inner product};
+\node[align=center, font=\small] at (1.5,-1.0) {$\mathbf{a}\cdot\mathbf{b}=\|\mathbf{a}\|\|\mathbf{b}\|\cos(\alpha-\beta)$, $\|\mathbf{a}\times\mathbf{b}\|=\|\mathbf{a}\|\|\mathbf{b}\|\sin(\alpha-\beta)$};
+\end{tikzpicture}
+\caption{Geometric meaning of the phase kernel: the real part $\cos(\alpha-\beta)$ corresponds to the inner-product projection, and the imaginary part $\sin(\alpha-\beta)$ corresponds to the outer-product area.}
+\label{fig:phase_kernel_geometry}
+\end{figure}
+
+\begin{theorem}[Three-level consistency of cosine similarity]\label{thm:three_layer_identity}
+Cosine similarity takes the same form at the vector level, the component level and the delay level:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Vector level}: $\cos\theta = (\mathbf{a} \cdot \mathbf{b})/(\|\mathbf{a}\| \|\mathbf{b}\|)$;
+    \item \textbf{Component level}: $\mathbb{S}_{mn} = A_m B_n \cos(\theta_m - \varphi_n)/(A_m B_n) = \cos(\theta_m - \varphi_n)$;
+    \item \textbf{Delay level}: $(f \star g)(0)/(\|f\| \|g\|)$ is the $L^2$ cosine similarity.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) The geometric definition of the inner product. (ii) The numerator is the real part of the trend convolution and the denominator is the product of amplitudes. (iii) By Theorem \ref{cor:zero_delay_cosine}.
+\end{proof}
+
+\begin{example}[Numerical example of the component-level coupling coefficients]\label{ex:component_tendency_similarity}
+Let $f(t) = 3 e^{i(2t + \pi/4)} + 2 e^{i(4t)}$ and $g(t) = 4 e^{i(2t)} + e^{i(6t + \pi/3)}$ ($T = \pi$). The components of $f$: $(A_1=3, \omega_1=2, \phi_1=\pi/4)$, $(A_2=2, \omega_2=4, \phi_2=0)$. The components of $g$: $(B_1=4, \nu_1=2, \psi_1=0)$, $(B_2=1, \nu_2=6, \psi_2=\pi/3)$.
+
+Take the difference-angle kernel $S^{(1)}$. The entries $\mathbb{T}_{mn} = A_m B_n e^{i(\phi_m - \psi_n)}$ of the coupling coefficient matrix $\mathbb{T}$ ($\alpha = 1$) are:
+\[
+\mathbb{T} = \begin{pmatrix}
+3 \cdot 4\, e^{i(\pi/4 - 0)} & 3 \cdot 1\, e^{i(\pi/4 - \pi/3)} \\
+2 \cdot 4\, e^{i(0 - 0)} & 2 \cdot 1\, e^{i(0 - \pi/3)}
+\end{pmatrix}
+= \begin{pmatrix}
+12 e^{i\pi/4} & 3 e^{-i\pi/12} \\
+8 & 2 e^{-i\pi/3}
+\end{pmatrix}.
+\]
+After normalisation we obtain the similarity matrix
+\[
+\mathbb{S} = \begin{pmatrix}
+e^{i\pi/4} & e^{-i\pi/12} \\
+1 & e^{-i\pi/3}
+\end{pmatrix}.
+\]
+Verify the normalisation relation: $\mathbb{S}_{mn} = \mathbb{T}_{mn}/(A_m B_n)$ holds elementwise.
+\end{example}
+
+\begin{example}[Window--kernel duality for the Gaussian window]\label{ex:window_kernel_numerical}
+Take the period $T = 2$, $f(t) = e^{i\pi t} + e^{i3\pi t}$, $g(t) = e^{i\pi t} + 2e^{i3\pi t}$, and the Gaussian window $w(t) = e^{-t^2/(2\sigma_t^2)}$ ($\sigma_t = 1/\sqrt{2}$). The frequency-domain kernel is $\widehat{w}(\omega) = \frac{\sqrt{\pi}}{2} e^{-\omega^2/4}$ (normalised for $T=2$).
+
+The windowed cross-correlation expansion (Theorem \ref{thm:window_kernel_duality}):
+\[
+(f \star_w g)(0) = \sum_{m,n} \widehat{w}(\omega_m - \omega_n) c_m \overline{d_n}.
+\]
+The frequency dictionary is $\{\pi, 3\pi\}$, $\widehat{w}(0) = \sqrt{\pi}/2 \approx 0.886$, and $\widehat{w}(2\pi) = \frac{\sqrt{\pi}}{2} e^{-\pi^2} \approx 0.0000458$ (the off-diagonal weights being extremely small). Hence
+\[
+(f \star_w g)(0) \approx \widehat{w}(0)(c_1\overline{d_1} + c_3\overline{d_3}) = 0.886 \cdot (1 + 2) = 2.658.
+\]
+The diagonal terms dominate completely---the frequency-domain kernel of the Gaussian window is concentrated at the origin, and the cross-frequency leakage is controlled by $\widehat{w}(2\pi) \approx 4.58 \times 10^{-5}$.
+\end{example}
+
+\section{\texorpdfstring{Circular convolution and power spectrum}{Circular convolution and power spectrum}}
+
+\begin{definition}[Circular convolution]\label{def:circular_convolution_harmonic}
+Let $f, g$ be periodic functions of period $T$. The \textbf{circular convolution} of $f$ and $g$ is
+\[
+(f \circledast g)(\tau) := \frac{1}{T}\int_0^T f(t) g(\tau - t)\, dt.
+\]
+In the discrete case, $(f \circledast g)(n) = \sum_{k=0}^{T-1} f(k) g((n-k) \bmod T)$.
+\end{definition}
+
+\begin{definition}[Power spectrum]\label{def:periodic_tendency_spectrum}
+Let $X$ be a periodic function of period $T$ with Fourier coefficients $c_k$. The \textbf{power spectrum} of $X$ is defined as
+\[
+S(\omega_k) := |c_k|^2, \qquad \omega_k = 2\pi k/T.
+\]
+\end{definition}
+
+\begin{theorem}[Power spectrum and autocorrelation function]\label{thm:spectrum_classical_limit}
+Let $X$ be a periodic function of period $T$ with Fourier coefficients $c_k$. Then the Fourier coefficients of the autocorrelation function
+\[
+R_X(\tau) := \frac{1}{T}\int_0^T X(t) \overline{X(t-\tau)}\, dt
+\]
+are $|c_k|^2$. That is, the power spectrum is the Fourier transform of the autocorrelation function.
+\end{theorem}
+
+\begin{proof}
+Substitute $X(t) = \sum_n c_n e^{i\omega_n t}$ into the definition of the autocorrelation function:
+\[
+R_X(\tau) = \frac{1}{T}\int_0^T \left(\sum_n c_n e^{i\omega_n t}\right)\left(\sum_m \overline{c_m} e^{-i\omega_m (t-\tau)}\right) dt = \sum_n |c_n|^2 e^{i\omega_n \tau},
+\]
+where the orthogonality relation $\frac{1}{T}\int_0^T e^{i(\omega_n - \omega_m)t}dt = \delta_{nm}$ has been used. Hence the Fourier coefficients of $R_X$ are $|c_n|^2$.
+\end{proof}
+
+\begin{remark}[The two notational conventions for autocorrelation]\label{rem:autocorrelation_two_conventions}
+This book uses two conventions for the autocorrelation simultaneously. Each is internally consistent, but they differ by a sign in the argument.
+
+\textbf{The advanced type} (the convention introduced first, used for the convolution-action conclusion of the `Periodic Systems' chapter and for the autocorrelation propositions of the domain chapters: astronomy, audio, mechanics, circuits and chips, biology, psychology, social systems, climate, economics, politics, geography, electromagnetism, cryptography and data analysis):
+\[
+R_{\text{advanced}}(h)=\sum_t z_t\overline{z_{t+h}}
+\ \Longleftrightarrow\
+\sum_n \|A_n\|^2 e^{-i\omega_n h}.
+\]
+
+\textbf{The delayed type} (the harmonic-analysis and probability-and-statistics convention of this book, that is, the convention used by the definition of the present theorem, \cref{thm:spectrum_classical_limit}, and by the definition of the power spectral density, \cref{def:power_spectral_density}):
+\[
+R_{\text{delayed}}(\tau)=\frac{1}{T}\int_0^T X(t)\overline{X(t-\tau)}\,dt
+\ \Longleftrightarrow\
+\sum_n |c_n|^2 e^{+i\omega_n \tau}.
+\]
+
+The two expressions differ only in the sign of the exponent, because they take opposite views of the direction of the delay; the conversion between them is
+\[
+R_{\text{advanced}}(h)=R_{\text{delayed}}(-h).
+\]
+Consequently, for a \textbf{real-valued} signal $R_{\text{delayed}}(-h)=R_{\text{delayed}}(h)$, so the two agree numerically; for a \textbf{complex-valued} signal they are in general unequal.
+
+The sign of the exponent in each chapter's propositions should therefore agree with the convention \textbf{of the chapter in which it appears}; when a result on autocorrelation is cited across chapters, it must first be converted by $R_{\text{advanced}}(h)=R_{\text{delayed}}(-h)$.
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.9]
+% Left: autocorrelation
+\draw[fill=blue!8, rounded corners] (-4.5,-1.2) rectangle (-1.0,1.2);
+\node at (-2.75,0.6) {autocorrelation $R_X(\tau)$};
+\node at (-2.75,-0.6) {$\frac1T\int_0^TX(t)\overline{X(t-\tau)}dt$};
+% Middle: Fourier transform
+\draw[->, very thick] (-0.7,0) -- (0.7,0);
+\node[above, font=\small] at (0,0.2) {$\mathcal{F}$};
+% Right: power spectrum
+\draw[fill=orange!8, rounded corners] (1.0,-1.2) rectangle (4.5,1.2);
+\node at (2.75,0.6) {power spectrum $S(\omega_k)=|c_k|^2$};
+\node at (2.75,-0.6) {discrete spectral lines};
+\node[align=center, font=\small] at (0,-2.4) {Wiener--Khinchin theorem: the power spectrum is the Fourier transform of the autocorrelation function};
+\end{tikzpicture}
+\caption{Relation between the power spectrum and the autocorrelation function (Wiener--Khinchin theorem).}
+\label{fig:power_spectrum_autocorrelation}
+\end{figure}
+
+\begin{corollary}[Parseval identity and power spectrum]\label{cor:six_spectrum_family}
+Let $X$ be an integrable function of period $T$ with Fourier coefficients $c_n$, and denote by $S(\omega_n)$ its power spectrum as in Definition \cref{def:periodic_tendency_spectrum}. Then
+\[
+\frac{1}{T}\int_0^T |X(t)|^2\,dt = \sum_n |c_n|^2 = \sum_n S(\omega_n),
+\]
+that is, \textbf{the total energy equals the sum of the powers of the individual frequency components}.
+\end{corollary}
+
+\begin{proof}
+The two equalities are given by two already proved theorems.
+
+\textbf{The left equality}. By \cref{thm:parseval_fourier} (the continuous Parseval identity), for the square-integrable periodic function $X$,
+\[
+\frac{1}{T}\int_0^T |X(t)|^2\,dt = \sum_{n} |c_n|^2 ,
+\]
+the series on the right-hand side converging absolutely.
+
+\textbf{The right equality}. By \cref{thm:spectrum_classical_limit}, in the classical limit the power spectrum of the $n$-th frequency component takes the value $S(\omega_n) = |c_n|^2$ (that is, the limit of no window, $\alpha = 1$ and zero delay). Hence $\sum_n S(\omega_n) = \sum_n |c_n|^2$, which equals the left-hand side.
+
+Both equalities are identities rather than approximations: the former is the Parseval identity itself, and the latter is the value taken by the definition in the classical limit. This completes the proof.
+\end{proof}
+
+\begin{example}[Comparison of the kernel families of the power spectrum]\label{ex:spectrum_family}
+Let $X(t) = 2e^{i(2t + \pi/3)} + e^{i(4t - \pi/6)}$ ($T = \pi$, frequencies $\{2, 4\}$). The power spectrum is $|c_1|^2 = 4$ and $|c_2|^2 = 1$ (all the others being zero).
+
+The off-diagonal terms correspond to cross-frequency coupling. When the kernel width is non-zero, $\alpha = 1$ and $\tau = 0$, the off-diagonal contribution of the difference-angle kernel $S^{(1)}$ is $A_1 A_2 e^{i(\phi_1 - \phi_2)} = 2 e^{i(\pi/3 + \pi/6)} = 2i$, with modulus $2$; the off-diagonal contribution of the sum-angle kernel $S^{(2)}$ is $A_1 A_2 e^{i(\phi_1 + \phi_2)} = 2e^{i\pi/6}$, with modulus $2$. Different phase kernels give the same modulus but different phases on the off-diagonal terms.
+\end{example}
+
+\section{\texorpdfstring{Approximation, intercalation and the bounding of spectral leakage}{Approximation, intercalation and the bounding of spectral leakage}}\label{sec:intercalation_spectral_leakage}
+
+\begin{remark}[Positioning of this section]\label{rem:intercalation_leakage_positioning}
+The discrete Fourier transform (DFT) presumes that the window contains an integer number of consecutive periods. If the consecutive period and the sampling interval are incommensurable, then the number of periods in the window is not an integer, and spectral energy leaks from the main lobe into the sidelobes; this is called \textbf{spectral leakage}. This section places intercalation within the general framework of \textbf{approximation theory}, explains how it reduces spectral leakage from `uncontrollable' to `bounded', and points out that intercalation and window functions are complementary rather than substitutable.
+
+The core of this section is not the claim that intercalation `eliminates' leakage---when $\rho=T_f/\Delta x\notin\mathbb{Q}$, no finite window $T$ can make the leakage strictly zero---but rather the establishment of the following \textbf{progressive chain of three approximations}:
+\[
+\underbrace{\text{rational approximation of}\ \rho}_{\text{number-theoretic layer}}
+\ \Longrightarrow\
+\underbrace{\text{window approximation of}\ M\rho\ \text{by}\ S_M}_{\text{sampling layer}}
+\ \Longrightarrow\
+\underbrace{\text{spectral approximation of}\ c_m\ \text{by}\ F[k]}_{\text{frequency-domain layer}}.
+\]
+Each layer has its own approximation tool and error estimate: the number-theoretic layer uses \textbf{continued-fraction convergents}, the sampling layer uses the \textbf{intercalation sequence}, and the frequency-domain layer uses the \textbf{Dirichlet kernel}. The synthesis of the three layers gives the quantitative upper bound $O(|E_M|/T)$ on the leakage amplitude, and shows that this bound tends to zero along the sequence of continued-fraction convergent windows.
+
+Positioning of this section within the seven themes: Translation---the integer encoding of the irrational rotation $R_\rho$ on the circle; Scaling---the ideal period ratio $\rho$ as a scaling charge; Rotation---the phase-error feedback of the intercalation sequence; Conservation---the boundedness of the cumulative error; Symmetry---the symmetric approximation of the continued-fraction convergents; Closure---the intercalation window closes the approximate period; Period---strict periodicity when $\rho\in\mathbb{Q}$, quasi-periodicity when $\rho\notin\mathbb{Q}$.
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=0.6cm and 1.0cm,
+  layer/.style={draw, rounded corners, align=center, minimum width=3.4cm, minimum height=1.0cm, font=\small}]
+\node[layer, fill=blue!12] (l1) {number-theoretic layer\\$\rho\approx p_j/q_j$};
+\node[layer, fill=green!12, below=of l1] (l2) {sampling layer\\$S_M\approx M\rho$};
+\node[layer, fill=orange!12, below=of l2] (l3) {frequency-domain layer\\$F[k]\approx c_m$};
+\node[font=\small, right=1.2cm of l1] (t1) {continued-fraction convergents};
+\node[font=\small, right=1.2cm of l2] (t2) {intercalation sequence};
+\node[font=\small, right=1.2cm of l3] (t3) {Dirichlet kernel};
+\draw[->, very thick] (l1) -- (l2);
+\draw[->, very thick] (l2) -- (l3);
+\node[align=center, font=\small, below=0.6cm of l3] {Three-layer approximation chain: number theory $\to$ sampling $\to$ frequency domain, the leakage amplitude being bounded by $O(|E_M|/T)$};
+\end{tikzpicture}
+\caption{The three-layer approximation chain by which intercalation suppresses spectral leakage: the number-theoretic layer uses continued-fraction convergents, the sampling layer uses the intercalation sequence, and the frequency-domain layer uses the Dirichlet kernel.}
+\label{fig:three_layer_approximation}
+\end{figure}
+
+\subsection{Spectral leakage and incommensurability}
+
+\begin{remark}[Terminological connection with the discrete sampling chapter]\label{rem:harmonic_sampling_link}
+The sampling interval $\Delta x$, the number of sampling points $T$ and the sampling sequence $f[n]=f(n\Delta x)$ used in this section are defined canonically in the `Discrete Sampling and Intercalation of Periodic Signals' chapter, \cref{def:uniform_sampling_parallel}, \cref{def:nyquist_sampling_parallel}, and will not be redefined here. The \textbf{ideal period ratio} $\rho=T_f/\Delta x$ defined in this section is the same quantity as the \textbf{normalised period ratio} of \cref{def:normalised_ratio_parallel} in that chapter, and this section retains the name `ideal period ratio'. The general definition of spectral leakage is given in \cref{def:spectral_leakage} of that chapter.
+\end{remark}
+
+\begin{definition}[Spectral leakage]\label{def:spectral_leakage_harmonic}
+Let the continuous periodic function \(f:\mathbb{R}\to\mathbb{C}\) have period \(T_f>0\), let the sampling interval be \(\Delta x>0\), and take \(T\) samples
+\[
+f[n]=f(n\Delta x),\qquad n=0,1,\dots,T-1.
+\]
+Its DFT is
+\[
+F[k]=\frac{1}{T}\sum_{n=0}^{T-1} f[n]e^{-i2\pi kn/T},\qquad k=0,1,\dots,T-1.
+\]
+If \(T\Delta x\) is not an integer multiple of \(T_f\), that is, if the window does not contain an integer number of consecutive periods, then the spectral energy of \(f\) cannot be concentrated at a single frequency point in the DFT, but spreads to neighbouring frequency points. This phenomenon is called \textbf{spectral leakage}.
+\end{definition}
+
+\begin{definition}[Ideal period ratio]\label{def:ideal_period_ratio}
+Let the continuous periodic function \(f\) have period \(T_f\) and let the sampling interval be \(\Delta x\). Define the \textbf{ideal period ratio}
+\[
+\rho=\frac{T_f}{\Delta x}.
+\]
+If \(\rho\in\mathbb{N}^+\), then taking \(T=\rho\) gives zero leakage. If \(\rho\notin\mathbb{N}^+\), then no integer window \(T\) can make \(T/\rho\) an integer, and leakage is unavoidable; the role of intercalation is to confine the leakage to a bounded level and to make it tend to zero along the sequence of continued-fraction convergent windows.
+\end{definition}
+
+\begin{remark}[The essence of leakage]\label{rem:leakage_essence}
+Spectral leakage is not a numerical defect of the DFT---given $T$ samples, the computation of $F[k]$ is exact. Leakage is an inevitable consequence of the geometric fact of \textbf{finite-window truncation}: the frequency-domain grid of the DFT is $\{k/T\}_{k=0}^{T-1}$, whilst the frequencies of the continuous signal are $\{m/\rho\}_{m\in\mathbb{Z}}$. The two sets of frequencies coincide exactly only when $T/\rho\in\mathbb{Z}$; in the general case the principal frequency $m/\rho$ falls between the grid points, and the energy necessarily spreads to neighbouring grid points. Hence the essence of suppressing leakage is \textbf{making $T/\rho$ approach an integer}.
+\end{remark}
+
+\subsection{Rational approximation: best approximation by continued fractions}
+
+The first layer of the three-layer approximation chain of this section is the number-theoretic layer: how to approximate the irrational number $\rho$ by rational numbers. This is the cornerstone of the entire theory of intercalation.
+
+\begin{definition}[Continued fractions and convergents]\label{def:continued_fraction_harmonic}
+Let $\rho>0$. The \textbf{simple continued fraction} expansion of $\rho$ is
+\[
+\rho=a_0+\cfrac{1}{a_1+\cfrac{1}{a_2+\cfrac{1}{a_3+\cdots}}},
+\]
+where $a_0=\lfloor\rho\rfloor$ and $a_i\in\mathbb{N}^+$ ($i\ge 1$). Its $j$-th \textbf{convergent} is defined as
+\[
+\frac{p_j}{q_j}=a_0+\cfrac{1}{a_1+\cfrac{1}{\cdots+\cfrac{1}{a_j}}},
+\]
+where $p_j,q_j\in\mathbb{N}^+$ and $\gcd(p_j,q_j)=1$.
+\end{definition}
+
+\begin{theorem}[Best approximation theorem for continued fractions]\label{thm:continued_fraction_best_approx_harmonic}
+Let $\rho>0$ and let $\{p_j/q_j\}$ be its continued-fraction convergents. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Optimality}: for any denominator $q<q_{j+1}$ with $(p,q)\in\mathbb{N}^+\times\mathbb{N}^+$,
+    \[
+    \left|\rho-\frac{p_j}{q_j}\right|<\left|\rho-\frac{p}{q}\right|.
+    \]
+    That is, $p_j/q_j$ is the best approximation amongst all rational numbers with denominator not exceeding $q_{j+1}-1$.
+    \item \textbf{Error bound}:
+    \[
+    \left|\rho-\frac{p_j}{q_j}\right|<\frac{1}{q_jq_{j+1}}<\frac{1}{q_j^2}.
+    \]
+    \item \textbf{Alternation}: the even-indexed convergents approach $\rho$ from below and the odd-indexed ones from above, forming a symmetric sandwiching structure.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) and (ii) are classical results of continued-fraction theory, whose standard proofs may be found in textbooks on number theory (such as Hardy \& Wright, \textit{An Introduction to the Theory of Numbers}, Chapter 10). The key step in the error bound is the following: from the recurrence relations for convergents $p_j=a_jp_{j-1}+p_{j-2}$ and $q_j=a_jq_{j-1}+q_{j-2}$ one obtains
+\[
+\left|\rho-\frac{p_j}{q_j}\right|=\frac{1}{q_j(\alpha_{j+1}q_j+q_{j-1})},
+\]
+where $\alpha_{j+1}=[a_{j+1};a_{j+2},\dots]>a_{j+1}$. Since $\alpha_{j+1}>q_{j+1}/q_j$, we obtain $|p_j/q_j-\rho|<1/(q_jq_{j+1})$.
+
+(iii) From $\alpha_{j+1}>1$ and the recurrence relations, the even-indexed terms satisfy $p_{2k}/q_{2k}<\rho$ and the odd-indexed terms $p_{2k+1}/q_{2k+1}>\rho$, approaching $\rho$ alternately.
+\end{proof}
+
+\begin{remark}[Symmetric structure of best approximation]\label{rem:best_approx_symmetry}
+The `alternating approximation' of continued-fraction convergents has a clear symmetric meaning: the even-indexed terms approach $\rho$ from below and the odd-indexed ones from above, and $\rho$ always lies between two adjacent convergents. This symmetric structure corresponds to `symmetry' amongst the seven themes: $\rho$ is sandwiched symmetrically by the best rational approximations on the two sides. The optimality of the intercalation window comes directly from this symmetry---lower intercalation corresponds to the convergent below, upper intercalation to the convergent above, and balanced intercalation takes the optimal choice between the two.
+\end{remark}
+
+\begin{remark}[Other rational approximation tools]\label{rem:other_rational_approximations}
+Continued fractions are not the only tool for rational approximation. The following tools are closely related to continued fractions and may be used in further research:
+\begin{itemize}
+    \item \textbf{Dirichlet's approximation theorem}: for any $\rho>0$ and $N\ge 1$, there exists $1\le q\le N$ such that $\|q\rho\|<1/N$, where $\|\cdot\|$ is the distance to the nearest integer.
+    \item \textbf{The three-gap theorem}: the gaps of the rotation orbit $\{m\rho\bmod 1\}$ on the circle take at most three lengths, whose proportions are controlled by the partial quotients of the continued fraction.
+    \item \textbf{Weyl's equidistribution theorem and Koksma's inequality}: these control the degree of uniform distribution of the rotation orbit $\{m\rho\}$ on $[0,1)$ and are related to the long-term behaviour of the intercalation error.
+    \item \textbf{Sturmian sequences}: when $\rho$ is irrational, the intercalation sequence $\varepsilon_m=N_m-\lfloor\rho\rfloor\in\{0,1\}$ is a Sturmian word with factor complexity $n+1$, the `most regular of aperiodic sequences'.
+\end{itemize}
+This section uses only continued-fraction convergents, the most direct of these tools; the introduction of the others lies beyond the scope of this section and may be found in Section \ref{sec:commensurability_intercalation}, `Intercalation: the active commensuration of discrete sampling approximation', of the `Discrete Sampling and Intercalation of Periodic Signals' chapter.
+\end{remark}
+
+\subsection{Window approximation: the intercalation sequence and the error bound theorem}
+
+The second layer of the three-layer approximation chain of this section is the sampling layer: how to approximate $M\rho$ by a sequence of integer windows $S_M$. The core tool is the intercalation sequence.
+
+\begin{definition}[Intercalation sequence and cumulative sample count]\label{def:intercalation_sequence_harmonic}
+Let \(\rho>0\). A sequence of integers \(\{N_m\}_{m\in\mathbb{N}}\) is called an \textbf{intercalation sequence} for \(\rho\) if
+\[
+N_m\in\{\lfloor\rho\rfloor,\lceil\rho\rceil\},\qquad \forall m\in\mathbb{N},
+\]
+and
+\[
+\lim_{M\to\infty}\frac{1}{M}\sum_{m=0}^{M-1}N_m=\rho.
+\]
+Define the \textbf{cumulative sample count}
+\[
+S_M=\sum_{m=0}^{M-1}N_m,\qquad M\in\mathbb{N}^+.
+\]
+Define the \textbf{intercalation error}
+\[
+E_M=S_M-M\rho.
+\]
+If there exists \(C>0\) such that \(|E_M|\le C\) for all \(M\), then the intercalation sequence is said to have \textbf{bounded error}.
+\end{definition}
+
+\begin{lemma}[Values of the basic intercalation sequences]\label{lem:intercalation_values_harmonic}
+Let \(\rho>0\). Define lower intercalation, upper intercalation and balanced intercalation respectively as
+\[
+N_m^{\mathrm{floor}}=\lfloor (m+1)\rho\rfloor-\lfloor m\rho\rfloor,
+\]
+\[
+N_m^{\mathrm{ceil}}=\lceil (m+1)\rho\rceil-\lceil m\rho\rceil,
+\]
+\[
+N_m^{\mathrm{round}}=\operatorname{round}((m+1)\rho)-\operatorname{round}(m\rho).
+\]
+Then for any \(m\in\mathbb{N}\),
+\[
+N_m^{\mathrm{floor}},N_m^{\mathrm{ceil}},N_m^{\mathrm{round}}\in\{\lfloor\rho\rfloor,\lceil\rho\rceil\}.
+\]
+\end{lemma}
+
+\begin{proof}
+Let \(\rho=a+\theta\), where \(a=\lfloor\rho\rfloor\) and \(\theta\in[0,1)\). For lower intercalation,
+\[
+N_m^{\mathrm{floor}}=\lfloor m\rho+\rho\rfloor-\lfloor m\rho\rfloor
+=a+\lfloor\{m\rho\}+\theta\rfloor.
+\]
+Since \(\{m\rho\}+\theta\in[0,2)\), we have \(\lfloor\{m\rho\}+\theta\rfloor\in\{0,1\}\), and hence \(N_m^{\mathrm{floor}}\in\{a,a+1\}=\{\lfloor\rho\rfloor,\lceil\rho\rceil\}\). The cases of upper intercalation and balanced intercalation are analogous.
+\end{proof}
+
+\begin{theorem}[Bounded-error theorem for intercalation]\label{thm:intercalation_error_bound_harmonic}
+Let \(\rho>0\).
+\begin{enumerate}[label=(\roman*)]
+    \item Lower intercalation satisfies
+    \[
+    S_M^{\mathrm{floor}}=\lfloor M\rho\rfloor,\qquad
+    E_M^{\mathrm{floor}}=-\{M\rho\}\in(-1,0].
+    \]
+    \item Upper intercalation satisfies
+    \[
+    S_M^{\mathrm{ceil}}=\lceil M\rho\rceil,\qquad
+    E_M^{\mathrm{ceil}}=\lceil M\rho\rceil-M\rho\in[0,1),
+    \]
+    and $E_M^{\mathrm{ceil}}=0$ when $M\rho\in\mathbb Z$.
+    \item Balanced intercalation satisfies
+    \[
+    S_M^{\mathrm{round}}=\operatorname{round}(M\rho),\qquad
+    |E_M^{\mathrm{round}}|\le\frac12.
+    \]
+\end{enumerate}
+In particular, all three intercalation sequences have bounded error, and the balanced intercalation error is the smallest; $E_M^{\mathrm{floor}}$ and $E_M^{\mathrm{ceil}}$ both vanish when $M\rho\in\mathbb Z$. The three conclusions correspond to the sampling-layer realisations of the three approximation schemes of the number-theoretic layer: lower intercalation corresponds to the convergent below, upper intercalation to the convergent above, and balanced intercalation takes the optimal compromise between the two.
+\end{theorem}
+
+\begin{proof}
+(i) By the definition of lower intercalation,
+\[
+S_M^{\mathrm{floor}}=\sum_{m=0}^{M-1}\bigl(\lfloor (m+1)\rho\rfloor-\lfloor m\rho\rfloor\bigr)=\lfloor M\rho\rfloor.
+\]
+Hence \(E_M^{\mathrm{floor}}=\lfloor M\rho\rfloor-M\rho=-\{M\rho\}\in(-1,0]\).
+
+(ii) Similarly,
+\[
+S_M^{\mathrm{ceil}}=\lceil M\rho\rceil,\qquad
+E_M^{\mathrm{ceil}}=\lceil M\rho\rceil-M\rho\in[0,1),
+\]
+and $E_M^{\mathrm{ceil}}=0$ when $M\rho\in\mathbb Z$ (the ideal, leakage-free case).
+
+(iii) Balanced intercalation gives
+\[
+S_M^{\mathrm{round}}=\operatorname{round}(M\rho),
+\]
+and by the definition of \(\operatorname{round}\), \(|\operatorname{round}(x)-x|\le 1/2\), hence \(|E_M^{\mathrm{round}}|\le 1/2\).
+\end{proof}
+
+\begin{definition}[Intercalation window]\label{def:intercalation_window_harmonic}
+Let the continuous periodic function \(f\) have period \(T_f\), let the sampling interval be \(\Delta x\), and let the ideal period ratio be \(\rho=T_f/\Delta x\). Take an intercalation sequence \(\{N_m\}\) with cumulative sample count \(S_M=\sum_{m=0}^{M-1}N_m\). A sampling window of length \(T=S_M\) is called an \textbf{intercalation window}.
+\end{definition}
+
+\begin{remark}[General principle of window approximation]\label{rem:window_approximation_principle}
+The window approximation of the intercalation sequence translates the number-theoretic layer's `rational approximation $\rho\approx p/q$' into the sampling layer's `window approximation $S_M\approx M\rho$'. The two approximation steps have different meanings:
+\begin{itemize}
+    \item the number-theoretic layer approximates the \emph{real number} $\rho$ by a rational number $p/q$---this is \textbf{numerical approximation};
+    \item the sampling layer approximates `the number of sampling points required for $M$ consecutive periods', $M\rho$, by an \emph{integer} $S_M$---this is \textbf{window-length approximation}.
+\end{itemize}
+The error of the latter, $E_M=S_M-M\rho$, directly determines the accuracy of the spectral approximation in the next layer.
+\end{remark}
+
+\subsection{Spectral approximation: bounding the leakage amplitude}
+
+The third layer of the three-layer approximation chain of this section is the frequency-domain layer: how the DFT spectrum $F[k]$ on the intercalation window approximates the continuous Fourier coefficients $c_m$.
+
+\begin{theorem}[DFT leakage estimate for the intercalation window]\label{thm:intercalation_dft_leakage}
+Let \(f\) be a continuous \(T_f\)-periodic function with Fourier coefficients
+\[
+c_m=\frac{1}{T_f}\int_0^{T_f} f(t)e^{-i2\pi mt/T_f}\,dt.
+\]
+Let the sampling interval be \(\Delta x\) and the ideal period ratio \(\rho=T_f/\Delta x\). Take the intercalation window \(T=S_M\) and the sampling sequence \(f[n]=f(n\Delta x)\) (\(n=0,\dots,T-1\)), whose DFT is
+\[
+F[k]=\frac{1}{T}\sum_{n=0}^{T-1}f[n]e^{-i2\pi kn/T}.
+\]
+Then
+\[
+F[k]=\sum_{m\in\mathbb{Z}} c_m D_T\!\left(\frac{m}{\rho}-\frac{k}{T}\right),
+\]
+where
+\[
+D_T(\theta)=\frac{1}{T}\sum_{n=0}^{T-1}e^{i2\pi n\theta}
+=e^{i\pi(T-1)\theta}\frac{\sin(\pi T\theta)}{T\sin(\pi\theta)}
+\]
+is the Dirichlet kernel. If the intercalation error \(E_M=S_M-M\rho\) is bounded, then the main-lobe position offset satisfies
+\[
+\left|\frac{m}{\rho}-\frac{k}{T}\right|
+\le \frac{|m|\,|E_M|}{\rho\,T},
+\]
+and the leakage amplitude satisfies
+\[
+|F[k]-c_{k/M}|
+\le C\,\frac{|E_M|}{T}\sum_{m\in\mathbb{Z}}|c_m|,
+\]
+where \(C>0\) is a constant independent of \(T\). In particular, balanced intercalation gives \(|E_M|\le 1/2\), and best continued-fraction intercalation gives \(|E_M|<1/q_{j+1}\), reducing the leakage further.
+\end{theorem}
+
+\begin{proof}
+Represent the sampling sequence by the continuous Fourier series:
+\[
+f[n]=f(n\Delta x)=\sum_{m\in\mathbb{Z}}c_m e^{i2\pi m n\Delta x/T_f}
+=\sum_{m\in\mathbb{Z}}c_m e^{i2\pi m n/\rho}.
+\]
+Substituting into the definition of the DFT:
+\[
+F[k]=\frac{1}{T}\sum_{n=0}^{T-1}\sum_{m\in\mathbb{Z}}c_m
+e^{i2\pi n(m/\rho-k/T)}
+=\sum_{m\in\mathbb{Z}}c_m D_T\!\left(\frac{m}{\rho}-\frac{k}{T}\right).
+\]
+When \(T=S_M=M\rho+E_M\), for the principal frequency \(k=Mm\),
+\[
+\frac{m}{\rho}-\frac{Mm}{S_M}
+=m\left(\frac{1}{\rho}-\frac{M}{S_M}\right)
+=m\frac{S_M-M\rho}{\rho S_M}
+=m\frac{E_M}{\rho T}.
+\]
+Hence the main-lobe offset is \(|m|\,|E_M|/(\rho T)\). The Dirichlet kernel is approximately \(1\) when \(|\theta|\ll 1/T\), and decays like \(1/(T|\theta|)\) in the sidelobes. Summing the sidelobe contributions gives the leakage estimate. The error bounds for balanced intercalation and best continued-fraction intercalation are given by Theorem \ref{thm:intercalation_error_bound_harmonic} and the best approximation theorem for continued fractions.
+\end{proof}
+
+\begin{corollary}[Best continued-fraction intercalation window]\label{cor:continued_fraction_intercalation}
+Let \(\rho>0\) be irrational with continued-fraction convergents \(p_j/q_j\). Then taking the intercalation window
+\[
+T=p_j,\qquad M=q_j
+\]
+and choosing the direction of intercalation in \textbf{alternating fashion by parity}---lower intercalation for even \(j\) and upper intercalation for odd \(j\)---gives a window containing \(q_j\) consecutive periods, with cumulative error
+\[
+|E_{q_j}|=|p_j-q_j\rho|<\frac{1}{q_{j+1}}.
+\]
+Hence the DFT leakage amplitude is controlled by \(O(1/(q_j q_{j+1}))\), and this bound tends to zero as $j\to\infty$. Amongst all choices of window length not exceeding $p_{j+1}-1$, this window has the smallest leakage bound.
+\end{corollary}
+
+\begin{proof}
+By the best approximation theorem for continued fractions (Theorem \ref{thm:continued_fraction_best_approx_harmonic}), \(p_j/q_j\) is the best approximation amongst all rational numbers with denominator not exceeding \(q_{j+1}-1\), so \(|p_j-q_j\rho|<1/(q_j q_{j+1})\). The alternating choice gives \(S_{q_j}=p_j\), hence \(E_{q_j}=S_{q_j}-q_j\rho=p_j-q_j\rho\): for even \(j\) we have \(p_j/q_j<\rho\), so lower intercalation gives \(S_{q_j}=\lfloor q_j\rho\rfloor=p_j\), whilst for odd \(j\) we have \(p_j/q_j>\rho\), so upper intercalation gives \(S_{q_j}=\lceil q_j\rho\rceil=p_j\). Without alternation, lower intercalation at odd \(j\) would give \(S_{q_j}=p_j-1\) and an error \(1-|p_j-q_j\rho|\to1\), so the assertion would fail. Substituting into Theorem \ref{thm:intercalation_dft_leakage} gives the leakage bound. As $j\to\infty$, $q_jq_{j+1}\to\infty$, and the bound tends to zero. The optimality is guaranteed by the minimality of the continued-fraction convergents.
+\end{proof}
+
+\begin{remark}[`Bounding' rather than `elimination']\label{rem:bounded_not_eliminated}
+It must be emphasised that intercalation \textbf{does not eliminate} leakage, but rather \textbf{reduces leakage from uncontrollable to bounded}. When $\rho\notin\mathbb{Q}$, any finite window $T$ corresponds to some non-zero $|E_M|$, so the leakage amplitude is non-zero---this is the intrinsic cost of incommensurability. The value of intercalation lies in the following:
+\begin{enumerate}[label=(\roman*)]
+    \item it gives an \textbf{explicit upper bound} $O(|E_M|/T)$ on the leakage amplitude, making the leakage quantitatively controllable;
+    \item by choosing the window via continued fractions, it makes this bound \textbf{tend to zero} along the sequence of convergent windows;
+    \item it is complementary to the window-function method (see \S \ref{subsec:intercalation_vs_window}), striking a balance between bandwidth and sidelobes.
+\end{enumerate}
+Hence the rigorous formulation should be `intercalation \textbf{suppresses} or \textbf{bounds} spectral leakage', not `solves' it. When $\rho\in\mathbb{Q}$, the intercalation sequence degenerates to a constant sequence and the leakage is strictly zero---this is the degenerate solution of the bounding in the commensurable case.
+\end{remark}
+
+\subsection{Complementarity with the window-function method}\label{subsec:intercalation_vs_window}
+
+Intercalation and window functions are two independent routes to suppressing spectral leakage; they act on different links in the leakage process, and are therefore complementary.
+
+\begin{remark}[Division of labour between the two routes]\label{rem:two_routes_division}
+\textbf{Intercalation} acts on the \textbf{window length}: by choosing $T=S_M$ it makes the window contain approximately an integer number of consecutive periods, reducing the leakage of main-lobe energy into the sidelobes at the source. Its drawback is that the window length must be chosen from continued-fraction convergents, so that flexibility is limited.
+
+\textbf{Window functions} act on the \textbf{window boundary}: by multiplying the samples by a smooth window $w(t)$ (Hann, Hamming, Blackman and so on) they make the two ends of the window tend smoothly to zero, suppressing the sidelobes from the frequency-domain point of view. Their drawback is that the window function widens the main lobe and reduces the frequency resolution.
+
+The two act on different links in the leakage process, and can therefore be used in combination. Table \ref{tab:intercalation_vs_window} gives a comparison of the two.
+\end{remark}
+
+\begin{table}[htbp]
+\centering
+\caption{Comparison of intercalation and window functions}
+\label{tab:intercalation_vs_window}
+\begin{tabular}{@{}p{3cm}p{5.2cm}p{5.2cm}@{}}
+\toprule
+Dimension of comparison & Intercalation & Window function \\
+\midrule
+Object acted upon & Window length $T$ & Window-boundary weights \\
+Mechanism of action & Makes the window approach an integer number of periods & Makes the boundary tend smoothly to zero \\
+Mode of leakage suppression & Reduces main-lobe leakage at the source & Suppresses sidelobes from the frequency domain \\
+Effect on the main lobe & The main lobe does not widen (if the window is chosen accurately) & The main lobe widens ($O(1/T_w)$) \\
+Effect on the sidelobes & Sidelobes controlled by the Dirichlet kernel & Sidelobes controlled by the frequency-domain kernel of the window function \\
+Flexibility & The window is restricted to continued-fraction convergents & The window function may be chosen continuously \\
+Optimality condition & Continued-fraction convergent $T=p_j$ & Window width matched to the signal-to-noise ratio and the target sidelobe level \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.0cm and 1.2cm,
+  box/.style={draw, rounded corners, align=center, minimum width=3.0cm, minimum height=0.9cm, font=\small}]
+\node[box, fill=blue!12] (leak) {spectral leakage};
+\node[box, fill=green!12, above left=of leak] (inter) {intercalation\\(controls the window length)};
+\node[box, fill=orange!12, above right=of leak] (win) {window function\\(controls the window boundary)};
+\node[box, fill=green!8, below left=of leak] (l1) {main-lobe offset $O(|E_M|/T)$};
+\node[box, fill=orange!8, below right=of leak] (l2) {sidelobe decay $O(|\omega|^{-m-1})$};
+\node[box, fill=purple!12, below=2.2cm of leak] (both) {used in combination: narrow main lobe + low sidelobes};
+\draw[->, very thick] (inter) -- (leak);
+\draw[->, very thick] (win) -- (leak);
+\draw[->, very thick] (leak) -- (l1);
+\draw[->, very thick] (leak) -- (l2);
+\draw[->, very thick] (l1) -- (both);
+\draw[->, very thick] (l2) -- (both);
+\node[align=center, font=\small] at (0,-4.4) {Intercalation and window functions act on different links in the leakage process and can be combined to obtain the optimal result};
+\end{tikzpicture}
+\caption{Complementarity of intercalation and window functions: intercalation controls the main-lobe offset and window functions control the sidelobe decay, and the two together give both a narrow main lobe and low sidelobes.}
+\label{fig:intercalation_window_complementarity}
+\end{figure}
+
+\begin{proposition}[Complementary bound for intercalation and window functions]\label{prop:intercalation_window_complementarity}
+Let the intercalation window be $T=p_j$ (a continued-fraction convergent), and let the window function $w$ be applied in addition. Then the windowed spectrum satisfies
+\[
+\widehat{fw}[k]=\sum_{m\in\mathbb{Z}}c_m\,\widehat{w}\!\left(\frac{2\pi m}{T_f}-\frac{2\pi k}{T}\right)D_T\!\left(\frac{m}{\rho}-\frac{k}{T}\right),
+\]
+where $\widehat{w}$ is the frequency-domain kernel of the window function. In particular:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{With no window} ($w\equiv 1$, $\widehat{w}\equiv\delta$): the sidelobes are controlled by the Dirichlet kernel $D_T$, with decay rate $O(1/T)$.
+    \item \textbf{With a Hann window} ($\widehat{w}$ of main-lobe width $O(1/T)$ and sidelobes $-31$ dB): the main lobe widens but the sidelobes are markedly lowered.
+    \item \textbf{Combined effect}: intercalation aligns the main-lobe position with the grid (the offset of the first factor $D_T$ tending to zero), whilst the window function lowers the sidelobes (the sidelobe decay of the second factor $\widehat{w}$). The two together give both a narrow main lobe and low sidelobes---something that neither method alone can achieve.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) The no-window case is Theorem \ref{thm:intercalation_dft_leakage}. (ii) The sidelobes of the frequency-domain kernel $\widehat{w}$ of the Hann window decay like $1/\omega^3$, its main-lobe width is $O(1/T)$, and its classical sidelobe level is about $-31$ dB (Harper, 1970, \textit{Perturbation of the Fourier coefficients of a periodic function}). (iii) The windowed spectrum is the product of two factors: the intercalation factor $D_T$ controls the main-lobe offset and the window-function factor $\widehat{w}$ controls the sidelobe decay. The two factors act independently of one another (the first is related to the length of the time window and the second to the shape of the window), so they can be optimised simultaneously.
+\end{proof}
+
+\begin{remark}[Advice on choosing a method]\label{rem:method_selection_advice}
+How to choose between intercalation and window functions in practice:
+\begin{itemize}
+    \item If the signal period ratio $\rho$ is known (or can be estimated with high accuracy): give preference to intercalation to choose the window $T=p_j$, and then select the window function according to the target sidelobe level;
+    \item if $\rho$ is unknown or time-varying: intercalation cannot be applied, and one can only rely on window functions and spectral estimation algorithms (such as multitaper spectral estimation);
+    \item if the window length is constrained by hardware or real-time requirements and cannot be chosen freely: the role of intercalation is limited, and one must fall back on the window-function method;
+    \item if the signal-to-noise ratio is low: the benefit of the window function in lowering the sidelobes exceeds the benefit of intercalation in adjusting the main lobe, and combining the two is the optimal solution.
+\end{itemize}
+\end{remark}
+
+\subsection{Applications and examples}
+
+\begin{example}[Bounding the leakage of a single-tone signal]\label{ex:single_tone_leakage}
+Let the continuous signal be
+\[
+f(t)=e^{i2\pi t/\sqrt{2}},
+\]
+with sampling interval $\Delta x=1$ and ideal period ratio $\rho=\sqrt{2}\approx 1.41421356$. Taking the window $T=100$ directly, the number of periods within the window is
+\[
+\frac{T}{\rho}=\frac{100}{\sqrt{2}}\approx 70.7107,
+\]
+which is not an integer, and the leakage is pronounced. Take the continued-fraction convergent $99/70$ of $\sqrt{2}$ and set $T=99$, $M=70$. The intercalation error is
+\[
+|E_{70}|=|99-70\sqrt{2}|\approx 0.00505.
+\]
+Compared with the smallest error when $T=100$ is taken directly (about $0.409$), the error is reduced by a factor of about $81$; by Theorem \ref{thm:intercalation_dft_leakage}, the upper bound on the leakage amplitude is correspondingly reduced by a factor of about $81$. If the later convergent $239/169$ is taken, then $T=239$ and the error is
+\[
+|239-169\sqrt{2}|\approx 0.00042,
+\]
+and the leakage bound is reduced further. This example shows that intercalation does not eliminate leakage, but rather lowers the leakage bound by several orders of magnitude through the choice of continued-fraction convergents.
+\end{example}
+
+\begin{example}[Multi-tone signals and joint approximation]\label{ex:multi_tone_intercalation}
+Let
+\[
+f(t)=e^{i2\pi t/\sqrt{2}}+0.5e^{i2\pi t/\sqrt{3}}.
+\]
+The two frequency components correspond to the ideal period ratios $\rho_1=\sqrt{2}$ and $\rho_2=\sqrt{3}$. A single window cannot make both period ratios integers at the same time, and the `bounding' of intercalation degenerates in the multi-tone case into a `joint approximation' problem: one must choose $T$ so that both $|E_M^{(1)}|$ and $|E_M^{(2)}|$ are as small as possible. This can then be handled by the theory of two-dimensional continued fractions or of joint continued-fraction approximation; this section does not develop it, but merely points out that intercalation still gives an upper bound estimate in the multi-tone case, although the bound is determined by the weighted sum of the intercalation errors of the individual components. In practice one often combines it with a window function (such as the Hann window) to suppress the sidelobes further.
+\end{example}
+
+\begin{remark}[Analogy between the ten-day void, the void in the sexagenary cycle and spectral leakage]\label{rem:xunkong_leakage_analogy}
+The ten-day void and the void in the sexagenary cycle in the Chinese calendar and the mantic arts may be regarded as vacancy phenomena of a discrete periodic system under incommensurable conditions. The ten Heavenly Stems and the twelve Earthly Branches leave a remainder of two in each ten-day period, forming the void (kongwang). Intercalation, by contrast, compensates the cumulative phase error through error feedback. DFT spectral leakage is the manifestation of the same mathematical structure in the frequency domain: the window and the signal period are incommensurable, so that energy leaks from the principal frequency into the sidelobes. Intercalation makes the cumulative error bounded by choosing continued-fraction convergent windows, thereby suppressing the leakage. This analogy is heuristic and does not constitute a rigorous mathematical equivalence.
+\end{remark}
+
+\begin{remark}[Interface with circular convolution and the power spectrum]\label{rem:intercalation_convolution_spectrum}
+The sampling sequence on an intercalation window may be regarded as a \(T\)-periodic sequence. By the circular convolution theorem (Theorem \ref{thm:circular_convolution_theorem}), the Fourier coefficients of its circular convolution are \(Tc_kd_k\). If the intercalation error is bounded, then the circular convolution approximates the continuous periodic convolution, the error being controlled by \(|E_M|/T\). The power spectrum \(S(\omega_k)=|c_k|^2\) (Definition \ref{def:periodic_tendency_spectrum}) is estimated more accurately on the intercalation window, because the leakage energy is suppressed. The Parseval identity (Theorem \ref{thm:parseval_fourier}) still holds on the intercalation window, the total energy being conserved, and the leakage merely changes the distribution of the energy over the frequency points.
+\end{remark}
+
+\begin{remark}[Correspondence with the seven themes of this chapter]\label{rem:intercalation_seven_themes}
+Within the framework of the seven themes, intercalation may be positioned as follows:
+\begin{center}
+\begin{tabular}{@{}p{2.2cm}p{10.5cm}@{}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & Integer encoding of the irrational rotation \(R_\rho:z\mapsto e^{i2\pi\rho}z\) on the circle \\
+Scaling & The ideal period ratio \(\rho=T_f/\Delta x\) as a scaling charge \\
+Rotation & Phase-error feedback of the intercalation sequence \\
+Conservation & The cumulative error is bounded, and energy is conserved \\
+Symmetry & Alternating symmetric approximation of the continued-fraction convergents (even-indexed terms from below, odd-indexed terms from above) \\
+Closure & The intercalation window closes the approximate period \\
+Period & Strict periodicity when \(\rho\in\mathbb{Q}\), quasi-periodicity when \(\rho\notin\mathbb{Q}\) \\
+Algorithm & Continued fractions and best rational approximation, bounding the DFT leakage \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{remark}
+
+\section{\texorpdfstring{Circular convolution theorem and the unification of the classical integral transforms}{Circular convolution theorem and the unification of the classical integral transforms}}
+
+\begin{theorem}[Circular convolution theorem]\label{thm:circular_convolution_theorem}
+Let $f, g$ be periodic functions of period $T$ with Fourier coefficients $c_n, d_n$ respectively. Then the Fourier coefficients of the circular convolution $f \circledast g$ are $T c_n d_n$.
+\end{theorem}
+
+\begin{proof}
+\[
+\widehat{f \circledast g}(k) = \frac{1}{T}\int_0^T (f \circledast g)(t) e^{-i\omega_k t} dt
+= \frac{1}{T}\int_0^T \frac{1}{T}\int_0^T f(\tau) g(t-\tau) e^{-i\omega_k t} d\tau\, dt.
+\]
+Substituting $u = t - \tau$ and using Fubini's theorem:
+\[
+= T \cdot \left(\frac{1}{T}\int_0^T f(\tau) e^{-i\omega_k \tau} d\tau\right)\left(\frac{1}{T}\int_0^T g(u) e^{-i\omega_k u} du\right) = T c_k d_k.
+\]
+\end{proof}
+
+\begin{theorem}[Classical integral transforms as harmonic analysis on groups]\label{thm:classical_transforms_unified}
+Within a suitable framework of group actions, representations and function spaces, the classical integral transforms can be described uniformly:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Fourier transform}: harmonic analysis on the translation group $\mathbb{R}$, $\hat{f}(\omega) = \int f(t) e^{-i\omega t} dt$.
+    \item \textbf{Laplace transform}: the Fourier transform with a damping factor, $\mathcal{L}\{f\}(s) = \mathcal{F}\{f(t)e^{-\sigma t}\}(\omega)$ ($s = \sigma + i\omega$).
+    \item \textbf{Mellin transform}: harmonic analysis on the scaling group $\mathbb{R}^+$, reduced to the Fourier transform by the substitution $x = e^t$.
+    \item \textbf{Wavelet transform}: harmonic analysis on the affine group $\mathbb{R} \rtimes \mathbb{R}^+$.
+    \item \textbf{DFT}: harmonic analysis on the finite cyclic group $\mathbb{Z}/N\mathbb{Z}$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+Each item follows from the definitions together with Propositions \ref{prop:laplace_fourier}, \ref{prop:mellin_fourier}, \ref{prop:wavelet_group} and the definition of the DFT.
+\end{proof}
+
+\begin{remark}[General framework of harmonic analysis on groups]\label{rem:harmonic_general}
+Let $G$ be a locally compact abelian group and let $\widehat{G}$ be its dual group. The Fourier transform $\hat{f}(\chi) = \int_G f(g) \overline{\chi(g)} dg$ maps functions on $L^2(G)$ to functions on $L^2(\widehat{G})$, and satisfies the Parseval identity $\|f\|_{L^2(G)} = \|\hat{f}\|_{L^2(\widehat{G})}$. The classical integral transforms correspond to different choices of the group $G$:
+\begin{center}
+\begin{tabular}{@{}p{4cm}p{4cm}p{5cm}@{}}
+\toprule
+Group $G$ & Dual group $\widehat{G}$ & Transform \\
+\midrule
+$\mathbb{R}$ (translation group) & $\mathbb{R}$ & Fourier transform \\
+$\mathbb{R}^+$ (scaling group) & $\mathbb{R}$ & Mellin transform \\
+$U(1)$ (rotation group) & $\mathbb{Z}$ & Fourier series \\
+$\mathbb{Z}/N\mathbb{Z}$ & $\mathbb{Z}/N\mathbb{Z}$ & DFT \\
+$\mathbb{R} \rtimes \mathbb{R}^+$ (affine group) & --- & wavelet transform \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.0cm and 1.4cm,
+  box/.style={draw, rounded corners, align=center, minimum width=2.8cm, minimum height=0.9cm, font=\small}]
+\node[box, fill=blue!12] (G) {group $G$};
+\node[box, fill=green!12, right=of G] (dual) {dual group $\widehat{G}$};
+\node[box, fill=orange!12, right=of dual] (transform) {Fourier transform};
+% Group examples
+\node[font=\footnotesize, below=0.6cm of G] (g1) {$\mathbb{R}$ (translation)};
+\node[font=\footnotesize, below=0.2cm of g1] (g2) {$\mathbb{R}^+$ (scaling)};
+\node[font=\footnotesize, below=0.2cm of g2] (g3) {$U(1)$ (rotation)};
+\node[font=\footnotesize, below=0.2cm of g3] (g4) {$\mathbb{Z}/N\mathbb{Z}$};
+\node[font=\footnotesize, below=0.2cm of g4] (g5) {$\mathbb{R}\rtimes\mathbb{R}^+$};
+% Dual examples
+\node[font=\footnotesize, below=0.6cm of dual] (d1) {$\mathbb{R}$};
+\node[font=\footnotesize, below=0.2cm of d1] (d2) {$\mathbb{R}$};
+\node[font=\footnotesize, below=0.2cm of d2] (d3) {$\mathbb{Z}$};
+\node[font=\footnotesize, below=0.2cm of d3] (d4) {$\mathbb{Z}/N\mathbb{Z}$};
+\node[font=\footnotesize, below=0.2cm of d4] (d5) {---};
+% Transform examples
+\node[font=\footnotesize, below=0.6cm of transform] (t1) {Fourier transform};
+\node[font=\footnotesize, below=0.2cm of t1] (t2) {Mellin transform};
+\node[font=\footnotesize, below=0.2cm of t2] (t3) {Fourier series};
+\node[font=\footnotesize, below=0.2cm of t3] (t4) {DFT};
+\node[font=\footnotesize, below=0.2cm of t4] (t5) {wavelet transform};
+% Connections
+\draw[->, very thick] (G) -- (dual);
+\draw[->, very thick] (dual) -- (transform);
+\node[align=center, font=\small] at (3.5,-4.6) {Harmonic analysis on groups: the Fourier transform on different groups $G$ gives different classical integral transforms};
+\end{tikzpicture}
+\caption{Unified framework of harmonic analysis on groups: the Fourier transforms associated with different groups $G$ and dual groups $\widehat{G}$ give the Fourier transform, the Mellin transform, the Fourier series, the DFT, the wavelet transform and so on.}
+\label{fig:harmonic_group_analysis}
+\end{figure}
+
+\begin{property}[Area preservation and duality of the Fourier transform]\label{prop:fourier_area_duality}
+The Fourier transform $\mathcal{F}$ preserves area on $L^2(\mathbb{R})$ (Plancherel theorem):
+\[
+\|f\|_2=\frac{1}{\sqrt{2\pi}}\|\hat f\|_2.
+\]
+Moreover $\mathcal{F}$ is a unitary operator on $L^2$ satisfying the duality
+\[
+\mathcal{F}^2 f(t)=f(-t),\qquad \mathcal{F}^4=\operatorname{id}.
+\]
+That is, the Fourier transform is a fourth-order involutive operator on $L^2$.
+\end{property}
+
+\begin{proof}
+Area preservation is given by the Plancherel theorem (Theorem \ref{thm:plancherel}). The duality follows directly from the Fourier inversion formula: $\mathcal{F}^2f(t)=\int\hat f(\omega)e^{i\omega t}d\omega/(2\pi)=f(-t)$, whence $\mathcal{F}^4=\operatorname{id}$.
+\end{proof}
+
+\begin{example}[Fourier transforms of common functions]\label{ex:fourier_transform_examples}
+\begin{itemize}
+    \item The Gaussian function $e^{-t^2/2}$ is a fixed point of the Fourier transform: $\mathcal{F}\{e^{-t^2/2}\}=\sqrt{2\pi}e^{-\omega^2/2}$.
+    \item The Fourier transform of the rectangular pulse $\mathbf{1}_{[-T,T]}(t)$ is $2T\operatorname{sinc}(T\omega/\pi)$.
+    \item The Fourier transform of the exponential decay $e^{-a|t|}$ ($a>0$) is $\frac{2a}{a^2+\omega^2}$ (Lorentzian type).
+    \item The Fourier transform of the $\delta$ function is the constant $1$; the Fourier transform of the constant $1$ is $2\pi\delta(\omega)$.
+\end{itemize}
+\end{example}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & Frequency operator: the delay phase factor $e^{i\nu\tau}$; the translation property of the Fourier transform; the DFT periodicity lemma (Lemma \ref{lem:dft_periodicity}) \\
+Scaling & Amplitude operator; the weighted kernel system; the multiscale nature of the wavelet transform (Proposition \ref{prop:wavelet_group}) \\
+Rotation & Phase operator: the 6 complex phase kernels; the $90^\circ$ rotation of the Hilbert kernel; unitary diagonalisation by the DFT (Proposition \ref{prop:dft_unitary}) \\
+Conservation & Power spectrum $|c_k|^2$ (Theorem \ref{thm:spectrum_classical_limit}); the Parseval identity (Theorem \ref{thm:parseval_fourier}); the Plancherel theorem (Theorem \ref{thm:plancherel}) \\
+Symmetry & Conjugate symmetry; window--kernel duality; orthogonality of orbit decomposition (Lemma \ref{lem:irreducible_orthogonality}); duality of the Fourier transform (Property \ref{prop:fourier_area_duality}) \\
+Closure & Closure of the degeneration chain: circular convolution $\supset$ kernelised convolution $\supset$ classical convolution; periodic closure of the DFT (Lemma \ref{lem:dft_periodicity}) \\
+Period & Period operator $\Theta_{p,q}$; power spectrum $S(\omega_k)$ (Definition \ref{def:periodic_tendency_spectrum}); the uncertainty principle (Theorem \ref{thm:uncertainty}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove Proposition \ref{prop:PPO_group}:
+    the set $\mathcal{P}_T=\{\mathcal{O}_k^{(T)}=e^{i2\pi k/T}\mid k=0,1,\dots,T-1\}$
+    forms a cyclic group $C_T$ under complex multiplication, and
+    \[
+    \mathcal{O}_a^{(T)}\cdot\mathcal{O}_b^{(T)}=\mathcal{O}_{(a+b)\bmod T}^{(T)}.
+    \]
+    Verify closure, the identity element and the inverse element, and explain why $\mathcal{P}_T$ is in one-to-one correspondence with the irreducible representations of $C_T$.
+
+    \item Prove Proposition \ref{prop:schur_orthogonality} (the Schur orthogonality relations):
+    let $G$ be a finite group and let $\rho,\sigma$ be irreducible unitary representations. Then the matrix coefficients satisfy
+    \[
+    \frac{1}{|G|}\sum_{g\in G}\rho_{ij}(g)\,\overline{\sigma_{kl}(g)}
+    =\frac{\delta_{\rho\sigma}\delta_{ik}\delta_{jl}}{d_\rho}.
+    \]
+    Complete the proof by constructing an averaging operator with Schur's lemma,
+    and explain why the characters satisfy $\langle\chi_\rho,\chi_\sigma\rangle=\delta_{\rho\sigma}$.
+
+    \item Verify Definition \ref{def:regular_representation_dft}:
+    the DFT matrix $\mathbf{F}_T$ unitarily diagonalises the regular representation of $C_T$:
+    \[
+    \mathbf{F}_T^\dagger\cdot\rho_{\text{reg}}(g)\cdot\mathbf{F}_T
+    =\operatorname{diag}(\mathcal{O}_0^{(T)},\dots,\mathcal{O}_{T-1}^{(T)}).
+    \]
+    Taking $T=4$ as an example, write down the cyclic shift matrix and the DFT matrix,
+    and verify that the diagonalisation relation holds.
+
+    \item Prove Lemma \ref{lem:irreducible_orthogonality}:
+    let $\rho,\sigma$ be two non-isomorphic irreducible unitary representations of $G$,
+    and let $V_\rho,V_\sigma$ be the corresponding equivariant subspaces of their representation spaces in $L^2(G)$. Then
+    \[
+    V_\rho\perp V_\sigma.
+    \]
+    Complete the proof using Schur's lemma,
+    and explain why this orthogonality guarantees the legitimacy of orbit decomposition.
+
+    \item Prove Proposition \ref{prop:orbit_diagonalisation}:
+    under orbit decomposition the group action $\lambda(g)$ is diagonalised,
+    and each irreducible orbit evolves independently under the group action.
+    Write down the decomposition $\lambda(g)f=\sum_\rho\lambda(g)f_\rho$,
+    and explain why the subspaces $V_\rho$ are pairwise orthogonal.
+
+    \item Prove Corollary \ref{cor:convolution_orbit_decomp}:
+    let $K\in L^1(G)$. The convolution operator $C_Kf=K*f$ is completely diagonalised under orbit decomposition:
+    \[
+    (C_Kf)_\rho=\hat{K}(\rho)f_\rho.
+    \]
+    Use Schur's lemma to explain why the restriction of $C_K$ to the irreducible subspace $V_\rho$ is a scalar operator.
+
+    \item Prove the relation between the Fourier coefficients and the parameters of the harmonic components (Proposition \ref{prop:fourier_epicycle}):
+    let $f(t)=\sum_{n=-\infty}^{\infty}c_ne^{in\omega_0t}$ with $\omega_0=2\pi/T$. Then
+    \begin{enumerate}[label=(\roman*)]
+        \item the $n$-th harmonic component has radius $A_n=2|c_n|$ ($n\ge1$);
+        \item angular velocity $\omega_n=n\omega_0$;
+        \item initial argument $\phi_n=\arg(c_n)$;
+        \item angular momentum $L_n=4m_n|c_n|^2n\omega_0$.
+    \end{enumerate}
+    Complete the proof using the real-signal conjugate symmetry of the Fourier coefficients.
+
+    \item Prove the Parseval identity (Theorem \ref{thm:parseval_fourier}):
+    let $f\in L^2([0,T])$ with Fourier coefficients $c_n$. Then
+    \[
+    \frac{1}{T}\int_0^T|f(t)|^2dt=\sum_{n=-\infty}^{\infty}|c_n|^2.
+    \]
+    Complete the proof using the orthogonality of the Fourier basis,
+    and explain why the Parseval identity can be stated using the amplitude series alone.
+
+    \item Prove the convergence of the Fourier series (Property \ref{prop:fourier_series_convergence}):
+    prove the convergence of the Fourier series separately for the three cases $f\in C^1$, $f\in L^2$ and piecewise continuity.
+
+    \item Prove the basic properties of the Fourier transform (Proposition \ref{prop:fourier_properties}):
+    \begin{enumerate}[label=(\roman*)]
+        \item linearity;
+        \item translation: $\mathcal{F}\{f(t-a)\}(\omega)=e^{-i\omega a}\hat{f}(\omega)$;
+        \item convolution: $\mathcal{F}\{f*g\}=\hat{f}\cdot\hat{g}$;
+        \item differentiation: $\mathcal{F}\{f'(t)\}(\omega)=i\omega\hat{f}(\omega)$;
+        \item Parseval.
+    \end{enumerate}
+    Write out the proofs separately, and explain why the translation property manifests itself in the frequency domain as a phase factor.
+
+    \item Prove the Plancherel theorem (Theorem \ref{thm:plancherel}):
+    the Fourier transform extends uniquely to a unitary operator on $L^2(\mathbb{R})$, satisfying
+    \[
+    \|f\|_{L^2}^2=\frac{1}{2\pi}\|\hat f\|_{L^2}^2.
+    \]
+    Explain why the density of $L^1\cap L^2$ is the key to the extension.
+
+    \item Prove the uncertainty principle (Theorem \ref{thm:uncertainty}):
+    for $\|f\|_2=1$,
+    \[
+    \Delta t\,\Delta\omega\ge\frac12.
+    \]
+    Complete the proof using integration by parts and the Cauchy--Schwarz inequality,
+    and explain why the Gaussian function attains equality.
+
+    \item Prove the Fourier invariance of Schwartz space (Property \ref{prop:schwartz_invariance}):
+    the Fourier transform is a linear homeomorphism of $\mathcal{S}(\mathbb{R})$ onto itself,
+    with $\mathcal{F}^4=\operatorname{id}$, and the Gaussian function is a fixed point.
+    Explain why $\mathcal{S}$ is the natural domain of definition for the Fourier transform.
+
+    \item Prove Proposition \ref{prop:dft_unitary}:
+    the DFT matrix $\mathbf{F}_N$ is unitary: $\mathbf{F}_N^\dagger\mathbf{F}_N=\mathbf{I}_N$.
+    Complete the proof by summing the geometric series,
+    and verify Lemma \ref{lem:dft_periodicity}:
+    $F[k+N]=F[k]$ and $F[-k]=F[N-k]$.
+
+    \item Prove the Radix-2 FFT (Theorem \ref{thm:radix2_fft}):
+    let $N=2^k$. The DFT can be decomposed into two DFTs of length $N/2$,
+    with time complexity $O(N\log_2N)$.
+    Write down the recurrence relation $T(2^k)=2T(2^{k-1})+O(2^k)$ and solve it.
+
+    \item Verify the Radix-$p$ FFT (Theorem \ref{thm:radix_p_fft}) and the Bluestein algorithm (Proposition \ref{prop:bluestein}):
+    \begin{enumerate}[label=(\roman*)]
+        \item when $N=p^k$ ($p=3,5,7$), the DFT can be decomposed into $p$ DFTs of length $N/p$;
+        \item the DFT for arbitrary $N$ can be computed in convolution form.
+    \end{enumerate}
+    Write down the time complexities separately, and explain how the Bluestein algorithm uses the identity
+    $kn=\frac12(k^2+n^2-(k-n)^2)$.
+
+    \item Prove the relation between the Laplace transform and the Fourier transform (Proposition \ref{prop:laplace_fourier}):
+    \[
+    \mathcal{L}\{f\}(s)=\mathcal{F}\{f(t)e^{-\sigma t}\}(\omega),
+    \]
+    where $s=\sigma+i\omega$.
+    Write out the proof, and explain why the Laplace transform is the Fourier transform with a damping factor.
+
+    \item Prove the relation between the Mellin transform and the Fourier transform (Proposition \ref{prop:mellin_fourier}):
+    with the substitution $x=e^t$ and $f(x)=g(t)$,
+    \[
+    \mathcal{M}\{f\}(s)=\mathcal{F}\{g\}(is).
+    \]
+    Write out the proof, and explain why the Mellin transform is harmonic analysis on the scaling group.
+
+    \item Prove the group-representation-theoretic basis of the wavelet transform (Proposition \ref{prop:wavelet_group}):
+    the wavelet transform is harmonic analysis on the affine group $\mathbb{R}\rtimes\mathbb{R}^+$.
+    Write down the representation of the affine group,
+    \[
+    \pi_{(a,b)}\psi(t)=|a|^{-1/2}\psi((t-b)/a),
+    \]
+    and explain why the wavelet transform can be written as
+    $W_f(a,b)=\langle f,\pi_{(a,b)}\psi\rangle$.
+
+    \item Prove Proposition \ref{prop:twelve_to_six}:
+    define the 6 complex phase kernels
+    \[
+    S^{(1)}=e^{i\theta},\;S^{(2)}=e^{i\phi},\;S^{(3)}=e^{i2\theta},\;
+    S^{(4)}=e^{i2\phi},\;S^{(5)}=e^{i\theta/2},\;S^{(6)}=e^{i\phi/2},
+    \]
+    where $\theta=\alpha-\beta$ and $\phi=\alpha+\beta$. Then the real part of $S^{(d)}$ is a cosine kernel,
+    and the imaginary part is a sine kernel. Complete the proof using Euler's formula,
+    and explain how the 12 real similarities correspond to the real and imaginary parts of the 6 complex kernels.
+
+    \item Prove Theorem \ref{thm:three_layer_identity} (three-level consistency of cosine similarity):
+    cosine similarity takes the same form at the vector level, the component level and the delay level:
+    \begin{enumerate}[label=(\roman*)]
+        \item vector level: $\cos\theta=(\mathbf{a}\cdot\mathbf{b})/(\|\mathbf{a}\|\|\mathbf{b}\|)$;
+        \item component level: $\mathbb{S}_{mn}=\cos(\theta_m-\varphi_n)$;
+        \item delay level: $(f\star g)(0)/(\|f\|\|g\|)$ is the $L^2$ cosine similarity.
+    \end{enumerate}
+
+    \item Verify Example \ref{ex:component_tendency_similarity}:
+    take $f(t)=3e^{i(2t+\pi/4)}+2e^{i4t}$ and $g(t)=4e^{i2t}+e^{i(6t+\pi/3)}$,
+    compute the coupling coefficient matrix $\mathbb{T}$ and the similarity matrix $\mathbb{S}$,
+    and verify the normalisation relation $\mathbb{S}_{mn}=\mathbb{T}_{mn}/(A_mB_n)$.
+
+    \item Prove Theorem \ref{thm:spectrum_classical_limit}:
+    let $X$ be a periodic function of period $T$ with Fourier coefficients $c_k$. Then the autocorrelation function
+    \[
+    R_X(\tau)=\frac1T\int_0^TX(t)\overline{X(t-\tau)}dt
+    \]
+    has Fourier coefficients $|c_k|^2$, that is, the power spectrum is the Fourier transform of the autocorrelation function.
+    Complete the proof using the orthogonality relation $\frac1T\int_0^Te^{i(\omega_n-\omega_m)t}dt=\delta_{nm}$.
+
+    \item Prove Corollary \ref{cor:six_spectrum_family}:
+    let $X$ be an integrable function of period $T$ with Fourier coefficients $c_n$. Then
+    \[
+    \frac1T\int_0^T|X(t)|^2dt=\sum_n|c_n|^2=\sum_nS(\omega_n).
+    \]
+    Complete the proof using the Parseval identity and the definition of the power spectrum respectively,
+    and explain why this is the expression of energy conservation in the frequency domain.
+
+    \item Prove the circular convolution theorem (Theorem \ref{thm:circular_convolution_theorem}):
+    let $f,g$ have period $T$ with Fourier coefficients $c_n,d_n$ respectively. Then
+    the circular convolution $f\circledast g$ has Fourier coefficients $Tc_nd_n$.
+    Complete the proof using Fubini's theorem and the substitution $u=t-\tau$.
+
+    \item Prove Theorem \ref{thm:classical_transforms_unified}:
+    the classical integral transforms as special cases of harmonic analysis on groups:
+    \begin{enumerate}[label=(\roman*)]
+        \item Fourier transform---the translation group $\mathbb{R}$;
+        \item Laplace transform---the Fourier transform with a damping factor;
+        \item Mellin transform---the scaling group $\mathbb{R}^+$;
+        \item wavelet transform---the affine group $\mathbb{R}\rtimes\mathbb{R}^+$;
+        \item DFT---the finite cyclic group $\mathbb{Z}/N\mathbb{Z}$.
+    \end{enumerate}
+    Point out the group and the dual group corresponding to each transform,
+    and explain why group representation theory can describe these transforms uniformly.
+
+    \item Prove Property \ref{prop:fourier_area_duality}:
+    the Fourier transform is a fourth-order involutive operator on $L^2$: $\mathcal{F}^4=\operatorname{id}$.
+    Complete the proof using the Fourier inversion formula, and explain why $\mathcal{F}^2f(t)=f(-t)$.
+
+    \item Prove Theorem \ref{thm:intercalation_error_bound_harmonic} (the bounded-error theorem for intercalation):
+    the boundedness of the errors of the three basic intercalation sequences:
+    \begin{enumerate}[label=(\roman*)]
+        \item lower intercalation: $S_M^{\mathrm{floor}}=\lfloor M\rho\rfloor$,
+              $E_M^{\mathrm{floor}}=-\{M\rho\}\in(-1,0]$;
+        \item upper intercalation: $S_M^{\mathrm{ceil}}=\lceil M\rho\rceil$,
+              $E_M^{\mathrm{ceil}}=\lceil M\rho\rceil-M\rho\in[0,1)$ (with $E_M^{\mathrm{ceil}}=0$ when $M\rho\in\mathbb Z$);
+        \item balanced intercalation: $S_M^{\mathrm{round}}=\operatorname{round}(M\rho)$,
+              $|E_M^{\mathrm{round}}|\le1/2$.
+    \end{enumerate}
+
+    \item Prove Theorem \ref{thm:intercalation_dft_leakage} (the DFT leakage estimate for the intercalation window):
+    let $f$ be a continuous $T_f$-periodic function with Fourier coefficients $c_m$,
+    ideal period ratio $\rho=T_f/\Delta x$, and intercalation window $T=S_M$. Then
+    \[
+    F[k]=\sum_{m\in\mathbb{Z}}c_mD_T\Bigl(\frac{m}{\rho}-\frac{k}{T}\Bigr),
+    \]
+    and the main-lobe offset satisfies
+    \[
+    \Bigl|\frac{m}{\rho}-\frac{k}{T}\Bigr|
+    \le\frac{|m||E_M|}{\rho T}.
+    \]
+    Complete the proof using the Fourier series representation of the sampling sequence,
+    and explain why the leakage amplitude satisfies $|F[k]-c_{k/M}|\le C\frac{|E_M|}{T}\sum_m|c_m|$.
+
+    \item Prove Corollary \ref{cor:continued_fraction_intercalation}:
+    let $\rho>0$ be irrational with continued-fraction convergents $p_j/q_j$.
+    When the intercalation window is taken as $T=p_j$, $M=q_j$,
+    the cumulative error is $|E_{q_j}|=|p_j-q_j\rho|<1/q_{j+1}$,
+    and the leakage amplitude is controlled by $O(1/(q_jq_{j+1}))$.
+    Explain why, amongst all choices of window length not exceeding $p_{j+1}-1$,
+    this window has the smallest leakage bound.
+
+    \item Prove Proposition \ref{prop:intercalation_window_complementarity}:
+    the complementary bound for intercalation and window functions:
+    \begin{enumerate}[label=(\roman*)]
+        \item with no window the sidelobes are controlled by the Dirichlet kernel, with decay $O(1/T)$;
+        \item with a Hann window the main lobe widens but the sidelobes are lowered to $-31$ dB;
+        \item when the two are used together, intercalation aligns the main lobe with the grid and the window function lowers the sidelobes.
+    \end{enumerate}
+    Explain why the two act on different links in the leakage process,
+    and can therefore be used in combination.
+
+    \item Verify Example \ref{ex:single_tone_leakage}:
+    let $f(t)=e^{i2\pi t/\sqrt{2}}$ with sampling interval $\Delta x=1$,
+    and ideal period ratio $\rho=\sqrt{2}\approx1.41421356$.
+    Take the continued-fraction convergent $99/70$ of $\sqrt{2}$ and set $T=99$, $M=70$.
+    Compute the intercalation error $|E_{70}|=|99-70\sqrt{2}|$,
+    and compare it with the smallest error when $T=100$ is taken directly, explaining the suppression effect of intercalation.
+
+    \item Synthesis problem: combining roots of unity and cyclic group representations (\S\ref{sec:unit_roots_cyclic_rep}),
+    orbit decomposition and synthesis (\S\ref{sec:orbit_decomposition_synthesis}),
+    the unification of the classical integral transforms (Theorem \ref{thm:classical_transforms_unified}),
+    phase kernels and similarity (Proposition \ref{prop:twelve_to_six}),
+    the power spectrum and circular convolution (Theorem \ref{thm:spectrum_classical_limit})
+    and the bounding of intercalation leakage (Theorem \ref{thm:intercalation_dft_leakage}),
+    explain how harmonic analysis unifies the four pillars of periodic mathematics---group representation theory, periodic
+    convolution, window functions and the refractive index, and complex exponential activation functions---within a single framework.
+    Point out separately:
+    \begin{enumerate}[label=(\roman*)]
+        \item how group representation theory decomposes periodic functions via irreducible representations;
+        \item how periodic convolution manifests itself as a tensor product in the frequency domain;
+        \item how window functions control spectral leakage;
+        \item how complex exponential activation functions correspond to the Fourier basis.
+    \end{enumerate}
+\end{enumerate}

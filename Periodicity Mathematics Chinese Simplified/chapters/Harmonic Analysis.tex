@@ -1,0 +1,1530 @@
+\chapter{调和分析}
+\label{chap:harmonic}
+\label{chap:harmonic-analysis}
+\markboth{调和分析}{调和分析}
+
+\begin{remark}[本章定位]\label{rem:harmonic_chapter_positioning}
+调和分析是研究周期结构在不同观察尺度之间变换与比较的数学理论。本章在“函数与分析基础”章（卷积、傅里叶级数、周期变换）与“周期函数与具有周期轨道的群”章（相位算子、卷积）的基础上，完成以下工作：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{傅里叶级数与傅里叶变换的完整理论}：定义、正交性、帕塞瓦尔恒等式、卷积定理，以及离散傅里叶变换、快速傅里叶变换的代数基础。
+    \item \textbf{经典积分变换的统一}：傅里叶变换、拉普拉斯变换、梅林变换、小波变换、希尔伯特变换作为群上的调和分析。
+    \item \textbf{相位核与相似度}：余弦核与正弦核在分量层面的形式，与向量层面内积/外积的关系。
+    \item \textbf{功率谱与循环卷积}：傅里叶系数模方、帕塞瓦尔恒等式、循环卷积定理。
+\end{enumerate}
+本章各节遵循统一的逻辑顺序：\textbf{定义 $\to$ 命题 $\to$ 引理 $\to$ 定理 $\to$ 证明 $\to$ 推论 $\to$ 性质 $\to$ 例子 $\to$ 注释}。
+
+\textbf{本章七主题导引}：平移——频率算子（时延相子 $e^{i\nu\tau}$ 与拍频定位）；缩放——振幅算子与权重核体系；旋转——相位算子（复相位核）；守恒——功率谱（周期趋势谱的经典极限）；对称——共轭对称与窗-核对偶；闭合——退化链闭合；周期——跨周期交互的周期算子 $\Theta_{p,q}$。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=0.9cm and 1.1cm,
+  hub/.style={draw, very thick, rounded corners, align=center, minimum width=2.6cm, minimum height=1.0cm, fill=orange!15, font=\small},
+  seg/.style={draw, rounded corners, align=center, minimum width=2.4cm, minimum height=0.85cm, fill=blue!8, font=\small},
+  arr/.style={-{Stealth[length=2.2mm]}, thick}]
+\node[hub] (hub) {群上调和分析};
+\node[seg, fill=green!12, above left=of hub] (u1) {$U(1)$\\傅里叶级数};
+\node[seg, fill=cyan!12, above right=of hub] (r) {$\mathbb{R}$\\傅里叶变换};
+\node[seg, fill=yellow!16, left=of hub] (zp) {$\mathbb{Z}/N\mathbb{Z}$\\DFT/FFT};
+\node[seg, fill=purple!12, right=of hub] (aff) {$\mathbb{R}\rtimes\mathbb{R}^+$\\小波变换};
+\node[seg, fill=red!10, below left=of hub] (mellin) {$\mathbb{R}^+$\\梅林变换};
+\node[seg, fill=orange!10, below right=of hub] (laplace) {带衰减\\拉普拉斯};
+\foreach \x in {u1,r,zp,aff,mellin,laplace}
+  \draw[arr] (hub) -- (\x);
+\node[align=center, font=\small] at (0,-5.0) {调和分析统一框架：不同群 $G$ 上的傅里叶变换给出不同经典积分变换};
+\end{tikzpicture}
+\caption{调和分析统一框架：群上傅里叶变换按群 $G$ 的不同选择，给出傅里叶级数、傅里叶变换、DFT、小波变换、梅林变换、拉普拉斯变换等经典变换。}
+\label{fig:harmonic_unified}
+\end{figure}
+
+\section{\texorpdfstring{单位根与循环群表示}{单位根与循环群表示}}
+\label{sec:unit_roots_cyclic_rep}
+
+\begin{definition}[单位根]\label{def:PPO}
+对任意 $T \in \mathbb{N}^+$，其 $T$ 次单位根为 $z_k^{(T)} = e^{i2\pi k/T}$（$k = 0, 1, \dots, T-1$）。全部 $T$ 个 $T$ 次单位根构成集合
+\[
+\mathcal{P}_T = \{\mathcal{O}_k^{(T)} = e^{i2\pi k/T} \mid k = 0, 1, \dots, T-1\}.
+\]
+\end{definition}
+
+\begin{proposition}[单位根群的循环结构]\label{prop:PPO_group}
+集合 $\mathcal{P}_T$ 在复乘运算下构成循环群 $C_T$，且与 $C_T$ 的不可约表示一一对应。乘法满足 $\mathcal{O}_a^{(T)} \cdot \mathcal{O}_b^{(T)} = \mathcal{O}_{(a+b) \bmod T}^{(T)}$。
+\end{proposition}
+
+\begin{proof}
+$\mathcal{P}_T$ 中的元素是单位圆上的 $T$ 次单位根。
+
+封闭性：对任意 $\mathcal{O}_a, \mathcal{O}_b \in \mathcal{P}_T$，
+\[
+\mathcal{O}_a \cdot \mathcal{O}_b
+= e^{i2\pi(a+b)/T}
+= \mathcal{O}_{(a+b)\bmod T} \in \mathcal{P}_T.
+\]
+
+单位元为 $\mathcal{O}_0 = 1$；
+逆元为
+\[
+\mathcal{O}_k^{-1}
+= e^{-i2\pi k/T}
+= \mathcal{O}_{(T-k)\bmod T}.
+\]
+
+因此 $\mathcal{P}_T$ 构成一个群，且由 $\mathcal{O}_1$ 生成，
+阶为 $T$，同构于循环群 $C_T$。
+
+由 $C_T$ 的不可约表示分类，
+$C_T$ 恰有 $T$ 个一维不可约表示
+\[
+\rho_k(g^m) = e^{i2\pi km/T},
+\]
+其在生成元处取值为 $\rho_k(g) = \mathcal{O}_k^{(T)}$，
+与 $\mathcal{P}_T$ 中的元素一一对应。
+\end{proof}
+
+\begin{proposition}[Schur 正交关系]\label{prop:schur_orthogonality}
+设 $G$ 为有限群，$\rho,\sigma$ 为不可约酉表示，维数分别为 $d_\rho,d_\sigma$。则矩阵系数满足
+\[
+\frac{1}{|G|}\sum_{g\in G}\rho_{ij}(g)\,\overline{\sigma_{kl}(g)}
+=\frac{\delta_{\rho\sigma}\,\delta_{ik}\,\delta_{jl}}{d_\rho}.
+\]
+特别地，特征标满足
+\[
+\langle\chi_\rho,\chi_\sigma\rangle:=\frac{1}{|G|}\sum_{g\in G}\chi_\rho(g)\overline{\chi_\sigma(g)}=\delta_{\rho\sigma}.
+\]
+\end{proposition}
+
+\begin{proof}
+对 $d_\sigma\times d_\rho$ 矩阵 $M$ 构造
+\[
+T=\frac{1}{|G|}\sum_{g\in G}\rho(g)\,M\,\sigma(g)^{-1}.
+\]
+对任意 $h$，$\rho(h)T=T\sigma(h)$，故 $T$ 是 $\rho$ 到 $\sigma$ 的缠绕算子。$\rho\not\cong\sigma$ 时由 Schur 引理 $T=0$；$\rho=\sigma$ 时 $T=\lambda I$，取迹得 $\lambda=\operatorname{tr}(M)/d_\rho$。取 $M$ 为单位矩阵元素即得。
+\end{proof}
+
+\begin{definition}[正则表示与DFT对角化]\label{def:regular_representation_dft}
+$C_T$ 的正则表示 $\rho_{\text{reg}}$ 作用在 $T$ 维群代数上，其矩阵为 $T \times T$ 循环移位矩阵。DFT 矩阵 $\mathbf{F}_T$（元素为 $F_T[m,n] = \frac{1}{\sqrt{T}} e^{-i2\pi mn/T}$）将正则表示酉对角化：
+\[
+\mathbf{F}_T^\dagger \cdot \rho_{\text{reg}}(g) \cdot \mathbf{F}_T = \operatorname{diag}(\mathcal{O}_0^{(T)}, \mathcal{O}_1^{(T)}, \dots, \mathcal{O}_{T-1}^{(T)}).
+\]
+\end{definition}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.2,>=stealth]
+        \draw[gray, thin] (0,0) circle (2.5cm);
+        \draw[->, gray] (-3.0,0) -- (3.0,0) node[right] {$\operatorname{Re}$};
+        \draw[->, gray] (0,-3.0) -- (0,3.0) node[above] {$\operatorname{Im}$};
+        \foreach \k in {0,1,...,7}
+        {
+            \filldraw[blue] ({360/8*\k}:2.5cm) circle (2pt);
+        }
+        \draw[->, red, thick] (0,0) -- ({360/8*1}:2.5cm) node[midway, above right, font=\footnotesize] {$\mathcal{O}_1^{(8)}$};
+        \node[font=\footnotesize] at (0, -3.5) {$\mathcal{P}_8 = \{e^{i2\pi k/8} : k=0,\dots,7\}$：$C_8$ 的8个不可约表示};
+    \end{tikzpicture}
+    \caption{$C_8$ 的 8 个不可约表示均匀分布在单位圆上。}
+    \label{fig:PPO_C8}
+\end{figure}
+
+\begin{remark}[单位根、正多边形与离散旋转对称]\label{rem:unit_root_geometry}
+$\mathcal{P}_T$ 的几何形象是单位圆内接正 $T$ 边形的顶点集合。其凸包是对称正多边形，$C_T$ 作为旋转群作用于该多边形。因此，$\mathcal{P}_T$ 是离散旋转对称的代数表示，也是本章 DFT 采样格 $\{2\pi k/T\}$ 的复指数对应物。
+\end{remark}
+
+\section{\texorpdfstring{轨道分解与合并}{轨道分解与合并}}\label{sec:orbit_decomposition_synthesis}
+
+\begin{definition}[轨道分解]\label{def:orbit_decomposition}
+设 $G$ 为局部紧群，$f \in L^2(G)$。$f$ 的\textbf{轨道分解}是指将 $f$ 按 $G$ 的左正则表示 $\lambda$ 的不可约子表示进行正交投影：
+\[f = \sum_{\rho \in \widehat{G}} f_\rho,\]
+其中 $f_\rho$ 是 $f$ 在 $\rho$-等变子空间上的分量。
+\end{definition}
+
+\begin{definition}[轨道合并]\label{def:orbit_synthesis}
+给定各轨道分量上的有界算子 $\{T_\rho\}_{\rho \in \widehat{G}}$，\textbf{轨道合并}是指将作用后的各分量重新合成为函数：$T f = \sum_{\rho \in \widehat{G}} T_\rho f_\rho$。
+\end{definition}
+
+\begin{lemma}[不可约子空间的正交性]\label{lem:irreducible_orthogonality}
+设 $\rho, \sigma$ 为 $G$ 的两个不同构的不可约酉表示，$V_\rho, V_\sigma$ 分别为其表示空间在 $L^2(G)$ 中的等变子空间。则 $V_\rho \perp V_\sigma$（在 $L^2$ 内积下）。
+\end{lemma}
+
+\begin{proof}
+设 $u \in V_\rho$，$v \in V_\sigma$。由 Schur 引理，$V_\rho$ 与 $V_\sigma$ 之间的缠绕算子只有零算子。考虑内积 $\langle \lambda(g)u, \lambda(g)v \rangle$：因 $\lambda(g)$ 是酉算子，$\langle \lambda(g)u, \lambda(g)v \rangle = \langle u, v \rangle$。若 $\langle u, v \rangle \neq 0$，则 $v \mapsto \langle u, v \rangle$ 诱导了非零缠绕算子，矛盾。故 $\langle u, v \rangle = 0$。
+\end{proof}
+
+\begin{proposition}[轨道分解的对角化性质]\label{prop:orbit_diagonalisation}
+在轨道分解下，群作用 $\lambda(g)$ 被对角化。每个不可约轨道在群作用下独立演化，互不干扰。
+\end{proposition}
+
+\begin{proof}
+由定义 \ref{def:orbit_decomposition}，$f = \sum_\rho f_\rho$ 且 $f_\rho \in V_\rho$。对任意 $g \in G$，
+\[
+\lambda(g) f = \sum_\rho \lambda(g) f_\rho.
+\]
+由于 $V_\rho$ 是 $\lambda(g)$ 的不变子空间（$\lambda(g) V_\rho \subseteq V_\rho$），故 $\lambda(g) f_\rho \in V_\rho$。由引理 \ref{lem:irreducible_orthogonality}，各 $V_\rho$ 两两正交，故
+\[
+(\lambda(g) f)_\rho = \lambda(g) f_\rho.
+\]
+即群作用逐轨道独立作用，对角化成立。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.95]
+% 左侧：函数 f
+\draw[fill=blue!10, rounded corners] (-3.5,-2.0) rectangle (-1.5,2.0);
+\node at (-2.5,1.6) {$L^2(G)$};
+\node at (-2.5,0.5) {$f$};
+% 右侧：轨道分量
+\draw[fill=green!10, rounded corners] (0.5,1.2) rectangle (4.5,2.0);
+\node at (2.5,1.6) {$\rho_1$ 等变子空间 $V_{\rho_1}$};
+\draw[fill=orange!10, rounded corners] (0.5,0.0) rectangle (4.5,0.8);
+\node at (2.5,0.4) {$\rho_2$ 等变子空间 $V_{\rho_2}$};
+\draw[fill=red!10, rounded corners] (0.5,-1.2) rectangle (4.5,-0.4);
+\node at (2.5,-0.8) {$\rho_3$ 等变子空间 $V_{\rho_3}$};
+% 箭头
+\draw[->, very thick] (-1.4,0.5) -- (0.4,1.6);
+\draw[->, very thick] (-1.4,0.0) -- (0.4,0.4);
+\draw[->, very thick] (-1.4,-0.5) -- (0.4,-0.8);
+\node[align=center, font=\small] at (0.5,-2.6) {轨道分解：$f=\sum_\rho f_\rho$，各分量互相正交，群作用各自独立};
+\end{tikzpicture}
+\caption{轨道分解示意：函数 $f\in L^2(G)$ 按不可约表示的正交等变子空间分解，各分量正交且群作用独立作用。}
+\label{fig:orbit_decomposition}
+\end{figure}
+
+\begin{corollary}[卷积算子的轨道分解]\label{cor:convolution_orbit_decomp}
+设 $K \in L^1(G)$，卷积算子 $C_K f = K * f$ 在轨道分解下完全对角化：$(C_K f)_\rho = \hat{K}(\rho) f_\rho$，其中 $\hat{K}(\rho)$ 是算子值傅里叶系数。
+\end{corollary}
+
+\begin{proof}
+由命题 \ref{prop:orbit_diagonalisation}，$\lambda(g)$ 逐轨道对角化。卷积算子 $C_K = \int_G K(g) \lambda(g) dg$ 是 $\lambda(g)$ 的线性组合，故也在每个 $V_\rho$ 上独立作用。由 Schur 引理，$C_K$ 在不可约子空间 $V_\rho$ 上的限制是标量算子 $\hat{K}(\rho) \cdot \operatorname{id}_{V_\rho}$（因 $C_K$ 与所有 $\lambda(g)$ 交换，而 $V_\rho$ 上与其交换的算子仅标量）。故 $(C_K f)_\rho = \hat{K}(\rho) f_\rho$。
+\end{proof}
+
+\section{\texorpdfstring{经典积分变换}{经典积分变换}}
+
+经典积分变换将时域信号映射到频域，提取频谱分量。本节建立傅里叶级数、傅里叶变换、离散傅里叶变换、快速傅里叶变换、拉普拉斯变换、梅林变换、小波变换、希尔伯特变换的严格理论。
+
+\subsection{\texorpdfstring{傅里叶级数：$U(1)$ 上的调和分析}{傅里叶级数}}
+
+\begin{definition}[傅里叶级数]\label{def:fourier_series}
+对于 $U(1)$ 上的平方可积周期函数 $f(t+T)=f(t)$，可展开为
+\[f(t) = \sum_{n=-\infty}^{\infty} c_n e^{i 2\pi n t / T},\]
+其中 $c_n = \frac{1}{T} \int_0^T f(t) e^{-i 2\pi n t / T} dt$。每个基函数 $e^{i 2\pi n t / T}$ 是 $U(1)$ 的一维不可约表示。
+\end{definition}
+
+\begin{proposition}[傅里叶系数与简谐分量参数的关系]\label{prop:fourier_epicycle}
+设周期函数 $f(t)$ 的傅里叶级数为 $f(t) = \sum_{n=-\infty}^{\infty} c_n e^{i n \omega_0 t}$，$\omega_0 = 2\pi/T$。则第 $n$ 级简谐分量的半径 $A_n = 2|c_n|$（$n \ge 1$），角速度 $\omega_n = n\omega_0$，初始辐角 $\phi_n = \arg(c_n)$，角动量 $L_n = 4m_n |c_n|^2 n\omega_0$。
+\end{proposition}
+
+\begin{proof}
+实信号的傅里叶系数满足 $c_{-n} = \overline{c_n}$，故
+\[
+c_n e^{in\omega_0 t} + c_{-n} e^{-in\omega_0 t} = 2|c_n| \cos(n\omega_0 t + \arg c_n).
+\]
+于是 $A_n = 2|c_n|$，$\omega_n = n\omega_0$，$\phi_n = \arg(c_n)$。代入角动量公式得 $L_n = 4m_n |c_n|^2 n\omega_0$。
+\end{proof}
+
+\begin{theorem}[帕塞瓦尔恒等式]\label{thm:parseval_fourier}
+设 $f \in L^2([0,T])$，其傅里叶系数为 $c_n$。则
+\[\frac{1}{T}\int_0^T |f(t)|^2 dt = \sum_{n=-\infty}^{\infty} |c_n|^2.\]
+\end{theorem}
+
+\begin{proof}
+代入傅里叶级数并利用正交性 $\frac{1}{T}\int_0^T e^{i 2\pi (n-m)t / T} dt = \delta_{nm}$，交叉项全部消失。
+\end{proof}
+
+\begin{property}[傅里叶级数的收敛性]\label{prop:fourier_series_convergence}
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $f\in C^1$，则傅里叶级数一致收敛到 $f$；
+    \item 若 $f\in L^2$，则傅里叶级数在 $L^2$ 范数下收敛；
+    \item 若 $f$ 仅有有限个不连续点且左右极限存在，则傅里叶级数在每点收敛到 $(f(t^+)+f(t^-))/2$（Dirichlet 定理）。
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i) 分部积分给出 $|c_n|\le C/|n|^2$，级数绝对一致收敛。(ii) 由 Bessel 不等式与 $L^2$ 完备性。(iii) 标准 Dirichlet 核论证。
+\end{proof}
+
+\subsection{\texorpdfstring{傅里叶变换：$\mathbb{R}$ 上的调和分析}{傅里叶变换}}
+
+\begin{definition}[傅里叶变换]\label{def:fourier_transform}
+对于 $f \in L^1(\mathbb{R}) \cap L^2(\mathbb{R})$，
+\[\hat{f}(\omega) = \int_{-\infty}^{\infty} f(t) e^{-i\omega t} dt.\]
+\end{definition}
+
+\begin{property}[傅里叶变换的基本性质]\label{prop:fourier_properties}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{线性性}：$\mathcal{F}\{\alpha f + \beta g\} = \alpha \hat{f} + \beta \hat{g}$。
+    \item \textbf{平移}：$\mathcal{F}\{f(t-a)\}(\omega) = e^{-i\omega a}\hat{f}(\omega)$。
+    \item \textbf{卷积}：$\mathcal{F}\{f * g\} = \hat{f} \cdot \hat{g}$。
+    \item \textbf{微分}：$\mathcal{F}\{f'(t)\}(\omega) = i\omega \hat{f}(\omega)$。
+    \item \textbf{帕塞瓦尔}：$\int_{-\infty}^{\infty} |f(t)|^2 dt = \frac{1}{2\pi}\int_{-\infty}^{\infty} |\hat{f}(\omega)|^2 d\omega$。
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i) 由积分线性性。(ii) 换元 $u = t - a$：$\int f(t-a)e^{-i\omega t}dt = e^{-i\omega a}\int f(u)e^{-i\omega u}du$。(iii) 富比尼定理交换积分次序。(iv) 分部积分（$f$ 在无穷远处消失）。(v) 由 (iii) 和傅里叶逆变换在 $t=0$ 处的取值。
+\end{proof}
+
+\begin{theorem}[Plancherel 定理]\label{thm:plancherel}
+傅里叶变换 $\mathcal{F}:L^1\cap L^2(\mathbb{R})\to L^2(\mathbb{R})$ 唯一延拓为 $L^2(\mathbb{R})$ 上的酉算子。即对任意 $f,g\in L^2(\mathbb{R})$，
+\[
+\langle f,g\rangle = \frac{1}{2\pi}\langle \hat{f},\hat{g}\rangle,\qquad
+\|f\|_{L^2}^2 = \frac{1}{2\pi}\|\hat f\|_{L^2}^2.
+\]
+\end{theorem}
+
+\begin{proof}
+对 $f,g\in L^1\cap L^2$，由帕塞瓦尔恒等式得 $\|f\|^2=\frac{1}{2\pi}\|\hat f\|^2$。因 $L^1\cap L^2$ 在 $L^2$ 中稠密，傅里叶变换延拓为 $L^2$ 上的等距算子。由与逆变换的复合即得酉性。
+\end{proof}
+
+\begin{theorem}[不确定性原理]\label{thm:uncertainty}
+设 $f\in L^2(\mathbb{R})$，$\|f\|_2=1$。则
+\[
+\Delta t\,\Delta\omega\ \ge\ \frac12,
+\]
+其中 $\Delta t^2=\int t^2|f(t)|^2dt$，$\Delta\omega^2=\frac{1}{2\pi}\int\omega^2|\hat f(\omega)|^2d\omega$（取原点为中心）。
+\end{theorem}
+
+\begin{proof}
+由分部积分得 $1=\int|f|^2 = -2\operatorname{Re}\int t f'(t)\overline{f(t)}dt$。应用 Cauchy-Schwarz：
+\[
+1\le 2\|tf(t)\|_2\cdot\|f'(t)\|_2.
+\]
+由 $\|f'\|_2^2=\frac{1}{2\pi}\|\omega\hat f\|_2^2$ 即得。
+\end{proof}
+
+\begin{definition}[Schwartz 空间与缓增分布]\label{def:schwartz}
+\textbf{Schwartz 空间} $\mathcal{S}(\mathbb{R})$ 是满足
+\[
+\sup_{t\in\mathbb{R}}|t^m f^{(n)}(t)|<\infty,\qquad \forall m,n\in\mathbb{N}
+\]
+的 $C^\infty$ 函数全体。其上的连续线性泛函称为\textbf{缓增分布}，记作 $\mathcal{S}'(\mathbb{R})$。傅里叶变换在 $\mathcal{S}$ 与 $\mathcal{S}'$ 上均良定义且可逆。
+\end{definition}
+
+\begin{property}[Schwartz 空间的傅里叶不变性]\label{prop:schwartz_invariance}
+傅里叶变换 $\mathcal{F}$ 是 $\mathcal{S}(\mathbb{R})$ 到自身的线性同胚，且 $\mathcal{F}^4=\operatorname{id}$。特别地，高斯函数 $e^{-t^2/2}$ 是 $\mathcal{F}$ 的不动点（本征值 $1$）。
+\end{property}
+
+\begin{proof}
+由 $t^m f^{(n)}\mapsto i^n\partial_\omega^m\hat f(\omega)$（相差常数），Schwartz 范数在 $\mathcal{F}$ 下等价。$\mathcal{F}^4$ 由傅里叶反演给出恒等。高斯函数的不变性由高斯积分配方得到。
+\end{proof}
+
+\subsection{\texorpdfstring{离散傅里叶变换：$\mathbb{Z}_N$ 上的调和分析}{离散傅里叶变换}}
+
+\begin{definition}[DFT]\label{def:dft}
+\[F[k] = \sum_{n=0}^{N-1} f[n] e^{-i 2\pi kn / N}, \quad k = 0,1,\dots,N-1.\]
+\end{definition}
+
+\begin{proposition}[DFT矩阵的酉性]\label{prop:dft_unitary}
+DFT矩阵 $\mathbf{F}_N$ 是酉矩阵：$\mathbf{F}_N^\dagger \mathbf{F}_N = \mathbf{I}_N$。
+\end{proposition}
+
+\begin{proof}
+$(\mathbf{F}_N^\dagger \mathbf{F}_N)_{m,n} = \frac{1}{N}\sum_{k=0}^{N-1} e^{i2\pi k(m-n)/N} = \delta_{mn}$（几何级数求和）。
+\end{proof}
+
+\begin{lemma}[DFT的周期性引理]\label{lem:dft_periodicity}
+设 $f[n]$ 为 $C_N$ 上的函数，$F[k]$ 为其 DFT。则 $F[k+N] = F[k]$ 对所有 $k$ 成立，且 $F[-k] = F[N-k]$（共轭对称当 $f$ 为实序列时 $F[-k] = \overline{F[k]}$）。
+\end{lemma}
+
+\begin{proof}
+$F[k+N] = \sum_n f[n] e^{-i2\pi(k+N)n/N} = \sum_n f[n] e^{-i2\pi kn/N} e^{-i2\pi n} = F[k]$。共轭对称直接由定义验证。
+\end{proof}
+
+\subsection{\texorpdfstring{快速傅里叶变换（FFT）}{快速傅里叶变换}}
+
+\begin{theorem}[Radix-2 FFT]\label{thm:radix2_fft}
+设 $N = 2^k$。DFT可分解为两个 $N/2$ 长度的DFT，时间复杂度为 $O(N\log_2 N)$。
+\end{theorem}
+
+\begin{proof}
+按奇偶索引分组并利用 $e^{-i2\pi k(2n)/N} = e^{-i2\pi kn/(N/2)}$，递推得 $T(2^k) = 2T(2^{k-1}) + O(2^k)$，解得 $T(N) = O(N\log_2 N)$。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.85]
+% 蝶形图
+\node[draw, circle, fill=blue!15, minimum size=0.6cm] (a0) at (0,1.5) {$a_0$};
+\node[draw, circle, fill=blue!15, minimum size=0.6cm] (a1) at (0,0.5) {$a_1$};
+\node[draw, circle, fill=blue!15, minimum size=0.6cm] (a2) at (0,-0.5) {$a_2$};
+\node[draw, circle, fill=blue!15, minimum size=0.6cm] (a3) at (0,-1.5) {$a_3$};
+\node[draw, circle, fill=orange!15, minimum size=0.6cm] (b0) at (2.5,1.5) {};
+\node[draw, circle, fill=orange!15, minimum size=0.6cm] (b1) at (2.5,0.5) {};
+\node[draw, circle, fill=orange!15, minimum size=0.6cm] (b2) at (2.5,-0.5) {};
+\node[draw, circle, fill=orange!15, minimum size=0.6cm] (b3) at (2.5,-1.5) {};
+\node[draw, circle, fill=green!15, minimum size=0.6cm] (c0) at (5,1.5) {$F_0$};
+\node[draw, circle, fill=green!15, minimum size=0.6cm] (c1) at (5,0.5) {$F_2$};
+\node[draw, circle, fill=green!15, minimum size=0.6cm] (c2) at (5,-0.5) {$F_1$};
+\node[draw, circle, fill=green!15, minimum size=0.6cm] (c3) at (5,-1.5) {$F_3$};
+% 连线
+\draw[->] (a0) -- (b0);
+\draw[->] (a1) -- (b0);
+\draw[->] (a2) -- (b1);
+\draw[->] (a3) -- (b1);
+\draw[->] (a0) -- (b2);
+\draw[->] (a1) -- (b2);
+\draw[->] (a2) -- (b3);
+\draw[->] (a3) -- (b3);
+\draw[->] (b0) -- (c0);
+\draw[->] (b1) -- (c0);
+\draw[->] (b0) -- (c1);
+\draw[->] (b1) -- (c1);
+\draw[->] (b2) -- (c2);
+\draw[->] (b3) -- (c2);
+\draw[->] (b2) -- (c3);
+\draw[->] (b3) -- (c3);
+% 阶段标注
+\node[font=\footnotesize] at (0,2.3) {输入};
+\node[font=\footnotesize] at (2.5,2.3) {第一层};
+\node[font=\footnotesize] at (5,2.3) {输出};
+\node[align=center, font=\small] at (2.5,-3.0) {Radix-2 FFT 蝶形图（$N=4$）：奇偶分组递推，复杂度 $O(N\log_2 N)$};
+\end{tikzpicture}
+\caption{Radix-2 FFT 蝶形图（$N=4$）：输入按奇偶索引分组，经过两层蝶形运算得到 DFT 输出。}
+\label{fig:fft_butterfly}
+\end{figure}
+
+\begin{theorem}[Radix-$p$ FFT]\label{thm:radix_p_fft}
+设 $N = p^k$（$p = 3,5,7$）。DFT可通过Radix-$p$算法分解为 $p$ 个 $N/p$ 长度的DFT，时间复杂度为 $O(N\log_p N)$。
+\end{theorem}
+
+\begin{proof}
+按模 $p$ 的同余类分组，递推得 $T(p^k) = pT(p^{k-1}) + O(p^k)$，解得 $O(N\log_p N)$。
+\end{proof}
+
+\begin{proposition}[Bluestein算法——任意 $N$ 的DFT]\label{prop:bluestein}
+DFT 可重写为卷积形式：$F[k] = e^{-i\pi k^2/N} \sum_{n=0}^{N-1} (f[n] e^{-i\pi n^2/N}) e^{i\pi (k-n)^2/N}$，可通过 FFT 计算卷积实现任意 $N$ 的 DFT，时间复杂度 $O(N\log N)$。
+\end{proposition}
+
+\begin{proof}
+利用恒等式 $kn = \frac{1}{2}(k^2 + n^2 - (k-n)^2)$ 代入 DFT 定义即得。
+\end{proof}
+
+\subsection{\texorpdfstring{拉普拉斯变换与梅林变换}{拉普拉斯变换与梅林变换}}
+
+\begin{definition}[拉普拉斯变换]\label{def:laplace}
+\[\mathcal{L}\{f\}(s) = \int_0^\infty f(t) e^{-st} dt, \quad s = \sigma + i\omega.\]
+\end{definition}
+
+\begin{proposition}[拉普拉斯变换与傅里叶变换的关系]\label{prop:laplace_fourier}
+$\mathcal{L}\{f\}(s) = \mathcal{F}\{f(t) e^{-\sigma t}\}(\omega)$，其中 $s = \sigma + i\omega$。
+\end{proposition}
+
+\begin{proof}
+$\mathcal{L}\{f\}(s) = \int_0^\infty f(t)e^{-\sigma t}e^{-i\omega t}dt = \mathcal{F}\{f(t)e^{-\sigma t}\}(\omega)$。
+\end{proof}
+
+\begin{definition}[梅林变换]\label{def:mellin}
+\[\mathcal{M}\{f\}(s) = \int_0^\infty f(x) x^{s-1} dx.\]
+\end{definition}
+
+\begin{proposition}[梅林变换与傅里叶变换的关系]\label{prop:mellin_fourier}
+换元 $x = e^t$，$f(x) = g(t)$，则 $\mathcal{M}\{f\}(s) = \mathcal{F}\{g\}(is)$。
+\end{proposition}
+
+\begin{proof}
+$dx = e^t dt$，$x^{s-1} = e^{(s-1)t}$，故 $\mathcal{M}\{f\}(s) = \int_{-\infty}^{\infty} g(t)e^{st}dt = \mathcal{F}\{g\}(is)$。
+\end{proof}
+
+\subsection{\texorpdfstring{小波变换与希尔伯特变换}{小波变换与希尔伯特变换}}
+
+\begin{definition}[小波变换]\label{def:wavelet_transform}
+\[W_f(a,b) = \frac{1}{\sqrt{|a|}} \int_{-\infty}^{\infty} f(t) \overline{\psi\left(\frac{t-b}{a}\right)} dt.\]
+\end{definition}
+
+\begin{proposition}[小波变换的群表示论基础]\label{prop:wavelet_group}
+小波变换是仿射群 $\mathbb{R} \rtimes \mathbb{R}^+$ 上的调和分析。
+\end{proposition}
+
+\begin{proof}
+仿射群的表示 $\pi_{(a,b)}\psi(t) = |a|^{-1/2}\psi((t-b)/a)$ 覆盖平移与缩放，小波变换为 $W_f(a,b) = \langle f, \pi_{(a,b)}\psi \rangle$。
+\end{proof}
+
+\begin{definition}[希尔伯特变换]\label{def:hilbert}
+\[\mathcal{H}\{f\}(t) = \frac{1}{\pi} \operatorname{p.v.} \int_{-\infty}^{\infty} \frac{f(\tau)}{t-\tau} d\tau.\]
+\end{definition}
+
+\begin{proposition}[解析信号与瞬时参数]\label{prop:analytic_signal}
+解析信号 $f_a(t) = f(t) + i\mathcal{H}\{f\}(t)$ 的瞬时振幅为 $|f_a(t)|$，瞬时相位为 $\arg(f_a(t))$，瞬时频率为 $d\phi/dt$。
+\end{proposition}
+
+\begin{proof}
+对单频分量 $\mathcal{H}\{\cos\omega t\} = \sin\omega t$，解析信号为 $e^{i\omega t}$。一般信号经傅里叶分解逐分量验证。
+\end{proof}
+
+\begin{definition}[Gabor 变换（短时傅里叶变换）]\label{def:gabor}
+设 $g$ 为窗函数。\textbf{Gabor 变换}为
+\[
+\mathcal{G}_f(\tau,\omega)=\int_{-\infty}^{\infty}f(t)\overline{g(t-\tau)}e^{-i\omega t}dt.
+\]
+Gabor 变换是海森堡群 $\mathbb{R}\rtimes\mathbb{R}$ 上的调和分析。
+\end{definition}
+
+\begin{theorem}[Gabor 变换的重构公式]\label{thm:gabor_reconstruction}
+设 $g$ 为窗函数，其 Gabor 框架界为 $A,B>0$，则
+\[
+f = \frac{1}{\langle g,\gamma\rangle}\int\int\mathcal{G}_f(\tau,\omega)\pi_{(\tau,\omega)}\gamma\,d\tau d\omega,
+\]
+其中 $\gamma$ 为对偶窗。
+\end{theorem}
+
+\begin{proof}
+由 Gabor 框架理论的标准重构公式。取对偶窗 $\gamma$ 使 $\langle g,\gamma\rangle\ne 0$，则任何框架 $\{\pi_{(\tau,\omega)}g\}$ 都给出重构。
+\end{proof}
+
+\section{\texorpdfstring{相似度与趋势：相位核的实部与虚部}{相似度与趋势}}
+
+\begin{proposition}[6 个复相位核及其实部与虚部]\label{prop:twelve_to_six}
+定义 6 个复相位核
+\[
+S^{(1)} = e^{i\theta}, \quad S^{(2)} = e^{i\phi}, \quad S^{(3)} = e^{i2\theta},
+\]
+\[
+S^{(4)} = e^{i2\phi}, \quad S^{(5)} = e^{i\theta/2}, \quad S^{(6)} = e^{i\phi/2},
+\]
+其中 $\theta = \alpha - \beta$，$\phi = \alpha + \beta$。则 $S^{(d)}$ 的实部为余弦核，虚部为正弦核：
+\[
+\operatorname{Re} S^{(d)} = \cos(\cdot), \qquad \operatorname{Im} S^{(d)} = \sin(\cdot).
+\]
+\end{proposition}
+
+\begin{proof}
+由欧拉公式 $e^{iu} = \cos u + i\sin u$ 直接得出。
+\end{proof}
+
+\begin{remark}[相位核与内积/外积的关系]\label{rem:phase_kernel_inner_outer}
+在向量层面，相位核 $S^{(1)} = e^{i(\alpha-\beta)}$ 的实部 $\cos(\alpha-\beta)$ 与内积的关系为
+\[
+\mathbf{a} \cdot \mathbf{b} = \|\mathbf{a}\| \|\mathbf{b}\| \cos(\alpha - \beta),
+\]
+虚部 $\sin(\alpha-\beta)$ 与外积模的关系为
+\[
+\|\mathbf{a} \times \mathbf{b}\| = \|\mathbf{a}\| \|\mathbf{b}\| \sin(\alpha - \beta).
+\]
+在分量层面，两个傅里叶分量的振幅乘积乘以相位核即为该分量对的耦合系数。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+% 向量 a 和 b
+\draw[->, very thick, blue] (0,0) -- (2.4,1.0) node[above right, font=\footnotesize] {$\mathbf{a}$};
+\draw[->, very thick, red] (0,0) -- (1.4,1.6) node[above left, font=\footnotesize] {$\mathbf{b}$};
+\draw[->, gray, dashed] (1.4,1.6) -- (2.4,1.0);
+% 夹角
+\draw[->, orange, thick] (0.8,0) arc (0:41:0.8);
+\node[orange, font=\footnotesize] at (1.0,0.4) {$\alpha-\beta$};
+% 投影
+\draw[dashed, green!60!black] (1.4,1.6) -- (1.8,0.75);
+\node[green!60!black, font=\footnotesize] at (1.6,0.9) {内积};
+\node[align=center, font=\small] at (1.5,-1.0) {$\mathbf{a}\cdot\mathbf{b}=\|\mathbf{a}\|\|\mathbf{b}\|\cos(\alpha-\beta)$，$\|\mathbf{a}\times\mathbf{b}\|=\|\mathbf{a}\|\|\mathbf{b}\|\sin(\alpha-\beta)$};
+\end{tikzpicture}
+\caption{相位核的几何含义：实部 $\cos(\alpha-\beta)$ 对应内积投影，虚部 $\sin(\alpha-\beta)$ 对应外积面积。}
+\label{fig:phase_kernel_geometry}
+\end{figure}
+
+\begin{theorem}[余弦相似度的三层一致]\label{thm:three_layer_identity}
+余弦相似度在向量层、分量层、时延层的形式一致：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{向量层}：$\cos\theta = (\mathbf{a} \cdot \mathbf{b})/(\|\mathbf{a}\| \|\mathbf{b}\|)$；
+    \item \textbf{分量层}：$\mathbb{S}_{mn} = A_m B_n \cos(\theta_m - \varphi_n)/(A_m B_n) = \cos(\theta_m - \varphi_n)$；
+    \item \textbf{时延层}：$(f \star g)(0)/(\|f\| \|g\|)$ 为 $L^2$ 余弦相似度。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 内积几何定义。(ii) 分子为趋势卷积的实部，分母为振幅乘积。(iii) 由定理 \ref{cor:zero_delay_cosine}。
+\end{proof}
+
+\begin{example}[分量层耦合系数的数值示例]\label{ex:component_tendency_similarity}
+设 $f(t) = 3 e^{i(2t + \pi/4)} + 2 e^{i(4t)}$，$g(t) = 4 e^{i(2t)} + e^{i(6t + \pi/3)}$（$T = \pi$）。$f$ 的分量：$(A_1=3, \omega_1=2, \phi_1=\pi/4)$、$(A_2=2, \omega_2=4, \phi_2=0)$。$g$ 的分量：$(B_1=4, \nu_1=2, \psi_1=0)$、$(B_2=1, \nu_2=6, \psi_2=\pi/3)$。
+
+取差角核 $S^{(1)}$。耦合系数矩阵 $\mathbb{T}$（$\alpha = 1$）的元素 $\mathbb{T}_{mn} = A_m B_n e^{i(\phi_m - \psi_n)}$：
+\[
+\mathbb{T} = \begin{pmatrix}
+3 \cdot 4\, e^{i(\pi/4 - 0)} & 3 \cdot 1\, e^{i(\pi/4 - \pi/3)} \\
+2 \cdot 4\, e^{i(0 - 0)} & 2 \cdot 1\, e^{i(0 - \pi/3)}
+\end{pmatrix}
+= \begin{pmatrix}
+12 e^{i\pi/4} & 3 e^{-i\pi/12} \\
+8 & 2 e^{-i\pi/3}
+\end{pmatrix}.
+\]
+归一化后得相似度矩阵
+\[
+\mathbb{S} = \begin{pmatrix}
+e^{i\pi/4} & e^{-i\pi/12} \\
+1 & e^{-i\pi/3}
+\end{pmatrix}.
+\]
+验证归一化关系：$\mathbb{S}_{mn} = \mathbb{T}_{mn}/(A_m B_n)$ 逐元素成立。
+\end{example}
+
+\begin{example}[高斯窗的窗-核对偶]\label{ex:window_kernel_numerical}
+取周期 $T = 2$，$f(t) = e^{i\pi t} + e^{i3\pi t}$，$g(t) = e^{i\pi t} + 2e^{i3\pi t}$，高斯窗 $w(t) = e^{-t^2/(2\sigma_t^2)}$（$\sigma_t = 1/\sqrt{2}$）。频域核 $\widehat{w}(\omega) = \frac{\sqrt{\pi}}{2} e^{-\omega^2/4}$（$T=2$ 时归一化）。
+
+带窗互相关展开（定理 \ref{thm:window_kernel_duality}）：
+\[
+(f \star_w g)(0) = \sum_{m,n} \widehat{w}(\omega_m - \omega_n) c_m \overline{d_n}.
+\]
+频率字典 $\{\pi, 3\pi\}$，$\widehat{w}(0) = \sqrt{\pi}/2 \approx 0.886$，$\widehat{w}(2\pi) = \frac{\sqrt{\pi}}{2} e^{-\pi^2} \approx 0.0000458$（非对角权重极小）。故
+\[
+(f \star_w g)(0) \approx \widehat{w}(0)(c_1\overline{d_1} + c_3\overline{d_3}) = 0.886 \cdot (1 + 2) = 2.658.
+\]
+对角项完全主导——高斯窗的频域核集中于原点，跨频率泄漏由 $\widehat{w}(2\pi) \approx 4.58 \times 10^{-5}$ 控制。
+\end{example}
+
+\section{\texorpdfstring{循环卷积与功率谱}{循环卷积与功率谱}}
+
+\begin{definition}[循环卷积]\label{def:circular_convolution_harmonic}
+设 $f, g$ 为周期为 $T$ 的周期函数。$f$ 与 $g$ 的\textbf{循环卷积}为
+\[
+(f \circledast g)(\tau) := \frac{1}{T}\int_0^T f(t) g(\tau - t)\, dt.
+\]
+在离散情形下，$(f \circledast g)(n) = \sum_{k=0}^{T-1} f(k) g((n-k) \bmod T)$。
+\end{definition}
+
+\begin{definition}[功率谱]\label{def:periodic_tendency_spectrum}
+设 $X$ 为周期为 $T$ 的周期函数，傅里叶系数为 $c_k$。$X$ 的\textbf{功率谱}定义为
+\[
+S(\omega_k) := |c_k|^2, \qquad \omega_k = 2\pi k/T.
+\]
+\end{definition}
+
+\begin{theorem}[功率谱与自相关函数]\label{thm:spectrum_classical_limit}
+设 $X$ 为周期为 $T$ 的周期函数，傅里叶系数为 $c_k$。则自相关函数
+\[
+R_X(\tau) := \frac{1}{T}\int_0^T X(t) \overline{X(t-\tau)}\, dt
+\]
+的傅里叶系数为 $|c_k|^2$。即功率谱是自相关函数的傅里叶变换。
+\end{theorem}
+
+\begin{proof}
+将 $X(t) = \sum_n c_n e^{i\omega_n t}$ 代入自相关函数定义：
+\[
+R_X(\tau) = \frac{1}{T}\int_0^T \left(\sum_n c_n e^{i\omega_n t}\right)\left(\sum_m \overline{c_m} e^{-i\omega_m (t-\tau)}\right) dt = \sum_n |c_n|^2 e^{i\omega_n \tau},
+\]
+其中利用了正交性 $\frac{1}{T}\int_0^T e^{i(\omega_n - \omega_m)t}dt = \delta_{nm}$。故 $R_X$ 的傅里叶系数为 $|c_n|^2$。
+\end{proof}
+
+\begin{remark}[自相关约定的两套记号]\label{rem:autocorrelation_two_conventions}
+本书同时使用两套自相关约定，二者各自内部自洽，但相差一个宗量符号。
+
+\textbf{超前型}（先出现的约定，用于「周期系统」章的卷积作用结论及天文、音频、机械、电路与芯片、生物、心理、社交、气候、经济、政治、地理、电磁、密码、数据分析等各领域章的自相关命题）：
+\[
+R_{\text{超前}}(h)=\sum_t z_t\overline{z_{t+h}}
+\ \Longleftrightarrow\
+\sum_n \|A_n\|^2 e^{-i\omega_n h}.
+\]
+
+\textbf{延迟型}（本书的调和分析、概率与统计约定，即本定理的定义 \cref{thm:spectrum_classical_limit} 与功率谱密度定义 \cref{def:power_spectral_density} 所用）：
+\[
+R_{\text{延迟}}(\tau)=\frac{1}{T}\int_0^T X(t)\overline{X(t-\tau)}\,dt
+\ \Longleftrightarrow\
+\sum_n |c_n|^2 e^{+i\omega_n \tau}.
+\]
+
+两式的差别只在指数上的符号，因为二者对延迟方向的取法相反，其换算关系为
+\[
+R_{\text{超前}}(h)=R_{\text{延迟}}(-h).
+\]
+于是对\textbf{实值}信号有 $R_{\text{延迟}}(-h)=R_{\text{延迟}}(h)$，二者数值相同；对\textbf{复值}信号二者一般不相等。
+
+因此各章命题中的指数符号应与其\textbf{所在章的约定}一致；跨章引用自相关结论时，须先按 $R_{\text{超前}}(h)=R_{\text{延迟}}(-h)$ 换算。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.9]
+% 左侧：自相关
+\draw[fill=blue!8, rounded corners] (-4.5,-1.2) rectangle (-1.0,1.2);
+\node at (-2.75,0.6) {自相关 $R_X(\tau)$};
+\node at (-2.75,-0.6) {$\frac1T\int_0^TX(t)\overline{X(t-\tau)}dt$};
+% 中间：傅里叶变换
+\draw[->, very thick] (-0.7,0) -- (0.7,0);
+\node[above, font=\small] at (0,0.2) {$\mathcal{F}$};
+% 右侧：功率谱
+\draw[fill=orange!8, rounded corners] (1.0,-1.2) rectangle (4.5,1.2);
+\node at (2.75,0.6) {功率谱 $S(\omega_k)=|c_k|^2$};
+\node at (2.75,-0.6) {离散谱线};
+\node[align=center, font=\small] at (0,-2.4) {维纳--辛钦定理：功率谱是自相关函数的傅里叶变换};
+\end{tikzpicture}
+\caption{功率谱与自相关函数的关系（维纳--辛钦定理）。}
+\label{fig:power_spectrum_autocorrelation}
+\end{figure}
+
+\begin{corollary}[帕塞瓦尔恒等式与功率谱]\label{cor:six_spectrum_family}
+设 $X$ 为周期 $T$ 的可积函数，傅里叶系数为 $c_n$，按定义 \cref{def:periodic_tendency_spectrum} 记 $S(\omega_n)$ 为其功率谱。则
+\[
+\frac{1}{T}\int_0^T |X(t)|^2\,dt = \sum_n |c_n|^2 = \sum_n S(\omega_n),
+\]
+即\textbf{总能量等于各频率分量功率之和}。
+\end{corollary}
+
+\begin{proof}
+两个等号分别由两条已证定理给出。
+
+\textbf{左等号}。由 \cref{thm:parseval_fourier}（连续帕塞瓦尔恒等式），对平方可积的周期函数 $X$，
+\[
+\frac{1}{T}\int_0^T |X(t)|^2\,dt = \sum_{n} |c_n|^2 ,
+\]
+右端的级数绝对收敛。
+
+\textbf{右等号}。由 \cref{thm:spectrum_classical_limit}，经典极限下第 $n$ 个频率分量的功率谱取值 $S(\omega_n) = |c_n|^2$（即无窗、$\alpha = 1$、零时延的极限）。故 $\sum_n S(\omega_n) = \sum_n |c_n|^2$，与左端相等。
+
+两个等号均是恒等式而非近似：前者是帕塞瓦尔恒等式本身，后者是定义在经典极限下的取值。证毕。
+\end{proof}
+
+\begin{example}[功率谱的核族对比]\label{ex:spectrum_family}
+设 $X(t) = 2e^{i(2t + \pi/3)} + e^{i(4t - \pi/6)}$（$T = \pi$，频率 $\{2, 4\}$）。功率谱为 $|c_1|^2 = 4$、$|c_2|^2 = 1$（其余为零）。
+
+非对角项对应跨频率耦合。在核宽非零、$\alpha = 1$、$\tau = 0$ 时，差角核 $S^{(1)}$ 的非对角贡献为 $A_1 A_2 e^{i(\phi_1 - \phi_2)} = 2 e^{i(\pi/3 + \pi/6)} = 2i$，模为 $2$；和角核 $S^{(2)}$ 的非对角贡献为 $A_1 A_2 e^{i(\phi_1 + \phi_2)} = 2e^{i\pi/6}$，模为 $2$。不同相位核在非对角项上给出相同模但不同相位。
+\end{example}
+
+\section{\texorpdfstring{逼近、置闰与频谱泄漏的有界化}{逼近、置闰与频谱泄漏的有界化}}\label{sec:intercalation_spectral_leakage}
+
+\begin{remark}[本节定位]\label{rem:intercalation_leakage_positioning}
+离散傅里叶变换（DFT）默认窗口内包含整数个连续周期。若连续周期与采样间隔不可公度，则窗口内周期数非整数，频谱能量从主瓣泄漏到旁瓣，称为\textbf{频谱泄漏}。本节把置闰放在\textbf{逼近论}的一般框架下，说明它如何把频谱泄漏从“不可控”降为“有界”，并指出置闰与窗函数是互补而非替代的关系。
+
+本节的核心不是声称置闰“消除”泄漏——当 $\rho=T_f/\Delta x\notin\mathbb{Q}$ 时，任何有限窗口 $T$ 都不能使泄漏严格为零——而是建立如下\textbf{三种逼近的递进链条}：
+\[
+\underbrace{\rho\ \text{的有理逼近}}_{\text{数论层}}
+\ \Longrightarrow\
+\underbrace{S_M\ \text{对}\ M\rho\ \text{的窗口逼近}}_{\text{采样层}}
+\ \Longrightarrow\
+\underbrace{F[k]\ \text{对}\ c_m\ \text{的频谱逼近}}_{\text{频域层}}.
+\]
+每一层都有独立的逼近工具和误差估计：数论层用\textbf{连分数收敛子}，采样层用\textbf{置闰序列}，频域层用\textbf{Dirichlet 核}。三层合成给出泄漏幅度 $O(|E_M|/T)$ 的定量上界，并说明在连分数收敛窗口序列上该上界趋于零。
+
+本节七主题定位：平移——圆上无理旋转 $R_\rho$ 的整数编码；缩放——理想周期比 $\rho$ 作为标度荷；旋转——置闰序列的相位误差反馈；守恒——累计误差有界性；对称——连分数收敛项的对称逼近；闭合——置闰窗口使近似周期闭合；周期——$\rho\in\mathbb{Q}$ 时严格周期，$\rho\notin\mathbb{Q}$ 时准周期。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=0.6cm and 1.0cm,
+  layer/.style={draw, rounded corners, align=center, minimum width=3.4cm, minimum height=1.0cm, font=\small}]
+\node[layer, fill=blue!12] (l1) {数论层\\$\rho\approx p_j/q_j$};
+\node[layer, fill=green!12, below=of l1] (l2) {采样层\\$S_M\approx M\rho$};
+\node[layer, fill=orange!12, below=of l2] (l3) {频域层\\$F[k]\approx c_m$};
+\node[font=\small, right=1.2cm of l1] (t1) {连分数收敛子};
+\node[font=\small, right=1.2cm of l2] (t2) {置闰序列};
+\node[font=\small, right=1.2cm of l3] (t3) {Dirichlet 核};
+\draw[->, very thick] (l1) -- (l2);
+\draw[->, very thick] (l2) -- (l3);
+\node[align=center, font=\small, below=0.6cm of l3] {三层逼近链条：数论 $\to$ 采样 $\to$ 频域，泄漏幅度按 $O(|E_M|/T)$ 有界化};
+\end{tikzpicture}
+\caption{置闰抑制频谱泄漏的三层逼近链条：数论层用连分数收敛子，采样层用置闰序列，频域层用 Dirichlet 核。}
+\label{fig:three_layer_approximation}
+\end{figure}
+
+\subsection{频谱泄漏与不可公度性}
+
+\begin{remark}[与离散采样章的术语衔接]\label{rem:harmonic_sampling_link}
+本节所用的采样间隔 $\Delta x$、采样点数 $T$ 与采样序列 $f[n]=f(n\Delta x)$，其规范定义见「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{def:nyquist_sampling_parallel}，本节不再重复定义。本节定义的\textbf{理想周期比} $\rho=T_f/\Delta x$ 与该章 \cref{def:normalised_ratio_parallel} 的\textbf{归一化周期比}是同一个量，本节沿用「理想周期比」这一名称。频谱泄漏的一般定义见该章 \cref{def:spectral_leakage}。
+\end{remark}
+
+\begin{definition}[频谱泄漏]\label{def:spectral_leakage_harmonic}
+设连续周期函数 \(f:\mathbb{R}\to\mathbb{C}\) 以 \(T_f>0\) 为周期，采样间隔 \(\Delta x>0\)，取 \(T\) 个样本
+\[
+f[n]=f(n\Delta x),\qquad n=0,1,\dots,T-1.
+\]
+其 DFT 为
+\[
+F[k]=\frac{1}{T}\sum_{n=0}^{T-1} f[n]e^{-i2\pi kn/T},\qquad k=0,1,\dots,T-1.
+\]
+若 \(T\Delta x\) 不是 \(T_f\) 的整数倍，即窗口内不包含整数个连续周期，则 \(f\) 的频谱能量在 DFT 中不能集中于单个频点，而向邻近频点扩散。这一现象称为\textbf{频谱泄漏}。
+\end{definition}
+
+\begin{definition}[理想周期比]\label{def:ideal_period_ratio}
+设连续周期函数 \(f\) 以 \(T_f\) 为周期，采样间隔为 \(\Delta x\)。定义\textbf{理想周期比}
+\[
+\rho=\frac{T_f}{\Delta x}.
+\]
+若 \(\rho\in\mathbb{N}^+\)，则取 \(T=\rho\) 即可无泄漏。若 \(\rho\notin\mathbb{N}^+\)，则任何整数窗口 \(T\) 都不能使 \(T/\rho\) 为整数，泄漏不可避免；置闰的作用是把泄漏限制在有界水平，并使其在连分数收敛窗口序列上趋于零。
+\end{definition}
+
+\begin{remark}[泄漏的本质]\label{rem:leakage_essence}
+频谱泄漏不是 DFT 的数值缺陷——给定 $T$ 个样本，$F[k]$ 的计算是精确的。泄漏是\textbf{有限窗口截断}这一几何事实的必然结果：DFT 的频域栅格为 $\{k/T\}_{k=0}^{T-1}$，而连续信号的频率为 $\{m/\rho\}_{m\in\mathbb{Z}}$。两组频率只有在 $T/\rho\in\mathbb{Z}$ 时才精确重合；一般情形下主频 $m/\rho$ 落在栅格之间，能量必然扩散到邻近栅格点。因此，抑制泄漏的本质是\textbf{使 $T/\rho$ 逼近整数}。
+\end{remark}
+
+\subsection{有理逼近：连分数最佳逼近}
+
+本节三层逼近链条的第一层是数论层：如何用有理数逼近无理数 $\rho$。这是整个置闰理论的基石。
+
+\begin{definition}[连分数与收敛子]\label{def:continued_fraction_harmonic}
+设 $\rho>0$。$\rho$ 的\textbf{简单连分数}表示为
+\[
+\rho=a_0+\cfrac{1}{a_1+\cfrac{1}{a_2+\cfrac{1}{a_3+\cdots}}},
+\]
+其中 $a_0=\lfloor\rho\rfloor$，$a_i\in\mathbb{N}^+$（$i\ge 1$）。其第 $j$ 个\textbf{收敛子}定义为
+\[
+\frac{p_j}{q_j}=a_0+\cfrac{1}{a_1+\cfrac{1}{\cdots+\cfrac{1}{a_j}}},
+\]
+其中 $p_j,q_j\in\mathbb{N}^+$，$\gcd(p_j,q_j)=1$。
+\end{definition}
+
+\begin{theorem}[连分数最佳逼近定理]\label{thm:continued_fraction_best_approx_harmonic}
+设 $\rho>0$，$\{p_j/q_j\}$ 为其连分数收敛子。则：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{最佳性}：对任意分母 $q<q_{j+1}$ 且 $(p,q)\in\mathbb{N}^+\times\mathbb{N}^+$，有
+    \[
+    \left|\rho-\frac{p_j}{q_j}\right|<\left|\rho-\frac{p}{q}\right|.
+    \]
+    即 $p_j/q_j$ 是所有分母不超过 $q_{j+1}-1$ 的有理数中最佳逼近。
+    \item \textbf{误差上界}：
+    \[
+    \left|\rho-\frac{p_j}{q_j}\right|<\frac{1}{q_jq_{j+1}}<\frac{1}{q_j^2}.
+    \]
+    \item \textbf{交错性}：偶数项收敛子从下方逼近 $\rho$，奇数项从上方逼近，形成对称的夹逼结构。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 与 (ii) 为连分数理论的经典结果，其标准证明可参见数论教材（如 Hardy \& Wright, \textit{An Introduction to the Theory of Numbers}, 第 10 章）。误差上界的核心步骤为：由收敛子的递推关系 $p_j=a_jp_{j-1}+p_{j-2}$、$q_j=a_jq_{j-1}+q_{j-2}$，可得
+\[
+\left|\rho-\frac{p_j}{q_j}\right|=\frac{1}{q_j(\alpha_{j+1}q_j+q_{j-1})},
+\]
+其中 $\alpha_{j+1}=[a_{j+1};a_{j+2},\dots]>a_{j+1}$。因 $\alpha_{j+1}>q_{j+1}/q_j$，得 $|p_j/q_j-\rho|<1/(q_jq_{j+1})$。
+
+(iii) 由 $\alpha_{j+1}>1$ 与递推关系，偶数项 $p_{2k}/q_{2k}<\rho$，奇数项 $p_{2k+1}/q_{2k+1}>\rho$，交错地逼近 $\rho$。
+\end{proof}
+
+\begin{remark}[最佳逼近的对称结构]\label{rem:best_approx_symmetry}
+连分数收敛子的“交错逼近”具有明确的对称含义：偶数项从下方、奇数项从上方交替逼近 $\rho$，且 $\rho$ 始终位于相邻两个收敛子之间。这一对称结构对应于七主题中的“对称”：$\rho$ 被两侧的最佳有理逼近对称地夹逼。置闰窗口的最优性直接来自这一对称性——下置闰对应下方收敛子，上置闰对应上方收敛子，平衡置闰取两者之间的最优选择。
+\end{remark}
+
+\begin{remark}[其他有理逼近工具]\label{rem:other_rational_approximations}
+连分数并非唯一的有理逼近工具。以下工具与连分数密切相关，在进一步研究中可以使用：
+\begin{itemize}
+    \item \textbf{Dirichlet 逼近定理}：对任意 $\rho>0$ 和 $N\ge 1$，存在 $1\le q\le N$ 使 $\|q\rho\|<1/N$，其中 $\|\cdot\|$ 为到最近整数的距离。
+    \item \textbf{三间隙定理}：旋转轨道 $\{m\rho\bmod 1\}$ 在圆上的间隙最多有三种长度，其比例由连分数部分商控制。
+    \item \textbf{Weyl 等分布定理与 Koksma 不等式}：控制旋转轨道 $\{m\rho\}$ 在 $[0,1)$ 上的均匀分布程度，与置闰误差的长期行为相关。
+    \item \textbf{Sturmian 序列}：当 $\rho$ 无理时，置闰序列 $\varepsilon_m=N_m-\lfloor\rho\rfloor\in\{0,1\}$ 是 Sturmian 词，因子复杂度为 $n+1$，是“最规则的非周期序列”。
+\end{itemize}
+本节仅使用连分数收敛子这一最直接的工具；其他工具的引入超出本节范围，可在“离散采样逼近与置闰”章第 \ref{sec:commensurability_intercalation} 节“置闰：离散采样逼近的主动公度化”中找到。
+\end{remark}
+
+\subsection{窗口逼近：置闰序列与误差有界定理}
+
+本节三层逼近链条的第二层是采样层：如何用整数窗口序列 $S_M$ 逼近 $M\rho$。核心工具是置闰序列。
+
+\begin{definition}[置闰序列与累计采样数]\label{def:intercalation_sequence_harmonic}
+设 \(\rho>0\)。一列整数 \(\{N_m\}_{m\in\mathbb{N}}\) 称为 \(\rho\) 的\textbf{置闰序列}，若
+\[
+N_m\in\{\lfloor\rho\rfloor,\lceil\rho\rceil\},\qquad \forall m\in\mathbb{N},
+\]
+且
+\[
+\lim_{M\to\infty}\frac{1}{M}\sum_{m=0}^{M-1}N_m=\rho.
+\]
+定义\textbf{累计采样数}
+\[
+S_M=\sum_{m=0}^{M-1}N_m,\qquad M\in\mathbb{N}^+.
+\]
+定义\textbf{置闰误差}
+\[
+E_M=S_M-M\rho.
+\]
+若存在 \(C>0\) 使 \(|E_M|\le C\) 对所有 \(M\) 成立，则称该置闰序列具有\textbf{有界误差}。
+\end{definition}
+
+\begin{lemma}[基本置闰序列的取值]\label{lem:intercalation_values_harmonic}
+设 \(\rho>0\)。定义下置闰、上置闰、平衡置闰分别为
+\[
+N_m^{\mathrm{floor}}=\lfloor (m+1)\rho\rfloor-\lfloor m\rho\rfloor,
+\]
+\[
+N_m^{\mathrm{ceil}}=\lceil (m+1)\rho\rceil-\lceil m\rho\rceil,
+\]
+\[
+N_m^{\mathrm{round}}=\operatorname{round}((m+1)\rho)-\operatorname{round}(m\rho).
+\]
+则对任意 \(m\in\mathbb{N}\)，
+\[
+N_m^{\mathrm{floor}},N_m^{\mathrm{ceil}},N_m^{\mathrm{round}}\in\{\lfloor\rho\rfloor,\lceil\rho\rceil\}.
+\]
+\end{lemma}
+
+\begin{proof}
+设 \(\rho=a+\theta\)，其中 \(a=\lfloor\rho\rfloor\)，\(\theta\in[0,1)\)。对下置闰，
+\[
+N_m^{\mathrm{floor}}=\lfloor m\rho+\rho\rfloor-\lfloor m\rho\rfloor
+=a+\lfloor\{m\rho\}+\theta\rfloor.
+\]
+因 \(\{m\rho\}+\theta\in[0,2)\)，故 \(\lfloor\{m\rho\}+\theta\rfloor\in\{0,1\}\)，从而 \(N_m^{\mathrm{floor}}\in\{a,a+1\}=\{\lfloor\rho\rfloor,\lceil\rho\rceil\}\)。上置闰与平衡置闰同理。
+\end{proof}
+
+\begin{theorem}[置闰误差有界定理]\label{thm:intercalation_error_bound_harmonic}
+设 \(\rho>0\)。
+\begin{enumerate}[label=(\roman*)]
+    \item 下置闰满足
+    \[
+    S_M^{\mathrm{floor}}=\lfloor M\rho\rfloor,\qquad
+    E_M^{\mathrm{floor}}=-\{M\rho\}\in(-1,0].
+    \]
+    \item 上置闰满足
+    \[
+    S_M^{\mathrm{ceil}}=\lceil M\rho\rceil,\qquad
+    E_M^{\mathrm{ceil}}=\lceil M\rho\rceil-M\rho\in[0,1),
+    \]
+    当 $M\rho\in\mathbb Z$ 时 $E_M^{\mathrm{ceil}}=0$。
+    \item 平衡置闰满足
+    \[
+    S_M^{\mathrm{round}}=\operatorname{round}(M\rho),\qquad
+    |E_M^{\mathrm{round}}|\le\frac12.
+    \]
+\end{enumerate}
+特别地，三种置闰序列均具有有界误差，平衡置闰误差最小；$E_M^{\mathrm{floor}}$ 与 $E_M^{\mathrm{ceil}}$ 在 $M\rho\in\mathbb Z$ 时同时为零。三条结论对应数论层三种逼近方式的采样层实现：下置闰对应下方收敛子，上置闰对应上方收敛子，平衡置闰取两者的最优折中。
+\end{theorem}
+
+\begin{proof}
+(i) 由下置闰定义，
+\[
+S_M^{\mathrm{floor}}=\sum_{m=0}^{M-1}\bigl(\lfloor (m+1)\rho\rfloor-\lfloor m\rho\rfloor\bigr)=\lfloor M\rho\rfloor.
+\]
+故 \(E_M^{\mathrm{floor}}=\lfloor M\rho\rfloor-M\rho=-\{M\rho\}\in(-1,0]\)。
+
+(ii) 同理，
+\[
+S_M^{\mathrm{ceil}}=\lceil M\rho\rceil,\qquad
+E_M^{\mathrm{ceil}}=\lceil M\rho\rceil-M\rho\in[0,1),
+\]
+当 $M\rho\in\mathbb Z$（置闰最理想、无泄漏）时 $E_M^{\mathrm{ceil}}=0$。
+
+(iii) 平衡置闰给出
+\[
+S_M^{\mathrm{round}}=\operatorname{round}(M\rho),
+\]
+由 \(\operatorname{round}\) 的定义，\(|\operatorname{round}(x)-x|\le 1/2\)，故 \(|E_M^{\mathrm{round}}|\le 1/2\)。
+\end{proof}
+
+\begin{definition}[置闰窗口]\label{def:intercalation_window_harmonic}
+设连续周期函数 \(f\) 以 \(T_f\) 为周期，采样间隔 \(\Delta x\)，理想周期比 \(\rho=T_f/\Delta x\)。取置闰序列 \(\{N_m\}\)，累计采样数 \(S_M=\sum_{m=0}^{M-1}N_m\)。称长度为 \(T=S_M\) 的采样窗口为\textbf{置闰窗口}。
+\end{definition}
+
+\begin{remark}[窗口逼近的一般原理]\label{rem:window_approximation_principle}
+置闰序列的窗口逼近把数论层的“有理逼近 $\rho\approx p/q$”翻译成采样层的“窗口逼近 $S_M\approx M\rho$”。两步逼近的意义不同：
+\begin{itemize}
+    \item 数论层把 $\rho$ 这个\emph{实数}逼近为有理数 $p/q$——这是\textbf{数值逼近}；
+    \item 采样层把“$M$ 个连续周期所需的采样点数” $M\rho$ 逼近为\emph{整数} $S_M$——这是\textbf{窗口长度逼近}。
+\end{itemize}
+后者的误差 $E_M=S_M-M\rho$ 直接决定下一层频谱逼近的精度。
+\end{remark}
+
+\subsection{频谱逼近：泄漏幅度的有界化}
+
+本节三层逼近链条的第三层是频域层：置闰窗口上的 DFT 频谱 $F[k]$ 如何逼近连续傅里叶系数 $c_m$。
+
+\begin{theorem}[置闰窗口的 DFT 泄漏估计]\label{thm:intercalation_dft_leakage}
+设 \(f\) 为连续 \(T_f\)-周期函数，傅里叶系数为
+\[
+c_m=\frac{1}{T_f}\int_0^{T_f} f(t)e^{-i2\pi mt/T_f}\,dt.
+\]
+采样间隔 \(\Delta x\)，理想周期比 \(\rho=T_f/\Delta x\)。取置闰窗口 \(T=S_M\)，采样序列 \(f[n]=f(n\Delta x)\)（\(n=0,\dots,T-1\)），其 DFT 为
+\[
+F[k]=\frac{1}{T}\sum_{n=0}^{T-1}f[n]e^{-i2\pi kn/T}.
+\]
+则
+\[
+F[k]=\sum_{m\in\mathbb{Z}} c_m D_T\!\left(\frac{m}{\rho}-\frac{k}{T}\right),
+\]
+其中
+\[
+D_T(\theta)=\frac{1}{T}\sum_{n=0}^{T-1}e^{i2\pi n\theta}
+=e^{i\pi(T-1)\theta}\frac{\sin(\pi T\theta)}{T\sin(\pi\theta)}
+\]
+为 Dirichlet 核。若置闰误差 \(E_M=S_M-M\rho\) 有界，则主瓣位置偏移满足
+\[
+\left|\frac{m}{\rho}-\frac{k}{T}\right|
+\le \frac{|m|\,|E_M|}{\rho\,T},
+\]
+且泄漏幅度满足
+\[
+|F[k]-c_{k/M}|
+\le C\,\frac{|E_M|}{T}\sum_{m\in\mathbb{Z}}|c_m|,
+\]
+其中 \(C>0\) 为与 \(T\) 无关的常数。特别地，平衡置闰使 \(|E_M|\le 1/2\)，连分数最佳置闰使 \(|E_M|<1/q_{j+1}\)，泄漏进一步减小。
+\end{theorem}
+
+\begin{proof}
+将采样序列用连续傅里叶级数表示：
+\[
+f[n]=f(n\Delta x)=\sum_{m\in\mathbb{Z}}c_m e^{i2\pi m n\Delta x/T_f}
+=\sum_{m\in\mathbb{Z}}c_m e^{i2\pi m n/\rho}.
+\]
+代入 DFT 定义：
+\[
+F[k]=\frac{1}{T}\sum_{n=0}^{T-1}\sum_{m\in\mathbb{Z}}c_m
+e^{i2\pi n(m/\rho-k/T)}
+=\sum_{m\in\mathbb{Z}}c_m D_T\!\left(\frac{m}{\rho}-\frac{k}{T}\right).
+\]
+当 \(T=S_M=M\rho+E_M\) 时，对主频 \(k=Mm\)，
+\[
+\frac{m}{\rho}-\frac{Mm}{S_M}
+=m\left(\frac{1}{\rho}-\frac{M}{S_M}\right)
+=m\frac{S_M-M\rho}{\rho S_M}
+=m\frac{E_M}{\rho T}.
+\]
+因此主瓣偏移量为 \(|m|\,|E_M|/(\rho T)\)。Dirichlet 核在 \(|\theta|\ll 1/T\) 时近似为 \(1\)，在旁瓣以 \(1/(T|\theta|)\) 衰减。将旁瓣贡献求和即得泄漏估计。平衡置闰与连分数最佳置闰的误差上界由定理 \ref{thm:intercalation_error_bound_harmonic} 和连分数最佳逼近定理给出。
+\end{proof}
+
+\begin{corollary}[连分数最佳置闰窗口]\label{cor:continued_fraction_intercalation}
+设 \(\rho>0\) 为无理数，其连分数收敛项为 \(p_j/q_j\)。则取置闰窗口
+\[
+T=p_j,\qquad M=q_j
+\]
+并按\textbf{奇偶交错}选取置闰方向——对偶数 \(j\) 取下置闰、对奇数 \(j\) 取上置闰——时，窗口内包含 \(q_j\) 个连续周期，累计误差
+\[
+|E_{q_j}|=|p_j-q_j\rho|<\frac{1}{q_{j+1}}.
+\]
+因此 DFT 泄漏幅度被 \(O(1/(q_j q_{j+1}))\) 控制，且该上界随 $j\to\infty$ 趋于零。在所有窗口长度不超过 $p_{j+1}-1$ 的选择中，该窗口的泄漏上界最小。
+\end{corollary}
+
+\begin{proof}
+由连分数最佳逼近定理（定理 \ref{thm:continued_fraction_best_approx_harmonic}），\(p_j/q_j\) 是所有分母不超过 \(q_{j+1}-1\) 的有理数中最佳逼近，故 \(|p_j-q_j\rho|<1/(q_j q_{j+1})\)。交错选取给出 \(S_{q_j}=p_j\)，从而 \(E_{q_j}=S_{q_j}-q_j\rho=p_j-q_j\rho\)：偶数 \(j\) 时 \(p_j/q_j<\rho\)，下置闰给 \(S_{q_j}=\lfloor q_j\rho\rfloor=p_j\)；奇数 \(j\) 时 \(p_j/q_j>\rho\)，上置闰给 \(S_{q_j}=\lceil q_j\rho\rceil=p_j\)。若不交错，则奇数 \(j\) 时下置闰给 \(S_{q_j}=p_j-1\)，误差为 \(1-|p_j-q_j\rho|\to1\)，结论不成立。代入定理 \ref{thm:intercalation_dft_leakage} 即得泄漏上界。随 $j\to\infty$，$q_jq_{j+1}\to\infty$，上界趋于零。最佳性由连分数收敛项的极小性保证。
+\end{proof}
+
+\begin{remark}[“有界化”而非“消除”]\label{rem:bounded_not_eliminated}
+需要强调：置闰\textbf{不消除}泄漏，而是\textbf{把泄漏从不可控降为有界}。当 $\rho\notin\mathbb{Q}$ 时，任何有限窗口 $T$ 都对应某个非零 $|E_M|$，因此泄漏幅度非零——这是不可公度的内在代价。置闰的价值在于：
+\begin{enumerate}[label=(\roman*)]
+    \item 给出泄漏幅度的一个\textbf{显式上界} $O(|E_M|/T)$，使泄漏可以定量控制；
+    \item 通过连分数选择窗口，使该上界在收敛窗口序列上\textbf{趋于零}；
+    \item 与窗函数方法互补（见 \S \ref{subsec:intercalation_vs_window}），在带宽与旁瓣之间取得平衡。
+\end{enumerate}
+因此严格表述应是“置闰\textbf{抑制}或\textbf{有界化}频谱泄漏”，而非“解决”。当 $\rho\in\mathbb{Q}$ 时，置闰序列退化为常数列，泄漏严格为零——这是有界化在公度情形的退化解。
+\end{remark}
+
+\subsection{与窗函数方法的互补}\label{subsec:intercalation_vs_window}
+
+置闰与窗函数是抑制频谱泄漏的两条独立路线，它们作用于泄漏的不同环节，因而互补。
+
+\begin{remark}[两条路线的分工]\label{rem:two_routes_division}
+\textbf{置闰}作用于\textbf{窗口长度}：通过选择 $T=S_M$ 使窗口内近似包含整数个连续周期，从源头减少主瓣能量向旁瓣的泄漏。其缺点是：窗口长度必须从连分数收敛子中选取，灵活性受限。
+
+\textbf{窗函数}作用于\textbf{窗口边界}：通过对样本乘以平滑窗 $w(t)$（Hann、Hamming、Blackman 等），使窗口两端平滑趋零，从频域角度压旁瓣。其缺点是：窗函数展宽主瓣，降低频率分辨率。
+
+两者作用于泄漏的不同环节，因此可叠加使用。表 \ref{tab:intercalation_vs_window} 给出两者的对比。
+\end{remark}
+
+\begin{table}[htbp]
+\centering
+\caption{置闰与窗函数的对比}
+\label{tab:intercalation_vs_window}
+\begin{tabular}{@{}p{3cm}p{5.2cm}p{5.2cm}@{}}
+\toprule
+对比维度 & 置闰 & 窗函数 \\
+\midrule
+作用对象 & 窗口长度 $T$ & 窗口边界权值 \\
+作用机制 & 使窗口逼近整数个周期 & 使边界平滑趋零 \\
+泄漏抑制方式 & 从源头减少主瓣泄漏 & 从频域压旁瓣 \\
+主瓣影响 & 主瓣不展宽（若窗口选得准） & 主瓣展宽（$O(1/T_w)$） \\
+旁瓣影响 & 旁瓣由 Dirichlet 核控制 & 旁瓣由窗函数频域核控制 \\
+灵活性 & 窗口受连分数收敛子限制 & 窗函数连续可选 \\
+最优条件 & 连分数收敛子 $T=p_j$ & 窗宽与信噪比、目标旁瓣匹配 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.0cm and 1.2cm,
+  box/.style={draw, rounded corners, align=center, minimum width=3.0cm, minimum height=0.9cm, font=\small}]
+\node[box, fill=blue!12] (leak) {频谱泄漏};
+\node[box, fill=green!12, above left=of leak] (inter) {置闰\\（控制窗口长度）};
+\node[box, fill=orange!12, above right=of leak] (win) {窗函数\\（控制窗口边界）};
+\node[box, fill=green!8, below left=of leak] (l1) {主瓣偏移 $O(|E_M|/T)$};
+\node[box, fill=orange!8, below right=of leak] (l2) {旁瓣衰减 $O(|\omega|^{-m-1})$};
+\node[box, fill=purple!12, below=2.2cm of leak] (both) {叠加使用：窄主瓣 + 低旁瓣};
+\draw[->, very thick] (inter) -- (leak);
+\draw[->, very thick] (win) -- (leak);
+\draw[->, very thick] (leak) -- (l1);
+\draw[->, very thick] (leak) -- (l2);
+\draw[->, very thick] (l1) -- (both);
+\draw[->, very thick] (l2) -- (both);
+\node[align=center, font=\small] at (0,-4.4) {置闰与窗函数作用于泄漏的不同环节，可叠加获得最优结果};
+\end{tikzpicture}
+\caption{置闰与窗函数的互补性：置闰控制主瓣偏移，窗函数控制旁瓣衰减，二者叠加可同时获得窄主瓣和低旁瓣。}
+\label{fig:intercalation_window_complementarity}
+\end{figure}
+
+\begin{proposition}[置闰与窗函数的互补界]\label{prop:intercalation_window_complementarity}
+设置闰窗口 $T=p_j$（连分数收敛子），再施加窗函数 $w$。则加窗后的频谱满足
+\[
+\widehat{fw}[k]=\sum_{m\in\mathbb{Z}}c_m\,\widehat{w}\!\left(\frac{2\pi m}{T_f}-\frac{2\pi k}{T}\right)D_T\!\left(\frac{m}{\rho}-\frac{k}{T}\right),
+\]
+其中 $\widehat{w}$ 为窗函数的频域核。特别地：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{无窗时}（$w\equiv 1$，$\widehat{w}\equiv\delta$）：旁瓣由 Dirichlet 核 $D_T$ 控制，衰减速率 $O(1/T)$。
+    \item \textbf{加 Hann 窗时}（$\widehat{w}$ 主瓣宽 $O(1/T)$，旁瓣 $-31$ dB）：主瓣展宽但旁瓣显著压低。
+    \item \textbf{叠加效果}：置闰使主瓣位置与栅格对齐（第一因子 $D_T$ 的偏移趋于零），窗函数压低旁瓣（第二因子 $\widehat{w}$ 的旁瓣衰减）。两者叠加可同时获得窄主瓣和低旁瓣——这是单用任一方法无法达到的。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 无窗情形即定理 \ref{thm:intercalation_dft_leakage}。(ii) Hann 窗的频域核 $\widehat{w}$ 旁瓣以 $1/\omega^3$ 衰减，主瓣宽度为 $O(1/T)$，其经典旁瓣电平约为 $-31$ dB（Harper, 1970, \textit{Perturbation of the Fourier coefficients of a periodic function}）。(iii) 加窗后的频谱是两个因子的乘积：置闰因子 $D_T$ 控制主瓣偏移，窗函数因子 $\widehat{w}$ 控制旁瓣衰减。两个因子的作用相互独立（一个与时间窗口长度相关，一个与窗口形状相关），因此可同时优化。
+\end{proof}
+
+\begin{remark}[方法选择建议]\label{rem:method_selection_advice}
+实际中如何选择置闰与窗函数：
+\begin{itemize}
+    \item 若信号周期比 $\rho$ 已知（或可高精度估计）：优先使用置闰选取窗口 $T=p_j$，再根据目标旁瓣电平选择窗函数；
+    \item 若 $\rho$ 未知或时变：无法应用置闰，只能依赖窗函数与谱估计算法（如多窗谱估计）；
+    \item 若窗口长度受硬件或实时性约束、无法自由选取：置闰的作用受限，需退回到窗函数方法；
+    \item 若信噪比低：窗函数压低旁瓣的收益大于置闰调整主瓣的收益，两者结合是最优解。
+\end{itemize}
+\end{remark}
+
+\subsection{应用与例子}
+
+\begin{example}[单频信号的泄漏有界化]\label{ex:single_tone_leakage}
+设连续信号
+\[
+f(t)=e^{i2\pi t/\sqrt{2}},
+\]
+采样间隔 $\Delta x=1$，理想周期比 $\rho=\sqrt{2}\approx 1.41421356$。直接取窗口 $T=100$：窗口内周期数
+\[
+\frac{T}{\rho}=\frac{100}{\sqrt{2}}\approx 70.7107,
+\]
+非整数，泄漏显著。取 $\sqrt{2}$ 的连分数收敛子 $99/70$，令 $T=99$，$M=70$。置闰误差
+\[
+|E_{70}|=|99-70\sqrt{2}|\approx 0.00505.
+\]
+与直接取 $T=100$ 时的最小误差（约 $0.409$）相比，误差减小约 $81$ 倍；由定理 \ref{thm:intercalation_dft_leakage}，泄漏幅度上界相应减小约 $81$ 倍。若取更靠后的收敛子 $239/169$，则 $T=239$，误差
+\[
+|239-169\sqrt{2}|\approx 0.00042,
+\]
+泄漏上界进一步减小。此例说明：置闰并不消除泄漏，而是通过选择连分数收敛子把泄漏上界压低若干数量级。
+\end{example}
+
+\begin{example}[多频信号与联合逼近]\label{ex:multi_tone_intercalation}
+设
+\[
+f(t)=e^{i2\pi t/\sqrt{2}}+0.5e^{i2\pi t/\sqrt{3}}.
+\]
+两个频率分量对应理想周期比 $\rho_1=\sqrt{2}$，$\rho_2=\sqrt{3}$。单一窗口无法同时使两个周期比都整数，置闰的“有界化”在多频情形退化为“联合逼近”问题：需选取 $T$ 使 $|E_M^{(1)}|$ 与 $|E_M^{(2)}|$ 都尽可能小。此时可用二维连分数或联合连分数逼近的理论处理；本节不展开，仅指出置闰在多频情形仍给出上界估计，但上界由各分量置闰误差的加权和决定。实际中常结合窗函数（如 Hann 窗）进一步抑制旁瓣。
+\end{example}
+
+\begin{remark}[旬空、空亡与频谱泄漏的类比]\label{rem:xunkong_leakage_analogy}
+中国历法与术数中的旬空、空亡，可视为离散周期系统在不可公度条件下的空缺现象。天干十、地支十二，每旬余二，形成空亡。置闰则是通过误差反馈补偿累计相位误差。DFT 频谱泄漏是同一数学结构在频域的表现：窗口与信号周期不可公度，导致能量从主频泄漏到旁瓣。置闰通过选择连分数收敛窗口使累计误差有界，从而抑制泄漏。此类比是启发性的，不构成严格数学等价。
+\end{remark}
+
+\begin{remark}[与循环卷积和功率谱的接口]\label{rem:intercalation_convolution_spectrum}
+置闰窗口上的采样序列可视为 \(T\)-周期序列。由循环卷积定理（定理 \ref{thm:circular_convolution_theorem}），其循环卷积的傅里叶系数为 \(Tc_kd_k\)。若置闰误差有界，则循环卷积逼近连续周期卷积，误差由 \(|E_M|/T\) 控制。功率谱 \(S(\omega_k)=|c_k|^2\)（定义 \ref{def:periodic_tendency_spectrum}）在置闰窗口下估计更准确，因为泄漏能量被压制。帕塞瓦尔恒等式（定理 \ref{thm:parseval_fourier}）在置闰窗口下仍成立，总能量守恒，泄漏仅改变能量在频点的分布。
+\end{remark}
+
+\begin{remark}[与本章七主题的对应]\label{rem:intercalation_seven_themes}
+置闰在七主题框架下可作如下定位：
+\begin{center}
+\begin{tabular}{@{}p{2.2cm}p{10.5cm}@{}}
+\toprule
+主题 & 置闰对应 \\
+\midrule
+平移 & 圆上无理旋转 \(R_\rho:z\mapsto e^{i2\pi\rho}z\) 的整数编码 \\
+缩放 & 理想周期比 \(\rho=T_f/\Delta x\) 作为标度荷 \\
+旋转 & 置闰序列的相位误差反馈 \\
+守恒 & 累计误差有界，能量守恒 \\
+对称 & 连分数收敛项的交错对称逼近（偶数项从下、奇数项从上） \\
+闭合 & 置闰窗口使近似周期闭合 \\
+周期 & \(\rho\in\mathbb{Q}\) 时严格周期，\(\rho\notin\mathbb{Q}\) 时准周期 \\
+算法 & 连分数与最佳有理逼近，DFT 泄漏有界化 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{remark}
+
+\section{\texorpdfstring{循环卷积定理与经典积分变换的统一}{循环卷积定理与经典积分变换的统一}}
+
+\begin{theorem}[循环卷积定理]\label{thm:circular_convolution_theorem}
+设 $f, g$ 为周期为 $T$ 的周期函数，傅里叶系数分别为 $c_n, d_n$。则循环卷积 $f \circledast g$ 的傅里叶系数为 $T c_n d_n$。
+\end{theorem}
+
+\begin{proof}
+\[
+\widehat{f \circledast g}(k) = \frac{1}{T}\int_0^T (f \circledast g)(t) e^{-i\omega_k t} dt
+= \frac{1}{T}\int_0^T \frac{1}{T}\int_0^T f(\tau) g(t-\tau) e^{-i\omega_k t} d\tau\, dt.
+\]
+换元 $u = t - \tau$，利用富比尼定理：
+\[
+= T \cdot \left(\frac{1}{T}\int_0^T f(\tau) e^{-i\omega_k \tau} d\tau\right)\left(\frac{1}{T}\int_0^T g(u) e^{-i\omega_k u} du\right) = T c_k d_k.
+\]
+\end{proof}
+
+\begin{theorem}[经典积分变换作为群上调和分析]\label{thm:classical_transforms_unified}
+在适当的群作用、表示和函数空间框架下，经典积分变换可以统一描述：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{傅里叶变换}：平移群 $\mathbb{R}$ 上的调和分析，$\hat{f}(\omega) = \int f(t) e^{-i\omega t} dt$。
+    \item \textbf{拉普拉斯变换}：带衰减因子的傅里叶变换，$\mathcal{L}\{f\}(s) = \mathcal{F}\{f(t)e^{-\sigma t}\}(\omega)$（$s = \sigma + i\omega$）。
+    \item \textbf{梅林变换}：缩放群 $\mathbb{R}^+$ 上的调和分析，经换元 $x = e^t$ 化为傅里叶变换。
+    \item \textbf{小波变换}：仿射群 $\mathbb{R} \rtimes \mathbb{R}^+$ 上的调和分析。
+    \item \textbf{DFT}：有限循环群 $\mathbb{Z}/N\mathbb{Z}$ 上的调和分析。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+逐条由定义与命题 \ref{prop:laplace_fourier}、\ref{prop:mellin_fourier}、\ref{prop:wavelet_group} 及 DFT 定义给出。
+\end{proof}
+
+\begin{remark}[群上调和分析的一般框架]\label{rem:harmonic_general}
+设 $G$ 为局部紧阿贝尔群，$\widehat{G}$ 为其对偶群。傅里叶变换 $\hat{f}(\chi) = \int_G f(g) \overline{\chi(g)} dg$ 将 $L^2(G)$ 上的函数映射为 $L^2(\widehat{G})$ 上的函数，且满足帕塞瓦尔恒等式 $\|f\|_{L^2(G)} = \|\hat{f}\|_{L^2(\widehat{G})}$。经典积分变换对应于不同群 $G$ 的选择：
+\begin{center}
+\begin{tabular}{@{}p{4cm}p{4cm}p{5cm}@{}}
+\toprule
+群 $G$ & 对偶群 $\widehat{G}$ & 变换 \\
+\midrule
+$\mathbb{R}$（平移群） & $\mathbb{R}$ & 傅里叶变换 \\
+$\mathbb{R}^+$（缩放群） & $\mathbb{R}$ & 梅林变换 \\
+$U(1)$（旋转群） & $\mathbb{Z}$ & 傅里叶级数 \\
+$\mathbb{Z}/N\mathbb{Z}$ & $\mathbb{Z}/N\mathbb{Z}$ & DFT \\
+$\mathbb{R} \rtimes \mathbb{R}^+$（仿射群） & — & 小波变换 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.0cm and 1.4cm,
+  box/.style={draw, rounded corners, align=center, minimum width=2.8cm, minimum height=0.9cm, font=\small}]
+\node[box, fill=blue!12] (G) {群 $G$};
+\node[box, fill=green!12, right=of G] (dual) {对偶群 $\widehat{G}$};
+\node[box, fill=orange!12, right=of dual] (transform) {傅里叶变换};
+% 群示例
+\node[font=\footnotesize, below=0.6cm of G] (g1) {$\mathbb{R}$（平移）};
+\node[font=\footnotesize, below=0.2cm of g1] (g2) {$\mathbb{R}^+$（缩放）};
+\node[font=\footnotesize, below=0.2cm of g2] (g3) {$U(1)$（旋转）};
+\node[font=\footnotesize, below=0.2cm of g3] (g4) {$\mathbb{Z}/N\mathbb{Z}$};
+\node[font=\footnotesize, below=0.2cm of g4] (g5) {$\mathbb{R}\rtimes\mathbb{R}^+$};
+% 对偶示例
+\node[font=\footnotesize, below=0.6cm of dual] (d1) {$\mathbb{R}$};
+\node[font=\footnotesize, below=0.2cm of d1] (d2) {$\mathbb{R}$};
+\node[font=\footnotesize, below=0.2cm of d2] (d3) {$\mathbb{Z}$};
+\node[font=\footnotesize, below=0.2cm of d3] (d4) {$\mathbb{Z}/N\mathbb{Z}$};
+\node[font=\footnotesize, below=0.2cm of d4] (d5) {—};
+% 变换示例
+\node[font=\footnotesize, below=0.6cm of transform] (t1) {傅里叶变换};
+\node[font=\footnotesize, below=0.2cm of t1] (t2) {梅林变换};
+\node[font=\footnotesize, below=0.2cm of t2] (t3) {傅里叶级数};
+\node[font=\footnotesize, below=0.2cm of t3] (t4) {DFT};
+\node[font=\footnotesize, below=0.2cm of t4] (t5) {小波变换};
+% 连接
+\draw[->, very thick] (G) -- (dual);
+\draw[->, very thick] (dual) -- (transform);
+\node[align=center, font=\small] at (3.5,-4.6) {群上调和分析：不同群 $G$ 上的傅里叶变换给出不同经典积分变换};
+\end{tikzpicture}
+\caption{群上调和分析统一框架：不同群 $G$ 与对偶群 $\widehat{G}$ 的傅里叶变换分别给出傅里叶变换、梅林变换、傅里叶级数、DFT、小波变换等。}
+\label{fig:harmonic_group_analysis}
+\end{figure}
+
+\begin{property}[傅里叶变换的保面积与对偶性]\label{prop:fourier_area_duality}
+傅里叶变换 $\mathcal{F}$ 在 $L^2(\mathbb{R})$ 上保持面积（Plancherel 定理）：
+\[
+\|f\|_2=\frac{1}{\sqrt{2\pi}}\|\hat f\|_2.
+\]
+且 $\mathcal{F}$ 是 $L^2$ 上的酉算子，满足对偶性
+\[
+\mathcal{F}^2 f(t)=f(-t),\qquad \mathcal{F}^4=\operatorname{id}.
+\]
+即傅里叶变换是 $L^2$ 上的四阶对合算子。
+\end{property}
+
+\begin{proof}
+保面积由 Plancherel 定理（定理 \ref{thm:plancherel}）给出。对偶性由傅里叶反演公式直接得到：$\mathcal{F}^2f(t)=\int\hat f(\omega)e^{i\omega t}d\omega/(2\pi)=f(-t)$，从而 $\mathcal{F}^4=\operatorname{id}$。
+\end{proof}
+
+\begin{example}[常用函数的傅里叶变换]\label{ex:fourier_transform_examples}
+\begin{itemize}
+    \item 高斯函数 $e^{-t^2/2}$ 是傅里叶变换的不动点：$\mathcal{F}\{e^{-t^2/2}\}=\sqrt{2\pi}e^{-\omega^2/2}$。
+    \item 矩形脉冲 $\mathbf{1}_{[-T,T]}(t)$ 的傅里叶变换为 $2T\operatorname{sinc}(T\omega/\pi)$。
+    \item 指数衰减 $e^{-a|t|}$（$a>0$）的傅里叶变换为 $\frac{2a}{a^2+\omega^2}$（洛伦兹型）。
+    \item $\delta$ 函数的傅里叶变换为常数 $1$；常数 $1$ 的傅里叶变换为 $2\pi\delta(\omega)$。
+\end{itemize}
+\end{example}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 频率算子：时延相子 $e^{i\nu\tau}$；傅里叶变换平移性质；DFT 周期性引理（引理 \ref{lem:dft_periodicity}） \\
+缩放 & 振幅算子；权重核体系；小波变换的多尺度（命题 \ref{prop:wavelet_group}） \\
+旋转 & 相位算子：6 个复相位核；希尔伯特核 $90^\circ$ 旋转；DFT 酉对角化（命题 \ref{prop:dft_unitary}） \\
+守恒 & 功率谱 $|c_k|^2$（定理 \ref{thm:spectrum_classical_limit}）；帕塞瓦尔恒等式（定理 \ref{thm:parseval_fourier}）；Plancherel 定理（定理 \ref{thm:plancherel}） \\
+对称 & 共轭对称；窗-核对偶；轨道分解的正交性（引理 \ref{lem:irreducible_orthogonality}）；傅里叶变换的对偶性（性质 \ref{prop:fourier_area_duality}） \\
+闭合 & 退化链闭合：循环卷积 $\supset$ 核化卷积 $\supset$ 经典卷积；DFT 周期性闭合（引理 \ref{lem:dft_periodicity}） \\
+周期 & 周期算子 $\Theta_{p,q}$；功率谱 $S(\omega_k)$（定义 \ref{def:periodic_tendency_spectrum}）；不确定性原理（定理 \ref{thm:uncertainty}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明命题 \ref{prop:PPO_group}：
+    集合 $\mathcal{P}_T=\{\mathcal{O}_k^{(T)}=e^{i2\pi k/T}\mid k=0,1,\dots,T-1\}$
+    在复乘运算下构成循环群 $C_T$，且
+    \[
+    \mathcal{O}_a^{(T)}\cdot\mathcal{O}_b^{(T)}=\mathcal{O}_{(a+b)\bmod T}^{(T)}.
+    \]
+    请验证封闭性、单位元、逆元，并说明为什么 $\mathcal{P}_T$ 与 $C_T$ 的不可约表示一一对应。
+
+    \item 证明命题 \ref{prop:schur_orthogonality}（Schur 正交关系）：
+    设 $G$ 为有限群，$\rho,\sigma$ 为不可约酉表示，则矩阵系数满足
+    \[
+    \frac{1}{|G|}\sum_{g\in G}\rho_{ij}(g)\,\overline{\sigma_{kl}(g)}
+    =\frac{\delta_{\rho\sigma}\delta_{ik}\delta_{jl}}{d_\rho}.
+    \]
+    请用 Schur 引理构造平均算子完成证明，
+    并说明为什么特征标满足 $\langle\chi_\rho,\chi_\sigma\rangle=\delta_{\rho\sigma}$。
+
+    \item 验证定义 \ref{def:regular_representation_dft}：
+    DFT 矩阵 $\mathbf{F}_T$ 将 $C_T$ 的正则表示酉对角化：
+    \[
+    \mathbf{F}_T^\dagger\cdot\rho_{\text{reg}}(g)\cdot\mathbf{F}_T
+    =\operatorname{diag}(\mathcal{O}_0^{(T)},\dots,\mathcal{O}_{T-1}^{(T)}).
+    \]
+    请以 $T=4$ 为例，写出循环移位矩阵与 DFT 矩阵，
+    并验证对角化关系成立。
+
+    \item 证明引理 \ref{lem:irreducible_orthogonality}：
+    设 $\rho,\sigma$ 为 $G$ 的两个不同构的不可约酉表示，
+    $V_\rho,V_\sigma$ 分别为其表示空间在 $L^2(G)$ 中的等变子空间，则
+    \[
+    V_\rho\perp V_\sigma.
+    \]
+    请用 Schur 引理完成证明，
+    并说明为什么这一正交性保证了轨道分解的合法性。
+
+    \item 证明命题 \ref{prop:orbit_diagonalisation}：
+    在轨道分解下，群作用 $\lambda(g)$ 被对角化，
+    每个不可约轨道在群作用下独立演化。
+    请写出 $\lambda(g)f=\sum_\rho\lambda(g)f_\rho$ 的分解，
+    并说明为什么各 $V_\rho$ 两两正交。
+
+    \item 证明推论 \ref{cor:convolution_orbit_decomp}：
+    设 $K\in L^1(G)$，卷积算子 $C_Kf=K*f$ 在轨道分解下完全对角化：
+    \[
+    (C_Kf)_\rho=\hat{K}(\rho)f_\rho.
+    \]
+    请用 Schur 引理说明 $C_K$ 在不可约子空间 $V_\rho$ 上的限制为标量算子。
+
+    \item 证明傅里叶系数与简谐分量参数的关系（命题 \ref{prop:fourier_epicycle}）：
+    设 $f(t)=\sum_{n=-\infty}^{\infty}c_ne^{in\omega_0t}$，$\omega_0=2\pi/T$。则
+    \begin{enumerate}[label=(\roman*)]
+        \item 第 $n$ 级简谐分量的半径 $A_n=2|c_n|$（$n\ge1$）；
+        \item 角速度 $\omega_n=n\omega_0$；
+        \item 初始辐角 $\phi_n=\arg(c_n)$；
+        \item 角动量 $L_n=4m_n|c_n|^2n\omega_0$。
+    \end{enumerate}
+    请用实信号的共轭对称性 $c_{-n}=\overline{c_n}$ 完成证明。
+
+    \item 证明帕塞瓦尔恒等式（定理 \ref{thm:parseval_fourier}）：
+    设 $f\in L^2([0,T])$，傅里叶系数为 $c_n$，则
+    \[
+    \frac{1}{T}\int_0^T|f(t)|^2dt=\sum_{n=-\infty}^{\infty}|c_n|^2.
+    \]
+    请用傅里叶基的正交性完成证明，
+    并说明为什么帕塞瓦尔恒等式可以仅用振幅级数表述。
+
+    \item 证明傅里叶级数的收敛性（性质 \ref{prop:fourier_series_convergence}）：
+    对 $f\in C^1$、$f\in L^2$、分片连续三种情形分别证明傅里叶级数的收敛性。
+
+    \item 证明傅里叶变换的基本性质（命题 \ref{prop:fourier_properties}）：
+    \begin{enumerate}[label=(\roman*)]
+        \item 线性性；
+        \item 平移：$\mathcal{F}\{f(t-a)\}(\omega)=e^{-i\omega a}\hat{f}(\omega)$；
+        \item 卷积：$\mathcal{F}\{f*g\}=\hat{f}\cdot\hat{g}$；
+        \item 微分：$\mathcal{F}\{f'(t)\}(\omega)=i\omega\hat{f}(\omega)$；
+        \item 帕塞瓦尔。
+    \end{enumerate}
+    请分别写出证明，并说明为什么平移性质在频域中表现为相位因子。
+
+    \item 证明 Plancherel 定理（定理 \ref{thm:plancherel}）：
+    傅里叶变换唯一延拓为 $L^2(\mathbb{R})$ 上的酉算子，满足
+    \[
+    \|f\|_{L^2}^2=\frac{1}{2\pi}\|\hat f\|_{L^2}^2.
+    \]
+    请说明为什么 $L^1\cap L^2$ 的稠密性是延拓的关键。
+
+    \item 证明不确定性原理（定理 \ref{thm:uncertainty}）：
+    对 $\|f\|_2=1$，
+    \[
+    \Delta t\,\Delta\omega\ge\frac12.
+    \]
+    请用分部积分与 Cauchy-Schwarz 不等式完成证明，
+    并说明为什么高斯函数取等号。
+
+    \item 证明 Schwartz 空间的傅里叶不变性（性质 \ref{prop:schwartz_invariance}）：
+    傅里叶变换是 $\mathcal{S}(\mathbb{R})$ 到自身的线性同胚，
+    且 $\mathcal{F}^4=\operatorname{id}$，高斯函数为不动点。
+    请说明为什么 $\mathcal{S}$ 是傅里叶变换的自然定义域。
+
+    \item 证明命题 \ref{prop:dft_unitary}：
+    DFT 矩阵 $\mathbf{F}_N$ 是酉矩阵：$\mathbf{F}_N^\dagger\mathbf{F}_N=\mathbf{I}_N$。
+    请用几何级数求和完成证明，
+    并验证引理 \ref{lem:dft_periodicity}：
+    $F[k+N]=F[k]$ 且 $F[-k]=F[N-k]$。
+
+    \item 证明 Radix-2 FFT（定理 \ref{thm:radix2_fft}）：
+    设 $N=2^k$，DFT 可分解为两个 $N/2$ 长度的 DFT，
+    时间复杂度为 $O(N\log_2N)$。
+    请写出递推关系 $T(2^k)=2T(2^{k-1})+O(2^k)$ 并求解。
+
+    \item 验证 Radix-$p$ FFT（定理 \ref{thm:radix_p_fft}）与 Bluestein 算法（命题 \ref{prop:bluestein}）：
+    \begin{enumerate}[label=(\roman*)]
+        \item 当 $N=p^k$（$p=3,5,7$）时，DFT 可分解为 $p$ 个 $N/p$ 长度的 DFT；
+        \item 任意 $N$ 的 DFT 可通过卷积形式计算。
+    \end{enumerate}
+    请分别写出时间复杂度，并说明 Bluestein 算法如何利用恒等式
+    $kn=\frac12(k^2+n^2-(k-n)^2)$。
+
+    \item 证明拉普拉斯变换与傅里叶变换的关系（命题 \ref{prop:laplace_fourier}）：
+    \[
+    \mathcal{L}\{f\}(s)=\mathcal{F}\{f(t)e^{-\sigma t}\}(\omega),
+    \]
+    其中 $s=\sigma+i\omega$。
+    请写出证明，并说明为什么拉普拉斯变换是带衰减因子的傅里叶变换。
+
+    \item 证明梅林变换与傅里叶变换的关系（命题 \ref{prop:mellin_fourier}）：
+    换元 $x=e^t$，$f(x)=g(t)$，则
+    \[
+    \mathcal{M}\{f\}(s)=\mathcal{F}\{g\}(is).
+    \]
+    请写出证明，并说明为什么梅林变换是缩放群上的调和分析。
+
+    \item 证明小波变换的群表示论基础（命题 \ref{prop:wavelet_group}）：
+    小波变换是仿射群 $\mathbb{R}\rtimes\mathbb{R}^+$ 上的调和分析。
+    请写出仿射群的表示
+    \[
+    \pi_{(a,b)}\psi(t)=|a|^{-1/2}\psi((t-b)/a),
+    \]
+    并说明为什么小波变换可以表示为
+    $W_f(a,b)=\langle f,\pi_{(a,b)}\psi\rangle$。
+
+    \item 证明命题 \ref{prop:twelve_to_six}：
+    定义 6 个复相位核
+    \[
+    S^{(1)}=e^{i\theta},\;S^{(2)}=e^{i\phi},\;S^{(3)}=e^{i2\theta},\;
+    S^{(4)}=e^{i2\phi},\;S^{(5)}=e^{i\theta/2},\;S^{(6)}=e^{i\phi/2},
+    \]
+    其中 $\theta=\alpha-\beta$，$\phi=\alpha+\beta$。则 $S^{(d)}$ 的实部为余弦核，
+    虚部为正弦核。请用欧拉公式完成证明，
+    并说明 12 种实相似度如何对应 6 个复核的实部与虚部。
+
+    \item 证明定理 \ref{thm:three_layer_identity}（余弦相似度的三层一致）：
+    余弦相似度在向量层、分量层、时延层的形式一致：
+    \begin{enumerate}[label=(\roman*)]
+        \item 向量层：$\cos\theta=(\mathbf{a}\cdot\mathbf{b})/(\|\mathbf{a}\|\|\mathbf{b}\|)$；
+        \item 分量层：$\mathbb{S}_{mn}=\cos(\theta_m-\varphi_n)$；
+        \item 时延层：$(f\star g)(0)/(\|f\|\|g\|)$ 为 $L^2$ 余弦相似度。
+    \end{enumerate}
+
+    \item 验证例 \ref{ex:component_tendency_similarity}：
+    取 $f(t)=3e^{i(2t+\pi/4)}+2e^{i4t}$，$g(t)=4e^{i2t}+e^{i(6t+\pi/3)}$，
+    计算耦合系数矩阵 $\mathbb{T}$ 与相似度矩阵 $\mathbb{S}$，
+    并验证归一化关系 $\mathbb{S}_{mn}=\mathbb{T}_{mn}/(A_mB_n)$。
+
+    \item 证明定理 \ref{thm:spectrum_classical_limit}：
+    设 $X$ 为周期 $T$ 的周期函数，傅里叶系数为 $c_k$，则自相关函数
+    \[
+    R_X(\tau)=\frac1T\int_0^TX(t)\overline{X(t-\tau)}dt
+    \]
+    的傅里叶系数为 $|c_k|^2$，即功率谱是自相关函数的傅里叶变换。
+    请用正交性 $\frac1T\int_0^Te^{i(\omega_n-\omega_m)t}dt=\delta_{nm}$ 完成证明。
+
+    \item 证明推论 \ref{cor:six_spectrum_family}：
+    设 $X$ 为周期 $T$ 的可积函数，傅里叶系数为 $c_n$，则
+    \[
+    \frac1T\int_0^T|X(t)|^2dt=\sum_n|c_n|^2=\sum_nS(\omega_n).
+    \]
+    请分别用帕塞瓦尔恒等式与功率谱定义完成证明，
+    并说明为什么这是能量守恒在频域中的表述。
+
+    \item 证明循环卷积定理（定理 \ref{thm:circular_convolution_theorem}）：
+    设 $f,g$ 以 $T$ 为周期，傅里叶系数分别为 $c_n,d_n$，则
+    循环卷积 $f\circledast g$ 的傅里叶系数为 $Tc_nd_n$。
+    请用富比尼定理与换元 $u=t-\tau$ 完成证明。
+
+    \item 证明定理 \ref{thm:classical_transforms_unified}：
+    经典积分变换作为群上调和分析的特殊情形：
+    \begin{enumerate}[label=(\roman*)]
+        \item 傅里叶变换——平移群 $\mathbb{R}$；
+        \item 拉普拉斯变换——带衰减因子的傅里叶变换；
+        \item 梅林变换——缩放群 $\mathbb{R}^+$；
+        \item 小波变换——仿射群 $\mathbb{R}\rtimes\mathbb{R}^+$；
+        \item DFT——有限循环群 $\mathbb{Z}/N\mathbb{Z}$。
+    \end{enumerate}
+    请分别指出各变换对应的群与对偶群，
+    并说明为什么群表示论可以统一描述这些变换。
+
+    \item 证明性质 \ref{prop:fourier_area_duality}：
+    傅里叶变换是 $L^2$ 上的四阶对合算子：$\mathcal{F}^4=\operatorname{id}$。
+    请用傅里叶反演公式完成证明，并说明为什么 $\mathcal{F}^2f(t)=f(-t)$。
+
+    \item 证明定理 \ref{thm:intercalation_error_bound_harmonic}（置闰误差有界定理）：
+    三种基本置闰序列的误差有界性：
+    \begin{enumerate}[label=(\roman*)]
+        \item 下置闰：$S_M^{\mathrm{floor}}=\lfloor M\rho\rfloor$，
+              $E_M^{\mathrm{floor}}=-\{M\rho\}\in(-1,0]$；
+        \item 上置闰：$S_M^{\mathrm{ceil}}=\lceil M\rho\rceil$，
+              $E_M^{\mathrm{ceil}}=\lceil M\rho\rceil-M\rho\in[0,1)$（当 $M\rho\in\mathbb Z$ 时 $E_M^{\mathrm{ceil}}=0$）；
+        \item 平衡置闰：$S_M^{\mathrm{round}}=\operatorname{round}(M\rho)$，
+              $|E_M^{\mathrm{round}}|\le1/2$。
+    \end{enumerate}
+
+    \item 证明定理 \ref{thm:intercalation_dft_leakage}（置闰窗口的 DFT 泄漏估计）：
+    设 $f$ 为连续 $T_f$-周期函数，傅里叶系数为 $c_m$，
+    理想周期比 $\rho=T_f/\Delta x$，置闰窗口 $T=S_M$。则
+    \[
+    F[k]=\sum_{m\in\mathbb{Z}}c_mD_T\Bigl(\frac{m}{\rho}-\frac{k}{T}\Bigr),
+    \]
+    且主瓣偏移满足
+    \[
+    \Bigl|\frac{m}{\rho}-\frac{k}{T}\Bigr|
+    \le\frac{|m||E_M|}{\rho T}.
+    \]
+    请用采样序列的傅里叶级数表示完成证明，
+    并说明泄漏幅度满足 $|F[k]-c_{k/M}|\le C\frac{|E_M|}{T}\sum_m|c_m|$。
+
+    \item 证明推论 \ref{cor:continued_fraction_intercalation}：
+    设 $\rho>0$ 无理，连分数收敛子为 $p_j/q_j$。
+    取置闰窗口 $T=p_j$、$M=q_j$ 时，
+    累计误差 $|E_{q_j}|=|p_j-q_j\rho|<1/q_{j+1}$，
+    泄漏幅度被 $O(1/(q_jq_{j+1}))$ 控制。
+    请说明为什么在所有窗口长度不超过 $p_{j+1}-1$ 的选择中，
+    该窗口的泄漏上界最小。
+
+    \item 证明命题 \ref{prop:intercalation_window_complementarity}：
+    置闰与窗函数的互补界：
+    \begin{enumerate}[label=(\roman*)]
+        \item 无窗时旁瓣由 Dirichlet 核控制，衰减 $O(1/T)$；
+        \item 加 Hann 窗时主瓣展宽但旁瓣压低到 $-31$ dB；
+        \item 叠加使用时置闰使主瓣与栅格对齐，窗函数压低旁瓣。
+    \end{enumerate}
+    请说明为什么两者作用于泄漏的不同环节，
+    因而可以叠加使用。
+
+    \item 验证例 \ref{ex:single_tone_leakage}：
+    设 $f(t)=e^{i2\pi t/\sqrt{2}}$，采样间隔 $\Delta x=1$，
+    理想周期比 $\rho=\sqrt{2}\approx1.41421356$。
+    取 $\sqrt{2}$ 的连分数收敛子 $99/70$，令 $T=99$，$M=70$。
+    请计算置闰误差 $|E_{70}|=|99-70\sqrt{2}|$，
+    并比较直接取 $T=100$ 时的最小误差，说明置闰的抑制效果。
+
+    \item 综合题：结合单位根与循环群表示（\S\ref{sec:unit_roots_cyclic_rep}）、
+    轨道分解与合并（\S\ref{sec:orbit_decomposition_synthesis}）、
+    经典积分变换的统一（定理 \ref{thm:classical_transforms_unified}）、
+    相位核与相似度（命题 \ref{prop:twelve_to_six}）、
+    功率谱与循环卷积（定理 \ref{thm:spectrum_classical_limit}）
+    与置闰泄漏有界化（定理 \ref{thm:intercalation_dft_leakage}），
+    说明调和分析如何把周期数学的四大支柱——群表示论、周期卷积、
+    窗函数与折射率、复指数激活函数——统一在同一框架下。
+    请分别指出：
+    \begin{enumerate}[label=(\roman*)]
+        \item 群表示论如何通过不可约表示分解周期函数；
+        \item 周期卷积如何在频域中表现为张量积；
+        \item 窗函数如何控制频谱泄漏；
+        \item 复指数激活函数如何与傅里叶基对应。
+    \end{enumerate}
+\end{enumerate}
+

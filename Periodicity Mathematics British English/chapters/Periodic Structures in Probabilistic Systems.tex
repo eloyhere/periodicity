@@ -1,0 +1,1042 @@
+\chapter{Periodic Structures in Probabilistic Systems}
+\label{chap:prob_periodic}
+\label{chap:probability-periodic}
+\markboth{Periodic Structures in Probabilistic Systems}{Periodic Structures in Probabilistic Systems}
+
+\begin{remark}[Periodicity decision for the target of this chapter (citation)]\label{rem:prob_ps_hook}
+When this chapter decides whether a research target is periodic, determines its period type, or seeks its minimal positive period, reference is always made to the `Periodic Systems' chapter:
+for the periodicity criterion see \cref{thm:ps_periodicity_decision},
+for the discrimination of period types see \cref{def:ps_period_type}, \cref{prop:ps_type_discrimination},
+for the search for the minimal positive period see \cref{def:ps_minimal_period_algorithm}, \cref{thm:ps_minimal_period_correctness},
+and for the construction of period series and epicycle groups from data see \cref{thm:ps_series_reconstruction}, \cref{def:ps_epicycle_group}.
+\end{remark}
+
+\begin{remark}[Positioning of this chapter: developed along the five-step interface of the `Periodic Systems' chapter]\label{rem:prob_chapter_positioning}
+The periodic structure of probabilistic systems studies the mathematical characterisation of periodicity, quasi-periodicity and scale invariance in stochastic processes. This chapter does not establish a separate periodicity criterion; instead it connects probability theory and stochastic process theory to the five-step interface prescribed by the `Periodic Systems' chapter:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{Decision}: reduce a stochastic process or a probability distribution to a discrete dynamical system, invoke \cref{thm:ps_periodicity_decision} to decide whether it is periodic, and determine the period type;
+    \item \textbf{Construction}: build the amplitude series, the frequency series and the phase series from probabilistic data, and assemble them into the probabilistic epicycle group;
+    \item \textbf{Adjustment}: dynamically adjust the epicycle group by Bayesian updating, spectral peak search and residual energy decrease;
+    \item \textbf{Convolution}: introduce amplitude convolution, phase convolution and frequency convolution on the probabilistic epicycle group, and connect them with characteristic functions, covariance and cross-correlation;
+    \item \textbf{Integration}: connect to the tool chains of the three chapters `Discrete Sampling and Intercalation of Periodic Signals', `Harmonic Analysis' and `Time Series Analysis', forming a probabilistic periodicity diagnostic procedure.
+\end{enumerate}
+The probability theory used in this chapter includes: probability spaces, random variables, distribution functions, characteristic functions, stationary processes, spectral measures, the Herglotz--Cramér spectral representation, cyclostationary processes, Bayesian updating, MCMC, hidden Markov models, Gaussian processes and ARFIMA long-memory processes.
+\end{remark}
+
+\begin{remark}[Guide to the seven themes of this chapter]\label{rem:prob_seven_themes}
+Translation---the time-translation invariance of a stationary process and the mean-square derivative variance $P_{\mathbb P}=-\gamma''(0)$;
+Scaling---the scale invariance of a self-similar process, the Hurst exponent and the tail index;
+Rotation---the phase-rotation invariance of a cyclostationary process and the phase coherence time $\tau_{\mathrm{coh}}=2/\sigma^2$;
+Balance---the invariants corresponding to the continuous invariance of probability measures;
+Symmetry---the scaling, translation and rotation information carried by the three classes of distributions: prior, likelihood and posterior;
+Closure---the closure of the probability current under detailed balance $\mathbf J_{ij}=0$;
+Period---the cyclic frequency $\alpha=k/T$, the phase coherence time, the self-similar period and the periodic decomposition of a Markov chain.
+\end{remark}
+
+\section{Periodicity decision for probabilistic targets: connection to step one of the `Periodic Systems' chapter}
+\label{sec:prob_periodicity_decision}
+
+\subsection{Probabilistic targets, decision input and decision map}
+
+\begin{definition}[Probabilistic target and decision input]\label{def:prob_target}
+A \textbf{probabilistic target} is one of the following objects:
+\begin{enumerate}[label=(\roman*)]
+    \item a stochastic process $\{X_t\}_{t\in\mathcal T}$ on a probability space $(\Omega,\mathcal F,\mathbb P)$;
+    \item a finite-state Markov chain with state space $S$ and transition matrix $P$;
+    \item a family of parameter posterior distributions $\{p(\theta\mid \mathbf D)\}$;
+    \item a discrete-time series $\{x_1,\dots,x_n\}$ obtained from observations, regarded as a sample path of some stochastic process.
+\end{enumerate}
+The \textbf{decision input} of a probabilistic target is the ordered pair
+\[
+\mathcal D_{\mathbb P}=(\mathcal T,\mu),
+\]
+where $\mathcal T$ is the time or index set and $\mu$ is a description of the probability law of the target on $\mathcal T$. If $\mathcal T=\mathbb Z$ or $\mathbb N$, the target is called a \textbf{discrete-time probabilistic target}; if $\mathcal T=\mathbb R$, it is called a \textbf{continuous-time probabilistic target}.
+\end{definition}
+
+\begin{definition}[Probabilistic decision map]\label{def:prob_periodization}
+Let a probabilistic target be given by the decision input $\mathcal D_{\mathbb P}=(\mathcal T,\mu)$. If there exist a map $\Phi:\mathcal T\to\mathcal T$, a map $\Psi:M\to M$ and a state $x_0\in M$ such that the probability law and the states of the target are generated by $\Phi$ and $\Psi$, that is,
+\[
+\mu_t=\mu_0\circ \Phi^{-t},\qquad x_t=\Psi^t(x_0),
+\]
+for $t\in\mathbb Z$ the symbol $\Phi^{-t}$ denotes the iterate of $\Phi^{-1}$ and $\Psi^t$ the iterate of $\Psi$; for $t\in\mathbb R$ they are described by the one-parameter evolution families $\{\Phi_t\}_{t\in\mathbb R}$ and $\{\Psi_t\}_{t\in\mathbb R}$, where each $\Phi_t$ is a bijection of $\mathcal T$ and each $\Psi_t$ a bijection of $M$, with $\Phi_0=\operatorname{id}$, $\Phi_{s+t}=\Phi_s\circ\Phi_t$ and $\Psi_0=\operatorname{id}$, $\Psi_{s+t}=\Psi_s\circ\Psi_t$ for all $s,t\in\mathbb R$, and where $(t,\theta)\mapsto\Phi_t(\theta)$ and $(t,x)\mapsto\Psi_t(x)$ are continuous.
+then $\Phi$ and $\Psi$ are called the \textbf{probabilistic decision maps} of the target. The probabilistic target is then reduced to the index-set dynamical system $(\mathcal T,\Phi)$ or the state-space dynamical system $(M,\Psi)$ when $t\in\mathbb Z$, and to the corresponding continuous case when $t\in\mathbb R$; in both cases the criteria of the `Operations and Periodicity' chapter and of the `Periodic Systems' chapter may be applied directly.
+\end{definition}
+
+\begin{theorem}[Probabilistic periodicity decision theorem]\label{thm:prob_periodicity_decision}
+Let the probabilistic decision map of a probabilistic target be $\Phi$, and let $(\mathcal T,\Phi)$ be a discrete dynamical system. Then:
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{Sufficient decision}: if there exists $m\in\mathbb N^+$ such that $\Phi^m=\mathrm{id}$, then the target is a uniformly periodic probabilistic system; every probabilistic orbit is closed, and the length of every orbit divides $m$.
+    \item \textbf{Equivalence of the decision}: the target is a uniformly periodic probabilistic system if and only if $\operatorname{ord}(\Phi)<\infty$.
+    \item \textbf{Pointwise criterion}: the probabilistic orbit of the target through the state $x_0$ is closed if and only if $x_0$ is a periodic point; the length of the orbit is then the period at that point.
+    \item \textbf{Non-omissibility}: the conjunction of conserved quantities and the symmetry group cannot replace $\operatorname{ord}(\Phi)<\infty$; a quasi-periodic probabilistic target is not a periodic probabilistic system.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\cref{thm:prob_periodicity_decision} of this chapter is the domain instantiation of \cref{thm:ps_periodicity_decision} of the `Periodic Systems' chapter:
+it suffices to replace the decision map $f$ and the evolution group by $\Phi$ of this chapter, and the four clauses (A) sufficient decision, (B) equivalence of the decision, (C) pointwise criterion and (D) non-omissibility hold one by one. By the convention of \cref{rem:ps_applications_hook}, they are not expanded again here.
+\end{proof}
+
+\begin{corollary}[Probabilistic period types]\label{cor:prob_period_type}
+After the decision by \cref{thm:prob_periodicity_decision}, a probabilistic target falls into one of the following types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Trivial period type}: the minimal period is $m_0=1$, and the probability distribution is a fixed point;
+    \item \textbf{Strictly periodic type}: $1<m_0<\infty$, and the distribution or the state is strictly periodic;
+    \item \textbf{Uniformly periodic type}: $\operatorname{ord}(\Phi)=m<\infty$, and the length of every orbit divides $m$;
+    \item \textbf{Quasi-periodic type}: $\operatorname{ord}(\Phi)=\infty$; the orbits are not closed but are dense on a compact carrier structure;
+    \item \textbf{Eventually periodic type}: there exists $N$ such that the target is periodic for $t\ge N$;
+    \item \textbf{Discrete periodic type}: the carrier structure is $\mathbb Z$, and the normalised period ratio is $\rho=T_x/\Delta x\in\mathbb Q$.
+    \item \textbf{Asymptotically periodic (damped) type}: the orbit is not closed, but tends asymptotically to a closed orbit or to a fixed point, the residual decaying as $e^{-\kappa t}$ (see \cref{def:ps_period_type}(vii)).
+\end{enumerate}
+Here (i)--(iii) and (vi) belong to periodic probabilistic systems; (iv) does not belong to a periodic probabilistic system, but can be handled with bounded-approximation tools; (v) is a periodic probabilistic system only in its stable stage; (vii), like (iv), is a type in the limiting sense; it is not a periodic probabilistic system and can be handled with bounded-approximation tools only in its stable stage.
+\end{corollary}
+
+\begin{proof}
+Substituting the probabilistic target into \cref{thm:prob_periodicity_decision} and into \cref{def:ps_period_type} of the `Periodic Systems' chapter yields the clauses one by one.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for a finite Markov chain]\label{lem:markov_period}
+Let $\{Z_t\}$ be an irreducible Markov chain on the finite state space $S$, with transition matrix $P$ and period $d$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the state space decomposes uniquely into $d$ cyclic classes $C_1,\dots,C_d$, and
+    \[
+    \mathbb P(Z_{t+1}\in C_{j+1}\mid Z_t\in C_j)=1,\qquad j=1,\dots,d\pmod d;
+    \]
+    \item the spectrum of $P$ contains the $d$-th roots of unity $e^{2\pi i k/d}$, $k=0,1,\dots,d-1$;
+    \item the chain is aperiodic if and only if $d=1$, if and only if every eigenvalue of $P$ other than $\lambda_1=1$ has modulus strictly less than $1$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(i) By the periodic decomposition theorem for Markov chains: for states $i,j$, let $d_i$ be the greatest common divisor of all $n$ satisfying $P^n(i,i)>0$. Irreducibility guarantees that all the $d_i$ are equal; denote this common value by $d$. Decomposing the state space according to the congruence classes of the number of return steps modulo $d$ yields the cyclic classes.
+(ii) Under the cyclic-class decomposition, $P^d$ is irreducible and aperiodic on each cyclic class. Hence every eigenvalue of $P^d$ other than $1$ has modulus less than $1$; consequently an eigenvalue $\lambda$ of $P$ satisfies that $\lambda^d$ is an eigenvalue of $P^d$. The Perron root of $P$ is $1$, and for the remaining eigenvalues $\lambda^d$ has modulus less than $1$, so either $|\lambda|<1$ or $\lambda^d=1$. The latter case gives the $d$-th roots of unity.
+(iii) $d=1$ means aperiodicity, and in this case there are no roots of unity. Conversely, if a non-trivial root of unity exists, then the chain has period $>1$.
+\end{proof}
+
+\begin{definition}[Probabilistic minimal positive period algorithm]\label{def:prob_minimal_period_algorithm}
+This definition has the same content as \cref{def:ps_minimal_period_algorithm} in the section `Periodicity decision: whether a target is periodic' (\cref{sec:ps_periodicity_decision}) of Chapter~\ref{chap:periodic_system}; to avoid repetition, only the reference anchor is retained here, and the complete statement is given there. The only difference here is terminology (probabilistic target / probabilistic sample); the steps of the algorithm and the conclusion are exactly the same.
+\end{definition}
+
+\begin{theorem}[Correctness of the probabilistic minimal positive period algorithm]\label{thm:prob_minimal_period_correctness}
+This theorem has the same content as \cref{thm:ps_minimal_period_correctness} in the section `Periodicity decision: whether a target is periodic' (\cref{sec:ps_periodicity_decision}) of Chapter~\ref{chap:periodic_system}; to avoid repetition, only the reference anchor is retained here, and the complete statement and proof are given there. The only difference here is terminology (probabilistic target / probabilistic sample); the steps of the algorithm and the conclusion are exactly the same.
+\end{theorem}
+
+\begin{example}[Bernoulli chain and periodicity decision]\label{ex:bernoulli_period}
+Let $Z_t\in\{0,1\}$ be an independent and identically distributed Bernoulli sequence. Its probabilistic decision map is the identity map and $\operatorname{ord}(\Phi)=1$, so it is of trivial period type; yet its sample paths are almost surely non-periodic. This shows that \textbf{the periodicity of a probability law and the periodicity of a sample path are not the same concept}. The probabilistic periodicity decision concerns the law, not a single sample path.
+\end{example}
+
+\begin{example}[Finite cyclic Markov chain]\label{ex:cyclic_markov}
+Let $S=\mathbb Z/d\mathbb Z$ and let the transition be $Z_{t+1}=Z_t+1\pmod d$. This chain is deterministic, irreducible and of period $d$. By \cref{lem:markov_period}, the eigenvalues of the transition matrix are $e^{2\pi i k/d}$, $k=0,\dots,d-1$. This is the purest strictly periodic type in probabilistic systems.
+\end{example}
+
+\begin{remark}[Invariants do not guarantee periodicity]\label{rem:prob_invariant_not_period}
+The invariance of a probabilistic system is an auxiliary condition for periodic structure, but it does not constitute a sufficient condition. White noise has time-translation invariance and a mean-square derivative variance, but its autocorrelation function vanishes at every non-zero lag, so no non-trivial periodic component exists. The decision of probabilistic periodic structure must rely on concrete criteria such as \cref{thm:prob_periodicity_decision} or \cref{lem:markov_period}.
+\end{remark}
+
+\section{Construction of the probabilistic period series and epicycle group: connection to step two of the `Periodic Systems' chapter}
+\label{sec:prob_series_construction}
+
+\begin{definition}[Probabilistic amplitude series, frequency series and phase series]\label{def:prob_series}
+Let $\{X_t\}$ be a zero-mean weakly stationary process with autocovariance function $\gamma(h)$ and spectral measure $F$. If $F$ has an atom $A_k^2$ at the frequency $\omega_k$, then one may write
+\[
+X_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+where $\phi_k$ is a random phase or phase component. The series
+\[
+\mathcal A_X(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_X(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_X(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+are called respectively the \textbf{amplitude series}, the \textbf{frequency series} and the \textbf{phase series} of the probabilistic target. The three agree with \cref{def:amplitude_series}, \cref{def:frequency_series} and \cref{def:phase_series} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{definition}[Probabilistic epicycle group]\label{def:prob_epicycle_group}
+This definition has the same content as \cref{def:epicycle_system} in the section `Epicycle group: rotational decomposition of a periodic signal' (\cref{sec:epicycle_system}) of Chapter~\ref{chap:sampling}; to avoid repetition, only the reference anchor is retained here, and the complete statement is given there. The only difference here is terminology (probabilistic target / probabilistic sample); the mathematical objects and the conclusion are exactly the same.
+\end{definition}
+
+\begin{theorem}[Construction of the period series from probabilistic data]\label{thm:prob_series_reconstruction}
+Let $\{X_t\}$ be a zero-mean weakly stationary process with spectral measure $F$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item if $F$ is a purely discrete measure, $F=\sum_k A_k^2\delta_{\omega_k}$, then $X_t$ has a probabilistic period series representation
+    \[
+    X_t=\sum_k A_k e^{i(\omega_k t+\phi_k)},
+    \]
+    where the phases $\phi_k$ are given by the random phases in the spectral decomposition;
+    \item if $F$ is absolutely continuous with respect to Lebesgue measure, $dF(\omega)=S(\omega)d\omega$, then $X_t$ has a continuous spectral representation
+    \[
+    X_t=\int_{-\pi}^{\pi}e^{i\omega t}\,dZ(\omega),
+    \]
+    and in this case there is no strict periodic decomposition into a finite or countable epicycle group, only a spectral density decomposition;
+    \item if $F$ is a singular continuous measure, then $X_t$ has a fractal spectrum, corresponding to a self-similar periodic structure.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) By the Herglotz theorem (\cref{thm:herglotz}), $\gamma(h)=\int e^{i\omega h}dF(\omega)$. If $F$ is purely discrete, then $\gamma(h)=\sum_k A_k^2 e^{i\omega_k h}$. By the Cramér spectral representation (\cref{thm:cramer}), $X_t=\int e^{i\omega t}dZ(\omega)$; at an atom, $dZ(\omega_k)$ is a random amplitude, written as $A_k e^{i\phi_k}$, which gives the result.
+(ii) In the absolutely continuous case the spectrum is a continuous distribution and cannot be written as a sum of countably many atoms, so only the integral representation can be retained.
+(iii) In the singular continuous case the spectral measure has neither atoms nor density; the decay of its Fourier coefficients is controlled by the fractal dimension of the singular measure, corresponding to a self-similar period.
+\end{proof}
+
+\begin{definition}[Spectral measure and spectral distribution function]\label{def:spectral_measure}
+Let $\{X_t\}$ be a zero-mean weakly stationary process with autocovariance function $\gamma(h)$. If there exists a finite measure $F$ on $[-\pi,\pi]$ such that
+\[
+\gamma(h)=\int_{-\pi}^{\pi}e^{i\omega h}\,dF(\omega),\qquad h\in\mathbb Z,
+\]
+then $F$ is called the \textbf{spectral measure} of $\{X_t\}$. If $F$ is absolutely continuous with respect to Lebesgue measure, that is, $dF(\omega)=S(\omega)d\omega$, then $S(\omega)$ is called the \textbf{spectral density}.
+\end{definition}
+
+\begin{theorem}[Herglotz theorem]\label{thm:herglotz}
+Let $\gamma:\mathbb Z\to\mathbb C$ be a non-negative definite function, that is, for every $n\in\mathbb N$ and all $t_1,\dots,t_n\in\mathbb Z$, $z_1,\dots,z_n\in\mathbb C$, one has
+\[
+\sum_{j,k=1}^{n}z_j\overline{z_k}\gamma(t_j-t_k)\ge0.
+\]
+Then there exists a unique finite measure $F$ on $[-\pi,\pi]$ such that
+\[
+\gamma(h)=\int_{-\pi}^{\pi}e^{i\omega h}\,dF(\omega),\qquad \forall h\in\mathbb Z.
+\]
+\end{theorem}
+
+\begin{proof}
+Consider the function
+\[
+f_N(\omega)=\frac{1}{2\pi N}\left|\sum_{t=1}^{N}X_t e^{-i\omega t}\right|^2.
+\]
+By the non-negative definiteness of $\gamma$, $f_N(\omega)\ge0$, and
+\[
+\frac{1}{2\pi}\int_{-\pi}^{\pi}f_N(\omega)\,d\omega
+=\frac{1}{N}\sum_{t,s=1}^{N}\gamma(t-s)
+\to \sum_h\gamma(h)
+\]
+in a suitable summability sense. By the Riesz representation theorem and the Helly selection theorem, the weak limit of the $f_N$ yields the spectral measure $F$. Conversely: if $\gamma(h)=\int e^{i\omega h}dF(\omega)$, then $\gamma$ is verified directly from $F\ge0$ to be non-negative definite. Uniqueness follows from the density of the trigonometric polynomials.
+\end{proof}
+
+\begin{theorem}[Cramér spectral representation theorem]\label{thm:cramer}
+Let $\{X_t\}$ be a zero-mean weakly stationary process. Then there exists an orthogonal-increment process $\{Z(\omega)\}$ on $[-\pi,\pi]$ satisfying
+\[
+\mathbb E[Z(\omega_1)\overline{Z(\omega_2)}]=F(\omega_1\wedge\omega_2),
+\]
+such that
+\[
+X_t=\int_{-\pi}^{\pi}e^{i\omega t}\,dZ(\omega),\qquad t\in\mathbb Z,
+\]
+where the integral is understood in the mean-square sense. Here $F$ is the spectral measure of $\{X_t\}$.
+\end{theorem}
+
+\begin{proof}
+Construct the Hilbert space $H=\overline{\operatorname{span}}\{X_t:t\in\mathbb Z\}$. By stationarity, the map $U:X_t\mapsto X_{t+1}$ is a unitary operator on $H$. By the spectral theorem,
+\[
+U=\int_{-\pi}^{\pi}e^{i\omega}\,dE(\omega),
+\]
+where $E$ is a projection-valued measure. Put $Z(\omega)=E(\omega)X_0$; then
+\[
+X_t=U^tX_0=\int e^{i\omega t}\,dZ(\omega),
+\]
+and
+\[
+\mathbb E[|Z(\omega)|^2]=\|E(\omega)X_0\|^2=F(\omega).
+\]
+This completes the proof.
+\end{proof}
+
+\begin{lemma}[Lebesgue decomposition of the spectral measure and the trichotomy of period types]\label{lem:spectral_lebesgue_decomposition}
+Let $F$ be the spectral measure of a stationary process. Then $F$ has a unique Lebesgue decomposition
+\[
+F=F_{\mathrm{d}}+F_{\mathrm{ac}}+F_{\mathrm{sc}},
+\]
+where $F_{\mathrm d}$ is purely discrete, $F_{\mathrm{ac}}$ is absolutely continuous and $F_{\mathrm{sc}}$ is singular continuous. The corresponding probabilistic period types are:
+\begin{enumerate}[label=(\roman*)]
+    \item $F_{\mathrm d}$ corresponds to the strictly periodic component;
+    \item $F_{\mathrm{ac}}$ corresponds to the broadband random periodic or quasi-periodic component;
+    \item $F_{\mathrm{sc}}$ corresponds to the fractal self-similar periodic component.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+The Lebesgue decomposition is a standard result of measure theory. The correspondence of the period types is read off directly from the Herglotz--Cramér representation: atoms correspond to deterministic complex exponential components; the absolutely continuous part corresponds to a continuous spectral density; the singular continuous part corresponds to a fractal spectrum with neither atoms nor density.
+\end{proof}
+
+\begin{proposition}[Spectral structure of typical stationary processes]\label{prop:typical_prob_spectra}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{White noise}: $\gamma_\varepsilon(h)=\sigma^2\delta_{h,0}$, $S_\varepsilon(\omega)=\sigma^2/(2\pi)$, mean-square derivative variance $P_{\mathbb P}=\sigma^2\pi^2/3$.
+    \item \textbf{AR(1)}: $X_t=\phi X_{t-1}+\varepsilon_t$, $|\phi|<1$, then
+    \[
+    \gamma(h)=\frac{\sigma^2}{1-\phi^2}\phi^{|h|},\qquad
+    S(\omega)=\frac{\sigma^2}{2\pi}\frac{1}{1-2\phi\cos\omega+\phi^2}.
+    \]
+    \item \textbf{OU process}: $dX_t=-\theta X_tdt+\sigma dW_t$, then
+    \[
+    \gamma(\tau)=\frac{\sigma^2}{2\theta}e^{-\theta|\tau|},\qquad
+    S(\omega)=\frac{\sigma^2}{2\pi}\frac{1}{\theta^2+\omega^2}.
+    \]
+    \item \textbf{Periodogram}: $I_n(\omega)=n^{-1}|\sum_{t=1}^nX_t e^{-i\omega t}|^2$, for which
+    \[
+    \mathbb E[I_n(\omega)]\to 2\pi S(\omega),\qquad
+    \operatorname{Var}(I_n(\omega))\to (2\pi S(\omega))^2.
+    \]
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) Independence gives $\gamma_\varepsilon(h)=\sigma^2\delta_{h,0}$; the Wiener--Khinchin theorem gives a flat spectrum; direct integration gives the mean-square derivative variance.
+(ii) Expanding the recursion as $X_t=\sum_{k=0}^\infty\phi^k\varepsilon_{t-k}$ and computing the autocovariance gives $\gamma(h)=\sigma^2\phi^{|h|}/(1-\phi^2)$; the Fourier transform gives the spectral density.
+(iii) The OU solution is $X_t=X_0e^{-\theta t}+\sigma\int_0^t e^{-\theta(t-s)}dW_s$, and the Itô isometry gives $\gamma(\tau)=\sigma^2 e^{-\theta|\tau|}/(2\theta)$; the continuous Fourier transform gives the Lorentzian spectrum.
+(iv) The expectation part follows from Toeplitz's lemma; for the variance part, in the Gaussian case $I_n(\omega)$ is asymptotically distributed as $\frac12(2\pi S(\omega))\chi^2_2$, so the variance tends to $(2\pi S(\omega))^2$.
+\end{proof}
+
+\begin{remark}[Relation between the spectral representation and periodic structure]\label{rem:spectral_period_relation}
+The Herglotz and Cramér theorems reveal that all the periodic information of a stationary process is encoded in the spectral measure $F$. A discrete spectrum gives strict periodicity, an absolutely continuous spectrum gives broadband random periodicity, and a singular continuous spectrum gives fractal self-similar periodicity. The construction of a probabilistic period series is essentially the explicit writing of the atomic part of $F$ as an epicycle group.
+\end{remark}
+
+\section{Dynamic adjustment of the probabilistic epicycle group: connection to step three of the `Periodic Systems' chapter}
+\label{sec:prob_adaptive}
+
+\begin{definition}[Dynamic adjustment of the probabilistic epicycle group]\label{def:prob_adaptive_adjustment}
+Let the current probabilistic epicycle group be $\mathfrak E^{(j)}$, with partial sum
+\[
+X^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+and residual $r^{(j)}=X-X^{(j)}$. The \textbf{dynamic adjustment} consists of two rules:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Quantity adjustment}: if the residual energy $\|r^{(j)}\|^2>\delta$, then a new epicycle is added according to the peak of the residual periodogram:
+    \[
+    \mathfrak E^{(j+1)}=\mathfrak E^{(j)}\cup\{(\hat A,\hat\omega,\hat\phi)\},\qquad
+    \hat\omega=\arg\max_\omega |\widehat{X_r}(\omega)|;
+    \]
+    \item \textbf{Parameter adjustment}: the parameters of the existing epicycles are corrected by regularised least squares or by Bayesian updating:
+    \[
+    (A_k,\phi_k)\leftarrow\arg\min_{A,\phi}\sum_n\left|X(n)-\sum_kA_ke^{i(\omega_kn+\phi_k)}\right|^2.
+    \]
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Monotonicity of quantity adjustment]\label{prop:prob_adaptive_growth}
+This proposition has the same content as \cref{prop:ps_adaptive_growth} in the section `Dynamic adjustment of the epicycle group' (\cref{sec:ps_adaptive}) of Chapter~\ref{chap:periodic_system}; to avoid repetition, only the reference anchor is retained here, and the complete statement and proof are given there. The only difference here is terminology (probabilistic target / probabilistic sample); the steps of the algorithm and the conclusion are exactly the same.
+\end{proposition}
+
+\begin{theorem}[Convergence of the dynamic adjustment]\label{thm:prob_adaptive_convergence}
+Let the probabilistic target be a \textbf{real-valued finite periodic sequence} of length $T_0$ ($T_0\in\mathbb N$) and let $\delta=0$. Then the dynamic adjustment makes the residual zero after at most $\lfloor T_0/2\rfloor+1$ steps, and the resulting probabilistic epicycle group is the exact Fourier data of the target; for a \textbf{complex-valued} sequence the corresponding number of steps is at most $T_0$.
+\end{theorem}
+
+\begin{proof}
+The discrete Fourier series of a \textbf{real-valued} finite periodic sequence of length $T_0$ ($T_0\in\mathbb N$) is complete on $\lfloor T_0/2\rfloor+1$ harmonics (including the constant term); a \textbf{complex-valued} sequence requires $T_0$ components (the positive and negative frequencies being independent). At each step, by \cref{prop:prob_adaptive_growth}, one dominant frequency component of the residual is extracted and the residual energy decreases strictly, so after finitely many steps the residual is zero. The convergence of the parameters follows from the strong convexity of regularised least squares.
+\end{proof}
+
+\begin{definition}[Exponential family and natural parameters]\label{def:exp_family_prob}
+This definition has the same content as \cref{def:exponential_family} in the section `Translation structure of Bayesian updating' (\cref{subsec:bayesian_translation}) of Chapter~\ref{chap:propagation}; to avoid repetition, only the reference anchor is retained here, and the complete statement is given there. The only difference here is terminology (probabilistic target / probabilistic sample); the mathematical objects and the conclusion are exactly the same.
+\end{definition}
+
+\begin{definition}[Conjugate prior]\label{def:conjugate_prior_prob}
+This definition has the same content as \cref{def:conjugate_prior} in the section `Basic framework of Bayesian inference' (\cref{subsec:bayes_framework}) of Chapter~\ref{chap:probability}; to avoid repetition, only the reference anchor is retained here, and the complete statement is given there. The only difference here is terminology (probabilistic target / probabilistic sample); the mathematical objects and the conclusion are exactly the same.
+\end{definition}
+
+\begin{theorem}[Exact finite-order translation of Bayesian updating under a conjugate prior]\label{thm:conjugate_exact_finite_order_prob}
+This theorem has the same content as \cref{thm:conjugate_exact_finite_order} in the section `Translation structure of Bayesian updating' (\cref{subsec:bayesian_translation}) of Chapter~\ref{chap:propagation}; to avoid repetition, only the reference anchor is retained here, and the complete statement and proof are given there. The only difference here is terminology (probabilistic target / probabilistic sample); the mathematical objects and the conclusion are exactly the same.
+\end{theorem}
+
+\begin{corollary}[Monotone accumulation of natural parameters]\label{cor:natural_param_monotone_prob}
+This corollary has the same content as \cref{cor:natural_parameter_monotone} in the section `Translation structure of Bayesian updating' (\cref{subsec:bayesian_translation}) of Chapter~\ref{chap:propagation}; to avoid repetition, only the reference anchor is retained here, and the complete statement is given there. The only difference here is terminology (probabilistic target / probabilistic sample); the mathematical objects and the conclusion are exactly the same.
+\end{corollary}
+
+\begin{proof}
+$\nu_n=\nu_0+n$ is strictly monotonically increasing; $\tau_n-\tau_{n-1}=T(x_n)$.
+\end{proof}
+
+\begin{example}[Exact evolution of Beta--binomial conjugacy]\label{ex:beta_binomial_prob}
+Let the likelihood be $X\mid\theta\sim\mathrm{Bernoulli}(\theta)$, with conjugate prior $\mathrm{Beta}(\alpha,\beta)$. After $n$ observations,
+\[
+\alpha_n=\alpha_0+\sum_{i=1}^nx_i,\qquad \beta_n=\beta_0+n-\sum_{i=1}^nx_i.
+\]
+In natural-parameter coordinates, each observation corresponds to one translation.
+\end{example}
+
+\begin{example}[Exact evolution of Gaussian--Gaussian conjugacy]\label{ex:gaussian_gaussian_prob}
+Let the likelihood be $X\mid\mu\sim\mathcal N(\mu,\sigma^2)$ with $\sigma^2$ known and prior $\mu\sim\mathcal N(\mu_0,\tau_0^2)$. Taking the precision--mean product coordinates $(1/\tau^2,\mu/\tau^2)$ as natural-parameter coordinates, after $n$ observations
+\[
+\frac{1}{\tau_n^2}=\frac{1}{\tau_0^2}+\frac{n}{\sigma^2},\qquad
+\frac{\mu_n}{\tau_n^2}=\frac{\mu_0}{\tau_0^2}+\frac{\sum_ix_i}{\sigma^2}.
+\]
+\end{example}
+
+\begin{remark}[Boundaries of the dynamic adjustment]\label{rem:prob_adaptive_boundary}
+\cref{thm:prob_adaptive_convergence} relies on finite-harmonic completeness and on the extraction of the residual dominant frequency. If the target is a continuous-spectrum or long-memory process, then no finite epicycle group represents it exactly, and one can only resort to bounded approximation or spectral density estimation. Bayesian updating under a non-conjugate prior generally cannot be represented as a finite-order translation in a finite-dimensional natural-parameter space, and this is an open problem.
+\end{remark}
+
+\section{Probabilistic convolution: connection to step four of the `Periodic Systems' chapter}
+\label{sec:prob_convolution}
+
+\begin{definition}[Probabilistic amplitude convolution, phase convolution and frequency convolution]\label{def:prob_convolution_types}
+Let two probabilistic epicycle groups be
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+Define:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Amplitude convolution}: $\mathbb A_{mn}=A_nB_m$;
+    \item \textbf{Phase convolution}: $\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$;
+    \item \textbf{Frequency convolution}: $\mathbb F_{mn}=\omega_n\nu_m$;
+    \item \textbf{Trend convolution}: $\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$.
+\end{enumerate}
+These agree with \cref{def:amplitude_convolution}, \cref{def:phase_convolution}, \cref{def:frequency_convolution} and \cref{def:tendency_convolution} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{theorem}[Action of the three convolutions on the probabilistic epicycle group]\label{thm:prob_convolution_action}
+Let the epicycle groups of two probabilistic targets be $\mathfrak E$ and $\mathfrak E'$ respectively. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item amplitude convolution acts only on the radii;
+    \item phase convolution acts only on the phases;
+    \item frequency convolution acts only on the rotation speeds;
+    \item trend convolution preserves both amplitude and phase.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+Read off directly from \cref{def:prob_convolution_types}: amplitude convolution contains neither phase nor frequency; phase convolution contains neither amplitude nor frequency; frequency convolution contains neither amplitude nor phase; trend convolution is the termwise product of amplitude convolution and phase convolution.
+\end{proof}
+
+\begin{proposition}[Characteristic functions and phase convolution]\label{prop:char_phase_convolution}
+Let $X,Y$ be independent random variables with characteristic functions $\phi_X(t)=\mathbb E[e^{itX}]$ and $\phi_Y(t)=\mathbb E[e^{itY}]$ respectively. Then
+\[
+\phi_{X+Y}(t)=\phi_X(t)\phi_Y(t).
+\]
+In the language of probabilistic epicycle groups, the phase convolution of an independent sum is the product of the phase factors of the two characteristic functions.
+\end{proposition}
+
+\begin{proof}
+By independence,
+\[
+\phi_{X+Y}(t)=\mathbb E[e^{it(X+Y)}]=\mathbb E[e^{itX}]\mathbb E[e^{itY}]=\phi_X(t)\phi_Y(t).
+\]
+If one writes $\phi_X=|\phi_X|e^{i\arg\phi_X}$, then the phase part satisfies $\arg\phi_{X+Y}=\arg\phi_X+\arg\phi_Y$, that is, the phases add.
+\end{proof}
+
+\begin{corollary}[Independent sums and convolution]\label{cor:indep_sum_conv}
+If $X_1,\dots,X_n$ are independent and identically distributed with characteristic function $\phi$, then $S_n=\sum_{i=1}^nX_i$ has characteristic function $\phi_{S_n}(t)=\phi(t)^n$. In the probabilistic epicycle group, an independent sum corresponds to the $n$-th power of the phase convolution.
+\end{corollary}
+
+\begin{proof}
+This follows by recursion from \cref{prop:char_phase_convolution}.
+\end{proof}
+
+\begin{example}[Phase convolution of a Gaussian sum]\label{ex:gaussian_sum}
+Let $X_i\sim\mathcal N(\mu_i,\sigma_i^2)$ be independent. Then
+\[
+\phi_{X_i}(t)=e^{i\mu_it-\sigma_i^2t^2/2}.
+\]
+Hence
+\[
+\phi_{\sum_iX_i}(t)=\exp\Bigl(i(\sum_i\mu_i)t-\frac12(\sum_i\sigma_i^2)t^2\Bigr),
+\]
+that is, an independent Gaussian sum is again Gaussian, with the means and the variances adding separately. The phase parts add linearly, and the amplitude parts add in squares.
+\end{example}
+
+\begin{remark}[Relation between probabilistic convolution and periodic convolution]\label{rem:prob_convolution_relation}
+Probabilistic convolution is not a new convolution operation, but an instance on the probabilistic epicycle group of the periodic convolution of the `Series and Convolution' chapter. The product of characteristic functions, the covariance and the cross-correlation are respectively the concrete manifestations in probability theory of phase convolution, amplitude convolution and trend convolution.
+\end{remark}
+
+\section{Integration with discrete sampling, harmonic analysis and time series analysis: connection to step five of the `Periodic Systems' chapter}
+\label{sec:prob_integration}
+
+\begin{definition}[Probabilistic periodicity diagnostic procedure]\label{def:probabilistic_periodic_diagnosis}
+For observed data $\{X_1,\dots,X_N\}$ of a stochastic process, the periodic convolution framework is used to diagnose the probabilistic periodic structure:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Translation periodicity diagnosis}: compute the sample autocorrelation function and the power spectral density, and identify the dominant frequency
+    \[
+    \omega_0=\arg\max_\omega \hat S(\omega).
+    \]
+    \item \textbf{Scaling periodicity diagnosis}: compute the Hurst exponent $\hat H$. If $\hat H\neq1/2$, then the process has a scaling structure.
+    \item \textbf{Rotation periodicity diagnosis}: compute the cyclic autocorrelation function and the cyclic spectral density, and identify the dominant cyclic frequency $\alpha_0$.
+    \item \textbf{Bayesian periodicity diagnosis}: fit a Bayesian model, and compute the prior entropy, the Fisher information matrix and the posterior covariance matrix.
+    \item \textbf{Invariance tests}: test stationarity, self-similarity and cyclostationarity separately.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[Probabilistic periodicity diagnostic procedure and its interface with three chapters]\label{thm:prob_diagnosis_integration}
+The five steps of \cref{def:probabilistic_periodic_diagnosis} connect respectively to:
+\begin{enumerate}[label=(\roman*)]
+    \item \cref{def:uniform_sampling_parallel}, \cref{thm:nyquist_shannon_parallel}, \cref{thm:intercalation_leakage_suppression} of the `Discrete Sampling and Intercalation of Periodic Signals' chapter;
+    \item \cref{def:fourier_series}, \cref{thm:parseval_fourier}, \cref{prop:twelve_to_six} of the `Harmonic Analysis' chapter;
+    \item \cref{def:ts_period_detection}, \cref{prop:ts_period_significance}, \cref{def:ts_window_validation} of the `Time Series Analysis' chapter.
+\end{enumerate}
+Hence the probabilistic periodicity diagnosis is not an independent method, but an application of the unified tool chain of periodic mathematics to stochastic systems.
+\end{theorem}
+
+\begin{proof}
+The correspondences are one by one:
+(i) the translation periodicity diagnosis requires sampling and spectral estimation, and the sampling definitions and leakage suppression are found in the `Discrete Sampling and Intercalation of Periodic Signals' chapter;
+(ii) the frequency decomposition and the phase kernel are found in the `Harmonic Analysis' chapter;
+(iii) the periodogram peak, the Fisher test and the window-function validation are found in the `Time Series Analysis' chapter.
+Hence the diagnostic procedure is synthesised from the tool chains of the three chapters.
+\end{proof}
+
+\begin{remark}[Order of operations after integration]\label{rem:prob_integration_order}
+The recommended order for an actual diagnosis is: first decide whether the probabilistic target is periodic (\cref{thm:prob_periodicity_decision}); then construct the spectral measure and the epicycle group (\cref{thm:prob_series_reconstruction}); then optimise the parameters by dynamic adjustment and Bayesian updating (\cref{thm:prob_adaptive_convergence}, \cref{thm:conjugate_exact_finite_order_prob}); then carry out probabilistic convolution and characteristic-function analysis (\cref{prop:char_phase_convolution}); and finally output the diagnosis according to \cref{def:probabilistic_periodic_diagnosis}.
+\end{remark}
+
+\section{Phase space, evolution and conservation of probabilistic periodic systems}
+\label{sec:prob_phase_space}
+
+\subsection{Mean-square derivative variance: the invariant of translation invariance}
+
+\begin{definition}[Mean-square derivative variance]\label{def:probability_momentum}
+Let $\{X_t\}$ be a mean-square differentiable weakly stationary stochastic process with autocovariance function $\gamma(h)$. Its \textbf{mean-square derivative variance} $P_{\mathbb P}$ is defined by
+\[
+P_{\mathbb P}=\mathbb E\left[\left(\frac{dX_t}{dt}\right)^2\right].
+\]
+\end{definition}
+
+\begin{proposition}[Relation between the mean-square derivative variance and the autocorrelation function]\label{prop:momentum_autocorrelation}
+Let $\{X_t\}$ be a mean-square differentiable stationary stochastic process. Then
+\[
+P_{\mathbb P}=-\gamma''(0)=-\left.\frac{d^2}{dh^2}\gamma(h)\right|_{h=0}.
+\]
+\end{proposition}
+
+\begin{proof}
+By the definition of the mean-square derivative:
+\[
+\mathbb E\left[\left(\frac{dX_t}{dt}\right)^2\right]
+=\lim_{h\to0}\mathbb E\left[\left(\frac{X_{t+h}-X_t}{h}\right)^2\right].
+\]
+Expanding gives
+\[
+\frac1{h^2}\mathbb E[X_{t+h}^2-2X_{t+h}X_t+X_t^2]
+=\frac{2}{h^2}(\gamma(0)-\gamma(h)).
+\]
+Stationarity makes $\gamma$ an even function, so $\gamma'(0)=0$, whence
+\[
+\gamma(h)=\gamma(0)+\frac12\gamma''(0)h^2+o(h^2).
+\]
+Substituting and passing to the limit gives $P_{\mathbb P}=-\gamma''(0)$.
+\end{proof}
+
+\begin{proposition}[Frequency-domain representation of the mean-square derivative variance]\label{prop:momentum_frequency}
+In the frequency domain the mean-square derivative variance $P_{\mathbb P}$ is given by the second moment of the power spectral density $S(\omega)$:
+\[
+P_{\mathbb P}=\int_{-\pi}^{\pi}\omega^2S(\omega)\,d\omega.
+\]
+\end{proposition}
+
+\begin{proof}
+By the Wiener--Khinchin theorem,
+\[
+\gamma(h)=\int_{-\pi}^{\pi}e^{i\omega h}S(\omega)\,d\omega.
+\]
+Differentiating twice with respect to $h$:
+\[
+\gamma''(h)=-\int_{-\pi}^{\pi}\omega^2e^{i\omega h}S(\omega)\,d\omega.
+\]
+Putting $h=0$ gives the result.
+\end{proof}
+
+\begin{proposition}[Invariance and stationarity of the mean-square derivative variance]\label{prop:momentum_conservation_stationarity}
+Let $\{X_t\}$ be a mean-square differentiable stochastic process. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item if $\{X_t\}$ is weakly stationary, then $P_{\mathbb P}$ is independent of the time $t$;
+    \item conversely, if for some twice differentiable autocovariance $\gamma(t,s)$ the quantity $-\partial^2\gamma/\partial h^2|_{h=0}$ is independent of $t$, then the process retains at least second-order stationarity.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) Weak stationarity requires $\gamma(t,t+h)$ to depend on $h$ alone, so $\gamma''(0)$ is independent of $t$.
+(ii) If this second derivative is independent of $t$, then $\operatorname{Var}(dX_t/dt)$ is independent of $t$; together with a finite mean, this gives second-order stationarity.
+\end{proof}
+
+\subsection{Spectral representation of stationary processes}
+
+\cref{def:spectral_measure,thm:herglotz,thm:cramer} have already given the spectral measure and the spectral representation. Their probabilistic periodicity interpretation is supplemented here.
+
+\begin{remark}[Relation between the spectral representation and periodic structure]\label{rem:spectral_period_relation_2}
+The Herglotz and Cramér theorems reveal that all the periodic information of a stationary process is encoded in the spectral measure $F$. A discrete spectrum corresponds to strict periodicity, an absolutely continuous spectrum to random or quasi-periodicity, and a singular continuous spectrum to self-similar periodicity. The Lebesgue decomposition of the spectral measure corresponds to the trichotomy of periodic structure.
+\end{remark}
+
+\subsection{Periodic structure of typical stationary processes}
+
+\cref{prop:typical_prob_spectra} has already given the spectral structure of white noise, AR(1), the OU process and the periodogram. Their probabilistic periodicity decision is supplemented here.
+
+\begin{example}[White noise has no period]\label{ex:white_noise_no_period}
+The autocovariance of white noise vanishes at every non-zero lag, so no non-trivial periodic component exists. Its probabilistic decision map is the identity and its period type is the trivial period type, yet its sample paths are not periodic.
+\end{example}
+
+\begin{example}[Spectral peak of AR(1)]\label{ex:ar1_peak}
+In AR(1), when $\phi>0$ the spectrum is maximal at $\omega=0$, indicating positive persistence; when $\phi<0$ the spectrum is maximal at $\omega=\pi$, indicating alternating reversal. The position of the spectral peak gives the dominant period.
+\end{example}
+
+\subsection{Multitaper spectral estimation}
+
+\begin{definition}[Slepian sequences]\label{def:slepian}
+Let the time--bandwidth product be $W\in(0,1/2)$ and the sample length be $N$. The \textbf{Slepian sequences} $\{v_k^{(N,W)}(t)\}_{k=0}^{N-1}$ are defined by
+\[
+\sum_{s=1}^{N}\frac{\sin2\pi W(t-s)}{\pi(t-s)}v_k(s)=\lambda_k^{(N,W)}v_k(t),\qquad t=1,\dots,N.
+\]
+The corresponding $\lambda_k^{(N,W)}$ are called the \textbf{Slepian eigenvalues} and satisfy $1>\lambda_0>\lambda_1>\dots>\lambda_{N-1}>0$.
+\end{definition}
+
+\begin{theorem}[Orthogonality and energy concentration of Slepian sequences]\label{thm:slepian}
+The Slepian sequences $\{v_k^{(N,W)}\}_{k=0}^{N-1}$ form an orthonormal basis of $\mathbb R^N$:
+\[
+\sum_{t=1}^{N}v_j(t)v_k(t)=\delta_{jk}.
+\]
+Moreover the energy concentration satisfies
+\[
+\beta_k^2(W)=\frac{\int_{-W}^{W}|\sum_{t=1}^{N}v_k(t)e^{-i2\pi ft}|^2df}{\int_{-1/2}^{1/2}|\sum_{t=1}^{N}v_k(t)e^{-i2\pi ft}|^2df}=\lambda_k^{(N,W)}.
+\]
+When $k<2NW-1$, $\lambda_k\approx1$; when $k>2NW+1$, $\lambda_k\approx0$. The quantity $2NW$ is called the Shannon number.
+\end{theorem}
+
+\begin{proof}
+The matrix $A_{ts}=\sin2\pi W(t-s)/(\pi(t-s))$ is real symmetric, so its eigenvectors are orthogonal. Normalising them gives an orthonormal basis. The energy concentration is computed by integrating in the frequency domain:
+\[
+\int_{-W}^{W}|V_k(f)|^2df
+=\sum_{t,s}v_k(t)v_k(s)\frac{\sin2\pi W(t-s)}{\pi(t-s)}
+=\lambda_k\sum_t|v_k(t)|^2=\lambda_k.
+\]
+The total energy is $1$, so $\beta_k^2=\lambda_k$. The asymptotic behaviour was proved by Slepian in 1978.
+\end{proof}
+
+\begin{definition}[Multitaper spectral estimation]\label{def:multitaper}
+Let $\{X_1,\dots,X_N\}$ be a sample of a zero-mean stationary process and let $\{v_k^{(N,W)}\}_{k=0}^{K-1}$ be the first $K$ Slepian sequences. The \textbf{multitaper spectral estimate} is defined by
+\[
+\hat S_{\mathrm{MT}}(f)=\frac1K\sum_{k=0}^{K-1}\hat S_k(f),\qquad
+\hat S_k(f)=\Delta t\left|\sum_{t=1}^{N}v_k(t)X_te^{-i2\pi ft\Delta t}\right|^2.
+\]
+\end{definition}
+
+\begin{proposition}[Bias--variance analysis of the multitaper spectral estimate]\label{prop:multitaper_consistency}
+Under the conditions of a Gaussian stationary process, $N\to\infty$, $W\to0$ and $NW\to\infty$:
+\begin{enumerate}[label=(\roman*)]
+    \item asymptotic unbiasedness: $\mathbb E[\hat S_{\mathrm{MT}}(f)]\to S(f)$;
+    \item variance reduction: $\operatorname{Var}[\hat S_{\mathrm{MT}}(f)]\approx S^2(f)/K$;
+    \item degrees of freedom: $\hat S_{\mathrm{MT}}(f)$ is asymptotically distributed as $S(f)\chi^2_{2K}/(2K)$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) Each $\hat S_k(f)$ is a windowed periodogram, whose expectation tends to $S(f)$.
+(ii) By the Slepian orthogonality, the $\hat S_k(f)$ are asymptotically uncorrelated, so the variance is $S^2(f)/K$.
+(iii) In the Gaussian case each $\hat S_k(f)/S(f)$ is asymptotically distributed as $\frac12\chi^2_2$, and averaging $K$ independent copies gives $\chi^2_{2K}/(2K)$.
+\end{proof}
+
+\begin{example}[Multitaper spectrum of the sunspot series]\label{ex:sunspot_multitaper}
+For the monthly mean sunspot numbers of 1749--2024, taking $NW=4$ and $K=8$, the multitaper spectrum gives a clear peak at $11$ years, and the variance is reduced to $1/8$ of that of a single window. The adaptive Thomson estimate further suppresses low-frequency leakage.
+\end{example}
+
+\subsection{Self-similarity exponent and tail index}
+
+\begin{definition}[Self-similarity exponent and tail index]\label{def:probability_scaling_charge}
+The \textbf{scaling invariants} of a probabilistic system include:
+\begin{enumerate}[label=(\roman*)]
+    \item the Hurst exponent $H$ of a self-similar process: $X_{\lambda t}\stackrel{d}{=}\lambda^H X_t$;
+    \item the tail index $\alpha$ of a heavy-tailed distribution: $\mathbb P(|X|>x)\sim x^{-\alpha}$;
+    \item the log marginal likelihood $\log p(\mathbf D)$ of a Bayesian model.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Duality between the Hurst exponent and the tail index]\label{prop:hurst_tail_duality}
+Let the self-similar process $X_t$ satisfy $X_{\lambda t}\stackrel{d}{=}\lambda^H X_t$, and let the tail index of $X_1$ be $\alpha>0$. Then $\alpha=1/H$.
+\end{proposition}
+
+\begin{proof}
+By self-similarity,
+\[
+\mathbb P(|X_\lambda|>x)=\mathbb P(\lambda^H|X_1|>x)=\mathbb P(|X_1|>\lambda^{-H}x).
+\]
+By the definition of the tail index, $\mathbb P(|X_1|>y)\sim y^{-\alpha}$; substituting $y=\lambda^{-H}x$ gives
+\[
+\mathbb P(|X_\lambda|>x)\sim \lambda^{H\alpha}x^{-\alpha}.
+\]
+On the other hand $X_\lambda$ itself has tail index $\alpha$, and comparison gives $\lambda^{H\alpha}=1$, that is, $H\alpha=1$.
+\end{proof}
+
+\subsection{Phase coherence}
+
+\begin{definition}[Phase coherence]\label{def:probability_angular_momentum}
+The \textbf{phase coherence} of a probabilistic system includes:
+\begin{enumerate}[label=(\roman*)]
+    \item the conservation of the cyclic frequency of a cyclostationary process: $\alpha=k/T$;
+    \item the phase coherence time of a random oscillation: $\tau_{\mathrm{coh}}=2/\sigma^2$;
+    \item the trace of the Bayesian posterior covariance matrix $\operatorname{tr}(\Sigma_{\mathrm{post}})$.
+\end{enumerate}
+\end{definition}
+
+\begin{lemma}[Coherence time of phase diffusion]\label{ch15_coherence_time}
+Let the phase $\Phi_t$ be a Wiener process with diffusion coefficient $\sigma^2$. Then
+\[
+\mathbb E[e^{i(\Phi_{t+\tau}-\Phi_t)}]=e^{-\sigma^2\tau/2},
+\]
+and the coherence time is
+\[
+\tau_{\mathrm{coh}}=\frac{2}{\sigma^2}.
+\]
+\end{lemma}
+
+\begin{proof}
+$\Phi_{t+\tau}-\Phi_t=\sigma(W_{t+\tau}-W_t)$ is a normal random variable with mean zero and variance $\sigma^2\tau$. The normal characteristic function gives
+\[
+\mathbb E[e^{i(\Phi_{t+\tau}-\Phi_t)}]=e^{-\sigma^2\tau/2}.
+\]
+Setting $e^{-\sigma^2\tau/2}=e^{-1}$ yields $\tau=2/\sigma^2$.
+\end{proof}
+
+\subsection{Cyclostationary processes}
+
+\begin{definition}[Cyclostationary process]\label{def:cyclostationary_strict}
+A stochastic process $\{X_t\}$ is called a \textbf{cyclostationary process} with period $T$ if
+\[
+\mu(t+T)=\mu(t),\qquad \gamma(t+T,s+T)=\gamma(t,s),\qquad \forall t,s\in\mathbb R.
+\]
+If this holds for every $T$, the process degenerates to a stationary process.
+\end{definition}
+
+\begin{definition}[Cyclic autocovariance function]\label{def:cyclic_autocovariance}
+Let $\{X_t\}$ be a cyclostationary process with period $T$. Its \textbf{cyclic autocovariance function} is defined by
+\[
+R_X^\alpha(\tau)=\lim_{N\to\infty}\frac1{2N+1}\sum_{t=-N}^{N}\mathbb E[(X_{t+\tau}-\mu)\overline{(X_t-\mu)}]e^{-i2\pi\alpha t},
+\]
+where $\alpha=k/T$ is called the \textbf{cyclic frequency}.
+\end{definition}
+
+\begin{theorem}[Spectral decomposition of a cyclostationary process]\label{thm:cyclostationary_spectral_decomposition}
+Let $\{X_t\}$ be a cyclostationary process with period $T$ and finite second moment. Then
+\[
+X_t=\sum_{k\in\mathbb Z}X_t^{(k)}e^{i2\pi kt/T},
+\]
+where each $X_t^{(k)}$ is a stationary process, and the components for different $k$ are orthogonal in the mean sense.
+\end{theorem}
+
+\begin{proof}
+By cyclostationarity, $\gamma(t,s)$ is periodic in $t$ with period $T$ and can be expanded as
+\[
+\gamma(t,s)=\sum_k\gamma_k(s-t)e^{i2\pi kt/T}.
+\]
+Projecting $X_t$ onto the frequency $\omega_k=2\pi k/T$ gives
+\[
+X_t^{(k)}=\frac1T\int_0^TX_{t-u}e^{-i2\pi k(t-u)/T}du.
+\]
+By cyclostationarity,
+\[
+\mathbb E[X_{t+\tau}^{(k)}\overline{X_t^{(l)}}]=\gamma_k(\tau)\delta_{kl}.
+\]
+This completes the proof.
+\end{proof}
+
+\subsection{Spectral theory of the Kalman filter}
+
+\begin{definition}[State-space model]\label{def:state_space_model}
+The linear Gaussian \textbf{state-space model} is given by
+\[
+\mathbf x_{t+1}=\mathbf F\mathbf x_t+\mathbf w_t,\qquad
+\mathbf y_t=\mathbf H\mathbf x_t+\mathbf v_t,
+\]
+where $\mathbf w_t\sim\mathcal N(\mathbf 0,\mathbf Q)$ and $\mathbf v_t\sim\mathcal N(\mathbf 0,\mathbf R)$ are independent.
+\end{definition}
+
+\begin{theorem}[Spectral density of the state-space model]\label{thm:kalman_spectrum}
+Let the state-space model be stable. Then the observation process $\{\mathbf y_t\}$ is stationary, with spectral density
+\[
+\mathbf S_y(\omega)=\mathbf H(e^{i\omega}\mathbf I-\mathbf F)^{-1}\mathbf Q(e^{-i\omega}\mathbf I-\mathbf F^{-\mathsf T})^{-1}\mathbf H^{\mathsf T}+\mathbf R.
+\]
+If $\mathbf Q=\mathbf 0$, then $\mathbf S_y=\mathbf R$.
+\end{theorem}
+
+\begin{proof}
+Recursion on the state equation gives
+\[
+\mathbf y_t=\mathbf H\sum_{k=0}^{\infty}\mathbf F^k\mathbf w_{t-1-k}+\mathbf v_t.
+\]
+The autocovariance is
+\[
+\boldsymbol\gamma_y(\tau)=\mathbf H\mathbf F^{|\tau|}\mathbf P\mathbf H^{\mathsf T}+\mathbf R\delta_{\tau,0},
+\]
+where $\mathbf P$ satisfies the Lyapunov equation $\mathbf P=\mathbf F\mathbf P\mathbf F^{\mathsf T}+\mathbf Q$. The Fourier transform gives the spectral density.
+\end{proof}
+
+\begin{proposition}[Periodic signal extraction by the Kalman filter]\label{prop:kalman_periodic_extraction}
+Take
+\[
+\mathbf F=\begin{pmatrix}\cos\omega_0&-\sin\omega_0\\ \sin\omega_0&\cos\omega_0\end{pmatrix},\qquad
+\mathbf H=\begin{pmatrix}1&0\end{pmatrix}.
+\]
+Then the model generates a narrowband signal centred at the frequency $\omega_0$. The steady-state Kalman filter realises adaptive variable-bandwidth bandpass filtering, with equivalent bandwidth
+\[
+\Delta\omega\approx \frac{q}{\sqrt{p_0r}}.
+\]
+\end{proposition}
+
+\begin{proof}
+Linearising the model, the steady-state prediction covariance $p_0$ satisfies the Riccati equation. The $3$ dB bandwidth of the frequency response is determined by $q,r,p_0$ and is approximately $q/\sqrt{p_0r}$.
+\end{proof}
+
+\subsection{Structural correspondence in Bayesian inference}
+
+\begin{remark}[Structural correspondence of the three classes of distributions in a Bayesian model (\textbf{empirical observation / research programme})]\label{thm:bayesian_grammar_correspondence}
+The three assertions below are a heuristic analogy in the manner of an \textbf{empirical observation / research programme}, not a proved theorem --- `carrying scaling/translation/rotation information' has no independent mathematical definition in this section, and the `proof' of the three assertions is itself only a metaphor:
+\begin{enumerate}[label=(\roman*)]
+    \item the prior distribution $\pi(\theta)$ carries scaling information;
+    \item the likelihood function $p(\mathbf D\mid\theta)$ carries translation information;
+    \item the posterior distribution $p(\theta\mid\mathbf D)$ carries rotation information.
+\end{enumerate}
+To turn this into a testable proposition one must first give a mathematical definition of `carrying information of a given class of transformations' (for example: $\pi$ is equivariant under $\theta\mapsto a\theta+b$ $\Rightarrow$ scaling information; the score function $\nabla_\theta\log p(\mathbf D\mid\theta)$ is covariant under $\theta\mapsto\theta+c$ $\Rightarrow$ translation information; the eigen-decomposition of the posterior covariance matrix $\Sigma_{\mathrm{post}}$ gives an orthogonal frame in parameter space $\Rightarrow$ rotation information). That work lies beyond the scope of this chapter, and the assertions are retained here only as an analogy.
+\end{remark}
+
+\begin{proposition}[Periodic convolution representation of the marginal likelihood]\label{prop:marginal_likelihood_periodic_transform}
+The marginal likelihood can be represented as
+\[
+p(\mathbf D)=\mathcal K^{(1)}\{p_{\mathbf D},\pi\}(\mathbf D)\big|_{\text{global integral}},
+\]
+where $p_{\mathbf D}(\theta)=p(\mathbf D\mid\theta)$, and the periodic convolution parameters are $\alpha=1,d=1$.
+\end{proposition}
+
+\begin{proof}
+By the definition of the marginal likelihood,
+\[
+p(\mathbf D)=\int p(\mathbf D\mid\theta)\pi(\theta)d\theta.
+\]
+The integrand is the pointwise product of the likelihood and the prior, that is, the kernelised product of the periodic convolution with $\alpha=1,d=1,W\equiv1,\tau=0$.
+\end{proof}
+
+\subsection{Convergence of MCMC and periodicity diagnosis}
+
+\begin{definition}[Spectral gap of a Markov chain]\label{def:spectral_gap}
+Let a finite-state Markov chain be irreducible and aperiodic, and \textbf{reversible} with respect to its stationary distribution $\boldsymbol\pi$ (that is, satisfying detailed balance $\pi(x)P(x,y)=\pi(y)P(y,x)$; reversibility makes $\mathbf P$ self-adjoint in $L^2(\pi)$ with all eigenvalues real, so that both `the second largest eigenvalue in modulus' and the spectral decomposition are available; for a non-reversible chain the spectral gap must instead be defined by singular values). Let the transition matrix be $\mathbf P$ and the stationary distribution $\boldsymbol\pi$. The \textbf{spectral gap} is
+\[
+\gamma=1-\lambda_2,
+\]
+where $\lambda_2$ is the second largest eigenvalue in modulus. The convergence rate satisfies
+\[
+\|P^t(x,\cdot)-\pi\|_{\mathrm{TV}}\le \frac12\|\pi_x/\pi-1\|_2(1-\gamma)^t,
+\]
+where $\pi_x(\cdot)=P(x,\cdot)$ is the one-step distribution from the initial state $x$ and $\|\pi_x/\pi-1\|_2^2=\sum_y\bigl(\pi_x(y)/\pi(y)-1\bigr)^2\pi(y)$ measures how far the initial state departs from the stationary distribution (the $\chi^2$ distance). This bound is given in Levin--Peres--Wilmer, \textit{Markov Chains and Mixing Times}, 2nd ed., AMS, 2017, Theorem 12.3 (the contraction estimate for the $\chi^2$ distance) and Corollary 12.5.
+\end{definition}
+
+\begin{theorem}[MCMC convergence and periodicity diagnosis]\label{thm:mcmc_convergence}
+Let $\{X_t\}$ be a finite-state, irreducible Markov chain of period $d$ that is reversible with respect to its stationary distribution $\boldsymbol\pi$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the convergence rate is determined by the spectral gap: $\|P^t(x,\cdot)-\pi\|_{\mathrm{TV}}\le\frac12\|\pi_x/\pi-1\|_2(1-\gamma)^t$ (see \cref{def:spectral_gap});
+    \item the chain has period $d$ if and only if $\mathbf P$ has the eigenvalues $e^{2\pi ik/d}$, $k=0,\dots,d-1$;
+    \item if every eigenvalue other than $\lambda_1=1$ has modulus strictly less than $1$, then the chain is aperiodic ($d=1$).
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) By reversibility, $\mathbf P$ is self-adjoint in $L^2(\pi)$ and possesses an orthonormal basis $\{v_j\}$ of real eigenvectors with eigenvalues $1=\lambda_1>\lambda_2\ge\cdots\ge\lambda_n\ge-1$; Perron--Frobenius gives that $\lambda_1=1$ is a simple root and $v_1\equiv1$. Writing $\pi_x/\pi-1=\sum_{j\ge2}a_jv_j$ gives $P^t(x,y)/\pi(y)-1=\sum_{j\ge2}a_j\lambda_j^tv_j(y)$, so that the $\chi^2$ distance satisfies $\sum_y\bigl(P^t(x,y)/\pi(y)-1\bigr)^2\pi(y)=\sum_{j\ge2}a_j^2\lambda_j^{2t}\le(1-\gamma)^{2t}\|\pi_x/\pi-1\|_2^2$ (here we use $|\lambda_j|\le1-\gamma$ for every $j\ge2$). By Cauchy--Schwarz, $\|P^t(x,\cdot)-\pi\|_{\mathrm{TV}}=\frac12\sum_y\pi(y)\bigl|P^t(x,y)/\pi(y)-1\bigr|\le\frac12\|\pi_x/\pi-1\|_2(1-\gamma)^t$.
+(ii) The periodic decomposition of an irreducible chain splits the state space into $d$ cyclic classes, and $d$ is the least positive integer for which $P^d$ is aperiodic on each class; the eigenvalues of $P$ are precisely the $d$-th roots of the eigenvalues of $P^d$, so the only roots of unity are $e^{2\pi ik/d}$ ($k=0,\dots,d-1$). Conversely, if such an eigenvalue exists, the corresponding eigenvector gives a cyclic structure of modulus $d$ (\cref{lem:markov_period}).
+(iii) Aperiodicity means $d=1$, in which case there is no eigenvalue of modulus $1$ other than $\lambda_1=1$, that is, all $|\lambda_i|<1$; conversely, if all $|\lambda_i|<1$ ($i\ne1$), then by (ii) there is no root of unity, so $d=1$.
+\end{proof}
+
+\begin{proposition}[Periodicity diagnostic methods for MCMC]\label{prop:mcmc_periodicity}
+For MCMC samples one may use:
+\begin{enumerate}[label=(\roman*)]
+    \item peaks of the autocorrelation function at $h=kT$;
+    \item a spike of the spectral density at $\omega=2\pi/T$;
+    \item periodic oscillation of the distance between multiple chains.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+If the transition matrix has the eigenvalue $e^{i2\pi/T}$, then the autocovariance contains that frequency component; the spectral density has a corresponding spike; and multiple chains return to nearby positions after $T$ steps.
+\end{proof}
+
+\subsection{Periodic structure of hidden Markov models}
+
+\begin{definition}[Hidden Markov model]\label{def:hmm}
+A \textbf{hidden Markov model} consists of a hidden state chain $\{Z_t\}$ and an observation chain $\{X_t\}$:
+\[
+Z_t\in\{1,\dots,K\},\qquad \mathbb P(Z_{t+1}=j\mid Z_t=i)=a_{ij},
+\]
+\[
+X_t\mid Z_t=j\sim p_j(\cdot).
+\]
+\end{definition}
+
+\begin{theorem}[Periodic decomposition of the HMM transition matrix]\label{thm:hmm_period}
+Let the HMM transition matrix $\mathbf A$ be irreducible. Then the state space decomposes uniquely into $d$ cyclic classes $C_1,\dots,C_d$:
+\[
+\mathbb P(Z_{t+1}\in C_{j+1}\mid Z_t\in C_j)=1,\qquad j=1,\dots,d\pmod d.
+\]
+$d=1$ means aperiodicity; $d>1$ means cycling with period $d$.
+\end{theorem}
+
+\begin{proof}
+By the periodic decomposition theorem for Markov chains, $d$ is the greatest common divisor of the return times, and the states decompose according to their congruence classes modulo $d$.
+\end{proof}
+
+\begin{proposition}[Spectral density of the HMM observation process]\label{prop:hmm_spectrum}
+Let $\mu_j=\mathbb E[X_t\mid Z_t=j]$. Then
+\[
+S_X(\omega)=\sigma_X^2+2\operatorname{Re}\left[\sum_{h=1}^\infty\boldsymbol\mu^{\mathsf T}\operatorname{diag}(\boldsymbol\pi)\mathbf A^h\boldsymbol\mu e^{-i\omega h}\right].
+\]
+\end{proposition}
+
+\begin{proof}
+From
+\[
+\mathbb E[(X_{t+h}-\mathbb EX)(X_t-\mathbb EX)]
+=\boldsymbol\mu^{\mathsf T}\operatorname{diag}(\boldsymbol\pi)\mathbf A^h\boldsymbol\mu-(\mathbb EX)^2,
+\]
+the Fourier transform gives the result.
+\end{proof}
+
+\subsection{Gaussian processes and the periodic kernel}
+
+\begin{definition}[Periodic kernel]\label{def:periodic_kernel}
+The \textbf{periodic kernel} is
+\[
+k_{\mathrm{per}}(x,x')=\sigma^2\exp\left(-\frac{2\sin^2(\pi|x-x'|/T)}{\ell^2}\right).
+\]
+\end{definition}
+
+\begin{proposition}[Spectral density of the periodic kernel]\label{prop:gp_spectrum}
+The spectral density of the MacKay periodic kernel is
+\[
+S_{\mathrm{per}}(\omega)=\sigma^2\sum_{k=-\infty}^{\infty}I_k\left(\frac1{\ell^2}\right)e^{-1/\ell^2}\delta\left(\omega-\frac{2\pi k}{T}\right),
+\]
+where $I_k$ is the modified Bessel function. Hence a periodic-kernel Gaussian process contains only harmonics of the frequency $2\pi k/T$.
+\end{proposition}
+
+\begin{proof}
+From
+\[
+k_{\mathrm{per}}(x,x')=\sigma^2e^{-1/\ell^2}e^{(2/\ell^2)\cos(2\pi(x-x')/T)}
+\]
+and the Bessel generating function $e^{z\cos\theta}=\sum_kI_k(z)e^{ik\theta}$, the Fourier transform with respect to $x-x'$ gives the discrete spectrum.
+\end{proof}
+
+\subsection{Periodicity diagnosis of long-memory processes}
+
+\begin{definition}[ARFIMA process]\label{def:arfima}
+The \textbf{ARFIMA}$(p,d,q)$ process is defined by
+\[
+\Phi(B)(1-B)^dX_t=\Theta(B)\varepsilon_t,
+\]
+where $d\in(-1/2,1/2)$.
+\end{definition}
+
+\begin{proposition}[Spectral density of the ARFIMA process]\label{prop:arfima_spectrum}
+The spectral density of ARFIMA$(p,d,q)$ is
+\[
+S_X(\omega)=\frac{\sigma^2}{2\pi}\frac{|\Theta(e^{-i\omega})|^2}{|\Phi(e^{-i\omega})|^2}|1-e^{-i\omega}|^{-2d}.
+\]
+As $\omega\to0$, $S_X(\omega)\sim C|\omega|^{-2d}$.
+\begin{enumerate}[label=(\roman*)]
+    \item $d=0$: short memory;
+    \item $0<d<1/2$: long memory, spectral divergence;
+    \item $d<0$: anti-persistence.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+The frequency-domain representation of the fractional difference is $(1-B)^d\to(1-e^{-i\omega})^d$, so the squared modulus is $|1-e^{-i\omega}|^{-2d}$. As $\omega\to0$, $|1-e^{-i\omega}|^2\approx\omega^2$, giving $S_X\propto\omega^{-2d}$.
+\end{proof}
+
+\subsection{Invariants corresponding to continuous invariance of probability measures}
+
+\begin{theorem}[Invariants corresponding to continuous invariance of probability measures]\label{thm:probability_noether}
+Let the probability distribution $\mathbb P$ of a stochastic process $\{X_t\}$ be invariant under a continuous transformation group $G$. Then there exists a probabilistic invariant $Q_{\mathbb P}$ satisfying $\mathbb E[dQ_{\mathbb P}/dt]=0$:
+\begin{enumerate}[label=(\roman*)]
+    \item translation invariance $G=\mathbb R$: the invariant is $P_{\mathbb P}=-\gamma''(0)$;
+    \item scaling invariance $G=\mathbb R^+$: the invariants are the Hurst exponent $H$, the tail index $\alpha$ and the log marginal likelihood;
+    \item rotation invariance $G=U(1)$: the invariants are the cyclic frequency, the phase coherence time and the trace of the posterior covariance matrix.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The three kinds of invariance induce respectively unitary or self-adjoint operators on $L^2(\mathbb P)$, whose spectral functionals remain constant along the process. For the concrete correspondences see \cref{prop:momentum_autocorrelation}, \cref{prop:hurst_tail_duality}, \cref{ch15_coherence_time}.
+\end{proof}
+
+\begin{remark}[Relationship between probability invariants and periodicity]\label{rem:probability_period_scope}
+Probabilistic invariance is an auxiliary condition for periodic structure, and it does not constitute a sufficient condition. White noise has an invariant mean-square derivative variance, but no periodic component. A probabilistic periodic structure must be decided by criteria such as \cref{thm:prob_periodicity_decision} or \cref{lem:markov_period}.
+\end{remark}
+
+\subsection{Detailed balance and the fluctuation--dissipation theorem}
+
+\begin{proposition}[Detailed balance and closure of the probability current]\label{prop:detailed_balance_curl}
+Let a Markov process have stationary distribution $\pi$ and transition rate matrix $Q$. Detailed balance
+\[
+\pi_iQ_{ij}=\pi_jQ_{ji},\qquad \forall i,j
+\]
+is equivalent to the probability current
+\[
+\mathbf J_{ij}=\pi_iQ_{ij}-\pi_jQ_{ji}
+\]
+being zero everywhere.
+\end{proposition}
+
+\begin{proof}
+Detailed balance gives $\mathbf J_{ij}=0$ directly. Conversely, if $\mathbf J_{ij}=0$, then $\pi_iQ_{ij}=\pi_jQ_{ji}$.
+\end{proof}
+
+\begin{theorem}[Structural decomposition of the fluctuation--dissipation theorem]\label{thm:fluctuation_dissipation_grammar}
+Let the Langevin equation be
+\[
+\frac{dX}{dt}=-\gamma X+\sqrt{2\gamma k_BT}\xi_t,
+\]
+where $\xi_t$ is standard white noise. Then the stationary distribution is
+\[
+p_{\mathrm{eq}}(x)\propto e^{-\gamma x^2/(2k_BT)},
+\]
+and the fluctuation and the dissipation satisfy $D=\gamma k_BT$.
+\end{theorem}
+
+\begin{proof}
+The corresponding Fokker--Planck equation is
+\[
+\partial_tp=\partial_x(\gamma xp)+\gamma k_BT\partial_x^2p.
+\]
+The stationary solution is $p_{\mathrm{eq}}\propto e^{-\gamma x^2/(2k_BT)}$, and substitution gives $D=\gamma k_BT$.
+\end{proof}
+
+\section{Comprehensive diagnosis of probabilistic periodic structure}
+\label{sec:prob_final_diagnosis}
+
+\begin{example}[Periodicity diagnosis of the sunspot series: complete numerical procedure]\label{ex:sunspot_diagnosis}
+For the monthly mean sunspot series of 1749--2024 ($N=3312$):
+\begin{enumerate}[label=(\roman*)]
+    \item translation period: the sample autocorrelation has a local maximum at a lag of $132$ months, corresponding to the Schwabe cycle;
+    \item multitaper spectral estimation: with $K=8$ and $NW=4$, the periodogram has its highest peak at $\omega_0=2\pi/132\approx0.0476$ month$^{-1}$, and the variance is reduced to $1/8$;
+    \item scaling period: R/S analysis gives $\hat H\approx0.85>0.5$, strong long-range positive persistence;
+    \item rotation period: the cyclic autocorrelation has a dominant cyclic frequency at $\alpha=1/132$ month$^{-1}$;
+    \item Kalman filter: a state-space model extracts a smooth $11$-year periodic component and forecasts $12$ months ahead;
+    \item invariance tests: ADF cannot reject a unit root, and KPSS rejects stationarity at the $5\%$ level.
+\end{enumerate}
+\end{example}
+
+\begin{remark}[Connection with the rest of the book]\label{rem:prob_book_interface}
+The theory of probabilistic periodic structure established in this chapter is an application of periodic mathematics to stochastic systems. The Herglotz and Cramér theorems reveal that the periodic information of a stationary process is encoded in the spectral measure; the Lebesgue decomposition of the spectral measure corresponds to the trichotomy of periodic structure. The spectral structure of specific processes exhibits a continuous transition from no periodicity to long-memory periodicity. Cyclostationary processes handle non-stationary periodic signals such as amplitude modulation and frequency modulation. Multitaper spectral estimation overcomes the inconsistency of the variance of the periodogram. The Kalman filter provides adaptive extraction of periodic signals. The MCMC spectral gap theory gives convergence diagnostics. The HMM periodic decomposition is connected with speech recognition. The GP periodic kernel provides non-parametric periodic modelling. ARFIMA supplements long memory. The invariance of a probabilistic system is an auxiliary condition for periodic structure, not a sufficient condition; the decision of probabilistic periodic structure relies on concrete criteria such as cyclostationarity, phase locking and the periodic decomposition of a Markov chain.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & Time-translation invariance of a stationary process; mean-square derivative variance $P_{\mathbb P}=-\gamma''(0)=\int\omega^2S(\omega)d\omega$ (\cref{def:probability_momentum}, \cref{prop:momentum_autocorrelation}, \cref{prop:momentum_frequency}); the Herglotz--Cramér spectral representation (\cref{thm:herglotz}, \cref{thm:cramer}) \\
+Scaling & Self-similarity and heavy-tailed scale invariance: the Hurst exponent $H$ and the tail index $\alpha=1/H$ (\cref{def:probability_scaling_charge}, \cref{prop:hurst_tail_duality}); the ARFIMA long-memory spectrum (\cref{prop:arfima_spectrum}) \\
+Rotation & Phase-rotation invariance of cyclostationary processes; phase diffusion and the coherence time $\tau_{\mathrm{coh}}=2/\sigma^2$ (\cref{def:probability_angular_momentum}, \cref{ch15_coherence_time}, \cref{def:cyclostationary_strict}, \cref{thm:cyclostationary_spectral_decomposition}) \\
+Balance & The invariants corresponding to continuous invariance of probability measures (\cref{thm:probability_noether}); the criteria and boundaries of probabilistic periodic structure (\cref{rem:probability_period_scope}) \\
+Symmetry & The scaling/translation/rotation information carried by the three classes of distributions: prior/likelihood/posterior (\textbf{empirical observation / research programme}, see Remark \cref{thm:bayesian_grammar_correspondence}) \\
+Closure & Closure of the probability current under detailed balance $\mathbf J_{ij}=0$ (\cref{prop:detailed_balance_curl}); the fluctuation--dissipation relation (\cref{thm:fluctuation_dissipation_grammar}); the MCMC spectral gap and convergence (\cref{thm:mcmc_convergence}) \\
+Period & The cyclic frequency $\alpha=k/T$; the self-similar period; the spectral structure of typical processes (\cref{prop:typical_prob_spectra}); multitaper spectral estimation (\cref{thm:slepian}, \cref{prop:multitaper_consistency}); periodic extraction by the Kalman filter (\cref{thm:kalman_spectrum}, \cref{prop:kalman_periodic_extraction}); the HMM periodic decomposition (\cref{thm:hmm_period}); the GP periodic kernel (\cref{def:periodic_kernel}, \cref{prop:gp_spectrum}); the sunspot numerical diagnosis (\cref{ex:sunspot_diagnosis}, \cref{ex:sunspot_multitaper}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the \textbf{probabilistic periodicity decision theorem} of this chapter (\ref{thm:prob_periodicity_decision}). Hint: first write down the decision map and the evolution group of this chapter's target, then apply the proof structure of the general criterion of the `Periodic Systems' chapter.
+
+    \item Verify that the hypotheses of the \textbf{monotonicity of quantity adjustment} (\ref{prop:prob_adaptive_growth}) hold for the domain objects of this chapter, and give a counterexample in which the hypotheses fail.
+
+    \item Examine the behaviour of the \textbf{structural correspondence of the three classes of distributions in a Bayesian model} (\textbf{empirical observation / research programme}, see Remark \ref{thm:bayesian_grammar_correspondence}) under parameter degeneracy, and explain how the analogy degenerates accordingly; state what definitions would have to be supplied in order to promote any one of the three assertions to a testable proposition.
+
+    \item Explain the relation between the \textbf{probabilistic periodicity diagnostic procedure and its interface with three chapters} (\ref{thm:prob_diagnosis_integration}) and the corresponding general conclusion of the `Periodic Systems' chapter (whether they agree, whether it is a special case, or whether additional conditions are required).
+
+    \item Using the seven-theme comparison table of this chapter, identify the concrete carriers of the three themes \textbf{translation}, \textbf{scaling} and \textbf{rotation} in this chapter, and give one example of domain data for each.
+
+    \item Synthesis: restate the diagnostic procedure of this chapter using the five-step standard interface of the `Periodic Systems' chapter (Table \ref{tab:ps_five_steps}), noting one by one the theorem or remark of this chapter on which each step depends: \ref{thm:prob_periodicity_decision}, \ref{prop:prob_adaptive_growth}, \ref{thm:bayesian_grammar_correspondence} (\textbf{empirical observation / research programme}), \ref{thm:prob_diagnosis_integration}.
+\end{enumerate}
+

@@ -1,0 +1,990 @@
+\chapter{周期函数与具有周期轨道的群}
+\markboth{周期函数与具有周期轨道的群}{周期函数与具有周期轨道的群}
+
+\begin{remark}[本章定位]\label{rem:periodic_function_chapter_positioning}
+本章的核心任务是将具有周期结构的系统建模为周期函数、具有周期轨道的群、傅里叶级数、波、周期变换与分量。本章不重复前面章节的级数和卷积定义，而是以引用方式继承它们，聚焦于\textbf{建模方法论}。
+
+建模链条为：
+\[
+\begin{aligned}
+\text{物理系统} &\longrightarrow \text{平移/缩放/旋转} \longrightarrow \text{守恒律} \longrightarrow \text{对称性} \\
+&\longrightarrow \text{周期函数} \longrightarrow \text{具有周期轨道的群} \longrightarrow \text{傅里叶级数} \\
+&\longrightarrow \text{波} \longrightarrow \text{周期变换} \longrightarrow \text{分量}
+\end{aligned}
+\]
+
+各环节的含义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{物理系统} $\mathcal{S}$：光源、声源、时钟等具体对象；
+    \item \textbf{平移/缩放/旋转}：系统的基本变换；
+    \item \textbf{守恒律}：基本变换对应的守恒量（能量、角动量、标度荷）；
+    \item \textbf{对称性}：守恒律保证的对称群 $G$；
+    \item \textbf{周期函数}：对称性保证的周期函数 $f(t)$（定义 \ref{def:periodic_function_gf}）；
+    \item \textbf{具有周期轨道的群}：$\operatorname{Group}_{\mathrm{period}}(f)$（定义 \ref{def:group_with_periodic_orbits_gf}）；
+    \item \textbf{傅里叶级数}：$f(t) = \sum A_{p,n} e^{i(\omega_{p,n} t + \phi_{p,n})}$（定义 \ref{def:periodic_series}）；
+    \item \textbf{波}：傅里叶级数在空间中的传播 $f(x,t) = \sum A_n e^{i(k_n x - \omega_n t + \phi_n)}$（定义 \ref{def:wave}）；
+    \item \textbf{周期变换}：$\mathcal{P}_\Lambda f$（定义 \ref{def:periodic_transform}）；
+    \item \textbf{分量}：四元组 $(A_{p,n}, \omega_{p,n}, \phi_{p,n}, T_p)$（定义 \ref{def:period_parameters}）。
+\end{enumerate}
+
+\textbf{本章七主题导引}：平移——平移保持周期（命题 \ref{prop:period_translation}）；缩放——振幅参数 $A$；旋转——离散相位算子（定义 \ref{def:discrete_phase_operator}）与简谐分量（定义 \ref{def:harmonic_component}）；守恒——简谐分量的三大守恒量（定理 \ref{thm:harmonic_three_conservations}）与诺特对应（\textbf{经验观察／研究纲领}，见注 \ref{thm:noether_group_with_periodic_orbits}）；对称——具有周期轨道的群的作用（$T\mathbb{Z}$、$\langle q_0\rangle$、$\langle e^{i\theta_0}\rangle$、$\Lambda$）；闭合——守恒律保证的闭合轨道（简谐分量与商空间 $\mathbb{R}/T\mathbb{Z}\cong S^1$）；周期——度量参数 $T$ 与周期卷积的周期算子 $\mathfrak{T}$（定义 \ref{def:periodic_convolution_four_operators}）。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  >=Stealth, thick,
+  node distance=1.0cm and 0.4cm,
+  stage/.style={draw, rounded corners, align=center, minimum width=2.4cm, minimum height=0.75cm, font=\small, fill=blue!8},
+  arr/.style={-{Stealth[length=2.2mm]}, very thick}
+]
+\node[stage, fill=blue!12]  (s0) {物理系统 $\mathcal{S}$};
+\node[stage, fill=cyan!12, right=of s0] (s1) {基本变换\\平移/缩放/旋转};
+\node[stage, fill=green!12, right=of s1] (s2) {守恒律 $Q$};
+\node[stage, fill=teal!12, right=of s2] (s3) {对称群 $G$};
+\node[stage, fill=orange!12, right=of s3] (s4) {周期函数 $f$};
+\node[stage, fill=yellow!16, below=of s0] (s5) {具有周期轨道的群\\$\operatorname{Group}_{\mathrm{period}}(f)$};
+\node[stage, fill=orange!8, right=of s5] (s6) {傅里叶级数\\$\sum A_{p,n}e^{i(\omega_{p,n}t+\phi_{p,n})}$};
+\node[stage, fill=purple!12, right=of s6] (s7) {波 $f(x,t)$};
+\node[stage, fill=red!12, right=of s7] (s8) {周期变换\\$\mathcal{P}_\Lambda f$};
+\node[stage, fill=magenta!12, right=of s8] (s9) {分量\\$(A,\omega,\phi,T)$};
+\draw[arr] (s0) -- (s1);
+\draw[arr] (s1) -- (s2);
+\draw[arr] (s2) -- (s3);
+\draw[arr] (s3) -- (s4);
+\draw[arr] (s4.south) |- (s5.east);
+\draw[arr] (s5) -- (s6);
+\draw[arr] (s6) -- (s7);
+\draw[arr] (s7) -- (s8);
+\draw[arr] (s8) -- (s9);
+\end{tikzpicture}
+\caption{周期结构建模的完整链条：从物理系统出发，经基本变换、守恒律、对称性、周期函数、具有周期轨道的群、傅里叶级数、波、周期变换，最终到达分量四元组。}
+\label{fig:modelling_chain}
+\end{figure}
+
+\section{周期结构建模的完整链条}
+
+\begin{definition}[周期结构建模的完整链条]
+\label{def:modelling_chain}
+给定一个物理系统 $\mathcal{S}$，将其建模为周期结构的过程如下：
+\[
+\begin{aligned}
+\mathcal{S}
+&\xrightarrow{\text{基本变换}}
+\{\text{平移}, \text{缩放}, \text{旋转}\} \\
+&\xrightarrow{\text{守恒律}} Q
+\xrightarrow{\text{对称性}} G
+\xrightarrow{\text{周期函数}} f \\
+&\xrightarrow{\text{具有周期轨道的群}} \operatorname{Group}_{\mathrm{period}}(f)
+\xrightarrow{\text{级数展开}} \sum A_{p,n} e^{i(\omega_{p,n} t + \phi_{p,n})} \\
+&\xrightarrow{\text{空间传播}} \text{波}
+\xrightarrow{\text{周期变换}} \mathcal{P}_\Lambda f \\
+&\xrightarrow{\text{分量提取}} (A_{p,n}, \omega_{p,n}, \phi_{p,n}, T_p).
+\end{aligned}
+\]
+\end{definition}
+
+\begin{remark}[建模链条的一致性]\label{rem:modelling_chain_consistency}
+建模链条的每一环节由上一环节确定：
+\begin{enumerate}[label=(\roman*)]
+    \item 物理系统的基本变换（平移/缩放/旋转）由系统的物理性质决定；
+    \item 守恒律由基本变换经诺特对应确定（诺特定理的前提见「周期基础」章）；
+    \item 对称性由守恒律确定（守恒律先于对称性）；
+    \item 周期函数由对称性经定义 \ref{def:periodic_function_gf} 确定；
+    \item 具有周期轨道的群由周期函数经定义 \ref{def:group_with_periodic_orbits_gf} 确定；
+    \item 傅里叶级数由具有周期轨道的群经定理 \ref{thm:periodic_series_bohr} 确定；
+    \item 波由傅里叶级数经空间传播（波数 $k_n = \omega_n / c$，$c$ 为传播速度）确定；
+    \item 周期变换由定义 \ref{def:periodic_transform} 确定；
+    \item 分量由周期变换确定（玻尔系数提取）。
+\end{enumerate}
+\end{remark}
+
+\begin{remark}[周期结构的判定流程]\label{rem:periodic_structure_criterion}
+给定一个系统 $\mathcal{S}$，判定其是否可建模为完整周期结构的流程为：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{基本变换判定}：系统是否具有平移、缩放或旋转变换？
+    \item \textbf{守恒律判定}：基本变换是否对应守恒量？
+    \item \textbf{对称性判定}：守恒量是否定义对称群 $G$？
+    \item \textbf{周期函数判定}：系统的可观测量是否满足 $f(\phi_g(x)) = f(x)$？
+    \item \textbf{具有周期轨道的群的判定}：$\operatorname{Group}_{\mathrm{period}}(f)$ 是否非平凡？
+    \item \textbf{级数判定}：$f$ 是否可展开为傅里叶级数（玻尔系数唯一确定）？
+    \item \textbf{波判定}：傅里叶级数是否可在空间中传播（波动方程的解）？
+    \item \textbf{变换判定}：周期变换是否可提取分量？
+\end{enumerate}
+若全部八个条件满足，则系统可建模为完整的周期结构。八个条件逐层递进，每一条对应建模链条的一个环节。
+\end{remark}
+
+\section{周期函数的度量参数与分量}
+
+\begin{definition}[周期函数的度量参数与分量]\label{def:period_parameters}
+设 $f: \mathcal{D} \to V$ 为周期函数（定义 \ref{def:periodic_function_gf}），其傅里叶级数展开为
+\[
+f(t) = \sum_{p \in P} \sum_{n \in \mathbb{Z}} A_{p,n} e^{i(\omega_{p,n} t + \phi_{p,n})}.
+\]
+$f$ 的\textbf{分量}是傅里叶级数中的四元组 $(A_{p,n}, \omega_{p,n}, \phi_{p,n}, T_p)$：
+\begin{itemize}
+    \item $A_{p,n} \ge 0$：\textbf{振幅分量}（简谐分量半径）；
+    \item $\omega_{p,n} = 2\pi n / T_p$：\textbf{频率分量}（旋转速率）；
+    \item $\phi_{p,n} \in [0, 2\pi)$：\textbf{相位分量}（初始辐角）；
+    \item $T_p > 0$：\textbf{周期分量}（时间轴的尺度格）。
+\end{itemize}
+四元组是建模链条的最终输出——它将周期结构完全参数化。
+\end{definition}
+
+\begin{property}[度量参数与分量的关系]\label{ch9_period_params_property}
+分量四元组与度量参数（表 \ref{tab:period_parameters}）的对应关系：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅分量} $A_{p,n}$ $\leftrightarrow$ 振幅 $A$；
+    \item \textbf{频率分量} $\omega_{p,n}$ $\leftrightarrow$ 角频率 $\omega$；
+    \item \textbf{相位分量} $\phi_{p,n}$ $\leftrightarrow$ 相位 $\phi$；
+    \item \textbf{周期分量} $T_p$ $\leftrightarrow$ 周期 $T$。
+\end{enumerate}
+守恒量由振幅和频率表出：$L = mA^2\omega$（角动量）、$\frac{dS}{dt} = \frac12 A^2|\omega|$（面积速度）、$E = \frac12 mA^2\omega^2$（能量）。
+\end{property}
+
+\begin{proof}
+(i)-(iv) 由定义 \ref{def:period_parameters} 与傅里叶级数定义逐项对应。守恒量公式由定理 \ref{thm:harmonic_three_conservations} 直接给出。
+\end{proof}
+
+\begin{table}[htbp]
+    \centering
+    \caption{周期度量参数与分量（含物理对应）}
+    \label{tab:period_parameters}
+    \begin{tabular}{>{\centering\arraybackslash}p{2.0cm}>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{2.8cm}>{\centering\arraybackslash}p{3.5cm}>{\centering\arraybackslash}p{1.5cm}}
+        \toprule
+        参数 & 符号 & 数学定义 & 物理含义 & 单位 \\
+        \midrule
+        振幅 & $A$ & $A = \sup \|f - \bar{f}\|$ & 简谐分量半径；信号强度 & 取决于场量 \\
+        频率 & $\nu$ & $\nu = 1/T$ & 单位时间内的周期数 & Hz \\
+        周期 & $T$ & 满足 $f(t+T)=f(t)$ 的最小正数 & 最小闭合轨道 & s \\
+        角频率 & $\omega$ & $\omega = 2\pi \nu$ & 旋转速率 & rad/s \\
+        相位 & $\phi$ & 相对参考点的偏移量 & 初始辐角；位置编码 & rad \\
+        时延 & $\tau$ & $\tau = \phi/\omega$ & 相位对应的时间偏移（取\textbf{超前}约定：$\phi>0$ 时该分量相对基准\textbf{超前} $\tau$） & s \\
+        角动量 & $L$ & $L = m A^2 \omega$ & 简谐分量角动量，守恒 & kg·m$^2$/s \\
+        面积速度 & $dS/dt$ & $\frac{1}{2}A^2\omega$ & 开普勒第二定律，守恒 & m$^2$/s \\
+        能量 & $E$ & $\frac{1}{2}m A^2 \omega^2$ & 简谐分量动能，守恒 & J \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+\draw[->] (-0.4,0) -- (7.2,0) node[right] {$t$};
+\draw[->] (0,-1.6) -- (0,1.6) node[above] {$f$};
+\draw[blue, very thick, domain=0:6.5, samples=200]
+  plot (\x, {1.0*sin(deg(1.4*\x))});
+\draw[dashed, red, very thick] (0,1.0) -- (4.49,1.0);
+\draw[dashed, red, very thick] (0,-1.0) -- (4.49,-1.0);
+\draw[<->, red] (0,-1.4) -- (4.49,-1.4);
+\node[red, below] at (2.25,-1.5) {$T=2\pi/\omega$};
+\draw[<->, blue] (-0.3,0) -- (-0.3,1.0);
+\node[blue, left, font=\footnotesize] at (-0.3,0.5) {$A$};
+\draw[<->, green!60!black] (0,0.2) -- (1.1,0.2);
+\node[green!60!black, above, font=\footnotesize] at (0.55,0.25) {$\phi/\omega$};
+\node[align=center, font=\small] at (3.6,-2.4) {四元组 $(A,\omega,\phi,T)$ 完整参数化一个简谐分量};
+\end{tikzpicture}
+\caption{周期函数的四元组分量：振幅 $A$、角频率 $\omega$、相位 $\phi$ 与周期 $T$。}
+\label{fig:period_quadruple}
+\end{figure}
+
+\begin{definition}[频率字典]\label{def:frequency_dictionary}
+设 $f$ 为傅里叶级数，其全部出现的频率构成集合
+\[
+\Lambda := \{\omega_{p,n} : p\in P,\ n\in\mathbb{Z},\ A_{p,n}\neq 0\},
+\]
+称为 $f$ 的\textbf{频率字典}。频率字典是周期变换的输入数据。
+\end{definition}
+
+\begin{property}[频率字典的结构]\label{prop:frequency_dictionary_structure}
+设 $f$ 的主具有周期轨道的群为 $\operatorname{Group}_{\mathrm{period}}(f)=T\mathbb{Z}$。则频率字典 $\Lambda$ 是 $\frac{2\pi}{T}\mathbb{Z}$ 的子集；若 $f\in L^2$，则 $\Lambda$ 至多可数。
+\end{property}
+
+\begin{proof}
+由傅里叶级数展开 $f(t)=\sum A_{p,n}e^{i(\omega_{p,n}t+\phi_{p,n})}$ 与 $T$-周期性，$e^{i\omega_{p,n}T}=1$ 给出 $\omega_{p,n}=2\pi n/T$，故 $\Lambda\subseteq\frac{2\pi}{T}\mathbb{Z}$。$L^2$ 函数的傅里叶系数满足 $\sum|A_{p,n}|^2<\infty$，故非零系数至多可数。
+\end{proof}
+
+\section{简谐分量与守恒律}
+
+\begin{definition}[简谐分量]\label{def:harmonic_component}
+设 $A > 0$, $\omega \in \mathbb{R}\setminus\{0\}$, $\phi \in \mathbb{R}$。一个\textbf{简谐分量}是复平面上的参数化曲线：
+\[
+\gamma(t) = A e^{i(\omega t + \phi)}.
+\]
+简谐分量是傅里叶级数的\textbf{最小几何单元}——它同时编码了振幅（半径 $A$）、频率（角速度 $\omega$）和相位（初始辐角 $\phi$）三个分量。（历史上，托勒密天文学用“周转圆”一词描述同类几何对象。）
+\end{definition}
+
+\begin{theorem}[简谐分量的三大守恒量]\label{thm:harmonic_three_conservations}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{角动量守恒}：$L = m A^2 \omega$ 为常数。
+    \item \textbf{面积速度守恒}：$\frac{dS}{dt} = \frac{1}{2}A^2|\omega|$ 为常数。
+    \item \textbf{动能守恒}：$E_k = \frac{1}{2}m A^2 \omega^2$ 为常数。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+速度向量 $\dot{\mathbf{r}}(t) = i\omega A e^{i\omega t}$，模长为常数 $A|\omega|$。角动量 $L = m\|\mathbf{r} \times \dot{\mathbf{r}}\| = mA^2|\omega|$（$\mathbf{r} \perp \dot{\mathbf{r}}$）。面积速度 $\frac{1}{2}\|\mathbf{r}\times\dot{\mathbf{r}}\| = \frac12 A^2|\omega|$。动能 $\frac12 m|\dot{\mathbf{r}}|^2 = \frac12 mA^2\omega^2$。三项均不随时间变化。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+\draw[->] (-2.2,0) -- (2.4,0) node[right] {$\operatorname{Re}$};
+\draw[->] (0,-2.2) -- (0,2.4) node[above] {$\operatorname{Im}$};
+\draw[gray!30] (0,0) circle (1.6);
+\fill (1.6,0) circle (1.5pt);
+\draw[->, blue, very thick] (0,0) -- (1.3,0.9);
+\draw[->, red, very thick] (1.3,0.9) -- (-0.3,1.6);
+\node[blue, above left, font=\footnotesize] at (0.7,0.5) {$\mathbf{r}(t)$};
+\node[red, above, font=\footnotesize] at (0.5,1.5) {$\dot{\mathbf{r}}(t)$};
+\draw[<->, green!60!black] (1.6,0) arc[start angle=0, end angle=30, radius=1.6];
+\node[green!60!black] at (1.9,0.5) {$\omega t$};
+\node[align=center, font=\small] at (0,-3.0) {$L=mA^2\omega$，$\frac{dS}{dt}=\frac12A^2|\omega|$，$E_k=\frac12mA^2\omega^2$};
+\end{tikzpicture}
+\caption{简谐分量 $Ae^{i(\omega t+\phi)}$ 的三大守恒量：角动量、面积速度、动能。}
+\label{fig:harmonic_conservation}
+\end{figure}
+
+\begin{definition}[嵌套简谐分量系统]\label{def:nested_harmonic}
+\[
+P_0(t) = O, \quad P_k(t) = P_{k-1}(t) + A_k e^{i(\omega_k t + \phi_k)}, \quad k = 1, 2, \dots, K.
+\]
+最终动点位置向量 $\mathbf{V}(t) = \sum_{k=1}^{K} A_k e^{i(\omega_k t + \phi_k)}$。嵌套简谐分量系统是傅里叶级数的\textbf{几何实现}。
+\end{definition}
+
+\begin{theorem}[嵌套简谐分量系统的独立守恒量]\label{thm:nested_harmonic_conservation}
+每一级简谐分量各自独立满足三大守恒量。总角动量为 $\mathbf{L}_{\text{total}} = \sum_{k=1}^{K} m_k A_k^2 \omega_k \cdot \mathbf{k}$。
+\end{theorem}
+
+\begin{proof}
+第 $k$ 级是单简谐分量（定理 \ref{thm:harmonic_three_conservations}），各级互不耦合。角动量可加。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+\draw[->] (-3.4,0) -- (3.4,0);
+\draw[->] (0,-2.0) -- (0,2.0);
+\draw[gray!40] (0,0) circle (1.6);
+\draw[gray!30] (1.6,0) circle (0.7);
+\draw[gray!30] (2.1,0.6) circle (0.35);
+\draw[->, blue, very thick] (0,0) -- (1.6,0);
+\node[blue, below, font=\footnotesize] at (0.8,0) {$\mathbf{r}_1$};
+\draw[->, red, very thick] (1.6,0) -- (2.1,0.6);
+\node[red, above, font=\footnotesize] at (1.9,0.4) {$\mathbf{r}_2$};
+\draw[->, green!60!black, very thick] (2.1,0.6) -- (2.35,0.85);
+\node[green!60!black, above, font=\footnotesize] at (2.4,0.85) {$\mathbf{r}_3$};
+\fill (2.35,0.85) circle (1.5pt);
+\node[align=center, font=\small] at (0,-2.8) {嵌套简谐分量：$\mathbf{V}(t)=\sum_k A_ke^{i(\omega_kt+\phi_k)}$，即周转圆系统};
+\end{tikzpicture}
+\caption{嵌套简谐分量系统（周转圆）：每一级独立的简谐分量叠加，构成傅里叶级数的几何实现。}
+\label{fig:nested_harmonic}
+\end{figure}
+
+\section{相位算子}
+
+\begin{definition}[离散相位算子]\label{def:discrete_phase_operator}
+设周期为 $N \in \mathbb{N}^+$。第 $k$ 个\textbf{相位算子}为
+\[
+\mathcal{O}_k^{(N)} = e^{i 2\pi k / N}, \quad k = 0, 1, \dots, N-1.
+\]
+相位算子集合 $\mathcal{P}_N$ 在复数乘法下构成 $N$ 阶循环群 $C_N$。
+\end{definition}
+
+\begin{definition}[连续相位算子]\label{def:continuous_phase_operator}
+连续相位算子 $\mathcal{O}_\theta = e^{i\theta}$，$\theta \in [0, 2\pi)$。集合构成 $U(1)$ 群。
+\end{definition}
+
+\begin{proposition}[相位算子群的结构]\label{prop:phase_operator_group}
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathcal{P}_N \cong C_N$。
+    \item $\mathcal{P}_\infty = S^1 \cong U(1)$。
+    \item $\mathcal{P}_N \subset \mathcal{P}_\infty$。
+    \item $N \to \infty$ 时 $\mathcal{P}_N$ 在 $S^1$ 中稠密。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\mathcal{O}_k \cdot \mathcal{O}_l = \mathcal{O}_{k+l \bmod N}$。(ii) $S^1$ 是紧致阿贝尔李群。(iii) 由 (i) 与 $S^1$ 的群结构直接得到。(iv) 对任意 $\theta$ 和 $\varepsilon > 0$，取 $N > 2\pi/\varepsilon$。
+\end{proof}
+
+\begin{proposition}[相位算子的正交性]\label{prop:phase_operator_orthogonality}
+对任意 $k, l \in \{0, 1, \dots, N-1\}$，
+\[
+\frac{1}{N}\sum_{j=0}^{N-1} \mathcal{O}_j^{(N)}(\overline{\mathcal{O}_{j+k-l}^{(N)}})
+= \frac{1}{N}\sum_{j=0}^{N-1} e^{i 2\pi (l-k) j / N}
+= \delta_{kl}.
+\]
+\end{proposition}
+
+\begin{proof}
+当 $k=l$ 时，被求和项为 $1$，平均为 $1$。当 $k\neq l$ 时，令 $q=e^{i2\pi(l-k)/N}\neq 1$，则 $\sum_{j=0}^{N-1}q^j=(1-q^N)/(1-q)=0$。故平均值等于 $\delta_{kl}$。
+\end{proof}
+
+\begin{example}[周期为2的相位算子]\label{ex:phase_operators_c2}
+\[
+\mathcal{O}_0^{(2)} = 1, \quad \mathcal{O}_1^{(2)} = -1.
+\]
+恒等算子与反射算子，构成 $C_2$。
+\end{example}
+
+\begin{example}[周期为4的相位算子]\label{ex:phase_operators_c4}
+\[
+\mathcal{O}_0^{(4)} = 1, \quad \mathcal{O}_1^{(4)} = i, \quad \mathcal{O}_2^{(4)} = -1, \quad \mathcal{O}_3^{(4)} = -i.
+\]
+旋转 $0^\circ, 90^\circ, 180^\circ, 270^\circ$，构成 $C_4$。
+\end{example}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+% C_2
+\begin{scope}[xshift=-5.0cm]
+\draw[gray!40] (0,0) circle (1.2);
+\draw[->] (-1.4,0) -- (1.5,0);
+\draw[->] (0,-1.4) -- (0,1.5);
+\fill (1.2,0) circle (2pt) node[below right, font=\footnotesize] {$1$};
+\fill (-1.2,0) circle (2pt) node[below left, font=\footnotesize] {$-1$};
+\node[align=center, font=\small] at (0,-2.2) {$C_2$};
+\end{scope}
+% C_4
+\begin{scope}[xshift=0cm]
+\draw[gray!40] (0,0) circle (1.2);
+\draw[->] (-1.4,0) -- (1.5,0);
+\draw[->] (0,-1.4) -- (0,1.5);
+\fill (1.2,0) circle (2pt) node[below right, font=\footnotesize] {$1$};
+\fill (0,1.2) circle (2pt) node[above right, font=\footnotesize] {$i$};
+\fill (-1.2,0) circle (2pt) node[below left, font=\footnotesize] {$-1$};
+\fill (0,-1.2) circle (2pt) node[below right, font=\footnotesize] {$-i$};
+\node[align=center, font=\small] at (0,-2.2) {$C_4$};
+\end{scope}
+% U(1)
+\begin{scope}[xshift=5.0cm]
+\draw[gray!40] (0,0) circle (1.2);
+\draw[->] (-1.4,0) -- (1.5,0);
+\draw[->] (0,-1.4) -- (0,1.5);
+\foreach \a in {0,30,60,90,120,150,180,210,240,270,300,330} {
+  \fill (\a:1.2) circle (1.2pt);
+}
+\node[align=center, font=\small] at (0,-2.2) {$U(1)$};
+\end{scope}
+\node[align=center, font=\small] at (0,-3.4) {相位算子群的三个层次：$C_N\subset U(1)$，$N\to\infty$ 时在 $U(1)$ 中稠密};
+\end{tikzpicture}
+\caption{相位算子的单位圆分布：$C_2$、$C_4$ 与 $U(1)$ 的对比。}
+\label{fig:phase_operators}
+\end{figure}
+
+\section{波：傅里叶级数的空间传播}
+
+\begin{definition}[波——傅里叶级数的空间传播]\label{def:wave}
+设傅里叶级数 $f(t) = \sum_n A_n e^{i(\omega_n t + \phi_n)}$ 描述系统在原点处的振动。该振动以速度 $c$ 沿 $x$ 轴正方向传播形成的\textbf{波}为
+\[
+f(x, t) = \sum_n A_n e^{i(k_n x - \omega_n t + \phi_n)},
+\]
+其中 $k_n = \omega_n / c$ 为\textbf{波数}（空间频率）。波是傅里叶级数在空间中的传播——它同时具有时间周期性（周期 $T_n = 2\pi/\omega_n$）和空间周期性（波长 $\lambda_n = 2\pi/k_n$）。
+\end{definition}
+
+\begin{proposition}[波的双重周期结构]\label{prop:wave_double_period}
+波 $f(x,t)$ 具有双重周期结构：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{时间周期}：$f(x, t + T_n) = f(x, t)$，$T_n = 2\pi/\omega_n$；
+    \item \textbf{空间周期}：$f(x + \lambda_n, t) = f(x, t)$，$\lambda_n = 2\pi/k_n$。
+\end{enumerate}
+时间的具有周期轨道的群为 $T_n\mathbb{Z}$，空间的具有周期轨道的群为 $\lambda_n\mathbb{Z}$。两者共同构成波的双周期的具有周期轨道的群 $\Lambda = T_n\mathbb{Z} \oplus \lambda_n\mathbb{Z}$（在 $(x,t)$ 平面中）。
+\end{proposition}
+
+\begin{proof}
+(i) $e^{i(k_n x - \omega_n(t+T_n) + \phi_n)} = e^{i(k_n x - \omega_n t + \phi_n)} e^{-i\omega_n T_n} = e^{i(k_n x - \omega_n t + \phi_n)}$ 因为 $\omega_n T_n = 2\pi$。(ii) 同理 $k_n \lambda_n = 2\pi$。
+\end{proof}
+
+\begin{proposition}[波满足波动方程]\label{prop:wave_satisfies_wave_equation}
+设 $f(x,t) = \sum_n A_n e^{i(k_n x - \omega_n t + \phi_n)}$ 且色散关系 $\omega_n = c k_n$（$c$ 为常数）。则 $f$ 满足一维波动方程
+\[
+\frac{\partial^2 f}{\partial t^2} = c^2 \frac{\partial^2 f}{\partial x^2}.
+\]
+\end{proposition}
+
+\begin{proof}
+逐项求导得
+\[
+\begin{aligned}
+\partial_t^2 e^{i(k_n x-\omega_n t+\phi_n)} &= -\omega_n^2 e^{i(k_n x-\omega_n t+\phi_n)},\\
+\partial_x^2 e^{i(k_n x-\omega_n t+\phi_n)} &= -k_n^2 e^{i(k_n x-\omega_n t+\phi_n)}.
+\end{aligned}
+\]
+由 $\omega_n^2 = c^2 k_n^2$，两端逐项相等，线性叠加后仍相等。
+\end{proof}
+
+\begin{corollary}[色散关系与双重周期的耦合]\label{cor:dispersion_double_period}
+在波动方程下，波数 $k_n$、角频率 $\omega_n$、时间周期 $T_n$、空间波长 $\lambda_n$ 满足
+\[
+c = \frac{\omega_n}{k_n} = \frac{\lambda_n}{T_n}.
+\]
+即相速度等于波长与时间周期之比。
+\end{corollary}
+
+\begin{proof}
+由 $\omega_n = c k_n$ 与 $T_n=2\pi/\omega_n$，$\lambda_n=2\pi/k_n$，得 $\lambda_n/T_n = (2\pi/k_n)/(2\pi/\omega_n)=\omega_n/k_n=c$。
+\end{proof}
+
+\begin{proposition}[波与周期函数的关系]\label{prop:wave_periodic_function}
+波 $f(x,t)$ 在固定空间位置 $x = x_0$ 处退化为时间周期函数；在固定时刻 $t = t_0$ 处退化为空间周期函数。两者的周期结构由波数和角频率分别给出。
+\end{proposition}
+
+\begin{proof}
+固定 $x = x_0$，则
+\[
+f(x_0, t)
+= \sum_n A_n e^{i(k_n x_0 - \omega_n t + \phi_n)}
+= \sum_n A'_n e^{-i\omega_n t},
+\]
+其中 $A'_n = A_n e^{i(k_n x_0 + \phi_n)}$，故为时间周期函数。
+
+固定 $t = t_0$，则
+\[
+f(x, t_0)
+= \sum_n A''_n e^{ik_n x},
+\]
+故为空间周期函数。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+% time axis
+\draw[->] (-0.3,1.8) -- (7.5,1.8) node[right] {$t$};
+\draw[blue, very thick, domain=0:7, samples=150]
+  plot (\x, {1.8 + 0.5*sin(deg(1.6*\x))});
+\draw[dashed, red] (0,1.3) -- (0,2.3);
+\draw[dashed, red] (3.93,1.3) -- (3.93,2.3);
+\draw[<->, red] (0,1.1) -- (3.93,1.1);
+\node[red, below, font=\footnotesize] at (1.96,1.05) {$T_n$};
+% space axis
+\draw[->] (-0.3,-1.8) -- (7.5,-1.8) node[right] {$x$};
+\draw[green!60!black, very thick, domain=0:7, samples=150]
+  plot (\x, {-1.8 + 0.5*sin(deg(1.6*\x))});
+\draw[dashed, orange] (0,-2.3) -- (0,-1.3);
+\draw[dashed, orange] (3.93,-2.3) -- (3.93,-1.3);
+\draw[<->, orange] (0,-2.5) -- (3.93,-2.5);
+\node[orange, below, font=\footnotesize] at (1.96,-2.55) {$\lambda_n$};
+\node[align=center, font=\small] at (3.6,0.2) {波 $f(x,t)$ 的双重周期结构：\\时间周期 $T_n=2\pi/\omega_n$（上）；空间波长 $\lambda_n=2\pi/k_n$（下）};
+\end{tikzpicture}
+\caption{波的双重周期结构：时间轴上的周期 $T_n$ 与空间轴上的波长 $\lambda_n$。}
+\label{fig:wave_double_period}
+\end{figure}
+
+\section{周期变换与分量提取}
+
+\begin{definition}[周期变换——分量提取]\label{def:periodic_transform_component}
+设 $f$ 为傅里叶级数，频率字典为 $\Lambda = \{\omega_{p,n}\}$。\textbf{周期变换}（定义 \ref{def:periodic_transform}）提取分量：
+\[
+\mathcal{P}_\Lambda f(p,n) = M\{f(t) e^{-i\omega_{p,n} t}\} = A_{p,n} e^{i\phi_{p,n}}.
+\]
+周期变换是建模链条的倒数第二步——它将傅里叶级数转化为显式的分量四元组。
+\end{definition}
+
+\begin{theorem}[分量提取的唯一性]\label{thm:component_uniqueness}
+周期变换提取的分量四元组 $(A_{p,n}, \omega_{p,n}, \phi_{p,n}, T_p)$ 由周期函数 $f$ 唯一确定。
+\end{theorem}
+
+\begin{proof}
+由定理 \ref{thm:periodic_series_bohr}（玻尔唯一性）直接得出。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{fittikz}
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.6cm,
+  box/.style={draw, rounded corners, align=center, minimum width=3.0cm, minimum height=0.9cm, fill=blue!8, font=\small}]
+\node[box, fill=blue!12] (f) {周期函数\\$f(t)$};
+\node[box, fill=green!12, right=of f] (pd) {频率字典\\$\Lambda=\{\omega_{p,n}\}$};
+\node[box, fill=orange!12, right=of pd] (pt) {周期变换\\$\mathcal{P}_\Lambda f(p,n)$};
+\node[box, fill=red!12, right=of pt] (comp) {分量\\$(A_{p,n},\omega_{p,n},\phi_{p,n},T_p)$};
+\draw[->, very thick] (f) -- (pd);
+\draw[->, very thick] (pd) -- (pt);
+\draw[->, very thick] (pt) -- (comp);
+\node[align=center, font=\small, below=1.0cm of pt] {提取系数：$\mathcal{P}_\Lambda f(p,n)=M\{f(t)e^{-i\omega_{p,n}t}\}=A_{p,n}e^{i\phi_{p,n}}$};
+\end{tikzpicture}
+\end{fittikz}
+\caption{周期变换与分量提取：从周期函数出发，经频率字典，提取唯一的四元组分量。}
+\label{fig:periodic_transform_extraction}
+\end{figure}
+
+\section{基本变换对具有周期轨道的群的保持}
+
+\begin{proposition}[平移保持周期]\label{prop:period_translation}
+设 $f:\mathbb{R}\to V$ 为周期函数，$a\in\mathbb{R}$，定义 $f$ 的\textbf{平移} $(\tau_a f)(t) := f(t+a)$。则对任意 $T\in\operatorname{Group}_{\mathrm{period}}(f)$ 都有 $T\in\operatorname{Group}_{\mathrm{period}}(\tau_a f)$，故
+\[
+\operatorname{Group}_{\mathrm{period}}(\tau_a f) = \operatorname{Group}_{\mathrm{period}}(f), \qquad T_0(\tau_a f) = T_0(f).
+\]
+即平移是周期结构的基本保持变换。
+\end{proposition}
+
+\begin{proof}
+设 $T\in\operatorname{Group}_{\mathrm{period}}(f)$。对任意 $t\in\mathbb{R}$，
+\[
+(\tau_a f)(t+T) = f(t+T+a) = f(t+a) = (\tau_a f)(t),
+\]
+故 $T\in\operatorname{Group}_{\mathrm{period}}(\tau_a f)$，即 $\operatorname{Group}_{\mathrm{period}}(f)\subseteq\operatorname{Group}_{\mathrm{period}}(\tau_a f)$。
+反之设 $T\in\operatorname{Group}_{\mathrm{period}}(\tau_a f)$，对任意 $s\in\mathbb{R}$ 取 $t = s-a$，得
+\[
+f(s+T) = f\bigl((s-a)+T+a\bigr) = (\tau_a f)(s-a+T) = (\tau_a f)(s-a) = f(s),
+\]
+故 $T\in\operatorname{Group}_{\mathrm{period}}(f)$，两个具有周期轨道的群相等，最小正周期随之相同。
+\end{proof}
+
+\begin{proposition}[缩放与旋转下具有周期轨道的群的变换]\label{prop:scaling_rotation_period}
+设 $f$ 为周期函数，$q>0$ 与 $\theta\in\mathbb{R}$ 分别对应缩放与相位旋转。则
+\[
+\operatorname{Group}_{\mathrm{period}}(f(q\,\cdot)) = \frac{1}{q}\operatorname{Group}_{\mathrm{period}}(f), \qquad
+\operatorname{Group}_{\mathrm{period}}(e^{i\theta} f) = \operatorname{Group}_{\mathrm{period}}(f).
+\]
+即缩放将具有周期轨道的群反比压缩，而相位旋转不改变具有周期轨道的群。
+\end{proposition}
+
+\begin{proof}
+缩放：令 $g(t)=f(qt)$。$T\in\operatorname{Group}_{\mathrm{period}}(g)$ 当且仅当 $f(q(t+T))=f(qt)$，即 $qT\in\operatorname{Group}_{\mathrm{period}}(f)$，故 $\operatorname{Group}_{\mathrm{period}}(g)=\frac{1}{q}\operatorname{Group}_{\mathrm{period}}(f)$。相位旋转：$\operatorname{Group}_{\mathrm{period}}(e^{i\theta}f)$ 与 $\operatorname{Group}_{\mathrm{period}}(f)$ 相等，因为 $|e^{i\theta}|=1$ 不改变 $f$ 的取值在时间上的对应关系。
+\end{proof}
+
+\begin{proposition}[具有周期轨道的群是闭子群]\label{prop:group_with_periodic_orbits_closed}
+设 $f:\mathbb{R}\to V$ 连续，则 $\operatorname{Group}_{\mathrm{period}}(f)$ 是 $\mathbb{R}$ 的闭子群。特别地，$\operatorname{Group}_{\mathrm{period}}(f)$ 或等于 $\mathbb{R}$（$f$ 常值），或等于 $T_0\mathbb{Z}$（$f$ 非常值周期函数）。
+\end{proposition}
+
+\begin{proof}
+闭性：设 $T_k\in\operatorname{Group}_{\mathrm{period}}(f)$ 且 $T_k\to T$。由 $f$ 连续，$f(t+T)=\lim_k f(t+T_k)=\lim_k f(t)=f(t)$，故 $T\in\operatorname{Group}_{\mathrm{period}}(f)$，$\operatorname{Group}_{\mathrm{period}}(f)$ 闭。子群：若 $T_1,T_2\in\operatorname{Group}_{\mathrm{period}}(f)$，则 $f(t+T_1-T_2)=f((t-T_2)+T_1)=f(t-T_2)=f(t)$，故 $T_1-T_2\in\operatorname{Group}_{\mathrm{period}}(f)$。$\mathbb{R}$ 的闭子群或为 $\mathbb{R}$，或为离散群 $T_0\mathbb{Z}$，前者对应常值函数，后者对应最小正周期 $T_0$。
+\end{proof}
+
+\section{具有周期轨道的群与守恒律}
+
+\begin{remark}[具有周期轨道的群的诺特对应——周期函数版（经验观察／研究纲领）]\label{thm:noether_group_with_periodic_orbits}
+下面的三条对应是\textbf{经验观察／研究纲领}，不是本框架内已证明的定理（「周期基础」章 \cref{rem:noether} 已声明其框架内只给出轨道计数型不变量构造，不含需要拉格朗日变分结构的诺特定理）：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平移具有周期轨道的群}：对应能量守恒（帕塞瓦尔恒等式）。
+    \item \textbf{旋转具有周期轨道的群}：对应角动量守恒（简谐分量独立角动量守恒）。
+    \item \textbf{缩放具有周期轨道的群}：对应标度荷守恒（对数域平移不变性）。
+\end{enumerate}
+可严格证明的只有 (i) 中由 \cref{thm:parseval_periodic} 给出的能量恒等式（它是帕塞瓦尔恒等式本身，与「对称」无关地成立）；(ii) 的 $L_k$ 与 (iii) 的「标度荷」在本章均无独立定义，二者的「对应」目前只是与「群与群函数」章相同形式的重述。
+\end{remark}
+
+\begin{theorem}[帕塞瓦尔恒等式]\label{thm:parseval_periodic}
+设 $f(t)=\sum_{n}A_ne^{i(\omega_nt+\phi_n)}$ 以 $T$ 为周期且 $f\in L^2[0,T]$。则
+\[
+\frac{1}{T}\int_0^T |f(t)|^2\,dt = \sum_n A_n^2.
+\]
+即时间平均能量等于各分量振幅平方之和。
+\end{theorem}
+
+\begin{proof}
+由正交性 $\frac{1}{T}\int_0^T e^{i(\omega_m-\omega_n)t}dt=\delta_{mn}$，
+\[
+\frac{1}{T}\int_0^T |f|^2\,dt = \sum_{m,n}A_mA_ne^{i(\phi_m-\phi_n)}\frac{1}{T}\int_0^T e^{i(\omega_m-\omega_n)t}dt = \sum_n A_n^2.
+\]
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.4cm and 1.4cm,
+  box/.style={draw, rounded corners, align=center, minimum width=3.0cm, minimum height=0.9cm, fill=blue!8, font=\small}]
+\node[box, fill=blue!12] (pg1) {平移具有周期轨道的群\\$T\mathbb{Z}$};
+\node[box, fill=green!12, right=of pg1] (pg2) {旋转具有周期轨道的群\\$\langle e^{i\theta_0}\rangle$};
+\node[box, fill=orange!12, right=of pg2] (pg3) {缩放具有周期轨道的群\\$\langle q_0\rangle$};
+\node[box, fill=blue!6, below=of pg1] (c1) {能量守恒\\帕塞瓦尔恒等式};
+\node[box, fill=green!6, below=of pg2] (c2) {角动量守恒\\简谐分量 $L_k$};
+\node[box, fill=orange!6, below=of pg3] (c3) {标度荷守恒\\对数域平移};
+\draw[->, very thick] (pg1) -- (c1);
+\draw[->, very thick] (pg2) -- (c2);
+\draw[->, very thick] (pg3) -- (c3);
+\node[align=center, font=\small] at (5.8,-4.0) {具有周期轨道的群的诺特对应：三种具有周期轨道的群分别对应三种守恒量};
+\end{tikzpicture}
+\caption{具有周期轨道的群的诺特对应（\textbf{经验观察／研究纲领}）：平移、旋转、缩放具有周期轨道的群分别对应能量、角动量、标度荷守恒。}
+\label{fig:noether_group_with_periodic_orbits}
+\end{figure}
+
+\section{周期卷积：四算子形式}
+
+\begin{definition}[周期卷积（四算子形式）]\label{def:periodic_convolution_four_operators}
+设 $f, g$ 为傅里叶级数。$f$ 与 $g$ 的\textbf{周期卷积}为
+\[
+(f \circledast g)(\tau) := \sum_{p,q} \Theta_{p,q} \sum_{n,m} W(\omega_{p,n} - \nu_{q,m}) \cdot (A_{p,n} B_{q,m})^{\alpha} \cdot S^{(d)}(\phi_{p,n}, \psi_{q,m}) \cdot e^{i\nu_{q,m} \tau},
+\]
+四个算子：振幅算子 $\mathfrak{A}_\alpha$（缩放）、频率算子 $\mathfrak{F}_{W,\tau}$（平移）、相位算子 $\mathfrak{P}_d$（旋转）、周期算子 $\mathfrak{T}$（定长）。
+\end{definition}
+
+\begin{proposition}[四算子的算子对应]\label{prop:periodic_convolution_grammar}
+振幅算子与周期算子分属缩放算子的值轴与时间轴；频率算子属平移算子；相位算子属旋转算子。
+\end{proposition}
+
+\begin{proof}
+由定义 \ref{def:periodic_convolution_four_operators} 逐项验证。
+\end{proof}
+
+\begin{proposition}[周期卷积是核化卷积的周期维度推广]\label{prop:periodic_convolution_kernelized}
+单周期层（$P = Q = \{T\}$，$\Theta \equiv 1$）时，周期卷积化为核化卷积。
+\end{proposition}
+
+\begin{proof}
+代入即得。
+\end{proof}
+
+\begin{theorem}[周期卷积的三种退化]\label{thm:periodic_convolution_degeneracies}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{经典极限}：$W \to \delta$ 退化为互相关/循环卷积。
+    \item \textbf{相似度/趋势层}：$\alpha = 0$ 给出相似度卷积，$\alpha = 1$ 给出趋势卷积。
+    \item \textbf{跨周期层}：跨周期项由 $\Theta_{p,q}$ 与 $W$ 共同控制。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+核宽极限使非对角项消失；$\tau = 0$ 给出矩阵元素；跨周期项携带 $\Theta_{p,q} W$ 因子。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.0cm,
+  core/.style={draw, very thick, rounded corners, align=center, minimum width=4.0cm, minimum height=1.1cm, fill=orange!15, font=\small},
+  op/.style={draw, rounded corners, align=center, minimum width=2.6cm, minimum height=0.9cm, fill=blue!8, font=\small}]
+\node[core] (core) at (0,0) {周期卷积 $(f\circledast g)(\tau)$};
+\node[op, fill=blue!12]  (A) at (-5.4,1.6)  {振幅算子 $\mathfrak{A}_\alpha$\\（缩放）};
+\node[op, fill=green!12] (F) at (-2.0,1.6)  {频率算子 $\mathfrak{F}_{W,\tau}$\\（平移）};
+\node[op, fill=red!12]   (P) at (2.0,1.6)   {相位算子 $\mathfrak{P}_d$\\（旋转）};
+\node[op, fill=purple!12](T) at (5.4,1.6)   {周期算子 $\mathfrak{T}$\\（定长）};
+\draw[->, very thick] (A) -- (core);
+\draw[->, very thick] (F) -- (core);
+\draw[->, very thick] (P) -- (core);
+\draw[->, very thick] (T) -- (core);
+\node[align=center, font=\small, below=1.0cm of core] {$(A_{p,n}B_{q,m})^\alpha$；$W(\omega_{p,n}-\nu_{q,m})$；$S^{(d)}(\phi_{p,n},\psi_{q,m})$；$e^{i\nu_{q,m}\tau}$};
+\end{tikzpicture}
+\caption{周期卷积的四算子结构：振幅、频率、相位、周期算子分别对应缩放、平移、旋转、定长。}
+\label{fig:periodic_convolution_operators}
+\end{figure}
+
+\begin{example}[周期为 2 的周期卷积矩阵]\label{ex:period_two_periodic_convolution}
+趋势卷积矩阵为
+\[
+\mathbb{T} = \begin{pmatrix} c_0\overline{d_0} & c_0\overline{d_1} \\ c_1\overline{d_0} & c_1\overline{d_1} \end{pmatrix}.
+\]
+\end{example}
+
+\section{建模示例：光源—光波—光谱}
+
+\begin{example}[光源—光波—光谱的完整建模链条]\label{ex:light_source_modelling}
+\textbf{物理系统}：光源发出电磁波。
+
+\textbf{平移/缩放/旋转}：时间平移 $t \mapsto t+T$（光源持续发光）；频率缩放 $\omega \mapsto \lambda\omega$（改变颜色）。
+
+\textbf{守恒律}：能量守恒（光强不随时间衰减）——时间平移对称性的守恒量。
+
+\textbf{对称性}：时间平移对称群 $\mathbb{R}$。
+
+\textbf{周期函数}：单色光的电场分量 $E(t) = A e^{i(\omega t + \phi)}$。
+
+\textbf{具有周期轨道的群}：$\operatorname{Group}_{\mathrm{period}}(E) = T\mathbb{Z}$，$T = 2\pi/\omega$。
+
+\textbf{傅里叶级数}：实际光源（如太阳）发出连续光谱：
+\[
+E(t) = \sum_{n} A_n e^{i(\omega_n t + \phi_n)},
+\]
+每个频率分量是一个简谐分量，振幅谱 $\{A_n\}$ 即\textbf{光谱}。
+
+\textbf{波}：光波在空间中传播：
+\[
+E(x,t) = \sum_n A_n e^{i(k_n x - \omega_n t + \phi_n)}, \quad k_n = \omega_n / c.
+\]
+波长 $\lambda_n = 2\pi/k_n = 2\pi c/\omega_n$。
+
+\textbf{周期变换}：玻尔提取给出光谱分量 $\mathcal{P}_\Lambda E(n) = A_n e^{i\phi_n}$。
+
+\textbf{分量}：四元组 $(A_n, \omega_n, \phi_n, T_n)$ 完全参数化光谱线。
+\end{example}
+
+\begin{example}[声音—声波—频谱]\label{ex:sound_modelling}
+\textbf{物理系统}：乐器发出声波。
+
+\textbf{守恒律}：能量守恒（声强不随时间衰减）。
+
+\textbf{周期函数}：声压 $p(t) = \sum_n A_n \cos(n\omega_0 t + \phi_n)$（基频 $\omega_0$ 的谐波）。
+
+\textbf{具有周期轨道的群}：$\operatorname{Group}_{\mathrm{period}}(p) = T\mathbb{Z}$，$T = 2\pi/\omega_0$。
+
+\textbf{傅里叶级数}：频谱 $\{A_n\}$ 即音色。
+
+\textbf{波}：声波传播 $p(x,t) = \sum_n A_n \cos(k_n x - n\omega_0 t + \phi_n)$。
+
+\textbf{分量}：$(A_n, n\omega_0, \phi_n, T/n)$。
+\end{example}
+
+\begin{example}[时钟—指针—时间]\label{ex:clock_modelling}
+\textbf{物理系统}：时钟。
+
+\textbf{平移}：时间平移（时钟持续运行）。
+
+\textbf{守恒律}：能量守恒（时钟的驱动力恒定）。
+
+\textbf{周期函数}：指针角度 $\theta(t) = \omega t$。
+
+\textbf{具有周期轨道的群}：$\operatorname{Group}_{\mathrm{period}}(\theta) = T\mathbb{Z}$，$T = 2\pi/\omega$。
+
+\textbf{傅里叶级数}：单频率简谐分量。
+
+\textbf{分量}：$(A=1, \omega, \phi=0, T)$。
+\end{example}
+
+\begin{example}[方波的傅里叶级数]\label{ex:square_wave_fourier}
+设方波 $f(t)=\operatorname{sgn}(\sin(\omega_0 t))$，主周期 $T=2\pi/\omega_0$。其傅里叶级数为
+\[
+f(t) = \frac{4}{\pi}\sum_{k=0}^{\infty} \frac{1}{2k+1}\sin\bigl((2k+1)\omega_0 t\bigr).
+\]
+即只有奇次谐波分量 $A_{2k+1} = 4/((2k+1)\pi)$，相位 $\phi_{2k+1}=-\pi/2$。分量随频率 $1/n$ 衰减——这正是方波包含高频尖角的频谱体现。
+\end{example}
+
+\begin{example}[锯齿波的傅里叶级数]\label{ex:sawtooth_fourier}
+设锯齿波 $f(t)=\frac{2}{\pi}\sum_{n=1}^\infty\frac{(-1)^{n+1}}{n}\sin(n\omega_0 t)$，主周期 $T=2\pi/\omega_0$。分量 $A_n = 2/(\pi n)$ 覆盖全部整数次谐波——比方波包含更多偶次分量。
+\end{example}
+
+\begin{table}[htbp]
+    \centering
+    \caption{三个建模示例的链条对照表}
+    \label{tab:modelling_examples}
+    \small
+    \renewcommand{\arraystretch}{1.25}
+    \begin{tabular}{@{}p{2.0cm} p{3.6cm} p{3.6cm} p{3.6cm}@{}}
+    \toprule
+    建模环节 & 光源—光波 & 声源—声波 & 时钟—指针 \\
+    \midrule
+    物理系统 & 光源 & 乐器 & 时钟 \\
+    基本变换 & 时间平移 + 频率缩放 & 时间平移 & 时间平移 \\
+    守恒律 & 能量守恒 & 能量守恒 & 能量守恒 \\
+    周期函数 & 电场 $E(t)$ & 声压 $p(t)$ & 角度 $\theta(t)$ \\
+    具有周期轨道的群 & $T\mathbb{Z}$，$T=2\pi/\omega$ & $T\mathbb{Z}$，$T=2\pi/\omega_0$ & $T\mathbb{Z}$，$T=2\pi/\omega$ \\
+    傅里叶级数 & 连续谱 $\{A_n\}$ & 谐波谱 $\{A_n\}$ & 单频分量 \\
+    波 & $E(x,t)$，$k_n=\omega_n/c$ & $p(x,t)$，$k_n=n\omega_0/c$ & 无空间传播 \\
+    分量 & $(A_n,\omega_n,\phi_n,T_n)$ & $(A_n,n\omega_0,\phi_n,T/n)$ & $(1,\omega,0,T)$ \\
+    \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{remark}[傅里叶级数与玻尔级数的区别]\label{rem:fourier_bohr_distinction}
+对于以 $T$ 为周期的 $L^2$ 函数，傅里叶级数按频率 $\omega_n=2\pi n/T$ 离散展开，系数由正交性唯一确定。对于更一般的\textbf{准周期函数}（频率由有限或可数多个不可公度基频生成），展开式称为\textbf{玻尔级数}，其系数由玻尔平均唯一确定（定理 \ref{thm:periodic_series_bohr}）。本章统一以“傅里叶级数”称呼两者的共同形式，以便建模链条保持统一。
+\end{remark}
+
+\begin{remark}[周期函数与准周期函数]\label{rem:periodic_quasiperiodic}
+周期函数的具有周期轨道的群是离散群 $T\mathbb{Z}$。准周期函数的“频率群”由多个不可公度频率生成的 $\mathbb{Z}$-线性组合构成，此时不存在非零的单一周期 $T$，但函数仍可展开为玻尔级数。这一区分在物理上对应“单一音调”与“和弦”的差别。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 建模链条的平移环节；频率算子 $\mathfrak{F}_{W,\tau}$ 携带平移信息 \\
+缩放 & 建模链条的缩放环节；振幅算子 $\mathfrak{A}_\alpha$；振幅分量 $A_{p,n}$ \\
+旋转 & 建模链条的旋转环节；相位算子 $\mathfrak{P}_d$；相位算子群 $C_N$（命题 \ref{prop:phase_operator_group}） \\
+守恒 & 建模链条的守恒律环节；简谐分量三大守恒量（定理 \ref{thm:harmonic_three_conservations}）；诺特对应（\textbf{经验观察／研究纲领}，见注 \ref{thm:noether_group_with_periodic_orbits}） \\
+对称 & 建模链条的对称性环节；具有周期轨道的群的作用 $T\mathbb{Z}$、$\langle q_0\rangle$、$\langle e^{i\theta_0}\rangle$、$\Lambda$ \\
+闭合 & 守恒律保证的闭合轨道：简谐分量 $Ae^{i(\omega t+\phi)}$ 与商空间 $\mathbb{R}/T\mathbb{Z}\cong S^1$ \\
+周期 & 建模链条的周期环节；分量四元组 $(A_{p,n}, \omega_{p,n}, \phi_{p,n}, T_p)$（定义 \ref{def:period_parameters}）；波的双重周期（命题 \ref{prop:wave_double_period}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 根据定义 \ref{def:modelling_chain}，说明周期结构建模的完整链条如何从物理系统出发，
+    经基本变换、守恒律、对称性、周期函数、具有周期轨道的群、傅里叶级数、波、周期变换，
+    最终到达分量四元组。请以声源为例（例 \ref{ex:sound_modelling}），
+    逐环节写出建模链条的具体内容，并指出哪一环节是本章的核心。
+
+    \item 验证定义 \ref{def:period_parameters} 中周期函数的四元组分量：
+    \[
+    (A_{p,n},\omega_{p,n},\phi_{p,n},T_p),
+    \]
+    并说明振幅分量、频率分量、相位分量与周期分量分别对应“缩放”“平移”“旋转”“定长”
+    四种操作。请结合表 \ref{tab:period_parameters} 中的物理含义，
+    以钟摆振动为例写出各分量的具体数值。
+
+    \item 证明性质 \ref{prop:frequency_dictionary_structure}：
+    频率字典 $\Lambda$ 是 $\frac{2\pi}{T}\mathbb{Z}$ 的子集；若 $f\in L^2$，则 $\Lambda$ 至多可数。
+    请说明为什么频率字典是周期变换的输入数据。
+
+    \item 证明定理 \ref{thm:harmonic_three_conservations}：
+    简谐分量 $\gamma(t)=Ae^{i(\omega t+\phi)}$ 的三大守恒量：
+    \begin{enumerate}[label=(\roman*)]
+        \item 角动量 $L=mA^2\omega$；
+        \item 面积速度 $\frac{dS}{dt}=\frac12A^2|\omega|$；
+        \item 动能 $E_k=\frac12mA^2\omega^2$。
+    \end{enumerate}
+    请用速度向量 $\dot{\mathbf{r}}(t)=i\omega Ae^{i\omega t}$ 与 $\mathbf{r}\perp\dot{\mathbf{r}}$
+    完成证明，并说明为什么三项均不随时间变化。
+
+    \item 证明定理 \ref{thm:nested_harmonic_conservation}：
+    嵌套简谐分量系统中，每一级简谐分量各自独立满足三大守恒量，
+    总角动量为
+    \[
+    \mathbf{L}_{\text{total}}=\sum_{k=1}^K m_kA_k^2\omega_k\cdot\mathbf{k}.
+    \]
+    请说明为什么各级之间互不耦合，
+    并计算 $K=3$ 时 $m_1=m_2=m_3=1$、$A_k=1/k$、$\omega_k=k$ 的总角动量。
+
+    \item 证明命题 \ref{prop:phase_operator_group}：
+    相位算子群的四条结构性质：
+    \begin{enumerate}[label=(\roman*)]
+        \item $\mathcal{P}_N\cong C_N$；
+        \item $\mathcal{P}_\infty=S^1\cong U(1)$；
+        \item $\mathcal{P}_N\subset\mathcal{P}_\infty$；
+        \item $N\to\infty$ 时 $\mathcal{P}_N$ 在 $S^1$ 中稠密。
+    \end{enumerate}
+    请分别验证四种情形，并说明 $\mathcal{O}_a\cdot\mathcal{O}_b=\mathcal{O}_{(a+b)\bmod N}$。
+
+    \item 证明命题 \ref{prop:phase_operator_orthogonality}：
+    相位算子满足正交性
+    \[
+    \frac{1}{N}\sum_{j=0}^{N-1}\mathcal{O}_j^{(N)}\overline{\mathcal{O}_{j+k-l}^{(N)}}=\delta_{kl}.
+    \]
+    请说明这一正交性如何对应傅里叶级数系数的提取。
+
+    \item 验证例 \ref{ex:phase_operators_c2} 与例 \ref{ex:phase_operators_c4}：
+    \begin{enumerate}[label=(\roman*)]
+        \item $\mathcal{O}_0^{(2)}=1$，$\mathcal{O}_1^{(2)}=-1$，构成 $C_2$；
+        \item $\mathcal{O}_0^{(4)}=1$，$\mathcal{O}_1^{(4)}=i$，$\mathcal{O}_2^{(4)}=-1$，$\mathcal{O}_3^{(4)}=-i$，构成 $C_4$。
+    \end{enumerate}
+    请画出 $C_2$ 与 $C_4$ 在单位圆上的分布，
+    并说明 $\mathcal{O}_1^{(4)}=i$ 如何对应 $90^\circ$ 旋转。
+
+    \item 证明命题 \ref{prop:wave_double_period}：
+    波 $f(x,t)=\sum_nA_ne^{i(k_nx-\omega_nt+\phi_n)}$ 具有双重周期结构：
+    \begin{enumerate}[label=(\roman*)]
+        \item 时间周期：$f(x,t+T_n)=f(x,t)$，$T_n=2\pi/\omega_n$；
+        \item 空间周期：$f(x+\lambda_n,t)=f(x,t)$，$\lambda_n=2\pi/k_n$。
+    \end{enumerate}
+    请分别验证两个周期条件，并证明波数与角频率由色散关系耦合为 $\lambda_n=cT_n$。
+
+    \item 证明命题 \ref{prop:wave_satisfies_wave_equation}：
+    波 $f(x,t)$ 满足一维波动方程
+    \[
+    \frac{\partial^2 f}{\partial t^2}=c^2\frac{\partial^2 f}{\partial x^2}.
+    \]
+    请说明色散关系 $\omega_n=ck_n$ 在证明中的作用，并证明推论 \ref{cor:dispersion_double_period}。
+
+    \item 证明命题 \ref{prop:wave_periodic_function}：
+    波 $f(x,t)$ 在固定空间位置 $x=x_0$ 处退化为时间周期函数；
+    在固定时刻 $t=t_0$ 处退化为空间周期函数。
+    请分别写出两种退化情形下的傅里叶级数表达式，
+    并说明波数 $k_n$ 与角频率 $\omega_n$ 分别对应的周期结构。
+
+    \item 证明定理 \ref{thm:component_uniqueness}：
+    周期变换提取的分量四元组 $(A_{p,n},\omega_{p,n},\phi_{p,n},T_p)$
+    由周期函数 $f$ 唯一确定。
+    请用玻尔唯一性定理（定理 \ref{thm:periodic_series_bohr}）完成证明，
+    并说明为什么“分量提取的唯一性”是建模链条可靠性的保证。
+
+    \item 证明命题 \ref{prop:period_translation}：
+    设 $f:\mathbb{R}\to V$ 为周期函数，$a\in\mathbb{R}$，定义平移
+    \[
+    (\tau_af)(t)=f(t+a),
+    \]
+    则
+    \[
+    \operatorname{Group}_{\mathrm{period}}(\tau_af)=\operatorname{Group}_{\mathrm{period}}(f),\qquad
+    T_0(\tau_af)=T_0(f).
+    \]
+    请分别证明 $\operatorname{Group}_{\mathrm{period}}(f)\subseteq\operatorname{Group}_{\mathrm{period}}(\tau_af)$\\
+    与 $\operatorname{Group}_{\mathrm{period}}(\tau_af)\subseteq\operatorname{Group}_{\mathrm{period}}(f)$。
+
+    \item 证明命题 \ref{prop:scaling_rotation_period}：
+    设 $f$ 为周期函数，$q>0$ 与 $\theta\in\mathbb{R}$ 分别对应缩放与相位旋转，则
+    \[
+    \operatorname{Group}_{\mathrm{period}}(f(q\,\cdot))=\frac{1}{q}\operatorname{Group}_{\mathrm{period}}(f),\qquad
+    \operatorname{Group}_{\mathrm{period}}(e^{i\theta}f)=\operatorname{Group}_{\mathrm{period}}(f).
+    \]
+    请说明为什么缩放会反比压缩具有周期轨道的群，而相位旋转不改变具有周期轨道的群。
+
+    \item 证明命题 \ref{prop:group_with_periodic_orbits_closed}：
+    设 $f:\mathbb{R}\to V$ 连续，则 $\operatorname{Group}_{\mathrm{period}}(f)$ 是 $\mathbb{R}$ 的闭子群，
+    因而或等于 $\mathbb{R}$，或等于 $T_0\mathbb{Z}$。
+    请用闭性和子群性质完成证明，并说明该结论为什么是周期结构“离散化”的代数根源。
+
+    \item 讨论注 \ref{thm:noether_group_with_periodic_orbits} 中的\textbf{经验观察／研究纲领}——具有周期轨道的群的诺特对应：
+    具有周期轨道的群的诺特对应：
+    \begin{enumerate}[label=(\roman*)]
+        \item 平移具有周期轨道的群对应能量守恒（帕塞瓦尔恒等式）；
+        \item 旋转具有周期轨道的群对应角动量守恒（简谐分量独立角动量守恒）；
+        \item 缩放具有周期轨道的群对应标度荷守恒（对数域平移不变性）。
+    \end{enumerate}
+    请分别写出三种守恒量的具体形式，
+    并说明它们与相应具有周期轨道的群的作用的对应关系；
+    再指出这三条中哪一条可以在本章框架内严格证明，哪两条目前只是形式类比。
+
+    \item 证明定理 \ref{thm:parseval_periodic}：
+    帕塞瓦尔恒等式
+    \[
+    \frac{1}{T}\int_0^T|f(t)|^2\,dt=\sum_nA_n^2.
+    \]
+    请用相位算子的正交性完成证明，并说明该恒等式如何量化“能量守恒”。
+
+    \item 验证定义 \ref{def:periodic_convolution_four_operators} 中周期卷积的四算子形式：
+    \[
+    (f\circledast g)(\tau)
+    =\sum_{p,q}\Theta_{p,q}\sum_{n,m}
+    W(\omega_{p,n}-\nu_{q,m})\cdot(A_{p,n}B_{q,m})^{\alpha}
+    \cdot S^{(d)}(\phi_{p,n},\psi_{q,m})\cdot e^{i\nu_{q,m}\tau}.
+    \]
+    请分别指出振幅算子、频率算子、相位算子、周期算子在公式中的位置，
+    并说明它们分别对应缩放、平移、旋转、定长四种操作
+    （参见命题 \ref{prop:periodic_convolution_grammar}）。
+
+    \item 证明命题 \ref{prop:periodic_convolution_kernelized}：
+    单周期层（$P=Q=\{T\}$，$\Theta\equiv1$）时，
+    周期卷积化为核化卷积。请写出退化后的表达式，
+    并说明核化卷积如何保留全部频率对的交互。
+
+    \item 证明定理 \ref{thm:periodic_convolution_degeneracies}：
+    周期卷积的三种退化：
+    \begin{enumerate}[label=(\roman*)]
+        \item 经典极限：$W\to\delta$ 退化为互相关/循环卷积；
+        \item 相似度/趋势层：$\alpha=0$ 给出相似度卷积，$\alpha=1$ 给出趋势卷积；
+        \item 跨周期层：跨周期项由 $\Theta_{p,q}$ 与 $W$ 共同控制。
+    \end{enumerate}
+    请分别写出三种退化情形下的具体形式，
+    并说明为什么每一级退化都对应信息量的严格减少。
+
+    \item 验证例 \ref{ex:period_two_periodic_convolution}：
+    周期为 $2$ 的周期卷积矩阵
+    \[
+    \mathbb{T}=\begin{pmatrix}
+    c_0\overline{d_0}&c_0\overline{d_1}\\
+    c_1\overline{d_0}&c_1\overline{d_1}
+    \end{pmatrix}.
+    \]
+    请取 $c_0=1$、$c_1=i$、$d_0=1$、$d_1=-i$，
+    计算趋势卷积矩阵 $\mathbb{T}$，并验证其元素满足
+    $\mathbb{T}_{mn}=c_m\overline{d_n}$。
+
+    \item 验证例 \ref{ex:square_wave_fourier} 与例 \ref{ex:sawtooth_fourier}：
+    写出方波与锯齿波的傅里叶级数，比较两者的谱结构与衰减率。请说明为什么方波只包含奇次谐波，而锯齿波包含全部谐波。
+
+    \item 说明注 \ref{rem:fourier_bohr_distinction} 中傅里叶级数与玻尔级数的区别：
+    傅里叶级数的频率字典是 $\frac{2\pi}{T}\mathbb{Z}$ 的子集；
+    玻尔级数的“频率群”是多个不可公度频率生成的 $\mathbb{Z}$-线性组合。
+    请给出一个准周期函数的具体例子，并说明它不具有非零的最小周期。
+
+    \item 综合题：结合建模链条（定义 \ref{def:modelling_chain}）、
+    周期函数的四元组分量（定义 \ref{def:period_parameters}）、
+    简谐分量与守恒律（定义 \ref{def:harmonic_component}、定理 \ref{thm:harmonic_three_conservations}）、
+    相位算子（定义 \ref{def:discrete_phase_operator}）、
+    波的双重周期（命题 \ref{prop:wave_double_period}）
+    与周期卷积四算子（定义 \ref{def:periodic_convolution_four_operators}），
+    说明周期函数与具有周期轨道的群如何把周期数学的三大主题——平移、缩放、旋转——
+    统一在“振幅、频率、相位、周期”四参数框架下。
+    请分别指出：
+    \begin{enumerate}[label=(\roman*)]
+        \item 振幅如何对应缩放操作；
+        \item 频率如何对应平移操作；
+        \item 相位如何对应旋转操作；
+        \item 周期如何对应定长操作。
+    \end{enumerate}
+\end{enumerate}
+

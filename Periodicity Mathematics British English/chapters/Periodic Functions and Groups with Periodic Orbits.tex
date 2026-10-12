@@ -1,0 +1,987 @@
+\chapter{Periodic Functions and Groups with Periodic Orbits}
+\markboth{Periodic Functions and Groups with Periodic Orbits}{Periodic Functions and Groups with Periodic Orbits}
+
+\begin{remark}[Positioning of This Chapter]\label{rem:periodic_function_chapter_positioning}
+The central task of this chapter is to model systems with periodic structure as periodic functions, groups with periodic orbits, Fourier series, waves, periodic transformations and components. This chapter does not repeat the definitions of series and convolution given in the preceding chapters; it inherits them by reference and focuses on \textbf{modelling methodology}.
+
+The modelling chain is:
+\[
+\begin{aligned}
+\text{Physical system} &\longrightarrow \text{Translation/scaling/rotation} \longrightarrow \text{Conservation law} \\
+&\longrightarrow \text{Symmetry} \longrightarrow \text{Periodic function} \\
+&\longrightarrow \text{Group with periodic orbits} \longrightarrow \text{Fourier series} \\
+&\longrightarrow \text{Wave} \longrightarrow \text{Periodic transformation} \longrightarrow \text{Component}
+\end{aligned}
+\]
+
+The meaning of each link is as follows:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Physical system} $\mathcal{S}$: concrete objects such as a light source, a sound source or a clock;
+    \item \textbf{Translation/scaling/rotation}: the fundamental transformations of the system;
+    \item \textbf{Conservation law}: the conserved quantities corresponding to the fundamental transformations (energy, angular momentum, scale charge);
+    \item \textbf{Symmetry}: the symmetry group $G$ guaranteed by the conservation law;
+    \item \textbf{Periodic function}: the periodic function $f(t)$ guaranteed by symmetry (Definition \ref{def:periodic_function_gf});
+    \item \textbf{Group with periodic orbits}: $\operatorname{Group}_{\mathrm{period}}(f)$ (Definition \ref{def:group_with_periodic_orbits_gf});
+    \item \textbf{Fourier series}: $f(t) = \sum A_{p,n} e^{i(\omega_{p,n} t + \phi_{p,n})}$ (Definition \ref{def:periodic_series});
+    \item \textbf{Wave}: the propagation of the Fourier series in space, $f(x,t) = \sum A_n e^{i(k_n x - \omega_n t + \phi_n)}$ (Definition \ref{def:wave});
+    \item \textbf{Periodic transformation}: $\mathcal{P}_\Lambda f$ (Definition \ref{def:periodic_transform});
+    \item \textbf{Component}: the quadruple $(A_{p,n}, \omega_{p,n}, \phi_{p,n}, T_p)$ (Definition \ref{def:period_parameters}).
+\end{enumerate}
+
+\textbf{Seven-theme guide for this chapter}: translation---translation preserves periodicity (Proposition \ref{prop:period_translation}); scaling---the amplitude parameter $A$; rotation---the discrete phase operator (Definition \ref{def:discrete_phase_operator}) and the harmonic component (Definition \ref{def:harmonic_component}); conservation---the three conserved quantities of the harmonic component (Theorem \ref{thm:harmonic_three_conservations}) and the Noether correspondence (\textbf{empirical observation / research programme}, see Remark \ref{thm:noether_group_with_periodic_orbits}); symmetry---the action of the group with periodic orbits ($T\mathbb{Z}$, $\langle q_0\rangle$, $\langle e^{i\theta_0}\rangle$, $\Lambda$); closure---the closed orbit guaranteed by the conservation law (the harmonic component and the quotient space $\mathbb{R}/T\mathbb{Z}\cong S^1$); period---the metric parameter $T$ and the period operator $\mathfrak{T}$ of periodic convolution (Definition \ref{def:periodic_convolution_four_operators}).
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{max width=\textwidth}{%
+\begin{tikzpicture}[
+  >=Stealth, thick,
+  node distance=1.0cm and 0.4cm,
+  stage/.style={draw, rounded corners, align=center, minimum width=2.4cm, minimum height=0.75cm, font=\small, fill=blue!8},
+  arr/.style={-{Stealth[length=2.2mm]}, very thick}
+]
+\node[stage, fill=blue!12]  (s0) {Physical system $\mathcal{S}$};
+\node[stage, fill=cyan!12, right=of s0] (s1) {Fundamental transformations\\translation/scaling/rotation};
+\node[stage, fill=green!12, right=of s1] (s2) {Conservation law $Q$};
+\node[stage, fill=teal!12, right=of s2] (s3) {Symmetry group $G$};
+\node[stage, fill=orange!12, right=of s3] (s4) {Periodic function $f$};
+\node[stage, fill=yellow!16, below=of s0] (s5) {Group with periodic orbits\\$\operatorname{Group}_{\mathrm{period}}(f)$};
+\node[stage, fill=orange!8, right=of s5] (s6) {Fourier series\\$\sum A_{p,n}e^{i(\omega_{p,n}t+\phi_{p,n})}$};
+\node[stage, fill=purple!12, right=of s6] (s7) {Wave $f(x,t)$};
+\node[stage, fill=red!12, right=of s7] (s8) {Periodic transformation\\$\mathcal{P}_\Lambda f$};
+\node[stage, fill=magenta!12, right=of s8] (s9) {Components\\$(A,\omega,\phi,T)$};
+\draw[arr] (s0) -- (s1);
+\draw[arr] (s1) -- (s2);
+\draw[arr] (s2) -- (s3);
+\draw[arr] (s3) -- (s4);
+\draw[arr] (s4.south) |- (s5.east);
+\draw[arr] (s5) -- (s6);
+\draw[arr] (s6) -- (s7);
+\draw[arr] (s7) -- (s8);
+\draw[arr] (s8) -- (s9);
+\end{tikzpicture}}
+\caption{The complete chain of periodic-structure modelling: starting from a physical system and passing through the fundamental transformations, the conservation law, symmetry, the periodic function, the group with periodic orbits, the Fourier series, the wave and the periodic transformation, finally arriving at the component quadruple.}
+\label{fig:modelling_chain}
+\end{figure}
+
+\section{The Complete Chain of Periodic-Structure Modelling}
+
+\begin{definition}[The Complete Chain of Periodic-Structure Modelling]
+\label{def:modelling_chain}
+Given a physical system $\mathcal{S}$, the process of modelling it as a periodic structure is as follows:
+\[
+\begin{aligned}
+\mathcal{S}
+&\xrightarrow{\text{basic transformations}}
+\{\text{translation}, \text{scaling}, \text{rotation}\} \\
+&\xrightarrow{\text{conservation law}} Q
+\xrightarrow{\text{symmetry}} G
+\xrightarrow{\text{periodic function}} f \\
+&\xrightarrow{\text{group with periodic orbits}} \operatorname{Group}_{\mathrm{period}}(f)
+\xrightarrow{\text{series expansion}} \sum A_{p,n} e^{i(\omega_{p,n} t + \phi_{p,n})} \\
+&\xrightarrow{\text{spatial propagation}} \text{Wave}
+\xrightarrow{\text{periodic transformation}} \mathcal{P}_\Lambda f \\
+&\xrightarrow{\text{component extraction}} (A_{p,n}, \omega_{p,n}, \phi_{p,n}, T_p).
+\end{aligned}
+\]
+\end{definition}
+
+\begin{remark}[Consistency of the Modelling Chain]\label{rem:modelling_chain_consistency}
+Each link of the modelling chain is determined by the preceding link:
+\begin{enumerate}[label=(\roman*)]
+    \item the fundamental transformations of the physical system (translation/scaling/rotation) are determined by the physical properties of the system;
+    \item the conservation law is determined by the fundamental transformations through the Noether correspondence (the prerequisites of Noether's theorem are given in the `Operations and Periodicity' chapter);
+    \item symmetry is determined by the conservation law (the conservation law precedes symmetry);
+    \item the periodic function is determined by symmetry through Definition \ref{def:periodic_function_gf};
+    \item the group with periodic orbits is determined by the periodic function through Definition \ref{def:group_with_periodic_orbits_gf};
+    \item the Fourier series is determined by the group with periodic orbits through Theorem \ref{thm:periodic_series_bohr};
+    \item the wave is determined by the Fourier series through spatial propagation (wave number $k_n = \omega_n / c$, where $c$ is the propagation speed);
+    \item the periodic transformation is determined by Definition \ref{def:periodic_transform};
+    \item the component is determined by the periodic transformation (Bohr coefficient extraction).
+\end{enumerate}
+\end{remark}
+
+\begin{remark}[Criterion Procedure for Periodic Structures]\label{rem:periodic_structure_criterion}
+Given a system $\mathcal{S}$, the procedure for deciding whether it can be modelled as a complete periodic structure is as follows:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Fundamental-transformation test}: does the system possess translation, scaling or rotation transformations?
+    \item \textbf{Conservation-law test}: do the fundamental transformations correspond to conserved quantities?
+    \item \textbf{Symmetry test}: do the conserved quantities define a symmetry group $G$?
+    \item \textbf{Periodic-function test}: do the observables of the system satisfy $f(\phi_g(x)) = f(x)$?
+    \item \textbf{Test for the group with periodic orbits}: is $\operatorname{Group}_{\mathrm{period}}(f)$ non-trivial?
+    \item \textbf{Series test}: can $f$ be expanded as a Fourier series (with the Bohr coefficients uniquely determined)?
+    \item \textbf{Wave test}: can the Fourier series propagate in space (as a solution of the wave equation)?
+    \item \textbf{Transformation test}: can the periodic transformation extract the components?
+\end{enumerate}
+If all eight conditions are satisfied, the system can be modelled as a complete periodic structure. The eight conditions are progressive layer by layer, each one corresponding to a link of the modelling chain.
+\end{remark}
+
+\section{Metric Parameters and Components of Periodic Functions}
+
+\begin{definition}[Metric Parameters and Components of Periodic Functions]\label{def:period_parameters}
+Let $f: \mathcal{D} \to V$ be a periodic function (Definition \ref{def:periodic_function_gf}), with Fourier series expansion
+\[
+f(t) = \sum_{p \in P} \sum_{n \in \mathbb{Z}} A_{p,n} e^{i(\omega_{p,n} t + \phi_{p,n})}.
+\]
+The \textbf{components} of $f$ are the quadruples $(A_{p,n}, \omega_{p,n}, \phi_{p,n}, T_p)$ in the Fourier series:
+\begin{itemize}
+    \item $A_{p,n} \ge 0$: the \textbf{amplitude component} (radius of the harmonic component);
+    \item $\omega_{p,n} = 2\pi n / T_p$: the \textbf{frequency component} (rate of rotation);
+    \item $\phi_{p,n} \in [0, 2\pi)$: the \textbf{phase component} (initial argument);
+    \item $T_p > 0$: the \textbf{period component} (scale lattice of the time axis).
+\end{itemize}
+The quadruple is the final output of the modelling chain---it parametrises the periodic structure completely.
+\end{definition}
+
+\begin{property}[Relation Between Metric Parameters and Components]\label{ch9_period_params_property}
+The correspondence between the component quadruple and the metric parameters (Table \ref{tab:period_parameters}):
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Amplitude component} $A_{p,n}$ $\leftrightarrow$ amplitude $A$;
+    \item \textbf{Frequency component} $\omega_{p,n}$ $\leftrightarrow$ angular frequency $\omega$;
+    \item \textbf{Phase component} $\phi_{p,n}$ $\leftrightarrow$ phase $\phi$;
+    \item \textbf{Period component} $T_p$ $\leftrightarrow$ period $T$.
+\end{enumerate}
+The conserved quantities are expressed in terms of the amplitude and the frequency: $L = mA^2\omega$ (angular momentum), $\frac{dS}{dt} = \frac12 A^2|\omega|$ (areal velocity), $E = \frac12 mA^2\omega^2$ (energy).
+\end{property}
+
+\begin{proof}
+(i)--(iv) follow by term-by-term correspondence from Definition \ref{def:period_parameters} and the definition of the Fourier series. The formulae for the conserved quantities are given directly by Theorem \ref{thm:harmonic_three_conservations}.
+\end{proof}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Periodic metric parameters and components (with physical correspondences)}
+    \label{tab:period_parameters}
+    \begin{tabular}{>{\centering\arraybackslash}p{2.0cm}>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{2.8cm}>{\centering\arraybackslash}p{3.5cm}>{\centering\arraybackslash}p{1.5cm}}
+        \toprule
+        Parameter & Symbol & Mathematical definition & Physical meaning & Unit \\
+        \midrule
+        Amplitude & $A$ & $A = \sup \|f - \bar{f}\|$ & radius of the harmonic component; signal strength & depends on the field quantity \\
+        Frequency & $\nu$ & $\nu = 1/T$ & number of periods per unit time & Hz \\
+        Period & $T$ & smallest positive number satisfying $f(t+T)=f(t)$ & smallest closed orbit & s \\
+        Angular frequency & $\omega$ & $\omega = 2\pi \nu$ & rate of rotation & rad/s \\
+        Phase & $\phi$ & offset relative to the reference point & initial argument; positional encoding & rad \\
+        Time delay & $\tau$ & $\tau = \phi/\omega$ & time offset corresponding to the phase (\textbf{advanced} convention: when $\phi>0$ the component \textbf{leads} the baseline by $\tau$) & s \\
+        Angular momentum & $L$ & $L = m A^2 \omega$ & angular momentum of the harmonic component, conserved & kg·m$^2$/s \\
+        Areal velocity & $dS/dt$ & $\frac{1}{2}A^2\omega$ & Kepler's second law, conserved & m$^2$/s \\
+        Energy & $E$ & $\frac{1}{2}m A^2 \omega^2$ & kinetic energy of the harmonic component, conserved & J \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+\draw[->] (-0.4,0) -- (7.2,0) node[right] {$t$};
+\draw[->] (0,-1.6) -- (0,1.6) node[above] {$f$};
+\draw[blue, very thick, domain=0:6.5, samples=200]
+  plot (\x, {1.0*sin(deg(1.4*\x))});
+\draw[dashed, red, very thick] (0,1.0) -- (4.49,1.0);
+\draw[dashed, red, very thick] (0,-1.0) -- (4.49,-1.0);
+\draw[<->, red] (0,-1.4) -- (4.49,-1.4);
+\node[red, below] at (2.25,-1.5) {$T=2\pi/\omega$};
+\draw[<->, blue] (-0.3,0) -- (-0.3,1.0);
+\node[blue, left, font=\footnotesize] at (-0.3,0.5) {$A$};
+\draw[<->, green!60!black] (0,0.2) -- (1.1,0.2);
+\node[green!60!black, above, font=\footnotesize] at (0.55,0.25) {$\phi/\omega$};
+\node[align=center, font=\small] at (3.6,-2.4) {The quadruple $(A,\omega,\phi,T)$ completely parametrises a harmonic component};
+\end{tikzpicture}
+\caption{The quadruple components of a periodic function: amplitude $A$, angular frequency $\omega$, phase $\phi$ and period $T$.}
+\label{fig:period_quadruple}
+\end{figure}
+
+\begin{definition}[Frequency dictionary]\label{def:frequency_dictionary}
+Let $f$ be a Fourier series. The set of all frequencies occurring in it,
+\[
+\Lambda := \{\omega_{p,n} : p\in P,\ n\in\mathbb{Z},\ A_{p,n}\neq 0\},
+\]
+is called the \textbf{frequency dictionary} of $f$. The frequency dictionary is the input data of the periodic transformation.
+\end{definition}
+
+\begin{property}[Structure of the frequency dictionary]\label{prop:frequency_dictionary_structure}
+Let the principal group with periodic orbits of $f$ be $\operatorname{Group}_{\mathrm{period}}(f)=T\mathbb{Z}$. Then the frequency dictionary $\Lambda$ is a subset of $\frac{2\pi}{T}\mathbb{Z}$; if $f\in L^2$, then $\Lambda$ is at most countable.
+\end{property}
+
+\begin{proof}
+From the Fourier series expansion $f(t)=\sum A_{p,n}e^{i(\omega_{p,n}t+\phi_{p,n})}$ and $T$-periodicity, $e^{i\omega_{p,n}T}=1$ gives $\omega_{p,n}=2\pi n/T$, hence $\Lambda\subseteq\frac{2\pi}{T}\mathbb{Z}$. The Fourier coefficients of an $L^2$ function satisfy $\sum|A_{p,n}|^2<\infty$, hence there are at most countably many non-zero coefficients.
+\end{proof}
+
+\section{Harmonic Components and Conservation Laws}
+
+\begin{definition}[Harmonic Component]\label{def:harmonic_component}
+Let $A > 0$, $\omega \in \mathbb{R}\setminus\{0\}$, $\phi \in \mathbb{R}$. A \textbf{harmonic component} is the parametrised curve in the complex plane
+\[
+\gamma(t) = A e^{i(\omega t + \phi)}.
+\]
+A harmonic component is the \textbf{minimal geometric unit} of a Fourier series---it encodes simultaneously the three components amplitude (radius $A$), frequency (angular velocity $\omega$) and phase (initial argument $\phi$). (Historically, Ptolemaic astronomy used the term `epicycle' to describe geometric objects of the same kind.)
+\end{definition}
+
+\begin{theorem}[Three Conserved Quantities of Harmonic Components]\label{thm:harmonic_three_conservations}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Conservation of angular momentum}: $L = m A^2 \omega$ is a constant.
+    \item \textbf{Conservation of areal velocity}: $\frac{dS}{dt} = \frac{1}{2}A^2|\omega|$ is a constant.
+    \item \textbf{Conservation of kinetic energy}: $E_k = \frac{1}{2}m A^2 \omega^2$ is a constant.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The velocity vector is $\dot{\mathbf{r}}(t) = i\omega A e^{i\omega t}$, whose modulus is the constant $A|\omega|$. The angular momentum is $L = m\|\mathbf{r} \times \dot{\mathbf{r}}\| = mA^2|\omega|$ (since $\mathbf{r} \perp \dot{\mathbf{r}}$). The areal velocity is $\frac{1}{2}\|\mathbf{r}\times\dot{\mathbf{r}}\| = \frac12 A^2|\omega|$. The kinetic energy is $\frac12 m|\dot{\mathbf{r}}|^2 = \frac12 mA^2\omega^2$. None of the three varies with time.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+\draw[->] (-2.2,0) -- (2.4,0) node[right] {$\operatorname{Re}$};
+\draw[->] (0,-2.2) -- (0,2.4) node[above] {$\operatorname{Im}$};
+\draw[gray!30] (0,0) circle (1.6);
+\fill (1.6,0) circle (1.5pt);
+\draw[->, blue, very thick] (0,0) -- (1.3,0.9);
+\draw[->, red, very thick] (1.3,0.9) -- (-0.3,1.6);
+\node[blue, above left, font=\footnotesize] at (0.7,0.5) {$\mathbf{r}(t)$};
+\node[red, above, font=\footnotesize] at (0.5,1.5) {$\dot{\mathbf{r}}(t)$};
+\draw[<->, green!60!black] (1.6,0) arc[start angle=0, end angle=30, radius=1.6];
+\node[green!60!black] at (1.9,0.5) {$\omega t$};
+\node[align=center, font=\small] at (0,-3.0) {$L=mA^2\omega$, $\frac{dS}{dt}=\frac12A^2|\omega|$, $E_k=\frac12mA^2\omega^2$};
+\end{tikzpicture}
+\caption{The three conserved quantities of the harmonic component $Ae^{i(\omega t+\phi)}$: angular momentum, areal velocity and kinetic energy.}
+\label{fig:harmonic_conservation}
+\end{figure}
+
+\begin{definition}[Nested Harmonic-Component System]\label{def:nested_harmonic}
+\[
+P_0(t) = O, \quad P_k(t) = P_{k-1}(t) + A_k e^{i(\omega_k t + \phi_k)}, \quad k = 1, 2, \dots, K.
+\]
+The final position vector of the moving point is $\mathbf{V}(t) = \sum_{k=1}^{K} A_k e^{i(\omega_k t + \phi_k)}$. A nested harmonic-component system is the \textbf{geometric realisation} of a Fourier series.
+\end{definition}
+
+\begin{theorem}[Independent Conserved Quantities of Nested Harmonic-Component Systems]\label{thm:nested_harmonic_conservation}
+Each level of harmonic component independently satisfies the three conserved quantities. The total angular momentum is $\mathbf{L}_{\text{total}} = \sum_{k=1}^{K} m_k A_k^2 \omega_k \cdot \mathbf{k}$.
+\end{theorem}
+
+\begin{proof}
+The $k$-th level is a single harmonic component (Theorem \ref{thm:harmonic_three_conservations}), and the levels are mutually uncoupled. Angular momentum is additive.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+\draw[->] (-3.4,0) -- (3.4,0);
+\draw[->] (0,-2.0) -- (0,2.0);
+\draw[gray!40] (0,0) circle (1.6);
+\draw[gray!30] (1.6,0) circle (0.7);
+\draw[gray!30] (2.1,0.6) circle (0.35);
+\draw[->, blue, very thick] (0,0) -- (1.6,0);
+\node[blue, below, font=\footnotesize] at (0.8,0) {$\mathbf{r}_1$};
+\draw[->, red, very thick] (1.6,0) -- (2.1,0.6);
+\node[red, above, font=\footnotesize] at (1.9,0.4) {$\mathbf{r}_2$};
+\draw[->, green!60!black, very thick] (2.1,0.6) -- (2.35,0.85);
+\node[green!60!black, above, font=\footnotesize] at (2.4,0.85) {$\mathbf{r}_3$};
+\fill (2.35,0.85) circle (1.5pt);
+\node[align=center, font=\small] at (0,-2.8) {Nested harmonic components: $\mathbf{V}(t)=\sum_k A_ke^{i(\omega_kt+\phi_k)}$, that is, an epicycle system};
+\end{tikzpicture}
+\caption{Nested harmonic-component system (epicycles): the superposition of independent harmonic components at each level constitutes the geometric realisation of a Fourier series.}
+\label{fig:nested_harmonic}
+\end{figure}
+
+\section{Phase Operators}
+
+\begin{definition}[Discrete Phase Operator]\label{def:discrete_phase_operator}
+Let the period be $N \in \mathbb{N}^+$. The $k$-th \textbf{phase operator} is
+\[
+\mathcal{O}_k^{(N)} = e^{i 2\pi k / N}, \quad k = 0, 1, \dots, N-1.
+\]
+The set of phase operators $\mathcal{P}_N$ forms a cyclic group $C_N$ of order $N$ under multiplication of complex numbers.
+\end{definition}
+
+\begin{definition}[Continuous Phase Operator]\label{def:continuous_phase_operator}
+The continuous phase operator is $\mathcal{O}_\theta = e^{i\theta}$, $\theta \in [0, 2\pi)$. The set forms the group $U(1)$.
+\end{definition}
+
+\begin{proposition}[Structure of the Phase-Operator Group]\label{prop:phase_operator_group}
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathcal{P}_N \cong C_N$.
+    \item $\mathcal{P}_\infty = S^1 \cong U(1)$.
+    \item $\mathcal{P}_N \subset \mathcal{P}_\infty$.
+    \item As $N \to \infty$, $\mathcal{P}_N$ is dense in $S^1$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\mathcal{O}_k \cdot \mathcal{O}_l = \mathcal{O}_{k+l \bmod N}$. (ii) $S^1$ is a compact Abelian Lie group. (iii) This follows directly from (i) and the group structure of $S^1$. (iv) For any $\theta$ and $\varepsilon > 0$, take $N > 2\pi/\varepsilon$.
+\end{proof}
+
+\begin{proposition}[Orthogonality of the phase operators]\label{prop:phase_operator_orthogonality}
+For any $k, l \in \{0, 1, \dots, N-1\}$,
+\[
+\frac{1}{N}\sum_{j=0}^{N-1} \mathcal{O}_j^{(N)}(\overline{\mathcal{O}_{j+k-l}^{(N)}})
+= \frac{1}{N}\sum_{j=0}^{N-1} e^{i 2\pi (l-k) j / N}
+= \delta_{kl}.
+\]
+\end{proposition}
+
+\begin{proof}
+When $k=l$ the summand is $1$ and the average is $1$. When $k\neq l$, put $q=e^{i2\pi(l-k)/N}\neq 1$; then $\sum_{j=0}^{N-1}q^j=(1-q^N)/(1-q)=0$. Hence the average equals $\delta_{kl}$.
+\end{proof}
+
+\begin{example}[Phase Operators of Period 2]\label{ex:phase_operators_c2}
+\[
+\mathcal{O}_0^{(2)} = 1, \quad \mathcal{O}_1^{(2)} = -1.
+\]
+The identity operator and the reflection operator form $C_2$.
+\end{example}
+
+\begin{example}[Phase Operators of Period 4]\label{ex:phase_operators_c4}
+\[
+\mathcal{O}_0^{(4)} = 1, \quad \mathcal{O}_1^{(4)} = i, \quad \mathcal{O}_2^{(4)} = -1, \quad \mathcal{O}_3^{(4)} = -i.
+\]
+The rotations $0^\circ, 90^\circ, 180^\circ, 270^\circ$ form $C_4$.
+\end{example}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+% C_2
+\begin{scope}[xshift=-5.0cm]
+\draw[gray!40] (0,0) circle (1.2);
+\draw[->] (-1.4,0) -- (1.5,0);
+\draw[->] (0,-1.4) -- (0,1.5);
+\fill (1.2,0) circle (2pt) node[below right, font=\footnotesize] {$1$};
+\fill (-1.2,0) circle (2pt) node[below left, font=\footnotesize] {$-1$};
+\node[align=center, font=\small] at (0,-2.2) {$C_2$};
+\end{scope}
+% C_4
+\begin{scope}[xshift=0cm]
+\draw[gray!40] (0,0) circle (1.2);
+\draw[->] (-1.4,0) -- (1.5,0);
+\draw[->] (0,-1.4) -- (0,1.5);
+\fill (1.2,0) circle (2pt) node[below right, font=\footnotesize] {$1$};
+\fill (0,1.2) circle (2pt) node[above right, font=\footnotesize] {$i$};
+\fill (-1.2,0) circle (2pt) node[below left, font=\footnotesize] {$-1$};
+\fill (0,-1.2) circle (2pt) node[below right, font=\footnotesize] {$-i$};
+\node[align=center, font=\small] at (0,-2.2) {$C_4$};
+\end{scope}
+% U(1)
+\begin{scope}[xshift=5.0cm]
+\draw[gray!40] (0,0) circle (1.2);
+\draw[->] (-1.4,0) -- (1.5,0);
+\draw[->] (0,-1.4) -- (0,1.5);
+\foreach \a in {0,30,60,90,120,150,180,210,240,270,300,330} {
+  \fill (\a:1.2) circle (1.2pt);
+}
+\node[align=center, font=\small] at (0,-2.2) {$U(1)$};
+\end{scope}
+\node[align=center, font=\small] at (0,-3.4) {The three levels of the phase-operator group: $C_N\subset U(1)$, dense in $U(1)$ as $N\to\infty$};
+\end{tikzpicture}
+\caption{Distribution of the phase operators on the unit circle: comparison of $C_2$, $C_4$ and $U(1)$.}
+\label{fig:phase_operators}
+\end{figure}
+
+\section{Waves: Spatial Propagation of Fourier Series}
+
+\begin{definition}[Wave---Spatial Propagation of Fourier Series]\label{def:wave}
+Let the Fourier series $f(t) = \sum_n A_n e^{i(\omega_n t + \phi_n)}$ describe the vibration of the system at the origin. The \textbf{wave} formed by this vibration propagating along the positive $x$-axis with speed $c$ is
+\[
+f(x, t) = \sum_n A_n e^{i(k_n x - \omega_n t + \phi_n)},
+\]
+where $k_n = \omega_n / c$ is the \textbf{wave number} (spatial frequency). A wave is the propagation of a Fourier series in space---it possesses both temporal periodicity (period $T_n = 2\pi/\omega_n$) and spatial periodicity (wavelength $\lambda_n = 2\pi/k_n$).
+\end{definition}
+
+\begin{proposition}[Double Periodic Structure of Waves]\label{prop:wave_double_period}
+The wave $f(x,t)$ has a double periodic structure:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{temporal period}: $f(x, t + T_n) = f(x, t)$, $T_n = 2\pi/\omega_n$;
+    \item \textbf{spatial period}: $f(x + \lambda_n, t) = f(x, t)$, $\lambda_n = 2\pi/k_n$.
+\end{enumerate}
+The temporal group with periodic orbits is $T_n\mathbb{Z}$ and the spatial group with periodic orbits is $\lambda_n\mathbb{Z}$. Together they constitute the group with periodic orbits of the double period of the wave, $\Lambda = T_n\mathbb{Z} \oplus \lambda_n\mathbb{Z}$ (in the $(x,t)$ plane).
+\end{proposition}
+
+\begin{proof}
+(i) $e^{i(k_n x - \omega_n(t+T_n) + \phi_n)} = e^{i(k_n x - \omega_n t + \phi_n)} e^{-i\omega_n T_n} = e^{i(k_n x - \omega_n t + \phi_n)}$ because $\omega_n T_n = 2\pi$. (ii) Similarly $k_n \lambda_n = 2\pi$.
+\end{proof}
+
+\begin{proposition}[A wave satisfies the wave equation]\label{prop:wave_satisfies_wave_equation}
+Let $f(x,t) = \sum_n A_n e^{i(k_n x - \omega_n t + \phi_n)}$ with dispersion relation $\omega_n = c k_n$ ($c$ a constant). Then $f$ satisfies the one-dimensional wave equation
+\[
+\frac{\partial^2 f}{\partial t^2} = c^2 \frac{\partial^2 f}{\partial x^2}.
+\]
+\end{proposition}
+
+\begin{proof}
+Differentiating term by term gives
+\[
+\begin{aligned}
+\partial_t^2 e^{i(k_n x-\omega_n t+\phi_n)} &= -\omega_n^2 e^{i(k_n x-\omega_n t+\phi_n)},\\
+\partial_x^2 e^{i(k_n x-\omega_n t+\phi_n)} &= -k_n^2 e^{i(k_n x-\omega_n t+\phi_n)}.
+\end{aligned}
+\]
+Since $\omega_n^2 = c^2 k_n^2$, the two sides are equal term by term, and they remain equal after linear superposition.
+\end{proof}
+
+\begin{corollary}[Coupling of the dispersion relation with the double period]\label{cor:dispersion_double_period}
+Under the wave equation, the wave number $k_n$, the angular frequency $\omega_n$, the temporal period $T_n$ and the spatial wavelength $\lambda_n$ satisfy
+\[
+c = \frac{\omega_n}{k_n} = \frac{\lambda_n}{T_n}.
+\]
+That is, the phase velocity equals the ratio of the wavelength to the temporal period.
+\end{corollary}
+
+\begin{proof}
+From $\omega_n = c k_n$ and $T_n=2\pi/\omega_n$, $\lambda_n=2\pi/k_n$, we obtain $\lambda_n/T_n = (2\pi/k_n)/(2\pi/\omega_n)=\omega_n/k_n=c$.
+\end{proof}
+
+\begin{proposition}[Relation Between Waves and Periodic Functions]\label{prop:wave_periodic_function}
+At a fixed spatial position $x = x_0$ the wave $f(x,t)$ degenerates into a temporally periodic function; at a fixed time $t = t_0$ it degenerates into a spatially periodic function. The period structures of the two are given by the wave number and the angular frequency respectively.
+\end{proposition}
+
+\begin{proof}
+Fixing $x = x_0$ gives
+\[
+f(x_0, t)
+= \sum_n A_n e^{i(k_n x_0 - \omega_n t + \phi_n)}
+= \sum_n A'_n e^{-i\omega_n t},
+\]
+where $A'_n = A_n e^{i(k_n x_0 + \phi_n)}$, so this is a temporally periodic function.
+
+Fixing $t = t_0$ gives
+\[
+f(x, t_0)
+= \sum_n A''_n e^{ik_n x},
+\]
+so this is a spatially periodic function.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+% time axis
+\draw[->] (-0.3,1.8) -- (7.5,1.8) node[right] {$t$};
+\draw[blue, very thick, domain=0:7, samples=150]
+  plot (\x, {1.8 + 0.5*sin(deg(1.6*\x))});
+\draw[dashed, red] (0,1.3) -- (0,2.3);
+\draw[dashed, red] (3.93,1.3) -- (3.93,2.3);
+\draw[<->, red] (0,1.1) -- (3.93,1.1);
+\node[red, below, font=\footnotesize] at (1.96,1.05) {$T_n$};
+% space axis
+\draw[->] (-0.3,-1.8) -- (7.5,-1.8) node[right] {$x$};
+\draw[green!60!black, very thick, domain=0:7, samples=150]
+  plot (\x, {-1.8 + 0.5*sin(deg(1.6*\x))});
+\draw[dashed, orange] (0,-2.3) -- (0,-1.3);
+\draw[dashed, orange] (3.93,-2.3) -- (3.93,-1.3);
+\draw[<->, orange] (0,-2.5) -- (3.93,-2.5);
+\node[orange, below, font=\footnotesize] at (1.96,-2.55) {$\lambda_n$};
+\node[align=center, font=\small] at (3.6,0.2) {Double periodic structure of the wave $f(x,t)$:\\temporal period $T_n=2\pi/\omega_n$ (top); spatial wavelength $\lambda_n=2\pi/k_n$ (bottom)};
+\end{tikzpicture}
+\caption{Double periodic structure of a wave: the period $T_n$ on the time axis and the wavelength $\lambda_n$ on the space axis.}
+\label{fig:wave_double_period}
+\end{figure}
+
+\section{Periodic Transformations and Component Extraction}
+
+\begin{definition}[Periodic Transformation---Component Extraction]\label{def:periodic_transform_component}
+Let $f$ be a Fourier series with frequency dictionary $\Lambda = \{\omega_{p,n}\}$. The \textbf{periodic transformation} (Definition \ref{def:periodic_transform}) extracts the components:
+\[
+\mathcal{P}_\Lambda f(p,n) = M\{f(t) e^{-i\omega_{p,n} t}\} = A_{p,n} e^{i\phi_{p,n}}.
+\]
+The periodic transformation is the penultimate step of the modelling chain---it converts the Fourier series into the explicit component quadruple.
+\end{definition}
+
+\begin{theorem}[Uniqueness of Component Extraction]\label{thm:component_uniqueness}
+The component quadruple $(A_{p,n}, \omega_{p,n}, \phi_{p,n}, T_p)$ extracted by the periodic transformation is uniquely determined by the periodic function $f$.
+\end{theorem}
+
+\begin{proof}
+This follows directly from Theorem \ref{thm:periodic_series_bohr} (Bohr uniqueness).
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{fittikz}
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.6cm,
+  box/.style={draw, rounded corners, align=center, minimum width=3.0cm, minimum height=0.9cm, fill=blue!8, font=\small}]
+\node[box, fill=blue!12] (f) {Periodic function\\$f(t)$};
+\node[box, fill=green!12, right=of f] (pd) {Frequency dictionary\\$\Lambda=\{\omega_{p,n}\}$};
+\node[box, fill=orange!12, right=of pd] (pt) {Periodic transformation\\$\mathcal{P}_\Lambda f(p,n)$};
+\node[box, fill=red!12, right=of pt] (comp) {Components\\$(A_{p,n},\omega_{p,n},\phi_{p,n},T_p)$};
+\draw[->, very thick] (f) -- (pd);
+\draw[->, very thick] (pd) -- (pt);
+\draw[->, very thick] (pt) -- (comp);
+\node[align=center, font=\small, below=1.0cm of pt] {Extracting the coefficients: $\mathcal{P}_\Lambda f(p,n)=M\{f(t)e^{-i\omega_{p,n}t}\}=A_{p,n}e^{i\phi_{p,n}}$};
+\end{tikzpicture}
+\end{fittikz}
+\caption{Periodic transformation and component extraction: starting from a periodic function and passing through the frequency dictionary, the unique component quadruple is extracted.}
+\label{fig:periodic_transform_extraction}
+\end{figure}
+
+\section{Preservation of the Group with Periodic Orbits by the Fundamental Transformations}
+
+\begin{proposition}[Translation Preserves Periodicity]\label{prop:period_translation}
+Let $f:\mathbb{R}\to V$ be a periodic function and $a\in\mathbb{R}$, and define the \textbf{translation} of $f$ by $(\tau_a f)(t) := f(t+a)$. Then for every $T\in\operatorname{Group}_{\mathrm{period}}(f)$ we have $T\in\operatorname{Group}_{\mathrm{period}}(\tau_a f)$, hence
+\[
+\operatorname{Group}_{\mathrm{period}}(\tau_a f) = \operatorname{Group}_{\mathrm{period}}(f), \qquad T_0(\tau_a f) = T_0(f).
+\]
+That is, translation is the fundamental transformation that preserves the period structure.
+\end{proposition}
+
+\begin{proof}
+Let $T\in\operatorname{Group}_{\mathrm{period}}(f)$. For every $t\in\mathbb{R}$,
+\[
+(\tau_a f)(t+T) = f(t+T+a) = f(t+a) = (\tau_a f)(t),
+\]
+hence $T\in\operatorname{Group}_{\mathrm{period}}(\tau_a f)$, that is, $\operatorname{Group}_{\mathrm{period}}(f)\subseteq\operatorname{Group}_{\mathrm{period}}(\tau_a f)$.
+Conversely, let $T\in\operatorname{Group}_{\mathrm{period}}(\tau_a f)$; for any $s\in\mathbb{R}$ take $t = s-a$, obtaining
+\[
+f(s+T) = f\bigl((s-a)+T+a\bigr) = (\tau_a f)(s-a+T) = (\tau_a f)(s-a) = f(s),
+\]
+hence $T\in\operatorname{Group}_{\mathrm{period}}(f)$; the two groups with periodic orbits are equal, and the least positive periods coincide accordingly.
+\end{proof}
+
+\begin{proposition}[Transformation of the group with periodic orbits under scaling and rotation]\label{prop:scaling_rotation_period}
+Let $f$ be a periodic function, and let $q>0$ and $\theta\in\mathbb{R}$ correspond to scaling and phase rotation respectively. Then
+\[
+\operatorname{Group}_{\mathrm{period}}(f(q\,\cdot)) = \frac{1}{q}\operatorname{Group}_{\mathrm{period}}(f), \qquad
+\operatorname{Group}_{\mathrm{period}}(e^{i\theta} f) = \operatorname{Group}_{\mathrm{period}}(f).
+\]
+That is, scaling compresses the group with periodic orbits in inverse proportion, whilst phase rotation leaves the group with periodic orbits unchanged.
+\end{proposition}
+
+\begin{proof}
+Scaling: put $g(t)=f(qt)$. Then $T\in\operatorname{Group}_{\mathrm{period}}(g)$ if and only if $f(q(t+T))=f(qt)$, that is, $qT\in\operatorname{Group}_{\mathrm{period}}(f)$; hence $\operatorname{Group}_{\mathrm{period}}(g)=\frac{1}{q}\operatorname{Group}_{\mathrm{period}}(f)$. Phase rotation: $\operatorname{Group}_{\mathrm{period}}(e^{i\theta}f)$ equals $\operatorname{Group}_{\mathrm{period}}(f)$, because $|e^{i\theta}|=1$ does not alter the correspondence in time of the values of $f$.
+\end{proof}
+
+\begin{proposition}[The group with periodic orbits is a closed subgroup]\label{prop:group_with_periodic_orbits_closed}
+Let $f:\mathbb{R}\to V$ be continuous. Then $\operatorname{Group}_{\mathrm{period}}(f)$ is a closed subgroup of $\mathbb{R}$. In particular, $\operatorname{Group}_{\mathrm{period}}(f)$ is either equal to $\mathbb{R}$ ($f$ constant) or equal to $T_0\mathbb{Z}$ ($f$ a non-constant periodic function).
+\end{proposition}
+
+\begin{proof}
+Closedness: let $T_k\in\operatorname{Group}_{\mathrm{period}}(f)$ with $T_k\to T$. By the continuity of $f$, $f(t+T)=\lim_k f(t+T_k)=\lim_k f(t)=f(t)$, hence $T\in\operatorname{Group}_{\mathrm{period}}(f)$ and $\operatorname{Group}_{\mathrm{period}}(f)$ is closed. Subgroup: if $T_1,T_2\in\operatorname{Group}_{\mathrm{period}}(f)$, then $f(t+T_1-T_2)=f((t-T_2)+T_1)=f(t-T_2)=f(t)$, hence $T_1-T_2\in\operatorname{Group}_{\mathrm{period}}(f)$. A closed subgroup of $\mathbb{R}$ is either $\mathbb{R}$ or a discrete group $T_0\mathbb{Z}$, the former corresponding to constant functions and the latter to the least positive period $T_0$.
+\end{proof}
+
+\section{Groups with Periodic Orbits and Conservation Laws}
+
+\begin{remark}[Noether correspondence of groups with periodic orbits---the periodic-function version (\textbf{empirical observation / research programme})]\label{thm:noether_group_with_periodic_orbits}
+\leavevmode
+The three correspondences below are an \textbf{empirical observation / research programme}, not theorems proved within this framework (the `Operations and Periodicity' chapter has already declared in \cref{rem:noether} that its framework furnishes only an orbit-counting construction of invariants, and does not contain Noether's theorem, which requires a Lagrangian variational structure):
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Translation group with periodic orbits}: corresponds to conservation of energy (Parseval's identity).
+    \item \textbf{Rotation group with periodic orbits}: corresponds to conservation of angular momentum (independent conservation of the angular momentum of each harmonic component).
+    \item \textbf{Scaling group with periodic orbits}: corresponds to conservation of scale charge (invariance under translation in the logarithmic domain).
+\end{enumerate}
+All that can be proved rigorously is the energy identity of (i) given by \cref{thm:parseval_periodic} (which is Parseval's identity itself and holds independently of any `symmetry'); the quantity $L_k$ of (ii) and the `scale charge' of (iii) have no independent definition in this chapter, so that the correspondences asserted there are at present merely restatements of the same form as in the `Groups and Group Functions' chapter.
+\end{remark}
+
+\begin{theorem}[Parseval's identity]\label{thm:parseval_periodic}
+Let $f(t)=\sum_{n}A_ne^{i(\omega_nt+\phi_n)}$ be periodic with period $T$, and let $f\in L^2[0,T]$. Then
+\[
+\frac{1}{T}\int_0^T |f(t)|^2\,dt = \sum_n A_n^2.
+\]
+That is, the time-averaged energy equals the sum of the squares of the amplitudes of the components.
+\end{theorem}
+
+\begin{proof}
+By the orthogonality $\frac{1}{T}\int_0^T e^{i(\omega_m-\omega_n)t}dt=\delta_{mn}$,
+\[
+\frac{1}{T}\int_0^T |f|^2\,dt = \sum_{m,n}A_mA_ne^{i(\phi_m-\phi_n)}\frac{1}{T}\int_0^T e^{i(\omega_m-\omega_n)t}dt = \sum_n A_n^2.
+\]
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.4cm and 1.4cm,
+  box/.style={draw, rounded corners, align=center, text width=4.0cm, minimum height=0.9cm, fill=blue!8, font=\small}]
+\node[box, fill=blue!12] (pg1) {Translation group with periodic orbits\\$T\mathbb{Z}$};
+\node[box, fill=green!12, right=of pg1] (pg2) {Rotation group with periodic orbits\\$\langle e^{i\theta_0}\rangle$};
+\node[box, fill=orange!12, right=of pg2] (pg3) {Scaling group with periodic orbits\\$\langle q_0\rangle$};
+\node[box, fill=blue!6, below=of pg1] (c1) {Conservation of energy\\Parseval's identity};
+\node[box, fill=green!6, below=of pg2] (c2) {Conservation of angular momentum\\harmonic component $L_k$};
+\node[box, fill=orange!6, below=of pg3] (c3) {Conservation of scale charge\\translation in the logarithmic domain};
+\draw[->, very thick] (pg1) -- (c1);
+\draw[->, very thick] (pg2) -- (c2);
+\draw[->, very thick] (pg3) -- (c3);
+\node[align=center, text width=13cm, font=\small] at (5.8,-4.0) {Noether correspondence of groups with periodic orbits: the three kinds of group with periodic orbits correspond respectively to the three kinds of conserved quantity};
+\end{tikzpicture}
+\caption{Noether correspondence of groups with periodic orbits (\textbf{empirical observation / research programme}): the translation, rotation and scaling groups with periodic orbits correspond respectively to the conservation of energy, of angular momentum and of scale charge.}
+\label{fig:noether_group_with_periodic_orbits}
+\end{figure}
+
+\section{Periodic Convolution: The Four-Operator Form}
+
+\begin{definition}[Periodic Convolution (Four-Operator Form)]\label{def:periodic_convolution_four_operators}
+Let $f, g$ be Fourier series. The \textbf{periodic convolution} of $f$ and $g$ is
+\[
+(f \circledast g)(\tau) := \sum_{p,q} \Theta_{p,q} \sum_{n,m} W(\omega_{p,n} - \nu_{q,m}) \cdot (A_{p,n} B_{q,m})^{\alpha} \cdot S^{(d)}(\phi_{p,n}, \psi_{q,m}) \cdot e^{i\nu_{q,m} \tau},
+\]
+The four operators are: the amplitude operator $\mathfrak{A}_\alpha$ (scaling), the frequency operator $\mathfrak{F}_{W,\tau}$ (translation), the phase operator $\mathfrak{P}_d$ (rotation) and the period operator $\mathfrak{T}$ (fixed length).
+\end{definition}
+
+\begin{proposition}[Operator Correspondence of the Four Operators]\label{prop:periodic_convolution_grammar}
+The amplitude operator and the period operator belong respectively to the value axis and the time axis of the scaling operator; the frequency operator belongs to the translation operator; the phase operator belongs to the rotation operator.
+\end{proposition}
+
+\begin{proof}
+Verified term by term from Definition \ref{def:periodic_convolution_four_operators}.
+\end{proof}
+
+\begin{proposition}[Periodic convolution as generalised kernelised convolution]\label{prop:periodic_convolution_kernelized}
+For a single period layer ($P = Q = \{T\}$, $\Theta \equiv 1$), the periodic convolution reduces to kernelised convolution.
+\end{proposition}
+
+\begin{proof}
+Obtained by substitution.
+\end{proof}
+
+\begin{theorem}[Three Degeneracies of Periodic Convolution]\label{thm:periodic_convolution_degeneracies}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Classical limit}: as $W \to \delta$ it degenerates into cross-correlation/circular convolution.
+    \item \textbf{Similarity/trend layer}: $\alpha = 0$ gives similarity convolution, $\alpha = 1$ gives trend convolution.
+    \item \textbf{Cross-period layer}: the cross-period terms are controlled jointly by $\Theta_{p,q}$ and $W$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The kernel-width limit makes the off-diagonal terms vanish; $\tau = 0$ gives the matrix entries; the cross-period terms carry the factor $\Theta_{p,q} W$.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.0cm,
+  core/.style={draw, very thick, rounded corners, align=center, minimum width=4.0cm, minimum height=1.1cm, fill=orange!15, font=\small},
+  op/.style={draw, rounded corners, align=center, minimum width=2.6cm, minimum height=0.9cm, fill=blue!8, font=\small}]
+\node[core] (core) at (0,0) {Periodic convolution $(f\circledast g)(\tau)$};
+\node[op, fill=blue!12]  (A) at (-5.4,1.6)  {Amplitude operator $\mathfrak{A}_\alpha$\\(scaling)};
+\node[op, fill=green!12] (F) at (-2.0,1.6)  {Frequency operator $\mathfrak{F}_{W,\tau}$\\(translation)};
+\node[op, fill=red!12]   (P) at (2.0,1.6)   {Phase operator $\mathfrak{P}_d$\\(rotation)};
+\node[op, fill=purple!12](T) at (5.4,1.6)   {Period operator $\mathfrak{T}$\\(fixed length)};
+\draw[->, very thick] (A) -- (core);
+\draw[->, very thick] (F) -- (core);
+\draw[->, very thick] (P) -- (core);
+\draw[->, very thick] (T) -- (core);
+\node[align=center, font=\small, below=1.0cm of core] {$(A_{p,n}B_{q,m})^\alpha$; $W(\omega_{p,n}-\nu_{q,m})$; $S^{(d)}(\phi_{p,n},\psi_{q,m})$; $e^{i\nu_{q,m}\tau}$};
+\end{tikzpicture}
+\caption{The four-operator structure of periodic convolution: the amplitude, frequency, phase and period operators correspond respectively to scaling, translation, rotation and fixed length.}
+\label{fig:periodic_convolution_operators}
+\end{figure}
+
+\begin{example}[Periodic-Convolution Matrix of Period 2]\label{ex:period_two_periodic_convolution}
+The trend convolution matrix is
+\[
+\mathbb{T} = \begin{pmatrix} c_0\overline{d_0} & c_0\overline{d_1} \\ c_1\overline{d_0} & c_1\overline{d_1} \end{pmatrix}.
+\]
+\end{example}
+
+\section{Modelling Example: Light Source---Light Wave---Spectrum}
+
+\begin{example}[Complete Modelling Chain for Light Source---Light Wave---Spectrum]\label{ex:light_source_modelling}
+\textbf{Physical system}: a light source emits electromagnetic waves.
+
+\textbf{Translation/scaling/rotation}: time translation $t \mapsto t+T$ (the light source emits continuously); frequency scaling $\omega \mapsto \lambda\omega$ (changing the colour).
+
+\textbf{Conservation law}: conservation of energy (the light intensity does not decay with time)---the conserved quantity of time-translation symmetry.
+
+\textbf{Symmetry}: the time-translation symmetry group $\mathbb{R}$.
+
+\textbf{Periodic function}: the electric field component of monochromatic light, $E(t) = A e^{i(\omega t + \phi)}$.
+
+\textbf{Group with periodic orbits}: $\operatorname{Group}_{\mathrm{period}}(E) = T\mathbb{Z}$, $T = 2\pi/\omega$.
+
+\textbf{Fourier series}: a real light source (such as the sun) emits a continuous spectrum:
+\[
+E(t) = \sum_{n} A_n e^{i(\omega_n t + \phi_n)},
+\]
+each frequency component is a harmonic component, and the amplitude spectrum $\{A_n\}$ is the \textbf{spectrum}.
+
+\textbf{Wave}: the light wave propagates in space:
+\[
+E(x,t) = \sum_n A_n e^{i(k_n x - \omega_n t + \phi_n)}, \quad k_n = \omega_n / c.
+\]
+The wavelength is $\lambda_n = 2\pi/k_n = 2\pi c/\omega_n$.
+
+\textbf{Periodic transformation}: Bohr extraction gives the spectral components $\mathcal{P}_\Lambda E(n) = A_n e^{i\phi_n}$.
+
+\textbf{Component}: the quadruple $(A_n, \omega_n, \phi_n, T_n)$ completely parametrises the spectral lines.
+\end{example}
+
+\begin{example}[Sound---Sound Wave---Frequency Spectrum]\label{ex:sound_modelling}
+\textbf{Physical system}: a musical instrument emits sound waves.
+
+\textbf{Conservation law}: conservation of energy (the sound intensity does not decay with time).
+
+\textbf{Periodic function}: the sound pressure $p(t) = \sum_n A_n \cos(n\omega_0 t + \phi_n)$ (harmonics of the fundamental frequency $\omega_0$).
+
+\textbf{Group with periodic orbits}: $\operatorname{Group}_{\mathrm{period}}(p) = T\mathbb{Z}$, $T = 2\pi/\omega_0$.
+
+\textbf{Fourier series}: the frequency spectrum $\{A_n\}$ is the timbre.
+
+\textbf{Wave}: sound-wave propagation $p(x,t) = \sum_n A_n \cos(k_n x - n\omega_0 t + \phi_n)$.
+
+\textbf{Component}: $(A_n, n\omega_0, \phi_n, T/n)$.
+\end{example}
+
+\begin{example}[Clock---Hand---Time]\label{ex:clock_modelling}
+\textbf{Physical system}: a clock.
+
+\textbf{Translation}: time translation (the clock runs continuously).
+
+\textbf{Conservation law}: conservation of energy (the driving force of the clock is constant).
+
+\textbf{Periodic function}: the hand angle $\theta(t) = \omega t$.
+
+\textbf{Group with periodic orbits}: $\operatorname{Group}_{\mathrm{period}}(\theta) = T\mathbb{Z}$, $T = 2\pi/\omega$.
+
+\textbf{Fourier series}: a single-frequency harmonic component.
+
+\textbf{Component}: $(A=1, \omega, \phi=0, T)$.
+\end{example}
+
+\begin{example}[Fourier series of the square wave]\label{ex:square_wave_fourier}
+Let $f(t)=\operatorname{sgn}(\sin(\omega_0 t))$ be the square wave with principal period $T=2\pi/\omega_0$. Its Fourier series is
+\[
+f(t) = \frac{4}{\pi}\sum_{k=0}^{\infty} \frac{1}{2k+1}\sin\bigl((2k+1)\omega_0 t\bigr).
+\]
+That is, only odd-order harmonic components occur, with $A_{2k+1} = 4/((2k+1)\pi)$ and phase $\phi_{2k+1}=-\pi/2$. The components decay with frequency as $1/n$---this is precisely the spectral manifestation of the high-frequency corners contained in the square wave.
+\end{example}
+
+\begin{example}[Fourier series of the sawtooth wave]\label{ex:sawtooth_fourier}
+Let the sawtooth wave be $f(t)=\frac{2}{\pi}\sum_{n=1}^\infty\frac{(-1)^{n+1}}{n}\sin(n\omega_0 t)$, with principal period $T=2\pi/\omega_0$. The components $A_n = 2/(\pi n)$ cover all integer-order harmonics---more even-order components than the square wave contains.
+\end{example}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Comparison table of the chains of the three modelling examples}
+    \label{tab:modelling_examples}
+    \small
+    \renewcommand{\arraystretch}{1.25}
+    \begin{tabular}{@{}p{2.0cm} p{3.6cm} p{3.6cm} p{3.6cm}@{}}
+    \toprule
+    Modelling link & Light source---light wave & Sound source---sound wave & Clock---hand \\
+    \midrule
+    Physical system & Light source & Musical instrument & Clock \\
+    Fundamental transformation & Time translation + frequency scaling & Time translation & Time translation \\
+    Conservation law & Conservation of energy & Conservation of energy & Conservation of energy \\
+    Periodic function & Electric field $E(t)$ & Sound pressure $p(t)$ & Angle $\theta(t)$ \\
+    Group with periodic orbits & $T\mathbb{Z}$, $T=2\pi/\omega$ & $T\mathbb{Z}$, $T=2\pi/\omega_0$ & $T\mathbb{Z}$, $T=2\pi/\omega$ \\
+    Fourier series & Continuous spectrum $\{A_n\}$ & Harmonic spectrum $\{A_n\}$ & Single-frequency component \\
+    Wave & $E(x,t)$, $k_n=\omega_n/c$ & $p(x,t)$, $k_n=n\omega_0/c$ & No spatial propagation \\
+    Component & $(A_n,\omega_n,\phi_n,T_n)$ & $(A_n,n\omega_0,\phi_n,T/n)$ & $(1,\omega,0,T)$ \\
+    \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{remark}[Distinction between the Fourier series and the Bohr series]\label{rem:fourier_bohr_distinction}
+For an $L^2$ function of period $T$, the Fourier series expands discretely in the frequencies $\omega_n=2\pi n/T$, and the coefficients are uniquely determined by orthogonality. For the more general \textbf{quasi-periodic functions} (whose frequencies are generated by finitely or countably many incommensurable fundamental frequencies), the expansion is called a \textbf{Bohr series}, and its coefficients are uniquely determined by the Bohr mean (Theorem \ref{thm:periodic_series_bohr}). This chapter uniformly calls the common form of the two a `Fourier series', so that the modelling chain remains uniform.
+\end{remark}
+
+\begin{remark}[Periodic functions and quasi-periodic functions]\label{rem:periodic_quasiperiodic}
+The group with periodic orbits of a periodic function is the discrete group $T\mathbb{Z}$. The `frequency group' of a quasi-periodic function is formed by the $\mathbb{Z}$-linear combinations generated by several incommensurable frequencies; in this case no single non-zero period $T$ exists, but the function can still be expanded as a Bohr series. Physically, this distinction corresponds to the difference between a `single tone' and a `chord'.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & The translation link of the modelling chain; the frequency operator $\mathfrak{F}_{W,\tau}$ carries translation information \\
+Scaling & The scaling link of the modelling chain; the amplitude operator $\mathfrak{A}_\alpha$; the amplitude component $A_{p,n}$ \\
+Rotation & The rotation link of the modelling chain; the phase operator $\mathfrak{P}_d$; the phase-operator group $C_N$ (Proposition \ref{prop:phase_operator_group}) \\
+Conservation & The conservation-law link of the modelling chain; the three conserved quantities of the harmonic component (Theorem \ref{thm:harmonic_three_conservations}); the Noether correspondence (\textbf{empirical observation / research programme}, see Remark \ref{thm:noether_group_with_periodic_orbits}) \\
+Symmetry & The symmetry link of the modelling chain; the action of the group with periodic orbits $T\mathbb{Z}$, $\langle q_0\rangle$, $\langle e^{i\theta_0}\rangle$, $\Lambda$ \\
+Closure & The closed orbit guaranteed by the conservation law: the harmonic component $Ae^{i(\omega t+\phi)}$ and the quotient space $\mathbb{R}/T\mathbb{Z}\cong S^1$ \\
+Period & The period link of the modelling chain; the component quadruple $(A_{p,n}, \omega_{p,n}, \phi_{p,n}, T_p)$ (Definition \ref{def:period_parameters}); the double period of the wave (Proposition \ref{prop:wave_double_period}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Using Definition \ref{def:modelling_chain}, explain how the complete chain of periodic-structure modelling starts from a physical system, passes through the fundamental transformations, the conservation law, symmetry, the periodic function, the group with periodic orbits, the Fourier series, the wave and the periodic transformation, and finally arrives at the component quadruple. Taking a sound source as an example (Example \ref{ex:sound_modelling}), write out the concrete content of the modelling chain link by link, and point out which link is the core of this chapter.
+
+    \item Verify the quadruple components of a periodic function in Definition \ref{def:period_parameters}:
+    \[
+    (A_{p,n},\omega_{p,n},\phi_{p,n},T_p),
+    \]
+    and explain that the amplitude component, the frequency component, the phase component and the period component correspond respectively to the four operations `scaling', `translation', `rotation' and `fixed length'. Using the physical meanings in Table \ref{tab:period_parameters}, write out the concrete numerical values of each component for the vibration of a pendulum.
+
+    \item Prove Property \ref{prop:frequency_dictionary_structure}:
+    the frequency dictionary $\Lambda$ is a subset of $\frac{2\pi}{T}\mathbb{Z}$; if $f\in L^2$, then $\Lambda$ is at most countable.
+    Explain why the frequency dictionary is the input data of the periodic transformation.
+
+    \item Prove Theorem \ref{thm:harmonic_three_conservations}:
+    the three conserved quantities of the harmonic component $\gamma(t)=Ae^{i(\omega t+\phi)}$:
+    \begin{enumerate}[label=(\roman*)]
+        \item the angular momentum $L=mA^2\omega$;
+        \item the areal velocity $\frac{dS}{dt}=\frac12A^2|\omega|$;
+        \item the kinetic energy $E_k=\frac12mA^2\omega^2$.
+    \end{enumerate}
+    Complete the proof using the velocity vector $\dot{\mathbf{r}}(t)=i\omega Ae^{i\omega t}$ and $\mathbf{r}\perp\dot{\mathbf{r}}$, and explain why none of the three varies with time.
+
+    \item Prove Theorem \ref{thm:nested_harmonic_conservation}:
+    in a nested harmonic-component system, each level of harmonic component independently satisfies the three conserved quantities,
+    and the total angular momentum is
+    \[
+    \mathbf{L}_{\text{total}}=\sum_{k=1}^K m_kA_k^2\omega_k\cdot\mathbf{k}.
+    \]
+    Explain why the levels are mutually uncoupled,
+    and compute the total angular momentum for $K=3$ with $m_1=m_2=m_3=1$, $A_k=1/k$ and $\omega_k=k$.
+
+    \item Prove Proposition \ref{prop:phase_operator_group}:
+    the four structural properties of the phase-operator group:
+    \begin{enumerate}[label=(\roman*)]
+        \item $\mathcal{P}_N\cong C_N$;
+        \item $\mathcal{P}_\infty=S^1\cong U(1)$;
+        \item $\mathcal{P}_N\subset\mathcal{P}_\infty$;
+        \item as $N\to\infty$, $\mathcal{P}_N$ is dense in $S^1$.
+    \end{enumerate}
+    Verify the four cases separately, and show that $\mathcal{O}_a\cdot\mathcal{O}_b=\mathcal{O}_{(a+b)\bmod N}$.
+
+    \item Prove Proposition \ref{prop:phase_operator_orthogonality}:
+    the phase operators satisfy the orthogonality
+    \[
+    \frac{1}{N}\sum_{j=0}^{N-1}\mathcal{O}_j^{(N)}\overline{\mathcal{O}_{j+k-l}^{(N)}}=\delta_{kl}.
+    \]
+    Explain how this orthogonality corresponds to the extraction of the Fourier coefficients.
+
+    \item Verify Example \ref{ex:phase_operators_c2} and Example \ref{ex:phase_operators_c4}:
+    \begin{enumerate}[label=(\roman*)]
+        \item $\mathcal{O}_0^{(2)}=1$, $\mathcal{O}_1^{(2)}=-1$, forming $C_2$;
+        \item $\mathcal{O}_0^{(4)}=1$, $\mathcal{O}_1^{(4)}=i$, $\mathcal{O}_2^{(4)}=-1$, $\mathcal{O}_3^{(4)}=-i$, forming $C_4$.
+    \end{enumerate}
+    Draw the distribution of $C_2$ and $C_4$ on the unit circle,
+    and explain how $\mathcal{O}_1^{(4)}=i$ corresponds to a rotation of $90^\circ$.
+
+    \item Prove Proposition \ref{prop:wave_double_period}:
+    the wave $f(x,t)=\sum_nA_ne^{i(k_nx-\omega_nt+\phi_n)}$ has a double periodic structure:
+    \begin{enumerate}[label=(\roman*)]
+        \item temporal period: $f(x,t+T_n)=f(x,t)$, $T_n=2\pi/\omega_n$;
+        \item spatial period: $f(x+\lambda_n,t)=f(x,t)$, $\lambda_n=2\pi/k_n$.
+    \end{enumerate}
+    Verify the two period conditions separately, and prove that the wave number and the angular frequency are coupled by the dispersion relation as $\lambda_n=cT_n$.
+
+    \item Prove Proposition \ref{prop:wave_satisfies_wave_equation}:
+    the wave $f(x,t)$ satisfies the one-dimensional wave equation
+    \[
+    \frac{\partial^2 f}{\partial t^2}=c^2\frac{\partial^2 f}{\partial x^2}.
+    \]
+    Explain the role of the dispersion relation $\omega_n=ck_n$ in the proof, and prove Corollary \ref{cor:dispersion_double_period}.
+
+    \item Prove Proposition \ref{prop:wave_periodic_function}:
+    at a fixed spatial position $x=x_0$ the wave $f(x,t)$ degenerates into a temporally periodic function;
+    at a fixed time $t=t_0$ it degenerates into a spatially periodic function.
+    Write out the Fourier series expressions in the two degenerate cases separately,
+    and explain the period structures corresponding to the wave number $k_n$ and the angular frequency $\omega_n$ respectively.
+
+    \item Prove Theorem \ref{thm:component_uniqueness}:
+    the component quadruple $(A_{p,n},\omega_{p,n},\phi_{p,n},T_p)$ extracted by the periodic transformation
+    is uniquely determined by the periodic function $f$.
+    Complete the proof using the Bohr uniqueness theorem (Theorem \ref{thm:periodic_series_bohr}),
+    and explain why the `uniqueness of component extraction' guarantees the reliability of the modelling chain.
+
+    \item Prove Proposition \ref{prop:period_translation}:
+    let $f:\mathbb{R}\to V$ be a periodic function and $a\in\mathbb{R}$, and define the translation
+    \[
+    (\tau_af)(t)=f(t+a),
+    \]
+    then
+    \[
+    \operatorname{Group}_{\mathrm{period}}(\tau_af)=\operatorname{Group}_{\mathrm{period}}(f),\qquad
+    T_0(\tau_af)=T_0(f).
+    \]
+    Prove $\operatorname{Group}_{\mathrm{period}}(f)\subseteq\operatorname{Group}_{\mathrm{period}}(\tau_af)$
+    and $\operatorname{Group}_{\mathrm{period}}(\tau_af)\subseteq\operatorname{Group}_{\mathrm{period}}(f)$ separately.
+
+    \item Prove Proposition \ref{prop:scaling_rotation_period}:
+    let $f$ be a periodic function, and let $q>0$ and $\theta\in\mathbb{R}$ correspond to scaling and phase rotation respectively; then
+    \[
+    \operatorname{Group}_{\mathrm{period}}(f(q\,\cdot))=\frac{1}{q}\operatorname{Group}_{\mathrm{period}}(f),\qquad
+    \operatorname{Group}_{\mathrm{period}}(e^{i\theta}f)=\operatorname{Group}_{\mathrm{period}}(f).
+    \]
+    Explain why scaling compresses the group with periodic orbits in inverse proportion, whilst phase rotation leaves the group with periodic orbits unchanged.
+
+    \item Prove Proposition \ref{prop:group_with_periodic_orbits_closed}:
+    let $f:\mathbb{R}\to V$ be continuous; then $\operatorname{Group}_{\mathrm{period}}(f)$ is a closed subgroup of $\mathbb{R}$,
+    and hence is either equal to $\mathbb{R}$ or equal to $T_0\mathbb{Z}$.
+    Complete the proof using closedness and the subgroup property, and explain why this conclusion is the algebraic root of the `discretisation' of periodic structure.
+
+    \item Discuss the \textbf{empirical observation / research programme} of Remark \ref{thm:noether_group_with_periodic_orbits}---the Noether correspondence of groups with periodic orbits:
+    the Noether correspondence of groups with periodic orbits:
+    \begin{enumerate}[label=(\roman*)]
+        \item the translation group with periodic orbits corresponds to conservation of energy (Parseval's identity);
+        \item the rotation group with periodic orbits corresponds to conservation of angular momentum (independent conservation of the angular momentum of harmonic components);
+        \item the scaling group with periodic orbits corresponds to conservation of scale charge (invariance under translation in the logarithmic domain).
+    \end{enumerate}
+    Write out the concrete forms of the three conserved quantities separately,
+    and explain their correspondence with the actions of the respective groups with periodic orbits;
+    then state which of the three can be proved rigorously within the framework of this chapter and which two are at present merely formal analogies.
+
+    \item Prove Theorem \ref{thm:parseval_periodic}:
+    Parseval's identity
+    \[
+    \frac{1}{T}\int_0^T|f(t)|^2\,dt=\sum_nA_n^2.
+    \]
+    Complete the proof using the orthogonality of the phase operators, and explain how this identity quantifies `conservation of energy'.
+
+    \item Verify the four-operator form of periodic convolution in Definition \ref{def:periodic_convolution_four_operators}:
+    \[
+    (f\circledast g)(\tau)
+    =\sum_{p,q}\Theta_{p,q}\sum_{n,m}
+    W(\omega_{p,n}-\nu_{q,m})\cdot(A_{p,n}B_{q,m})^{\alpha}
+    \cdot S^{(d)}(\phi_{p,n},\psi_{q,m})\cdot e^{i\nu_{q,m}\tau}.
+    \]
+    Point out the positions of the amplitude operator, the frequency operator, the phase operator and the period operator in the formula,
+    and explain that they correspond respectively to the four operations of scaling, translation, rotation and fixed length
+    (see Proposition \ref{prop:periodic_convolution_grammar}).
+
+    \item Prove Proposition \ref{prop:periodic_convolution_kernelized}:
+    for a single period layer ($P=Q=\{T\}$, $\Theta\equiv1$),
+    the periodic convolution reduces to kernelised convolution. Write out the degenerate expression,
+    and explain how kernelised convolution retains the interaction of all frequency pairs.
+
+    \item Prove Theorem \ref{thm:periodic_convolution_degeneracies}:
+    the three degeneracies of periodic convolution:
+    \begin{enumerate}[label=(\roman*)]
+        \item classical limit: as $W\to\delta$ it degenerates into cross-correlation/circular convolution;
+        \item similarity/trend layer: $\alpha=0$ gives similarity convolution, $\alpha=1$ gives trend convolution;
+        \item cross-period layer: the cross-period terms are controlled jointly by $\Theta_{p,q}$ and $W$.
+    \end{enumerate}
+    Write out the concrete forms in the three degenerate cases separately,
+    and explain why each level of degeneracy corresponds to a strict decrease in the amount of information.
+
+    \item Verify Example \ref{ex:period_two_periodic_convolution}:
+    the periodic-convolution matrix of period $2$
+    \[
+    \mathbb{T}=\begin{pmatrix}
+    c_0\overline{d_0}&c_0\overline{d_1}\\
+    c_1\overline{d_0}&c_1\overline{d_1}
+    \end{pmatrix}.
+    \]
+    Taking $c_0=1$, $c_1=i$, $d_0=1$ and $d_1=-i$,
+    compute the trend convolution matrix $\mathbb{T}$, and verify that its entries satisfy
+    $\mathbb{T}_{mn}=c_m\overline{d_n}$.
+
+    \item Verify Example \ref{ex:square_wave_fourier} and Example \ref{ex:sawtooth_fourier}:
+    write out the Fourier series of the square wave and of the sawtooth wave, and compare their spectral structures and decay rates. Explain why the square wave contains only odd-order harmonics, whilst the sawtooth wave contains all harmonics.
+
+    \item Explain the distinction between the Fourier series and the Bohr series in Remark \ref{rem:fourier_bohr_distinction}:
+    the frequency dictionary of a Fourier series is a subset of $\frac{2\pi}{T}\mathbb{Z}$;
+    the `frequency group' of a Bohr series is the $\mathbb{Z}$-linear combination generated by several incommensurable frequencies.
+    Give a concrete example of a quasi-periodic function, and explain that it has no non-zero least period.
+
+    \item Synthesis question: combining the modelling chain (Definition \ref{def:modelling_chain}),
+    the quadruple components of a periodic function (Definition \ref{def:period_parameters}),
+    harmonic components and conservation laws (Definition \ref{def:harmonic_component}, Theorem \ref{thm:harmonic_three_conservations}),
+    the phase operator (Definition \ref{def:discrete_phase_operator}),
+    the double period of waves (Proposition \ref{prop:wave_double_period})
+    and the four operators of periodic convolution (Definition \ref{def:periodic_convolution_four_operators}),
+    explain how periodic functions and groups with periodic orbits unify the three great themes of periodic mathematics---translation, scaling and rotation---
+    within the four-parameter framework of `amplitude, frequency, phase and period'.
+    Point out separately:
+    \begin{enumerate}[label=(\roman*)]
+        \item how the amplitude corresponds to the scaling operation;
+        \item how the frequency corresponds to the translation operation;
+        \item how the phase corresponds to the rotation operation;
+        \item how the period corresponds to the fixed-length operation.
+    \end{enumerate}
+\end{enumerate}
+

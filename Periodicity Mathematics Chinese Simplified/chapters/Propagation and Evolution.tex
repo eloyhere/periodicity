@@ -1,0 +1,1519 @@
+\chapter{传播与演化}
+\label{chap:propagation}
+\markboth{传播与演化}{传播与演化}
+
+\begin{remark}[本章定位与严格前提]\label{rem:propagation_chapter_positioning}
+本章以\textbf{光的传播}为基本原型，建立传播与演化的统一数学框架。全章所有定义、命题、引理、定理、推论均以下列两条前提为界：
+
+\begin{enumerate}[label=(\alph*)]
+    \item \textbf{线性前提}：场量满足\textbf{线性}波动方程（真空麦克斯韦方程组在无源区域的退化形式，「电磁系统之周期结构」章 \cref{thm:electromagnetic_wave_equation}），或更一般地满足\textbf{线性}常系数（或缓变系数）偏微分方程；
+    \item \textbf{缓变介质前提}：介质的折射率 $n(\mathbf{r})$ 为 $C^2$ 光滑函数，且在一个波长尺度内的相对变化远小于 $1$：$|\nabla n|\lambda \ll n$。
+\end{enumerate}
+
+凡超出上述前提的陈述——非线性介质、强场效应、量子光学、焦散面上的场强发散、随机介质中的局域化——一律以\textbf{注释}或\textbf{开放问题}标注，\textbf{不作为已证结论使用}。
+
+本章七主题定位：平移——空间传播由平移群 $\mathbb{R}^n$ 作用生成（\cref{def:propagation_operator}），时间演化由演化半群生成（\cref{def:evolution_semigroup}）；缩放——介质折射率导致波长缩放 $\lambda = \lambda_0/n$（\cref{prop:medium_wavelength_scaling}）；旋转——复相位表示与相位算子（\cref{prop:phase_propagation}）；守恒——真空中光传播保持能量（\cref{thm:vacuum_energy_conservation}）；对称——真空光传播在空间平移下不变（\cref{prop:propagation_commutes_translation}）；闭合——周期介质中的 Bloch 波（\cref{thm:bloch_floquet}）；周期——色散关系的频域支撑（\cref{prop:dispersion_period}）。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  node distance=8mm and 10mm,
+  box/.style={draw, rounded corners, align=center, minimum width=2.4cm, minimum height=0.8cm, fill=blue!5},
+  core/.style={draw, very thick, rounded corners, align=center, minimum width=3.2cm, minimum height=1cm, fill=orange!15},
+  arrow/.style={-{Stealth[length=2mm]}, thick}
+]
+\node[core] (core) {传播与演化\\统一数学框架};
+\node[box, above left=of core] (trans) {平移\\传播算子 / 演化半群};
+\node[box, above=of core] (scale) {缩放\\波长缩放 / 学习率};
+\node[box, above right=of core] (rot) {旋转\\复相位 / CEAF};
+\node[box, left=of core] (cons) {守恒\\能量 / 通量 / 自然参数};
+\node[box, right=of core] (sym) {对称\\平移不变 / Bloch};
+\node[box, below left=of core] (close) {闭合\\周期闭合 / 带隙 / 收敛};
+\node[box, below right=of core] (period) {周期\\色散周期 / 退火周期};
+\foreach \x in {trans,scale,rot,cons,sym,close,period}
+  \draw[arrow] (core) -- (\x);
+\end{tikzpicture}
+\caption{本章七主题定位：平移、缩放、旋转、守恒、对称、闭合、周期。}
+\label{fig:chapter_map}
+\end{figure}
+
+\section{光线轨迹：从费马原理到程函方程}\label{sec:ray_trajectory}
+
+\begin{remark}[本节定位]\label{rem:ray_section_positioning}
+本节从费马原理出发，严格推导光线轨迹的数学描述。费马原理是几何光学的基本变分原理，其严格化需要光程泛函的一阶变分。本节不假设读者已了解变分法，所有推导从定义出发；涉及分部积分之处均显式写出边界项的处理。
+\end{remark}
+
+\begin{definition}[光程泛函]\label{def:optical_path_functional}
+设折射率 $n:\mathbb{R}^n\to\mathbb{R}^+$ 为 $C^2$ 光滑函数，$\gamma:[s_0,s_1]\to\mathbb{R}^n$ 为 $C^2$ 曲线，参数化为弧长 $s$（即 $|\dot\gamma(s)|=1$）。定义 $\gamma$ 上的\textbf{光程泛函}为
+\[
+L[\gamma] := \int_{s_0}^{s_1} n(\gamma(s))\,ds.
+\]
+\end{definition}
+
+\begin{definition}[费马原理]\label{def:fermat_principle}
+\textbf{费马原理}：光线是光程泛函 $L[\gamma]$ 在一切连接两端点 $\gamma(s_0)=\mathbf{r}_0$、$\gamma(s_1)=\mathbf{r}_1$ 的 $C^2$ 曲线中的一阶驻定曲线。
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick]
+\coordinate (A) at (0,0);
+\coordinate (B) at (5,1.2);
+\draw[fill=gray!10] (0,-0.6) .. controls (2,0.4) and (3,0.8) .. (5,0.6) .. controls (5.5,0.4) and (5.5,-0.2) .. (5,-0.6) -- cycle;
+\node at (2.5,-0.35) {折射率 $n(\mathbf{r})$};
+\draw[blue, very thick] (A) .. controls (1.8,1.6) and (3.2,-0.2) .. (B);
+\node[blue, above] at (1.4,1.15) {真实光线 $\gamma(s)$};
+\draw[red, dashed] (A) .. controls (2.0,2.4) and (3.0,1.8) .. (B);
+\node[red, above] at (2.8,2.0) {变分曲线 $\gamma_\varepsilon$};
+\fill (A) circle (1.5pt) node[left] {$\mathbf{r}_0$};
+\fill (B) circle (1.5pt) node[right] {$\mathbf{r}_1$};
+\draw[<->] (1.2,0.2) -- (1.6,0.8);
+\node (hlabel) at (-1.2,0.55) {$\mathbf{h}(s)$};
+\draw[dashed, ->] (hlabel) -- (1.6,0.8);
+\node at (2.5,-1.3) {$\displaystyle L[\gamma]=\int_{s_0}^{s_1} n(\gamma(s))\,ds$};
+\end{tikzpicture}
+\caption{费马原理：固定端点变分。}
+\label{fig:fermat_variation}
+\end{figure}
+
+\begin{lemma}[光程泛函的一阶变分]\label{lem:optical_path_variation}
+设 $\gamma_\varepsilon(s) = \gamma(s) + \varepsilon\mathbf{h}(s)$ 为 $L[\gamma]$ 的一族变分曲线，其中 $\mathbf{h}\in C^2([s_0,s_1],\mathbb{R}^n)$ 满足 $\mathbf{h}(s_0)=\mathbf{h}(s_1)=\mathbf{0}$（固定端点变分）。则
+\[
+\left.\frac{d}{d\varepsilon}\right|_{\varepsilon=0} L[\gamma_\varepsilon]
+= \int_{s_0}^{s_1}\Bigl[\nabla n(\gamma(s))\cdot\mathbf{h}(s)\Bigr]\,ds
++ \int_{s_0}^{s_1}n(\gamma(s))\frac{d}{ds}\Bigl[\frac{\dot\gamma(s)\cdot\dot{\mathbf{h}}(s)}{|\dot\gamma(s)|}\Bigr]_{\varepsilon=0}\,ds.
+\]
+在弧长参数化 $|\dot\gamma|=1$ 下，第二项简化为 $\int_{s_0}^{s_1}n(\gamma(s))\,\dot\gamma(s)\cdot\dot{\mathbf{h}}(s)\,ds$。
+\end{lemma}
+
+\begin{proof}
+按定义展开 $L[\gamma_\varepsilon]$ 并直接求导。记 $\mathbf{v}_\varepsilon(s) := \dot\gamma_\varepsilon(s)$，则 $|\mathbf{v}_\varepsilon(s)| = |\dot\gamma(s) + \varepsilon\dot{\mathbf{h}}(s)|$。由 $|\dot\gamma|=1$，
+\[
+|\mathbf{v}_\varepsilon| = \sqrt{1 + 2\varepsilon\dot\gamma\cdot\dot{\mathbf{h}} + \varepsilon^2|\dot{\mathbf{h}}|^2} = 1 + \varepsilon\dot\gamma\cdot\dot{\mathbf{h}} + O(\varepsilon^2).
+\]
+代入 $L[\gamma_\varepsilon] = \int n(\gamma+\varepsilon\mathbf{h})|\mathbf{v}_\varepsilon|\,ds$ 并对 $\varepsilon$ 求导，取 $\varepsilon=0$ 即得第一项 $\int\nabla n\cdot\mathbf{h}\,ds$ 与第二项 $\int n\,\dot\gamma\cdot\dot{\mathbf{h}}\,ds$。
+\end{proof}
+
+\begin{theorem}[光线方程]\label{thm:ray_equation}
+在费马原理（\cref{def:fermat_principle}）与缓变介质前提（\cref{rem:propagation_chapter_positioning}）下，光线 $\gamma(s)$ 满足\textbf{光线方程}
+\[
+\boxed{\ \frac{d}{ds}\Bigl(n(\gamma(s))\,\dot\gamma(s)\Bigr) = \nabla n(\gamma(s)).\ }
+\]
+\end{theorem}
+
+\begin{proof}
+由 \cref{lem:optical_path_variation}，光程泛函的一阶变分为
+\[
+\delta L[\mathbf{h}] = \int_{s_0}^{s_1}\nabla n\cdot\mathbf{h}\,ds + \int_{s_0}^{s_1}n\,\dot\gamma\cdot\dot{\mathbf{h}}\,ds.
+\]
+对第二项作分部积分：
+\[
+\int_{s_0}^{s_1}n\,\dot\gamma\cdot\dot{\mathbf{h}}\,ds = \Bigl[n\,\dot\gamma\cdot\mathbf{h}\Bigr]_{s_0}^{s_1} - \int_{s_0}^{s_1}\frac{d}{ds}(n\dot\gamma)\cdot\mathbf{h}\,ds.
+\]
+由固定端点条件 $\mathbf{h}(s_0)=\mathbf{h}(s_1)=\mathbf{0}$，边界项为零。故
+\[
+\delta L[\mathbf{h}] = \int_{s_0}^{s_1}\Bigl[\nabla n - \frac{d}{ds}(n\dot\gamma)\Bigr]\cdot\mathbf{h}\,ds.
+\]
+费马原理要求 $\delta L[\mathbf{h}]=0$ 对所有满足端点条件的 $\mathbf{h}$ 成立。由变分法基本引理（\cref{lem:fundamental_lemma_calculus_of_variations}），被积函数恒为零：
+\[
+\nabla n - \frac{d}{ds}(n\dot\gamma) = \mathbf{0}. \qedhere
+\]
+\end{proof}
+
+\begin{lemma}[变分法基本引理]\label{lem:fundamental_lemma_calculus_of_variations}
+设 $f\in C^0([s_0,s_1],\mathbb{R}^n)$。若对一切满足 $\mathbf{h}(s_0)=\mathbf{h}(s_1)=\mathbf{0}$ 的 $C^1$ 向量函数 $\mathbf{h}$ 有 $\int_{s_0}^{s_1}f(s)\cdot\mathbf{h}(s)\,ds = 0$，则 $f\equiv\mathbf{0}$。
+\end{lemma}
+
+\begin{proof}
+反设存在 $s^*\in(s_0,s_1)$ 使 $f(s^*)\neq\mathbf{0}$。取 $f$ 的第 $j$ 个分量 $f_j(s^*)\neq 0$。由连续性，存在 $\delta>0$ 使 $|s-s^*|<\delta$ 时 $f_j(s)$ 与 $f_j(s^*)$ 同号。取截断函数 $\varphi\in C^1$，满足 $\varphi(s)\ge 0$、$\varphi(s)=0$ 于 $|s-s^*|\ge\delta$、$\varphi(s)>0$ 于 $|s-s^*|<\delta$。令 $\mathbf{h} = \varphi\,\mathbf{e}_j$（$\mathbf{e}_j$ 为第 $j$ 个坐标单位向量）。则 $\int f\cdot\mathbf{h}\,ds = \int f_j\varphi\,ds$，被积函数在 $|s-s^*|<\delta$ 上恒非负且不恒为零，积分严格为正，与假设矛盾。故 $f\equiv\mathbf{0}$。
+\end{proof}
+
+\begin{corollary}[程函方程]\label{cor:eikonal_equation}
+若存在光程函数 $S:\mathbb{R}^n\to\mathbb{R}$ 使光线方向为 $\dot\gamma = \nabla S/n$，则 $S$ 满足\textbf{程函方程}
+\[
+\boxed{\ |\nabla S(\mathbf{r})|^2 = n(\mathbf{r})^2.\ }
+\]
+\end{corollary}
+
+\begin{proof}
+由 $|\dot\gamma|=1$ 与 $\dot\gamma = \nabla S/n$，取模长平方得 $1 = |\nabla S|^2/n^2$，即 $|\nabla S|^2 = n^2$。
+\end{proof}
+
+\begin{corollary}[均匀介质中的直线传播]\label{cor:straight_line_uniform}
+若 $n(\mathbf{r})\equiv n_0$ 为常数，则光线为直线，传播速度为 $v = c/n_0$。
+\end{corollary}
+
+\begin{proof}
+由 \cref{thm:ray_equation}，$\nabla n = \mathbf{0}$，故 $d/ds(n_0\dot\gamma) = n_0\ddot\gamma = \mathbf{0}$，即 $\ddot\gamma = \mathbf{0}$——光线为直线。传播速度：由 $ds/dt = c/n_0$（由真空光速 $c$ 与折射率定义 $n = c/v$ 给出），即 $v = c/n_0$。
+\end{proof}
+
+\begin{proposition}[介质中的波长缩放]\label{prop:medium_wavelength_scaling}
+在折射率为 $n$ 的介质中，光的波长缩放为真空波长的 $1/n$：
+\[
+\lambda_{\text{medium}} = \frac{\lambda_{\text{vacuum}}}{n}.
+\]
+\end{proposition}
+
+\begin{proof}
+由光在介质中的相速度 $v = c/n$ 与频率在介质界面处连续（\cref{thm:snell_consequence}）：$\lambda_{\text{medium}} = v/\nu = c/(n\nu) = \lambda_{\text{vacuum}}/n$。
+\end{proof}
+
+\begin{theorem}[斯涅尔定律]\label{thm:snell_consequence}
+在两种均匀介质的平坦界面上，入射角 $\theta_1$ 与折射角 $\theta_2$ 满足
+\[
+n_1\sin\theta_1 = n_2\sin\theta_2.
+\]
+\end{theorem}
+
+\begin{proof}
+由费马原理（\cref{def:fermat_principle}）应用于跨越界面的光路。设入射光从 $\mathbf{A}$ 到界面上一点 $\mathbf{P}$，再从 $\mathbf{P}$ 到 $\mathbf{B}$。光程为 $L(\mathbf{P}) = n_1|\mathbf{A}-\mathbf{P}| + n_2|\mathbf{P}-\mathbf{B}|$。对 $\mathbf{P}$ 在界面内变分并令一阶变分为零，得 $n_1\sin\theta_1 = n_2\sin\theta_2$（其中 $\theta_1,\theta_2$ 分别为光路与界面法线夹角）。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+\fill[blue!8] (-3,0) rectangle (3,-2.2);
+\fill[orange!8] (-3,0) rectangle (3,2.2);
+\draw[thick] (-3,0) -- (3,0);
+\node at (-2.3,0.25) {$n_1$};
+\node at (-2.3,-0.35) {$n_2$};
+\draw[dashed] (0,-2) -- (0,2);
+\draw[->, blue, very thick] (-2,1.6) -- (0,0);
+\draw[->, red, very thick] (0,0) -- (1.8,-1.4);
+\draw[->, gray, dashed] (0,0) -- (2.2,0);
+\node at (-0.25,0.9) {$\theta_1$};
+\node at (0.35,-0.8) {$\theta_2$};
+\node[blue] at (-1.5,1.35) {入射};
+\node[red] at (2.2,-1.1) {折射};
+\node at (1.8,0.3) {界面};
+\node at (0.2,-2.0) {$n_1\sin\theta_1=n_2\sin\theta_2$};
+\end{tikzpicture}
+\caption{斯涅尔定律与全反射。}
+\label{fig:snell}
+\end{figure}
+
+\begin{property}[几何光学与「矢量分析」章算子的接口]\label{prop:geometric_optics_interface}
+几何光学的基本方程与「矢量分析」章的三个算子精确对应：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{梯度}：程函方程 $|\nabla S|^2 = n^2$（\cref{cor:eikonal_equation}）直接使用梯度算子 $\nabla$。光线方向为 $\nabla S/n$，垂直于波前 $S=\text{const}$。
+    \item \textbf{散度}：光线管束的通量守恒由散度定理（\cref{thm:divergence}）给出。设光线管束的横截面积为 $A(s)$，则 $n(s)A(s)$ 在传播中保持常数——这是「矢量分析」章守恒律在几何光学中的实现。
+    \item \textbf{旋度}：光线弯折的量由光线方程的旋度给出：$\nabla\times(n\dot\gamma) = \nabla\times(\nabla S) = \mathbf{0}$，即 $n\dot\gamma$ 为无旋场。
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i) 已由 \cref{cor:eikonal_equation} 证明。(ii) 对光线管束的侧面积分应用散度定理，结合 $\nabla\cdot(n\dot\gamma) = 0$（由光线方程直接计算），得 $nA = \text{const}$。(iii) 由 $\dot\gamma = \nabla S/n$，$n\dot\gamma = \nabla S$，故 $\nabla\times(n\dot\gamma) = \nabla\times\nabla S = \mathbf{0}$（「矢量分析」章 \cref{thm:curl_grad_zero}）。
+\end{proof}
+
+\begin{example}[球面梯度介质中的光线]\label{ex:graded_index_ray}
+取 $n(r) = n_0(1 - \alpha r^2)$（近轴近似下的梯度折射率介质）。由光线方程，近轴光线满足 $\ddot{r} \approx -2\alpha n_0\,r$（简谐振动），光线呈周期为 $T = 2\pi/\sqrt{2\alpha n_0}$ 的正弦轨迹。这是自聚焦光纤中光线的周期闭合——几何光学中「有限阶作用产生闭合轨道」的实例，与「周期基础」章的有限阶作用框架一致。
+\end{example}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.9]
+\draw[->] (-0.5,0) -- (7,0) node[right] {$z$};
+\draw[->] (0,-1.5) -- (0,1.5) node[above] {$x$};
+\draw[blue, very thick, domain=0:6.5, samples=200] plot (\x, {1.1*sin(deg(1.2*\x))});
+\foreach \x in {0,1.57,3.14,4.71,6.28} {
+  \draw[dashed, gray] (\x,-1.3) -- (\x,1.3);
+}
+\node at (3.2,-1.8) {近轴光线：$\ddot r \approx -2\alpha n_0 r$，周期 $T=2\pi/\sqrt{2\alpha n_0}$};
+\end{tikzpicture}
+\caption{梯度折射率介质中的正弦光线。}
+\label{fig:graded_index_ray}
+\end{figure}
+
+\begin{remark}[焦散与程函方程的失效]\label{rem:caustic_eikonal_failure}
+程函方程（\cref{cor:eikonal_equation}）在\textbf{焦散面}上失效：焦散面是光线管束横截面积 $A(s)\to 0$ 的曲面，其上光强按几何光学预言发散（$I\propto 1/A\to\infty$）。这一发散不是物理的——实际的场强在焦散附近有限，需用波动光学（Airy 函数）描述。因此本章所有几何光学结论均以「远离焦散面」为前提；焦散附近的波动修正属于\textbf{开放问题}（\cref{rem:propagation_open}）。
+\end{remark}
+
+\section{传播算子：空间平移的代数实现}\label{sec:propagation_operator}
+
+\begin{definition}[自由空间传播算子]\label{def:propagation_operator}
+设 $X$ 为场量（标量或向量分量）所在函数空间，取 $X = L^2(\mathbb{R}^n)$ 或 Schwarz 空间 $\mathcal{S}(\mathbb{R}^n)$。对 $\mathbf{a}\in\mathbb{R}^n$，定义\textbf{自由空间传播算子}
+\[
+(P_{\mathbf{a}} f)(\mathbf{x}) := f(\mathbf{x}-\mathbf{a}), \qquad f\in X,\ \mathbf{x}\in\mathbb{R}^n.
+\]
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick]
+\draw[->] (-0.5,0) -- (6,0) node[right] {$\mathbf{x}$};
+\draw[blue, very thick, domain=0:2.2, samples=100] plot (\x, {0.8*exp(-(\x-1)^2/0.4)});
+\node[blue] at (1.1,1.1) {$f(\mathbf{x})$};
+\draw[red, very thick, domain=2.5:4.7, samples=100] plot (\x, {0.8*exp(-(\x-3.5)^2/0.4)});
+\node[red] at (3.5,1.1) {$(P_{\mathbf{a}}f)(\mathbf{x})=f(\mathbf{x}-\mathbf{a})$};
+\draw[->, dashed] (1.0,-0.4) -- (3.4,-0.4) node[midway, below] {平移 $\mathbf{a}$};
+\end{tikzpicture}
+\caption{传播算子平移示意。}
+\label{fig:propagation_operator}
+\end{figure}
+
+\begin{definition}[介质传播算子]\label{def:medium_propagation_operator}
+设均匀介质的折射率为 $n_0$。在介质中传播距离 $\mathbf{a}$（几何距离）等价于真空中的光学距离 $n_0\mathbf{a}$（光程）。定义\textbf{介质传播算子}
+\[
+(P_{\mathbf{a}}^{(n_0)} f)(\mathbf{x}) := f(\mathbf{x}-n_0\mathbf{a}).
+\]
+\end{definition}
+
+\begin{proposition}[传播算子的群结构]\label{prop:propagation_group}
+传播算子族 $\{P_{\mathbf{a}}\}_{\mathbf{a}\in\mathbb{R}^n}$ 在算子复合下构成平移群 $\mathbb{R}^n$ 的忠实表示：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{群同态}：$P_{\mathbf{a}}P_{\mathbf{b}} = P_{\mathbf{a}+\mathbf{b}}$；
+    \item \textbf{单位元}：$P_{\mathbf{0}} = \operatorname{id}_X$；
+    \item \textbf{逆元}：$P_{\mathbf{a}}^{-1} = P_{-\mathbf{a}}$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $(P_{\mathbf{a}}P_{\mathbf{b}}f)(\mathbf{x}) = (P_{\mathbf{b}}f)(\mathbf{x}-\mathbf{a}) = f(\mathbf{x}-\mathbf{a}-\mathbf{b}) = (P_{\mathbf{a}+\mathbf{b}}f)(\mathbf{x})$。(ii)(iii) 由 (i) 取 $\mathbf{b}=\mathbf{0}$ 或 $\mathbf{b}=-\mathbf{a}$ 即得。
+\end{proof}
+
+\begin{proposition}[传播算子的等距性]\label{prop:propagation_isometry}
+在 $X = L^2(\mathbb{R}^n)$ 上，传播算子 $P_{\mathbf{a}}$ 是等距算子：
+\[
+\|P_{\mathbf{a}} f\|_{L^2} = \|f\|_{L^2}, \qquad \forall f\in L^2(\mathbb{R}^n).
+\]
+特别地，$P_{\mathbf{a}}$ 是酉算子。
+\end{proposition}
+
+\begin{proof}
+作换元 $\mathbf{y} = \mathbf{x}-\mathbf{a}$（勒贝格测度不变）：
+\[
+\|P_{\mathbf{a}} f\|_{L^2}^2 = \int_{\mathbb{R}^n}|f(\mathbf{x}-\mathbf{a})|^2\,d\mathbf{x} = \int_{\mathbb{R}^n}|f(\mathbf{y})|^2\,d\mathbf{y} = \|f\|_{L^2}^2.
+\]
+\end{proof}
+
+\begin{proposition}[传播算子的傅里叶乘子表示]\label{prop:propagation_fourier}
+设 $f\in L^2(\mathbb{R}^n)$，$\hat f(\mathbf{k}) = \int f(\mathbf{x})e^{-i\mathbf{k}\cdot\mathbf{x}}\,d\mathbf{x}$ 为其傅里叶变换。则
+\[
+\widehat{P_{\mathbf{a}} f}(\mathbf{k}) = e^{-i\mathbf{k}\cdot\mathbf{a}}\hat f(\mathbf{k}).
+\]
+即传播算子在傅里叶域中等价于乘以相位因子 $e^{-i\mathbf{k}\cdot\mathbf{a}}$。
+\end{proposition}
+
+\begin{proof}
+直接计算：
+\[
+\widehat{P_{\mathbf{a}} f}(\mathbf{k}) = \int f(\mathbf{x}-\mathbf{a})e^{-i\mathbf{k}\cdot\mathbf{x}}\,d\mathbf{x} = \int f(\mathbf{y})e^{-i\mathbf{k}\cdot(\mathbf{y}+\mathbf{a})}\,d\mathbf{y} = e^{-i\mathbf{k}\cdot\mathbf{a}}\hat f(\mathbf{k}). \qedhere
+\]
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.8cm, scale=0.9, every node/.style={transform shape}]
+\node[draw, rounded corners, fill=blue!5, align=center, minimum width=2.0cm] (x) {空间域\\$f(\mathbf{x})$};
+\node[draw, rounded corners, fill=orange!8, align=center, right=of x, minimum width=5.0cm] (p) {传播算子\\$P_{\mathbf{a}}f=f(\mathbf{x}-\mathbf{a})$};
+\node[draw, rounded corners, fill=green!8, align=center, right=of p, minimum width=2.0cm] (k) {频域\\$\hat f(\mathbf{k})$};
+\node[draw, rounded corners, fill=red!8, align=center, below=of p, minimum width=5.0cm] (phase) {乘相位因子\\$e^{-i\mathbf{k}\cdot\mathbf{a}}\hat f(\mathbf{k})$};
+\draw[->] (x) to[out=45, in=135] node[above] {$\mathcal{F}$} (k);
+\draw[->] (x) -- (p);
+\draw[->] (p) -- (phase);
+\draw[->] (phase) -- (k);
+\node at (5.3,-4.6) {传播距离 $a=\lambda$ 时，$\phi=2\pi$，$e^{-i\phi}=1$：周期闭合。};
+\end{tikzpicture}
+\caption{傅里叶域中的相位乘子。}
+\label{fig:fourier_phase}
+\end{figure}
+
+\begin{proposition}[传播算子与相位算子的一致性]\label{prop:phase_propagation}
+真空平面波 $e^{i(\mathbf{k}\cdot\mathbf{x}-\omega t)}$ 传播距离 $a$ 对应相位变化 $\phi = ka = \omega a/c$。传播算子 $P_a$ 在频域中等于相位算子
+\[
+\mathcal{O}_\phi^{(2\pi)} = e^{-i\phi},
+\]
+与「周期函数与具有周期轨道的群」章的离散相位算子（\cref{def:discrete_phase_operator}）结构一致。
+\end{proposition}
+
+\begin{proof}
+由 \cref{prop:propagation_fourier}，$P_a e^{ikx} = e^{-ika}e^{ikx}$。取 $\phi = ka$，即得 $e^{-i\phi}$。
+\end{proof}
+
+\begin{definition}[真空电磁波的复指数平面波表示]\label{def:vacuum_em_wave}
+在真空中，无源麦克斯韦方程组的单色解取复指数平面波形式
+\[
+\mathbf{E}(\mathbf{x},t)=\mathbf{E}_0\,e^{i(\mathbf{k}\cdot\mathbf{x}-\omega t)},\qquad
+\mathbf{B}(\mathbf{x},t)=\mathbf{B}_0\,e^{i(\mathbf{k}\cdot\mathbf{x}-\omega t)},
+\]
+其中色散关系为 $\omega=c|\mathbf{k}|$，并满足横波条件 $\mathbf{k}\cdot\mathbf{E}_0=0$、$\mathbf{k}\times\mathbf{E}_0=\omega\mathbf{B}_0$。
+\end{definition}
+
+\begin{corollary}[传播的周期闭合]\label{cor:propagation_period_closure}
+当传播距离等于一个波长 $a = \lambda = 2\pi/k$ 时，相位变化 $\phi = 2\pi$，$e^{-i\phi}=1$——平面波恢复到出发时的相位。这是传播算子的一个完整\textbf{周期}。
+\end{corollary}
+
+\begin{proof}
+由 \cref{prop:phase_propagation}，$\phi = k\lambda = k\cdot 2\pi/k = 2\pi$，$e^{-i2\pi}=1$。
+\end{proof}
+
+\begin{proposition}[传播算子与常系数微分算子交换]\label{prop:propagation_commutes_translation}
+设 $A$ 为常系数线性微分算子。则
+\[
+P_{\mathbf{a}}A = A P_{\mathbf{a}}, \qquad \forall \mathbf{a}\in\mathbb{R}^n.
+\]
+\end{proposition}
+
+\begin{proof}
+只需对单项式 $A = \partial^\alpha$ 验证。由链式法则，$\partial^\alpha(P_{\mathbf{a}}f) = P_{\mathbf{a}}(\partial^\alpha f)$。对多项式和取线性组合即得。
+\end{proof}
+
+\begin{definition}[演化半群]\label{def:evolution_semigroup}
+设 $X$ 为 Banach 空间。算子族 $\{E_t\}_{t\ge 0}\subset\mathcal{L}(X)$ 称为\textbf{强连续演化半群}，若
+\begin{enumerate}[label=(\roman*)]
+    \item $E_0 = \operatorname{id}_X$；
+    \item $E_{t+s} = E_t\circ E_s$ 对一切 $t,s\ge 0$；
+    \item 对每个 $f\in X$，$\lim_{t\to 0^+}E_t f = f$（强连续性）。
+\end{enumerate}
+其\textbf{无穷小生成元} $A$ 定义为 $Af := \lim_{t\to 0^+}(E_t f - f)/t$，定义域为上述极限存在的 $f$ 全体。
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick]
+\draw[->] (-0.5,0) -- (7,0) node[right] {$t$};
+\foreach \t in {0,1,2,3,4,5,6} {
+  \draw[gray!40] (\t,-0.15) -- (\t,0.15);
+}
+\node[blue] at (0.3,0.6) {$E_0=\operatorname{id}$};
+\node[blue] at (2.0,0.6) {$E_s$};
+\node[blue] at (4.0,0.6) {$E_t$};
+\node[blue] at (6.0,0.6) {$E_{t+s}=E_t\circ E_s$};
+\draw[->, red, very thick] (0,-0.7) -- (6,-0.7) node[midway, below] {强连续演化半群};
+\node at (3.0,-1.9) {生成元 $A$：$\displaystyle Af=\lim_{t\to0^+}\frac{E_tf-f}{t}$，形式上 $E_t=e^{tA}$};
+\end{tikzpicture}
+\caption{强连续演化半群时间轴。}
+\label{fig:evolution_semigroup}
+\end{figure}
+
+\begin{theorem}[线性演化方程的指数表示]\label{thm:linear_evolution_exponential}
+设 $X$ 为 Banach 空间，$A$ 为 $X$ 上的闭稠定线性算子，且 $\{E_t\}_{t\ge 0}$ 由 $\partial_t u = Au$ 生成。则形式上有
+\[
+E_t = e^{tA}, \qquad t\ge 0,
+\]
+在 $\mathcal{D}(A)$ 上成立。
+\end{theorem}
+
+\begin{proof}
+对 $u_0\in\mathcal{D}(A)$，由生成元的定义 $E_t u_0 - u_0 = \int_0^t AE_s u_0\,ds$。两边对 $t$ 求导得 $\frac{d}{dt}E_t u_0 = AE_t u_0$，即 $E_t u_0$ 是 $\partial_t u = Au$ 的解。由半群性质，解的唯一性保证 $E_t = e^{tA}$（在 $\mathcal{D}(A)$ 上）。
+\end{proof}
+
+\begin{theorem}[真空光传播的能量守恒]\label{thm:vacuum_energy_conservation}
+设 $\mathbf{u}(t) = (\mathbf{E}(t),\mathbf{B}(t))$ 为真空麦克斯韦方程组的解，能量密度积分
+\[
+U(t) := \int_{\mathbb{R}^3}\Bigl(\frac{\varepsilon_0}{2}|\mathbf{E}(\mathbf{x},t)|^2 + \frac{1}{2\mu_0}|\mathbf{B}(\mathbf{x},t)|^2\Bigr)\,d\mathbf{x}.
+\]
+则 $U(t) = U(0)$ 对一切 $t$ 成立。
+\end{theorem}
+
+\begin{proof}
+将麦克斯韦方程组写为 $\partial_t\mathbf{u} = A\mathbf{u}$，其中 $A$ 由旋度算子给出。在 $L^2$ 能量内积下，$A$ 反对称：$\langle A\mathbf{u},\mathbf{u}\rangle = 0$（用分部积分，「电磁系统之周期结构」章 \cref{thm:electromagnetic_conservation} 的坡印廷定理已证明）。反对称算子在 Hilbert 空间上生成幺正群（Stone 定理），故 $\|\mathbf{u}(t)\|^2 = \|\mathbf{u}(0)\|^2$，即 $U(t)=U(0)$。
+\end{proof}
+
+\begin{corollary}[因果性的数学表述]\label{cor:causality_speed}
+在真空线性波动方程下，电磁信号的传播速度不超过 $c$。具体地，设初始场在 $t=0$ 时支撑于开集 $\Omega_0$，则 $t>0$ 时场支撑于 $\Omega_0$ 的 $ct$-邻域 $\Omega_0 + B_{ct}(\mathbf{0})$。
+\end{corollary}
+
+\begin{proof}
+由 \cref{thm:vacuum_energy_conservation} 的幺正演化群与波动方程的有限传播速度性质。对能量通量应用散度定理，可得穿越任意以 $\mathbf{x}_0$ 为心、半径 $r$ 的球面的能量被 $c$ 乘以球外能量密度所界；当球内初始能量为零时，球内能量在 $t<r/c$ 内保持为零。
+\end{proof}
+
+\begin{example}[真空中的高斯光脉冲]\label{ex:vacuum_gaussian_pulse}
+取初始高斯脉冲 $\psi_0(x) = e^{-x^2/(2\sigma^2)}e^{ik_0x}$。真空色散关系 $\omega(k) = ck$，群速度 $v_g = c$，二阶色散 $\omega''=0$。由 \cref{thm:linear_evolution_exponential}，脉冲以速度 $c$ 平移且不展宽：
+\[
+\psi(x,t) = e^{ik_0(x-ct)}e^{-(x-ct)^2/(2\sigma^2)}.
+\]
+这是「无色散」现象的数学刻画。
+\end{example}
+
+\begin{example}[色散介质中的脉冲展宽]\label{ex:dispersive_pulse}
+在色散介质中，色散关系为 $\omega(k)$，二阶色散 $\beta_2 = d^2\beta/d\omega^2$（$\beta = \omega n(\omega)/c$）。高斯脉冲展宽：
+\[
+\sigma(t) \approx \sigma\sqrt{1 + (\beta_2 t/\sigma^2)^2}, \qquad t\to\infty.
+\]
+这是光纤通信中的色散代价。
+\end{example}
+
+\section{核函数体系：传播的积分表示}\label{sec:kernel_functions}
+
+\begin{remark}[本节定位]\label{rem:kernel_section_positioning}
+本节系统列出全书涉及的核函数，并按功能分类。核函数是传播与演化在积分层面的实现——每一个核函数都是某一类传播过程或某一种谱变换的积分核。本节严格区分三类核函数：(i) \textbf{传播核}（描述物理传播的格林函数）；(ii) \textbf{窗核与谱核}（描述频谱分析中的窗函数与周期化核）；(iii) \textbf{相位相似核与权重核}（描述周期卷积中的相位与频率选择）。
+\end{remark}
+
+\begin{definition}[传播核（格林函数）]\label{def:propagation_kernel}
+设线性演化方程 $\partial_t u = \mathcal{L}u$ 具有唯一解。\textbf{传播核} $G(\mathbf{x},t;\mathbf{x}_0)$ 是初值 $u(\mathbf{x},0) = \delta(\mathbf{x}-\mathbf{x}_0)$ 对应的解：
+\[
+u(\mathbf{x},t) = \int_{\mathbb{R}^n}G(\mathbf{x},t;\mathbf{x}_0)u_0(\mathbf{x}_0)\,d\mathbf{x}_0.
+\]
+等价地，$G$ 是演化算子 $E_t = e^{t\mathcal{L}}$ 的积分核。
+\end{definition}
+
+\begin{theorem}[传播核满足演化方程与初值条件]\label{thm:propagation_kernel_satisfies_pde}
+传播核 $G(\mathbf{x},t;\mathbf{x}_0)$ 满足
+\[
+\partial_t G = \mathcal{L}G, \qquad G(\mathbf{x},0;\mathbf{x}_0) = \delta(\mathbf{x}-\mathbf{x}_0).
+\]
+\end{theorem}
+
+\begin{proof}
+由定义 \ref{def:propagation_kernel}，$u(\mathbf{x},t) = \int G(\mathbf{x},t;\mathbf{x}_0)u_0(\mathbf{x}_0)\,d\mathbf{x}_0$ 对任意 $u_0$ 满足 $\partial_t u = \mathcal{L}u$。取 $u_0 = \delta(\cdot-\mathbf{x}_0)$ 即得。初值条件由 $E_0 = \operatorname{id}$ 给出。
+\end{proof}
+
+\begin{longtable}{@{}>{\raggedright\arraybackslash\hspace{0pt}}p{2.3cm}
+                >{\raggedright\arraybackslash\hspace{0pt}\small}p{5.2cm}
+                >{\raggedright\arraybackslash\hspace{0pt}}p{3.8cm}
+                >{\raggedright\arraybackslash\hspace{0pt}}p{2.2cm}@{}}
+\caption{全书核函数总表（按功能分类）}
+\label{tab:all_kernels}\\
+\toprule
+核函数 & 数学形式 & 物理/数学意义 & 所在章节 \\
+\midrule
+\endfirsthead
+
+\multicolumn{4}{@{}l}{\small\itshape（续表）}\\
+\toprule
+核函数 & 数学形式 & 物理/数学意义 & 所在章节 \\
+\midrule
+\endhead
+
+\midrule
+\multicolumn{4}{r@{}}{\small\itshape 接下页}\\
+\endfoot
+
+\bottomrule
+\endlastfoot
+
+\multicolumn{4}{@{}l}{\textbf{(A) 传播核（格林函数）}} \\
+\midrule
+自由空间格林函数 & $G(\mathbf{x},\mathbf{x}') = \frac{e^{ik\|\mathbf{x}-\mathbf{x}'\|}}{4\pi\|\mathbf{x}-\mathbf{x}'\|}$ & 点源在真空中的亥姆霍兹传播 & 电磁系统 \\
+热核 & $G(x,t) = \frac{1}{\sqrt{4\pi\alpha t}}e^{-x^2/(4\alpha t)}$ & 热传导的扩散核 & 微分方程 \\
+一维波传播核 & $G(x,t) = \frac{1}{2c}\mathbf{1}_{|x|<ct}$ & 一维波动方程的基本解 & 微分方程 \\
+泊松核 & $P_r(\theta) = \frac{1-r^2}{1-2r\cos\theta+r^2}$ & 调和函数边界值传播 & 调和分析 \\
+推迟格林函数 & $G_{\text{ret}} = \frac{\delta(t'-t+\|\mathbf{x}-\mathbf{x}'\|/c)}{4\pi\|\mathbf{x}-\mathbf{x}'\|}$ & 推迟势积分核 & 电磁系统 \\
+艾里核 & $\operatorname{Ai}(x) = \frac{1}{\pi}\int_0^\infty\cos(t^3/3+xt)\,dt$ & 焦散附近的波动修正 & 本章注释 \\
+\midrule
+\multicolumn{4}{@{}l}{\textbf{(B) 窗核与谱核}} \\
+\midrule
+矩形窗核 & $W_T(\omega) = \frac{1}{T}\frac{\sin(T\omega/2)}{\sin(\omega/2)}$ & 有限窗的频谱核，旁瓣 $-13$ dB & 离散采样 \\
+Hann 窗核 & $w(n) = \tfrac12\bigl(1-\cos\tfrac{2\pi n}{M-1}\bigr)$ & 旁瓣 $-31$ dB，衰减 $1/\omega^3$ & 离散采样 \\
+Hamming 窗核 & $w(n) = 0.54-0.46\cos\tfrac{2\pi n}{M-1}$ & 旁瓣 $-43$ dB & 离散采样 \\
+Blackman 窗核 & $w(n) = 0.42-0.5\cos\tfrac{2\pi n}{M-1}+0.08\cos\tfrac{4\pi n}{M-1}$ & 旁瓣 $-58$ dB & 离散采样 \\
+三角窗核 & $w(n) = 1-\bigl|\tfrac{2n}{M-1}-1\bigr|$ & 旁瓣 $-27$ dB，衰减 $1/\omega^2$ & 离散采样 \\
+高斯核 & $K_\Delta(x) = \frac{1}{\sqrt{2\pi}\Delta}e^{-x^2/(2\Delta^2)}$ & 时频最优，无旁瓣 & 时序分析 \\
+墨西哥帽核 & $K_{\text{MexHat}}(x) = (1-x^2/\Delta^2)e^{-x^2/(2\Delta^2)}$ & 带通，二阶导 & 时序分析 \\
+柯西核 & $K_\Delta(x) = \frac{1}{\pi}\frac{\Delta}{x^2+\Delta^2}$ & 重尾，长程 & 时序分析 \\
+Sinc 核 & $K(x) = \frac{\sin(\pi x/\Delta)}{\pi x/\Delta}$ & 理想低通 & 调和分析 \\
+狄利克雷核 & $D_M(\theta) = \frac{\sin((M+\frac12)\theta)}{\sin(\theta/2)}$ & 周期窗核，主瓣 $2\pi/T$ & 离散采样 \\
+Fejér 核 & $F_N(x) = \frac{1}{N+1}\Bigl(\frac{\sin((N+1)x/2)}{\sin(x/2)}\Bigr)^2$ & 非负好核，Cesàro 平均 & 调和分析 \\
+\midrule
+\multicolumn{4}{@{}l}{\textbf{(C) 相位相似核（周期卷积中）}} \\
+\midrule
+$S^{(1)}$ & $e^{i(\theta_m-\varphi_n)}$ & 基础差角（内积/外积模） & 标量与矢量 \\
+$S^{(2)}$ & $e^{i(\theta_m+\varphi_n)}$ & 基础和角（复数乘法） & 标量与矢量 \\
+$S^{(3)}$ & $e^{i2(\theta_m-\varphi_n)}$ & 倍角差角（二阶反转检测） & 标量与矢量 \\
+$S^{(4)}$ & $e^{i2(\theta_m+\varphi_n)}$ & 倍角和角 & 标量与矢量 \\
+$S^{(5)}$ & $e^{i(\theta_m-\varphi_n)/2}$ & 半角差角（和差向量模长） & 标量与矢量 \\
+$S^{(6)}$ & $e^{i(\theta_m+\varphi_n)/2}$ & 半角和角 & 标量与矢量 \\
+\midrule
+\multicolumn{4}{@{}l}{\textbf{(D) 权重核与周期核}} \\
+\midrule
+权重核 $W$ & $W(\omega_m-\nu_n)$ & 频域选择（带宽控制） & 级数与卷积 \\
+周期核 $k_{\text{per}}$ & $\sigma^2\exp\bigl(-\tfrac{2\sin^2(\pi|x-x'|/T)}{\ell^2}\bigr)$ & GP 周期先验（MacKay） & 概率系统 \\
+高斯过程核 $k_{\text{SE}}$ & $\sigma^2 e^{-(x-x')^2/(2\ell^2)}$ & GP 光滑先验 & 概率系统 \\
+\end{longtable}
+
+\begin{figure}[htbp]
+\centering
+\begin{fittikz}
+\begin{tikzpicture}[
+  every node/.style={draw, rounded corners, align=center, fill=blue!4,
+                     font=\footnotesize, minimum width=2.2cm, minimum height=0.8cm},
+  edge/.style={draw, -{Stealth[length=2mm]}, thick}
+]
+\node (root) at (0,0) {核函数体系};
+
+\node (TL) at (-4.1,3)  {传播核\\格林函数};
+
+\node (TR) at (3.5,2)   {窗核与谱核};
+% 相位相似核与权重核与周期核整体左移 2cm
+\node (BL) at (-6.0,-2) {相位相似核};
+\node (BR) at (2.5,-2)  {权重核与周期核};
+
+\draw[edge] (root) -- (TL);
+\draw[edge] (root) -- (TR);
+\draw[edge] (root) -- (BL);
+\draw[edge] (root) -- (BR);
+
+\node (TL1) at (-9.0,5.0) {自由空间\\格林函数};
+\node (TL2) at (-9.0,3.8) {热核};
+\node (TL3) at (-9.0,2.6) {波传播核};
+\node (TL4) at (-9.0,1.4) {泊松核};
+\node (TL5) at (-9.0,0.2) {推迟格林函数};
+\draw[edge] (TL) -- (TL1);
+\draw[edge] (TL) -- (TL2);
+\draw[edge] (TL) -- (TL3);
+\draw[edge] (TL) -- (TL4);
+\draw[edge] (TL) -- (TL5);
+
+\node (TR1) at (0.0,4) {矩形/Hann\\Hamming/Blackman};
+\node (TR2) at (3.5,4) {高斯/墨西哥帽\\柯西/Sinc};
+\node (TR3) at (3.5,0) {狄利克雷\\Fejér};
+\draw[edge] (TR) -- (TR1);
+\draw[edge] (TR) -- (TR2);
+\draw[edge] (TR) -- (TR3);
+
+\node (BL1) at (-8.5,-4) {$S^{(1)},S^{(2)}$};
+\node (BL2) at (-6.0,-4) {$S^{(3)},S^{(4)}$};
+\node (BL3) at (-3.5,-4) {$S^{(5)},S^{(6)}$};
+\draw[edge] (BL) -- (BL1);
+\draw[edge] (BL) -- (BL2);
+\draw[edge] (BL) -- (BL3);
+
+\node (BR1) at (0.0,-4) {权重核 $W$};
+\node (BR2) at (2.5,-4) {周期核 $k_{\text{per}}$};
+\node (BR3) at (5.0,-4) {GP 高斯核};
+\draw[edge] (BR) -- (BR1);
+\draw[edge] (BR) -- (BR2);
+\draw[edge] (BR) -- (BR3);
+
+\end{tikzpicture}
+\end{fittikz}
+\caption{核函数分类树。}
+\label{fig:kernel_tree}
+\end{figure}
+
+\begin{property}[核函数的对偶关系]\label{prop:kernel_duality}
+核函数之间满足以下对偶关系：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{高斯-高斯对偶}：高斯窗核的傅里叶变换仍为高斯核（引理 \ref{lem:gaussian_fourier_duality}）。
+    \item \textbf{窗-核对偶}：矩形窗核与 Sinc 核互为傅里叶对偶（定理 \ref{thm:window_kernel_duality}）。
+    \item \textbf{相位核共轭}：$S^{(d)}$ 与 $S^{(d')}$ 满足共轭对偶 $S^{(1)} = \overline{S^{(1)}_{\text{反向}}}$（\cref{prop:phase_convolution_symmetry}）。
+    \item \textbf{传播-演化对偶}：空间传播核与时间演化核互为时空对偶（\cref{thm:propagation_evolution_duality}）。
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i) 直接计算高斯核的傅里叶变换。(ii) 由「离散采样逼近、同余角与置闰」章核-核对偶定理（\cref{thm:window_kernel_duality}）。(iii) 由「级数与卷积」章相位卷积共轭对称性（\cref{prop:phase_convolution_symmetry}）。(iv) 见 \cref{thm:propagation_evolution_duality}。
+\end{proof}
+
+\begin{lemma}[高斯核的傅里叶自对偶]\label{lem:gaussian_fourier_duality}
+设 $K_\Delta(x) = \frac{1}{\sqrt{2\pi}\Delta}e^{-x^2/(2\Delta^2)}$。则
+\[
+\hat K_\Delta(\omega) = e^{-\Delta^2\omega^2/2},
+\]
+即高斯核的傅里叶变换仍为高斯核（方差互换 $\Delta\leftrightarrow 1/\Delta$）。
+\end{lemma}
+
+\begin{proof}
+由标准高斯积分 $\int_{-\infty}^\infty e^{-x^2/(2\Delta^2)}e^{-i\omega x}\,dx = \sqrt{2\pi}\Delta e^{-\Delta^2\omega^2/2}$（配方为完全平方后作高斯积分）。
+\end{proof}
+
+\begin{theorem}[传播核与演化核的时空对偶]\label{thm:propagation_evolution_duality}
+设 $G_{\text{prop}}(\mathbf{x})$ 为空间传播核（亥姆霍兹方程的格林函数），$G_{\text{evo}}(t)$ 为时间演化核。在傅里叶域中，二者由时空色散关系 $\omega(\mathbf{k})$ 联系：
+\[
+\widehat{G_{\text{prop}}}(\mathbf{k}) = \frac{1}{\omega(\mathbf{k})}, \qquad \widehat{G_{\text{evo}}}(\omega) = \frac{1}{\omega},
+\]
+且 $G_{\text{prop}}$ 与 $G_{\text{evo}}$ 的时空卷积给出完整的传播-演化核。
+\end{theorem}
+
+\begin{proof}
+在傅里叶域中，亥姆霍兹方程 $(\nabla^2+k^2)G = -\delta$ 化为 $(-|\mathbf{k}|^2+k^2)\hat G = -1$，即 $\hat G(\mathbf{k}) = 1/(|\mathbf{k}|^2-k^2)$。对时间演化方程 $\partial_t u = i\omega u$，傅里叶变换给出 $\hat G_{\text{evo}}(\omega) = 1/(-i\omega)$，模长即 $1/|\omega|$。时空对偶由色散关系 $\omega = \omega(\mathbf{k})$ 联系。
+\end{proof}
+
+\begin{example}[自由空间格林函数的远场展开]\label{ex:green_far_field}
+自由空间格林函数 $G(\mathbf{x},\mathbf{x}') = e^{ik\|\mathbf{x}-\mathbf{x}'\|}/(4\pi\|\mathbf{x}-\mathbf{x}'\|)$ 在远场 $|\mathbf{x}|\gg|\mathbf{x}'|$ 下展开为
+\[
+G(\mathbf{x},\mathbf{x}') \approx \frac{e^{ik|\mathbf{x}|}}{4\pi|\mathbf{x}|}e^{-i\mathbf{k}\cdot\mathbf{x}'}, \qquad \mathbf{k} = k\hat{\mathbf{x}}.
+\]
+这是相位因子 $e^{-i\mathbf{k}\cdot\mathbf{a}}$ 的物理来源——传播算子的傅里叶乘子表示（\cref{prop:propagation_fourier}）在格林函数远场展开中的实现。
+\end{example}
+
+\section{传播卷积与演化卷积}\label{sec:propagation_convolution}
+
+\begin{remark}[本节定位]\label{rem:convolution_section_positioning}
+本节在核函数体系（第 \ref{sec:kernel_functions} 节）基础上，定义\textbf{传播卷积}与\textbf{演化卷积}。二者的共同结构为：传播算子或演化算子作用在函数上等价于函数与对应核的卷积。本节的严格前提与本章其余部分一致：线性演化方程 + 缓变介质。本节末尾明确二者与「级数与卷积」章周期卷积的关系。
+\end{remark}
+
+\begin{definition}[传播卷积]\label{def:propagation_convolution}
+设 $G_{\text{prop}}(\mathbf{x},\mathbf{x}')$ 为空间传播核（\cref{def:propagation_kernel}）。函数 $f$ 与 $G$ 的\textbf{传播卷积}定义为
+\[
+(f \circledast_{\text{prop}} G)(\mathbf{x}) := \int_{\mathbb{R}^n}f(\mathbf{x}')G(\mathbf{x},\mathbf{x}')\,d\mathbf{x}'.
+\]
+当介质均匀（平移不变）时，$G(\mathbf{x},\mathbf{x}') = G(\mathbf{x}-\mathbf{x}')$，传播卷积退化为普通卷积
+\[
+(f \circledast_{\text{prop}} G)(\mathbf{x}) = \int_{\mathbb{R}^n}f(\mathbf{x}')G(\mathbf{x}-\mathbf{x}')\,d\mathbf{x}' = (f * G)(\mathbf{x}).
+\]
+\end{definition}
+
+\begin{definition}[演化卷积]\label{def:evolution_convolution}
+设 $G_{\text{evo}}(t,t')$ 为时间演化核（\cref{def:propagation_kernel} 的时间对偶）。函数 $f$ 与 $G$ 的\textbf{演化卷积}定义为
+\[
+(f \circledast_{\text{evo}} G)(t) := \int_{\mathbb{R}}f(t')G(t,t')\,dt'.
+\]
+当演化方程常系数（时间平移不变）时，$G(t,t') = G(t-t')$，演化卷积退化为普通时间卷积
+\[
+(f \circledast_{\text{evo}} G)(t) = (f * G)(t).
+\]
+\end{definition}
+
+\begin{definition}[传播-演化联合卷积]\label{def:joint_convolution}
+设 $G(\mathbf{x},t;\mathbf{x}',t')$ 为时空传播核。函数 $f$ 与 $G$ 的\textbf{传播-演化联合卷积}定义为
+\[
+(f \circledast_{\text{PE}} G)(\mathbf{x},t) := \int_{\mathbb{R}^n}\int_{\mathbb{R}}f(\mathbf{x}',t')G(\mathbf{x},t;\mathbf{x}',t')\,d\mathbf{x}'\,dt'.
+\]
+当介质均匀且演化常系数时，$G(\mathbf{x},t;\mathbf{x}',t') = G(\mathbf{x}-\mathbf{x}', t-t')$，联合卷积为时空普通卷积。
+\end{definition}
+
+\begin{theorem}[传播卷积与周期卷积的关系]\label{thm:propagation_periodic_convolution}
+单周期层（$P=Q=\{T\}$，$W\to\delta$）的周期卷积（\cref{def:periodic_convolution}）在空间平移群 $\mathbb{R}^n$ 上退化为传播卷积：
+\[
+(f \circledast_{\text{prop}} G)(\mathbf{x}) = \lim_{W\to\delta}(f\circledast g)(\mathbf{x}),
+\]
+其中 $g$ 取为传播核 $G$，$S^{(d)}$ 取相位核 $S^{(1)}$。
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:periodic_convolution} 的单周期层退化（\cref{prop:periodic_convolution_degenerations}(i)）与 \cref{def:propagation_convolution}，两者均为同一频率对 $(n=m)$ 的卷积。相位核 $S^{(1)}(\theta,\theta)=1$，振幅开关 $\alpha=1$ 保留振幅。故周期卷积退化为传播卷积。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{fittikz}
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.2cm]
+\node[draw, rounded corners, fill=purple!8, align=center] (pc) {周期卷积\\$f\circledast g$};
+\node[draw, rounded corners, fill=blue!8, align=center, below left=of pc] (prop) {传播卷积\\$f\circledast_{\text{prop}}G$};
+\node[draw, rounded corners, fill=green!8, align=center, below right=of pc] (evo) {演化卷积\\$f\circledast_{\text{evo}}G$};
+\node[draw, rounded corners, fill=orange!8, align=center, below=of pc] (joint) {传播-演化联合卷积\\$f\circledast_{\text{PE}}G$};
+\draw[->] (pc) -- node[left, align=center] {$W\to\delta$\\$S^{(1)}=1$\\$\alpha=1$} (prop);
+\draw[->] (pc) -- node[right, align=center] {时间平移\\单周期退化} (evo);
+\draw[->] (prop) -- (joint);
+\draw[->] (evo) -- (joint);
+\node at (0,-4.2) {周期卷积的相位核、权重核、振幅开关在单周期退化中分别变为 $S^{(1)}=1$、$W=\delta$、$\alpha=1$。};
+\end{tikzpicture}
+\end{fittikz}
+\caption{周期卷积到传播卷积的退化。}
+\label{fig:convolution_degeneration}
+\end{figure}
+
+\begin{property}[传播卷积的代数性质]\label{prop:propagation_convolution_algebra}
+在平移不变介质中，传播卷积满足：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{交换律}：$f\circledast_{\text{prop}}G = G\circledast_{\text{prop}}f$（由卷积交换律）；
+    \item \textbf{结合律}：$(f\circledast_{\text{prop}}G_1)\circledast_{\text{prop}}G_2 = f\circledast_{\text{prop}}(G_1\circledast_{\text{prop}}G_2)$；
+    \item \textbf{傅里叶乘子}：$\widehat{f\circledast_{\text{prop}}G}(\mathbf{k}) = \hat f(\mathbf{k})\hat G(\mathbf{k})$；
+    \item \textbf{传播算子实现}：$P_{\mathbf{a}}f = f\circledast_{\text{prop}}\delta_{\mathbf{a}}$，其中 $\delta_{\mathbf{a}}(\mathbf{x}) = \delta(\mathbf{x}-\mathbf{a})$。
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i)(ii) 由普通卷积的交换律和结合律。(iii) 由卷积定理。(iv) 由 $\delta$ 函数的筛选性质：$\int f(\mathbf{x}')\delta(\mathbf{x}-\mathbf{a}-\mathbf{x}')\,d\mathbf{x}' = f(\mathbf{x}-\mathbf{a}) = P_{\mathbf{a}}f(\mathbf{x})$。
+\end{proof}
+
+\begin{theorem}[传播卷积与传播算子的统一]\label{thm:propagation_convolution_operator}
+设 $G_{\text{prop}}$ 为均匀介质中的传播核。则传播算子 $P_{\mathbf{a}}$ 作用在 $f$ 上等价于 $f$ 与 $\delta_{\mathbf{a}}$ 的传播卷积：
+\[
+P_{\mathbf{a}}f = f\circledast_{\text{prop}}\delta_{\mathbf{a}}.
+\]
+更一般地，若 $G$ 为任意传播核，则 $f\circledast_{\text{prop}}G$ 给出以 $G$ 为传播核的传播结果。
+\end{theorem}
+
+\begin{proof}
+第一式已由 \cref{prop:propagation_convolution_algebra}(iv) 证明。第二式由定义 \ref{def:propagation_convolution} 与传播核定义 \ref{def:propagation_kernel} 直接给出。
+\end{proof}
+
+\begin{example}[热传导的演化卷积]\label{ex:heat_evolution_convolution}
+一维热传导方程 $\partial_t u = \alpha\partial_x^2 u$ 的传播核为热核 $G(x,t) = \frac{1}{\sqrt{4\pi\alpha t}}e^{-x^2/(4\alpha t)}$。演化卷积
+\[
+u(x,t) = (u_0\circledast_{\text{evo}}G)(x,t) = \int_{\mathbb{R}}u_0(x')\frac{1}{\sqrt{4\pi\alpha t}}e^{-(x-x')^2/(4\alpha t)}\,dx'
+\]
+给出初值 $u_0$ 的演化。由核函数对偶（\cref{prop:kernel_duality}），热核的傅里叶变换为 $e^{-\alpha k^2 t}$——这是频率分量的指数衰减因子，与「微分方程与复变函数」章热传导方程的傅里叶解法（\cref{ex:heat_fourier}）一致。
+\end{example}
+
+\begin{example}[自由空间的光传播卷积]\label{ex:free_space_optical_convolution}
+真空中的光传播核为自由空间格林函数 $G(\mathbf{x}) = e^{ik|\mathbf{x}|}/(4\pi|\mathbf{x}|)$。传播卷积
+\[
+u(\mathbf{x}) = (u_0\circledast_{\text{prop}}G)(\mathbf{x}) = \int_{\mathbb{R}^3}u_0(\mathbf{x}')\frac{e^{ik|\mathbf{x}-\mathbf{x}'|}}{4\pi|\mathbf{x}-\mathbf{x}'|}\,d\mathbf{x}'
+\]
+给出亥姆霍兹方程的解——这是基尔霍夫衍射公式的数学形式。
+\end{example}
+
+\begin{remark}[传播卷积与周期卷积的关系摘要]\label{rem:propagation_convolution_summary}
+传播卷积与周期卷积的关系可总结为：\textbf{传播卷积是周期卷积在空间平移群上的单周期退化}（\cref{thm:propagation_periodic_convolution}），\textbf{演化卷积是周期卷积在时间平移群上的单周期退化}。两者的联合（\cref{def:joint_convolution}）给出完整的时空传播。周期卷积的相位相似核 $S^{(d)}$、权重核 $W$、振幅开关 $\alpha$ 在传播卷积中分别退化为：相位核 $S^{(1)}=1$、权重核 $W=\delta$、$\alpha=1$。
+\end{remark}
+
+\begin{remark}[传播-演化联合卷积的傅里叶表示]\label{rem:joint_convolution_fourier}
+由傅里叶变换的乘积定理，传播-演化联合卷积在时空频域中为
+\[
+\widehat{f\circledast_{\text{PE}}G}(\mathbf{k},\omega) = \hat f(\mathbf{k},\omega)\hat G(\mathbf{k},\omega).
+\]
+其中 $\hat G(\mathbf{k},\omega)$ 由时空色散关系 $\omega = \omega(\mathbf{k})$ 决定。特别地，自由空间的 $\hat G$ 在 $\omega = c|\mathbf{k}|$ 上取非零值——这正是「电磁系统之周期结构」章平面波色散关系（\cref{prop:plane_wave_periodic}）在联合卷积框架中的重述。
+\end{remark}
+
+\begin{theorem}[Bloch-Floquet 传播]\label{thm:bloch_floquet}
+设线性演化算子 $\mathcal{L}$ 具有空间周期 $\mathbf{T}$（即 $P_{\mathbf{T}}\mathcal{L} = \mathcal{L}P_{\mathbf{T}}$）。则存在形如
+\[
+u_{\mathbf{k},n}(\mathbf{x},t) = e^{i(\mathbf{k}\cdot\mathbf{x}-\omega_n(\mathbf{k})t)}\phi_{\mathbf{k},n}(\mathbf{x}), \qquad \phi_{\mathbf{k},n}(\mathbf{x}+\mathbf{T}) = \phi_{\mathbf{k},n}(\mathbf{x})
+\]
+的 Bloch 波解。每个 $n$ 对应一个\textbf{能带}，$\omega_n(\mathbf{k})$ 是第 $n$ 能带的色散关系，$\mathbf{k}$ 取\textbf{第一布里渊区} $\mathbb{R}^n/\mathbf{T}^*\mathbb{Z}^n$。
+\end{theorem}
+
+\begin{proof}
+$\mathcal{L}$ 与 $P_{\mathbf{T}}$ 交换，故在 $L^2$ 上可同时谱分解。$P_{\mathbf{T}}$ 是酉算子，其谱为单位圆；每个特征值可取 $e^{-i\mathbf{k}\cdot\mathbf{T}}$（$\mathbf{k}$ 取模 $\mathbf{T}^*$）形式。对应特征向量空间由 Bloch 波张成：$u(\mathbf{x}) = e^{i\mathbf{k}\cdot\mathbf{x}}\phi(\mathbf{x})$，$\phi$ 以 $\mathbf{T}$ 为周期。在 $\mathcal{L}$ 的谱分解中进一步按 $\omega_n(\mathbf{k})$ 分级即得。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.95]
+\draw[->] (-0.5,0) -- (6.5,0) node[right] {$k$};
+\draw[->] (0,-0.2) -- (0,3.2) node[above] {$\omega$};
+\foreach \x in {0,1,2,3,4,5,6} {
+  \draw[gray!30] (\x,0) -- (\x,3.0);
+}
+\draw[blue, very thick, domain=0:3, samples=100] plot (\x, {0.5+0.4*sin(deg(1.2*\x))});
+\draw[red, very thick, domain=0:3, samples=100] plot (\x, {1.6+0.35*sin(deg(1.5*\x+0.5))});
+\draw[green!60!black, very thick, domain=0:3, samples=100] plot (\x, {2.5+0.3*sin(deg(1.0*\x+1.0))});
+\node[blue] at (1.5,0.2) {能带 $n=1$};
+\node[red] at (1.5,1.3) {能带 $n=2$};
+\node[green!60!black] at (1.5,2.2) {能带 $n=3$};
+\draw[dashed] (0,0.95) -- (3,0.95);
+\draw[dashed] (0,2.05) -- (3,2.05);
+\node at (4.5,1.5) {带隙};
+\draw[<->] (3.2,0.95) -- (3.2,2.05);
+\node at (3.0,-0.7) {第一布里渊区 $\mathbb{R}^n/\mathbf{T}^*\mathbb{Z}^n$};
+\end{tikzpicture}
+\caption{Bloch 能带与布里渊区。}
+\label{fig:bloch_bands}
+\end{figure}
+
+\begin{corollary}[光子带隙]\label{cor:photonic_bandgap}
+在介电常数以 $\mathbf{T}$ 为周期的光子晶体中，若某频率段不存在任何实数 $\mathbf{k}$ 的能带，则该频段为\textbf{光子带隙}。带隙内的光被禁止在晶体中传播。
+\end{corollary}
+
+\begin{proof}
+由 \cref{thm:bloch_floquet}，光传播模式由能带 $\omega_n(\mathbf{k})$ 描述。若某频率段不属于任何 $\omega_n(\mathbb{R}^n)$ 的值域，则不存在对应的 Bloch 波解，光无法以传播模式存在。
+\end{proof}
+
+\begin{property}[色散关系的频域支撑]\label{prop:dispersion_period}
+在周期介质中，色散关系 $\omega_n(\mathbf{k})$ 是第一布里渊区上的周期函数：
+\[
+\omega_n(\mathbf{k}+\mathbf{G}) = \omega_n(\mathbf{k}), \qquad \forall \mathbf{G}\in\mathbf{T}^*\mathbb{Z}^n.
+\]
+即能带结构在频域中具有周期 $\mathbf{G}$——这是空间周期 $\mathbf{T}$ 在频率域的表示（庞特里亚金对偶，「群与群函数」章 \cref{thm:three_groups_duality}）。
+\end{property}
+
+\begin{proof}
+由 Bloch 波定义 $u_{\mathbf{k},n} = e^{i(\mathbf{k}\cdot\mathbf{x}-\omega_n(\mathbf{k})t)}\phi_{\mathbf{k},n}(\mathbf{x})$，当 $\mathbf{k}\to\mathbf{k}+\mathbf{G}$（$\mathbf{G}$ 为倒格矢）时，$e^{i\mathbf{G}\cdot\mathbf{x}}$ 与 $\phi_{\mathbf{k},n}$ 的乘积仍是周期为 $\mathbf{T}$ 的函数，故 $\omega_n(\mathbf{k}+\mathbf{G}) = \omega_n(\mathbf{k})$。
+\end{proof}
+
+\begin{remark}[与「微分方程与复变函数」章 Floquet 理论的对偶]\label{rem:propagation_floquet}
+\cref{thm:bloch_floquet} 是「微分方程与复变函数」章 Floquet 定理（\cref{thm:floquet}）在空间周期介质中的对偶版本：时间周期系统的 Floquet 乘子 $\leftrightarrow$ 空间周期系统的 Bloch 相位；时间演化群 $\leftrightarrow$ 空间传播算子。两者都是周期系数线性系统的谱理论，只是周期性的方向不同。
+\end{remark}
+
+\begin{remark}[与「周期流形」章的接口]\label{rem:propagation_periodic_manifold}
+在「周期流形」章中，离散格点上的幺正演化 $\mathcal{U}^p=I$ 给出严格周期。本章的演化半群是其连续极限：当时间步长 $\Delta t\to 0$ 时，离散演化趋于连续演化群 $E_t = e^{tA}$（\cref{thm:continuum_limit_full}）。Bloch 波在周期流形上对应格点上的周期轨道——在「周期流形」章 Wilson 环（\cref{ch12_wilson_homotopy_lemma}）的连续极限中已经出现。
+\end{remark}
+
+\begin{remark}[因果性的严格边界]\label{rem:propagation_causality_boundary}
+\cref{cor:causality_speed} 给出的因果性是\textbf{线性波动方程}的数学性质，其推导只用到方程本身与能量守恒，不引入任何超出「线性 + 常系数（或周期系数）+ 有限能量」的假设。在非线性介质中（强场光学、等离子体中的强电磁脉冲），上述有限传播速度结论\textbf{不一定成立}——非线性项可产生超光速的相前移动。本章将此边界明确标注：所有关于传播速度的陈述均以\textbf{线性波动方程}为前提。
+\end{remark}
+
+\section{信息演化：贝叶斯更新、激活函数与学习}\label{sec:information_evolution}
+
+\begin{remark}[本节定位与严格前提]\label{rem:information_evolution_positioning}
+本节将传播与演化的数学框架从物理场推广到\textbf{信息状态}。核心观察是：贝叶斯更新、逐点激活函数与参数学习在本章已建立的平移群框架下具有统一的代数结构。本节所有定义、命题、引理、定理、推论均以下列两条前提为界：
+
+\begin{enumerate}[label=(\alph*)]
+    \item \textbf{线性演化前提}：信息状态在\textbf{自然参数空间}或\textbf{对数信念空间}中的演化由平移群 $\mathbb{R}^m$ 作用生成（与 \cref{def:propagation_operator} 结构同型）；
+    \item \textbf{逐点激活前提}：激活函数为\textbf{逐点}映射 $\varphi:\mathbb{R}\to\mathbb{R}$，逐分量作用于状态向量，不引入任何跨分量耦合。
+\end{enumerate}
+
+凡涉及非凸优化、自适应学习率、向量值激活、门控机制等超出上述前提的陈述，一律以\textbf{注释}或\textbf{开放问题}标注。本节的概念是「智能体之周期结构」章与「周转圆激活函数与函数逼近」章中相应概念的\textbf{数学基础}；那两章的内容在本节框架下成为应用。
+
+本节七主题定位：平移——贝叶斯更新在对数信念空间中是加法平移（\cref{thm:bayesian_translation_structure}），逐点激活与传播算子交换（\cref{prop:pointwise_activation_commutes}）；缩放——学习率作为参数演化的标度因子（\cref{def:learning_rate}）；旋转——复指数激活函数的相位旋转（\cref{prop:ceaf_phase_rotation}）；守恒——共轭先验下自然参数的单调累积（\cref{cor:natural_parameter_monotone}）；对称——逐点激活保持平移不变性（\cref{cor:pointwise_preserves_translation}）；闭合——参数演化的收敛闭合（\cref{thm:parametric_evolution_convergence}）；周期——学习率余弦退火的周期结构（\cref{prop:cosine_annealing_period}）。
+\end{remark}
+
+\subsection{贝叶斯更新的平移结构}\label{subsec:bayesian_translation}
+
+\begin{definition}[信念状态与观测算子]\label{def:belief_state}
+设参数空间 $\Theta\subseteq\mathbb{R}^m$。$\Theta$ 上的\textbf{信念状态}是概率密度 $p:\Theta\to\mathbb{R}^+$，满足 $\int_\Theta p(\theta)\,d\theta = 1$。\textbf{观测算子} $\mathcal{O}_D$ 将信念状态 $p$ 与观测数据 $D$ 映射为后验 $p' = \mathcal{O}_D(p)$，定义为
+\[
+(\mathcal{O}_D p)(\theta) := \frac{p(D\mid\theta)\,p(\theta)}{Z_D}, \qquad Z_D := \int_\Theta p(D\mid\theta')\,p(\theta')\,d\theta'.
+\]
+若 $Z_D = 0$，称 $D$ 与 $p$ 不兼容，观测算子在该处无定义。
+\end{definition}
+
+\begin{definition}[对数信念空间]\label{def:log_belief_space}
+设 $\mathcal{P}(\Theta)$ 为 $\Theta$ 上的概率密度空间。定义\textbf{对数信念映射}
+\[
+\Lambda:\mathcal{P}(\Theta)\to \mathcal{F}(\Theta), \qquad \Lambda(p) := \log p,
+\]
+其中 $\mathcal{F}(\Theta)$ 为 $\Theta$ 上的实值函数空间（模去常数）。$\mathcal{F}(\Theta)$ 中两个函数视为等同，若它们相差常数。称 $\Lambda(p)$ 为 $p$ 的\textbf{对数信念}。
+\end{definition}
+
+\begin{theorem}[贝叶斯更新的平移结构]\label{thm:bayesian_translation_structure}
+设 $p,p'\in\mathcal{P}(\Theta)$，$p' = \mathcal{O}_D(p)$。则在对数信念空间 $\mathcal{F}(\Theta)$ 中，
+\[
+\boxed{\ \Lambda(p') = \Lambda(p) + \ell_D,\ }
+\]
+其中 $\ell_D(\theta) := \log p(D\mid\theta) - \log Z_D$ 为\textbf{对数似然修正项}（模去常数后可取 $\log p(D\mid\theta)$）。即：\textbf{贝叶斯更新在对数信念空间中等于以 $\ell_D$ 为平移量的加法平移}。
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:belief_state} 与 \cref{def:log_belief_space}，
+\[
+\Lambda(p')(\theta) = \log\Bigl(\frac{p(D\mid\theta)\,p(\theta)}{Z_D}\Bigr) = \log p(\theta) + \bigl[\log p(D\mid\theta) - \log Z_D\bigr] = \Lambda(p)(\theta) + \ell_D(\theta).
+\]
+在模去常数的意义下，$\ell_D$ 中 $-\log Z_D$ 部分可略去。证毕。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.3cm]
+\node[draw, rounded corners, fill=blue!6, align=center] (p) {信念状态\\$p(\theta)$};
+\node[draw, rounded corners, fill=orange!8, align=center, right=of p] (log) {对数信念\\$\Lambda(p)=\log p$};
+\node[draw, rounded corners, fill=green!8, align=center, right=of log] (post) {后验\\$p'=\mathcal{O}_D(p)$};
+\node[draw, rounded corners, fill=purple!8, align=center, below=of log] (shift) {加法平移\\$\Lambda(p')=\Lambda(p)+\ell_D$};
+\draw[->] (p) -- node[above] {$\Lambda$} (log);
+\draw[->] (p) -- node[below] {贝叶斯更新} (post);
+\draw[->] (log) -- (shift);
+\draw[->] (shift) -- (post);
+\node at (5.5,-2.0) {平移量 $\ell_D(\theta)=\log p(D\mid\theta)-\log Z_D$。};
+\end{tikzpicture}
+\caption{对数信念空间中的加法平移。}
+\label{fig:bayesian_translation}
+\end{figure}
+
+\begin{corollary}[贝叶斯更新与传播算子的结构同型]\label{cor:bayesian_propagation_isomorphism}
+贝叶斯更新（\cref{thm:bayesian_translation_structure}）与传播算子（\cref{def:propagation_operator}）在结构上同型：
+\[
+\begin{array}{c|c|c}
+& \text{作用空间} & \text{作用形式} \\ \hline
+\text{传播算子} & L^2(\mathbb{R}^n) & f(\mathbf{x})\mapsto f(\mathbf{x}-\mathbf{a}) \\
+\text{贝叶斯更新} & \mathcal{F}(\Theta) & \Lambda(p)(\theta)\mapsto \Lambda(p)(\theta)+\ell_D(\theta)
+\end{array}
+\]
+两者的共同代数结构为\textbf{平移群作用}：传播算子由空间平移群 $\mathbb{R}^n$ 生成，贝叶斯更新由对数似然决定的\textbf{数据依赖平移}生成。
+\end{corollary}
+
+\begin{proof}
+由 \cref{prop:propagation_group}(i)（传播算子构成群）与 \cref{thm:bayesian_translation_structure}（贝叶斯更新为加法平移）直接对比即得。
+\end{proof}
+
+\begin{definition}[指数族与自然参数]\label{def:exponential_family}
+设数据空间 $\mathcal{X}$，参数空间 $\Theta\subseteq\mathbb{R}^m$。似然族 $\{p(\cdot\mid\theta)\}_{\theta\in\Theta}$ 称为\textbf{指数族}，若存在充分统计量 $T:\mathcal{X}\to\mathbb{R}^d$、自然参数映射 $\eta:\Theta\to\mathbb{R}^d$、对数配分函数 $A:\Theta\to\mathbb{R}$ 与基础测度 $h:\mathcal{X}\to\mathbb{R}^+$，使得
+\[
+p(x\mid\theta) = h(x)\exp\bigl(\eta(\theta)\cdot T(x) - A(\theta)\bigr), \qquad x\in\mathcal{X}.
+\]
+$\eta(\Theta)\subseteq\mathbb{R}^d$ 称为\textbf{自然参数空间}。
+\end{definition}
+
+\begin{definition}[共轭先验与自然参数坐标]\label{def:conjugate_prior_natural}
+设 $\{p(\cdot\mid\theta)\}$ 为指数族（\cref{def:exponential_family}）。\textbf{共轭先验族}为
+\[
+\pi(\theta\mid\tau,\nu) := \frac{\exp\bigl(\tau\cdot\eta(\theta) - \nu A(\theta)\bigr)}{\int_\Theta \exp\bigl(\tau\cdot\eta(\theta') - \nu A(\theta')\bigr)\,d\theta'}, \qquad \tau\in\mathbb{R}^d,\ \nu>0.
+\]
+$(\tau,\nu)$ 称为共轭先验的\textbf{自然参数坐标}。当 $d=1$ 时，$(\tau,\nu)\in\mathbb{R}\times\mathbb{R}^+$。
+\end{definition}
+
+\begin{theorem}[共轭先验下贝叶斯更新的精确有限阶演化]\label{thm:conjugate_exact_finite_order}
+设 $\{p(\cdot\mid\theta)\}$ 为指数族（\cref{def:exponential_family}），先验为共轭先验 $\pi(\theta\mid\tau_0,\nu_0)$（\cref{def:conjugate_prior_natural}），观测序列 $x_1,\dots,x_n$ 独立同分布自 $p(\cdot\mid\theta)$。则后验仍为共轭先验，其自然参数坐标为
+\[
+\boxed{\ \tau_n = \tau_0 + \sum_{i=1}^n T(x_i), \qquad \nu_n = \nu_0 + n.\ }
+\]
+即：\textbf{共轭先验下的贝叶斯更新在自然参数坐标 $(\tau,\nu)$ 中是沿固定方向 $(T(x_i),1)$ 的有限阶加法演化}——每一步观测对应一次平移。
+\end{theorem}
+
+\begin{proof}
+由贝叶斯公式与共轭先验定义：
+\[
+\pi(\theta\mid x_1,\dots,x_n) \propto \pi(\theta\mid\tau_0,\nu_0)\prod_{i=1}^n p(x_i\mid\theta) \propto \exp\Bigl(\bigl(\tau_0 + \textstyle\sum_i T(x_i)\bigr)\cdot\eta(\theta) - (\nu_0+n)A(\theta)\Bigr).
+\]
+与共轭先验形式（\cref{def:conjugate_prior_natural}）对比即得。有限阶性：在 $(\tau,\nu)$ 坐标下，每次更新为 $(\tau,\nu)\mapsto(\tau+T(x_i), \nu+1)$——一阶仿射变换。
+\end{proof}
+
+\begin{corollary}[自然参数的单调累积]\label{cor:natural_parameter_monotone}
+在 \cref{thm:conjugate_exact_finite_order} 的记号下，$\nu_n$ 关于 $n$ 严格单调递增；$\tau_n$ 沿 $T(x_i)$ 方向累积。这一单调性对应「概率系统之周期结构」章 Bernstein-von Mises 定理（\cref{thm:bernstein_von_mises}）中后验收缩的代数根源。
+\end{corollary}
+
+\begin{proof}
+$\nu_n = \nu_0+n$ 严格单调递增（每步恰增 $1$）。$\tau_n - \tau_{n-1} = T(x_n)$ 为第 $n$ 次观测的充分统计量。
+\end{proof}
+
+\begin{example}[Beta-Binomial 共轭的精确演化]\label{ex:beta_binomial_exact}
+设似然 $X\mid\theta\sim\operatorname{Bernoulli}(\theta)$，指数族形式为 $p(x\mid\theta) = \theta^x(1-\theta)^{1-x}$，$T(x)=x$，$\eta(\theta) = \log(\theta/(1-\theta))$，$A(\theta) = -\log(1-\theta)$。共轭先验为 Beta 分布 $\operatorname{Beta}(\alpha,\beta)$，自然参数坐标 $(\tau,\nu) = (\alpha-1, \alpha+\beta-2)$（具体坐标选择视约定而定）。$n$ 次观测后
+\[
+\alpha_n = \alpha_0 + \sum_{i=1}^n x_i, \qquad \beta_n = \beta_0 + n - \sum_{i=1}^n x_i.
+\]
+这与「概率系统之周期结构」章 Beta-Binomial 共轭模型的结论（\cref{ex:beta_binomial}）一致，此处以自然参数坐标给出其\textbf{平移结构}。
+\end{example}
+
+\begin{example}[Gaussian-Gaussian 共轭的精确演化]\label{ex:gaussian_gaussian_exact}
+设似然 $X\mid\mu\sim\mathcal{N}(\mu,\sigma^2)$（$\sigma^2$ 已知），参数 $\mu$ 的先验为 $\mathcal{N}(\mu_0,\tau_0^2)$。以精度-均值积坐标 $(1/\tau^2,\ \mu/\tau^2)$ 为自然参数坐标，则 $n$ 次观测后
+\[
+\frac{1}{\tau_n^2} = \frac{1}{\tau_0^2} + \frac{n}{\sigma^2}, \qquad \frac{\mu_n}{\tau_n^2} = \frac{\mu_0}{\tau_0^2} + \frac{\sum_i x_i}{\sigma^2}.
+\]
+这与「概率系统之周期结构」章正态-正态共轭模型（\cref{ex:normal_normal}）一致，此处以自然参数坐标给出其\textbf{平移结构}。
+\end{example}
+
+\begin{remark}[有限阶演化与传播算子的结构对应表]\label{rem:belief_propagation_correspondence}
+综合 \cref{thm:bayesian_translation_structure} 与 \cref{thm:conjugate_exact_finite_order}，贝叶斯更新与传播算子满足如下结构对应：
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}p{3.2cm} p{4.2cm} p{4.2cm}@{}}
+\toprule
+\textbf{对象} & \textbf{传播算子} & \textbf{贝叶斯更新} \\
+\midrule
+作用空间 & 场函数 $L^2(\mathbb{R}^n)$ & 对数信念 $\mathcal{F}(\Theta)$ 或自然参数空间 $\mathbb{R}^d\times\mathbb{R}^+$ \\
+平移量 & 空间向量 $\mathbf{a}$ & 对数似然 $\ell_D$ 或充分统计量 $T(x)$ \\
+生成元 & $-\nabla$（空间方向导数） & 观测算子（似然方向的积分） \\
+群结构 & 平移群 $\mathbb{R}^n$ & 数据依赖平移（每次观测定义一次平移） \\
+传递矩阵（频域） & $e^{-i\mathbf{k}\cdot\mathbf{a}}$ & 共轭先验下自然参数的加法 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{remark}
+
+\subsection{逐点激活函数与传播算子}\label{subsec:pointwise_activation}
+
+\begin{definition}[逐点激活函数]\label{def:pointwise_activation}
+映射 $\varphi:\mathbb{R}\to\mathbb{R}$ 称为\textbf{逐点激活函数}。其作用于函数 $f:\mathbb{R}^n\to\mathbb{R}$ 的定义为
+\[
+(\varphi\cdot f)(\mathbf{x}) := \varphi(f(\mathbf{x})), \qquad \mathbf{x}\in\mathbb{R}^n.
+\]
+逐点激活函数族包含：恒等映射 $\varphi(x)=x$、Heaviside 阶跃 $H(x)$、ReLU $\max(0,x)$、Sigmoid $\sigma(x)$、Tanh、GELU、Swish 以及复指数激活（\cref{def:ceaf_definition}）。
+\end{definition}
+
+\begin{proposition}[逐点激活与传播算子的交换性]\label{prop:pointwise_activation_commutes}
+设 $\varphi:\mathbb{R}\to\mathbb{R}$ 为逐点激活函数（\cref{def:pointwise_activation}），$P_{\mathbf{a}}$ 为传播算子（\cref{def:propagation_operator}）。则
+\[
+\boxed{\ P_{\mathbf{a}}\circ\varphi = \varphi\circ P_{\mathbf{a}}.\ }
+\]
+即逐点激活函数与传播算子精确交换。
+\end{proposition}
+
+\begin{proof}
+对任意 $f:\mathbb{R}^n\to\mathbb{R}$ 与 $\mathbf{x}\in\mathbb{R}^n$，计算两端：
+\[
+(P_{\mathbf{a}}\circ\varphi)(f)(\mathbf{x}) = (\varphi\cdot f)(\mathbf{x}-\mathbf{a}) = \varphi(f(\mathbf{x}-\mathbf{a})),
+\]
+\[
+(\varphi\circ P_{\mathbf{a}})(f)(\mathbf{x}) = \varphi((P_{\mathbf{a}}f)(\mathbf{x})) = \varphi(f(\mathbf{x}-\mathbf{a})).
+\]
+两端相等。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=2.2cm]
+\node (f) {$f$};
+\node[right=of f] (pf) {$P_{\mathbf{a}}f$};
+\node[below=of f] (phif) {$\varphi\cdot f$};
+\node[below=of pf] (papphi) {$P_{\mathbf{a}}(\varphi\cdot f)$};
+\draw[->] (f) -- node[above] {$P_{\mathbf{a}}$} (pf);
+\draw[->] (f) -- node[left] {$\varphi$} (phif);
+\draw[->] (pf) -- node[right] {$\varphi$} (papphi);
+\draw[->] (phif) -- node[below] {$P_{\mathbf{a}}$} (papphi);
+\node at (1.2,-2.4) {$P_{\mathbf{a}}\circ\varphi=\varphi\circ P_{\mathbf{a}}$：逐点激活与传播算子精确交换。};
+\end{tikzpicture}
+\caption{逐点激活与传播算子交换图。}
+\label{fig:pointwise_commute}
+\end{figure}
+
+\begin{corollary}[逐点激活保持平移不变性]\label{cor:pointwise_preserves_translation}
+设 $f$ 为 $P_{\mathbf{a}}$-不变函数（即 $P_{\mathbf{a}}f = f$）。则 $\varphi\cdot f$ 也是 $P_{\mathbf{a}}$-不变的：
+\[
+P_{\mathbf{a}}(\varphi\cdot f) = \varphi\cdot f.
+\]
+\end{corollary}
+
+\begin{proof}
+由 \cref{prop:pointwise_activation_commutes}，$P_{\mathbf{a}}(\varphi\cdot f) = \varphi\cdot(P_{\mathbf{a}}f) = \varphi\cdot f$。
+\end{proof}
+
+\begin{remark}[线性变换破坏平移不变性]\label{rem:linear_transform_breaks_translation}
+逐点激活与传播算子交换（\cref{prop:pointwise_activation_commutes}），但一般\textbf{线性变换} $W:\mathbb{R}^n\to\mathbb{R}^n$ 与传播算子不交换：$W\circ P_{\mathbf{a}}\neq P_{\mathbf{a}}\circ W$（除非 $W$ 与 $\mathbf{a}$ 方向相容）。这解释了神经网络中“线性变换 $\to$ 逐点激活 $\to$ 线性变换 $\to\cdots$”交替结构的代数必然性：线性变换破坏平移不变性，逐点激活保持平移不变性，二者的交替产生既非完全不变又非完全任意的中间表示。
+\end{remark}
+
+\begin{definition}[复指数激活函数]\label{def:ceaf_definition}
+设 $N\in\mathbb{N}^+$，$A_k>0$，$\omega_k\in\mathbb{R}$，$\phi_k\in[0,2\pi)$。\textbf{复指数激活函数}（CEAF）定义为
+\[
+\mathcal{E}(x) := \sum_{k=1}^{N}A_k e^{i(\omega_k x+\phi_k)}, \qquad x\in\mathbb{R}.
+\]
+其读出方式包括：实部读出 $\operatorname{Re}\mathcal{E}(x)$、双通道读出 $(\operatorname{Re}\mathcal{E}(x),\operatorname{Im}\mathcal{E}(x))$ 与模长-相位读出 $(|\mathcal{E}(x)|, \arg\mathcal{E}(x))$。
+\end{definition}
+
+\begin{proposition}[CEAF 的传播结构]\label{prop:ceaf_phase_rotation}
+CEAF 在平移下的行为为纯相位旋转：对任意 $a\in\mathbb{R}$，
+\[
+\mathcal{E}(x+a) = \sum_{k=1}^{N}A_k e^{i(\omega_k x+\phi_k+\omega_k a)}.
+\]
+即平移 $a$ 等价于第 $k$ 个分量相位增加 $\omega_k a$——这是 \cref{prop:phase_propagation}（传播算子与相位算子的一致性）在 CEAF 上的逐分量实现。
+\end{proposition}
+
+\begin{proof}
+代入 \cref{def:ceaf_definition} 与 $e^{i(\omega_k(x+a)+\phi_k)} = e^{i(\omega_k x+\phi_k)}e^{i\omega_k a}$ 即得。
+\end{proof}
+
+\begin{corollary}[CEAF 的周期条件]\label{cor:ceaf_period}
+若所有 $\omega_k/\omega_0\in\mathbb{Z}$（$\omega_0$ 为基频），则 $\mathcal{E}$ 以 $T = 2\pi/\omega_0$ 为周期；否则 $\mathcal{E}$ 为概周期函数。这是「周期基础」章周期函数判据在 CEAF 上的逐项实现。
+\end{corollary}
+
+\begin{proof}
+若 $\omega_k = n_k\omega_0$（$n_k\in\mathbb{Z}$），则 $\mathcal{E}(x+T) = \sum_k A_k e^{i(n_k\omega_0 x+\phi_k+n_k\omega_0\cdot 2\pi/\omega_0)} = \sum_k A_k e^{i(n_k\omega_0 x+\phi_k)} = \mathcal{E}(x)$。若存在不可公度频率对，则 $\mathcal{E}$ 为 Bohr 概周期函数。
+\end{proof}
+
+\begin{example}[单分量 CEAF 的相位旋转]\label{ex:single_ceaf_phase}
+取 $\mathcal{E}(x) = e^{i\omega x}$（$N=1$，$A_1=1$，$\phi_1=0$）。平移 $a$ 给出 $\mathcal{E}(x+a) = e^{i\omega(x+a)} = e^{i\omega x}e^{i\omega a}$——相位增加 $\omega a$。当 $a = 2\pi/\omega$ 时，相位增加 $2\pi$，$\mathcal{E}$ 恢复到出发值——这是 CEAF 上的传播周期闭合（\cref{cor:propagation_period_closure}）。
+\end{example}
+
+\begin{remark}[CEAF 与核平滑导-积下降的关系]\label{rem:ceaf_kdi_interface}
+CEAF 的参数 $\{A_k,\omega_k,\phi_k\}$ 通过核平滑导-积下降（\cref{def:kdi_definition}）优化。本节仅建立 CEAF 的传播与相位结构（\cref{prop:ceaf_phase_rotation}、\cref{cor:ceaf_period}）；其优化算法在 \cref{subsec:parametric_evolution} 中作为参数演化的特例给出。
+\end{remark}
+
+\subsection{学习作为参数演化}\label{subsec:parametric_evolution}
+
+\begin{definition}[参数演化方程]\label{def:parametric_evolution}
+设损失函数 $\mathcal{L}:\mathbb{R}^d\to\mathbb{R}$ 为 $C^1$ 光滑，$\eta>0$ 为\textbf{学习率}（标度因子）。\textbf{参数演化方程}为
+\[
+\theta_{t+1} = \theta_t - \eta\,\nabla\mathcal{L}(\theta_t), \qquad t = 0,1,2,\dots.
+\]
+若 $\mathcal{L}$ 在 $\theta^*$ 处取极小值，则 $\theta_t$ 在 $t\to\infty$ 时的行为称为\textbf{参数演化}。
+\end{definition}
+
+\begin{definition}[学习率]\label{def:learning_rate}
+\cref{def:parametric_evolution} 中的 $\eta>0$ 称为\textbf{学习率}。学习率是参数演化的标度因子——$\eta$ 越大，每步参数平移越大（快速但可能不稳定）；$\eta$ 越小，每步参数平移越小（缓慢但更稳定）。
+\end{definition}
+
+\begin{theorem}[二次损失下的线性演化与收敛条件]\label{thm:parametric_evolution_convergence}
+设损失函数为二次型 $\mathcal{L}(\theta) = \frac{1}{2}(\theta-\theta^*)^{\mathsf T}H(\theta-\theta^*)$，其中 $H$ 为对称正定矩阵，特征值为 $0 < \lambda_1\le\dots\le\lambda_d$。则参数演化（\cref{def:parametric_evolution}）为\textbf{线性演化}
+\[
+\theta_{t+1} - \theta^* = (I - \eta H)(\theta_t - \theta^*),
+\]
+沿第 $i$ 个特征方向的误差为
+\[
+e_t^{(i)} = (1-\eta\lambda_i)^t\,e_0^{(i)}.
+\]
+\textbf{收敛的充要条件}为
+\[
+0 < \eta < \frac{2}{\lambda_d}.
+\]
+在 $\eta = 2/(\lambda_1+\lambda_d)$ 时，收敛速率 $|1-\eta\lambda_i|$ 的最大值最小——此时 $\max_i|1-\eta\lambda_i| = (\lambda_d-\lambda_1)/(\lambda_1+\lambda_d)$。
+\end{theorem}
+
+\begin{proof}
+沿 $H$ 的特征基分解误差向量 $\mathbf{e}_t := \theta_t - \theta^* = \sum_i e_t^{(i)}\mathbf{v}_i$。由 $\nabla\mathcal{L}(\theta_t) = H(\theta_t-\theta^*)$，参数演化方程给出 $\theta_{t+1}-\theta^* = (I-\eta H)(\theta_t-\theta^*)$。各特征方向解耦：$e_{t+1}^{(i)} = (1-\eta\lambda_i)e_t^{(i)}$，迭代得 $e_t^{(i)} = (1-\eta\lambda_i)^t e_0^{(i)}$。收敛当且仅当 $|1-\eta\lambda_i|<1$ 对一切 $i$ 成立，即 $0<\eta\lambda_i<2$，等价于 $0<\eta<2/\lambda_d$。最优学习率由最小化谱半径 $\rho(\eta) = \max_i|1-\eta\lambda_i|$ 给出；谱半径在 $\eta = 2/(\lambda_1+\lambda_d)$ 时最小，此时 $\lambda_1$ 与 $\lambda_d$ 方向的收敛速率相等，为 $(\lambda_d-\lambda_1)/(\lambda_1+\lambda_d)$。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.9]
+\draw[->] (-0.5,0) -- (5.5,0) node[right] {$\theta_1$};
+\draw[->] (0,-0.5) -- (0,4.5) node[above] {$\theta_2$};
+\draw[rotate=35, blue, very thick] (0,0) ellipse (2.8 and 1.2);
+\draw[rotate=35, red, thick, dashed] (0,0) ellipse (2.0 and 0.85);
+\draw[rotate=35, green!60!black, thick, dotted] (0,0) ellipse (1.2 and 0.5);
+\fill (0,0) circle (2pt) node[below right] {$\theta^*$};
+\draw[->, red, very thick] (4.3,3.6) .. controls (3.0,2.5) and (1.8,1.6) .. (0.2,0.2);
+\node[red] at (4.5,3.9) {$\theta_t$ 轨迹};
+\node at (2.8,-0.9) {沿特征方向：$e_t^{(i)}=(1-\eta\lambda_i)^t e_0^{(i)}$};
+\node at (2.8,-1.6) {收敛条件：$0<\eta<2/\lambda_d$};
+\end{tikzpicture}
+\caption{二次损失下参数演化收敛。}
+\label{fig:parametric_convergence}
+\end{figure}
+
+\begin{corollary}[参数演化作为线性演化半群的离散实现]\label{cor:parametric_as_semigroup}
+参数演化（\cref{thm:parametric_evolution_convergence}）是本章演化半群（\cref{def:evolution_semigroup}）的离散实现：生成元为 $-H$，半群为 $\{(I-\eta H)^t\}_{t\ge 0}$。连续极限 $\eta\to 0$ 下，
+\[
+\theta(t) = e^{-Ht}\theta(0)
+\]
+对应连续时间参数演化。
+\end{corollary}
+
+\begin{proof}
+参数演化方程 $\theta_{t+1} = (I-\eta H)\theta_t$ 的迭代为 $\theta_t = (I-\eta H)^t\theta_0$。取 $\eta\to 0$、$t\to\infty$、$\eta t\to s$，则 $(I-\eta H)^t\to e^{-Hs}$，即得连续极限。
+\end{proof}
+
+\begin{definition}[核平滑导-积下降]\label{def:kdi_definition}
+设损失函数 $\mathcal{L}:\mathbb{R}^d\to\mathbb{R}$ 为 $C^1$ 光滑，$\theta\in\mathbb{R}^d$ 为参数。\textbf{核平滑导-积下降}（KDI）的更新规则为
+\[
+\theta_{t+1} = \theta_t - \eta\Bigl[\alpha\,\nabla\mathcal{L}(\theta_t) + \beta\,\mathbf{d}_{\text{int}}(\theta_t) + \gamma\,\mathbf{d}_{\text{curv}}(\theta_t)\Bigr],
+\]
+其中 $\alpha,\beta,\gamma\ge 0$ 为权重系数，$\mathbf{d}_{\text{int}}$ 为\textbf{累积变化修正项}（积分信息），$\mathbf{d}_{\text{curv}}$ 为\textbf{曲率修正项}（二阶导数信息）。当 $\beta=\gamma=0$ 时，KDI 退化为标准梯度下降。
+\end{definition}
+
+\begin{proposition}[KDI 方向的下降性]\label{prop:kdi_descent}
+设 $\mathcal{L}$ 在 $\theta$ 的邻域内 $C^1$，KDI 方向为
+\[
+\mathbf{d}_{\text{KDI}}(\theta) := \alpha\,\nabla\mathcal{L}(\theta) + \beta\,\mathbf{d}_{\text{int}}(\theta) + \gamma\,\mathbf{d}_{\text{curv}}(\theta).
+\]
+若 $\nabla\mathcal{L}(\theta)\cdot\mathbf{d}_{\text{KDI}}(\theta) > 0$（即 KDI 方向与负梯度方向的内积为正），则存在 $\eta>0$ 使
+\[
+\mathcal{L}(\theta - \eta\,\mathbf{d}_{\text{KDI}}(\theta)) < \mathcal{L}(\theta).
+\]
+\end{proposition}
+
+\begin{proof}
+由方向导数 $\frac{d}{d\eta}\big|_{\eta=0}\mathcal{L}(\theta-\eta\mathbf{d}_{\text{KDI}}) = -\nabla\mathcal{L}(\theta)\cdot\mathbf{d}_{\text{KDI}}(\theta)$。若该值为负（即 $\nabla\mathcal{L}\cdot\mathbf{d}_{\text{KDI}} > 0$），则对充分小 $\eta$ 函数值严格下降。
+\end{proof}
+
+\begin{remark}[KDI 的严格边界]\label{rem:kdi_boundary}
+\cref{prop:kdi_descent} 只陈述 KDI 的\textbf{下降性}——只要方向与负梯度夹角小于 $90^\circ$，就能下降。KDI 相比标准梯度下降的\textbf{优势}（逃离鞍点、跨越局部极小值、加速平坦区域）依赖具体问题的几何结构，\textbf{不构成本章的定理}。KDI 的收敛性分析（尤其是非凸情形）属于\textbf{开放问题}（\cref{rem:information_evolution_open}）。
+\end{remark}
+
+\begin{definition}[学习率调度]\label{def:learning_rate_schedule}
+\textbf{学习率调度}是学习率 $\eta_t$ 关于迭代步数 $t$ 的函数。常见类型：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{阶梯衰减}：$\eta_t = \eta_0\gamma^{\lfloor t/T\rfloor}$（$\gamma\in(0,1)$，$T$ 为衰减周期）；
+    \item \textbf{余弦退火}：$\eta_t = \eta_{\min} + \frac{1}{2}(\eta_{\max}-\eta_{\min})\bigl(1+\cos(\pi t/T)\bigr)$；
+    \item \textbf{指数衰减}：$\eta_t = \eta_0 e^{-t/\tau}$。
+\end{enumerate}
+学习率调度是参数演化的标度因子随时间的调制——从大学习率（快速探索）到小学习率（精细收敛）。
+\end{definition}
+
+\begin{proposition}[余弦退火学习率的周期结构]\label{prop:cosine_annealing_period}
+余弦退火学习率 $\eta_t = \eta_{\min} + \frac{1}{2}(\eta_{\max}-\eta_{\min})(1+\cos(\pi t/T))$ 是周期为 $2T$ 的周期函数：
+\[
+\eta_{t+2T} = \eta_t, \qquad \forall t\ge 0.
+\]
+在每个周期内，$\eta_t$ 从 $\eta_{\max}$ 单调下降至 $\eta_{\min}$（$t\in[0,T]$），再单调上升回 $\eta_{\max}$（$t\in[T,2T]$）。
+\end{proposition}
+
+\begin{proof}
+由 $\cos(\pi(t+2T)/T) = \cos(\pi t/T + 2\pi) = \cos(\pi t/T)$ 即得周期性。单调性由余弦在 $[0,\pi]$ 与 $[\pi,2\pi]$ 上的单调性给出。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.9]
+\draw[->] (-0.3,0) -- (9,0) node[right] {$t$};
+\draw[->] (0,-0.2) -- (0,3.2) node[above] {$\eta_t$};
+\draw[blue, very thick, domain=0:8, samples=200]
+  plot (\x, {0.4 + 1.2*(1+cos(180*\x/4))/2});
+\draw[dashed, gray] (0,1.6) -- (8,1.6) node[right] {$\eta_{\max}$};
+\draw[dashed, gray] (0,0.4) -- (8,0.4) node[right] {$\eta_{\min}$};
+\draw[<->] (4,0.1) -- (8,0.1) node[midway, below] {周期 $2T$};
+\node at (4.5,2.6) {$\eta_t=\eta_{\min}+\frac12(\eta_{\max}-\eta_{\min})(1+\cos(\pi t/T))$};
+\end{tikzpicture}
+\caption{余弦退火学习率的周期结构。}
+\label{fig:cosine_annealing}
+\end{figure}
+
+\begin{example}[参数演化的数值验证]\label{ex:parametric_evolution_numeric}
+取 $d=2$，$H = \operatorname{diag}(1,4)$，$\theta^* = (0,0)$，初值 $\theta_0 = (1,1)$。由 \cref{thm:parametric_evolution_convergence}，收敛条件为 $0 < \eta < 2/4 = 0.5$。取 $\eta = 0.3$：
+\begin{itemize}
+    \item 第 $1$ 特征方向：$|1-\eta\lambda_1| = |1-0.3| = 0.7$；
+    \item 第 $2$ 特征方向：$|1-\eta\lambda_2| = |1-1.2| = 0.2$。
+\end{itemize}
+误差 $\|\theta_t - \theta^*\|$ 以每步至少衰减因子 $0.7$ 收敛。取 $\eta = 0.6 > 0.5$：$|1-\eta\lambda_2| = |1-2.4| = 1.4 > 1$，第 $2$ 特征方向发散——参数演化不稳定。
+\end{example}
+
+\begin{theorem}[参数演化的收敛闭合]\label{thm:parametric_evolution_closure}
+设 $\mathcal{L}$ 为 $\mathbb{R}^d$ 上的 $L$-光滑、$\mu$-强凸函数（$0<\mu\le L$），则参数演化（\cref{def:parametric_evolution}）取 $\eta = 1/L$ 时
+\[
+\|\theta_t - \theta^*\|^2 \le \Bigl(1-\frac{\mu}{L}\Bigr)^t\,\|\theta_0-\theta^*\|^2.
+\]
+特别地，$\theta_t\to\theta^*$ 指数收敛——这是\textbf{参数演化的收敛闭合}。
+\end{theorem}
+
+\begin{proof}
+由 $L$-光滑（下降引理）与 $\mu$-强凸性，标准分析给出
+\[
+\mathcal{L}(\theta_{t+1}) - \mathcal{L}(\theta^*) \le \Bigl(1-\frac{\mu}{L}\Bigr)\bigl(\mathcal{L}(\theta_t)-\mathcal{L}(\theta^*)\bigr).
+\]
+由 $\mu$-强凸性 $\|\theta_t-\theta^*\|^2\le\frac{2}{\mu}(\mathcal{L}(\theta_t)-\mathcal{L}(\theta^*))$，代入即得。
+\end{proof}
+
+\begin{example}[共轭先验的序贯更新与传播算子的复合]\label{ex:sequential_bayesian_propagation}
+考虑 Beta-Binomial 共轭模型（\cref{ex:beta_binomial_exact}）。每次观测 $x_i\in\{0,1\}$ 对应自然参数的一次平移：
+\[
+(\tau,\nu)\mapsto(\tau + T(x_i),\nu+1) = (\tau+x_i,\nu+1).
+\]
+$n$ 次观测的累积为 \cref{thm:conjugate_exact_finite_order}。这是\textbf{贝叶斯更新作为传播算子复合}的具体实例——每次观测对应一个平移算子 $P_{(\tau+x_i,\nu+1)}$，$n$ 次观测对应复合 $P_{(\tau+\sum x_i,\nu+n)}$。
+\end{example}
+
+\begin{remark}[三种信息演化的统一表]\label{rem:three_info_evolutions}
+本节建立的三种信息演化（贝叶斯更新、逐点激活、参数学习）在本章框架下统一为平移群作用：
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}p{2.2cm} p{3.6cm} p{3.6cm} p{2.2cm}@{}}
+\toprule
+\textbf{信息演化} & \textbf{作用空间} & \textbf{平移量} & \textbf{群生成元} \\
+\midrule
+贝叶斯更新 & 对数信念空间 $\mathcal{F}(\Theta)$ & 对数似然 $\ell_D$ & 观测算子 \\
+共轭先验贝叶斯更新 & 自然参数空间 $\mathbb{R}^d\times\mathbb{R}^+$ & 充分统计量 $(T(x),1)$ & 数据依赖平移 \\
+逐点激活 & 函数空间（逐点作用） & 无平移（与 $P_{\mathbf{a}}$ 交换） & 逐点映射 \\
+参数学习（二次损失） & 参数空间 $\mathbb{R}^d$ & 梯度方向的平移 & $-H$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{remark}
+
+\begin{remark}[与全书其他章节的接口]\label{rem:information_evolution_interfaces}
+本节建立的数学结构与全书其他章节的接口如下。凡引用的“智能体之周期结构”章与“周转圆激活函数与函数逼近”章的条目，\textbf{均位于本章之后}——本节的定义与命题是那些章节相应概念的\textbf{数学基础}，那些章节的内容在本节框架下成为应用。
+
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{「概率系统之周期结构」章}：\cref{thm:bayesian_translation_structure} 与 \cref{thm:conjugate_exact_finite_order} 为序贯贝叶斯更新（\cref{def:sequential_bayesian}）与共轭先验（\cref{def:conjugate_prior}）提供了平移群结构的代数基础；
+    \item \textbf{「智能体之周期结构」章}：CEAF（\cref{def:ceaf_definition}）与参数演化（\cref{def:parametric_evolution}）为该章的神经网络训练动力学提供了数学基础；该章中的 \cref{def:eaf_agent} 与 \cref{def:kdi_agent} 在本节框架下成为 \cref{def:ceaf_definition} 与 \cref{def:kdi_definition} 的应用实例；
+    \item \textbf{「周转圆激活函数与函数逼近」章}：CEAF 的传播结构（\cref{prop:ceaf_phase_rotation}）为该章的逼近理论提供了相位分析工具；
+    \item \textbf{「群与群函数」章}：\cref{prop:pointwise_activation_commutes} 是该章逐点运算与群作用交换律（\cref{ch8_pointwise_invariance}）在激活函数上的直接应用。
+\end{enumerate}
+\end{remark}
+
+\begin{remark}[本节开放问题]\label{rem:information_evolution_open}
+以下问题超出本节已建立的定理范围，列为\textbf{本节}的开放问题：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{非共轭先验下的有限阶演化}：当先验不是共轭先验时，贝叶斯更新一般\textbf{不能}在有限维自然参数空间中表示为有限阶平移。是否存在更一般的有限维嵌入使更新成为有限阶演化，属于开放问题；
+    \item \textbf{非凸损失下的参数演化收敛}：\cref{thm:parametric_evolution_convergence} 与 \cref{thm:parametric_evolution_closure} 都要求 $\mathcal{L}$ 凸。非凸损失下参数演化可能陷入局部极小值或鞍点，其收敛行为（尤其 KDI 的全局收敛性）属于开放问题；
+    \item \textbf{向量值激活下的传播交换性}：\cref{prop:pointwise_activation_commutes} 依赖逐点前提。向量值激活（如 softmax）与传播算子的交换性需要额外条件，超出本节范围；
+    \item \textbf{自适应学习率下的群结构}：\cref{def:learning_rate_schedule} 中学习率调度依赖迭代步数 $t$。自适应学习率（如 Adam）的学习率依赖梯度历史，此时参数演化不再是固定群的表示——其代数结构属于开放问题。
+\end{enumerate}
+\end{remark}
+
+\begin{remark}[整章开放问题]\label{rem:propagation_open}
+以下问题超出本章已建立的定理范围，列为\textbf{本章整体}的开放问题（与 \cref{rem:information_evolution_open} 的节级开放问题区分——后者属于第 \ref{sec:information_evolution} 节，前者属于本章其余各节的整体）：
+\begin{enumerate}[label=(\roman*)]
+    \item 非线性周期介质中波包的严格色散理论；
+    \item 随机周期介质中电磁波包的 Anderson 局域化与传播的定量刻画；
+    \item 焦散面附近 Airy 核的严格传播理论（本章仅在 \cref{rem:caustic_eikonal_failure} 与核函数表 \ref{tab:all_kernels} 中列出，未展开）；
+    \item 传播算子与周期卷积在非交换群（如 $SU(2)$ 或更一般李群）上的推广，及其与「周期范畴」章相位函子的接口；
+    \item 时变周期介质中传播与时间平移、空间平移的双重周期结构。
+\end{enumerate}
+这些问题的解决将把传播与演化理论从线性常系数情形推进到更一般的周期系统。
+\end{remark}
+
+\begin{remark}[本章与全书七主题对照]\label{rem:propagation_seven_themes}
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}p{2.0cm} p{10.5cm}@{}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 传播算子群（\cref{prop:propagation_group}）；演化半群（\cref{def:evolution_semigroup}）；传播的周期闭合（\cref{cor:propagation_period_closure}）；贝叶斯更新在对数信念空间中的加法平移（\cref{thm:bayesian_translation_structure}）；共轭先验下自然参数坐标的有限阶平移（\cref{thm:conjugate_exact_finite_order}） \\
+缩放 & 介质中的波长缩放（\cref{prop:medium_wavelength_scaling}）；介质传播算子的折射率标度（\cref{def:medium_propagation_operator}）；学习率作为参数演化的标度因子（\cref{def:learning_rate}） \\
+旋转 & 传播算子与相位算子的一致性（\cref{prop:phase_propagation}）；复指数平面波表示（\cref{def:vacuum_em_wave}）；CEAF 的相位旋转（\cref{prop:ceaf_phase_rotation}） \\
+守恒 & 真空光传播能量守恒（\cref{thm:vacuum_energy_conservation}）；光线管束通量守恒（\cref{prop:geometric_optics_interface}）；共轭先验下自然参数的单调累积（\cref{cor:natural_parameter_monotone}） \\
+对称 & 传播算子与常系数微分算子交换（\cref{prop:propagation_commutes_translation}）；Bloch 波在周期平移下的不变性（\cref{thm:bloch_floquet}）；逐点激活保持平移不变性（\cref{cor:pointwise_preserves_translation}） \\
+闭合 & 传播的周期闭合（\cref{cor:propagation_period_closure}）；光子带隙中的传播禁闭（\cref{cor:photonic_bandgap}）；参数演化的收敛闭合（\cref{thm:parametric_evolution_closure}） \\
+周期 & 色散关系的频域周期（\cref{prop:dispersion_period}）；Bloch 能带结构（\cref{thm:bloch_floquet}）；余弦退火学习率的周期结构（\cref{prop:cosine_annealing_period}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}p{2.2cm} p{10.5cm}@{}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 自由空间传播算子即空间平移的代数实现（\cref{def:propagation_operator}），传播算子族构成平移群（\cref{prop:propagation_group}）；时间方向由演化半群承载（\cref{def:evolution_semigroup}）；贝叶斯更新在对数信念空间中是数据依赖的加法平移（\cref{thm:bayesian_translation_structure}）；参数演化是梯度方向的平移（\cref{def:parametric_evolution}） \\
+缩放 & 介质中的波长缩放（\cref{prop:medium_wavelength_scaling}）；学习率作为参数演化的标度因子（\cref{def:learning_rate}、\cref{def:learning_rate_schedule}） \\
+旋转 & 传播算子与相位算子的一致性（\cref{prop:phase_propagation}）；复指数激活函数在传播下表现为纯相位旋转（\cref{prop:ceaf_phase_rotation}）；周期介质中的 Bloch--Floquet 相位（\cref{thm:bloch_floquet}） \\
+守恒 & 真空光传播的能量守恒（\cref{thm:vacuum_energy_conservation}）；传播算子的等距性即 $L^2$ 范数守恒（\cref{prop:propagation_isometry}）；因果性（\cref{cor:causality_speed}） \\
+对称 & 传播算子与常系数微分算子交换（\cref{prop:propagation_commutes_translation}）；逐点激活与传播算子交换（\cref{prop:pointwise_activation_commutes}）、逐点激活保持平移不变性（\cref{cor:pointwise_preserves_translation}） \\
+闭合 & 传播的周期闭合（\cref{cor:propagation_period_closure}）；参数演化的收敛闭合（\cref{thm:parametric_evolution_closure}） \\
+周期 & Bloch--Floquet 传播给出周期介质中的周期结构（\cref{thm:bloch_floquet}）与光子带隙（\cref{cor:photonic_bandgap}）；传播卷积与周期卷积的关系（\cref{thm:propagation_periodic_convolution}）；共轭先验下贝叶斯更新的精确有限阶演化（\cref{thm:conjugate_exact_finite_order}）；余弦退火学习率的周期结构（\cref{prop:cosine_annealing_period}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 根据定义 \ref{def:optical_path_functional} 与定义 \ref{def:fermat_principle}，
+    说明费马原理如何把光线轨迹化为光程泛函的一阶驻定曲线。
+    请用引理 \ref{lem:optical_path_variation} 写出光程泛函的一阶变分，
+    并说明固定端点变分中边界项如何处理。
+
+    \item 证明变分法基本引理（引理 \ref{lem:fundamental_lemma_calculus_of_variations}）：
+    设 $f\in C^0([s_0,s_1],\mathbb{R}^n)$，若对一切满足
+    $\mathbf{h}(s_0)=\mathbf{h}(s_1)=\mathbf{0}$ 的 $C^1$ 向量函数 $\mathbf{h}$ 有
+    \[
+    \int_{s_0}^{s_1}f(s)\cdot\mathbf{h}(s)\,ds=0,
+    \]
+    则 $f\equiv\mathbf{0}$。
+    请用截断函数构造反证法证明。
+
+    \item 证明光线方程（定理 \ref{thm:ray_equation}）：
+    \[
+    \frac{d}{ds}\bigl(n(\gamma(s))\dot\gamma(s)\bigr)=\nabla n(\gamma(s)).
+    \]
+    请按“展开一阶变分、分部积分、边界项为零、变分法基本引理”四步完成证明，
+    并说明均匀介质下退化为直线传播（推论 \ref{cor:straight_line_uniform}）。
+
+    \item 证明程函方程（推论 \ref{cor:eikonal_equation}）：
+    若存在光程函数 $S$ 使 $\dot\gamma=\nabla S/n$，则
+    \[
+    |\nabla S(\mathbf{r})|^2=n(\mathbf{r})^2.
+    \]
+    请用 $|\dot\gamma|=1$ 完成证明，
+    并说明光线方向垂直于波前 $S=\text{const}$。
+
+    \item 证明定理 \ref{thm:snell_consequence}（斯涅尔定律）：
+    在两种均匀介质的平坦界面上，
+    \[
+    n_1\sin\theta_1=n_2\sin\theta_2.
+    \]
+    请用费马原理对界面上的入射点变分，令一阶变分为零完成证明。
+    进一步说明当 $n_1>n_2$ 且入射角超过临界角时发生全内反射。
+
+    \item 证明命题 \ref{prop:propagation_group} 与命题 \ref{prop:propagation_isometry}：
+    \begin{enumerate}[label=(\roman*)]
+        \item 传播算子族 $\{P_{\mathbf{a}}\}$ 在复合下构成平移群 $\mathbb{R}^n$ 的忠实表示；
+        \item 传播算子 $P_{\mathbf{a}}$ 是 $L^2(\mathbb{R}^n)$ 上的等距算子，
+              从而为酉算子。
+    \end{enumerate}
+    请用换元 $\mathbf{y}=\mathbf{x}-\mathbf{a}$ 完成证明。
+
+    \item 证明命题 \ref{prop:propagation_fourier}：
+    传播算子在傅里叶域中等价于乘以相位因子，
+    \[
+    \widehat{P_{\mathbf{a}}f}(\mathbf{k})=e^{-i\mathbf{k}\cdot\mathbf{a}}\hat{f}(\mathbf{k}).
+    \]
+    请写出傅里叶变换的直接计算，
+    并证明推论 \ref{cor:propagation_period_closure}：
+    当传播距离等于一个波长 $a=\lambda$ 时，平面波恢复到出发时的相位。
+
+    \item 证明真空光传播的能量守恒（定理 \ref{thm:vacuum_energy_conservation}）：
+    对真空麦克斯韦方程组的解，
+    \[
+    U(t)=\int_{\mathbb{R}^3}\Bigl(\frac{\varepsilon_0}{2}|\mathbf{E}|^2
+    +\frac{1}{2\mu_0}|\mathbf{B}|^2\Bigr)d\mathbf{x}
+    \]
+    满足 $U(t)=U(0)$。
+    请说明如何将麦克斯韦方程组写为 $\partial_t\mathbf{u}=A\mathbf{u}$，
+    并利用 $A$ 的反对称性与 Stone 定理完成证明。
+
+    \item 证明传播核满足演化方程与初值条件（定理 \ref{thm:propagation_kernel_satisfies_pde}）：
+    传播核 $G(\mathbf{x},t;\mathbf{x}_0)$ 满足
+    \[
+    \partial_tG=\mathcal{L}G,\qquad
+    G(\mathbf{x},0;\mathbf{x}_0)=\delta(\mathbf{x}-\mathbf{x}_0).
+    \]
+    请用 $G$ 的定义与演化算子 $E_t=e^{t\mathcal{L}}$ 的性质完成证明。
+
+    \item 证明引理 \ref{lem:gaussian_fourier_duality}：
+    高斯核
+    \[
+    K_\Delta(x)=\frac{1}{\sqrt{2\pi}\Delta}e^{-x^2/(2\Delta^2)}
+    \]
+    的傅里叶变换仍为高斯核：
+    \[
+    \hat{K}_\Delta(\omega)=e^{-\Delta^2\omega^2/2}.
+    \]
+    请用高斯积分配方完成计算，
+    并说明为什么方差互换 $\Delta\leftrightarrow1/\Delta$。
+
+    \item 证明定理 \ref{thm:propagation_periodic_convolution}：
+    单周期层的周期卷积在空间平移群上退化为传播卷积，
+    \[
+    (f\circledast_{\text{prop}}G)(\mathbf{x})
+    =\lim_{W\to\delta}(f\circledast g)(\mathbf{x}),
+    \]
+    其中 $g$ 取传播核，$S^{(d)}$ 取相位核 $S^{(1)}$。
+    请从定义 \ref{def:periodic_convolution} 与 \ref{def:propagation_convolution} 出发完成证明。
+
+    \item 验证 Bloch--Floquet 传播定理（定理 \ref{thm:bloch_floquet}）：
+    设线性演化算子 $\mathcal{L}$ 具有空间周期 $\mathbf{T}$，
+    则存在 Bloch 波解
+    \[
+    u_{\mathbf{k},n}(\mathbf{x},t)
+    =e^{i(\mathbf{k}\cdot\mathbf{x}-\omega_n(\mathbf{k})t)}\phi_{\mathbf{k},n}(\mathbf{x}),
+    \quad
+    \phi_{\mathbf{k},n}(\mathbf{x}+\mathbf{T})=\phi_{\mathbf{k},n}(\mathbf{x}).
+    \]
+    请说明 $\mathcal{L}$ 与 $P_{\mathbf{T}}$ 交换如何导致同时谱分解，
+    并解释色散关系在频域中的周期性（命题 \ref{prop:dispersion_period}）。
+
+    \item 证明贝叶斯更新的平移结构（定理 \ref{thm:bayesian_translation_structure}）：
+    在对数信念空间 $\mathcal{F}(\Theta)$ 中，
+    \[
+    \Lambda(p')=\Lambda(p)+\ell_D,
+    \]
+    其中 $\ell_D(\theta)=\log p(D\mid\theta)-\log Z_D$。
+    请说明贝叶斯更新如何在对数信念空间中等于加法平移，
+    并指出推论 \ref{cor:bayesian_propagation_isomorphism} 中
+    贝叶斯更新与传播算子的结构同型。
+
+    \item 证明共轭先验下贝叶斯更新的精确有限阶演化（定理 \ref{thm:conjugate_exact_finite_order}）：
+    设似然为指数族，先验为共轭先验，观测序列为 $x_1,\dots,x_n$，
+    则后验自然参数为
+    \[
+    \tau_n=\tau_0+\sum_{i=1}^nT(x_i),\qquad
+    \nu_n=\nu_0+n.
+    \]
+    请用贝叶斯公式与共轭先验定义完成证明，
+    并验证 Beta--二项模型（例 \ref{ex:beta_binomial_exact}）
+    与 Gaussian--Gaussian 模型（例 \ref{ex:gaussian_gaussian_exact}）。
+
+    \item 证明逐点激活与传播算子的交换性（命题 \ref{prop:pointwise_activation_commutes}）：
+    设 $\varphi$ 为逐点激活函数，$P_{\mathbf{a}}$ 为传播算子，则
+    \[
+    P_{\mathbf{a}}\circ\varphi=\varphi\circ P_{\mathbf{a}}.
+    \]
+    请对任意 $f$ 与 $\mathbf{x}$ 计算两端并验证相等，
+    并证明推论 \ref{cor:pointwise_preserves_translation}：
+    逐点激活保持平移不变性。
+
+    \item 证明命题 \ref{prop:ceaf_phase_rotation}：
+    CEAF 在平移下的行为为纯相位旋转，
+    \[
+    \mathcal{E}(x+a)=\sum_{k=1}^{N}A_ke^{i(\omega_kx+\phi_k+\omega_ka)}.
+    \]
+    请写出 $e^{i(\omega_k(x+a)+\phi_k)}$ 的分解，
+    并证明推论 \ref{cor:ceaf_period} 的周期条件。
+
+    \item 证明定理 \ref{thm:parametric_evolution_convergence}：
+    设二次损失 $\mathcal{L}(\theta)=\frac12(\theta-\theta^*)^{\mathsf T}H(\theta-\theta^*)$，
+    $H$ 对称正定，特征值为 $0<\lambda_1\le\dots\le\lambda_d$。
+    则参数演化
+    \[
+    \theta_{t+1}=\theta_t-\eta\nabla\mathcal{L}(\theta_t)
+    \]
+    沿第 $i$ 个特征方向的误差为
+    \[
+    e_t^{(i)}=(1-\eta\lambda_i)^te_0^{(i)},
+    \]
+    收敛的充要条件为 $0<\eta<2/\lambda_d$。
+    请写出特征基分解的完整推导。
+
+    \item 验证例 \ref{ex:parametric_evolution_numeric}：
+    取 $d=2$，$H=\operatorname{diag}(1,4)$，$\theta^*=(0,0)$，$\theta_0=(1,1)$。
+    \begin{enumerate}[label=(\roman*)]
+        \item 当 $\eta=0.3$ 时计算两个特征方向的收敛因子，判断是否收敛；
+        \item 当 $\eta=0.6$ 时计算两个特征方向的收敛因子，判断是否收敛。
+    \end{enumerate}
+    请说明为什么收敛条件由最大特征值 $\lambda_d=4$ 决定。
+
+    \item 证明定理 \ref{thm:parametric_evolution_closure}：
+    设 $\mathcal{L}$ 为 $L$-光滑、$\mu$-强凸函数，取 $\eta=1/L$，则
+    \[
+    \|\theta_t-\theta^*\|^2
+    \le\Bigl(1-\frac{\mu}{L}\Bigr)^t\|\theta_0-\theta^*\|^2.
+    \]
+    请用下降引理与强凸性完成证明，
+    并说明为什么参数演化指数收敛——这是参数演化的收敛闭合。
+
+    \item 综合题：结合光线方程（定理 \ref{thm:ray_equation}）、
+    传播算子群（命题 \ref{prop:propagation_group}）、
+    Bloch--Floquet 传播（定理 \ref{thm:bloch_floquet}）
+    与贝叶斯更新的平移结构（定理 \ref{thm:bayesian_translation_structure}），
+    说明“传播”与“演化”在本章中如何统一为同一种平移群作用的两种实现：
+    \begin{enumerate}[label=(\roman*)]
+        \item 物理层面：光传播对应空间平移群 $\mathbb{R}^n$；
+        \item 时间层面：演化半群对应时间平移群 $\mathbb{R}_{\ge0}$；
+        \item 信息层面：贝叶斯更新对应数据依赖平移；
+        \item 学习层面：参数演化对应梯度方向的平移。
+    \end{enumerate}
+    请分别指出每种实现的平移量、生成元与群结构。
+\end{enumerate}
+

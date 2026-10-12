@@ -1,0 +1,595 @@
+\chapter{音频系统之周期结构}
+\markboth{音频系统之周期结构}{音频系统之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:audio_ps_hook}
+本章判定研究目标是否具有周期性、确定其周期类型、以及查找最小正周期时，一律引用「周期系统」章：
+周期性判据见 \cref{thm:ps_periodicity_decision}，
+周期类型判别见 \cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}，
+最小正周期查找见 \cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}，
+由数据构建周期级数与周转圆组见 \cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}。
+\end{remark}
+
+\begin{remark}[本章定位：按「周期系统」章五步接口展开]\label{rem:audio_five_steps_positioning}
+音频系统之周期结构研究声波中周期性、谐波结构和频谱特征的数学表征。本章不另立周期性判据，而是把音频系统接入「周期系统」章规定的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把简谐振动、单频声波、拍频、驻波等目标化为离散或连续动力系统，引用 \cref{thm:ps_periodicity_decision} 判定是否具有周期性，并确定周期类型；
+    \item \textbf{构建}：由声压、质点速度、频谱、相位数据构建振幅级数、频率级数、相位级数，组装为音频周转圆组；
+    \item \textbf{调节}：用残差能量下降、质量守恒、能量守恒与标度荷守恒约束动态调节音频周转圆组；
+    \item \textbf{卷积}：在音频周转圆组上引入振幅卷积、相位卷积、频率卷积，并与自相关、互相关、拍频时延衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成音频周期诊断流程。
+\end{enumerate}
+本章使用的数学工具包括：简谐振动、声波方程、傅里叶分解、周期卷积、周转圆组、相位算子、时延、十二平均律。
+\end{remark}
+
+\begin{remark}[本章七主题导引]\label{rem:audio_seven_themes}
+\textbf{平移}——声波传播时延 $\tau = r/c$ 的空间-时间平移对应（定义 \ref{def:acoustic_propagation_delay}）；\textbf{缩放}——十二平均律公比 $2^{1/12}$ 的等比音阶（定理 \ref{thm:equal_temperament}）；\textbf{旋转}——简谐振动的相空间周转（定义 \ref{def:simple_harmonic_motion}）与相位时延 $\tau = \phi/\omega$（定义 \ref{def:harmonic_phase_delay}）；\textbf{守恒}——质量/能量/标度荷守恒（定理 \ref{thm:acoustic_conservation}）与简谐振动能量守恒（命题 \ref{prop:harmonic_energy}）；\textbf{对称}——驻波的空间反射对称与弦两端固定边界；\textbf{闭合}——相位每增 $2\pi$ 的周期闭合（命题 \ref{prop:acoustic_delay_phase_unity}）；\textbf{周期}——基频与谐波级数（定义 \ref{def:harmonic_series}）、拍周期 $T_{\text{beat}} = 1/\Delta f$（定义 \ref{def:beat_delay}）。
+\end{remark}
+
+\section{接入「周期系统」章的五步接口}
+\label{sec:audio_five_steps}
+
+\subsection{第一步：音频目标的周期性判定}
+
+\begin{definition}[音频目标与判定输入]\label{def:audio_target}
+一个\textbf{音频目标}是指下列对象之一：
+\begin{enumerate}[label=(\roman*)]
+    \item 一个简谐振动系统，其状态空间为 $(x,p)$ 相空间；
+    \item 一个单频声波，其状态空间为相位 $\theta=\mathbf k\cdot\mathbf r-\omega t$；
+    \item 一个拍频系统，其状态空间为两个频率分量的相位差；
+    \item 一个驻波系统，其状态空间为空间模式与时间相位的联合空间。
+\end{enumerate}
+音频目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal D_{\mathrm{A}}=(\mathcal S,\Phi),
+\]
+其中 $\mathcal S$ 是状态空间，$\Phi:\mathcal S\to\mathcal S$ 是时间平移、相位旋转或振动演化所诱导的映射。若 $\mathcal S$ 为有限集，称目标为\textbf{有限音频目标}；若 $\mathcal S$ 为无限集，称目标为\textbf{无限音频目标}。
+\end{definition}
+
+\begin{definition}[音频判定映射]\label{def:audio_periodization}
+设音频目标由判定输入 $\mathcal D_{\mathrm{A}}=(\mathcal S,\Phi)$ 给出。若目标的状态由 $\Phi$ 生成，即存在 $x_0\in\mathcal S$ 使
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+当 $t\in\mathbb Z$ 时 $x_t$ 由 $\Phi$ 迭代生成；当 $t\in\mathbb R$ 时，以单参数演化族 $\{\Phi_t\}_{t\in\mathbb R}$（其中每个 $\Phi_t:\mathcal S\to\mathcal S$，且 $\Phi_0=\operatorname{id}$、$\Phi_{s+t}=\Phi_s\circ\Phi_t$ 对一切 $s,t\in\mathbb R$ 成立、$(t,x)\mapsto\Phi_t(x)$ 连续）记之。
+则称 $\Phi$ 为目标的\textbf{音频判定映射}。此时当 $t\in\mathbb Z$ 时音频目标化为离散动力系统 $(\mathcal S,\Phi)$，当 $t\in\mathbb R$ 时化为连续动力系统 $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$，两种情形均可直接套用「周期基础」章与「周期系统」章的判据。
+\end{definition}
+
+\begin{theorem}[音频周期性判定定理]\label{thm:audio_periodicity_decision}
+设音频目标的判定映射为 $\Phi$，且 $(\mathcal S,\Phi)$ 为离散动力系统。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 $m\in\mathbb N^+$ 使 $\Phi^m=\mathrm{id}$，则目标为一致周期音频系统；每条轨道闭合，且轨道长度整除 $m$。
+    \item \textbf{判定等价}：目标为一致周期音频系统当且仅当 $\operatorname{ord}(\Phi)<\infty$。
+    \item \textbf{逐点判据}：目标在状态 $x_0$ 处的轨道闭合当且仅当 $x_0$ 为周期点；此时轨道长度即该点处的周期。
+    \item \textbf{不可省略性}：守恒量与对称群的合取不能替代 $\operatorname{ord}(\Phi)<\infty$；准周期音频目标不属于周期音频系统。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:audio_periodicity_decision} 是「周期系统」章 \cref{thm:ps_periodicity_decision} 的领域实例化：
+只需把判定映射 $f$ 与演化群替换为本章的 $\Phi$，(A) 充分判定、(B) 判定等价、(C) 逐点判据、
+(D) 不可省略性四条即逐条成立。依 \cref{rem:ps_applications_hook} 的约定，此处不再重复展开。
+\end{proof}
+
+\begin{corollary}[音频周期类型]\label{cor:audio_period_type}
+经 \cref{thm:audio_periodicity_decision} 判定后，音频目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 $m_0=1$，状态为不动点；
+    \item \textbf{严格周期型}：$1<m_0<\infty$，状态严格周期；
+    \item \textbf{一致周期型}：$\operatorname{ord}(\Phi)=m<\infty$，所有轨道长度整除 $m$；
+    \item \textbf{准周期型}：$\operatorname{ord}(\Phi)=\infty$，轨道不闭合但在紧致承载结构上稠密；
+    \item \textbf{最终周期型}：存在 $N$，使 $t\ge N$ 后目标为周期；
+    \item \textbf{离散周期型}：承载结构为 $\mathbb Z$，且归一化周期比 $\rho=T_x/\Delta x\in\mathbb Q$。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，残差按 $e^{-\kappa t}$ 衰减（见 \cref{def:ps_period_type}(vii)）。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于周期音频系统；(iv) 不属于周期音频系统，但可用有界逼近工具处理；(v) 只在稳定阶段是周期音频系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期音频系统，只在稳定阶段可用有界逼近工具处理。
+\end{corollary}
+
+\begin{proof}
+逐条由 \cref{thm:audio_periodicity_decision} 与「周期系统」章 \cref{def:ps_period_type} 代入音频目标即得。
+\end{proof}
+
+\begin{lemma}[简谐振动的周期判定]\label{lem:shm_periodic}
+设简谐振动方程为
+\[
+\ddot x+\omega_0^2x=0.
+\]
+则简谐振动为一致周期系统，其最小正周期为
+\[
+T_0=\frac{2\pi}{\omega_0}=2\pi\sqrt{\frac{m}{k}}.
+\]
+\end{lemma}
+
+\begin{proof}
+由定义 \ref{def:simple_harmonic_motion}，通解为 $x(t)=A\cos(\omega_0t+\phi)$。时间平移 $T_0=2\pi/\omega_0$ 使 $x(t+T_0)=x(t)$，且 $T_0$ 为最小正周期。故判定映射 $\Phi$ 满足 $\Phi^{T_0}=\mathrm{id}$，为一致周期系统。
+\end{proof}
+
+\begin{lemma}[单频声波的周期判定]\label{lem:single_tone_periodic}
+设单频平面声波为
+\[
+p(\mathbf r,t)=p_0e^{i(\mathbf k\cdot\mathbf r-\omega t)}.
+\]
+则其时间周期为
+\[
+T=\frac{2\pi}{\omega},
+\]
+空间周期为
+\[
+\lambda=\frac{2\pi}{|\mathbf k|},
+\]
+且二者由色散关系 $\omega=c|\mathbf k|$ 耦合为 $\lambda=cT$。
+\end{lemma}
+
+\begin{proof}
+由 $e^{-i\omega(t+T)}=e^{-i\omega t}e^{-i\omega T}=e^{-i\omega t}$ 得时间周期 $T=2\pi/\omega$。由 $e^{i\mathbf k\cdot(\mathbf r+\lambda\hat{\mathbf k})}=e^{i\mathbf k\cdot\mathbf r}e^{i|\mathbf k|\lambda}=e^{i\mathbf k\cdot\mathbf r}$ 得空间周期 $\lambda=2\pi/|\mathbf k|$。色散关系由定理 \ref{thm:acoustic_wave_equation} 与命题 \ref{prop:acoustic_delay_phase_unity} 给出。
+\end{proof}
+
+\begin{lemma}[拍频的周期判定]\label{lem:beat_periodic}
+设两个频率相近的声波叠加，频率差为 $\Delta f=|f_1-f_2|$。则合成声波的振幅包络以拍周期
+\[
+T_{\text{beat}}=\frac{1}{\Delta f}
+\]
+为周期振荡。
+\end{lemma}
+
+\begin{proof}
+由定义 \ref{def:beat_delay} 与命题 \ref{prop:beat_delay_formula}，拍周期为 $T_{\text{beat}}=2\pi/\Delta\omega=1/\Delta f$。振幅包络 $2A\cos(\Delta\omega\,t/2)$ 以角频率 $\Delta\omega/2$ 振荡，包络周期为 $4\pi/\Delta\omega$，拍周期为包络周期的一半，即 $2\pi/\Delta\omega=1/\Delta f$。
+\end{proof}
+
+\begin{definition}[音频最小正周期算法]\label{def:audio_minimal_period_algorithm}
+本定义与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{def:ps_minimal_period_algorithm} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处的差别仅为术语（音频目标 / 音频样本），算法步骤与结论完全相同。
+\end{definition}
+
+\begin{theorem}[音频最小正周期算法的正确性]\label{thm:audio_minimal_period_correctness}
+本定理与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{thm:ps_minimal_period_correctness} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。本处的差别仅为术语（音频目标 / 音频样本），算法步骤与结论完全相同。
+\end{theorem}
+
+\begin{example}[音频周期判定实例]\label{ex:audio_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item 简谐振动：$T_0=2\pi\sqrt{m/k}$，一致周期型；
+    \item 单频声波：时间周期 $T=2\pi/\omega$，空间周期 $\lambda=2\pi/|\mathbf k|$；
+    \item 拍频：$T_{\text{beat}}=1/\Delta f$，一致周期型；
+    \item 驻波：弦上驻波频率 $f_n=n f_1$，一致周期型。
+\end{enumerate}
+\end{example}
+
+\begin{remark}[守恒量不保证周期]\label{rem:audio_invariant_not_period}
+音频系统中的质量守恒、能量守恒与标度荷守恒是周期结构的辅助条件，但不构成充分条件。例如阻尼振动具有能量耗散，但轨道可能不闭合。音频周期结构必须由 \cref{thm:audio_periodicity_decision} 或上述引理判定。
+\end{remark}
+
+\subsection{第二步：音频周期级数与周转圆组的构建}
+
+\begin{definition}[音频振幅级数、频率级数、相位级数]\label{def:audio_series}
+设音频目标的状态或输出序列为 $\{z_t\}$。若其可写为
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+则称
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+分别为音频目标的\textbf{振幅级数}、\textbf{频率级数}与\textbf{相位级数}。三者与「级数与卷积」章 \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} 一致。
+\end{definition}
+
+\begin{definition}[音频周转圆组]\label{def:audio_epicycle_group}
+设音频目标的周期级数由振幅级数 $\{A_k\}$、频率级数 $\{\omega_k\}$ 与相位级数 $\{\phi_k\}$ 给出。对每个 $k$ 定义周转圆
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+其集合
+\[
+\mathfrak E_{\mathrm{A}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+称为音频目标的\textbf{周转圆组}。其叠加即音频周期级数
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[由音频数据构建周期级数]\label{thm:audio_series_reconstruction}
+设音频目标的输出为有限周期序列，周期为 $N$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 输出可展开为离散傅里叶级数
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item 振幅级数由 $|c_k|$ 给出，相位级数由 $\arg c_k$ 给出，频率级数由 $2\pi k/N$ 给出；
+    \item 若输出为单频声波，则傅里叶分解只有一根谱线；若输出为乐器音色，则各级谐波对应不同谐波分量。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 有限周期序列的离散傅里叶级数是标准结论：基函数 $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ 构成 $\mathbb C^N$ 的正交基。
+(ii) 由 $c_k=A_k e^{i\phi_k}$ 直接读出。
+(iii) 单频声波的时间部分为 $e^{-i\omega t}$，在周期 $T=2\pi/\omega$ 上只有基频分量；乐器音色按傅里叶级数展开为各次谐波。
+\end{proof}
+
+\begin{proposition}[三参数对应：半径、相位与转速]\label{prop:audio_epicycle_correspondence}
+音频周转圆组 $\mathfrak E_{\mathrm{A}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ 的三个参数与三个几何—物理量一一对应：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{半径对应振幅}：$E_k$ 的半径 $|E_k|=A_k$ 即声压分量的振幅；
+    \item \textbf{相位对应旋转时延}：初相 $\phi_k$ 对应时间平移 $\tau_k=\phi_k/\omega_k$，即该周转圆相对基准\textbf{超前} $\tau_k$（$\phi_k>0$ 表示波形相对基准\textbf{提前} $\tau_k$，等价于把基准延后 $\tau_k$ 后二者重合）；
+    \item \textbf{频率对应旋转速度}：$\omega_k$ 即该分量的角频率。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:audio_epicycle_correspondence} 与「周期系统」章 \cref{prop:ps_epicycle_correspondence} 完全对应，
+三条对应——半径对应振幅、相位对应旋转时延、频率对应旋转速度——逐条平移至本章的周转圆组即得。
+证明见该处：(i) 由 $|E_k|=A_k$ 与能量分解，(ii) 由相位平移定理，(iii) 由频率级数定义。
+\end{proof}
+
+\begin{example}[乐器音色的周期级数]\label{ex:audio_timbre_series}
+不同乐器演奏同一音高产生不同音色，源于谐波结构的差异。音叉几乎只有基频，小提琴谐波丰富，单簧管以奇次谐波为主。这些差异在周期级数中表现为振幅级数 $\{A_k\}$ 的不同分布。
+\end{example}
+
+\begin{remark}[周期级数即复变函数]\label{rem:audio_series_complex}
+设 $z=e^{i\omega_0t}$，则音频周期级数
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+在\textbf{各分量频率与 $\omega_0$ 可公度}（即 $\omega_k=k\omega_0$，$k\in\mathbb Z$）时可写为洛朗级数 $\sum_k c_k z^k$，其中 $c_k=A_k e^{i\phi_k}$。故\textbf{当所有分量与 $\omega_0$ 可公度时，周期级数即单位圆上的复变函数（否则为环面上的函数）}。
+\end{remark}
+
+\subsection{第三步：音频周转圆组的动态调节}
+
+\begin{definition}[音频周转圆组的动态调节]\label{def:audio_adaptive_adjustment}
+设当前音频周转圆组为 $\mathfrak E^{(j)}$，部分和
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+残差 $r^{(j)}=z-z^{(j)}$。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 $\|r^{(j)}\|^2>\delta$，则依残差周期图峰值新增一个周转圆；
+    \item \textbf{参数调节}：对已有周转圆参数按正则化最小二乘或守恒约束更新。
+\end{enumerate}
+在音频系统中，数量调节对应增加谐波阶数或频率分量；参数调节对应调整振幅、相位与频率，使质量、能量与标度荷约束满足。
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:audio_adaptive_growth}
+按 \cref{def:audio_adaptive_adjustment}(i) 加入残差主频分量后，残差能量单调不增：
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+等号成立当且仅当残差在被选频率上无能量。
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:audio_adaptive_growth} 与「周期系统」章 \cref{def:ps_adaptive_adjustment} 的动态调节机制一致：
+新增周转圆即把 $r^{(j)}$ 沿 $\hat\omega$ 的分量从残差中移出，由正交分解
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{被移出的分量}\|^2$ 即得不等式，
+等号当且仅当被移出分量的范数为零。完整论证见该处。
+\end{proof}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:audio_adaptive_convergence}
+设音频目标为长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值有限周期序列}且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得音频周转圆组即目标的精确傅里叶数据；若序列为\textbf{复值}，则相应步数为至多 $T_0$ 步。
+\end{theorem}
+
+\begin{proof}
+长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值}有限周期序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波（含常数项）上完备；\textbf{复值}序列则需 $T_0$ 个分量。每步按 \cref{prop:audio_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。
+\end{proof}
+
+\begin{definition}[结构指标调节]\label{def:audio_structure_metric_adjustment}
+设音频目标的结构指标为
+\[
+\mathcal I=(\mathcal I_{\text{质量}},\mathcal I_{\text{能量}},\mathcal I_{\text{标度}})
+=(\text{质量守恒度},\ \text{能量守恒度},\ \text{标度荷守恒度}).
+\]
+\textbf{结构指标调节}为：在参数空间 $\Theta$ 中每步选取使 $\mathcal I(\theta)$ 按字典序\textbf{严格递减}（极小化）的邻近参数 $\theta$；若不存在这样的邻近参数，则停止——此时 $\theta$ 为\textbf{局部最优}参数。
+\end{definition}
+
+\begin{proposition}[结构指标调节的有限收敛]\label{prop:audio_structure_metric_convergence}
+设参数空间 $\Theta$ 有限，且每次调节使 $\mathcal I$ 按字典序\textbf{严格递减}。则调节在有限步内终止于局部最优参数。
+\end{proposition}
+
+\begin{proof}
+$\Theta$ 有限，$\mathcal I$ 取值有限。字典序在有限值集上是良基的，故字典序严格递减的序列不能无限延续，调节在有限步终止。终止时不存在使 $\mathcal I$ 按字典序严格递减的邻近参数，即局部最优。这里必须按\textbf{整条字典序}给出单调性：若只要求「某一分量严格增加／减小」，则 $(2,1)\to(1,2)\to(2,1)$ 这类循环无法排除，有限终止性不成立。
+\end{proof}
+
+\begin{remark}[动态调节的边界]\label{rem:audio_adaptive_boundary}
+\cref{thm:audio_adaptive_convergence} 依赖有限周期序列。对连续谱或准周期音频目标，不存在有限周转圆组精确表示，只能作有界逼近。结构指标调节不保证全局最优。
+\end{remark}
+
+\subsection{第四步：音频卷积}
+
+\begin{definition}[音频振幅卷积、相位卷积与频率卷积]\label{def:audio_convolution_types}
+设两个音频周转圆组为
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+定义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅卷积}：$\mathbb A_{mn}=A_nB_m$；
+    \item \textbf{相位卷积}：$\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$；
+    \item \textbf{频率卷积}：$\mathbb F_{mn}=\omega_n\nu_m$；
+    \item \textbf{趋势卷积}：$\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$。
+\end{enumerate}
+这与「级数与卷积」章 \cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution}、\cref{def:tendency_convolution} 一致。
+\end{definition}
+
+\begin{theorem}[三类卷积在音频周转圆组上的作用]\label{thm:audio_convolution_action}
+设两个音频目标的周转圆组分别为 $\mathfrak E$ 与 $\mathfrak E'$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 振幅卷积只作用于半径；
+    \item 相位卷积只作用于相位；
+    \item 频率卷积只作用于转速；
+    \item 趋势卷积同时保留振幅与相位。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:audio_convolution_types} 直接读出。
+\end{proof}
+
+\begin{proposition}[自相关与趋势卷积]\label{prop:audio_autocorr_phase_convolution}
+设 $\{z_t\}$ 为音频周期序列，其自相关函数为
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+在音频周转圆组语言中，自相关函数是趋势卷积在对角线上的投影：
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:audio_autocorr_phase_convolution} 是「周期系统」章 \cref{thm:ps_convolution_action} 的卷积作用结论在本领域的实现：
+将 $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ 代入自相关定义，由正交性消去全部非对角交叉项，只保留趋势卷积的对角线项
+（三类卷积的因式分解，\cref{prop:ps_convolution_factorization}），即得 $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$。
+完整展开见该处。
+\end{proof}
+
+\begin{remark}[音频卷积与周期卷积的关系]\label{rem:audio_convolution_relation}
+音频卷积不是新的卷积运算，而是「级数与卷积」章周期卷积在音频周转圆组上的实例。自相关是趋势卷积在对角线上的投影，互相关、拍频分别是振幅卷积和频率卷积在声学中的具体表现。
+\end{remark}
+
+\subsection{第五步：与离散采样、调和分析、时序分析的整合}
+
+\begin{definition}[音频周期诊断流程]\label{def:audio_periodic_diagnosis}
+对于给定音频系统，使用周期数学框架进行诊断：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{周期判定}：验证音频目标的周期类型（\cref{thm:audio_periodicity_decision}）；
+    \item \textbf{级数构建}：由声压、质点速度数据构建振幅、频率、相位级数与周转圆组（\cref{thm:audio_series_reconstruction}）；
+    \item \textbf{守恒诊断}：验证质量、能量与标度荷守恒（\cref{thm:acoustic_conservation}）；
+    \item \textbf{卷积诊断}：计算自相关（趋势卷积的对角线投影，\cref{prop:audio_autocorr_phase_convolution}）与相位卷积；
+    \item \textbf{整合诊断}：接入离散采样、调和分析、时序分析工具链。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[音频周期诊断流程与三章接口]\label{thm:audio_diagnosis_integration}
+\cref{def:audio_periodic_diagnosis} 的五个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}、\cref{thm:intercalation_leakage_suppression}；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}、\cref{prop:twelve_to_six}；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}、\cref{def:ts_window_validation}。
+\end{enumerate}
+因此音频周期诊断不是独立方法，而是周期数学统一工具链在音频系统上的应用。
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:audio_diagnosis_integration} 是「周期系统」章五步接口（\cref{tab:ps_five_steps}）在本领域的落地：
+周期判定用采样与谱估计，频率分解与相位核用「调和分析」章，周期图峰值、Fisher 检验与
+窗函数验证用「时序分析」章。故诊断流程由三章工具链合成，证明见该处。
+\end{proof}
+
+\begin{remark}[整合后的操作顺序]\label{rem:audio_integration_order}
+实际诊断建议顺序为：先判定音频目标是否周期（\cref{thm:audio_periodicity_decision}）；再构建音频数据的傅里叶数据与周转圆组（\cref{thm:audio_series_reconstruction}）；再用守恒约束与动态调节优化参数（\cref{thm:audio_adaptive_convergence}、\cref{prop:audio_structure_metric_convergence}）；再作音频卷积与自相关分析（\cref{prop:audio_autocorr_phase_convolution}）；最后按 \cref{def:audio_periodic_diagnosis} 输出诊断。
+\end{remark}
+
+\section{音频系统的数学基础}
+
+\begin{definition}[声波的基本量]\label{def:acoustic_quantities}
+音频系统由以下基本物理量描述：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{声压} $p(\mathbf{r}, t)$（单位：Pa）：声波引起的介质压强偏离静压的部分。
+    \item \textbf{质点速度} $\mathbf{v}(\mathbf{r}, t)$（单位：m/s）：介质微粒在声波作用下的振动速度。
+    \item \textbf{密度扰动} $\rho'(\mathbf{r}, t)$（单位：kg/m$^3$）：介质密度偏离静态密度 $\rho_0$ 的部分。
+    \item \textbf{声速} $c$（单位：m/s）：理想气体中 $c = \sqrt{\gamma p_0/\rho_0}$。
+\end{enumerate}
+\end{definition}
+
+\section{简谐振动}
+
+\begin{definition}[简谐振动]\label{def:simple_harmonic_motion}
+\textbf{简谐振动}是质点在线性恢复力 $F = -kx$ 作用下的运动：
+\[
+\frac{d^2 x}{dt^2} + \omega_0^2 x = 0, \quad \omega_0 = \sqrt{\frac{k}{m}}.
+\]
+通解为 $x(t) = A\cos(\omega_0 t + \phi)$。在相空间 $(x, p)$ 中，简谐振动的轨迹是椭圆。引入复变量 $z = x + i p/(m\omega_0)$，运动方程化为 $\dot{z} = -i\omega_0 z$——周转圆模型的一维退化形式。
+\end{definition}
+
+\begin{proposition}[简谐振动的能量守恒]\label{prop:harmonic_energy}
+总机械能 $E = \frac{1}{2}kA^2 = \text{常数}$。动能和势能以 $2\omega_0$ 的角频率交替转换。
+\end{proposition}
+
+\begin{proof}
+代入 $x = A\cos(\omega_0 t + \phi)$：动能 $K = \frac{1}{2}m\dot x^2 = \frac{1}{2}mA^2\omega_0^2\sin^2(\omega_0 t + \phi)$，势能 $U = \frac{1}{2}kx^2 = \frac{1}{2}kA^2\cos^2(\omega_0 t + \phi)$。由 $\omega_0^2 = k/m$ 得 $mA^2\omega_0^2 = kA^2$，故
+\[
+E = K + U = \frac{1}{2}kA^2\big(\sin^2(\omega_0 t + \phi) + \cos^2(\omega_0 t + \phi)\big) = \frac{1}{2}kA^2,
+\]
+与时间无关。$K$ 与 $U$ 各自以角频率 $2\omega_0$ 振荡（$\sin^2\theta = \frac{1-\cos 2\theta}{2}$），相位差 $\pi$——能量在两形式间周期转换而总量守恒。
+\end{proof}
+
+\begin{definition}[简谐振动的相位时延]\label{def:harmonic_phase_delay}
+简谐振动 $x(t) = A\cos(\omega_0 t + \phi)$ 中，相位 $\phi$ 对应的\textbf{相位时延}为
+\[
+\tau = \frac{\phi}{\omega_0}.
+\]
+相位时延将相位角转换为时间偏移：初相 $\phi$ 等价于振动相对基准\textbf{超前} $\tau = \phi/\omega_0$（$\phi>0$ 表示波形相对基准\textbf{提前} $\tau$，等价于把基准延后 $\tau$ 后二者重合）。当 $\phi = 2\pi$（一个完整周期）时，$\tau = T = 2\pi/\omega_0$——相位时延退化为完整周期。这是“周期函数与具有周期轨道的群”章参数表中时延 $\tau = \phi/\omega$ 的声学实现。
+\end{definition}
+
+\section{声波方程与传播时延}
+
+\begin{theorem}[声波方程]\label{thm:acoustic_wave_equation}
+在无粘、无热传导的理想流体中，声压 $p(\mathbf{r}, t)$ 满足三维波动方程：
+\[
+\boxed{\nabla^2 p - \frac{1}{c^2} \frac{\partial^2 p}{\partial t^2} = 0}.
+\]
+\end{theorem}
+
+\begin{proof}
+理想流体的三个线性化方程：(i) 连续性方程 $\frac{\partial \rho'}{\partial t} + \rho_0 \nabla\cdot\mathbf{v} = 0$；(ii) 欧拉方程 $\rho_0 \frac{\partial \mathbf{v}}{\partial t} = -\nabla p$；(iii) 绝热状态方程 $p = c^2 \rho'$（$c^2 = (\partial p/\partial\rho)_S$）。对 (i) 求 $\partial/\partial t$，对 (ii) 取散度：
+\[
+\frac{\partial^2 \rho'}{\partial t^2} + \rho_0 \nabla\cdot\frac{\partial \mathbf{v}}{\partial t} = 0, \qquad
+\rho_0 \nabla\cdot\frac{\partial \mathbf{v}}{\partial t} = -\nabla^2 p.
+\]
+两式相减消去速度场：$\frac{\partial^2 \rho'}{\partial t^2} = \nabla^2 p$。代入 (iii) 消去 $\rho'$：$\frac{1}{c^2}\frac{\partial^2 p}{\partial t^2} = \nabla^2 p$，即波动方程。
+\end{proof}
+
+\begin{definition}[声波的传播时延]\label{def:acoustic_propagation_delay}
+声波从声源 $\mathbf{r}'$ 到观察点 $\mathbf{r}$ 的\textbf{传播时延}为
+\[
+\tau_{\text{prop}} = \frac{|\mathbf{r} - \mathbf{r}'|}{c}.
+\]
+传播时延将空间距离转换为时间偏移——距离越远，时延越大，二者呈线性关系 $\tau \propto r$。在室温空气中（$c \approx 343$ m/s），$1$ 米距离对应时延约 $2.9$ ms——这是声学中可听回声的最小时延阈值。
+\end{definition}
+
+\begin{definition}[声波的相位时延]\label{def:acoustic_phase_delay}
+单色平面声波 $p(\mathbf{r}, t) = p_0 e^{i(\mathbf{k}\cdot\mathbf{r} - \omega t)}$ 中，空间相位 $\mathbf{k}\cdot\mathbf{r}$ 对应的\textbf{相位时延}为
+\[
+\tau_{\text{phase}} = \frac{\mathbf{k}\cdot\mathbf{r}}{\omega} = \frac{|\mathbf{r}|\cos\theta}{c},
+\]
+沿传播方向（$\theta=0$），$\tau_{\text{phase}} = r/c = \tau_{\text{prop}}$。
+\end{definition}
+
+\begin{proposition}[声波时延与相位的统一]\label{prop:acoustic_delay_phase_unity}
+沿传播方向，空间相位每增加 $2\pi$（一个波长 $\lambda$），对应时间偏移增加一个周期 $T$：
+\[
+\tau = \frac{\lambda}{c} = \frac{2\pi}{\omega} = T.
+\]
+声波的空间周期（波长）与时间周期（频率）通过时延精确耦合。
+\end{proposition}
+
+\begin{proof}
+波长 $\lambda = 2\pi/|\mathbf{k}| = cT$。沿传播方向，相位增加 $2\pi$ 对应距离增加 $\lambda$，时延 $\tau = \lambda/c = T$。
+\end{proof}
+
+\section{谐波结构与傅里叶分解}
+
+\begin{definition}[谐波级数]\label{def:harmonic_series}
+任何周期为 $T$ 的声波 $p(t)$ 可展开为\textbf{傅里叶级数}：
+\[
+p(t) = \sum_{n=1}^{\infty} A_n \cos(n\omega_0 t + \phi_n),
+\]
+其中 $\omega_0 = 2\pi/T$ 是基频，$n\omega_0$ 是第 $n$ 次谐波频率。各次谐波构成嵌套周转系统——基频对应外层大周转圆，高次谐波对应内层小周转圆。
+\end{definition}
+
+\begin{example}[乐器音色的谐波特征]\label{ex:instrument_timbre}
+不同乐器演奏同一音高产生不同音色，源于谐波结构的差异。音叉几乎只有基频，小提琴谐波丰富，单簧管以奇次谐波为主。
+\end{example}
+
+\section{音律系统}
+
+\begin{definition}[音程与频率比]\label{def:musical_interval}
+两个音之间的\textbf{音程}由频率比决定。纯八度 $2:1$，纯五度 $3:2$，纯四度 $4:3$，大三度 $5:4$。
+\end{definition}
+
+\begin{theorem}[十二平均律的数学结构]\label{thm:equal_temperament}
+十二平均律的公比为 $r = 2^{1/12}$。第 $k$ 个半音的频率为 $f_k = f_0 \cdot 2^{k/12}$。
+\end{theorem}
+
+\begin{proof}
+由八度频率比 $2:1$ 均分为十二等份直接得出：$r^{12} = 2 \Rightarrow r = 2^{1/12}$。
+\end{proof}
+
+\begin{lemma}[十二平均律对纯五度的逼近]\label{ch22_fifth_approximation}
+十二平均律中七个半音构成的“五度”频率比为 $2^{7/12} \approx 1.4983$，与纯五度 $3/2 = 1.5$ 的相对误差约 $0.11\%$；而十二个半音精确闭合八度（$2^{12/12} = 2$）。
+\end{lemma}
+
+\begin{proof}
+比较对数：$\log_2(2^{7/12}) = 7/12 \approx 0.5833$，$\log_2(3/2) \approx 0.5850$，差 $0.0016$。故 $2^{7/12} = 2^{0.5833} = 2^{0.5850} \cdot 2^{-0.0016} \approx \frac{3}{2} \cdot 0.9989$，相对误差 $\approx 0.11\%$。八度闭合性由 $2^{12/12}=2$ 直接成立。这一“近似五度 + 精确八度”的折中是等比标度（十二平均律）与简单整数比（纯律）在音乐中的折中。
+\end{proof}
+
+\section{声波的周期传播与拍频时延}
+
+\begin{definition}[驻波]\label{def:standing_wave}
+两个频率相同、振幅相等、沿相反方向传播的行波叠加形成\textbf{驻波}：
+\[
+p(x, t) = 2A\cos(kx)\cos(\omega t).
+\]
+驻波的空间反射对称性由“矢量分析”章中反射定律的形式给出——波在边界处反射后与入射波叠加，形成空间上的驻立模式。
+\end{definition}
+
+\begin{proposition}[弦乐器的谐波系列]\label{prop:string_harmonics}
+两端固定的弦上允许的驻波模式对应频率 $f_n = n f_1$（$n = 1, 2, 3, \dots$）。
+\end{proposition}
+
+\begin{proof}
+驻波形式 $p(x,t) = A\sin(kx)\cos(\omega t)$ 满足波动方程（定理 \ref{thm:acoustic_wave_equation}）。边界条件 $p(0,t) = p(L,t) = 0$：$x=0$ 自动满足；$x=L$ 要求 $\sin(kL) = 0$，即 $k_n L = n\pi$（$n = 1,2,3,\dots$）。由色散关系 $\omega_n = c k_n$，得
+\[
+f_n = \frac{\omega_n}{2\pi} = \frac{c n\pi/L}{2\pi} = n\cdot\frac{c}{2L} = n f_1, \qquad f_1 = \frac{c}{2L}.
+\]
+基频 $f_1$ 与弦长成反比——弦越短，音越高。
+\end{proof}
+
+\begin{definition}[拍频时延]\label{def:beat_delay}
+两个频率相近的声波（$f_1 \approx f_2$，$\Delta f = |f_1 - f_2|$ 很小）叠加产生\textbf{拍}现象——合成声波的振幅以拍频 $\Delta f$ 周期性变化。从时延的视角看，拍周期是两个声波相位差 $\Delta\phi(t) = 2\pi\Delta f \cdot t$ 从 $0$ 变化到 $2\pi$ 所需的\textbf{相位时延}。拍频时延度量了两个相近频率的声波在相位上完全重合到下一次完全重合所需的时间偏移——两个频率分量的相位差每周旋转 $2\pi$ 所需的时间。
+\end{definition}
+
+\begin{proposition}[拍频时延公式]\label{prop:beat_delay_formula}
+设两个声波频率为 $f_1, f_2$，$\Delta f = |f_1 - f_2|$。则拍周期为
+\[
+T_{\text{beat}} = \frac{1}{\Delta f}.
+\]
+\end{proposition}
+
+\begin{proof}
+两个声波叠加：$p(t) = A\cos(\omega_1 t) + A\cos(\omega_2 t) = 2A\cos(\Delta\omega \, t/2)\cos(\bar{\omega} t)$，其中 $\Delta\omega = |\omega_1 - \omega_2|$，$\bar{\omega} = (\omega_1 + \omega_2)/2$。振幅包络 $2A\cos(\Delta\omega \, t/2)$ 以角频率 $\Delta\omega/2$ 振荡，包络周期为 $2\pi/(\Delta\omega/2) = 4\pi/\Delta\omega$。拍周期（两次振幅最大或最小的间隔）为包络周期的一半：$T_{\text{beat}} = 2\pi/\Delta\omega = 1/\Delta f$。
+\end{proof}
+
+\section{音频系统的守恒律}
+
+\begin{theorem}[声波系统的三种守恒律]\label{thm:acoustic_conservation}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{质量守恒}：$\frac{\partial \rho'}{\partial t} + \rho_0 \nabla \cdot \mathbf{v} = 0$。
+    \item \textbf{能量守恒}：$\frac{\partial E}{\partial t} + \nabla \cdot \mathbf{I} = 0$（无源时）。
+    \item \textbf{标度荷守恒}：无阻尼时各频率分量振幅独立守恒。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 质量守恒即线性化连续性方程（定理 \ref{thm:acoustic_wave_equation} 证明中的 (i)）。(ii) 能量密度 $E = \frac{1}{2}\rho_0|\mathbf{v}|^2 + \frac{1}{2}\frac{p^2}{\rho_0 c^2}$，能流密度 $\mathbf{I} = p\mathbf{v}$；由波动方程直接求导得 $\frac{\partial E}{\partial t} + \nabla\cdot\mathbf{I} = 0$（无源时）——能量在空间平移下的守恒。(iii) 无阻尼波动方程的傅里叶分解（定理 \ref{thm:acoustic_wave_equation} 的平面波解）使各频率分量 $A_n e^{i(\mathbf{k}_n\cdot\mathbf{r} - \omega_n t)}$ 独立演化、振幅 $|A_n|$ 不变——各频率通道的标度荷守恒。
+\end{proof}
+
+\begin{remark}[与全书的衔接]
+本章建立的音频系统周期结构理论是周期数学在声学中的应用。简谐振动在相空间中的轨迹是周转圆模型的一维退化形式，谐波级数是嵌套周转系统的声学实例，声波方程是连续介质力学中的波动传播。时延概念揭示了声波传播的深层结构：传播时延 $\tau = r/c$ 将空间距离转换为时间偏移，相位时延 $\tau = \phi/\omega$ 将相位角转换为时间偏移，拍频时延 $\tau_{\text{beat}} = 1/\Delta f$ 将频率差转换为时间偏移。三种时延分别与三种基本操作（平移、旋转、缩放）在时间域中的表现对应。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 声波传播时延 $\tau_{\text{prop}} = |\mathbf{r}-\mathbf{r}'|/c$（定义 \ref{def:acoustic_propagation_delay}）：空间距离到时间偏移的线性平移对应 \\
+缩放 & 十二平均律公比 $2^{1/12}$（定理 \ref{thm:equal_temperament}）与纯五度逼近（引理 \ref{ch22_fifth_approximation}） \\
+旋转 & 简谐振动的相空间周转 $\dot z = -i\omega_0 z$（定义 \ref{def:simple_harmonic_motion}）；相位时延 $\tau = \phi/\omega$（定义 \ref{def:harmonic_phase_delay}） \\
+守恒 & 简谐振动能量守恒 $E = \frac{1}{2}kA^2$（命题 \ref{prop:harmonic_energy}）；质量/能量/标度荷守恒（定理 \ref{thm:acoustic_conservation}） \\
+对称 & 驻波的空间反射对称（定义 \ref{def:standing_wave}）；弦两端固定边界的对称约束（命题 \ref{prop:string_harmonics}） \\
+闭合 & 相位每增 $2\pi$ 的周期闭合：$\tau = \lambda/c = T$（命题 \ref{prop:acoustic_delay_phase_unity}）；拍相位差从 $0$ 回到 $2\pi$ 的闭合（定义 \ref{def:beat_delay}） \\
+周期 & 基频与谐波级数 $f_n = n f_1$（定义 \ref{def:harmonic_series}、命题 \ref{prop:string_harmonics}）；拍周期 $T_{\text{beat}} = 1/\Delta f$（定义 \ref{def:beat_delay}、命题 \ref{prop:beat_delay_formula}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{音频周期性判定定理}（\ref{thm:audio_periodicity_decision}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 验证\textbf{数量调节的单调性}（\ref{prop:audio_adaptive_growth}）的前提在本章领域对象上成立，并给出一个不满足前提的反例。
+
+    \item 考察\textbf{三参数对应：半径、相位与转速}（\ref{prop:audio_epicycle_correspondence}）在参数退化时的行为，说明结论如何随之退化。
+
+    \item 说明\textbf{音频周期诊断流程与三章接口}（\ref{thm:audio_diagnosis_integration}）与「周期系统」章相应通用结论的关系（是一致、特例还是需要附加条件）。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{thm:audio_periodicity_decision}、\ref{prop:audio_adaptive_growth}、\ref{prop:audio_epicycle_correspondence}、\ref{thm:audio_diagnosis_integration}。
+\end{enumerate}
+
+

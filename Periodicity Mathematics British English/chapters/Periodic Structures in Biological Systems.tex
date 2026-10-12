@@ -1,0 +1,788 @@
+\chapter{Periodic Structures in Biological Systems}
+\markboth{Periodic Structures in Biological Systems}{Periodic Structures in Biological Systems}
+
+\begin{remark}[Periodicity decision for the target of this chapter (citation)]\label{rem:bio_ps_hook}
+When this chapter decides whether a research target is periodic, determines its period type, or seeks its minimal positive period, reference is always made to the `Periodic Systems' chapter:
+for the periodicity criterion see \cref{thm:ps_periodicity_decision},
+for the discrimination of period types see \cref{def:ps_period_type}, \cref{prop:ps_type_discrimination},
+for the search for the minimal positive period see \cref{def:ps_minimal_period_algorithm}, \cref{thm:ps_minimal_period_correctness},
+and for the construction of period series and epicycle groups from data see \cref{thm:ps_series_reconstruction}, \cref{def:ps_epicycle_group}.
+\end{remark}
+
+\begin{remark}[Positioning of this chapter: unfolding along the five-step interface of the `Periodic Systems' chapter]\label{rem:bio_five_steps_positioning}
+The periodic structure of biological systems studies the mathematical characterisation of endogenous rhythms, periodic behaviour and the circadian clock in living organisms. This chapter does not set up a separate periodicity criterion; instead it connects biological systems to the five-step interface specified by the `Periodic Systems' chapter:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{Decision}: the circadian rhythm, the heartbeat cycle, the cell cycle, the population cycle, neural oscillation, multi-scale evolution and other such targets are formalised as discrete or continuous dynamical systems, and \cref{thm:ps_periodicity_decision} is cited to decide whether they are periodic and to determine the period type;
+    \item \textbf{Construction}: the amplitude series, the frequency series and the phase series are constructed from concentration variables, membrane potentials, population sizes and phase variables, and assembled into the biological epicycle group;
+    \item \textbf{Adjustment}: the biological epicycle group is dynamically adjusted under the constraints of residual energy decrease, energy conservation, matter conservation and information conservation;
+    \item \textbf{Convolution}: amplitude convolution, phase convolution and frequency convolution are introduced on the biological epicycle group, and connected with autocorrelation, cross-correlation and phase locking;
+    \item \textbf{Integration}: the tool chains of three chapters---`Discrete Sampling and Intercalation of Periodic Signals', `Harmonic Analysis' and `Time Series Analysis'---are connected, forming the biological periodicity diagnostic pipeline.
+\end{enumerate}
+The mathematical tools used in this chapter include: limit-cycle theory, delayed negative feedback, relaxation oscillation, the Lotka--Volterra equations, the phase-oscillator model, the replicator--mutator equation, periodic convolution, the epicycle group, the phase operator and time delay.
+\end{remark}
+
+\begin{remark}[Guide to the seven themes of this chapter]\label{rem:bio_seven_themes}
+\textbf{Translation}---the approximately 24-hour main period of the circadian rhythm (the internalisation of the Earth's rotation, Definition \ref{def:circadian_rhythm}); \textbf{Scaling}---the scaling transformation of the cell cycle (DNA content $2n \to 4n \to 2n$, Definition \ref{def:cell_cycle}) and the scaling of population size; \textbf{Rotation}---the heartbeat limit cycle (Definition \ref{def:cardiac_pacemaker}) and the phase of neural oscillation (Definition \ref{def:neural_oscillation}); \textbf{Conservation}---energy conservation, matter conservation and information conservation (Theorem \ref{thm:biological_conservation}); \textbf{Symmetry}---the complementary symmetry of the two DNA strands and the information symmetry of transmission from generation to generation; \textbf{Closure}---the closed orbits guaranteed by the Lotka--Volterra first integral (Theorem \ref{thm:lotka_volterra_periodic}); \textbf{Period}---the multi-scale periods of circadian (24 h), heartbeat ($0.6$--$1.0$ s), cell (hours--days) and population ($9$--$11$-year lynx cycle) processes.
+\end{remark}
+
+\section{Connection to the five-step interface of the `Periodic Systems' chapter}
+\label{sec:bio_five_steps}
+
+\subsection{Step one: periodicity decision for biological targets}
+
+\begin{definition}[Biological target and decision input]\label{def:bio_target}
+A \textbf{biological target} is one of the following objects:
+\begin{enumerate}[label=(\roman*)]
+    \item a circadian rhythm system, whose state space is the phase space of protein concentrations $(M,P,Z)$;
+    \item a heartbeat cycle system, whose state space is the joint space of the membrane potential and the ion-channel variables $(V_m,n)$;
+    \item a cell cycle system, whose state space is the space of cyclin concentrations;
+    \item a population cycle system, whose state space is the prey--predator phase space $(H,P)$;
+    \item a neural oscillation system, whose state space is the firing-phase space of neurons;
+    \item a multi-scale evolution system, whose state space is the joint space of the state variables of the various levels.
+\end{enumerate}
+The \textbf{decision input} of a biological target is an ordered pair
+\[
+\mathcal D_{\mathrm{B}}=(\mathcal S,\Phi),
+\]
+where $\mathcal S$ is the state space and $\Phi:\mathcal S\to\mathcal S$ is the map induced by time translation, phase rotation or feedback evolution. If $\mathcal S$ is a finite set, the target is called a \textbf{finite biological target}; if $\mathcal S$ is an infinite set, it is called an \textbf{infinite biological target}.
+\end{definition}
+
+\begin{definition}[Biological decision map]\label{def:bio_periodization}
+Let a biological target be given by the decision input $\mathcal D_{\mathrm{B}}=(\mathcal S,\Phi)$. If the states of the target are generated by $\Phi$, that is, if there exists $x_0\in\mathcal S$ such that
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+for $t\in\mathbb Z$ the state $x_t$ is generated by iteration of $\Phi$; for $t\in\mathbb R$ it is described by the one-parameter evolution family $\{\Phi_t\}_{t\in\mathbb R}$, where each $\Phi_t:\mathcal S\to\mathcal S$, $\Phi_0=\operatorname{id}$, $\Phi_{s+t}=\Phi_s\circ\Phi_t$ for all $s,t\in\mathbb R$, and $(t,x)\mapsto\Phi_t(x)$ is continuous.
+then $\Phi$ is called the \textbf{biological decision map} of the target. The biological target is then reduced to the discrete dynamical system $(\mathcal S,\Phi)$ when $t\in\mathbb Z$ and to the continuous dynamical system $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$ when $t\in\mathbb R$; in both cases the criteria of the `Operations and Periodicity' chapter and of the `Periodic Systems' chapter may be applied directly.
+\end{definition}
+
+\begin{theorem}[Periodicity decision theorem for biological systems]\label{thm:bio_periodicity_decision}
+Let the decision map of a biological target be $\Phi$, and let $(\mathcal S,\Phi)$ be a discrete dynamical system. Then:
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{Sufficient decision}: if there exists $m\in\mathbb N^+$ such that $\Phi^m=\mathrm{id}$, then the target is a uniformly periodic biological system; every orbit is closed, and the length of every orbit divides $m$.
+    \item \textbf{Equivalence of the decision}: the target is a uniformly periodic biological system if and only if $\operatorname{ord}(\Phi)<\infty$.
+    \item \textbf{Pointwise criterion}: the orbit of the target through the state $x_0$ is closed if and only if $x_0$ is a periodic point; the length of the orbit is then the period at that point.
+    \item \textbf{Indispensability}: the conjunction of conserved quantities and the symmetry group cannot replace $\operatorname{ord}(\Phi)<\infty$; a quasi-periodic biological target is not a periodic biological system.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:bio_periodicity_decision} of this chapter is the domain instantiation of \cref{thm:ps_periodicity_decision} in the `Periodic Systems' chapter:
+it suffices to replace the decision map $f$ and the evolution group by $\Phi$ of this chapter, and the four items---(A) sufficient decision, (B) equivalence of the decision, (C) pointwise criterion and
+(D) indispensability---hold one by one. By the convention of \cref{rem:ps_applications_hook}, they are not expanded again here.
+\end{proof}
+
+\begin{corollary}[Period types of biological targets]\label{cor:bio_period_type}
+After the decision by \cref{thm:bio_periodicity_decision}, a biological target falls into one of the following types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Trivially periodic type}: the least period is $m_0=1$ and the state is a fixed point;
+    \item \textbf{Strictly periodic type}: $1<m_0<\infty$ and the state is strictly periodic;
+    \item \textbf{Uniformly periodic type}: $\operatorname{ord}(\Phi)=m<\infty$ and the length of every orbit divides $m$;
+    \item \textbf{Quasi-periodic type}: $\operatorname{ord}(\Phi)=\infty$; the orbits are not closed but are dense on a compact carrier structure;
+    \item \textbf{Eventually periodic type}: there exists $N$ such that the target is periodic for $t\ge N$;
+    \item \textbf{Discrete periodic type}: the carrier structure is $\mathbb Z$ and the normalised period ratio is $\rho=T_x/\Delta x\in\mathbb Q$.
+    \item \textbf{Asymptotically periodic (damped) type}: the orbit is not closed, but tends asymptotically to a closed orbit or to a fixed point, the residual decaying as $e^{-\kappa t}$ (see \cref{def:ps_period_type}(vii)).
+\end{enumerate}
+Among these, (i)--(iii) and (vi) are periodic biological systems; (iv) is not a periodic biological system, but can be handled by bounded-approximation tools; (v) is a periodic biological system only in its stable stage; (vii), like (iv), is a type in the limiting sense; it is not a periodic biological system and can be handled with bounded-approximation tools only in its stable stage.
+\end{corollary}
+
+\begin{proof}
+Each item follows by substituting the biological target into \cref{thm:bio_periodicity_decision} and \cref{def:ps_period_type} of the `Periodic Systems' chapter.
+\end{proof}
+
+\begin{remark}[Periodicity decision for the circadian rhythm (empirical observation / research programme)]\label{lem:circadian_periodic}
+Empirical observation: on the observational scale the circadian rhythm of mammals is a rhythm of stable period, whose least positive period is approximately
+\[
+T_{\text{circadian}} \approx 24\ \text{hours}.
+\]
+Empirical basis: the foregoing is an empirical observation, not a proved theorem. This value is not a deduction from the model parameters---the three-variable Goodwin oscillator (\cref{prop:circadian_model}) yields only the existence of a stable limit cycle for Hill coefficient $n > 8$, and its period varies continuously with the parameters; the value of $24$ hours comes from the matching of the delay time scale of the TTFL (the accumulation, modification, nuclear localisation and degradation of the PER/CRY proteins) with the physiological parameters, and belongs to empirical observation and a research programme.
+\end{remark}
+
+\begin{lemma}[Periodicity decision for the heartbeat cycle]\label{lem:cardiac_periodic}
+Let the membrane potential $V_m$ and the ion-channel variables of a sinoatrial (SA) node pacemaker cell form a limit cycle in phase space. Then the heartbeat cycle is a uniformly periodic system, whose least positive period is
+\[
+T_{\text{cardiac}} \approx 0.6\text{--}1.0\ \text{s},
+\]
+corresponding to a heart rate of $60$--$100$ beats per minute.
+\end{lemma}
+
+\begin{proof}
+By Definition \ref{def:cardiac_pacemaker}, pacemaker cells generate autorhythmic action potentials through the periodic activation of currents such as $I_f$, $I_{Ca\text{-}T}$, $I_{Ca\text{-}L}$ and $I_K$. The joint dynamics of the membrane potential and the ion-channel variables form a limit cycle in phase space, and each complete depolarisation--repolarisation cycle corresponds to one turn of the limit cycle. Hence the heartbeat cycle is a uniformly periodic system, with a period of approximately $0.6$--$1.0$ s.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for the cell cycle]\label{lem:cell_cycle_periodic}
+Let the Cyclin B concentration evolve as a sawtooth relaxation oscillation, with accumulation rate $\rho$, threshold $C_{\text{th}}$ and residual concentration $C_0$. Then the cell cycle is a uniformly periodic system, whose least positive period is
+\[
+T_{\text{cell}} = \frac{C_{\text{th}} - C_0}{\rho}.
+\]
+\end{lemma}
+
+\begin{proof}
+By Lemma \ref{ch25_sawtooth_period}, the period of a sawtooth relaxation oscillation is $T=(C_{\text{th}}-C_0)/\rho$. When the Cyclin B concentration reaches the threshold it triggers the M phase; at the end of the M phase it is rapidly degraded to $C_0$, and accumulation begins afresh in the next cycle. Hence the decision map $\Phi$ satisfies $\Phi^{T_{\text{cell}}}=\mathrm{id}$, and the system is uniformly periodic.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for the population cycle]\label{lem:population_periodic}
+Let the first integral of the Lotka--Volterra system be $I(H,P)$, and let the equilibrium point be $(H^*,P^*)=(\gamma/\delta,\alpha/\beta)$. Then for every positive initial condition the system is a uniformly periodic system, and its small-amplitude period is approximately
+\[
+T_{\text{pop}} \approx \frac{2\pi}{\sqrt{\alpha\gamma}}.
+\]
+\end{lemma}
+
+\begin{proof}
+By Theorem \ref{thm:lotka_volterra_periodic}, the equilibrium point is a centre-type fixed point, the first integral $I(H,P)$ attains a minimum at $(H^*,P^*)$, and its level curves are closed curves surrounding the equilibrium point. For initial conditions sufficiently close to the equilibrium point the period is given by the linearised eigenvalues $\lambda=\pm i\sqrt{\alpha\gamma}$, namely $T\approx 2\pi/\sqrt{\alpha\gamma}$. Hence the system is uniformly periodic.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for neural oscillation]\label{lem:neural_periodic}
+Let two interneurons be coupled through an inhibitory synapse, with natural frequencies $\omega_1,\omega_2$ and coupling strengths $c_{12},c_{21}$. Then when $|\Delta\omega| < c_{12}+c_{21}$ the neuronal network enters phase locking and is a uniformly periodic system, with locking period
+\[
+T_{\text{sync}} = \frac{2\pi}{\bar\omega},
+\]
+where $\bar\omega$ is the common frequency after phase locking.
+\end{lemma}
+
+\begin{proof}
+By the proof of Proposition \ref{prop:gamma_oscillation}, the phase-difference dynamics $d(\Delta\theta)/dt = \Delta\omega - (c_{12}+c_{21})\sin(\Delta\theta)$ has a stable fixed point $\Delta\theta^*$ when $|\Delta\omega| < c_{12}+c_{21}$. The phase difference of the two neurons is then constant, and the common frequency is locked to $\bar\omega$. Hence the network is a uniformly periodic system, with period $T_{\text{sync}}=2\pi/\bar\omega$.
+\end{proof}
+
+\begin{definition}[Least positive period algorithm for biological systems]\label{def:bio_minimal_period_algorithm}
+This definition has the same content as the corresponding definition in Chapter~\ref{chap:periodic_system}, section `Periodicity decision: whether a target is periodic' (\cref{sec:ps_periodicity_decision}), namely \cref{def:ps_minimal_period_algorithm}; to avoid repetition, only the citation anchor is retained here, and the complete statement is given there. The only difference here is terminology (biological target / biological sample); the steps of the algorithm and the conclusion are exactly the same.
+\end{definition}
+
+\begin{theorem}[Correctness of the least positive period algorithm for biological systems]\label{thm:bio_minimal_period_correctness}
+This theorem has the same content as the corresponding theorem in Chapter~\ref{chap:periodic_system}, section `Periodicity decision: whether a target is periodic' (\cref{sec:ps_periodicity_decision}), namely \cref{thm:ps_minimal_period_correctness}; to avoid repetition, only the citation anchor is retained here, and the complete statement and proof are given there. The only difference here is terminology (biological target / biological sample); the steps of the algorithm and the conclusion are exactly the same.
+\end{theorem}
+
+\begin{example}[Examples of biological periodicity decisions]\label{ex:bio_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item circadian rhythm: $T_{\text{circadian}}\approx 24$ h (an empirical observation, see Remark \ref{lem:circadian_periodic});
+    \item heartbeat cycle: $T_{\text{cardiac}}\approx 0.6$--$1.0$ s, of the uniformly periodic type;
+    \item cell cycle: $T_{\text{cell}}=(C_{\text{th}}-C_0)/\rho$, of the uniformly periodic type;
+    \item population cycle: $T_{\text{pop}}\approx 2\pi/\sqrt{\alpha\gamma}$ (small-amplitude limit), of the uniformly periodic type;
+    \item neural oscillation: locking period $T_{\text{sync}}=2\pi/\bar\omega$, of the uniformly periodic type.
+\end{enumerate}
+\end{example}
+
+\begin{remark}[Conserved quantities do not guarantee periodicity]\label{rem:bio_invariant_not_period}
+Energy conservation, matter conservation and information conservation in biological systems are auxiliary conditions for periodic structure, but they do not constitute a sufficient condition. For example, a biochemical system that conserves energy but sits at an unstable equilibrium will not spontaneously produce periodic oscillations. Periodic structure in biological systems must be decided by \cref{thm:bio_periodicity_decision} or by the lemmas above.
+\end{remark}
+
+\subsection{Step two: construction of the biological period series and the epicycle group}
+
+\begin{definition}[Biological amplitude, frequency and phase series]\label{def:bio_series}
+Let the state or output sequence of a biological target be $\{z_t\}$. If it can be written as
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+then
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+are called respectively the \textbf{amplitude series}, the \textbf{frequency series} and the \textbf{phase series} of the biological target. The three agree with \cref{def:amplitude_series}, \cref{def:frequency_series} and \cref{def:phase_series} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{definition}[Biological epicycle group]\label{def:bio_epicycle_group}
+Let the period series of a biological target be given by the amplitude series $\{A_k\}$, the frequency series $\{\omega_k\}$ and the phase series $\{\phi_k\}$. For each $k$ define the epicycle
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+and let its set
+\[
+\mathfrak E_{\mathrm{B}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+be called the \textbf{epicycle group} of the biological target. Its superposition is the biological period series
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[Construction of the period series from biological data]\label{thm:bio_series_reconstruction}
+Let the output of a biological target be a finite periodic sequence of period $N$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the output can be expanded as a discrete Fourier series
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item the amplitude series is given by $|c_k|$, the phase series by $\arg c_k$ and the frequency series by $2\pi k/N$;
+    \item if the output is the protein concentration of the circadian rhythm, the Fourier decomposition yields a main component of approximately 24 hours together with its harmonics; if the output is the P-QRS-T waveform of the electrocardiogram, the harmonics of the various orders correspond to the electrical activity of different cardiac structures.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) The discrete Fourier series of a finite periodic sequence is a standard result: the basis functions $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ form an orthogonal basis of $\mathbb C^N$.
+(ii) This is read off directly from $c_k=A_k e^{i\phi_k}$.
+(iii) For a circadian sequence with $N=24$ (hourly sampling), the fundamental frequency corresponds to the 24-hour main period and the harmonics correspond to ultradian rhythms; for an ECG sequence, the waveform components are given by the harmonic assignment of Proposition \ref{prop:ecg_periodic}.
+\end{proof}
+
+\begin{proposition}[Three-parameter correspondence: radius, phase and speed]\label{prop:bio_epicycle_correspondence}
+The three parameters of the biological epicycle group $\mathfrak E_{\mathrm{B}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ are in one-to-one correspondence with three geometric--biological quantities:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Radius corresponds to amplitude}: the radius $|E_k|=A_k$ of $E_k$ is the amplitude of that concentration component or potential component;
+    \item \textbf{Phase corresponds to rotational delay}: the initial phase $\phi_k$ corresponds to the time translation $\tau_k=\phi_k/\omega_k$; when $\phi_k>0$ this component \textbf{leads} the baseline by $\tau_k$ (equivalently, the component coincides with the baseline once the baseline is postponed by $\tau_k$);
+    \item \textbf{Frequency corresponds to rotational speed}: $\omega_k$ is the angular frequency of that biological oscillation component.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:bio_epicycle_correspondence} of this chapter corresponds exactly to \cref{prop:ps_epicycle_correspondence} of the `Periodic Systems' chapter,
+and the three correspondences---radius to amplitude, phase to rotational delay and frequency to rotational speed---are obtained by translating each item to the epicycle group of this chapter.
+The proof is given there: (i) from $|E_k|=A_k$ and the energy decomposition, (ii) from the phase-translation theorem, (iii) from the definition of the frequency series.
+\end{proof}
+
+\begin{example}[The period series of the electrocardiogram]\label{ex:bio_ecg_series}
+The P-QRS-T waveform of the electrocardiogram is a periodic sequence with period $T=1/\text{heart rate}$; in its Fourier decomposition, the P wave and the T wave correspond to low-order harmonics ($n\le 2$) and the QRS complex to high-order harmonics ($n\approx 3$--$10$). In the biological epicycle group these harmonics appear as epicycle components of different radii and phases.
+\end{example}
+
+\begin{remark}[The period series is a complex function]\label{rem:bio_series_complex}
+Let $z=e^{i\omega_0t}$; then the biological period series
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+when all components are commensurable with $\omega_0$ (that is, $\omega_k=k\omega_0$, $k\in\mathbb Z$) it can be written as the Laurent series $\sum_k c_k z^k$, where $c_k=A_k e^{i\phi_k}$: in that case the biological period series is a complex function on the unit circle, and otherwise it is merely a function on the torus.
+\end{remark}
+
+\subsection{Step three: dynamic adjustment of the biological epicycle group}
+
+\begin{definition}[Dynamic adjustment of the biological epicycle group]\label{def:bio_adaptive_adjustment}
+Let the current biological epicycle group be $\mathfrak E^{(j)}$, with partial sum
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+and residual $r^{(j)}=z-z^{(j)}$. \textbf{Dynamic adjustment} consists of two rules:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Number adjustment}: if the residual energy satisfies $\|r^{(j)}\|^2>\delta$, add one epicycle according to the peak of the residual periodogram;
+    \item \textbf{Parameter adjustment}: update the parameters of the existing epicycles by regularised least squares or under the conservation constraints.
+\end{enumerate}
+In biological systems, number adjustment corresponds to increasing the harmonic order or the number of biological oscillation modes; parameter adjustment corresponds to tuning the amplitude, phase and frequency so that the energy, matter and information constraints are satisfied.
+\end{definition}
+
+\begin{proposition}[Monotonicity of number adjustment]\label{prop:bio_adaptive_growth}
+After adding the dominant-frequency component of the residual as in \cref{def:bio_adaptive_adjustment}(i), the residual energy is monotonically non-increasing:
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+with equality if and only if the residual has no energy at the selected frequency.
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:bio_adaptive_growth} of this chapter agrees with the dynamic adjustment mechanism of \cref{def:ps_adaptive_adjustment} in the `Periodic Systems' chapter:
+adding an epicycle removes the component of $r^{(j)}$ along $\hat\omega$ from the residual, and the orthogonal decomposition
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{the removed component}\|^2$ gives the inequality,
+with equality if and only if the norm of the removed component is zero. The complete argument is given there.
+\end{proof}
+
+\begin{theorem}[Convergence of dynamic adjustment]\label{thm:bio_adaptive_convergence}
+Let the biological target be a finite periodic sequence of period $T_0$ with $\delta=0$. Then after at most $\lfloor T_0/2\rfloor+1$ steps of dynamic adjustment the residual is zero, and the resulting biological epicycle group is the exact Fourier data of the target.
+\end{theorem}
+
+\begin{proof}
+The discrete Fourier series of a sequence of period $T_0$ is complete on $\lfloor T_0/2\rfloor+1$ harmonics. At each step one dominant-frequency component of the residual is extracted by \cref{prop:bio_adaptive_growth} and the residual energy decreases strictly, so after finitely many steps the residual is zero.
+\end{proof}
+
+\begin{definition}[Structural metric adjustment]\label{def:bio_structure_metric_adjustment}
+Let the structural metric of a biological target be
+\[
+\mathcal I=(\mathcal I_{\text{energy}},\mathcal I_{\text{matter}},\mathcal I_{\text{information}})
+=(\text{degree of energy conservation},\ \text{degree of matter conservation},\ \text{degree of information conservation}).
+\]
+\textbf{Structural-metric adjustment} consists in choosing $\theta$ in the parameter space $\Theta$: at each step take a neighbouring parameter for which $\mathcal I(\theta)$ is \textbf{strictly decreasing} in the lexicographic order (minimisation); if no such parameter exists, the process stops, and the parameter is then locally optimal.
+\end{definition}
+
+\begin{proposition}[Finite convergence of structural metric adjustment]\label{prop:bio_structure_metric_convergence}
+Let the parameter space $\Theta$ be finite, and let each adjustment make $\mathcal I$ strictly decreasing in the lexicographic order. Then the adjustment terminates after finitely many steps at a locally optimal parameter.
+\end{proposition}
+
+\begin{proof}
+Since $\Theta$ is finite, $\mathcal I$ takes only finitely many values, and the lexicographic order is a total order on a finite set; a strictly decreasing sequence in that order cannot continue indefinitely, so the adjustment terminates after finitely many steps. At termination there is no neighbouring parameter that makes $\mathcal I$ strictly decrease in the lexicographic order, that is, the parameter is locally optimal.
+\end{proof}
+
+\begin{remark}[Boundaries of dynamic adjustment]\label{rem:bio_adaptive_boundary}
+\cref{thm:bio_adaptive_convergence} relies on finite periodic sequences. For continuous spectra or quasi-periodic biological targets there is no exact representation by a finite epicycle group, and only a bounded approximation is possible. Structural metric adjustment does not guarantee a global optimum.
+\end{remark}
+
+\subsection{Step four: biological convolution}
+
+\begin{definition}[Biological amplitude convolution, phase convolution and frequency convolution]\label{def:bio_convolution_types}
+Let two biological epicycle groups be
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+Define:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Amplitude convolution}: $\mathbb A_{mn}=A_nB_m$;
+    \item \textbf{Phase convolution}: $\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$;
+    \item \textbf{Frequency convolution}: $\mathbb F_{mn}=\omega_n\nu_m$;
+    \item \textbf{Trend convolution}: $\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$.
+\end{enumerate}
+This agrees with \cref{def:amplitude_convolution}, \cref{def:phase_convolution}, \cref{def:frequency_convolution} and \cref{def:tendency_convolution} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{theorem}[Action of the three convolutions on biological epicycle groups]\label{thm:bio_convolution_action}
+Let the epicycle groups of two biological targets be $\mathfrak E$ and $\mathfrak E'$ respectively. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item amplitude convolution acts only on the radius;
+    \item phase convolution acts only on the phase;
+    \item frequency convolution acts only on the rotational speed;
+    \item trend convolution preserves both amplitude and phase.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+This follows directly from \cref{def:bio_convolution_types}.
+\end{proof}
+
+\begin{proposition}[Autocorrelation and trend convolution]\label{prop:bio_autocorr_phase_convolution}
+Let $\{z_t\}$ be a biological period sequence, with autocorrelation function
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+In the language of the biological epicycle group, the autocorrelation function is the projection of the trend convolution onto the diagonal:
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:bio_autocorr_phase_convolution} of this chapter is the realisation in this domain of the convolution-action conclusion of \cref{thm:ps_convolution_action} in the `Periodic Systems' chapter:
+substituting $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ into the definition of the autocorrelation, cancelling all off-diagonal cross terms by orthogonality and retaining only the diagonal term of the trend convolution
+(the factorisation of the three convolutions, \cref{prop:ps_convolution_factorization}), which yields $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$.
+The complete expansion is given there.
+\end{proof}
+
+\begin{remark}[Relation between biological convolution and periodic convolution]\label{rem:bio_convolution_relation}
+Biological convolution is not a new convolution operation; it is an instance on the biological epicycle group of the periodic convolution of the `Series and Convolution' chapter. Autocorrelation is the projection of the trend convolution onto the diagonal; cross-correlation and phase locking are respectively the concrete manifestations in the life sciences of amplitude convolution and frequency convolution.
+\end{remark}
+
+\subsection{Step five: integration with discrete sampling, harmonic analysis and time series analysis}
+
+\begin{definition}[The biological periodicity diagnostic pipeline]\label{def:bio_periodic_diagnosis}
+For a given biological system, diagnosis is carried out using the framework of periodic mathematics:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Periodicity decision}: verify the period type of the biological target (\cref{thm:bio_periodicity_decision});
+    \item \textbf{Series construction}: construct the amplitude, frequency and phase series and the epicycle group from concentration, membrane-potential and population data (\cref{thm:bio_series_reconstruction});
+    \item \textbf{Conservation diagnosis}: verify the conservation of energy, matter and information (\cref{thm:biological_conservation});
+    \item \textbf{Convolution diagnosis}: compute the autocorrelation (the diagonal projection of the trend convolution, \cref{prop:bio_autocorr_phase_convolution}) and the phase convolution;
+    \item \textbf{Integration diagnosis}: connect to the tool chains of discrete sampling, harmonic analysis and time series analysis.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[The biological periodicity diagnostic pipeline and its interface with three chapters]\label{thm:bio_diagnosis_integration}
+The five steps of \cref{def:bio_periodic_diagnosis} connect respectively to:
+\begin{enumerate}[label=(\roman*)]
+    \item the `Discrete Sampling and Intercalation of Periodic Signals' chapter: \cref{def:uniform_sampling_parallel}, \cref{thm:nyquist_shannon_parallel}, \cref{thm:intercalation_leakage_suppression};
+    \item the `Harmonic Analysis' chapter: \cref{def:fourier_series}, \cref{thm:parseval_fourier}, \cref{prop:twelve_to_six};
+    \item the `Time Series Analysis' chapter: \cref{def:ts_period_detection}, \cref{prop:ts_period_significance}, \cref{def:ts_window_validation}.
+\end{enumerate}
+Hence the biological periodicity diagnosis is not an independent method, but an application to biological systems of the unified tool chain of periodic mathematics.
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:bio_diagnosis_integration} of this chapter is the implementation in this domain of the five-step interface of the `Periodic Systems' chapter (\cref{tab:ps_five_steps}):
+the periodicity decision uses sampling and spectral estimation, the frequency decomposition and the phase kernels use the `Harmonic Analysis' chapter, and the periodogram peaks, the Fisher test and the
+window-function validation use the `Time Series Analysis' chapter. Hence the diagnostic pipeline is assembled from the tool chains of three chapters; the proof is given there.
+\end{proof}
+
+\begin{remark}[Order of operations after integration]\label{rem:bio_integration_order}
+The recommended order for an actual diagnosis is: first decide whether the biological target is periodic (\cref{thm:bio_periodicity_decision}); then construct the Fourier data and the epicycle group of the biological data (\cref{thm:bio_series_reconstruction}); then optimise the parameters using the conservation constraints and dynamic adjustment (\cref{thm:bio_adaptive_convergence}, \cref{prop:bio_structure_metric_convergence}); then carry out biological convolution and autocorrelation analysis (\cref{prop:bio_autocorr_phase_convolution}); and finally output the diagnosis according to \cref{def:bio_periodic_diagnosis}.
+\end{remark}
+
+\section{Mathematical foundations of biological systems}
+
+\begin{definition}[Basic quantities of biological periodic systems]\label{def:biological_quantities}
+A biological periodic system is described by the following basic variables:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Concentration variable} $[X](t)$: the concentration of a particular biomolecule (protein, mRNA, ion, etc.) inside or outside the cell. The rate of change of the concentration in time is determined by the production rate and the degradation rate.
+    \item \textbf{Membrane potential} $V_m(t)$ (unit: mV): the potential difference across the cell membrane. Changes in the membrane potential are controlled by the opening and closing of ion channels.
+    \item \textbf{Population size} $N(t)$: the number of individuals of a given species in a given region. Changes in the population size are determined by the birth rate, the death rate and the migration rate.
+    \item \textbf{Phase variable} $\phi(t)$: the position of a biological oscillator within its period ($0$ to $2\pi$). Phase is the intrinsic measure of biological time---the circadian rhythms of different tissues achieve system-wide coordination through phase synchronisation.
+\end{enumerate}
+A core feature of biological periodic systems is the \textbf{limit cycle}---there exists an isolated closed orbit in phase space, and the system converges to that orbit from any initial state. Limit cycles appear in dissipative systems: the continuous input and dissipation of energy or matter maintain the stability of the oscillation.
+\end{definition}
+
+\section{The circadian rhythm}
+
+\begin{definition}[Molecular mechanism of the circadian rhythm]\label{def:circadian_rhythm}
+The circadian rhythm of mammals is driven by the \textbf{transcription--translation negative feedback loop} (TTFL). The core feedback loop consists of the following genes and proteins:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Activators}: the CLOCK and BMAL1 proteins form a heterodimer that binds to E-box sequences in the DNA and activates the transcription of the Per and Cry genes.
+    \item \textbf{Repressors}: the PER and CRY proteins accumulate in the cytoplasm and, after forming a complex, enter the nucleus and inhibit the transcriptional activation activity of CLOCK--BMAL1.
+    \item \textbf{Delay}: the accumulation, modification, nuclear localisation and degradation of the PER and CRY proteins take approximately 24 hours---this delay determines the period of the circadian rhythm.
+\end{enumerate}
+The TTFL is a delayed negative feedback system: the activators (CLOCK--BMAL1) promote the production of the repressors (PER--CRY), the repressors in turn inhibit the activity of the activators, and the delay element causes the system to produce self-sustained oscillations. The temporal variation of the mRNA and protein concentrations constitutes a period of approximately 24 hours---every 24 hours a complete transcription--translation--inhibition--degradation cycle is completed.
+\end{definition}
+
+\begin{proposition}[Mathematical model of the circadian rhythm]\label{prop:circadian_model}
+Consider a simplified TTFL model---the three-variable Goodwin oscillator (mRNA $\to$ protein $\to$ end product, negative feedback):
+\[
+\frac{dM}{dt} = \frac{v_1}{1 + (Z/K)^n} - k_1 M, \quad \frac{dP}{dt} = v_2 M - k_2 P, \quad \frac{dZ}{dt} = v_3 P - k_3 Z,
+\]
+where $M$ is the mRNA concentration, $P$ the protein concentration, $Z$ the concentration of the end product (the repressor complex), $v_1, v_2, v_3$ the maximum production rates, $k_1, k_2, k_3$ the degradation rate constants, $K$ the inhibition constant and $n$ the Hill coefficient (cooperativity).
+
+The end product $Z$ nonlinearly inhibits the transcription of its own mRNA through the Hill function $1/(1+(Z/K)^n)$, so that the negative-feedback loop contains three variables and three conversion steps. When $n > 8$ and the parameters are suitable (see the proof), the fixed point loses stability through a Hopf bifurcation and a stable limit cycle appears.
+\end{proposition}
+
+\begin{proof}
+The fixed point satisfies $v_1/(1+(Z^*/K)^n) = k_1 M^*$, $v_2 M^* = k_2 P^*$ and $v_3 P^* = k_3 Z^*$. Write $u = Z^*/K > 0$ and let the steady-state flux be $R = k_1 M^* = v_1/(1+u^n)$; then $Z^* = v_2v_3R/(k_1k_2k_3) = uK$. Linearisation at the fixed point gives the Jacobian matrix
+\[
+J = \begin{pmatrix}
+-k_1 & 0 & -g\\
+v_2 & -k_2 & 0\\
+0 & v_3 & -k_3
+\end{pmatrix},
+\qquad
+g = \frac{n v_1}{K}\frac{u^{n-1}}{(1+u^n)^2},
+\]
+with characteristic equation $(\lambda+k_1)(\lambda+k_2)(\lambda+k_3) + v_2v_3g = 0$. The divergence of the two-variable model (with $Z$ and the third equation removed) is identically $-(k_1+k_2) < 0$, so by Bendixson's criterion there is no closed orbit in a simply connected region, and no limit cycle arises however large $n$ may be---the third variable is precisely what makes the oscillation possible. Taking the three degradation constants equal ($k_1 = k_2 = k_3 = k$), the characteristic equation reduces to
+\[
+(\lambda+k)^3 + k^3\hat\eta = 0,\qquad \hat\eta = \frac{n u^n}{1+u^n},
+\]
+so the real part of the conjugate pair is $k(\hat\eta^{1/3}/2 - 1)$, which is positive if and only if $\hat\eta > 8$. Since $u^n/(1+u^n) < 1$, the condition $\hat\eta > 8$ requires $n > 8$; conversely, when $n > 8$ one may take $K$ sufficiently small so that $u$ is sufficiently large and $\hat\eta > 8$, and the fixed point loses stability. At $\hat\eta = 8$ the eigenvalues cross the imaginary axis with non-zero speed (a Hopf bifurcation), so for $n > 8$ a stable limit cycle appears---this is precisely the mathematical mechanism by which the delayed negative feedback of the TTFL generates a self-sustained oscillation.
+\end{proof}
+
+\section{The heartbeat cycle}
+
+\begin{definition}[Electrophysiology of cardiac pacemaker cells]\label{def:cardiac_pacemaker}
+The pacemaker cells of the sinoatrial (SA) node of the heart possess \textbf{automaticity}---in the absence of external stimulation they spontaneously generate rhythmic action potentials. The action potential of a pacemaker cell is divided into four phases:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Phase 4 (diastolic depolarisation)}: the pacemaker current $I_f$ (Na$^+$ influx) and the T-type calcium current $I_{Ca\text{-}T}$ slowly depolarise the membrane potential from about $-60$ mV to about $-40$ mV.
+    \item \textbf{Phase 0 (upstroke)}: after the membrane potential reaches the threshold, the L-type calcium current $I_{Ca\text{-}L}$ surges and the membrane potential rises rapidly to about $+10$ mV.
+    \item \textbf{Phase 3 (repolarisation)}: the delayed rectifier potassium current $I_K$ activates, and the efflux of potassium ions returns the membrane potential to about $-60$ mV.
+    \item \textbf{Phase 4 begins again}: the period is approximately $0.6$--$1.0$ s, corresponding to a heart rate of $60$--$100$ beats per minute.
+\end{enumerate}
+The membrane potential $V_m$ and the ionic currents form a limit cycle in phase space. Each action potential corresponds to one complete rotation in phase space---depolarisation (the upstroke) and repolarisation (the downstroke) constitute a reciprocating motion. The natural frequency of about $0.8$ Hz of sinoatrial node cells is determined by the maximum conductances and the kinetic time constants of the various ion channels.
+\end{definition}
+
+\begin{proposition}[Periodic structure of the electrocardiogram]\label{prop:ecg_periodic}
+The electrocardiogram is the projection onto the body surface of the electrical activity of the heart, and the typical waveform of each cardiac cycle consists of the P wave, the QRS complex and the T wave. These waveforms are biological instances of nested epicycle systems:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{P wave}: atrial depolarisation---corresponding to the synchronous action potentials of atrial muscle cells. Lowest frequency, smallest amplitude (an outer, large epicycle).
+    \item \textbf{QRS complex}: ventricular depolarisation---corresponding to the rapid synchronous depolarisation of ventricular muscle cells. Highest frequency, largest amplitude (an inner, fast, small epicycle).
+    \item \textbf{T wave}: ventricular repolarisation---corresponding to the repolarisation of ventricular muscle cells. Intermediate frequency, intermediate amplitude.
+\end{enumerate}
+The P-QRS-T waveform of the electrocardiogram can be expanded as a Fourier series: $V(t) = \sum_{n} A_n \cos(n\omega_0 t + \phi_n)$ (with $\omega_0 = 2\pi \times \text{heart rate}$). The harmonics of the various orders correspond to the electrical activity of different cardiac structures---the P wave corresponds to the fundamental frequency ($n=1$), the QRS complex to high-order harmonics ($n \approx 3$--$10$) and the T wave to low-order harmonics ($n \approx 1$--$2$). The harmonic structure of the electrocardiogram is the mathematical fingerprint of the coordinated work of the various parts of the heart.
+\end{proposition}
+
+\begin{proof}
+The body-surface potential $V(t)$ of each cardiac cycle is a function of period $T = 1/\text{heart rate}$ (ignoring beat-to-beat variability), so it can be expanded in the Fourier series $V(t) = \sum_n c_n e^{in\omega_0 t}$ of the `Functions and Limits' chapter. The harmonic assignment of the waveform features is determined by steepness: the upstroke of the QRS complex is steep ($<0.1$ s) and its energy is concentrated in the high-order harmonics $n \approx 3$--$10$ (corresponding to the $10$--$40$ Hz band); the P wave and the T wave are gentle ($>0.1$ s) and their energy is concentrated in $n \le 2$. It is precisely according to this harmonic structure that the electrocardiographic bands are defined clinically (for example the $5$--$25$ Hz filter for QRS monitoring)---the Fourier series is the mathematical realisation of the `nested epicycle structure' of the electrocardiographic waveform.
+\end{proof}
+
+\section{The cell cycle}
+
+\begin{definition}[Cell cycle]\label{def:cell_cycle}
+The cell cycle is the continuous process through which a eukaryotic cell passes from the end of one division to the end of the next; it is divided into four phases:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{G1 phase} (the pre-DNA-synthesis phase): the cell grows and synthesises RNA and proteins. The duration is variable (from several hours to several days).
+    \item \textbf{S phase} (the DNA synthesis phase): the DNA is replicated, and each chromosome forms two sister chromatids. The duration is approximately $6$--$8$ hours.
+    \item \textbf{G2 phase} (the post-DNA-synthesis phase): the cell continues to grow and prepares to enter mitosis. The duration is approximately $2$--$4$ hours.
+    \item \textbf{M phase} (the mitotic phase): the chromosomes separate and the cell divides in two. The duration is approximately $1$ hour.
+\end{enumerate}
+The G1 phase corresponds to the increase in cell volume, the S phase to the exact replication of the DNA (scaling factor $2$) and the M phase to the division of the cell into two (scaling factor $1/2$). The whole cell cycle is a complete scaling transformation---from a single cell growing to its division into two daughter cells, the DNA content grows from $2n$ to $4n$ and returns to $2n$ (diploid cells).
+\end{definition}
+
+\begin{proposition}[Concentration oscillation of cyclin--CDK]
+\label{prop:cyclin_cdk_oscillation}
+The progress of the cell cycle is regulated by complexes of cyclins and
+cyclin-dependent kinases (CDKs).
+The successive phases are driven in turn by specific cyclin--CDK complexes:
+\[
+\begin{aligned}
+&\text{G1 phase: Cyclin D--CDK4/6} \\
+\longrightarrow\;&\text{G1/S transition: Cyclin E--CDK2} \\
+\longrightarrow\;&\text{S phase: Cyclin A--CDK2} \\
+\longrightarrow\;&\text{M phase: Cyclin B--CDK1}.
+\end{aligned}
+\]
+
+The concentration of Cyclin B undergoes a sawtooth oscillation during the cell cycle:
+it accumulates linearly during interphase (G1--S--G2) and is abruptly degraded at the end of the M phase.
+When its concentration reaches the threshold, mitosis is triggered;
+after division is complete the concentration falls sharply and the next cycle begins afresh.
+This oscillation is a relaxation oscillation formed by the alternating action of linear accumulation (interphase) and rapid degradation (the end of the M phase).
+\end{proposition}
+
+\begin{proof}
+The sawtooth oscillation of Cyclin B is the relaxation oscillation of Lemma \ref{ch25_sawtooth_period}: the accumulation rate $\rho$ is the synthesis rate during interphase, the threshold $C_{\text{th}}$ is the concentration that triggers APC/C-mediated degradation and $C_0$ is the residual concentration after mitosis ends. Hence the duration of the cell cycle is $T = (C_{\text{th}} - C_0)/\rho$---the slower the growth rate (the smaller $\rho$), the longer the cycle; this agrees with the experimental fact that `the duration of the G1 phase determines the length of the cell cycle'.
+\end{proof}
+
+\begin{lemma}[Period of the sawtooth relaxation oscillation]\label{ch25_sawtooth_period}
+Let a relaxation oscillation grow linearly at rate $\rho > 0$ during the accumulation phase, trigger a reset (degradation) on reaching the threshold $C_{\text{th}}$, and reset to $C_0 < C_{\text{th}}$, the duration of the reset being negligible relative to the accumulation phase. Then the oscillation is a strictly periodic oscillation, with period
+\[
+T = \frac{C_{\text{th}} - C_0}{\rho}.
+\]
+\end{lemma}
+
+\begin{proof}
+During the accumulation phase $dC/dt = \rho$, so $C(t) = C_0 + \rho t$. The time to reach the threshold is obtained from $C_0 + \rho T = C_{\text{th}}$, giving $T = (C_{\text{th}} - C_0)/\rho$; after the reset the system returns to the same initial condition $C_0$, and by uniqueness of the solution of the initial-value problem the cycle then repeats segment by segment.
+\end{proof}
+
+\section{The population cycle}
+
+\begin{definition}[The Lotka--Volterra predator--prey model]\label{def:lotka_volterra}
+Let $H(t)$ be the number of prey (for example hares) and $P(t)$ the number of predators (for example lynx). The classical Lotka--Volterra equations are
+\[
+\frac{dH}{dt} = \alpha H - \beta H P, \quad \frac{dP}{dt} = \delta H P - \gamma P,
+\]
+where $\alpha$ is the intrinsic growth rate of the prey, $\beta$ is the predation rate, $\delta$ is the proportion of prey converted by predators into offspring and $\gamma$ is the death rate of the predators.
+
+In the phase space $(H, P)$ the trajectories of the system form a family of closed curves surrounding the equilibrium point---each initial condition corresponds to one periodic orbit. The system has the first integral
+\[
+I(H, P) = \delta H - \gamma \ln H + \beta P - \alpha \ln P = \text{constant}.
+\]
+The numbers of prey and predators rise and fall in turn, with a phase difference of about $90^\circ$---the prey grows first and the predators grow afterwards; the predators decline first and the prey declines afterwards.
+\end{definition}
+
+\begin{theorem}[Periodic solution of the Lotka--Volterra model]\label{thm:lotka_volterra_periodic}
+All positive initial conditions ($H_0 > 0, P_0 > 0$) of the Lotka--Volterra model produce periodic solutions. The equilibrium point $(H^*, P^*) = (\gamma/\delta, \alpha/\beta)$ is a centre-type fixed point---the eigenvalues of the linearised system are purely imaginary, $\lambda = \pm i\sqrt{\alpha\gamma}$. The period of small-amplitude oscillations is approximately $T \approx 2\pi/\sqrt{\alpha\gamma}$. The period of large-amplitude oscillations is computed by means of the first integral and elliptic integrals, and the period grows as the amplitude increases.
+\end{theorem}
+
+\begin{proof}
+Linearisation: the eigenvalues of the Jacobian matrix at the equilibrium point $(H^*, P^*)$ are $\lambda_{1,2} = \pm i\sqrt{\alpha\gamma}$---purely imaginary, so the equilibrium point is a centre. The first integral $I(H, P)$ is obtained by separating the variables in $\frac{dH}{dP} = \frac{H(\alpha - \beta P)}{P(\delta H - \gamma)}$ and integrating:
+\[
+\int \frac{\delta H - \gamma}{H} dH = \int \frac{\alpha - \beta P}{P} dP,
+\]
+giving $\delta H - \gamma \ln H + \beta P - \alpha \ln P = \text{constant}$. This first integral attains a minimum at $(H^*, P^*)$, and its level curves are closed curves surrounding the equilibrium point---each closed curve corresponds to one periodic solution.
+\end{proof}
+
+\begin{example}[The ten-year cycle of the Canadian lynx and the snowshoe hare]
+The fur-trade records of the Hudson's Bay Company in Canada from the 18th century to the early 20th century show a pronounced periodic oscillation in the numbers of lynx and snowshoe hares---with a period of about $9$--$11$ years. This is the most famous instance of a population cycle in nature. In the small-amplitude approximation the $10$-year period is determined jointly by the intrinsic growth rate of the prey ($\alpha$) and the death rate of the predators ($\gamma$): $T \approx 2\pi/\sqrt{\alpha\gamma} \approx 10$ years. The solar activity cycle (about $11$ years) and climatic cycles may modulate this biological cycle by affecting the food supply of the prey.
+\end{example}
+
+\section{Neural oscillation and phase locking}
+
+\begin{definition}[Periodic firing of neuronal action potentials]\label{def:neural_oscillation}
+Neurons generate action potentials through the voltage dependence of their ion channels. Under a constant input current many neurons exhibit \textbf{periodic firing}---action potentials are produced repeatedly at a fixed frequency. The relation between the firing frequency $f$ and the input current $I$ is
+\[
+f(I) = \frac{1}{T(I)} \approx \frac{I - I_{\text{th}}}{C_m (V_{\text{th}} - V_{\text{reset}})} \quad (I > I_{\text{th}}),
+\]
+where $I_{\text{th}}$ is the threshold current, $C_m$ is the membrane capacitance, and $V_{\text{th}}$ and $V_{\text{reset}}$ are the threshold and reset potentials.
+
+The membrane potential $V_m$ and the recovery variable (such as the potassium-channel activation variable $n$) form a limit cycle in phase space. Each action potential corresponds to one complete rotation in phase space---the rapid upstroke (Na$^+$ influx) and repolarisation (K$^+$ efflux) constitute a reciprocating motion. The input current $I$ controls the rotational speed of the limit cycle---the larger $I$ is, the higher the frequency.
+\end{definition}
+
+\begin{proposition}[Gamma synchronous oscillation in neural networks]\label{prop:gamma_oscillation}
+In the cerebral cortex, networks of inhibitory interneurons produce synchronous oscillations in the gamma band ($30$--$80$ Hz). A single interneuron fires periodically at the gamma frequency under constant excitatory drive. Through inhibitory synaptic connections (GABA receptors), the neuronal network achieves phase synchronisation---the firing times of the individual neurons lock to a common phase within the gamma cycle.
+
+Gamma synchronous oscillation is the neural realisation of phase locking (Proposition \ref{prop:phase-locking}) in the `Periodic Systems' chapter: each interneuron is an independent periodic subsystem (with a natural frequency of about $40$ Hz), and the inhibitory synapses are the coupling coefficients $c_{ij}$ between the subsystems. When the coupling is strong enough, the phase differences of all the neurons tend to a constant---the network enters a state of synchronous oscillation. Gamma synchronous oscillation has important functions in attention, perception and consciousness---it provides a common temporal framework for the integration of information across different brain regions.
+\end{proposition}
+
+\begin{proof}
+Consider two neurons connected by an inhibitory synapse, each firing periodically under a constant excitatory input. The simplified model is a pair of phase oscillators:
+\[
+\frac{d\theta_1}{dt} = \omega_1 + c_{12} \sin(\theta_2 - \theta_1), \qquad \frac{d\theta_2}{dt} = \omega_2 + c_{21} \sin(\theta_1 - \theta_2).
+\]
+The dynamics of the phase difference $\Delta\theta = \theta_1 - \theta_2$ is
+\[
+\frac{d(\Delta\theta)}{dt} = \Delta\omega - (c_{12} + c_{21})\sin(\Delta\theta).
+\]
+When $|\Delta\omega| < c_{12} + c_{21}$ there is a stable phase-locking solution $\Delta\theta^* = \arcsin(\Delta\omega/(c_{12} + c_{21}))$---the firing phases of the two neurons lock. Extending to a network of $N$ neurons, the difference-angle sine component of the periodic convolution, $\operatorname{Im}\mathcal{K}^{(1)}\{f_i, f_j\}$, drives the network into global synchronisation.
+\end{proof}
+
+\section{Survival of the fittest and multi-scale evolution}
+
+This section generalises Darwin's mechanism of survival of the fittest into a \textbf{multi-scale selection--variation--inheritance cycle}: at every biological level there is a three-step cycle of `variation--selection--inheritance', and the levels achieve coevolution through cross-scale coupling. Biological evolution is not a single-scale phenomenon but a nested multi-scale process---genes, proteins, cells, tissues, organs, morphology, populations and niches each have their own time scale, periodic structure and rate of evolution.
+
+\subsection{Hierarchical structure of multi-scale evolution}
+
+\begin{definition}[Hierarchy of biological evolution]\label{def:evolution_hierarchy}
+Biological evolution can be divided into the following levels according to spatial scale, and each level has its own characteristic time scale, periodic structure and selection pressure:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Gene evolution}: time scale $10^{-1}$--$10^1$ generations; the sources of periodicity are base mutation, recombination and horizontal gene transfer; the selection pressure is the difference in phenotypic fitness. The change in gene frequencies is the dynamical process of departure from Hardy--Weinberg equilibrium.
+    \item \textbf{Protein evolution}: time scale $10^0$--$10^3$ generations; the sources of periodicity are amino-acid substitution, domain shuffling and conformational switching; the selection pressure is catalytic activity and structural stability.
+    \item \textbf{Cell evolution}: time scale $10^0$--$10^5$ generations (numbers of somatic cell generations); the sources of periodicity are mutations in cell-cycle regulation and epigenetic modifications; the selection pressure is the proliferation rate, resistance to apoptosis and metabolic efficiency.
+    \item \textbf{Tissue evolution}: time scale $10^2$--$10^6$ generations; the sources of periodicity are cell-type differentiation and tissue regeneration strategies; the selection pressure is the functional integrity and repair capacity of the tissue.
+    \item \textbf{Organ evolution}: time scale $10^3$--$10^7$ generations; the sources of periodicity are variations in the regulatory networks of organ morphogenesis; the selection pressure is the adaptability of organ function to the environment.
+    \item \textbf{Morphological evolution}: time scale $10^4$--$10^8$ generations; the sources of periodicity are variations in developmental regulatory networks (Hox genes, enhancers); the selection pressure is the adaptability of morphology to the niche.
+    \item \textbf{Population evolution}: time scale $10^2$--$10^6$ generations; the sources of periodicity are population genetic drift, natural selection and changes in population structure; the selection pressure is the matching of the population growth rate to the carrying capacity of the environment.
+    \item \textbf{Niche evolution}: time scale $10^4$--$10^9$ generations; the sources of periodicity are niche construction and the reorganisation of species interaction networks; the selection pressure is the stability of energy and matter flows.
+\end{enumerate}
+The ratio of time scales between levels is about $10^2$--$10^3$ (for adjacent levels), which constitutes \textbf{hierarchy separation}---a process at a higher level can be regarded as a quasi-static parameter (adiabatic parameter) on the time scale of a lower level, and conversely a process at a lower level appears as an averaged effect on the time scale of a higher level.
+\end{definition}
+
+\begin{theorem}[General mathematical form of survival of the fittest]\label{thm:natural_selection_general}
+Let the state variable at a given level be $x_i(t)$ (for example a gene frequency, a protein concentration or a cell-type proportion); its evolution follows the \textbf{replicator--mutator equation}:
+\[
+\frac{dx_i}{dt} = x_i \left( f_i(\mathbf{x}) - \bar f(\mathbf{x}) \right) + \sum_j \mu_{ji} x_j - \mu_{ij} x_i,
+\]
+where $f_i(\mathbf{x})$ is the fitness of the $i$-th state, $\bar f(\mathbf{x}) = \sum_i x_i f_i(\mathbf{x})$ is the mean fitness and $\mu_{ij}$ is the rate of mutation from state $i$ to state $j$. When $\mu_{ij} \equiv 0$ (no mutation) the equation reduces to the standard replicator equation: the frequency of a state $i$ whose fitness exceeds the mean ($f_i > \bar f$) grows, whilst the frequency of a state whose fitness is below the mean decays.
+\end{theorem}
+
+\begin{proof}
+In the case of no mutation, $\frac{dx_i}{dt} = x_i(f_i - \bar f)$. Differentiation gives $\sum_i dx_i/dt = \sum_i x_i f_i - \bar f \sum_i x_i = \bar f - \bar f = 0$, so the total probability is conserved. The equilibrium point satisfies $x_i(f_i - \bar f) = 0$---that is, $x_i = 0$ or $f_i = \bar f$. For a state with $f_i > \bar f$ we have $dx_i/dt > 0$ and the frequency grows; for a state with $f_i < \bar f$ we have $dx_i/dt < 0$ and the frequency decays. When $\mu_{ij} \neq 0$ the mutation term provides an `exploration' term near the equilibrium point---even if a state is currently disadvantaged, its mutational sources can still maintain it at low abundance in the population, so that the system can respond rapidly when the environment changes.
+\end{proof}
+
+\begin{corollary}[Replicator equation for gene evolution]\label{cor:gene_replicator}
+At the gene level, $x_i$ is the frequency of allele $i$ and $f_i$ is the phenotypic fitness of that allele. If only a single locus with two alleles is considered ($i \in \{A, a\}$), the replicator equation reduces to the logistic form:
+\[
+\frac{dx_A}{dt} = x_A(1-x_A)(w_A - w_a),
+\]
+where $w_A, w_a$ are the absolute fitnesses of the two alleles. If $w_A > w_a$ then $x_A \to 1$ (A becomes fixed); if $w_A < w_a$ then $x_A \to 0$ (a becomes fixed). This is a discretised version of Fisher's classical fundamental theorem of natural selection.
+\end{corollary}
+
+\subsection{The neutral theory of protein evolution and adaptive radiation}
+
+\begin{definition}[Molecular clock]\label{def:molecular_clock}
+The \textbf{molecular clock} is the hypothesis that protein or nucleic-acid sequences accumulate substitutions linearly with evolutionary time. Let the substitution rate between two homologous sequences be $\lambda$ (unit: substitutions/site/year) and let the divergence time be $t$ (years); then the sequence divergence $d$ is approximately
+\[
+d \approx 2\lambda t.
+\]
+The molecular clock provides an independent measure for the time calibration of phylogenetic trees---it converts protein evolution into a measurable time period.
+\end{definition}
+
+\begin{proposition}[Neutral and selective substitutions]\label{prop:neutral_selection}
+Protein evolution consists of two types of substitution:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Neutral substitution} (Kimura's neutral theory): $|s| \ll 1/(2N_e)$ (where $s$ is the selection coefficient and $N_e$ is the effective population size); the substitution rate equals the mutation rate $\mu$ and is independent of the population size.
+    \item \textbf{Adaptive substitution}: $|s| \gg 1/(2N_e)$; the substitution rate is determined jointly by the selection coefficient and the population size, and the rate of positive selection is higher than that of neutral substitution.
+\end{enumerate}
+Synonymous substitutions (which do not change the amino acid) are usually close to neutral, whilst non-synonymous substitutions are subject to stronger selective constraints. Hence the ratio $d_N/d_S$ of the non-synonymous substitution rate $d_N$ to the synonymous substitution rate $d_S$ is a common indicator for identifying adaptive evolution: $d_N/d_S > 1$ suggests positive selection.
+\end{proposition}
+
+\begin{proof}
+Under the neutral theory the substitution rate is $k = \mu \cdot P_{\text{fix}}$, where $P_{\text{fix}}$ is the probability that a mutant gene is ultimately fixed in the population. For a neutral mutation $P_{\text{fix}} = 1/(2N_e)$, so $k = \mu/(2N_e) \cdot 2N_e = \mu$---independent of $N_e$. For a positively selected mutation $P_{\text{fix}} \approx 2s$ (with $s > 0$ small), so $k \approx 2N_e \mu s$, which increases with $N_e$ and $s$.
+\end{proof}
+
+\subsection{Cross-scale coupling and coevolution}
+
+\begin{definition}[Cross-scale coupling]\label{def:cross_scale_coupling}
+Let the state variable of the $k$-th level be $\mathbf{x}^{(k)}$, with evolution equation
+\[
+\frac{d\mathbf{x}^{(k)}}{dt} = \mathbf{F}_k(\mathbf{x}^{(k)}, \mathbf{x}^{(k-1)}, \mathbf{x}^{(k+1)}),
+\]
+that is, the dynamics of the $k$-th level depends simultaneously on the `environmental parameters' of the level above ($k+1$ as a slow variable) and on the `constituent elements' of the level below ($k-1$ as a fast variable). This dependence is called \textbf{cross-scale coupling}.
+\end{definition}
+
+\begin{proposition}[Averaging under time-scale separation]\label{prop:adiabatic_averaging}
+If the characteristic time of level $k-1$ satisfies $\tau_{k-1} \ll \tau_k$ (the characteristic time of the $k$-th level), then within one period $\tau_k$ the state of level $k-1$ has relaxed sufficiently to its conditional equilibrium $\mathbf{x}^{(k-1)}_*(\mathbf{x}^{(k)})$. The effective dynamics of the $k$-th level is
+\[
+\frac{d\mathbf{x}^{(k)}}{dt} \approx \mathbf{F}_k(\mathbf{x}^{(k)}, \mathbf{x}^{(k-1)}_*(\mathbf{x}^{(k)}), \mathbf{x}^{(k+1)}).
+\]
+This averaging makes the dynamics of the higher level depend on the lower level only through its equilibrium state.
+\end{proposition}
+
+\begin{proof}
+Let $\mathbf{x}^{(k-1)} = \mathbf{x}^{(k-1)}_* + \delta \mathbf{x}^{(k-1)}$, where $\delta \mathbf{x}^{(k-1)}$ is the deviation from the equilibrium state. Its relaxation equation $\frac{d\delta}{dt} = -\frac{1}{\tau_{k-1}}\delta$ gives $\delta(t) \approx \delta(0) e^{-t/\tau_{k-1}}$. Within one period $\tau_k$ (with $\tau_k \gg \tau_{k-1}$) we have $\delta \to 0$, hence $\mathbf{x}^{(k-1)} \to \mathbf{x}^{(k-1)}_*$. Substituting this into the equation of the $k$-th level gives the averaged dynamics.
+\end{proof}
+
+\begin{theorem}[Periodic structure of multi-scale selection]\label{thm:multi_scale_selection_periodicity}
+In a multi-scale evolutionary system, if the selection pressure at some level varies periodically (for example seasonal climatic change, predator--prey cycles or the circadian rhythm), then the allele frequencies, protein concentrations or cell proportions at that level exhibit a \textbf{periodic response}. The character of this periodic response is determined by the following factors:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Selection period} $T_{\text{sel}}$: the period of the variation of the external selection pressure.
+    \item \textbf{Response time} $\tau_{\text{resp}}$: the time scale on which the state at that level relaxes to a new equilibrium.
+    \item \textbf{Matching condition}: when $T_{\text{sel}} \gg \tau_{\text{resp}}$ the system follows the selection pressure quasi-statically; when $T_{\text{sel}} \approx \tau_{\text{resp}}$ the system exhibits resonant amplification or phase lag; when $T_{\text{sel}} \ll \tau_{\text{resp}}$ the system responds only to the average of the selection pressure.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+Consider the single-locus two-allele model, whose allele-frequency dynamics is $dx/dt = x(1-x) s(t)$, where $s(t) = s_0 \cos(2\pi t/T_{\text{sel}})$ is the periodic selection coefficient. This is a logistic-type equation with intrinsic time scale $\tau_{\text{resp}} = 1/(s_0)$. By the classical theory of forced oscillations:
+\begin{itemize}
+\item $T_{\text{sel}} \gg \tau_{\text{resp}}$: the solution is approximately $x(t) \approx x_{\text{eq}}(s(t))$, a quasi-static following.
+\item $T_{\text{sel}} \approx \tau_{\text{resp}}$: the solution exhibits phase lag and amplitude amplification---the resonance of the classical forced oscillator.
+\item $T_{\text{sel}} \ll \tau_{\text{resp}}$: the solution is approximately $x(t) \approx x_0 + O(T_{\text{sel}}/\tau_{\text{resp}})$, a response to the time average only.
+\end{itemize}
+\end{proof}
+
+\begin{corollary}[Periodic structure of the Red Queen hypothesis]\label{cor:red_queen}
+The \emph{Red Queen hypothesis} states that coevolution between species (for example host--parasite or predator--prey interactions) gives rise to continuous mutual selection pressure, so that both parties must keep evolving in order to maintain their relative fitness. In the multi-scale periodic framework this appears as a \textbf{coevolutionary cycle}: the periodic response of the host's gene frequencies and that of the parasite's gene frequencies become phase-locked, and the period is determined by the geometric mean of the generation times of the two species.
+\end{corollary}
+
+\begin{proof}
+Let the period of the host's gene frequencies be $T_H$ and that of the parasite be $T_P$, and let the strength of coevolutionary selection between them be $c$. The phase-difference dynamics between the two is $d(\Delta\phi)/dt = \Delta\omega - c \sin(\Delta\phi)$, where $\Delta\omega = 2\pi(1/T_H - 1/T_P)$. When $c > |\Delta\omega|$ stable phase locking exists. The locked period is $T_{\text{lock}} = \sqrt{T_H T_P}$---the geometric mean of the generation times of the two species.
+\end{proof}
+
+\begin{example}[Concrete manifestations of multi-scale evolution in biological periodic structures]
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Gene--protein coupling}: an antibiotic-resistance gene mutation in bacteria (gene level) changes the structure of the target protein (protein level) and renders the existing drug ineffective. The periodic response of the gene frequency (the rise in resistance) and the change in protein structure (target variation) form a coevolutionary process over several cycles of antibiotic treatment.
+    \item \textbf{Cell--tissue coupling}: the clonal evolution of tumour cells (cell level) is subject to the selection pressure of the tissue microenvironment (tissue level). During treatment cycles, sensitive cells die and resistant cells proliferate, so that the composition of the tumour cell population changes cyclically; the tissue level regulates the rate of evolution at the cell level through angiogenesis.
+    \item \textbf{Organ--morphology coupling}: organ evolution (for example the vertebrate fin$\to$limb transition) and overall morphological evolution (for example the transition from aquatic to terrestrial life) are coupled on a time scale of $10^7$ years---variations in Hox gene regulatory networks change organ and morphology simultaneously.
+    \item \textbf{Population--niche coupling}: predator--prey cycles (population level) change the distribution of niche resources (niche level) and thereby select different predation strategies or prey defence strategies. The Red Queen style coevolutionary cycle (Corollary \ref{cor:red_queen}) is the long-term consequence of this coupling.
+\end{enumerate}
+\end{example}
+
+\begin{theorem}[Periodic time tree of multi-scale evolution]
+\label{thm:multi_scale_period_tree}
+Arranging the characteristic time scales of evolution at the various levels in order of magnitude
+yields the \textbf{periodic time tree}:
+\[
+\begin{aligned}
+&\text{genes} \ (\sim 10^0 \text{ generations}) \\
+\ll\;&\text{proteins} \ (\sim 10^1) \\
+\ll\;&\text{cells} \ (\sim 10^2) \\
+\ll\;&\text{tissues} \ (\sim 10^4) \\
+\ll\;&\text{organs} \ (\sim 10^6) \\
+\ll\;&\text{morphology} \ (\sim 10^7) \\[4pt]
+&\text{populations} \ (\sim 10^4) \ll \text{niches} \ (\sim 10^8).
+\end{aligned}
+\]
+
+The time scale of each level is $10^1$--$10^4$ times larger than that of the adjacent level.
+This time-scale separation makes each level appear, on its own time scale,
+as an independent periodic structure,
+whilst on the time scale of an adjacent level it appears as
+a quasi-static or averaged background.
+\end{theorem}
+
+\begin{proof}
+The orders of magnitude of the time scales are determined by the intrinsic rates of the principal processes at each level: the gene substitution rate is about $10^{-8}$--$10^{-9}$/site/generation, the protein substitution rate about $10^{-9}$/site/year, the cell cycle about $10^0$--$10^2$ generations, tissue regeneration about $10^2$--$10^4$ generations, organ morphogenesis about $10^4$--$10^6$ generations, morphological evolution about $10^6$--$10^7$ generations, population dynamics about $10^2$--$10^4$ generations and niche construction about $10^6$--$10^8$ generations. The ratio of time scales between adjacent levels is about $10^1$--$10^3$; that is, each level is about $1$--$3$ orders of magnitude slower than the level below it.
+\end{proof}
+
+\section{Conservation laws of biological systems}
+
+\begin{theorem}[Three conservation laws of biological systems]\label{thm:biological_conservation}
+The dynamics of biological systems is governed by three conservation laws:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Energy conservation}: organisms are open systems that maintain their energy balance by taking in food (chemical energy) and by respiration (oxidative phosphorylation). In a steady state, energy intake $=$ energy expenditure $+$ energy storage. The conversion of energy among biomolecules (ATP, glucose, fat) satisfies the first law of thermodynamics. In the circadian rhythm the metabolic rate fluctuates with a period of $24$ hours---this is the periodic redistribution of energy under time translation.
+    \item \textbf{Matter conservation}: the matter in an organism (carbon, nitrogen, water) satisfies conservation of mass between intake, utilisation and excretion. During the cell cycle the DNA content is exactly replicated in the S phase (doubling) and equally distributed in the M phase (halving)---the DNA content is conserved throughout the cell cycle. In the population cycle, the change in the total number of individuals $=$ births $-$ deaths $+$ immigration $-$ emigration---this is matter conservation at the level of the ecosystem.
+    \item \textbf{Information conservation}: the genetic information of an organism is conserved in DNA replication and cell division. The two strands of the DNA double helix are complementary---each strand contains all the information needed to reconstruct the complete double helix. The central dogma (DNA $\to$ RNA $\to$ protein) describes the direction in which genetic information flows, but does not change the total amount of information. The base sequence of the DNA is conserved in transmission from generation to generation.
+\end{enumerate}
+The hierarchical relation among the three conservation laws is as follows: energy conservation is the foundation for sustaining the activities of life, matter conservation guarantees the stability of the structure of the organism, and information conservation guarantees the transmission of hereditary traits from generation to generation. Together they constitute the physical basis of the periodic structure of biological systems.
+\end{theorem}
+
+\begin{proof}
+(i) Energy conservation: the chemical energy $E_{\text{in}}$ taken in by an organism (food) equals the energy expended $E_{\text{out}}$ (basal metabolism, heat produced by activity, growth) plus the energy stored $\Delta E_{\text{store}}$: $E_{\text{in}} = E_{\text{out}} + \Delta E_{\text{store}}$. In a steady state ($\Delta E_{\text{store}} = 0$) the energy intake equals the expenditure. The storage and release of energy in ATP (adenosine triphosphate) is the core of biological energy metabolism---the hydrolysis of ATP $\leftrightarrow$ ADP $+$ P$_i$ releases about $30.5$ kJ/mol of free energy.
+
+(ii) Matter conservation: the intake of carbon (food) equals the output (CO$_2$) plus storage (biomass growth): $C_{\text{in}} = C_{\text{out}} + \Delta C_{\text{store}}$. In the cell cycle the DNA content is $2n$ in the G1 phase, $4n$ after replication in the S phase and $2n$ again after division in the M phase---the scale is conserved over the cycle.
+
+(iii) Information conservation: DNA replication is semi-conservative---each parental strand serves as a template for the synthesis of a new complementary strand. In the daughter DNA double helix one strand comes from the parent and one is newly synthesised. The genetic information (the base sequence) is preserved exactly in replication---the mutation rate is only $10^{-9}$--$10^{-8}$/base/generation.
+\end{proof}
+
+\begin{remark}[Connection with the rest of the book]
+The theory of the periodic structure of biological systems established in this chapter is an application of periodic mathematics to the life sciences. The circadian rhythm is the approximately 24-hour self-sustained oscillation produced by the delayed negative feedback of the TTFL. The heartbeat cycle is the limit cycle formed in phase space by the ion-channel dynamics of pacemaker cells. The cell cycle is the complete scaling transformation in which the DNA content is replicated in the S phase and divided in the M phase. The population cycle (the Lotka--Volterra model) is the closed orbit in phase space guaranteed by the first integral. Neural oscillation is the biological realisation of phase locking in the `Periodic Systems' chapter---inhibitory synaptic coupling drives the neuronal network into gamma synchronisation. The mechanism of survival of the fittest appears at many levels---genes, proteins, cells, tissues, organs, morphology, populations and niches---as the replicator--mutator equation, and the levels achieve coevolution through time-scale separation and cross-scale coupling. The three conservation laws of biological systems---energy conservation, matter conservation and information conservation---together constitute the physical guarantee of the periodic structure of living systems.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & The approximately 24-hour main period of the circadian rhythm: the transcription--translation negative feedback loop (Definition \ref{def:circadian_rhythm}); the limit-cycle analysis of the Goodwin oscillator (Proposition \ref{prop:circadian_model}), the value of $24$ hours being an empirical observation (Remark \ref{lem:circadian_periodic}) \\
+Scaling & The scaling transformation of the cell cycle: DNA content $2n \to 4n \to 2n$ (Definition \ref{def:cell_cycle}); the accumulation--degradation of the Cyclin B sawtooth oscillation (Lemma \ref{ch25_sawtooth_period}) \\
+Rotation & The heartbeat limit cycle (Definition \ref{def:cardiac_pacemaker}); the phase of neural oscillation and gamma synchronisation (Proposition \ref{prop:gamma_oscillation}) \\
+Conservation & Energy conservation, matter conservation and information conservation (Theorem \ref{thm:biological_conservation}) \\
+Symmetry & The complementary symmetry of the two DNA strands: in semi-conservative replication each parental strand reconstructs the complete information (proof of Theorem \ref{thm:biological_conservation}, item (iii)) \\
+Closure & The closed orbits in phase space guaranteed by the Lotka--Volterra first integral $I(H,P)$ (Theorem \ref{thm:lotka_volterra_periodic}) \\
+Period & Circadian (24 h), heartbeat ($0.6$--$1.0$ s) and cell ($T=(C_{\text{th}}-C_0)/\rho$, Lemma \ref{ch25_sawtooth_period}) periods, and the lynx--snowshoe hare population ($9$--$11$ years); the multi-scale periodic time tree (Theorem \ref{thm:multi_scale_period_tree}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the \textbf{periodicity decision theorem for biological systems} of this chapter (\ref{thm:bio_periodicity_decision}). Hint: first write down the decision map and the evolution group of this chapter's target, then apply the proof structure of the general criterion of the `Periodic Systems' chapter.
+
+    \item Verify that the hypotheses of the \textbf{monotonicity of number adjustment} (\ref{prop:bio_adaptive_growth}) hold for the domain objects of this chapter, and give a counterexample in which the hypotheses fail.
+
+    \item Examine the behaviour of the \textbf{three-parameter correspondence: radius, phase and speed} (\ref{prop:bio_epicycle_correspondence}) under parameter degeneracy, and explain how the conclusion degenerates accordingly.
+
+    \item Explain the relation between the \textbf{biological periodicity diagnostic pipeline and its interface with three chapters} (\ref{thm:bio_diagnosis_integration}) and the corresponding general conclusion of the `Periodic Systems' chapter (whether the two agree, whether the former is a special case, or whether additional conditions are required).
+
+    \item Using the seven-theme comparison table of this chapter, identify the concrete carriers of the themes \textbf{translation}, \textbf{scaling} and \textbf{rotation} in this chapter, and give one example of domain data for each.
+
+    \item Synthesis: restate the diagnostic pipeline of this chapter using the five-step standard interface of the `Periodic Systems' chapter (Table \ref{tab:ps_five_steps}), noting one by one the theorem of this chapter on which each step depends: \ref{thm:bio_periodicity_decision}, \ref{prop:bio_adaptive_growth}, \ref{prop:bio_epicycle_correspondence}, \ref{thm:bio_diagnosis_integration}.
+\end{enumerate}
+

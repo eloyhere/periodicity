@@ -1,0 +1,936 @@
+\chapter{Periodic Structure of Social Systems}
+\markboth{Periodic Structure of Social Systems}{Periodic Structure of Social Systems}
+
+\begin{remark}[Periodicity decision for the goals of this chapter (reference)]\label{rem:social_ps_hook}
+When this chapter decides whether a research target is periodic, determines its period type, or seeks its minimal positive period, reference is always made to the `Periodic Systems' chapter:
+for the periodicity criterion see \cref{thm:ps_periodicity_decision},
+for the discrimination of period types see \cref{def:ps_period_type}, \cref{prop:ps_type_discrimination},
+for the search for the minimal positive period see \cref{def:ps_minimal_period_algorithm}, \cref{thm:ps_minimal_period_correctness},
+and for the construction of period series and epicycle groups from data see \cref{thm:ps_series_reconstruction}, \cref{def:ps_epicycle_group}.
+\end{remark}
+
+\begin{remark}[Positioning of this chapter: developed along the five-step interface of the `Periodic Systems' chapter]\label{rem:social_five_steps_positioning}
+The periodic structure of social systems studies the mathematical representation of periodic phenomena in group interaction, information diffusion, cultural change and population evolution in human society. This chapter does not set up a separate periodicity criterion; instead it connects social systems to the five-step interface laid down in the `Periodic Systems' chapter:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{Decision}: formalise social rhythms, periodic games, information diffusion, network evolution, cultural cycles, population evolution, collective synchronisation and similar goals as discrete or continuous dynamical systems, invoke \cref{thm:ps_periodicity_decision} to decide whether they possess periodicity, and determine the period type;
+    \item \textbf{Construction}: from social activity, information infection rate, tie strength, population size and population age structure construct amplitude series, frequency series and phase series, and assemble them into a social epicycle group;
+    \item \textbf{Adjustment}: constrain and dynamically adjust the social epicycle group by means of residual-energy decrease, population conservation, information conservation and trust conservation (a metaphor);
+    \item \textbf{Convolution}: introduce amplitude convolution, phase convolution and frequency convolution on the social epicycle group, and connect them with autocorrelation, cross-correlation, phase locking and collective synchronisation;
+    \item \textbf{Integration}: connect to the tool chains of the three chapters `Discrete Sampling and Intercalation of Periodic Signals', `Harmonic Analysis' and `Time Series Analysis' to form a social period diagnosis workflow.
+\end{enumerate}
+The mathematical tools used in this chapter include: Fourier series, the repeated prisoner's dilemma, Bayesian updating, SIR/SIRS equations, damped oscillation, the network clustering coefficient, logistic growth, the age-structure equation, the Kuramoto model, phase locking, periodic convolution, epicycle groups and phase operators.
+\end{remark}
+
+\begin{remark}[Guide to the seven themes of this chapter]\label{rem:social_seven_themes}
+\textbf{Translation}---the passage of interpersonal relations through time (the daily/weekly/yearly repetition of social rhythms, the reciprocal exchange period $T_{\text{ex}}$); \textbf{scaling}---the scaling of social-network size (stratified scales such as the Dunbar number $150$, the community half-life $T_{1/2}$); \textbf{rotation}---the phase cycle of relational closeness (the alternation of closeness and distance, the phase rotation of cultural retro, Kuramoto phase locking); \textbf{conservation}---population conservation, information conservation and trust conservation (of which trust conservation is a metaphor, see Theorem \ref{thm:social_conservation} and Remark \ref{ch27_trust_metaphor}); \textbf{symmetry}---reciprocal symmetry (the symmetric tit-for-tat strategy, the symmetric Nash equilibrium of fitness testing); \textbf{closure}---social-circle closure and relational loops (triadic closure, the exchange--test feedback loop); \textbf{period}---relational cycles and Kuramoto collective synchronisation (Proposition \ref{prop:kuramoto_model}).
+\end{remark}
+
+\section{Connection to the five-step interface of the `Periodic Systems' chapter}
+\label{sec:social_five_steps}
+
+\subsection{Step one: the periodicity decision for social goals}
+
+\begin{definition}[Social goals and decision input]\label{def:social_target}
+A \textbf{social goal} is one of the following objects:
+\begin{enumerate}[label=(\roman*)]
+    \item a social rhythm system, whose state space is the interval space of social activity $A(t)$;
+    \item a periodic game system, whose state space is the sequence space of behavioural states $(a,b)\in\{C,D\}^2$;
+    \item an information diffusion system, whose state space is the $(S,I,R)$ simplex;
+    \item a social-network evolution system, whose state space is the space of tie-strength matrices $\{W_{ij}\}$;
+    \item a cultural--demographic evolution system, whose state space is the joint space of population size $N(t)$ and age structure $n(a,t)$;
+    \item a collective synchronisation system, whose state space is the joint space of individual phases $(\theta_1,\dots,\theta_N)$.
+\end{enumerate}
+The \textbf{decision input} of a social goal is an ordered pair
+\[
+\mathcal D_{\mathrm{S}}=(\mathcal S,\Phi),
+\]
+where $\mathcal S$ is the state space and $\Phi:\mathcal S\to\mathcal S$ is the map induced by time translation, phase rotation or evolution. If $\mathcal S$ is a finite set, the goal is called a \textbf{finite social goal}; if $\mathcal S$ is an infinite set, the goal is called an \textbf{infinite social goal}.
+\end{definition}
+
+\begin{definition}[Social decision map]\label{def:social_periodization}
+Let a social goal be given by the decision input $\mathcal D_{\mathrm{S}}=(\mathcal S,\Phi)$. If the states of the goal are generated by $\Phi$, that is, if there exists $x_0\in\mathcal S$ such that
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+for $t\in\mathbb Z$ the state $x_t$ is generated by iteration of $\Phi$; for $t\in\mathbb R$ it is described by the one-parameter evolution family $\{\Phi_t\}_{t\in\mathbb R}$, where each $\Phi_t:\mathcal S\to\mathcal S$, $\Phi_0=\operatorname{id}$, $\Phi_{s+t}=\Phi_s\circ\Phi_t$ for all $s,t\in\mathbb R$, and $(t,x)\mapsto\Phi_t(x)$ is continuous.
+then $\Phi$ is called the \textbf{social decision map} of the goal. In this case the social goal is reduced to the discrete dynamical system $(\mathcal S,\Phi)$ when $t\in\mathbb Z$ and to the continuous dynamical system $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$ when $t\in\mathbb R$; in both cases the criteria of the `Operations and Periodicity' chapter and the `Periodic Systems' chapter may be applied directly.
+\end{definition}
+
+\begin{theorem}[Social periodicity decision theorem]\label{thm:social_periodicity_decision}
+Let the decision map of a social goal be $\Phi$, and let $(\mathcal S,\Phi)$ be a discrete dynamical system. Then:
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{Sufficient decision}: if there exists $m\in\mathbb N^+$ such that $\Phi^m=\mathrm{id}$, then the goal is a uniformly periodic social system; every orbit is closed, and the orbit lengths divide $m$.
+    \item \textbf{Equivalence of decisions}: the goal is a uniformly periodic social system if and only if $\operatorname{ord}(\Phi)<\infty$.
+    \item \textbf{Pointwise criterion}: the orbit of the goal at the state $x_0$ is closed if and only if $x_0$ is a periodic point; in this case the orbit length is precisely the period at that point.
+    \item \textbf{Non-omissibility}: the conjunction of conserved quantities and the symmetry group cannot replace $\operatorname{ord}(\Phi)<\infty$; a quasi-periodic social goal does not belong to the periodic social systems.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:social_periodicity_decision} of this chapter is the domain instantiation of \cref{thm:ps_periodicity_decision} in the `Periodic Systems' chapter:
+one need only replace the decision map $f$ and the evolution group by the $\Phi$ of this chapter, and the four items---(A) sufficient decision, (B) equivalence of decisions, (C) pointwise criterion,
+(D) non-omissibility---hold one by one. By the convention of \cref{rem:ps_applications_hook}, no further elaboration is repeated here.
+\end{proof}
+
+\begin{corollary}[Social period types]\label{cor:social_period_type}
+After the decision by \cref{thm:social_periodicity_decision}, a social goal falls into one of the following types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Trivially periodic type}: the minimal period is $m_0=1$, and the state is a fixed point;
+    \item \textbf{Strictly periodic type}: $1<m_0<\infty$, and the state is strictly periodic;
+    \item \textbf{Uniformly periodic type}: $\operatorname{ord}(\Phi)=m<\infty$, and all orbit lengths divide $m$;
+    \item \textbf{Quasi-periodic type}: $\operatorname{ord}(\Phi)=\infty$, and the orbit is not closed but is dense on a compact carrier structure;
+    \item \textbf{Eventually periodic type}: there exists $N$ such that the goal is periodic for $t\ge N$;
+    \item \textbf{Discretely periodic type}: the carrier structure is $\mathbb Z$, and the normalised period ratio is $\rho=T_x/\Delta x\in\mathbb Q$.
+    \item \textbf{Asymptotically periodic (damped) type}: the orbit is not closed, but tends asymptotically to a closed orbit or to a fixed point, the residual decaying as $e^{-\kappa t}$ (see \cref{def:ps_period_type}(vii)).
+\end{enumerate}
+Here (i)--(iii) and (vi) belong to the periodic social systems; (iv) does not belong to the periodic social systems, but can be handled by bounded-approximation tools; (v) is a periodic social system only in its stable stage; (vii), like (iv), is a type in the limiting sense; it is not a periodic social system and can be handled with bounded-approximation tools only in its stable stage.
+\end{corollary}
+
+\begin{proof}
+Each item follows by substituting the social goal into \cref{thm:social_periodicity_decision} and \cref{def:ps_period_type} of the `Periodic Systems' chapter.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for social rhythms]\label{lem:social_rhythm_periodic}
+Let the social activity $A(t)$ satisfy the daily periodicity condition $A(t+T_{\text{day}})=A(t)$ ($T_{\text{day}}=24$ h), the weekly periodicity condition $A(t+T_{\text{week}})=A(t)$ ($T_{\text{week}}=168$ h), and the yearly periodicity condition $A(t+T_{\text{year}})=A(t)$ ($T_{\text{year}}=8760$ h). Then $A$ is a uniformly periodic system, and its least positive period divides
+\[
+T_0=\gcd(T_{\text{day}},T_{\text{week}},T_{\text{year}}).
+\]
+\end{lemma}
+
+\begin{proof}
+By the three periodicity conditions, the group with periodic orbits $\operatorname{Group}_{\mathrm{period}}(A)$ of $A$ contains $24\mathbb Z$, $168\mathbb Z$ and $8760\mathbb Z$. Hence $\gcd(24,168,8760)\mathbb Z=24\mathbb Z\subseteq\operatorname{Group}_{\mathrm{period}}(A)$, and the least positive period of $A$ divides $24$. By \cref{def:strict_period} and \cref{thm:closed_orbit_criterion} of the `Operations and Periodicity' chapter, $A$ is a uniformly periodic system, and its least positive period divides $T_0$.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for the TFT periodic game]\label{lem:tft_periodic}
+Let both players in the repeated prisoner's dilemma use the tit-for-tat (TFT) strategy, with misjudgement probability $\varepsilon>0$. Then the cycle of cooperation--retaliation--return to cooperation is a uniformly periodic system, whose expected period is
+\[
+\mathbb{E}[L_{\text{cycle}}]\sim \frac{2}{\varepsilon}\qquad(\varepsilon\to0^+).
+\]
+\end{lemma}
+
+\begin{proof}
+By Proposition \ref{prop:tit_for_tat_period}, the 4-state Markov chain of TFT (with states $(a,b)\in\{C,D\}^2$) has $(C,C)$ as an absorbing state in the absence of noise, and escapes from it with probability $2\varepsilon(1-\varepsilon)$ under noise. The expected time of a first departure-and-return is $O(1/\varepsilon)$, and a complete cycle contains two such processes, hence $\mathbb{E}[L_{\text{cycle}}]\sim2/\varepsilon$. By \cref{def:strict_period} of the `Operations and Periodicity' chapter, this cycle is a uniformly periodic system (in the expected sense).
+\end{proof}
+
+\begin{lemma}[Periodicity decision for SIRS information diffusion]\label{lem:sirs_periodic}
+Let information diffusion be described by the SIRS model, with parameters satisfying $\Delta=(\beta I^*+\alpha)^2-4\beta I^*(\gamma+\alpha)<0$. Then the infected proportion $I(t)$ is a uniformly periodic system, whose damped oscillation period is
+\[
+T=\frac{2\pi}{\omega},\qquad \omega=\sqrt{\beta I^*(\alpha+\gamma)-\frac{(\beta I^*+\alpha)^2}{4}}.
+\]
+\end{lemma}
+
+\begin{proof}
+By Proposition \ref{prop:sir_periodic}, when $\Delta<0$ the eigenvalues of the Jacobian matrix are the complex conjugates $\lambda=-\frac{\beta I^*+\alpha}{2}\pm i\omega$, and the angular frequency of the damped oscillation is $\omega$. By \cref{def:strict_period} of the `Operations and Periodicity' chapter, the decaying oscillation of $I(t)-I^*$ constitutes a damped periodic system; neglecting the damping, it is a uniformly periodic system with period $T=2\pi/\omega$.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for the community life cycle]\label{lem:community_periodic}
+Let the community activity $u(t)$ rise during the formation stage, be highest during the peak stage, and decay exponentially during the decline stage as $u(t)=u_{\text{peak}}e^{-\lambda(t-t_{\text{peak}})}$. Then the community life cycle is of asymptotically periodic (damped) type (the decline converges to a steady state), and the half-life is
+\[
+T_{1/2}=\frac{\ln 2}{\lambda}.
+\]
+\end{lemma}
+
+\begin{proof}
+By Proposition \ref{prop:community_cycle}, during the decline stage $u(t)$ decays exponentially to $0$, which is the limiting case of the asymptotically periodic (damped) type, \cref{def:ps_period_type}(vii), of the `Periodic Systems' chapter (approaching the fixed point $u=0$). The half-life is obtained from $e^{-\lambda T_{1/2}}=1/2$ as $T_{1/2}=\ln2/\lambda$.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for intergenerational population cycles]\label{lem:generational_pop_periodic}
+Let the discrete generation population model be $N_{n+1}=s f(N_{n-1})N_n$, with $f(N)=r(1-N/K)$. Then when $4srN^*/K>1$, the population dynamics is a uniformly periodic system, whose period is approximately two generation times:
+\[
+T_{\text{gen}}\approx 2\times 25\text{ years}=50\text{ years}.
+\]
+\end{lemma}
+
+\begin{proof}
+By the proof of Proposition \ref{prop:generational_population_cycle}, linearisation near the equilibrium state gives the characteristic equation $\lambda^2-\lambda+srN^*/K=0$, with discriminant $\Delta=1-4srN^*/K$. When $\Delta<0$ the eigenvalues are complex conjugates, and the population dynamics exhibits periodic oscillation. The period is approximately two generation times, $T_{\text{gen}}\approx50$ years.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for Kuramoto collective synchronisation]\label{lem:kuramoto_periodic}
+Let $N$ individuals be coupled by the Kuramoto model, with a unimodal and symmetric natural-frequency distribution $g(\omega)$ and coupling strength $K>K_c$. Then the order parameter $r>0$ of the synchronised state is the macroscopic manifestation of a uniformly periodic system, and the period of individual phase locking is the period of the common mean frequency $\bar\omega$:
+\[
+T_{\text{sync}}=\frac{2\pi}{\bar\omega}.
+\]
+\end{lemma}
+
+\begin{proof}
+By Lemma \ref{ch27_kuramoto_threshold}, when $K>K_c$ there exists a synchronised solution with $r>0$. By Proposition \ref{prop:kuramoto_model}, the phases of all individuals lock near the common mean frequency $\bar\omega$. Hence, by \cref{def:strict_period} of the `Operations and Periodicity' chapter, the synchronised collective is a uniformly periodic system with period $T_{\text{sync}}=2\pi/\bar\omega$.
+\end{proof}
+
+\begin{definition}[Algorithm for the least positive period of a social system]\label{def:social_minimal_period_algorithm}
+This definition has the same content as Chapter~\ref{chap:periodic_system} in the section `Periodicity decision: whether a goal possesses periodicity' (\cref{sec:ps_periodicity_decision}) in \cref{def:ps_minimal_period_algorithm}; to avoid repeated exposition, only the reference anchor is retained here, and the complete statement is to be found there. The only difference here is terminology (social goal / social sample); the algorithm steps and conclusions are entirely the same.
+\end{definition}
+
+\begin{theorem}[Correctness of the algorithm for the least positive period of a social system]\label{thm:social_minimal_period_correctness}
+This theorem has the same content as Chapter~\ref{chap:periodic_system} in the section `Periodicity decision: whether a goal possesses periodicity' (\cref{sec:ps_periodicity_decision}) in \cref{thm:ps_minimal_period_correctness}; to avoid repeated exposition, only the reference anchor is retained here, and the complete statement and proof are to be found there. The only difference here is terminology (social goal / social sample); the algorithm steps and conclusions are entirely the same.
+\end{theorem}
+
+\begin{example}[Instances of social periodicity decisions]\label{ex:social_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item Social rhythms: $T_0=\gcd(24,168,8760)=24$ h, of uniformly periodic type;
+    \item TFT periodic game: $\mathbb{E}[L_{\text{cycle}}]\sim2/\varepsilon$, of uniformly periodic type;
+    \item SIRS information diffusion: $T=2\pi/\omega$, of uniformly periodic type (damped);
+    \item Community life cycle: of asymptotically periodic (damped) type (tending to $u=0$), half-life $\ln2/\lambda$;
+    \item Intergenerational population cycle: $T_{\text{gen}}\approx50$ years, of uniformly periodic type;
+    \item Kuramoto collective synchronisation: $T_{\text{sync}}=2\pi/\bar\omega$, of uniformly periodic type.
+\end{enumerate}
+\end{example}
+
+\begin{remark}[Conserved quantities do not guarantee periodicity]\label{rem:social_invariant_not_period}
+Population conservation, information conservation and trust conservation (a metaphor) in social systems are auxiliary conditions for periodic structure, but they do not constitute a sufficient condition. For instance, a closed society that has population conservation but no feedback coupling will not spontaneously produce periodic oscillations. The periodic structure of a social system must be decided by \cref{thm:social_periodicity_decision} or by the lemmas above.
+\end{remark}
+
+\subsection{Step two: construction of social period series and the epicycle group}
+
+\begin{definition}[Social amplitude series, frequency series and phase series]\label{def:social_series}
+Let the state or output sequence of a social goal be $\{z_t\}$. If it can be written as
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+then
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+are called respectively the \textbf{amplitude series}, the \textbf{frequency series} and the \textbf{phase series} of the social goal. The three are consistent with \cref{def:amplitude_series}, \cref{def:frequency_series} and \cref{def:phase_series} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{definition}[Social epicycle group]\label{def:social_epicycle_group}
+Let the period series of a social goal be given by the amplitude series $\{A_k\}$, the frequency series $\{\omega_k\}$ and the phase series $\{\phi_k\}$. For each $k$ define the epicycle
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+whose collection
+\[
+\mathfrak E_{\mathrm{S}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+is called the \textbf{epicycle group} of the social goal. Its superposition is precisely the social period series
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[Constructing a period series from social data]\label{thm:social_series_reconstruction}
+Let the output of a social goal be a finite periodic sequence with period $N$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the output can be expanded as a discrete Fourier series
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item the amplitude series is given by $|c_k|$, the phase series by $\arg c_k$, and the frequency series by $2\pi k/N$;
+    \item if the output is a social rhythm sequence, then the fundamental frequency corresponds to the daily period, the $k=7$ harmonic to the weekly period, and the $k=365$ harmonic to the yearly period; if the output is an information diffusion sequence, then the fundamental frequency corresponds to the damped oscillation period.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) The discrete Fourier series of a finite periodic sequence is a standard result: the basis functions $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ form an orthogonal basis of $\mathbb C^N$.
+(ii) This is read off directly from $c_k=A_k e^{i\phi_k}$.
+(iii) For a social rhythm sequence with $N=8760$ (hourly sampling), the fundamental frequency corresponds to 1 hour, $k=24$ to the daily period, $k=168$ to the weekly period, and $k=8760$ to the yearly period; for an information diffusion sequence, the fundamental frequency corresponds to the angular frequency $\omega/(2\pi)$ of the SIRS damped oscillation.
+\end{proof}
+
+\begin{proposition}[Three-parameter correspondence: radius, phase and rotation speed]\label{prop:social_epicycle_correspondence}
+The three parameters of the social epicycle group $\mathfrak E_{\mathrm{S}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ correspond one-to-one with three geometric--social quantities:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Radius corresponds to amplitude}: the radius $|E_k|=A_k$ of $E_k$ is precisely the amplitude of that social oscillation component;
+    \item \textbf{Phase corresponds to rotation delay}: the initial phase $\phi_k$ corresponds to the time translation $\tau_k=\phi_k/\omega_k$; when $\phi_k>0$ this component \textbf{leads} the baseline by $\tau_k$ (equivalently, the component coincides with the baseline once the baseline is postponed by $\tau_k$);
+    \item \textbf{Frequency corresponds to rotation speed}: $\omega_k$ is precisely the angular frequency of that social oscillation component.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:social_epicycle_correspondence} of this chapter corresponds exactly to \cref{prop:ps_epicycle_correspondence} in the `Periodic Systems' chapter,
+and the three correspondences---radius corresponds to amplitude, phase corresponds to rotation delay, frequency corresponds to rotation speed---are obtained by translating them one by one onto the epicycle group of this chapter.
+The proof is to be found there: (i) from $|E_k|=A_k$ and the energy decomposition, (ii) from the phase translation theorem, (iii) from the definition of the frequency series.
+\end{proof}
+
+\begin{example}[Period series of social activity]\label{ex:social_activity_series}
+Social activity $A(t)$ has periodic components on all three scales of day, week and year. In the social epicycle group the three appear as epicycle components of different radii and different angular frequencies---the daily period has the largest amplitude, the weekly period comes next, and the yearly period is the smallest.
+\end{example}
+
+\begin{remark}[A period series is a complex function]\label{rem:social_series_complex}
+Let $z=e^{i\omega_0t}$. Then the social period series
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+when all components are commensurable with $\omega_0$ (that is, $\omega_k=k\omega_0$, $k\in\mathbb Z$) it can be written as the Laurent series $\sum_k c_k z^k$, where $c_k=A_k e^{i\phi_k}$: in that case the social period series is a complex function on the unit circle, and otherwise it is merely a function on the torus.
+\end{remark}
+
+\subsection{Step three: dynamic adjustment of the social epicycle group}
+
+\begin{definition}[Dynamic adjustment of the social epicycle group]\label{def:social_adaptive_adjustment}
+Let the current social epicycle group be $\mathfrak E^{(j)}$, with partial sum
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+and residual $r^{(j)}=z-z^{(j)}$. \textbf{Dynamic adjustment} consists of two rules:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Quantity adjustment}: if the residual energy $\|r^{(j)}\|^2>\delta$, then add one epicycle according to the peak of the residual periodogram;
+    \item \textbf{Parameter adjustment}: update the parameters of the existing epicycles by regularised least squares or by conservation constraints.
+\end{enumerate}
+In social systems, quantity adjustment corresponds to adding social rhythm modes or information diffusion harmonics; parameter adjustment corresponds to tuning the amplitudes, phases and frequencies so that the population, information and trust constraints are satisfied.
+\end{definition}
+
+\begin{proposition}[Monotonicity of quantity adjustment]\label{prop:social_adaptive_growth}
+After adding the dominant-frequency component of the residual as in \cref{def:social_adaptive_adjustment}(i), the residual energy is monotonically non-increasing:
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+with equality if and only if the residual has no energy at the selected frequency.
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:social_adaptive_growth} of this chapter agrees with the dynamic adjustment mechanism of \cref{def:ps_adaptive_adjustment} in the `Periodic Systems' chapter:
+adding an epicycle means removing the component of $r^{(j)}$ along $\hat\omega$ from the residual, and the orthogonal decomposition
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{the component removed}\|^2$ yields the inequality,
+with equality if and only if the norm of the removed component is zero. The complete argument is to be found there.
+\end{proof}
+
+\begin{theorem}[Convergence of dynamic adjustment]\label{thm:social_adaptive_convergence}
+Let the social goal be a finite periodic sequence of period $T_0$ and let $\delta=0$. Then after at most $\lfloor T_0/2\rfloor+1$ steps the dynamic adjustment has zero residual, and the resulting social epicycle group is precisely the exact Fourier data of the goal.
+\end{theorem}
+
+\begin{proof}
+The discrete Fourier series of a sequence of period $T_0$ is complete on $\lfloor T_0/2\rfloor+1$ harmonics. At each step one dominant-frequency component of the residual is extracted by \cref{prop:social_adaptive_growth} and the residual energy decreases strictly, so after finitely many steps the residual is zero.
+\end{proof}
+
+\begin{definition}[Structural-metric adjustment]\label{def:social_structure_metric_adjustment}
+Let the structural metric of a social goal be
+\[
+\mathcal I=(\mathcal I_{\text{population}},\mathcal I_{\text{information}},\mathcal I_{\text{trust}})
+=(\text{degree of population conservation},\ \text{degree of information conservation},\ \text{degree of trust conservation}).
+\]
+\textbf{Structural-metric adjustment} consists in choosing $\theta$ in the parameter space $\Theta$: at each step take a neighbouring parameter for which $\mathcal I(\theta)$ is \textbf{strictly decreasing} in the lexicographic order (minimisation); if no such parameter exists, the process stops, and the parameter is then locally optimal.
+\end{definition}
+
+\begin{proposition}[Finite convergence of structural-metric adjustment]\label{prop:social_structure_metric_convergence}
+Let the parameter space $\Theta$ be finite, and let each adjustment make $\mathcal I$ strictly decreasing in the lexicographic order. Then the adjustment terminates after finitely many steps at a locally optimal parameter.
+\end{proposition}
+
+\begin{proof}
+Since $\Theta$ is finite, $\mathcal I$ takes only finitely many values, and the lexicographic order is a total order on a finite set; a strictly decreasing sequence in that order cannot continue indefinitely, so the adjustment terminates after finitely many steps. At termination there is no neighbouring parameter that makes $\mathcal I$ strictly decrease in the lexicographic order, that is, the parameter is locally optimal.
+\end{proof}
+
+\begin{remark}[The boundary of dynamic adjustment]\label{rem:social_adaptive_boundary}
+\cref{thm:social_adaptive_convergence} relies on a finite periodic sequence. For continuous spectra or quasi-periodic social goals, no finite epicycle group represents them exactly, and only a bounded approximation is possible. Structural-metric adjustment does not guarantee global optimality.
+\end{remark}
+
+\subsection{Step four: social convolution}
+
+\begin{definition}[Social amplitude convolution, phase convolution and frequency convolution]\label{def:social_convolution_types}
+Let two social epicycle groups be
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+Define:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Amplitude convolution}: $\mathbb A_{mn}=A_nB_m$;
+    \item \textbf{Phase convolution}: $\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$;
+    \item \textbf{Frequency convolution}: $\mathbb F_{mn}=\omega_n\nu_m$;
+    \item \textbf{Trend convolution}: $\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$.
+\end{enumerate}
+This is consistent with \cref{def:amplitude_convolution}, \cref{def:phase_convolution}, \cref{def:frequency_convolution} and \cref{def:tendency_convolution} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{theorem}[The action of the three convolutions on the social epicycle group]\label{thm:social_convolution_action}
+Let the epicycle groups of two social goals be $\mathfrak E$ and $\mathfrak E'$ respectively. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item amplitude convolution acts only on the radius;
+    \item phase convolution acts only on the phase;
+    \item frequency convolution acts only on the rotation speed;
+    \item trend convolution preserves both amplitude and phase.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+This is read off directly from \cref{def:social_convolution_types}.
+\end{proof}
+
+\begin{proposition}[Autocorrelation and trend convolution]\label{prop:social_autocorr_phase_convolution}
+Let $\{z_t\}$ be a social period sequence, with autocorrelation function
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+In the language of the social epicycle group, the autocorrelation function is the projection of the trend convolution onto the diagonal:
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:social_autocorr_phase_convolution} of this chapter is the realisation in this domain of the convolution-action conclusion of \cref{thm:ps_convolution_action} in the `Periodic Systems' chapter:
+substituting $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ into the definition of the autocorrelation, cancelling all off-diagonal cross terms by orthogonality and retaining only the diagonal term of the trend convolution
+(the factorisation of the three convolutions, \cref{prop:ps_convolution_factorization}), which yields $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$.
+The complete expansion is to be found there.
+\end{proof}
+
+\begin{remark}[The relation between social convolution and periodic convolution]\label{rem:social_convolution_relation}
+Social convolution is not a new convolution operation; it is the instance on the social epicycle group of the periodic convolution of the `Series and Convolution' chapter. Autocorrelation is the projection of the trend convolution onto the diagonal; cross-correlation, phase locking and collective synchronisation are respectively the concrete manifestations in social science of amplitude convolution and frequency convolution.
+\end{remark}
+
+\subsection{Step five: integration with discrete sampling, harmonic analysis and time series analysis}
+
+\begin{definition}[Social period diagnosis workflow]\label{def:social_periodic_diagnosis}
+For a given social system, diagnose it using the periodic-mathematics framework:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Periodicity decision}: verify the period type of the social goal (\cref{thm:social_periodicity_decision});
+    \item \textbf{Series construction}: from social activity, information diffusion rate and population data construct the amplitude, frequency and phase series and the epicycle group (\cref{thm:social_series_reconstruction});
+    \item \textbf{Conservation diagnosis}: verify population, information and trust conservation (\cref{thm:social_conservation});
+    \item \textbf{Convolution diagnosis}: compute the autocorrelation (the diagonal projection of the trend convolution, \cref{prop:social_autocorr_phase_convolution}) and the phase convolution;
+    \item \textbf{Integration diagnosis}: connect to the tool chains of discrete sampling, harmonic analysis and time series analysis.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[The social period diagnosis workflow and the interfaces to three chapters]\label{thm:social_diagnosis_integration}
+The five steps of \cref{def:social_periodic_diagnosis} connect respectively to:
+\begin{enumerate}[label=(\roman*)]
+    \item \cref{def:uniform_sampling_parallel}, \cref{thm:nyquist_shannon_parallel}, \cref{thm:intercalation_leakage_suppression} of the `Discrete Sampling and Intercalation of Periodic Signals' chapter;
+    \item \cref{def:fourier_series}, \cref{thm:parseval_fourier}, \cref{prop:twelve_to_six} of the `Harmonic Analysis' chapter;
+    \item \cref{def:ts_period_detection}, \cref{prop:ts_period_significance}, \cref{def:ts_window_validation} of the `Time Series Analysis' chapter.
+\end{enumerate}
+Hence social period diagnosis is not an independent method, but the application of the unified tool chain of periodic mathematics to social systems.
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:social_diagnosis_integration} of this chapter is the implementation in this domain of the five-step interface of the `Periodic Systems' chapter (\cref{tab:ps_five_steps}):
+the periodicity decision uses sampling and spectral estimation, the frequency decomposition and the phase kernel use the `Harmonic Analysis' chapter, and the periodogram peak, the Fisher test and the
+window-function validation use the `Time Series Analysis' chapter. Thus the diagnosis workflow is synthesised from the tool chains of three chapters, and the proof is to be found there.
+\end{proof}
+
+\begin{remark}[The operational order after integration]\label{rem:social_integration_order}
+The recommended order for an actual diagnosis is: first decide whether the social goal is periodic (\cref{thm:social_periodicity_decision}); then construct the Fourier data and the epicycle group of the social data (\cref{thm:social_series_reconstruction}); then optimise the parameters using the conservation constraints and dynamic adjustment (\cref{thm:social_adaptive_convergence}, \cref{prop:social_structure_metric_convergence}); then perform social convolution and autocorrelation analysis (\cref{prop:social_autocorr_phase_convolution}); and finally output the diagnosis as in \cref{def:social_periodic_diagnosis}.
+\end{remark}
+
+\section{Mathematical foundations of social systems}
+
+\begin{definition}[Basic quantities of social systems]\label{def:social_quantities}
+A social system is described by the following basic variables:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Social network graph} $G = (V, E)$: the vertices $V$ represent individuals (people, organisations), and the edges $E$ represent social relations (friendship, following, communication). The topology of the graph determines the paths and the speed of information diffusion.
+    \item \textbf{Social activity} $A(t) \in [0,1]$: the intensity with which an individual or group participates in social interaction at time $t$. $A \to 1$ indicates high-intensity socialising (frequent contact, a large amount of interaction), and $A \to 0$ indicates social isolation.
+    \item \textbf{Information infection rate} $I(t) \in [0,1]$: the proportion of a group through which a particular piece of information (or behaviour, or opinion) has spread. $I(t)$ is the core variable of SIR-type models.
+    \item \textbf{Tie strength} $W_{ij}(t) \in [0,1]$: the strength of the social tie between individuals $i$ and $j$ at time $t$. $W \to 1$ indicates a strong tie (a close friendship), and $W \to 0$ indicates a weak tie or no tie.
+    \item \textbf{Population size} $N(t)$: the total population of the social system at time $t$. Changes in population size are determined by the birth rate, the death rate and the migration rate.
+    \item \textbf{Population age structure} $n(a, t)$: the population density at time $t$ and age $a$. The age structure is the foundation of the periodic structure of population evolution.
+\end{enumerate}
+The core feature of a social system is \textbf{collective dynamics under the constraints of network structure}---the behaviour of an individual is influenced by its position in the social network and by the states of its neighbourhood, and periodic phenomena at the collective level are the emergent result of individual interaction.
+\end{definition}
+
+\begin{property}[Immediate constraints on the basic quantities]\label{ch27_basic_constraints}
+By Definition \ref{def:social_quantities}, the basic quantities of a social system satisfy the following immediate constraints:
+\begin{enumerate}[label=(\roman*)]
+    \item Normalisation: $A(t), I(t), W_{ij}(t) \in [0,1]$, all dimensionless proportional quantities; $N(t) \ge 0$ and $n(a, t) \ge 0$.
+    \item Network carrying: the tie-strength matrix $\{W_{ij}(t)\}$ is the weighted adjacency matrix of the social network graph $G=(V,E)$, whose support is determined by the edge set $E$, and $W_{ij}(t)$ is non-zero only for $(i,j) \in E$.
+    \item Population balance: $\int_0^\infty n(a,t)\, da = N(t)$; the rate of population change is $\frac{dN}{dt} = B(t) - D(t) + M(t)$, where $B, D, M$ are respectively the birth rate, the death rate and the net migration rate.
+    \item Emergence: the periodic phenomena at the collective level (statistics of $I(t)$, $A(t)$) are determined by individual interaction ($W_{ij}$, network topology) and by population processes, rather than being prescribed in advance.
+\end{enumerate}
+\end{property}
+
+\section{Social rhythms}
+
+\begin{definition}[Multi-scale periodicity of social activity]\label{def:social_rhythms}
+Human social activity displays pronounced periodicity on several time scales:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Daily period}: social activity varies regularly within $24$ hours---lowest in the small hours (sleep), rising gradually in the morning, falling slightly in the early afternoon (a midday rest), reaching a peak from evening to night (the peak of social activity), and dropping rapidly late at night.
+    \item \textbf{Weekly period}: the seven-day week is a purely \textbf{socially constructed period}---it has no astronomical basis and is sustained entirely by cultural convention. Social activity reaches its peak at the weekend (from Friday evening to Sunday) and is lowest at the start of the week (Monday).
+    \item \textbf{Yearly period}: social activity varies with the seasons---indoor socialising increases in winter, outdoor socialising increases in summer. Particular festivals (the Spring Festival, Christmas, Thanksgiving) give rise to large-scale periodic social gatherings and population movements.
+\end{enumerate}
+Social rhythms manifest themselves as the repetition of time translations of $24$ hours, $7$ days and $365$ days: the social pattern of every day, every week and every year repeats in the statistical sense. Social activity $A(t)$ approximately satisfies $A(t+T) \approx A(t)$ for the daily period $T_{\text{day}}=24$ h, the weekly period $T_{\text{week}}=168$ h and the yearly period $T_{\text{year}}=8760$ h.
+\end{definition}
+
+\begin{proposition}[Periodic decomposition of social activity]\label{ch27_rhythm_fourier}
+If the social activity $A(t)$ satisfies the daily periodicity condition $A(t+T_{\text{day}})=A(t)$ ($T_{\text{day}}=24$ h), then $A$ can be expanded as a Fourier series
+\[
+A(t) = \sum_{k=-\infty}^{\infty} \hat{A}_k e^{i k \omega_0 t}, \qquad \omega_0 = \frac{2\pi}{T_{\text{day}}},
+\]
+where the energy share of the $k$-th harmonic is $p_k = |\hat{A}_k|^2 / \sum_{n} |\hat{A}_n|^2$, satisfying $\sum_k p_k = 1$. The fundamental frequency ($k=1$) corresponds to the circadian rhythm, the second harmonic ($k=2$) to the two-peak work--rest structure, and the third harmonic ($k=3$) to the additional peak of mealtimes.
+\end{proposition}
+
+\begin{proof}
+$A$ has period $T_{\text{day}}$, so by the Fourier series theorem $A(t)$ can be expanded as the above series, with coefficients
+\[
+\hat{A}_k = \frac{1}{T_{\text{day}}}\int_0^{T_{\text{day}}} A(t)e^{-ik\omega_0 t}\,dt.
+\]
+The Parseval identity $\sum_{k}|\hat{A}_k|^2 = \frac{1}{T_{\text{day}}}\int_0^{T_{\text{day}}}|A(t)|^2 dt$ guarantees that the definition of $p_k$ is legitimate and that $\sum_k p_k = 1$. If $A(t)$ has period exactly $T_{\text{day}}$, then the energy is concentrated only at integer multiples of the frequency, $\omega = k\omega_0$.
+\end{proof}
+
+\begin{remark}[Rhythm patterns of social media (empirical observation)]\label{prop:social_media_rhythm}
+The number of posts, likes and comments on social-media platforms (Twitter/X, WeChat, Weibo) displays precise periodicity. Fourier analysis with a daily period shows that the fundamental frequency $\omega_0 = 2\pi/24\text{h}$ of posting volume explains about $60\%$ of the variance, whilst the second and third harmonics correspond respectively to the two-peak work--rest pattern and to the additional peak of mealtimes---this is an \textbf{empirical observation}, and its specific value (the $60\%$ variance share) comes from a statistical fit to real platform data, not from a mathematical theorem.
+
+Social-media data are the material for studying social rhythms---the statistical average of massive user data reveals the periodic structure of social behaviour. A twenty-four-hour heat map of global social-media activity shows that users in different time zones enter the active state in turn---the global social network behaves as a relay system, with activity translated between time zones. The mathematical formulation of this phenomenon is: under a suitable covering by time zones, $\sum_{\text{time zone}} A_{\text{time zone}}(t)$ is approximately constant within a day---again an empirical observation.
+\end{remark}
+
+\section{Periodic games in social interaction}
+
+The two core dynamics in social interaction---\textbf{reciprocal altruism} and \textbf{fitness testing}---both exhibit probabilistic periodic structure. This section uses the mathematical framework established in the `Probability and Distribution' chapter to carry out a formal analysis of these two social games.
+
+\subsection{The periodic game of reciprocal altruism}
+
+\begin{definition}[Periodic model of reciprocal altruism]\label{def:reciprocal_altruism}
+\textbf{Reciprocal altruism} (also called reciprocal exchange) means that individual A provides a benefit to individual B at time $t$ (help, resources, information), expecting to obtain a return at some future time. Let $X_{AB}(t) \in \{0,1\}$ indicate whether A provides a benefit to B at time $t$ ($1$ = provides, $0$ = does not provide), and let $Y_{BA}(t)$ be defined analogously. The long-run balance of reciprocal altruism requires that the cumulative giving and the cumulative return of both sides be equal in the statistical sense:
+\[
+\mathbb{E}\left[\sum_{t=1}^{T} X_{AB}(t) \cdot v_A(t)\right] \approx \mathbb{E}\left[\sum_{t=1}^{T} Y_{BA}(t) \cdot v_B(t)\right],
+\]
+where $v_A(t), v_B(t)$ are the `values' of the benefits each provides (which may vary with time).
+
+The periodicity of reciprocal behaviour (you help me once, I help you once) is the manifestation in social games of the repetition of time translation. The exchange period $T_{\text{ex}}$ (the average time interval between two reciprocal acts) measures the closeness of the social relationship. In close relationships $T_{\text{ex}}$ is longer (exchange need not be matched immediately), whilst in distant relationships $T_{\text{ex}}$ is shorter (every act of help requires a prompt return).
+\end{definition}
+
+\begin{proposition}[Periodic analysis of the tit-for-tat strategy]\label{prop:tit_for_tat_period}
+In the repeated prisoner's dilemma, one of the most successful strategies is tit-for-tat (Tit-for-Tat, TFT): cooperate on the first move, and thereafter repeat the opponent's previous move at every step. In a noisy environment (with misjudgement probability $\varepsilon$), the evolution of the TFT strategy produces a \textbf{cooperation--defection periodic oscillation}.
+
+Let the misjudgement probability be $\varepsilon$ (the probability that the opponent actually cooperates but is misjudged as defecting, or conversely). When $\varepsilon > 0$, a single misjudgement triggers a retaliation loop---A retaliates after misjudging B as defecting, B retaliates back after perceiving A's defection, and so the loop continues. In the reciprocal symmetric case, the expected length of a complete `cooperation--retaliation--return to cooperation' cycle is asymptotically
+\[
+\mathbb{E}[L_{\text{cycle}}] \sim \frac{2}{\varepsilon} \qquad (\varepsilon \to 0^+).
+\]
+A forgiving strategy (Forgiving TFT) ignores one defection of the opponent with probability $p$, shortening the oscillation period to $\mathbb{E}[L_{\text{cycle}}] \sim 2/p$.
+\end{proposition}
+
+\begin{proof}
+Let the state be the previous behaviour of the two sides $(a, b)$, where $a, b \in \{C, D\}$ (cooperate or defect). Under the TFT strategy the state transition matrix is a $4 \times 4$ Markov chain. In the absence of noise, $(C, C)$ is an absorbing state. With noise, the chain jumps from $(C, C)$ to $(C, D)$ or $(D, C)$ with probability $2\varepsilon(1-\varepsilon)$; starting from $(D, D)$, TFT causes both sides to defect alternately, and with probability $(1-\varepsilon)^2$ they return simultaneously to $(C, C)$. The expected time from the first departure from the cooperative state to the return to the cooperative state is $\mathbb{E}[T] = O(1/\varepsilon)$ for small $\varepsilon$---the expected length of a single `misjudgement--retaliation--return' cycle is $O(1/\varepsilon)$. A complete cycle (the time between two returns to the cooperative state) contains two such processes, hence $\mathbb{E}[L_{\text{cycle}}] \sim 2/\varepsilon$.
+\end{proof}
+
+\subsection{A probabilistic model of fitness testing}
+
+\begin{definition}[Mathematical definition of fitness testing]\label{def:shittest}
+\textbf{Fitness testing} means that individual A issues a costly challenge to individual B (verbal, behavioural, or a demand), and observes B's reaction in order to assess B's `fitness' (confidence, competence, resources, social status). From the standpoint of probability theory, fitness testing is a \textbf{Bayesian updating} process---A updates, by observing B's reaction to the test, the posterior probability of B's `type' (high value/low value).
+
+Let B's unknown type be $\theta \in \{H, L\}$ (High/Low), with prior probability $\mathbb{P}(\theta = H) = p_0$. A issues a test $T$, and B's reaction to the test is $R \in \{\text{pass}, \text{fail}\}$. The likelihood function is
+\[
+\mathbb{P}(R = \text{pass} \mid \theta = H) = \alpha_H, \quad \mathbb{P}(R = \text{pass} \mid \theta = L) = \alpha_L,
+\]
+where $\alpha_H > \alpha_L$ (high-value individuals are more likely to pass the test). By Bayes' formula, after observing B's reaction A updates the posterior probability of B's type:
+\[
+\mathbb{P}(\theta = H \mid R) = \frac{\mathbb{P}(R \mid \theta = H) \cdot p_0}{\mathbb{P}(R \mid \theta = H) \cdot p_0 + \mathbb{P}(R \mid \theta = L) \cdot (1-p_0)}.
+\]
+\end{definition}
+
+\begin{proposition}[Periodicity and sequential decision-making in fitness testing]\label{prop:shittest_periodic}
+In long-term social interaction, fitness testing is not a one-off event but occurs \textbf{periodically}---as time passes, A's uncertainty about B's type gradually increases (forgetting, environmental change, B may `disguise' itself), and periodic retesting is required. The optimal time interval $\Delta T_{\text{test}}$ for fitness testing is determined by the following factors:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Information decay rate} $\lambda$: the rate at which the posterior probability decays with time---$\mathbb{P}_t(\theta = H) = \mathbb{P}_0(\theta = H) \cdot e^{-\lambda t} + p_0 \cdot (1 - e^{-\lambda t})$.
+    \item \textbf{Test cost} $C_{\text{test}}$: the social cost of issuing a test (offending the other party, exposing one's own intentions).
+    \item \textbf{Misjudgement cost} $C_{\text{error}}$: the price of judging the other party's type incorrectly (trusting a low-value individual by mistake, or missing a high-value one).
+\end{enumerate}
+Under the assumption of `linear accumulation of staleness' (the risk of misjudgement grows linearly with the time since the last test), the optimal test period is
+\[
+\Delta T_{\text{test}}^* = \sqrt{\frac{2 C_{\text{test}}}{C_{\text{error}}\, p(1-p)\, \lambda}},
+\]
+where $p$ is the posterior probability after the last test and $p(1-p)$ is the variance measure of belief uncertainty. The test period $\Delta T_{\text{test}}^*$ measures after how long social information needs to be recalibrated.
+\end{proposition}
+
+\begin{proof}
+The information decay model $\frac{dp}{dt} = -\lambda(p-p_0)$ has the solution $p(t) = p_0 + (p_{\text{post}}-p_0)e^{-\lambda t}$, where $p_{\text{post}}$ is the posterior probability after the last test. The belief uncertainty after a test is measured by the variance $p(1-p)$. Suppose that at a time $\tau$ since the last test the instantaneous cost rate of misjudgement is $C_{\text{error}}\,p(1-p)\,\lambda\tau$ (linear accumulation of staleness). Then the total expected cost within one cycle $[0,\Delta T]$ is
+\[
+C(\Delta T) = C_{\text{test}} + \int_0^{\Delta T} C_{\text{error}}\,p(1-p)\,\lambda\tau\,d\tau
+= C_{\text{test}} + \frac12 C_{\text{error}}\,p(1-p)\,\lambda\,\Delta T^2.
+\]
+The average cost per unit time is
+\[
+c(\Delta T) = \frac{C(\Delta T)}{\Delta T} = \frac{C_{\text{test}}}{\Delta T} + \frac12 C_{\text{error}}\,p(1-p)\,\lambda\,\Delta T.
+\]
+The first-order condition
+\[
+c'(\Delta T) = -\frac{C_{\text{test}}}{\Delta T^2} + \frac12 C_{\text{error}}\,p(1-p)\,\lambda = 0
+\]
+gives
+\[
+\Delta T^* = \sqrt{\frac{2C_{\text{test}}}{C_{\text{error}}\,p(1-p)\,\lambda}}.
+\]
+The second-order condition $c''(\Delta T^*) = 2C_{\text{test}}/(\Delta T^*)^3 > 0$ guarantees that this is a minimum. For example, taking $C_{\text{test}}=1$, $C_{\text{error}}=10$, $p=0.8$ and $\lambda = 0.1$/week gives $p(1-p)=0.16$ and $\Delta T^* = \sqrt{2/(10\cdot 0.16\cdot 0.1)} = \sqrt{12.5} \approx 3.54$ weeks, which is of the same order of magnitude as the testing frequency of `about once a month' familiar from everyday experience.
+\end{proof}
+
+\begin{theorem}[Nash equilibrium of fitness testing]\label{thm:shittest_nash}
+In a social game in which both sides carry out fitness testing, there exists a symmetric Bayesian--Nash equilibrium. Let A and B simultaneously choose `the level of effort to pass the test' $e_A, e_B \in [0, \infty)$, with effort cost $c(e)$ ($c' > 0, c'' > 0$). The higher the effort level $e$, the higher the probability of passing the other's test, but the higher the cost as well. The optimal effort level $e^*$ under the symmetric equilibrium satisfies
+\[
+c'(e^*) = \frac{\partial \mathbb{P}(\text{pass} \mid e^*)}{\partial e} \cdot \Delta V,
+\]
+where $\Delta V$ is the difference in social payoff between `being regarded as high value' and `being regarded as low value'.
+
+The effort levels of A and B constitute a symmetric orbit in the phase space $(e_A, e_B)$---the optimal strategies of both sides are symmetric, analogous to the in-phase synchronisation of coupled oscillators. The equilibrium effort level $e^*$ increases with the frequency of testing ($\Delta T_{\text{test}}^{-1}$) and with the difference in social payoff ($\Delta V$).
+\end{theorem}
+
+\begin{proof}
+A's expected payoff is $\mathbb{E}[U_A] = \mathbb{P}_A(\text{passing B's test} \mid e_A) \cdot V_H + (1 - \mathbb{P}_A) \cdot V_L - c(e_A)$, where $V_H, V_L$ are the social payoffs from being regarded as high/low value respectively. First-order condition: $\frac{\partial \mathbb{E}[U_A]}{\partial e_A} = \frac{\partial \mathbb{P}_A}{\partial e_A} \cdot (V_H - V_L) - c'(e_A) = 0$. The symmetric equilibrium requires $e_A = e_B = e^*$. The second-order condition is guaranteed by $c''(e^*) > 0$ (increasing marginal cost).
+\end{proof}
+
+\begin{example}[Classic fitness tests in social situations]
+Common patterns of fitness testing in social interaction and their probabilistic structure:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Compliance Test}: A asks B to do something slightly troublesome but reasonable (such as fetching a glass of water). A high-value individual ($\theta = H$) complies good-humouredly or declines wittily with probability $\alpha_H \approx 0.9$, whilst a low-value individual ($\theta = L$) is over-compliant or over-resistant with probability $\alpha_L \approx 0.3$. The test period is $\Delta T_{\text{test}} \approx 1$--$2$ weeks.
+    \item \textbf{Congruence Test}: A expresses an opinion or an emotion, and observes whether B maintains its own position or accommodates A. A high-value individual maintains congruence (neither accommodating nor attacking), whilst a low-value individual either accommodates excessively or rebuts excessively. The test period is $\Delta T_{\text{test}} \approx 1$--$3$ days.
+    \item \textbf{Stress Test}: A creates a mildly awkward or tense situation, and observes B's reaction under pressure. A high-value individual remains calm and humorous, whilst a low-value individual displays anxiety or aggression. The test period is $\Delta T_{\text{test}} \approx 1$--$4$ weeks.
+\end{enumerate}
+What these fitness tests have in common is that they estimate the other party's `type parameter' by observing its reaction to a \textbf{phase perturbation} (the test). The strength of the test (its difficulty, its awkwardness) is a scaling factor. The information gain from the other party's reaction updates the prior probability through Bayesian updating, forming a complete `prior--test--posterior' cycle.
+\end{example}
+
+\subsection{Periodic coupling of reciprocal altruism and fitness testing}
+
+\begin{proposition}[The composite period of exchange and testing]\label{prop:exchange_test_coupling}
+In a long-term social relationship, reciprocal altruism and fitness testing form a \textbf{coupled periodic system}: a failure of reciprocal altruism (the other party does not return the benefit) triggers fitness testing (is the other party still trustworthy?), and the outcome of the fitness test determines whether reciprocal altruism continues. Let the exchange period be $T_{\text{ex}}$ and the test period be $T_{\text{test}}$; the coupling dynamics of the two is
+\[
+\frac{dT_{\text{ex}}}{dt} = -\alpha \cdot \mathbf{1}_{\text{test failed}} + \beta \cdot \mathbf{1}_{\text{test passed}}, \quad T_{\text{test}} = \gamma \cdot T_{\text{ex}} + \delta,
+\]
+where $\alpha, \beta, \gamma, \delta > 0$ are coupling parameters. The exchange period $T_{\text{ex}}$ (the exchange frequency) shortens when a test is passed (the relationship warms up) and lengthens when a test fails (the relationship cools down). The test period $T_{\text{test}}$ is positively correlated with the exchange period---the more frequent the exchange, the more frequent the testing.
+
+The coupling of reciprocal altruism and fitness testing is an instance of two substructures locking onto each other: reciprocal altruism provides the substantive content of the relationship, and fitness testing provides the assessment of its quality. The frequency ratio $T_{\text{ex}}/T_{\text{test}}$ of the two measures the degree of trust in the relationship. In a high-trust relationship $T_{\text{test}} \gg T_{\text{ex}}$ (testing occasionally, exchanging frequently), whilst in a low-trust relationship $T_{\text{test}} \approx T_{\text{ex}}$ (testing is required before and after every exchange).
+\end{proposition}
+
+\begin{proof}
+Let the probability that a test is passed be $p$ (failure probability $1-p$). Taking expectations of the first coupled equation gives
+\[
+\mathbb{E}\left[\frac{dT_{\text{ex}}}{dt}\right] = -\alpha\,\mathbb{E}[\mathbf{1}_{\text{test failed}}] + \beta\,\mathbb{E}[\mathbf{1}_{\text{test passed}}] = -\alpha(1-p) + \beta p = (\alpha+\beta)p - \alpha.
+\]
+Setting this to zero gives the equilibrium pass rate
+\[
+p^* = \frac{\alpha}{\alpha+\beta}.
+\]
+This is a negative-feedback stable fixed point: when $p > p^*$ we have $\mathbb{E}[dT_{\text{ex}}/dt] > 0$, so the exchange period is stretched (the relationship cools), the next test is more likely to fail, and $p$ falls back; when $p < p^*$ the exchange period shortens (the relationship warms up) and $p$ rises again. Hence the system is in dynamic balance around $p^*$. Substituting the equilibrium exchange period $\overline{T}_{\text{ex}}$ into $T_{\text{test}} = \gamma T_{\text{ex}} + \delta$ gives the equilibrium test period $\overline{T}_{\text{test}} = \gamma\overline{T}_{\text{ex}} + \delta$, and the frequency ratio tends to the constant $\overline{T}_{\text{ex}}/\overline{T}_{\text{test}} = 1/(\gamma + \delta/\overline{T}_{\text{ex}})$ in the equilibrium state. For example, taking $\alpha=1, \beta=3$ (the relationship warms up faster after a test is passed) gives $p^* = 1/4$---in the long run, when about one test in four ends in failure, the exchange--test system reaches equilibrium.
+\end{proof}
+
+\section{Information diffusion}
+
+\begin{definition}[SIR information diffusion model]\label{def:sir_model}
+\emergencystretch=6em
+The classic model of information diffusion in social networks is the SIR model (Susceptible--Infected--Recovered):
+\[
+\frac{dS}{dt} = -\beta S I, \quad \frac{dI}{dt} = \beta S I - \gamma I, \quad \frac{dR}{dt} = \gamma I,
+\]
+where $S(t)$ is the proportion of susceptibles who have not yet come into contact with the information, $I(t)$ is the proportion of infecteds who have come into contact with the information and are spreading it, and $R(t)$ is the proportion of recovereds who have lost interest in the information. $\beta$ is the diffusion rate (the number of susceptibles that one infected can infect per unit time), and $\gamma$ is the recovery rate (the rate at which infecteds lose interest in spreading).
+
+The diffusion of information from infecteds to susceptibles is forward scaling ($I$ increases, $S$ decreases), and the conversion of infecteds into recovereds is reverse scaling ($I$ decreases, $R$ increases). The basic reproduction number $R_0 = \beta/\gamma$ determines the scale of the diffusion---when $R_0 > 1$ the information spreads explosively, and when $R_0 < 1$ the information gradually dies out. When $R_0 > 1$ the infection curve $I(t)$ exhibits a single-peaked shape that first rises and then falls---the heat of the information first increases and then decreases with time.
+\end{definition}
+
+\begin{proposition}[Damped oscillation in the SIRS model]\label{prop:sir_periodic}
+When a replenishment of susceptibles is added to the SIR model (new users join, and those who have forgotten become susceptible again), the model becomes SIRS:
+\[
+\frac{dS}{dt} = -\beta S I + \alpha R, \quad \frac{dI}{dt} = \beta S I - \gamma I, \quad \frac{dR}{dt} = \gamma I - \alpha R,
+\]
+where $\alpha$ is the rate at which recovereds become susceptible again. The SIRS model has an endemic equilibrium point $S^* = \gamma/\beta$; when the discriminant is negative, the eigenvalues of the Jacobian matrix are complex conjugates---the system exhibits damped oscillation, fluctuating with period
+\[
+T = \frac{2\pi}{\omega}, \qquad \omega = \sqrt{\beta I^*(\alpha+\gamma) - \frac{(\beta I^*+\alpha)^2}{4}}
+\]
+as the infected proportion tends to the equilibrium point, where $I^* = \frac{\alpha}{\alpha+\gamma}\left(1-\frac{\gamma}{\beta}\right)$ is the equilibrium infected proportion.
+
+The periodic solution of the SIRS model manifests itself as the `outbreak--fade--re-outbreak' pattern of information. When $\alpha$ is large (recovereds quickly forget and pay attention again), the oscillation is pronounced---the information repeatedly becomes a hot topic. The phenomenon of `old news resurfacing' on social media is empirical evidence for the periodic solution of SIRS.
+\end{proposition}
+
+\begin{proof}
+Using $S+I+R=1$, reduce the system to two dimensions (the variables $S, I$). The equilibrium point is found by combining $dI/dt = 0$ with $dS/dt = 0$: from $I(\beta S-\gamma)=0$ and taking the non-zero solution we get $S^* = \gamma/\beta$; from $\gamma I = \alpha R$ we get $R^* = \gamma I^*/\alpha$, and substituting into $S^*+I^*+R^*=1$ yields
+\[
+I^* = \frac{\alpha}{\alpha+\gamma}\left(1-\frac{\gamma}{\beta}\right).
+\]
+When $R_0 = \beta/\gamma > 1$ we have $I^* > 0$. At the equilibrium point the Jacobian matrix is
+\[
+J = \begin{pmatrix} -\beta I^* - \alpha & -\gamma - \alpha \\ \beta I^* & 0 \end{pmatrix},
+\]
+and the characteristic equation is $\lambda^2 + (\beta I^*+\alpha)\lambda + \beta I^*(\gamma+\alpha) = 0$. When the discriminant $\Delta = (\beta I^*+\alpha)^2 - 4\beta I^*(\gamma+\alpha) < 0$, the eigenvalues are $\lambda = -\frac{\beta I^*+\alpha}{2} \pm i\omega$, where
+\[
+\omega = \sqrt{\beta I^*(\gamma+\alpha) - \frac{(\beta I^*+\alpha)^2}{4}}.
+\]
+The imaginary part $\omega$ gives the angular frequency of the damped oscillation, hence the period $T = 2\pi/\omega$. The damping rate $(\beta I^*+\alpha)/2 > 0$ guarantees that the oscillation decays with time and the system ultimately tends to the equilibrium point. When $\alpha$ is large (recovereds quickly become susceptible again), $I^*$ and $\omega$ increase and the oscillation is pronounced.
+\end{proof}
+
+\section{Evolution of social networks}
+
+\begin{definition}[Periodic evolution of social relations]\label{def:relationship_cycle}
+Social relations are not static, but \textbf{evolve periodically} with time. The change in tie strength $W_{ij}(t)$ can be modelled as
+\[
+\frac{dW_{ij}}{dt} = \eta_{ij}(t) - \lambda W_{ij} + \sigma \xi_{ij}(t),
+\]
+where $\eta_{ij}(t)$ is the interaction frequency (which varies with time), $\lambda$ is the natural decay rate of the tie, and $\xi_{ij}(t)$ is a random perturbation. The interaction frequency $\eta_{ij}(t)$ is itself periodic---weekday interaction, weekend interaction and festival interaction each have a different frequency.
+
+The alternation of closeness and distance in a relationship resembles a rotation in phase space. The periodic change in tie strength corresponds, in periodic convolution, to the periodic modulation of the difference-angle similarity $\operatorname{Similarity}^{(1)}(\theta_i, \theta_j)$---when the social activities of two people are in phase the relationship is at its closest ($\cos(0)=1$), and when they are in antiphase it is at its most distant ($\cos(\pi)=-1$).
+\end{definition}
+
+\begin{proposition}[Community-structure period of social networks]\label{prop:community_cycle}
+The community structure of a social network (circles of friends, interest groups, work teams) evolves with time---the formation, stabilisation and disintegration of a community have an intrinsic period. Let the community activity $u(t)$ (the interaction frequency of members) decay exponentially during the decline stage as
+\[
+u(t) = u_{\text{peak}}\, e^{-\lambda (t - t_{\text{peak}})}, \qquad t \ge t_{\text{peak}},
+\]
+where $t_{\text{peak}}$ is the time of peak activity and $\lambda > 0$ is the decay rate. Then the `half-life' of the community (the time for half the members to remain active) is
+\[
+T_{1/2} = \frac{\ln 2}{\lambda}.
+\]
+The community life cycle is a complete cycle of a formation stage (ties are established, interaction increases), a peak stage (activity is highest) and a decline stage (ties disintegrate, interaction decreases). The half-life $T_{1/2}$ measures the persistence of community cohesion. Analysis of group data from online social platforms shows that the activity of most groups peaks $3$--$6$ months after creation and thereafter decays approximately exponentially, with a complete life cycle of about $6$ months to $5$ years (this is an \textbf{empirical observation}, and the specific duration depends on the type of community).
+\end{proposition}
+
+\begin{proof}
+From $u(t) = u_{\text{peak}} e^{-\lambda(t-t_{\text{peak}})}$, set $u(t_{1/2}) = u_{\text{peak}}/2$; then $e^{-\lambda(t_{1/2}-t_{\text{peak}})} = 1/2$, and taking logarithms of both sides gives $\lambda(t_{1/2}-t_{\text{peak}}) = \ln 2$, hence
+\[
+T_{1/2} = t_{1/2} - t_{\text{peak}} = \frac{\ln 2}{\lambda}.
+\]
+For example, taking a measured half-life $T_{1/2} = 3$ months gives $\lambda = \ln 2/(3\text{ months}) \approx 0.231/\text{month}$, corresponding to a monthly activity decay of about $1 - e^{-0.231} \approx 20.6\%$.
+\end{proof}
+
+\begin{definition}[Social-circle closure]\label{ch27_triadic_closure}
+\textbf{Social-circle closure} (triadic closure) means: if individual $i$ has ties with both $j$ and $k$, then the probability that a tie forms between $j$ and $k$ is significantly higher than the random level. Let the degree of node $i$ be $d_i$ and let the number of closed triangles with $i$ as a vertex be $T_i$; then the local clustering coefficient of node $i$ is
+\[
+C_i = \frac{\text{number of edges actually present among the neighbours of node }i}{\binom{d_i}{2}} = \frac{2T_i}{d_i(d_i-1)},
+\]
+and the whole-network clustering coefficient is $\overline{C} = \frac{1}{|V|}\sum_{i\in V} C_i$. $\overline{C}=0$ corresponds to a tree-like network with no closure, and $\overline{C}=1$ to a completely closed clique.
+\end{definition}
+
+\begin{proposition}[Relational loops of social-circle closure]\label{ch27_closure_loop}
+Under the reciprocal symmetry assumption (tie strength $W_{ij}=W_{ji}$, corresponding to the symmetric equilibrium of Theorem \ref{thm:shittest_nash}), social-circle closure makes the relational network form a large number of closed loops---triangles $i$-$j$-$k$-$i$. For a random graph (the Erdős--Rényi graph $G(n,p)$), any two neighbours are joined by an edge independently, hence $\mathbb{E}[\overline{C}] = p$; whereas the measured $\overline{C} \gg p$ of real social networks shows that relational edges tend to be embedded in closed triangles---social-circle closure is systematic, not a random coincidence.
+\end{proposition}
+
+\begin{proof}
+For $G(n,p)$, the two neighbours corresponding to any two adjacent edges of node $i$ are joined by an edge independently with probability $p$, hence $\mathbb{E}[C_i] = p$, and therefore $\mathbb{E}[\overline{C}] = p$. By definition, each closed triangle $i$-$j$-$k$ contributes $1$ to each of $T_i, T_j, T_k$ at its three vertices, so the total number of triangles is $= \frac{1}{3}\sum_i T_i$, and the number of closed loops in the whole network is uniquely determined by $\{C_i\}$. Real social networks satisfy $\overline{C} \gg p$: for example, a certain social platform has $n \sim 10^4$ and $p \sim 10^{-3}$ (in which case $\overline{C}_{ER}\approx 0.001$), whereas the measured value is $\overline{C}\approx 0.12$, that is, closed triangles are about $120$ times more abundant than in a random graph---this quantifies the triadic closure effect that `a friend of a friend often becomes a friend too'.
+\end{proof}
+
+\section{Cultural cycles and population evolution}
+
+\subsection{Cultural cycles of fashion and style}
+
+\begin{definition}[Cultural cycles of fashion and style]\label{def:cultural_cycle}
+The rise and fall of cultural trends (fashion, musical styles, artistic movements, architectural styles) displays pronounced periodicity. The time scale of a cultural cycle differs from field to field:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Fast-fashion cycle}: the popularity cycle of clothing styles is about $6$--$12$ months (seasonal turnover).
+    \item \textbf{Musical style cycle}: the rise--peak--decline cycle of popular musical styles is about $5$--$10$ years.
+    \item \textbf{Artistic movement cycle}: the turnover cycle of modern artistic movements is about $20$--$30$ years (one generation).
+    \item \textbf{Retro cycle}: the renewed popularity of old styles---a retro cycle of about $20$--$30$ years (`what was popular twenty years ago becomes popular again').
+\end{enumerate}
+The rise and decline of cultural trends manifests itself as a scaling transformation from the margins to the mainstream and then to obsolescence, whilst the retro cycle manifests itself as a periodic rotation of cultural preferences about the `new--old' axis. The length of the cycle is determined jointly by the speed of generational turnover and the rate of technological change.
+\end{definition}
+
+\begin{remark}[Cultural cycles of generational turnover (empirical observation)]\label{prop:generational_cycle}
+Cultural cycles are closely related to generational turnover. A generation (about $20$--$30$ years) is the time for those born in the same years to pass from childhood to adulthood and from recipients of culture to creators of culture. Each generation tends to rebel against the cultural style of the previous generation and to establish its own cultural markers---this cycle of `rebellion--establishment--being rebelled against' drives the generational cycle of cultural trends. The above mechanism of generational replacement and `rebellion' is an \textbf{empirical observation}, not a provable theorem.
+
+The generational cultural cycle can be formally analogised to a phase rotation of cultural preferences: the cultural preferences of each generation stand in contrast to those of the previous generation (rebellion), and after two generations the cultural preferences resemble those of the grandparents (retro). In this formal analogy the `phase' of cultural preference is a heuristic concept, and not a rigorously defined mathematical quantity.
+\end{remark}
+
+\subsection{Population evolution and intergenerational cycles}
+
+\begin{definition}[Basic models of population evolution]\label{def:population_evolution}
+\textbf{Population evolution} describes the evolution of population size $N(t)$ and its age structure $n(a,t)$ with time. The basic equations include:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Malthusian growth model}: $\frac{dN}{dt} = rN$ ($r > 0$ is the intrinsic growth rate). The solution is exponential growth $N(t) = N_0 e^{rt}$---growth is not limited by resources.
+    \item \textbf{Logistic growth model (Verhulst)}: $\frac{dN}{dt} = rN\left(1 - \frac{N}{K}\right)$ ($K$ is the environmental carrying capacity). The solution is an S-shaped curve, tending ultimately to $K$.
+    \item \textbf{Age-structure equation (McKendrick--von Foerster)}:
+    \[
+    \frac{\partial n(a,t)}{\partial t} + \frac{\partial n(a,t)}{\partial a} = -\mu(a) n(a,t),
+    \]
+    where $\mu(a)$ is the age-dependent death rate. The boundary condition $n(0,t) = \int_0^\infty b(a)\, n(a,t)\, da$ gives the number of newborns ($b(a)$ is the age-dependent birth rate).
+\end{enumerate}
+The periodic structure of population evolution originates in generational turnover---each generation passes through birth, growth, reproduction, ageing and death on a time scale of $20$--$30$ years. The coupling of this generational cycle with resource constraints gives rise to periodic fluctuations in population dynamics.
+\end{definition}
+
+\begin{proposition}[Generational cycles in population dynamics]\label{prop:generational_population_cycle}
+Consider a discrete-generation population model: let the population of generation $n$ be $N_n$, let its fertility rate after reaching adulthood be $f(N_{n-1})$ (depending on the environmental influence of the previous generation's population), and let the survival rate be $s$. Then the population dynamics is
+\[
+N_{n+1} = s \cdot f(N_{n-1}) \cdot N_n.
+\]
+When $f$ decreases as the previous generation's population increases (resource competition), periodic oscillations can appear in the population dynamics. Its period $T_{\text{gen}}$ is about two generation times ($T_{\text{gen}} \approx 2 \times 25$ years $= 50$ years).
+\end{proposition}
+
+\begin{proof}
+Taking $f(N) = r(1 - N/K)$ (linear competition) gives
+\[
+N_{n+1} = s r N_n \left(1 - \frac{N_{n-1}}{K}\right).
+\]
+Let the equilibrium state be $N^*$; then $N^* = s r N^*(1 - N^*/K)$, that is, $1 = s r (1 - N^*/K)$, which gives $N^* = K(1 - 1/(sr))$. The existence of the equilibrium state requires $sr > 1$.
+
+Linearising near the equilibrium state, let $N_n = N^*(1 + x_n)$; this gives
+\[
+x_{n+1} = x_n - s r \frac{N^*}{K} x_{n-1}.
+\]
+The characteristic equation is $\lambda^2 - \lambda + s r N^*/K = 0$. The discriminant is $\Delta = 1 - 4 s r N^*/K$. When $4 s r N^*/K > 1$, the eigenvalues are complex conjugates and $x_n$ exhibits periodic oscillation. The oscillation period is about $2$ generation times (each generation being about $25$ years), hence $T_{\text{gen}} \approx 50$ years.
+\end{proof}
+
+\begin{definition}[Demographic transition]\label{def:demographic_transition}
+The \textbf{demographic transition} (Demographic Transition) is the systematic transition of a population from high birth rate and high death rate to low birth rate and low death rate. The demographic transition comprises four typical stages:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Pre-industrial stage}: high birth rate, high death rate, and an approximately constant population size.
+    \item \textbf{Transitional stage}: the death rate falls whilst the birth rate remains high, and the population expands rapidly.
+    \item \textbf{Industrial stage}: the birth rate begins to fall and population growth slows.
+    \item \textbf{Post-industrial stage}: low birth rate, low death rate, and a population size that stabilises or declines.
+\end{enumerate}
+The time scale of the demographic transition is about $100$--$200$ years---in the history of population evolution it appears as a large-scale structural leap.
+\end{definition}
+
+\begin{proposition}[S-shaped model of the demographic transition]\label{prop:demographic_transition_s}
+The process of the demographic transition can be approximated by a logistic-type equation:
+\[
+\frac{dN}{dt} = r(t) N \left(1 - \frac{N}{K(t)}\right),
+\]
+where the growth rate $r(t)$ and the carrying capacity $K(t)$ vary with time. In the early stage of the transition $r(t) > 0$ and $K(t)$ rises (the death rate falls), so the population grows rapidly; in the late stage of the transition $r(t)$ falls or even becomes negative (the birth rate falls), and population growth slows or even turns into shrinkage.
+\end{proposition}
+
+\begin{proof}
+In the early stage of the transition, medical progress makes the death rate fall rapidly whilst the birth rate remains essentially unchanged, so $r(t)$ rises; at this time $N \ll K(t)$, and the equation is approximately $\frac{dN}{dt} \approx r(t) N$, so the population grows exponentially. In the late stage of the transition, the fall in the birth rate makes $r(t) \to 0$ or even $r(t) < 0$, and population growth slows until it stabilises. Substituting empirical time series for $r(t)$ and $K(t)$ allows the population dynamics of each stage to be fitted.
+\end{proof}
+
+\begin{remark}[Multi-level periodic structure of population evolution (empirical observation / research programme)]\label{thm:population_multi_cycle}
+Population evolution contains a nested structure of multi-level cycles. \textbf{The following levels are empirical observations and a research programme, not proved theorems}:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Generational cycle} ($20$--$30$ years): the individual life cycle of birth, growth, reproduction and death.
+    \item \textbf{Intergenerational oscillation} ($40$--$60$ years): the two-generation periodic oscillation produced by generational resource competition and falling fertility (Proposition \ref{prop:generational_population_cycle}).
+    \item \textbf{Kondratiev-type demographic long wave} ($50$--$60$ years): the long wave produced by the coupling of the population age structure with the economic cycle.
+    \item \textbf{Demographic transition cycle} ($100$--$200$ years): the complete leap from high birth and high death rates to low birth and low death rates.
+    \item \textbf{Civilisation cycle} (several hundred to several thousand years): the co-evolutionary cycle of population, technology and culture.
+\end{enumerate}
+The cycles of the various levels exhibit a nested structure: the generational cycle is nested within the intergenerational oscillation, the intergenerational oscillation within the demographic long wave, the demographic long wave within the demographic transition, and the demographic transition within the civilisation cycle.
+
+\textbf{Empirical basis}:
+The existence of the cycles at the various levels is derived from the corresponding dynamical mechanisms:
+\begin{itemize}
+    \item The generational cycle is given directly by the individual life cycle and is the basic unit of population evolution.
+    \item The intergenerational oscillation is derived from the discrete-generation model of Proposition \ref{prop:generational_population_cycle}, with a period of about two generation times.
+    \item The demographic long wave is produced by the coupling of the intergenerational oscillation with the economic cycle, and its time scale is determined by the product of the generational cycle and the capital-renewal cycle.
+    \item The demographic transition is given by the S-shaped model of Proposition \ref{prop:demographic_transition_s}, and its period is determined by the time lag between the fall in the death rate and the fall in the birth rate.
+    \item The civilisation cycle is produced by the multi-level coupling of population, technology and culture, and its time scale is about several times the demographic transition cycle.
+\end{itemize}
+The nested structure is guaranteed by the ratios of the time scales at the various levels being about $2$--$5$, that is, a cycle at a higher level contains several cycles at lower levels.
+\end{remark}
+
+\begin{example}[Intergenerational cycles and the `echo boom']\label{ex:echo_boom}
+The `echo boom' (Echo Boom) is a concrete instance of the intergenerational cycle in demography. Taking the United States as an example:
+\begin{enumerate}[label=(\roman*)]
+    \item In 1946--1964 the `baby boom' generation (Baby Boomers) numbered about $76$ million births.
+    \item In 1965--1979 the birth rate of `Generation X' fell, and the population declined relatively.
+    \item In 1980--1994 the `echo boom' generation---after the baby boomers reached childbearing age, their number of children increased once more, forming a second demographic peak.
+    \item In 1995--2010 the population size of the `millennials' and Generation Z fell back once again.
+\end{enumerate}
+The time interval between the baby boom and the echo boom is about $25$--$30$ years, which corresponds exactly to one generational time. The formation of this cycle is driven jointly by intergenerational resource competition (the baby boomers occupied a large share of resources, depressing the childbearing intentions of the next generation) and by the age-structure effect (the baby boomers entered childbearing age en masse).
+\end{example}
+
+\begin{remark}[Coupling of population cycles and cultural cycles]
+There is a coupling relation between population evolution cycles and cultural cycles: generational turnover drives both the renewal of cultural trends (each generation rebels against the culture of the previous one) and the renewal of the population age structure. The common time scale of the two (about $20$--$30$ years) makes the cultural retro cycle and the population generational cycle statistically correlated. This coupling is an instance of the interaction of multi-level cycles in the `Periodic Systems' chapter.
+\end{remark}
+
+\section{Phase locking in collective behaviour}
+
+\begin{definition}[Collective synchronisation behaviour]\label{def:collective_synchrony}
+Several kinds of \textbf{spontaneous synchronisation behaviour} exist in human groups---the behavioural rhythms of individuals tend to become identical in group interaction:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Applause synchronisation}: applause at the end of a concert or a speech moves from chaos to synchrony---the clapping rhythm moves from random phases to a uniform periodic beat within a few seconds.
+    \item \textbf{Gait synchronisation}: people walking side by side unwittingly converge in step frequency---the leg-swing periods lock in phase after coupling.
+    \item \textbf{Financial-market panic}: investors sell en masse when the market crashes---panic spreads within an extremely short time, and the behaviour of all market participants tends to synchrony.
+\end{enumerate}
+Collective synchronisation behaviour is the realisation at the level of social groups of phase locking in the `Periodic Systems' chapter (Proposition \ref{prop:phase-locking}): each individual is an independent periodic subsystem (a natural clapping frequency, a natural step frequency, a natural risk preference), and social interaction is the coupling coefficient between the substructures. When the coupling is strong enough, the phases of all individuals tend to equality---collective synchronisation.
+\end{definition}
+
+\begin{lemma}[Kuramoto synchronisation threshold]\label{ch27_kuramoto_threshold}
+Let the natural-frequency distribution $g(\omega)$ be continuous and unimodal, and symmetric about its mean $\Omega$. In the continuous limit $N\to\infty$, the Kuramoto model has a critical coupling strength
+\[
+K_c = \frac{2}{\pi g(\Omega)},
+\]
+such that: when $K \le K_c$ the only stable solution is the asynchronous state ($r=0$); when $K > K_c$ a synchronised solution branch with $r>0$ appears, and the order parameter near the threshold satisfies
+\[
+r \approx \sqrt{\frac{16(K-K_c)}{\pi K_c^4\,(-g''(\Omega))}} \qquad (K \to K_c^+),
+\]
+where $g''(\Omega) < 0$ (the unimodal distribution attains its maximum at $\Omega$).
+\end{lemma}
+
+\begin{proof}
+In the continuous limit, the phase-locked individuals are distributed on the arc $|\theta| \le \pi/2$, and their natural frequencies satisfy $\omega = \Omega - Kr\sin\theta$, so the synchronised state satisfies the mean-field self-consistency equation
+\[
+r = K r \int_{-\pi/2}^{\pi/2} \cos^2\theta \, g(\Omega + K r \sin\theta)\, d\theta.
+\]
+Dividing both sides by $r$ for the branch $r>0$, and expanding $g$ in a Taylor series at $\Omega$ (by symmetry $g'(\Omega)=0$):
+\[
+1 = K\int_{-\pi/2}^{\pi/2}\cos^2\theta\left[g(\Omega) + \frac12 g''(\Omega)K^2r^2\sin^2\theta\right]d\theta + O(r^4).
+\]
+Using $\int_{-\pi/2}^{\pi/2}\cos^2\theta\,d\theta = \frac{\pi}{2}$ and $\int_{-\pi/2}^{\pi/2}\cos^2\theta\sin^2\theta\,d\theta = \frac{\pi}{8}$, we obtain
+\[
+1 = \frac{\pi}{2}Kg(\Omega) + \frac{\pi}{16}K^3g''(\Omega)r^2 + O(r^4).
+\]
+Letting $r\to0^+$ gives the threshold condition $1 = \frac{\pi}{2}K_c g(\Omega)$, that is, $K_c = \frac{2}{\pi g(\Omega)}$. For $K > K_c$, rearranging the above expression gives
+\[
+r^2 = \frac{16}{\pi K^3(-g''(\Omega))}\left(\frac{\pi}{2}Kg(\Omega) - 1\right)
+= \frac{16}{\pi K^3(-g''(\Omega))}\cdot\frac{K-K_c}{K_c},
+\]
+where $\frac{\pi}{2}g(\Omega) = 1/K_c$ has been used. Taking $K \to K_c^+$ (in which case $K^3 \to K_c^3$) gives
+\[
+r \approx \sqrt{\frac{16\,(K-K_c)}{\pi K_c^4\,(-g''(\Omega))}}.
+\]
+A linear stability analysis shows that $r=0$ is stable for $K<K_c$ and unstable for $K>K_c$, so a supercritical bifurcation occurs at $K_c$.
+\end{proof}
+
+\begin{proposition}[The Kuramoto model and collective synchronisation]\label{prop:kuramoto_model}
+The classic mathematical model of collective synchronisation is the Kuramoto model. Let $N$ individuals each have a natural frequency $\omega_i$ and influence one another through phase coupling:
+\[
+\frac{d\theta_i}{dt} = \omega_i + \frac{K}{N} \sum_{j=1}^{N} \sin(\theta_j - \theta_i), \quad i = 1, \dots, N,
+\]
+where $K \ge 0$ is the coupling strength. Define the order parameter $r(t) = \frac{1}{N}|\sum_{j=1}^{N} e^{i\theta_j(t)}|$ (measuring the degree of collective synchronisation: $r=0$ is complete asynchrony, $r=1$ is complete synchrony). When $K$ exceeds the critical value $K_c$ (whose explicit expression and the scaling law near the threshold are given by Lemma \ref{ch27_kuramoto_threshold}), the collective undergoes a \textbf{phase transition}---the order parameter $r$ grows continuously from zero to a positive value, and the collective passes from the asynchronous state into the synchronised state.
+
+The phase transition of the Kuramoto model manifests itself as the critical phenomenon of phase locking at the collective level: the order parameter $r$ is the collective average of the phase similarity $\operatorname{Similarity}^{(1)}$. When the coupling strength exceeds the critical value, the collective enters the synchronised state---the difference-angle sine component $\operatorname{Im}\mathcal{K}^{(1)}\{f_i, f_j\}$ of the periodic convolution drives the phases of all individuals towards a common mean phase.
+\end{proposition}
+
+\begin{proof}
+The non-zero solution branch of the order parameter $r(t)$ and the critical value are given by Lemma \ref{ch27_kuramoto_threshold}: for $K \le K_c$ the asynchronous state $r=0$ is linearly stable; for $K > K_c$ the state $r=0$ becomes unstable and a synchronised solution with $r>0$ appears, with $r \sim \sqrt{K-K_c}$ (square-root scaling). Hence the order parameter grows \textbf{continuously} from $0$ at $K_c$---this is a second-order (continuous) phase transition. The order parameter $r = \frac{1}{N}|\sum_j e^{i\theta_j}|$ is precisely the modulus measuring the degree of phase agreement in the collective, so $r$ rising from $0$ to a positive value means that the collective passes from disordered phases to phase locking.
+\end{proof}
+
+\begin{example}[Emotional contagion in social networks]
+The 2014 Facebook emotional contagion experiment (Kramer et al., PNAS, 2014) demonstrated that emotions can spread through textual content on social media. In the experiment the news feeds of about $690$ thousand users were covertly adjusted---some users saw less positive content, and some saw less negative content. The results showed that users who saw less positive content themselves posted fewer positive words and more negative words---emotion is contagious through purely textual interaction.
+
+Emotional contagion is empirical evidence of phase locking in social networks: a user's emotional state $\theta_i$ (in the valence--arousal space) is coupled to others through the edges of the social network. Although the effect size in the Facebook experiment was small ($d \approx 0.001$), it was highly significant statistically---when $N$ is extremely large, even a tiny coupling can produce a detectable collective shift.
+\end{example}
+
+\section{Conservation laws of social systems}
+
+\begin{theorem}[Three conservation laws of social systems]\label{thm:social_conservation}
+The dynamics of a social system is governed by three conservation laws:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Population conservation}: in a closed social system the total population $N = S + I + R$ remains constant. In an open system, the change in population $=$ new users joining $-$ old users leaving. On a long-term average, the total number of active users of a social platform tends to a dynamic balance---inflow equals outflow. The change in the population age structure is described by the McKendrick--von Foerster equation (Definition \ref{def:population_evolution}).
+    \item \textbf{Information conservation}: in the process of information diffusion, the `total amount' of information (the number of people who know it) is transferred from susceptibles to infecteds, and ultimately to recovereds---the total number of people who know the information, $I + R$, is monotonically non-decreasing. The final scale of information diffusion ($R_{\infty}$) is determined by the basic reproduction number $R_0$: $R_{\infty} = 1 - e^{-R_0 R_{\infty}}$.
+    \item \textbf{Trust conservation}: in a social relational network, the total amount of trust (the sum of tie strengths) remains stable in the absence of external events. The closeness and distance of ties between individuals is merely a redistribution of trust among different relationships---a person's distancing from some is often accompanied by closeness to others. The conservation of the total amount of trust in a social network resembles the conservation of angular momentum in a rotating system---the `total angular momentum' of trust remains constant within the network topology.
+\end{enumerate}
+The hierarchical relation of the three conservation laws is: population conservation is the foundation of the existence of a social system, information conservation is the motive power of social interaction, and trust conservation is the structural constraint on social relations. Together the three constitute the guarantee of the self-consistency of the periodic structure of social systems.
+\end{theorem}
+
+\begin{proof}
+(i) Population conservation: in a closed system $d(S+I+R)/dt = 0$. In an open system, if the rate $b$ at which new users join equals the rate $d$ at which old users leave ($b=d$), then the total population is stable. The user-growth curve of a social platform is usually S-shaped---exponential growth initially, linear growth in the middle period, and saturation later (the logistic equation, Definition \ref{def:population_evolution}).
+
+(ii) Information conservation: in the SIR model, $\frac{d}{dt}(I+R) = \beta S I \ge 0$---the number of people who know the information increases monotonically. The final proportion of recovereds, $R_{\infty}$, satisfies the transcendental equation $R_{\infty} = 1 - e^{-R_0 R_{\infty}}$ (assuming $S_0 \approx 1$). The larger $R_0$ is, the wider the information spreads---when $R_0 = 2$, $R_{\infty} \approx 0.80$ ($80\%$ of people ultimately know the information).
+
+(iii) Trust conservation: the total tie strength $\sum_{i<j} W_{ij}$ in a social network tends to be stable in the absence of major events. A change in tie strength is more likely to be a redistribution than a change in the total---analogous to the conservation of phase-space volume (Liouville's theorem). This assumption is supported by the sociological theory of `Dunbar's number': the number of stable social relationships a human can maintain is about $150$---the total social investment is distributed among several relationships.
+\end{proof}
+
+\begin{remark}[The metaphorical nature of trust conservation]\label{ch27_trust_metaphor}
+Among the three conservation laws of Theorem \ref{thm:social_conservation}, population conservation and information conservation can be derived rigorously from the population dynamics equations and the SIR/SIRS differential equations (see (i)(ii) of the proof of that theorem). \textbf{Trust conservation is different}: at present there is no rigorous mathematical definition of a `total amount of trust', and `the total amount of trust does not change with time' is a formal analogy and an empirical hypothesis, not a theorem. What Dunbar's number (about $150$) measures is the cognitive capacity of the human brain to maintain stable relationships; it implies that \textbf{social attention} (social energy) is redistributed among the relationships that are maintained, rather than being a precisely measurable conserved physical quantity. Hence `trust conservation/social-attention conservation' as discussed in this chapter should be understood as a \textbf{metaphor}---it characterises the redistributive structure of social investment, not a rigorous conservation law.
+\end{remark}
+
+\begin{remark}[Scaling of social-circle size: Dunbar stratification (empirical observation)]\label{ch27_dunbar_scaling}
+The size of human social circles exhibits an approximately stratified scaling structure. The theory of Dunbar's number (\textbf{empirical observation}, not a theorem) gives several characteristic scales: a core support circle of about $5$ people, an intimate circle of about $15$ people, a circle of good friends of about $50$ people, a circle of stable relationships of about $150$ people, and an acquaintance circle of about $500$ people. The ratio of the sizes of adjacent layers is about $3$ ($5\to15\to50\to150\to500$), an approximately geometric scaling. This scaling is determined by the neocortical capacity of the human brain, and is the manifestation in size of the cognitive constraint on social attention---it is the point of contact of the scaling theme in social systems; its specific values belong to empirical observation and do not constitute a provable theorem.
+\end{remark}
+
+\begin{remark}[Connection with the rest of the book]
+The theory of the periodic structure of social systems established in this chapter is an application of periodic mathematics in social science. Social rhythms manifest themselves as the repeated organisation of social activity by daily, weekly and yearly periods. The SIR/SIRS information diffusion model describes the explosive diffusion and the periodic re-heating of information. Social-network evolution describes the alternation of closeness and distance in relationships. Cultural cycles and population evolution display periodic rise and fall driven by generational turnover---the demographic transition is a structural leap in population evolution, and the intergenerational cycle and the `echo boom' are the direct manifestation of generational turnover in demography. The phase transition of the Kuramoto model is the collective realisation of phase locking in the `Periodic Systems' chapter---when the coupling strength exceeds the critical value, the collective passes from asynchrony into synchrony. The three conservation laws of social systems---population conservation, information conservation and trust conservation (the latter being a metaphor)---together constitute the sociological foundation of the periodic structure of social systems.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{9.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & The passage of interpersonal relations through time: the daily/weekly/yearly repetition of social rhythms (Definition \ref{def:social_rhythms}), the reciprocal exchange period $T_{\text{ex}}$ (Definition \ref{def:reciprocal_altruism}, Proposition \ref{prop:tit_for_tat_period}) \\
+Scaling & Scaling of social-network size: Dunbar stratification $5/15/50/150/500$ (Remark \ref{ch27_dunbar_scaling}), community half-life $T_{1/2}=\ln2/\lambda$ (Proposition \ref{prop:community_cycle}), reproduction number $R_0=\beta/\gamma$ (Definition \ref{def:sir_model}) \\
+Rotation & The phase cycle of relational closeness: the alternation of closeness and distance (Definition \ref{def:relationship_cycle}), the phase rotation of cultural retro (Definition \ref{def:cultural_cycle}), Kuramoto phase locking (Lemma \ref{ch27_kuramoto_threshold}, Proposition \ref{prop:kuramoto_model}) \\
+Conservation & Conservation of social energy/attention (\textbf{metaphor}): the three conservation laws of population/information/trust (Theorem \ref{thm:social_conservation}), of which trust/attention conservation is explicitly declared to be a metaphor (Remark \ref{ch27_trust_metaphor}) \\
+Symmetry & Reciprocal symmetry: the symmetric tit-for-tat strategy (Proposition \ref{prop:tit_for_tat_period}), the symmetric Bayesian--Nash equilibrium of fitness testing $e_A=e_B=e^*$ (Theorem \ref{thm:shittest_nash}), symmetry of tie strength $W_{ij}=W_{ji}$ (Proposition \ref{ch27_closure_loop}) \\
+Closure & Social-circle closure and relational loops: triadic closure and the clustering coefficient $\overline{C}$ (Definition \ref{ch27_triadic_closure}, Proposition \ref{ch27_closure_loop}), the exchange--test feedback loop (Proposition \ref{prop:exchange_test_coupling}) \\
+Period & Relational cycles and Kuramoto collective synchronisation: the retaliation-loop period $2/\varepsilon$ (Proposition \ref{prop:tit_for_tat_period}), the test period $\Delta T_{\text{test}}^*$ (Proposition \ref{prop:shittest_periodic}), the SIRS oscillation period (Proposition \ref{prop:sir_periodic}), the collective-synchronisation phase transition (Proposition \ref{prop:kuramoto_model}), the multi-level periodic structure of population evolution (empirical observation / research programme, Remark \ref{thm:population_multi_cycle}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the \textbf{social periodicity decision theorem} of this chapter (\ref{thm:social_periodicity_decision}). Hint: first write down the decision map and the evolution group of the goal in this chapter, then apply the proof structure of the general criterion of the `Periodic Systems' chapter.
+
+    \item Verify that the hypotheses of the \textbf{monotonicity of quantity adjustment} (\ref{prop:social_adaptive_growth}) hold for the domain objects of this chapter, and give a counterexample in which the hypotheses fail.
+
+    \item Examine the behaviour of the \textbf{three-parameter correspondence: radius, phase and rotation speed} (\ref{prop:social_epicycle_correspondence}) under parameter degeneration, and explain how the conclusion degenerates accordingly.
+
+    \item Explain the relation between the \textbf{social period diagnosis workflow and the interfaces to three chapters} (\ref{thm:social_diagnosis_integration}) and the corresponding general conclusion of the `Periodic Systems' chapter (whether it is consistent with it, a special case of it, or requires additional conditions).
+
+    \item According to the seven-theme comparison table of this chapter, point out respectively the concrete carriers of this chapter for the three themes \textbf{translation}, \textbf{scaling} and \textbf{rotation}, and give one domain data example for each.
+
+    \item Comprehensive question: restate the diagnosis workflow of this chapter using the five-step standard interface of the `Periodic Systems' chapter (Table \ref{tab:ps_five_steps}), and note one by one the theorem of this chapter on which each step depends: \ref{thm:social_periodicity_decision}, \ref{prop:social_adaptive_growth}, \ref{prop:social_epicycle_correspondence}, \ref{thm:social_diagnosis_integration}.
+\end{enumerate}
+

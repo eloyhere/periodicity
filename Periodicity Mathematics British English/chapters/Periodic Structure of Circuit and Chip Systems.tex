@@ -1,0 +1,797 @@
+\chapter{Periodic Structure of Circuit and Chip Systems}
+\markboth{Periodic Structure of Circuit and Chip Systems}{Periodic Structure of Circuit and Chip Systems}
+
+\begin{remark}[Periodicity decision for the target of this chapter (citation)]\label{rem:circuit_ps_hook}
+When this chapter decides whether a research target is periodic, determines its period type, or seeks its minimal positive period, reference is always made to the `Periodic Systems' chapter:
+for the periodicity criterion see \cref{thm:ps_periodicity_decision},
+for the discrimination of period types see \cref{def:ps_period_type}, \cref{prop:ps_type_discrimination},
+for the search for the minimal positive period see \cref{def:ps_minimal_period_algorithm}, \cref{thm:ps_minimal_period_correctness},
+and for the construction of period series and epicycle groups from data see \cref{thm:ps_series_reconstruction}, \cref{def:ps_epicycle_group}.
+\end{remark}
+
+\begin{remark}[Positioning of this chapter: developed along the five-step interface of the `Periodic Systems' chapter]\label{rem:circuit_five_steps_positioning}
+The periodic structure of circuit and chip systems studies the mathematical characterisation of periodicity and resonance phenomena in circuits, and of the chip as an epicycle waveform/spectrum processing unit. This chapter does not establish a separate periodicity criterion; instead it connects circuit and chip systems to the five-step interface prescribed by the `Periodic Systems' chapter:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{Decision}: reduce such targets as crystal-oscillator oscillation, PLL phase locking, clock-tree propagation and LC oscillation to discrete or continuous dynamical systems, invoke \cref{thm:ps_periodicity_decision} to decide whether they are periodic, and determine the period type;
+    \item \textbf{Construction}: build the amplitude series, the frequency series and the phase series from crystal-oscillator waveforms, clock signals, data signals and spectral data, and assemble them into the circuit epicycle group;
+    \item \textbf{Adjustment}: dynamically adjust the circuit epicycle group subject to residual-energy descent and the constraints of charge conservation, energy conservation and flux conservation;
+    \item \textbf{Convolution}: introduce amplitude convolution, phase convolution and frequency convolution on the circuit epicycle group, and link them to autocorrelation, cross-correlation and clock skew;
+    \item \textbf{Integration}: connect to the tool chains of the three chapters `Discrete Sampling and Intercalation of Periodic Signals', `Harmonic Analysis' and `Time Series Analysis', forming a circuit periodicity diagnostic procedure.
+\end{enumerate}
+The core content of this chapter is: \textbf{from the perspective of periodic mathematics, a chip is an epicycle waveform/spectrum processing unit with parameters}. All the inputs and outputs of a chip are processing operations based on epicycle waveforms/spectra. Specifically:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{The crystal oscillator as a fundamentally fixed epicycle}: the quartz crystal oscillator is the most central periodic source in a chip---it outputs a sinusoidal/square-wave oscillation whose amplitude, frequency and phase are all fundamentally fixed. The crystal oscillator is the \textbf{master epicycle} of all the other epicycles within the chip (driven by the outer ring).
+    \item \textbf{The phase-locked loop as a frequency multiplier/divider of epicycles}: a PLL multiplies the crystal-oscillator epicycle up to the GHz level, or divides it down to the kHz level---it is the \textbf{scaling operation} on epicycles.
+    \item \textbf{The clock tree as a nested epicycle system}: the clock distribution from the crystal oscillator to the individual registers is a layer-by-layer nested epicycle structure---the global clock (the master epicycle) drives the module clocks (secondary epicycles), and the module clocks drive the register clocks (epicycles further inside).
+    \item \textbf{The data signal as a modulated epicycle}: the data signal is nested on the clock epicycle by modulation---the `1' and `0' of the data correspond to the two states of a phase operator (the $C_2$ group).
+    \item \textbf{The chip as a spectrum processing unit}: an FFT chip directly implements the discrete Fourier transform---it decomposes a time-domain epicycle into frequency-domain components. A filter chip implements the selection of specific frequency components.
+\end{enumerate}
+The mathematical tools used in this chapter include: the epicycle model, LC oscillation, phase locking, feedback loops, periodic convolution, epicycle groups, phase operators and delay.
+\end{remark}
+
+\begin{remark}[Guide to the seven themes of this chapter]\label{rem:circuit_seven_themes}
+\textbf{Translation}---the advance of clock beats and the signal propagation delay (the clock-tree propagation delay $\tau_i$ and the pipeline delay $\tau_{\text{pipe}}$, Definition \ref{def:clock_skew}, \ref{def:chip_delay_types}); \textbf{Scaling}---process scaling (Moore's law, Definition \ref{ch24_moore_scaling}) and PLL frequency multiplication/division (Definition \ref{def:pll_epicycle}); \textbf{Rotation}---the phase rotation and locking of the phase-locked loop (Definition \ref{def:pll_delay}, Proposition \ref{prop:pll_phase_lock}); \textbf{Conservation}---energy conservation (power dissipation) and charge/information conservation (Theorem \ref{thm:circuit_conservation}, Remark \ref{ch24_power_info_conservation}); \textbf{Symmetry}---the H-tree symmetry of the clock tree (Example \ref{ex:h_tree_clock}) and differential-signal symmetry (Definition \ref{def:op_amp}); \textbf{Closure}---the closure of the phase-locked loop feedback path (Definition \ref{def:pll_epicycle}); \textbf{Period}---the crystal-oscillator period $T_0=1/f_0$ (Definition \ref{def:quartz_oscillator}) and the clock period $T_{\text{clk}}$ (Definition \ref{def:cpu_epicycle}).
+\end{remark}
+
+\section{Connection to the five-step interface of the `Periodic Systems' chapter}
+\label{sec:circuit_five_steps}
+
+\subsection{Step one: periodicity decision for the circuit target}
+
+\begin{definition}[Circuit target and decision input]\label{def:circuit_target}
+A \textbf{circuit target} is one of the following objects:
+\begin{enumerate}[label=(\roman*)]
+    \item a crystal-oscillator oscillation system, whose state space is the $(V,i)$ phase space;
+    \item an LC resonant circuit, whose state space is the charge--current phase space;
+    \item a phase-locked loop system, whose state space is the joint space of the input phase and the output phase;
+    \item a clock tree system, whose state space is the joint space of the clock phases of the leaf nodes;
+    \item a data-modulated signal, whose state space is the sequence space of $C_2$ phase states.
+\end{enumerate}
+The \textbf{decision input} of a circuit target is the pair
+\[
+\mathcal D_{\mathrm{C}}=(\mathcal S,\Phi),
+\]
+where $\mathcal S$ is the state space and $\Phi:\mathcal S\to\mathcal S$ is the map induced by time translation, phase rotation or feedback evolution. If $\mathcal S$ is a finite set, the target is called a \textbf{finite circuit target}; if $\mathcal S$ is an infinite set, the target is called an \textbf{infinite circuit target}.
+\end{definition}
+
+\begin{definition}[Circuit decision map]\label{def:circuit_periodization}
+Let a circuit target be given by the decision input $\mathcal D_{\mathrm{C}}=(\mathcal S,\Phi)$. If the states of the target are generated by $\Phi$, that is, if there exists $x_0\in\mathcal S$ such that
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+for $t\in\mathbb Z$ the state $x_t$ is generated by iteration of $\Phi$; for $t\in\mathbb R$ it is described by the one-parameter evolution family $\{\Phi_t\}_{t\in\mathbb R}$, where each $\Phi_t:\mathcal S\to\mathcal S$, $\Phi_0=\operatorname{id}$, $\Phi_{s+t}=\Phi_s\circ\Phi_t$ for all $s,t\in\mathbb R$, and $(t,x)\mapsto\Phi_t(x)$ is continuous.
+then $\Phi$ is called the \textbf{circuit decision map} of the target. The circuit target is then reduced to the discrete dynamical system $(\mathcal S,\Phi)$ when $t\in\mathbb Z$ and to the continuous dynamical system $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$ when $t\in\mathbb R$; in both cases the criteria of the `Operations and Periodicity' chapter and of the `Periodic Systems' chapter may be applied directly.
+\end{definition}
+
+\begin{theorem}[Circuit periodicity decision theorem]\label{thm:circuit_periodicity_decision}
+Let the decision map of a circuit target be $\Phi$, and let $(\mathcal S,\Phi)$ be a discrete dynamical system. Then:
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{Sufficient decision}: if there exists $m\in\mathbb N^+$ with $\Phi^m=\mathrm{id}$, then the target is a uniformly periodic circuit system; every orbit is closed and the orbit length divides $m$.
+    \item \textbf{Equivalence of the decision}: the target is a uniformly periodic circuit system if and only if $\operatorname{ord}(\Phi)<\infty$.
+    \item \textbf{Pointwise criterion}: the orbit of the target at a state $x_0$ is closed if and only if $x_0$ is a periodic point; the orbit length is then the period at that point.
+    \item \textbf{Non-omissibility}: the conjunction of conserved quantities and symmetry groups cannot replace $\operatorname{ord}(\Phi)<\infty$; a quasi-periodic circuit target is not a periodic circuit system.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:circuit_periodicity_decision} of this chapter is the domain instantiation of \cref{thm:ps_periodicity_decision} in the `Periodic Systems' chapter:
+it suffices to replace the decision map $f$ and the evolution group by $\Phi$ of this chapter, and the four items (A) sufficient decision, (B) equivalence of the decision, (C) pointwise criterion and
+(D) non-omissibility then hold one by one. By the convention of \cref{rem:ps_applications_hook}, they are not expanded again here.
+\end{proof}
+
+\begin{corollary}[Circuit period types]\label{cor:circuit_period_type}
+After the decision by \cref{thm:circuit_periodicity_decision}, a circuit target falls into one of the following types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Trivial periodic type}: the minimal period is $m_0=1$ and the state is a fixed point;
+    \item \textbf{Strictly periodic type}: $1<m_0<\infty$ and the state is strictly periodic;
+    \item \textbf{Uniformly periodic type}: $\operatorname{ord}(\Phi)=m<\infty$ and all orbit lengths divide $m$;
+    \item \textbf{Quasi-periodic type}: $\operatorname{ord}(\Phi)=\infty$; the orbits are not closed but are dense on a compact carrier structure;
+    \item \textbf{Eventually periodic type}: there exists $N$ such that the target is periodic for $t\ge N$;
+    \item \textbf{Discrete periodic type}: the carrier structure is $\mathbb Z$ and the normalised period ratio is $\rho=T_x/\Delta x\in\mathbb Q$.
+    \item \textbf{Asymptotically periodic (damped) type}: the orbit is not closed, but tends asymptotically to a closed orbit or to a fixed point, the residual decaying as $e^{-\kappa t}$ (see \cref{def:ps_period_type}(vii)).
+\end{enumerate}
+Here (i)--(iii) and (vi) are periodic circuit systems; (iv) is not a periodic circuit system but can be handled with bounded-approximation tools; (v) is a periodic circuit system only in its stable stage; (vii), like (iv), is a type in the limiting sense; it is not a periodic circuit system and can be handled with bounded-approximation tools only in its stable stage.
+\end{corollary}
+
+\begin{proof}
+Each item follows by substituting the circuit target into \cref{thm:circuit_periodicity_decision} and \cref{def:ps_period_type} of the `Periodic Systems' chapter.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for LC oscillation]\label{lem:lc_oscillator_periodic}
+Let an LC resonant circuit consist of an inductance $L$ and a capacitance $C$, with charge $q(t)$ satisfying
+\[
+\ddot q+\omega_0^2q=0,\qquad \omega_0=\frac{1}{\sqrt{LC}}.
+\]
+Then the LC oscillation is a uniformly periodic system whose minimal positive period is
+\[
+T_0=2\pi\sqrt{LC}.
+\]
+\end{lemma}
+
+\begin{proof}
+The general solution of the equation is $q(t)=A\cos(\omega_0t+\phi)$. The time translation $T_0=2\pi/\omega_0=2\pi\sqrt{LC}$ gives $q(t+T_0)=q(t)$, and $T_0$ is the minimal positive period. Hence the decision map $\Phi$ satisfies $\Phi^{T_0}=\mathrm{id}$, so the system is uniformly periodic.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for crystal-oscillator oscillation]\label{lem:quartz_periodic}
+Let the output signal of the crystal oscillator be
+\[
+V_{\text{crystal}}(t)=A_{\text{fixed}}e^{i(\omega_{\text{fixed}}t+\phi_0)},\qquad \omega_{\text{fixed}}=2\pi f_0.
+\]
+Then the crystal-oscillator oscillation is a uniformly periodic system whose minimal positive period is
+\[
+T_0=\frac{1}{f_0}=\frac{t}{K}.
+\]
+Here $K\approx 1.67\ \text{MHz}\cdot\text{mm}$ and $t$ is the thickness of the crystal plate.
+\end{lemma}
+
+\begin{proof}
+By Definition \ref{def:quartz_oscillator}, the crystal-oscillator output is a complex exponential signal of fixed frequency whose minimal positive period is $T_0=2\pi/\omega_{\text{fixed}}=1/f_0$. The resonant frequency $f_0=K/t$ is determined by the thickness of the crystal plate. Hence the decision map $\Phi$ satisfies $\Phi^{T_0}=\mathrm{id}$, so the system is uniformly periodic.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for PLL phase locking]\label{lem:pll_periodic}
+Let the PLL be in the locked state, with output frequency $f_{\text{out}}=Nf_{\text{ref}}$. Then the output clock is a uniformly periodic system whose minimal positive period is
+\[
+T_{\text{out}}=\frac{1}{Nf_{\text{ref}}}=\frac{T_{\text{ref}}}{N}.
+\]
+Moreover the output phase and the input phase satisfy $\phi_{\text{out}}(t)-N\phi_{\text{ref}}(t)=\text{constant}$.
+\end{lemma}
+
+\begin{proof}
+By Proposition \ref{prop:pll_phase_lock}, in the locked state $\phi_{\text{out}}=N\phi_{\text{ref}}+\text{constant}$, so the output frequency is $N$ times the reference frequency. The minimal positive period of the output clock is $T_{\text{out}}=1/(Nf_{\text{ref}})$. Because of phase locking, an integer multiple of the difference between the output phase and the input phase is constant, so the whole system is a uniformly periodic system.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for clock-tree propagation]\label{lem:clock_tree_periodic}
+Let the propagation delay from the root node of the clock tree to the leaf node $i$ be $\tau_i$. Then the clock signals of all leaf nodes are uniformly periodic systems with common period
+\[
+T_{\text{clk}}=\frac{1}{f_{\text{clk}}},
+\]
+and the relative phase difference between the clocks of the leaf nodes is the clock skew $\delta_{ij}=\tau_i-\tau_j$.
+\end{lemma}
+
+\begin{proof}
+Every leaf node of the clock tree receives a clock signal of the same frequency as the root node, with minimal positive period $T_{\text{clk}}=1/f_{\text{clk}}$ in each case. The phase difference between the clocks of the leaf nodes is determined by the difference of the propagation delays, $\delta_{ij}=\tau_i-\tau_j$. Hence the clocks of all leaf nodes are uniformly periodic systems with common period $T_{\text{clk}}$.
+\end{proof}
+
+\begin{definition}[Algorithm for the minimal positive period of a circuit]\label{def:circuit_minimal_period_algorithm}
+This definition is identical in content to the one in Chapter~\ref{chap:periodic_system}, section `Periodicity decision: whether a target is periodic' (\cref{sec:ps_periodicity_decision}), namely \cref{def:ps_minimal_period_algorithm}; to avoid repeated exposition, only the reference anchor is retained here and the complete statement is given there. The only difference here is terminology (circuit target / circuit sample); the steps of the algorithm and the conclusion are entirely the same.
+\end{definition}
+
+\begin{theorem}[Correctness of the algorithm for the minimal positive period of a circuit]\label{thm:circuit_minimal_period_correctness}
+This theorem is identical in content to the one in Chapter~\ref{chap:periodic_system}, section `Periodicity decision: whether a target is periodic' (\cref{sec:ps_periodicity_decision}), namely \cref{thm:ps_minimal_period_correctness}; to avoid repeated exposition, only the reference anchor is retained here and the complete statement and proof are given there. The only difference here is terminology (circuit target / circuit sample); the steps of the algorithm and the conclusion are entirely the same.
+\end{theorem}
+
+\begin{example}[Examples of circuit periodicity decisions]\label{ex:circuit_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item LC oscillation: $T_0=2\pi\sqrt{LC}$, uniformly periodic type;
+    \item crystal-oscillator oscillation: $T_0=1/f_0=t/K$, uniformly periodic type;
+    \item PLL locking: $T_{\text{out}}=T_{\text{ref}}/N$, uniformly periodic type;
+    \item clock tree: common period $T_{\text{clk}}=1/f_{\text{clk}}$, clock skew $\delta_{ij}$ at the leaf nodes;
+    \item FFT butterfly operation: the $N$-point phase operators form the cyclic group $C_N$.
+\end{enumerate}
+\end{example}
+
+\begin{remark}[Conserved quantities do not guarantee periodicity]\label{rem:circuit_invariant_not_period}
+Charge conservation, energy conservation and flux conservation in circuit systems are auxiliary conditions for periodic structure but do not constitute sufficient conditions. For example, an ideal RC discharge circuit possesses charge conservation, yet its output signal decays exponentially with time rather than being periodic. The periodic structure of a circuit must be decided by \cref{thm:circuit_periodicity_decision} or by the lemmas above.
+\end{remark}
+
+\subsection{Step two: construction of the circuit periodic series and the epicycle group}
+
+\begin{definition}[Circuit amplitude series, frequency series and phase series]\label{def:circuit_series}
+Let the state or output sequence of a circuit target be $\{z_t\}$. If it can be written as
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+then
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+are called respectively the \textbf{amplitude series}, the \textbf{frequency series} and the \textbf{phase series} of the circuit target. The three agree with \cref{def:amplitude_series}, \cref{def:frequency_series} and \cref{def:phase_series} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{definition}[Circuit epicycle group]\label{def:circuit_epicycle_group}
+Let the periodic series of a circuit target be given by the amplitude series $\{A_k\}$, the frequency series $\{\omega_k\}$ and the phase series $\{\phi_k\}$. For each $k$ define the epicycle
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+and call the set
+\[
+\mathfrak E_{\mathrm{C}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+the \textbf{epicycle group} of the circuit target. Its superposition is the circuit periodic series
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[Construction of a periodic series from circuit data]\label{thm:circuit_series_reconstruction}
+Let the output of a circuit target be a finite periodic sequence of period $N$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the output can be expanded as a discrete Fourier series
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item the amplitude series is given by $|c_k|$, the phase series by $\arg c_k$ and the frequency series by $2\pi k/N$;
+    \item if the output is a crystal-oscillator clock, the Fourier decomposition has only a single spectral line; if the output is a square-wave clock, the odd harmonics of each order correspond to the square-wave components.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) The discrete Fourier series of a finite periodic sequence is a standard result: the basis functions $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ form an orthogonal basis of $\mathbb C^N$.
+(ii) This is read off directly from $c_k=A_k e^{i\phi_k}$.
+(iii) The time part of the crystal-oscillator clock is $e^{-i\omega t}$, which on the period $T=2\pi/\omega$ has only the fundamental component; a square wave expands, as a Fourier series, into the odd harmonics of each order.
+\end{proof}
+
+\begin{proposition}[Three-parameter correspondence: radius, phase and speed]\label{prop:circuit_epicycle_correspondence}
+The three parameters of the circuit epicycle group $\mathfrak E_{\mathrm{C}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ correspond one-to-one to three geometric--physical quantities:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Radius corresponds to amplitude}: $E_k$ has radius $|E_k|=A_k$, which is the amplitude of the voltage or current component;
+    \item \textbf{Phase corresponds to rotational delay}: the initial phase $\phi_k$ corresponds to the time translation $\tau_k=\phi_k/\omega_k$; when $\phi_k>0$ this component \textbf{leads} the baseline by $\tau_k$ (equivalently, the component coincides with the baseline once the baseline is postponed by $\tau_k$);
+    \item \textbf{Frequency corresponds to rotational speed}: $\omega_k$ is the angular frequency of that clock component.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:circuit_epicycle_correspondence} of this chapter corresponds exactly to \cref{prop:ps_epicycle_correspondence} of the `Periodic Systems' chapter,
+and the three correspondences---radius to amplitude, phase to rotational delay, frequency to rotational speed---are obtained by translating them item by item to the epicycle group of this chapter.
+The proof is given there: (i) from $|E_k|=A_k$ and the energy decomposition, (ii) from the phase-translation theorem, (iii) from the definition of the frequency series.
+\end{proof}
+
+\begin{example}[Periodic series of the crystal-oscillator clock]\label{ex:circuit_quartz_series}
+The crystal-oscillator output $V(t)=A\cos(\omega_0t+\phi_0)$ is a single-frequency periodic series on the period $T_0=1/f_0$, with epicycle group $\{(A,\omega_0,\phi_0)\}$.
+\end{example}
+
+\begin{remark}[The periodic series is a complex-valued function]\label{rem:circuit_series_complex}
+Let $z=e^{i\omega_0t}$; then the circuit periodic series
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+when all components are commensurable with $\omega_0$ (that is, $\omega_k=k\omega_0$, $k\in\mathbb Z$) it can be written as the Laurent series $\sum_k c_k z^k$, where $c_k=A_k e^{i\phi_k}$: in that case the circuit period series is a complex function on the unit circle, and otherwise it is merely a function on the torus.
+\end{remark}
+
+\subsection{Step three: dynamic adjustment of the circuit epicycle group}
+
+\begin{definition}[Dynamic adjustment of the circuit epicycle group]\label{def:circuit_adaptive_adjustment}
+Let the current circuit epicycle group be $\mathfrak E^{(j)}$, with partial sum
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+and residual $r^{(j)}=z-z^{(j)}$. \textbf{Dynamic adjustment} consists of two rules:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Quantity adjustment}: if the residual energy $\|r^{(j)}\|^2>\delta$, add one epicycle according to the peak of the residual periodogram;
+    \item \textbf{Parameter adjustment}: update the parameters of the existing epicycles by regularised least squares or under the conservation constraints.
+\end{enumerate}
+In circuit systems, quantity adjustment corresponds to adding frequency components or clock domains; parameter adjustment corresponds to tuning the amplitude, phase and frequency so that the charge, energy and flux constraints are satisfied.
+\end{definition}
+
+\begin{proposition}[Monotonicity of quantity adjustment]\label{prop:circuit_adaptive_growth}
+After adding the dominant-frequency component of the residual as in \cref{def:circuit_adaptive_adjustment}(i), the residual energy is monotonically non-increasing:
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+with equality if and only if the residual has no energy at the selected frequency.
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:circuit_adaptive_growth} of this chapter is consistent with the dynamic adjustment mechanism of \cref{def:ps_adaptive_adjustment} in the `Periodic Systems' chapter:
+adding an epicycle removes the component of $r^{(j)}$ along $\hat\omega$ from the residual, and the orthogonal decomposition
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{the removed component}\|^2$ yields the inequality,
+with equality if and only if the norm of the removed component is zero. The complete argument is given there.
+\end{proof}
+
+\begin{theorem}[Convergence of dynamic adjustment]\label{thm:circuit_adaptive_convergence}
+Let the circuit target be a finite periodic sequence of period $T_0$ with $\delta=0$. Then after at most $\lfloor T_0/2\rfloor+1$ steps the dynamic adjustment leaves a zero residual, and the resulting circuit epicycle group is the exact Fourier data of the target. If the target is a complex-valued sequence, the number of independent harmonics is $T_0$, and the corresponding bound is at most $T_0$ steps.
+\end{theorem}
+
+\begin{proof}
+The discrete Fourier series of a sequence of period $T_0$ is complete on $\lfloor T_0/2\rfloor+1$ harmonics. At each step, by \cref{prop:circuit_adaptive_growth}, one dominant-frequency component is extracted from the residual and the residual energy decreases strictly, so after finitely many steps the residual is zero.
+\end{proof}
+
+\begin{definition}[Structural-metric adjustment]\label{def:circuit_structure_metric_adjustment}
+Let the structural metric of a circuit target be
+\[
+\mathcal I=(\mathcal I_{\text{charge}},\mathcal I_{\text{energy}},\mathcal I_{\text{flux}})
+=(\text{degree of charge conservation},\ \text{degree of energy conservation},\ \text{degree of flux conservation}).
+\]
+\textbf{Structural-metric adjustment} consists in choosing $\theta$ in the parameter space $\Theta$: at each step take a neighbouring parameter for which $\mathcal I(\theta)$ is \textbf{strictly decreasing} in the lexicographic order (minimisation); if no such parameter exists, the process stops, and the parameter is then locally optimal.
+\end{definition}
+
+\begin{proposition}[Finite convergence of structural-metric adjustment]\label{prop:circuit_structure_metric_convergence}
+Let the parameter space $\Theta$ be finite, and let each adjustment make $\mathcal I$ strictly decreasing in the lexicographic order. Then the adjustment terminates after finitely many steps at a locally optimal parameter.
+\end{proposition}
+
+\begin{proof}
+Since $\Theta$ is finite, $\mathcal I$ takes only finitely many values, and the lexicographic order is a total order on a finite set; a strictly decreasing sequence in that order cannot continue indefinitely, so the adjustment terminates after finitely many steps. At termination there is no neighbouring parameter that makes $\mathcal I$ strictly decrease in the lexicographic order, that is, the parameter is locally optimal.
+\end{proof}
+
+\begin{remark}[Boundary of dynamic adjustment]\label{rem:circuit_adaptive_boundary}
+\cref{thm:circuit_adaptive_convergence} relies on a finite periodic sequence. For a continuous spectrum or a quasi-periodic circuit target there is no exact representation by a finite epicycle group, and only bounded approximation is possible. Structural-metric adjustment does not guarantee global optimality.
+\end{remark}
+
+\subsection{Step four: circuit convolution}
+
+\begin{definition}[Circuit amplitude convolution, phase convolution and frequency convolution]\label{def:circuit_convolution_types}
+Let two circuit epicycle groups be
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+Define:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{amplitude convolution}: $\mathbb A_{mn}=A_nB_m$;
+    \item \textbf{phase convolution}: $\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$;
+    \item \textbf{frequency convolution}: $\mathbb F_{mn}=\omega_n\nu_m$;
+    \item \textbf{trend convolution}: $\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$.
+\end{enumerate}
+These agree with \cref{def:amplitude_convolution}, \cref{def:phase_convolution}, \cref{def:frequency_convolution} and \cref{def:tendency_convolution} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{theorem}[Action of the three convolutions on the circuit epicycle group]\label{thm:circuit_convolution_action}
+Let the epicycle groups of two circuit targets be $\mathfrak E$ and $\mathfrak E'$ respectively. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item amplitude convolution acts only on the radius;
+    \item phase convolution acts only on the phase;
+    \item frequency convolution acts only on the rotational speed;
+    \item trend convolution preserves both amplitude and phase.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+This is read off directly from \cref{def:circuit_convolution_types}.
+\end{proof}
+
+\begin{proposition}[Autocorrelation and trend convolution]\label{prop:circuit_autocorr_phase_convolution}
+Let $\{z_t\}$ be a circuit periodic sequence with autocorrelation function
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+In the language of circuit epicycle groups, the autocorrelation function is the projection of trend convolution onto the diagonal:
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:circuit_autocorr_phase_convolution} of this chapter is the realisation in this domain of the convolution-action conclusion of \cref{thm:ps_convolution_action} in the `Periodic Systems' chapter:
+substituting $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ into the definition of the autocorrelation, cancelling all off-diagonal cross terms by orthogonality and retaining only the diagonal term of the trend convolution
+(the factorisation of the three convolutions, \cref{prop:ps_convolution_factorization}), which yields $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$.
+The complete expansion is given there.
+\end{proof}
+
+\begin{remark}[Relation between circuit convolution and periodic convolution]\label{rem:circuit_convolution_relation}
+Circuit convolution is not a new convolution operation but an instance on the circuit epicycle group of the periodic convolution of the `Series and Convolution' chapter. Autocorrelation is the projection of the trend convolution onto the diagonal; cross-correlation and clock skew are respectively the concrete manifestations in electronic engineering of amplitude convolution and frequency convolution. The FFT butterfly unit is the simplest hardware implementation of the periodic convolution of phase operators.
+\end{remark}
+
+\subsection{Step five: integration with discrete sampling, harmonic analysis and time series analysis}
+
+\begin{definition}[Circuit periodicity diagnostic procedure]\label{def:circuit_periodic_diagnosis}
+For a given circuit system, diagnosis is carried out using the periodic-mathematics framework:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Periodicity decision}: verify the period type of the circuit target (\cref{thm:circuit_periodicity_decision});
+    \item \textbf{Series construction}: build the amplitude, frequency and phase series and the epicycle group from crystal-oscillator waveforms, clock signals and data signals (\cref{thm:circuit_series_reconstruction});
+    \item \textbf{Conservation diagnosis}: verify charge, energy and flux conservation (\cref{thm:circuit_conservation});
+    \item \textbf{Convolution diagnosis}: compute the autocorrelation (the diagonal projection of the trend convolution, \cref{prop:circuit_autocorr_phase_convolution}) and the phase convolution;
+    \item \textbf{Integrated diagnosis}: connect to the tool chains of discrete sampling, harmonic analysis and time series analysis.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[Circuit periodicity diagnostic procedure and its interfaces with three chapters]\label{thm:circuit_diagnosis_integration}
+The five steps of \cref{def:circuit_periodic_diagnosis} connect respectively to:
+\begin{enumerate}[label=(\roman*)]
+    \item the `Discrete Sampling and Intercalation of Periodic Signals' chapter: \cref{def:uniform_sampling_parallel}, \cref{thm:nyquist_shannon_parallel}, \cref{thm:intercalation_leakage_suppression};
+    \item the `Harmonic Analysis' chapter: \cref{def:fourier_series}, \cref{thm:parseval_fourier}, \cref{prop:twelve_to_six};
+    \item the `Time Series Analysis' chapter: \cref{def:ts_period_detection}, \cref{prop:ts_period_significance}, \cref{def:ts_window_validation}.
+\end{enumerate}
+Hence circuit periodicity diagnosis is not an independent method but an application of the unified tool chain of periodic mathematics to circuit systems.
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:circuit_diagnosis_integration} of this chapter is the landing in this domain of the five-step interface of the `Periodic Systems' chapter (\cref{tab:ps_five_steps}):
+the periodicity decision uses sampling and spectral estimation, the frequency decomposition and the phase kernel use the `Harmonic Analysis' chapter, and the periodogram peak, the Fisher test and
+window-function validation use the `Time Series Analysis' chapter. Hence the diagnostic procedure is synthesised from the tool chains of the three chapters; the proof is given there.
+\end{proof}
+
+\begin{remark}[Operational order after integration]\label{rem:circuit_integration_order}
+The recommended order for practical diagnosis is: first decide whether the circuit target is periodic (\cref{thm:circuit_periodicity_decision}); then construct the Fourier data and the epicycle group of the circuit data (\cref{thm:circuit_series_reconstruction}); then optimise the parameters using the conservation constraints and dynamic adjustment (\cref{thm:circuit_adaptive_convergence}, \cref{prop:circuit_structure_metric_convergence}); then perform circuit convolution and autocorrelation analysis (\cref{prop:circuit_autocorr_phase_convolution}); and finally output the diagnosis according to \cref{def:circuit_periodic_diagnosis}.
+\end{remark}
+
+\section{The crystal oscillator: a fundamentally fixed epicycle}
+
+\subsection{Physical principles of the crystal oscillator}
+
+\begin{definition}[Quartz crystal oscillator]\label{def:quartz_oscillator}
+A \textbf{quartz crystal oscillator} (crystal oscillator for short) uses the \textbf{piezoelectric effect} of a quartz crystal to produce stable oscillation. A quartz crystal possesses the direct piezoelectric effect (mechanical deformation produces an electric field) and the converse piezoelectric effect (an electric field produces mechanical deformation). When an alternating electric field is applied, the crystal plate undergoes mechanical vibration; the mechanical vibration is in turn fed back as an electric field through the piezoelectric effect---the positive feedback sustains a stable self-excited oscillation.
+
+The \textbf{resonant frequency} of a quartz crystal is determined by the physical dimensions and the cut angle of the crystal plate. For an AT-cut quartz crystal plate the resonant frequency is
+\[
+f_0 = \frac{K}{t},
+\]
+where $K \approx 1.67 \text{ MHz}\cdot\text{mm}$ is the frequency constant and $t$ is the thickness of the crystal plate. For example, a plate with $t = 0.1$ mm has a resonant frequency of about $16.7$ MHz. Once the plate has been cut and polished, its resonant frequency is \textbf{fundamentally fixed}---the frequency is determined by the geometric dimensions and is affected only minimally by temperature and ageing.
+
+From the perspective of periodic mathematics, the crystal oscillator is a \textbf{fundamentally fixed epicycle}:
+\[
+V_{\text{crystal}}(t) = A_{\text{fixed}} \cdot e^{i(\omega_{\text{fixed}} t + \phi_0)},
+\]
+where the amplitude $A_{\text{fixed}}$, the angular frequency $\omega_{\text{fixed}} = 2\pi f_0$ and the initial phase $\phi_0$ remain constant during steady-state operation.
+\end{definition}
+
+\begin{lemma}[Start-up and Steady-state Conditions of the Crystal Oscillator (Barkhausen Criterion)]\label{ch24_quartz_startup_lemma}
+Let the total complex gain around one loop of the oscillating circuit be $H(\omega)=\beta(\omega)A(\omega)$, where $A$ is the voltage gain of the amplifier and $\beta$ is the transmission coefficient of the feedback network. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{(Necessary condition for start-up, and sufficient within the linearisation)} self-excited start-up of the crystal oscillator requires
+\[
+|H(\omega_0)| > 1, \qquad \arg H(\omega_0) = 0 \ (\text{mod}\ 2\pi),
+\]
+that is, the amplitude condition (the loop gain exceeds $1$) and the phase condition (positive feedback, the total phase shift being an integer multiple of $2\pi$) hold simultaneously;
+    \item \textbf{(Sufficient condition for steady-state oscillation)} once the growing amplitude drives the amplifier into its non-linear saturation region, the modulus of the effective loop gain falls to $|H|=1$; the amplitude then ceases to grow and the system remains on the steady-state limit cycle.
+\end{enumerate}
+The two criteria are not interchangeable: start-up is governed by the small-signal loop gain $|H|>1$, whereas in \textbf{sustained} oscillation the effective gain has already fallen to $|H|=1$, so $|H|>1$ is not a necessary condition for sustained oscillation; conversely, the small-signal linearisation cannot yield sufficiency for start-up, which requires the saturating non-linearity.
+\end{lemma}
+
+\begin{proof}
+Suppose that a small perturbation of amplitude $V_0$ is present at the input; after one loop around the circuit the signal returning to the input is $V_1 = H(\omega)V_0$. In the linearised (small-signal) model, if $|H(\omega)|<1$, the amplitude after the $n$-th loop is $|V_n| = |H|^n V_0 \to 0$, the perturbation decays loop by loop and oscillation cannot start; if $\arg H \neq 0$, the feedback phases of the successive loops are mismatched and cannot reinforce in phase. Hence start-up requires $|H|>1$ and $\arg H = 0$.
+
+The converse (sufficiency) cannot be obtained from the linearised model: there, $|H|>1$ together with positive feedback only gives a perturbation growing like $|H|^n$ loop by loop, and whether the amplitude stabilises at a finite value depends on the non-linearity of the amplifier. A quartz crystal provides the steepest phase-frequency slope near its series resonant frequency $f_0$, so that the phase condition is satisfied only near $f_0$, which locks the oscillation frequency to $f_0$. When the amplitude grows until the amplifier enters its non-linear saturation region, the effective gain $|H|$ decreases monotonically as the amplitude increases, and finally stabilises at $|H|=1$---the amplitude no longer grows and the system remains on the steady-state limit cycle (in agreement with the limit-cycle mechanism of the `Periodic Structure of Mechanical Systems' chapter).
+\end{proof}
+
+\begin{proposition}[Three Fixed Attributes of the Crystal Oscillator]\label{prop:quartz_three_fixed}
+As a fundamentally fixed epicycle, the crystal oscillator has fixed attributes at three levels:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Fixed frequency}: the resonant frequency $f_0 = K/t$ is determined by the thickness of the crystal plate. Once the cut is complete the frequency is essentially unchanged---short-term stability reaches the order of $10^{-12}$ (OCXO). The constancy of the frequency stems from the high-Q resonance of the quartz crystal, which locks the oscillation frequency to the mechanical resonant frequency of the plate.
+    \item \textbf{Fixed amplitude}: the amplitude of the oscillator is stabilised by the non-linear gain-saturation mechanism. After start-up the amplitude grows rapidly to its steady-state value and thereafter remains unchanged. The constancy of the amplitude stems from the self-stabilisation of the loop gain on the steady-state limit cycle---an increase in amplitude lowers the effective gain until $|H|=1$.
+    \item \textbf{Phase stability}: the crystal oscillator has extremely low phase noise and extremely high short-term phase stability. Phase noise manifests in the time domain as \textbf{jitter}---the deviation of the actual arrival time of a clock edge from the ideal time. Low jitter means that the phase is highly stable under time translation, and its statistical description is the phase-diffusion model (see the `Probability and Distribution' chapter).
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) The fixed frequency is determined by the physical dimensions of the quartz crystal. The frequency constant $K$ of the AT cut is a physical constant of the quartz material. The thickness $t$ of the crystal plate is precisely controlled during manufacture and hardly changes in use. The variation of frequency with temperature is given by the temperature characteristic curve of the AT cut---near $25^\circ$C the frequency-temperature coefficient is close to zero.
+
+(ii) The fixed amplitude is guaranteed by the non-linear limit-cycle mechanism of the oscillator. The start-up condition requires the loop gain $> 1$, and the amplitude grows until non-linear effects reduce the loop gain to $= 1$. The amplitude is then stabilised at a steady-state value determined by the circuit parameters. This is the circuit realisation of the limit cycle of the `Periodic Structure of Mechanical Systems' chapter.
+
+(iii) The phase stability is guaranteed by the high Q factor of the crystal---the quality factor of a quartz crystal is $Q \approx 10^5$ to $10^7$, far higher than that of an LC circuit ($Q \approx 10^2$). A high Q factor means extremely low phase noise. The statistical distribution of the jitter is approximately Gaussian, with standard deviation $\sigma_{\text{jitter}} \approx 1/(2\pi f_0 Q)$.
+\end{proof}
+
+\subsection{The crystal oscillator as the master epicycle}
+
+\begin{definition}[Master-Epicycle Status of the Crystal Oscillator]\label{def:quartz_master_epicycle}
+The clock signal output by the crystal oscillator is the \textbf{master epicycle of all the other epicycles} in the chip. Every timing activity within the chip---register toggling, state-machine transitions, computation in the datapath---takes the crystal-oscillator clock as its global time reference. From the perspective of periodic mathematics, the crystal oscillator is the \textbf{outermost large epicycle} (at level $k=1$), whose radius is the amplitude $A_{\text{clk}}$ and whose angular speed is $\omega_{\text{clk}} = 2\pi f_0$.
+
+The other epicycles inside the chip are all nested on the crystal-oscillator clock epicycle:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{High-speed epicycles after frequency multiplication}: through PLL frequency multiplication, the crystal-oscillator clock is magnified into epicycles of higher frequency (such as the CPU core clock).
+    \item \textbf{Low-speed epicycles after frequency division}: through a frequency divider, the crystal-oscillator clock is reduced to epicycles of lower frequency (such as the UART baud-rate clock).
+    \item \textbf{Data-signal epicycles}: the data signal is nested on the clock epicycle by modulation, each bit of the data corresponding to the phase state of one clock period.
+\end{enumerate}
+This is the chip implementation of the nested epicycle system of the `Vector Analysis' chapter---the crystal oscillator is the large epicycle (low frequency), the PLL-multiplied clock is the small epicycle (high frequency), and the data signal is the innermost modulated epicycle.
+\end{definition}
+
+\section{Phase-locked loop}
+
+\begin{definition}[Epicycle Interpretation of the Phase-Locked Loop]\label{def:pll_epicycle}
+A \textbf{phase-locked loop} (PLL) is a feedback control system that locks the phase of an output clock to an input reference clock. The core components of a PLL include:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{phase detector} (PD): compares the phase difference between the input reference clock and the feedback clock.
+    \item \textbf{loop filter} (LF): low-pass filters the phase-error signal.
+    \item \textbf{voltage-controlled oscillator} (VCO): its output frequency varies linearly with the control voltage.
+    \item \textbf{frequency divider}: divides the VCO output frequency by $N$ and feeds it back to the phase detector.
+\end{enumerate}
+A PLL multiplies the crystal-oscillator clock frequency $f_{\text{ref}}$ up to the output frequency $f_{\text{out}} = N \cdot f_{\text{ref}}$. From the perspective of periodic mathematics, a PLL is a \textbf{scaling operation on epicycles}: it scales the angular speed $\omega_{\text{ref}}$ of the crystal-oscillator epicycle to $\omega_{\text{out}} = N\omega_{\text{ref}}$ whilst maintaining phase locking---the phase difference between the output epicycle and the input epicycle is constant.
+\end{definition}
+
+\begin{proposition}[Phase locking and scaling ratio of the PLL]\label{prop:pll_phase_lock}
+The steady-state operation of a PLL satisfies \textbf{phase locking}: the phase difference $\Delta\phi$ between the output clock and the input reference clock remains constant. The frequency divider ensures that the output frequency is an integer multiple of the reference frequency: $f_{\text{out}} = N f_{\text{ref}}$. The scaling factor $N$ is the \textbf{scaling ratio} of the PLL---it measures the factor by which the epicycle is scaled.
+
+In the locked state the PLL satisfies: $\phi_{\text{out}}(t) - N\phi_{\text{ref}}(t) = \text{constant}$. This means that for every $N$ rotations of the output epicycle the input epicycle rotates $1$ rotation---the nesting relation of the inner and outer epicycles is: \textbf{for each step of the input epicycle, the output epicycle rotates $N$ steps}. This is the implementation in a chip clock system of the epicycle nesting generation rule (Definition \ref{def:epicycle_nesting_rule}) of the `Periodic Structure of the I Ching System' chapter.
+\end{proposition}
+
+\begin{proof}
+The phase locking of a PLL is guaranteed by the feedback mechanism. The phase detector outputs $\varepsilon(t) = K_d \cdot (\phi_{\text{ref}}(t) - \phi_{\text{fb}}(t))$, where $\phi_{\text{fb}} = \phi_{\text{out}}/N$ is the feedback phase after frequency division. The instantaneous frequency of the VCO is $\omega_{\text{out}}(t) = \omega_0 + K_v \cdot v_c(t)$, where $v_c$ is the control voltage after loop filtering. Under steady-state locking, $\varepsilon = 0$, that is, $\phi_{\text{ref}} = \phi_{\text{fb}} = \phi_{\text{out}}/N$, hence $\phi_{\text{out}} = N\phi_{\text{ref}}$. The output phase is $N$ times the input phase---this is the realisation of the scaling operation in the phase domain.
+\end{proof}
+
+\begin{lemma}[Synchronisation (Lock-Holding) Range of the Phase-Locked Loop]\label{ch24_pll_lock_range_lemma}
+Let the loop d.c. gain of the PLL be $K = K_d K_v K_F / N$, where $K_d$ is the phase-detector gain, $K_v$ the voltage-controlled-oscillator gain, $K_F$ the d.c. gain of the loop filter and $N$ the division ratio. Then the maximum frequency offset (synchronisation range) over which a locked PLL can remain locked is
+\[
+\Delta\omega_{\text{lock}} \approx \pm \frac{\pi}{2} K \quad (\text{rad/s}).
+\]
+When the difference $|\omega_{\text{ref}} - \omega_0/N|$ between the reference frequency and the free-running frequency of the VCO, referred to the phase-detector input, lies within $\Delta\omega_{\text{lock}}$, the phase-locked loop remains locked; outside this range it loses lock.
+\end{lemma}
+
+\begin{proof}
+In the locked state the average error voltage output by the phase detector is $v_c = K_d(\phi_{\text{ref}} - \phi_{\text{fb}})$, which drives the VCO after passing through the loop filter (d.c. gain $K_F$), so that the output frequency is $\omega_{\text{out}} = \omega_0 + K_v K_F v_c$. The frequency fed back to the phase-detector input is $\omega_{\text{out}}/N$, and the locking condition $\omega_{\text{ref}} = \omega_{\text{out}}/N$ gives
+\[
+\omega_{\text{ref}} = \frac{\omega_0 + K_v K_F K_d \Delta\phi}{N},
+\]
+where $\Delta\phi = \phi_{\text{ref}} - \phi_{\text{fb}}$ is the steady-state phase difference. The linear output range of the phase detector is bounded by the maximum phase difference $\Delta\phi_{\max} \approx \pm\pi/2$, so the maximum frequency offset that the loop can compensate is
+\[
+\Delta\omega_{\max} = \frac{K_v K_F K_d}{N}\cdot \Delta\phi_{\max} \approx \pm \frac{\pi}{2}\frac{K_v K_F K_d}{N} = \pm \frac{\pi}{2}K.
+\]
+Hence the synchronisation range is proportional to the loop d.c. gain $K$ and inversely proportional to the division ratio $N$.
+\end{proof}
+
+\begin{remark}[Numerical Example of the Synchronisation Range]\label{ch24_pll_lock_range_example}
+Take typical parameters: $K_d = 0.5$ V/rad, $K_v = 2\pi\times 10^8$ rad/s/V (that is, each volt of control voltage changes the frequency by $100$ MHz), $K_F = 1$ and $N = 10$. Then the loop d.c. gain is
+\[
+K = \frac{0.5 \times 2\pi\times 10^8}{10} = \pi\times 10^7\ \text{rad/s},
+\]
+and the corresponding synchronisation range in the frequency domain is $\Delta f_{\text{lock}} = \Delta\omega_{\text{lock}}/(2\pi) = K/4 \approx 7.85$ MHz. This means that even if the reference frequency deviates from the locked value by about $\pm 7.85$ MHz, the phase-locked loop can still maintain lock---this is the source of the robustness of the PLL as a frequency multiplier.
+\end{remark}
+
+\begin{definition}[Delay characteristics of the PLL]\label{def:pll_delay}
+The output clock of a PLL has a \textbf{phase delay} relative to the input reference clock:
+\[
+\tau_{\text{PLL}} = \frac{\Delta\phi}{\omega_{\text{out}}} = \frac{\Delta\phi}{N\omega_{\text{ref}}},
+\]
+where $\Delta\phi$ is the steady-state phase difference in the locked state. Under ideal locking, $\Delta\phi \approx 0$ or $\pi/2$ (depending on the type of phase detector). The phase delay of the PLL converts the phase difference into a time offset---the output epicycle lags the input epicycle by a fixed time offset. In chip timing analysis this delay is called \textbf{clock skew}.
+\end{definition}
+
+\section{Clock tree}
+
+\begin{definition}[Clock Tree]\label{def:clock_tree}
+A \textbf{clock tree} is the clock distribution network from the crystal-oscillator/PLL output to the individual registers within a chip. The clock tree consists of multiple stages of buffers and wires and distributes the global clock to the various sequential elements. From the perspective of periodic mathematics, the clock tree is the implementation in a chip of a \textbf{nested epicycle system}:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Root node}: the crystal-oscillator/PLL output---the master epicycle (outer ring, $k=1$).
+    \item \textbf{Intermediate nodes}: clock buffers---secondary epicycles ($k=2, 3, \dots$), each buffer amplifying the clock signal and driving the next stage of load.
+    \item \textbf{Leaf nodes}: register clock inputs---the innermost epicycles ($k=K$), with the sequential logic of the registers referenced to this clock.
+\end{enumerate}
+Every node of the clock tree outputs an epicycle of the same frequency as the root node but possibly with a \textbf{delay offset}. An ideal clock tree should make the phase difference between the clocks of all leaf nodes and the root-node clock zero (zero skew).
+\end{definition}
+
+\begin{definition}[Clock-Tree Delay and Clock Skew]\label{def:clock_skew}
+The \textbf{propagation delay} required for the clock signal to travel from the root node to the leaf node $i$ is
+\[
+\tau_i = \sum_{j \in \text{path}_i} \tau_j,
+\]
+where $\tau_j$ is the gate-level delay of the $j$-th buffer plus the propagation delay of the wire. The difference between the propagation delays of different leaf nodes is called the \textbf{clock skew}:
+\[
+\delta_{ij} = \tau_i - \tau_j.
+\]
+From the perspective of periodic mathematics, clock skew is the \textbf{phase difference} of the inner epicycles relative to the outer epicycle in a nested epicycle system. A zero-skew clock tree is equivalent to the phases of all inner epicycles being perfectly aligned with that of the master epicycle---this is the ideal state of a nested epicycle system (perfect synchronisation of nested epicycles in the `Vector Analysis' chapter).
+\end{definition}
+
+\begin{example}[H-Tree Clock Distribution]
+\label{ex:h_tree_clock}
+The H-tree is a symmetrical clock distribution topology used to realise a low-skew clock tree.
+The H-tree starts from the root node (the centre of the chip), branches symmetrically into the four quadrants,
+and unfolds recursively level by level.
+Its symmetrical structure guarantees that the path lengths from all leaf nodes to the root node are equal,
+so that the propagation delays agree and the clock skew is close to zero.
+
+From the perspective of periodic mathematics, the H-tree is the \textbf{symmetrical unfolding} of a nested epicycle system:
+at each level of branching the clock epicycle is distributed symmetrically into four sub-epicycles,
+and the phases of all sub-epicycles remain exactly aligned with the outer ring.
+Moreover, the H-tree has a self-similar fractal structure---
+each level of branching is geometrically similar to the preceding one, with scaling factor $1/2$,
+and it thus constitutes a highly symmetrical clock distribution network.
+
+Take a chip of size $10\,\text{mm} \times 10\,\text{mm}$ as an example for a concrete calculation.
+Let the gate-level delay of each stage of buffer be $\tau_{\text{buf}} = 50\,\text{ps}$,
+and the delay per unit length of wire be $\tau_{\text{wire}} = 100\,\text{ps/mm}$.
+The H-tree has $K = 4$ levels of branching from root to leaf,
+and the lengths of the wire segments at the successive levels are
+$L_1 = 5\,\text{mm}$,
+$L_2 = 2.5\,\text{mm}$,
+$L_3 = 1.25\,\text{mm}$ and
+$L_4 = 0.625\,\text{mm}$.
+Then the total propagation delay of leaf node $i$ is
+\[
+\begin{aligned}
+\tau_i
+&= \sum_{k=1}^{4}\bigl(\tau_{\text{buf}} + L_k\,\tau_{\text{wire}}\bigr) \\
+&= 4 \times 50\,\text{ps}
+   + (5 + 2.5 + 1.25 + 0.625)\times 100\,\text{ps} \\
+&= 200\,\text{ps} + 937.5\,\text{ps} \\
+&= 1137.5\,\text{ps}.
+\end{aligned}
+\]
+
+Since the four branching paths of the H-tree are strictly symmetrical,
+the delays of all leaf nodes are equal,
+and the clock skew is $\delta_{ij} = \tau_i - \tau_j = 0$.
+
+By contrast, if the clock tree were asymmetrical,
+a difference of only $1\,\text{mm}$ between the path lengths of two leaf nodes
+would introduce a clock skew of $100\,\text{ps}$.
+At a clock frequency $f_{\text{clk}} = 1\,\text{GHz}$
+(period $T_{\text{clk}} = 1000\,\text{ps}$),
+this skew consumes $10\%$ of the clock period
+and significantly compresses the timing margin.
+This is precisely the quantitative basis for adopting a symmetrical topology (the H-tree) for clock trees.
+\end{example}
+
+\section{The chip: a parametrised epicycle waveform/spectrum processing unit}
+
+\begin{definition}[Epicycle Processing Model of the Chip]\label{def:chip_epicycle_model}
+From the perspective of periodic mathematics, a \textbf{chip} is a \textbf{parametrised epicycle waveform/spectrum processing unit}. The chip receives input epicycle waveforms (clock signals, data signals, analogue signals), processes them through an internal network of parametrised epicycles, and outputs the processed epicycle waveforms/spectra.
+
+The processing capability of the chip is constituted by the following parametrised epicycle components:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Parametrised epicycle oscillators}: crystal oscillators, PLLs and frequency dividers---they generate clock epicycles of different frequencies. Parameters: frequency $f$, amplitude $A$, phase $\phi$.
+    \item \textbf{Parametrised epicycle amplifiers}: operational amplifiers and buffers---they amplify or attenuate the amplitude of the signal epicycle. Parameter: gain $G$.
+    \item \textbf{Parametrised epicycle filters}: low-pass, high-pass, band-pass and band-stop filters---they select the epicycle components in a specific frequency range. Parameters: cut-off frequency $f_c$, quality factor $Q$.
+    \item \textbf{Parametrised epicycle modulators}: mixers and modulators---they add or subtract the frequencies of two epicycles. Parameter: local-oscillator frequency $f_{\text{LO}}$.
+    \item \textbf{Parametrised epicycle transformers}: FFT chips and DCT chips---they decompose a time-domain epicycle into frequency-domain components. Parameter: transform length $N$.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[All inputs and outputs of the chip are epicycles]\label{prop:chip_io_epicycle}
+All the inputs and outputs of a chip are essentially epicycle waveforms. Specifically:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Clock input}: a fundamentally fixed epicycle---provided by an external crystal oscillator or clock source.
+    \item \textbf{Data input}: data epicycles modulated on the clock epicycle---each bit corresponds to the phase state of one clock period (the $C_2$ group: $0$ and $1$).
+    \item \textbf{Analogue input}: epicycles of continuous amplitude---for example, an audio signal is a nested epicycle of several frequency components.
+    \item \textbf{Clock output}: epicycles scaled by the PLL---for example, the CPU core clock, the bus clock and peripheral clocks.
+    \item \textbf{Data output}: modulated epicycles after processing by the chip---for example, computation results and control signals.
+    \item \textbf{Analogue output}: epicycles after filtering or amplification---for example, audio power-amplifier output and conditioned sensor-signal output.
+\end{enumerate}
+Therefore \textbf{the function of a chip is equivalent to a parametrised transformation of epicycle waveforms}: frequency transformation (frequency multiplication/division/mixing), amplitude transformation (amplification/attenuation), phase transformation (delay/phase shift) and spectral transformation (filtering/FFT).
+\end{proposition}
+
+\begin{proof}
+(i) The epicycle property of the clock input follows directly from the definition of the crystal oscillator (Definition \ref{def:quartz_oscillator}).
+
+(ii) A data signal can be represented as a modulation on the clock epicycle: $V_{\text{data}}(t) = \sum_n a_n \cdot \text{rect}(t - nT_{\text{clk}})$, where $a_n \in \{0, 1\}$ is the $n$-th bit and $\text{rect}$ is the unit rectangular pulse. In the frequency domain the data signal is the epicycle expansion of the baseband spectrum.
+
+(iii) An analogue signal can be expanded as a Fourier series---$V_{\text{analog}}(t) = \sum_k A_k e^{i(\omega_k t + \phi_k)}$---which is the mathematical form of a nested epicycle system.
+
+(iv)--(vi) The processing properties of the output signals are given by the parametrised definitions of the functional modules of the chip.
+\end{proof}
+
+\begin{definition}[Process Scaling: the Scaling Operation of Moore's Law]\label{ch24_moore_scaling}
+The continuous shrinking of chip process technology is the manifestation of the \textbf{scaling operation} of periodic mathematics at the industrial scale. Let the process feature size be $L$; then the number of transistors that can be accommodated per unit chip area satisfies $M \propto 1/L^2$---each reduction of the feature size by a factor $\sqrt{2}$ ($L \to L/\sqrt{2}$) doubles the transistor density. The empirical statement of Moore's law is that the number of transistors per unit chip area doubles about every two years. For example, when the feature size shrinks from $28$ nm to $7$ nm (scaling factor $\lambda = 1/4$), the transistor density increases in theory by about $\lambda^{-2} = 16$ times; along with the shrink, the clock frequency rises in step---frequency is the reciprocal of the period $T$ ($f = 1/T$), which is the reciprocal duality of scaling under the theme of period. This self-similar scaling in geometric scale and the fractal scaling of the H-tree clock distribution (scaling factor $1/2$ per level, Example \ref{ex:h_tree_clock}) are both instances of the scaling operation.
+\end{definition}
+
+\section{Periodic-mathematical analysis of common chips}
+
+\subsection{Operational amplifier}
+
+\begin{definition}[Operational Amplifier]\label{def:op_amp}
+An \textbf{operational amplifier} (op amp) is a high-gain differential-mode amplifier. The properties of an ideal op amp are: infinite open-loop gain, infinite input impedance, zero output impedance and infinite bandwidth. A practical op amp has an open-loop gain $A_{\text{OL}} \approx 10^5 \sim 10^7$ and a unity-gain bandwidth $f_T \approx 1 \sim 100$ MHz. The differential-mode structure of the op amp is the circuit realisation of \textbf{differential-signal symmetry}: the positive and negative input terminals are symmetrical about the reference point, a common-mode disturbance appears symmetrically at the two input terminals and is cancelled after differential-mode amplification (common-mode rejection ratio $\text{CMRR} = A_{\text{DM}}/A_{\text{CM}}$, typically $80 \sim 120$ dB), and only the differential-mode component is amplified---this is common-mode rejection achieved by means of the structural symmetry of the signal pair.
+
+From the perspective of periodic mathematics, an op amp is a \textbf{parametrised epicycle amplifier}---it scales the amplitude of the input epicycle by the gain $G$. In a negative-feedback configuration the closed-loop gain of the op amp is determined by the parameters of the feedback network: $A_{\text{CL}} = -R_f/R_i$ (inverting amplifier) or $A_{\text{CL}} = 1 + R_f/R_i$ (non-inverting amplifier). The frequency response of the op amp is determined by the dominant pole---$A(s) = A_{\text{OL}}/(1 + s/\omega_p)$---and the gain-bandwidth product $GBW = A_{\text{OL}} \cdot \omega_p$ is the bandwidth manifestation of the scaling ratio.
+\end{definition}
+
+\subsection{Analogue-to-digital and digital-to-analogue converters}
+
+\begin{definition}[Epicycle Interpretation of the ADC and DAC]\label{def:adc_dac}
+An \textbf{analogue-to-digital converter} (ADC) converts a continuous analogue signal (a continuous-amplitude epicycle) into a discrete digital signal (a sequence of discrete phase states). A \textbf{digital-to-analogue converter} (DAC) performs the inverse operation.
+
+From the perspective of periodic mathematics, the ADC and the DAC are \textbf{converters between continuous epicycles and discrete phase operators}:
+\begin{enumerate}[label=(\roman*)]
+    \item the ADC discretises the continuous epicycle $V(t) = \sum_k A_k e^{i(\omega_k t + \phi_k)}$ at the sampling rate $f_s$, each sample being quantised into $2^N$ discrete levels (a $C_{2^N}$ phase operator).
+    \item the DAC reconstructs a sequence of discrete phase operators into a continuous epicycle waveform.
+\end{enumerate}
+The sampling rate $f_s$ and the number of quantisation bits $N$ of an ADC are the parameters that determine the conversion accuracy---$f_s$ determines the highest resolvable frequency (the Nyquist frequency $f_s/2$; see \cref{def:nyquist_sampling_parallel} in the `Discrete Sampling and Intercalation of Periodic Signals' chapter), whilst $N$ determines the amplitude resolution (signal-to-noise ratio $SNR \approx 6.02N + 1.76$ dB).
+\end{definition}
+
+\subsection{Processors and microcontrollers}
+
+\begin{definition}[Epicycle Interpretation of the Processor]\label{def:cpu_epicycle}
+A \textbf{processor} (CPU) is the most complex parametrised epicycle processing unit in a chip. The processor takes the crystal-oscillator clock as its master epicycle and processes data epicycles through pipelines, multi-level caches and parallel execution units:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Clock period}: the smallest unit of time of the processor---the period of the master epicycle, $T_{\text{clk}} = 1/f_{\text{clk}}$.
+    \item \textbf{Instruction cycle}: the number of clock periods required to execute one instruction---the instruction epicycle is nested on the clock epicycle.
+    \item \textbf{Pipeline stage}: the successive phases of instruction execution (instruction fetch, decode, execute, memory access and write-back)---each pipeline stage is an independent epicycle, and data are passed between the stages through registers.
+    \item \textbf{Multi-core parallelism}: several cores each process data epicycles independently and synchronise through shared caches and buses.
+\end{enumerate}
+The performance metrics of a processor---the clock frequency $f_{\text{clk}}$, the number of instructions per cycle (IPC) and the number of cores $N_{\text{core}}$---are all parameters of parametrised epicycles.
+\end{definition}
+
+\subsection{Digital signal processors and FFT chips}
+
+\begin{definition}[DSP and FFT Chips]\label{def:dsp_fft}
+A \textbf{digital signal processor} (DSP) is a processor specially optimised for multiply-accumulate operations, adept at implementing digital filtering and spectral analysis. An \textbf{FFT chip} is dedicated hardware that directly implements the fast Fourier transform.
+
+From the perspective of periodic mathematics, an FFT chip is the \textbf{hardware implementation of epicycle decomposition}---it decomposes the time-domain epicycle of the input signal into frequency-domain components. The input of an FFT chip is $N$ time-domain samples ($N$ discrete phases) and the output is $N$ frequency-domain components ($N$ spectral phase operators). The core of an FFT chip is the \textbf{butterfly unit}---it combines two input phase operators into two outputs through the twiddle factor $\mathcal{O}_k^{(N)} = e^{-i2\pi k/N}$:
+\[
+X_{\text{out},0} = X_{\text{in},0} + \mathcal{O}_k^{(N)} \cdot X_{\text{in},1}, \quad X_{\text{out},1} = X_{\text{in},0} - \mathcal{O}_k^{(N)} \cdot X_{\text{in},1}.
+\]
+The butterfly operation is the simplest hardware implementation of the periodic convolution of phase operators (Definition \ref{def:PPO_periodic_convolution} in the `Periodic Structure of the I Ching System' chapter)---two input phases produce two output phases through a single twiddle factor.
+\end{definition}
+
+\subsection{Memory and registers}
+
+\begin{definition}[Epicycle Interpretation of Memory]\label{def:memory_epicycle}
+\textbf{Memory} (RAM, ROM, flash) and \textbf{registers} are the elements in a chip that store phase states. From the perspective of periodic mathematics:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Registers}: they store $1$ bit of information---corresponding to the two states of a $C_2$ phase operator ($0$ and $1$). $N$ registers store $N$ bits---corresponding to the $C_{2^N}$ phase operator and its $2^N$ states.
+    \item \textbf{Static random-access memory} (SRAM): each bit is a bistable circuit formed of $6$ transistors---the stored phase state remains stable whilst power is supplied.
+    \item \textbf{Dynamic random-access memory} (DRAM): each bit consists of $1$ transistor and $1$ capacitor---the charge state of the capacitor stores the phase, and periodic refreshing is required (the refresh period is about $64$ ms).
+\end{enumerate}
+The clock period of the memory determines the read/write speed---the frequency of the data epicycle must match the read/write epicycle of the memory (a timing constraint). The capacity of the memory (the number of bits) determines the number of phase states that can be stored.
+\end{definition}
+
+\section{Delay in the chip}
+
+\begin{definition}[Types of Chip Delay]\label{def:chip_delay_types}
+Several types of delay exist in chip systems, each corresponding to a different physical mechanism in periodic mathematics:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Propagation delay}: the time required for a signal to travel from the chip input to the output---$\tau_{\text{prop}} = \sum \tau_{\text{gate}} + \sum \tau_{\text{wire}}$. This is the direct mapping of a spatial distance onto the time axis.
+    \item \textbf{Clock delay}: the propagation time of the clock signal from the crystal oscillator to the individual registers---$\tau_{\text{clk},i}$. The clock skew $\delta_{ij} = \tau_{\text{clk},i} - \tau_{\text{clk},j}$ is the phase difference between different registers, a phase splitting of one and the same clock epicycle at different locations.
+    \item \textbf{Pipeline delay}: the total time required for data to pass through the successive pipeline stages---$\tau_{\text{pipe}} = K \cdot T_{\text{clk}}$ (where $K$ is the number of pipeline stages). This is the accumulation of several clock periods.
+    \item \textbf{Setup time and hold time}: the setup time $t_{\text{setup}}$ and the hold time $t_{\text{hold}}$ of a register are timing constraints---they define the phase relation between the data epicycle and the clock epicycle. Violating a timing constraint leads to \textbf{metastability}---an indeterminate phase state.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Periodic-mathematical formulation of chip timing constraints]\label{prop:chip_timing_constraints}
+The timing constraints of a chip can be formulated uniformly as constraints on phase relations. Let the time at which data arrive at a register be $t_{\text{data}}$ and the time at which the clock arrives be $t_{\text{clk}}$. The setup-time requirement of the register is:
+\[
+t_{\text{clk}} - t_{\text{data}} \ge t_{\text{setup}},
+\]
+and the hold-time requirement is:
+\[
+t_{\text{data}} - t_{\text{clk}} \ge t_{\text{hold}}.
+\]
+From the perspective of periodic mathematics, these constraints ensure that the phase of the data epicycle is in a stable state within the sampling window of the clock epicycle. The setup time $t_{\text{setup}}$ and the hold time $t_{\text{hold}}$ are the \textbf{phase tolerances} of the register---they define the range of relative offset permitted between the data phase and the clock phase. Violating the constraints is equivalent to the phase difference between the data epicycle and the clock epicycle exceeding the tolerance---the system enters metastability with an indeterminate phase (analogous to the phase uncertainty of the `Probability and Distribution' chapter).
+\end{proposition}
+
+\begin{proof}
+A register samples data at the active clock edge $t_{\text{clk}}$. The setup-time constraint $t_{\text{clk}} - t_{\text{data}} \ge t_{\text{setup}}$ requires the arrival (stabilisation) instant $t_{\text{data}}$ of the data to lead the clock edge by at least $t_{\text{setup}}$, otherwise the data are not yet stable at sampling; the hold-time constraint $t_{\text{data}} - t_{\text{clk}} \ge t_{\text{hold}}$ requires the data to remain unchanged until at least $t_{\text{hold}}$ after the clock edge, otherwise the data change within the sampling window. The two constraints define respectively the \textbf{upper} and \textbf{lower} bounds of the data phase relative to the clock phase and together constitute the phase-tolerance band of the register: the data transition must fall outside the window that is centred on the clock edge and leaves $t_{\text{setup}}$ before it and $t_{\text{hold}}$ after it. When a data transition falls inside this window, what the sampler captures is an intermediate level in the course of switching, and the register output enters \textbf{metastability}---the output phase is indeterminate. Metastability is eventually resolved by a subsequent clock edge or by noise, and the time required for resolution follows an exponential distribution (in agreement with the phase uncertainty of the `Probability and Distribution' chapter).
+\end{proof}
+
+\section{Conservation laws of circuit systems}
+
+\begin{theorem}[Three conservation laws of circuit systems]\label{thm:circuit_conservation}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Charge conservation}: Kirchhoff's current law (KCL)---$\sum i_{\text{in}} = \sum i_{\text{out}}$. Charge does not accumulate at a node.
+    \item \textbf{Energy conservation}: Kirchhoff's voltage law (KVL)---$\sum v_k = 0$. The work done by the electric field on a unit charge around a closed loop is zero.
+    \item \textbf{Flux conservation}: the flux $\Phi = Li$ of an inductance is continuous in the absence of external flux injection.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) Charge conservation (KCL): take any node of the circuit and let the outflowing currents be $i_1,\dots,i_m$ and the inflowing currents be $i_{m+1},\dots,i_{m+n}$. By the law of charge conservation, the rate of change of the charge $Q$ at the node equals the negative of the net inflowing current: $dQ/dt = \sum_{k=m+1}^{m+n}i_k - \sum_{k=1}^{m}i_k$. The lumped-parameter assumption states that the node stores no charge ($Q\equiv 0$), so $dQ/dt=0$, giving $\sum_{k=1}^{m}i_k = \sum_{k=m+1}^{m+n}i_k$---the sum of the inflowing currents equals the sum of the outflowing currents, which is KCL.
+
+(ii) Energy conservation (KVL): in the electrostatic approximation with no time-varying magnetic flux the electric field is conservative, and there exists an electric potential $\varphi$ with $\vec{E} = -\nabla\varphi$. For a unit charge travelling once around the closed loop $L$, the work done by the electric field is
+\[
+\oint_L \vec{E}\cdot d\vec{l} = -\oint_L \nabla\varphi\cdot d\vec{l} = -\oint_L d\varphi = 0,
+\]
+that is, the sum of the voltage drops across the elements of a closed loop is zero: $\sum_k v_k = 0$. If a time-varying magnetic flux is present in the loop, then by Faraday's law $\oint_L \vec{E}\cdot d\vec{l} = -d\Phi/dt$, and KVL must be corrected to $\sum_k v_k = -d\Phi/dt$---this is precisely the origin of the induced electromotive force (the `Periodic Structure of Electromagnetic Systems' chapter).
+
+(iii) Flux conservation: the flux of the inductance current $i$ is $\Phi = Li$, and by Faraday's law $d\Phi/dt = v_L$ (where $v_L$ is the voltage across the inductance). In the absence of an external flux discontinuity (no ideal switch instantaneously interrupting the inductance current), $\Phi$ varies continuously, so the inductance current $i = \Phi/L$ cannot change abruptly---this is the mathematical root of `continuous inductance current' in switching power supplies.
+\end{proof}
+
+\begin{remark}[Power dissipation and information conservation]\label{ch24_power_info_conservation}
+The theme of conservation has two extensions in chips. (i) \textbf{Energy conservation and power dissipation}: the dynamic power dissipation $P_{\text{dyn}} = \alpha C V_{\text{dd}}^2 f$ characterises the energy dissipated in charging and discharging the load capacitance $C$ in each clock period---the dissipation per period is $\Delta E = C V_{\text{dd}}^2$, and multiplying by the switching activity factor $\alpha$ and the clock frequency $f$ gives the power dissipation; this is the dissipative form, under the periodic beat, of the energy conservation of Theorem \ref{thm:circuit_conservation}. (ii) \textbf{Information conservation}: the phase states (bits) stored in registers and memory are not lost in an ideal noise-free device and change only when they are rewritten or when power is removed---this is the circuit realisation of information conservation, corresponding to the information measure of the `Probability and Distribution' chapter.
+\end{remark}
+
+\begin{remark}[Connection with the rest of the book]
+The theory of the periodic structure of circuit and chip systems established in this chapter is an application of periodic mathematics in electronic engineering. The core insight is that \textbf{chip = parametrised epicycle waveform/spectrum processing unit}---all the inputs and outputs of a chip are essentially epicycle waveforms. The crystal oscillator is a fundamentally fixed epicycle and is the master epicycle of all the other epicycles within the chip. A PLL is the scaling operation on epicycles, a clock tree is a nested epicycle system, and a data signal is a sequence of phase states modulated on the clock epicycle. An operational amplifier is a parametrised epicycle amplifier, an ADC/DAC is a converter between continuous epicycles and discrete phase operators, an FFT chip is the hardware implementation of epicycle decomposition, and memory is the storage unit of phase states. The delays in a chip---propagation delay, clock delay, pipeline delay and timing constraints---completely cover the four delay structures of periodic mathematics: spatial distance, phase difference, period accumulation and phase tolerance. The three conservation laws of circuit systems---KCL (charge conservation), KVL (energy conservation) and flux conservation---together constitute the physical basis of the operation of a chip.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & The advance of clock beats and the signal propagation delay: the clock-tree propagation delay $\tau_i = \sum_{j}\tau_j$ (Definition \ref{def:clock_skew}); the propagation delay and the pipeline delay $\tau_{\text{pipe}} = K T_{\text{clk}}$ (Definition \ref{def:chip_delay_types}); the stability of the crystal-oscillator phase under time translation (Proposition \ref{prop:quartz_three_fixed}) \\
+Scaling & Process scaling (Moore's law, $M\propto 1/L^2$, Definition \ref{ch24_moore_scaling}); PLL frequency multiplication/division $f_{\text{out}} = N f_{\text{ref}}$ (Definition \ref{def:pll_epicycle}); the H-tree fractal scaling factor $1/2$ (Example \ref{ex:h_tree_clock}) \\
+Rotation & The phase rotation and locking of the phase-locked loop $\phi_{\text{out}} = N\phi_{\text{ref}}$ (Proposition \ref{prop:pll_phase_lock}); the PLL phase delay $\tau_{\text{PLL}} = \Delta\phi/(N\omega_{\text{ref}})$ (Definition \ref{def:pll_delay}); the FFT butterfly twiddle factor $e^{-i2\pi k/N}$ (Definition \ref{def:dsp_fft}) \\
+Conservation & Charge conservation (KCL), energy conservation (KVL) and flux conservation (Theorem \ref{thm:circuit_conservation}); dynamic power dissipation $P = \alpha C V_{\text{dd}}^2 f$ and information conservation (Remark \ref{ch24_power_info_conservation}) \\
+Symmetry & The H-tree symmetry of the clock tree (zero skew, Example \ref{ex:h_tree_clock}); differential-signal symmetry and common-mode rejection (Definition \ref{def:op_amp}); the stability of frequency, amplitude and phase among the three attributes of the crystal oscillator (Proposition \ref{prop:quartz_three_fixed}) \\
+Closure & The closure of the phase-locked loop feedback path: the phase-detector--loop-filter--VCO--divider closed loop (Definition \ref{def:pll_epicycle}); the PLL synchronisation range $\Delta\omega_{\text{lock}} \approx \pm\frac{\pi}{2}K$ (Lemma \ref{ch24_pll_lock_range_lemma}); the loop closure of crystal-oscillator start-up $|H|\ge 1$ (Lemma \ref{ch24_quartz_startup_lemma}) \\
+Period & The crystal-oscillator period $T_0 = 1/f_0$ (Definition \ref{def:quartz_oscillator}); the clock period $T_{\text{clk}} = 1/f_{\text{clk}}$ (Definition \ref{def:cpu_epicycle}); the DRAM refresh period of about $64$ ms (Definition \ref{def:memory_epicycle}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the \textbf{circuit periodicity decision theorem} of this chapter (\ref{thm:circuit_periodicity_decision}). Hint: first write down the decision map and the evolution group of this chapter's target, then apply the proof structure of the general criterion of the `Periodic Systems' chapter.
+
+    \item Verify that the hypotheses of \textbf{monotonicity of quantity adjustment} (\ref{prop:circuit_adaptive_growth}) hold for the domain objects of this chapter, and give a counterexample in which the hypotheses fail.
+
+    \item Examine the behaviour of the \textbf{three-parameter correspondence: radius, phase and speed} (\ref{prop:circuit_epicycle_correspondence}) under degeneracy of the parameters, and explain how the conclusion degenerates accordingly.
+
+    \item Explain the relation between \textbf{all inputs and outputs of the chip are epicycles} (\ref{prop:chip_io_epicycle}) and the corresponding general conclusion of the `Periodic Systems' chapter (whether they agree, whether it is a special case, or whether additional conditions are required).
+
+    \item Using the seven-theme comparison table of this chapter, identify the concrete carriers in this chapter of the three themes \textbf{translation}, \textbf{scaling} and \textbf{rotation}, and give one example of domain data for each.
+
+    \item Synthesis: restate the diagnostic procedure of this chapter using the five-step standard interface of the `Periodic Systems' chapter (Table \ref{tab:ps_five_steps}), noting for each step the theorem of this chapter on which it depends: \ref{thm:circuit_periodicity_decision}, \ref{prop:circuit_adaptive_growth}, \ref{prop:circuit_epicycle_correspondence}, \ref{prop:chip_io_epicycle}.
+\end{enumerate}
+
+

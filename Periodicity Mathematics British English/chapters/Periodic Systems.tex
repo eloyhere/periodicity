@@ -1,0 +1,1361 @@
+\chapter{Periodic Systems}
+\label{chap:periodic_system}
+\markboth{Periodic Systems}{Periodic Systems}
+\label{chap:periodic-system}
+
+\begin{remark}[Positioning of this chapter: the bridge from theoretical to applied mathematics]\label{rem:periodic-system-positioning}
+This chapter is the \textbf{bridge of the book from theoretical mathematics to applied mathematics}. By now all the theoretical tools are in place: the `Operations and Periodicity' chapter gives the rigorous criteria for periodicity and closed orbits, the `Periodic Functions and Groups with Periodic Orbits' chapter gives the group structure of periodic functions, the `Discrete Sampling and Intercalation of Periodic Signals' chapter gives the bridge from continuous objects to discrete sequences, the `Harmonic Analysis' chapter gives the integral transform for frequency decomposition, and the `Time Series Analysis' chapter gives turning-point detection, the periodogram and parameter estimation at the level of data.
+
+The application chapters that follow, by contrast, face one concrete \textbf{target} after another---a stretch of observed data, a physical system, a social phenomenon. Whether a target ought to be described by periodic mathematics, and how, cannot be asserted by intuition. This chapter gives the \textbf{standard interface} that connects an arbitrary target to the framework of periodic mathematics, in five steps:
+
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{Decision}: decide rigorously, by \cref{thm:combined_criterion} of the `Operations and Periodicity' chapter, whether the target possesses periodicity, and determine its \textbf{period type} (Section \ref{sec:ps_periodicity_decision});
+    \item \textbf{Construction}: if the target possesses periodicity, construct the \textbf{period series}---the amplitude series, the frequency series and the phase series---from the \textbf{turning points} of the data, obtaining the \textbf{epicycle group}, and establish the correspondence `radius to amplitude, phase to rotation delay, frequency to rotation speed' (Section \ref{sec:ps_series_construction});
+    \item \textbf{Adjustment}: \textbf{dynamically adjust} the number and the parameters of the epicycles according to the data---one epicycle corresponds to one simple complex function, and the epicycle group is precisely a complex function in the form of a period series (Section \ref{sec:ps_adaptive});
+    \item \textbf{Convolution}: introduce \textbf{amplitude convolution, phase convolution and frequency convolution} on the epicycle group (Section \ref{sec:ps_convolutions}; the three are defined in the `Series and Convolution' chapter);
+    \item \textbf{Integration}: connect to the tool chains of the three chapters `Discrete Sampling and Intercalation of Periodic Signals', `Harmonic Analysis' and `Time Series Analysis' (Section \ref{sec:ps_integration}).
+\end{enumerate}
+
+From Section \ref{sec:ps_phase_space} onwards the chapter gives the phase space, the evolution and the conservation structure of a periodic system, together with such dynamical and inferential tools as the complex exponential activation function, Bayesian updating and kernel-smoothed gradient descent.
+
+\textbf{Interface convention}: in deciding whether a target is periodic, and in looking up its least positive period, every later application chapter cites Section \ref{sec:ps_periodicity_decision} of this chapter (\cref{thm:ps_periodicity_decision}, \cref{def:ps_minimal_period_algorithm}) and no longer states a criterion of its own.
+\end{remark}
+
+\begin{remark}[Themes of this chapter]\label{rem:periodic-system-themes}
+This chapter develops around the following themes: translation---time-translation operations and conservation of energy, with phase corresponding to rotation delay; scaling---scale transformations and conservation of scale charge, with frequency corresponding to rotation speed; rotation---phase rotation and conservation of angular momentum; conservation---the Noether correspondence of the three types of conservation law; symmetry---symmetry determines the degree of integrability; closure---criteria for the closure of phase-space trajectories and the determination of the period type; period---the period series, the epicycle group, the dominant components and the complex exponential activation function.
+\end{remark}
+
+\begin{remark}[Terminology convention of this chapter]\label{rem:periodic-system-terminology}
+This chapter adopts standard terminology: `complex exponential component' in place of `epicycle component', `weighted cross-correlation' in place of `periodic convolution', `composite signal' in place of `composite period', `complex exponential activation function' in place of `epicycle activation function', and `kernel-smoothed gradient descent' in place of `KDI optimisation'. Of these, \textbf{epicycle} is used only in Section \ref{sec:ps_series_construction}, to state the geometric correspondence `radius to amplitude, phase to delay, frequency to rotation speed'; thereafter `complex exponential component' is used throughout.
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{fittikz}
+\begin{tikzpicture}[>=Stealth, thick, node distance=0.9cm and 1.0cm,
+  stage/.style={draw, rounded corners, align=center, minimum width=2.4cm, minimum height=0.8cm, font=\small, fill=blue!8},
+  arr/.style={-{Stealth[length=2.4mm]}, very thick}]
+\node[stage, fill=blue!12] (s1) {1. Decision\\periodicity};
+\node[stage, fill=cyan!12, right=of s1] (s2) {2. Construction\\epicycle group};
+\node[stage, fill=green!12, right=of s2] (s3) {3. Adjustment\\of parameters};
+\node[stage, fill=orange!12, right=of s3] (s4) {4. Convolution\\three couplings};
+\node[stage, fill=red!12, right=of s4] (s5) {5. Integration\\tool chain};
+\draw[arr] (s1) -- (s2);
+\draw[arr] (s2) -- (s3);
+\draw[arr] (s3) -- (s4);
+\draw[arr] (s4) -- (s5);
+% tool chain below
+\node[stage, fill=yellow!16, below=1.5cm of s1] (t1) {Operations and Periodicity chapter\\criteria};
+\node[stage, fill=yellow!16, right=of t1] (t2) {Series and Convolution chapter\\three series};
+\node[stage, fill=yellow!16, right=of t2] (t3) {Discrete Sampling chapter\\commensurability};
+\node[stage, fill=yellow!16, right=of t3] (t4) {Harmonic Analysis chapter\\Fourier coefficients};
+\node[stage, fill=yellow!16, right=of t4] (t5) {Time Series Analysis chapter\\parameter estimation};
+\draw[arr, dashed] (s1) -- (t1);
+\draw[arr, dashed] (s2) -- (t2);
+\draw[arr, dashed] (s3) -- (t3);
+\draw[arr, dashed] (s4) -- (t4);
+\draw[arr, dashed] (s5) -- (t5);
+\node[align=center, font=\small] at (5.2,-3.2) {Five-step interface: decision $\to$ construction $\to$ adjustment $\to$ convolution $\to$ integration, each step corresponding to the theoretical tools of one chapter};
+\end{tikzpicture}
+\end{fittikz}
+\caption{The five-step interface of a periodic system: starting from the decision on periodicity, through the construction of the epicycle group, the adjustment of parameters and the three convolutions, and finally the integration into the tool chain, each step being supported by a corresponding theoretical chapter.}
+\label{fig:ps_five_steps}
+\end{figure}
+
+\section{Periodicity decision: whether a target is periodic}\label{sec:ps_periodicity_decision}
+
+\subsection{Target and decision input}
+
+The objects faced by the application chapters are collectively called \textbf{targets}. Before a target can be connected to the framework of periodic mathematics, it must first be abstracted into a decidable object.
+
+\begin{definition}[Target and decision input]\label{def:ps_target}
+A \textbf{target} is an object studied in an application chapter (observed data, a physical system, a social phenomenon, an algorithmic process, and so on). The \textbf{decision input} of a target is the ordered pair
+\[
+\mathcal{D}=(\mathcal{T},x),
+\]
+where $\mathcal{T}$ is called the \textbf{carrier structure} (it may be $\mathbb{R}$, $\mathbb{Z}$, $\mathbb{R}^n$, a finite group $\mathbb{Z}_T$, a manifold or a category object, and so on), and $x:\mathcal{T}\to V$ is the value of the target on $\mathcal{T}$. If $\mathcal{T}=\mathbb{R}$, then $x$ is called a \textbf{continuous description} of the target; if $\mathcal{T}=\mathbb{Z}$, then $x$ is called a \textbf{discrete description} of the target. The choice of the carrier structure is itself part of the decision---under different carrier structures one and the same target may have different periodicity (see \cref{rem:translation_period_fix}).
+\end{definition}
+
+\begin{definition}[Decision map]\label{def:ps_periodization}
+Let a target be given by the decision input $\mathcal{D}=(\mathcal{T},x)$. If there exist a bijection $f:\mathcal{T}\to\mathcal{T}$ and an initial value $x_0$ such that the target is generated by the iteration of $f$ (that is, $x$ is an orbit of $f$), then $f$ is called a \textbf{decision map} of the target. This step reduces the target to a discrete dynamical system $(\mathcal{T},f)$, so that the criteria of the `Operations and Periodicity' chapter can be applied.
+\end{definition}
+
+\begin{theorem}[Periodicity decision theorem]\label{thm:ps_periodicity_decision}
+Let $f$ be the decision map of a target, and let $(\mathcal{T},f)$ be a discrete dynamical system.
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{Sufficient decision}: if there exists $m\in\mathbb{N}^+$ with $f^m=\operatorname{id}$ (that is, $\operatorname{ord}(f)=m<\infty$), then the target is a \textbf{uniformly periodic system}, every orbit is closed and every orbit length divides $m$ (`Operations and Periodicity' chapter \cref{thm:combined_criterion}(A), \cref{thm:finite_order_orbit}).
+    \item \textbf{Equivalence of the decision}: the target is a uniformly periodic system $\iff \operatorname{ord}(f)<\infty$ (`Operations and Periodicity' chapter \cref{thm:combined_criterion}(B)).
+    \item \textbf{Pointwise criterion}: the orbit of the target at $x_0$ is closed $\iff$ $x_0$ is a periodic point (`Operations and Periodicity' chapter \cref{thm:closed_orbit_criterion}); the orbit length is then the period at that point (`Operations and Periodicity' chapter \cref{cor:closed_orbit_structure}).
+    \item \textbf{Non-omissibility}: the conjunction of the conserved quantities and the symmetry group \textbf{cannot} replace $\operatorname{ord}(f)<\infty$ (`Operations and Periodicity' chapter \cref{cor:true_logic}(iv)); a quasi-periodic target ($\operatorname{ord}(f)=\infty$, the orbit not closed but dense on a compact carrier structure) \textbf{is not a periodic system} (`Operations and Periodicity' chapter \cref{rem:quasi_period}).
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(A) Apply \cref{thm:combined_criterion}(A) to the decision input: take the evolution group $G=\langle f\rangle\le\operatorname{Symmetry}(f)$; then $f\in G$ and $\operatorname{ord}(f)=m$ is finite, so every orbit is closed and every orbit length divides $m$.
+(B) This is a restatement of \cref{thm:combined_criterion}(B) and \cref{def:strict_period}.
+(C) By \cref{thm:closed_orbit_criterion} (a closed orbit $\iff$ pointwise periodicity) and \cref{cor:closed_orbit_structure}.
+(D) By \cref{cor:true_logic}(iv) (conservation plus symmetry does not imply periodicity) and \cref{rem:quasi_period} (a quasi-period can only be asserted, in a purely algebraic framework, as $\operatorname{ord}(f)=\infty$).
+\end{proof}
+
+\subsection{Period types}
+
+Once a target has been decided to `possess periodicity', its \textbf{period type} must still be determined. Periodic targets of different types differ in their modelling, in the tools available and in the nature of their errors.
+
+\begin{definition}[Period type]\label{def:ps_period_type}
+After the decision by \cref{thm:ps_periodicity_decision}, a target falls into one of the following types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Trivial periodic type}: the least period is $m_0=1$ and the target is a fixed point (\cref{rem:quasi_period});
+    \item \textbf{Strictly periodic type}: $1<m_0<\infty$, and the target is a periodic point rather than an equilibrium point (\cref{def:strict_period});
+    \item \textbf{Uniformly periodic type}: $\operatorname{ord}(f)=m<\infty$, and every orbit length divides $m$ (\cref{def:strict_period});
+    \item \textbf{Quasi-periodic type}: $\operatorname{ord}(f)=\infty$, the orbit not closed but dense on a compact carrier structure (\cref{rem:quasi_period});
+    \item \textbf{Eventually periodic type}: there exists $N$ such that the target is periodic for $t\ge N$ (\cref{def:periodic_point});
+    \item \textbf{Discretely periodic type}: the carrier structure is $\mathbb{Z}$ and the normalised period ratio $\rho=T_x/\Delta x\in\mathbb{Q}$ (`Discrete Sampling and Intercalation of Periodic Signals' chapter \cref{prop:commensurability_periodicity_parallel}).
+    \item \textbf{Asymptotically periodic (damped) type}: the orbit is not closed, but tends asymptotically to a closed orbit or to a fixed point, the residual decaying in time---that is, there exist a period $T>0$, a phase function $\theta$ and a residual $\rho(t)$ such that
+    \[
+    x(t)=\theta(t)+\rho(t),\qquad \theta(t+T)=\theta(t),\qquad \|\rho(t)\|\le Ce^{-\kappa t}\quad(\kappa>0);
+    \]
+    the boundary with the eventually periodic type: the latter requires the orbit to be \textbf{exactly} periodic after finitely many steps (\cref{def:periodic_point}), whereas the asymptotically periodic type approaches closure only in the limit $t\to\infty$, no orbit being closed at any finite time.
+\end{enumerate}
+Of these, (i)--(iii) and (vi) are \textbf{periodic systems}; (iv) is not a periodic system, but can be handled with bounded-approximation tools; (v) is a periodic system only in its stable stage; (vii), like (iv), is a type in the limiting sense, is not a periodic system, and can be handled with bounded-approximation tools only in its stable stage.
+\end{definition}
+
+\begin{proposition}[Discrimination criterion for period types]\label{prop:ps_type_discrimination}
+Let a target be given with decision input $\mathcal{D}=(\mathcal{T},x)$ and decision map $f$. Its period type is determined by the following sequence of discriminations:
+\begin{enumerate}[label=(\roman*)]
+    \item if $x$ is constant, the type is trivial periodic;
+    \item otherwise, if $\operatorname{ord}(f)<\infty$, the type is uniformly periodic; if its orbit contains a fixed point, the type is a mixture with the trivial periodic type, and otherwise it is strictly periodic;
+    \item otherwise, if $\mathcal{T}$ is compact and the orbit is dense and not closed, the type is quasi-periodic;
+    \item otherwise, if there exists $N$ such that the orbit is closed for $t\ge N$, the type is eventually periodic;
+    \item otherwise, if there exist a period $T>0$, a phase function $\theta$ (with $\theta(t+T)=\theta(t)$) and a residual $\rho(t)$ such that $x(t)=\theta(t)+\rho(t)$ and $\|\rho(t)\|\le Ce^{-\kappa t}$ ($\kappa>0$), the type is asymptotically periodic (damped);
+    \item otherwise the target does not possess periodicity and admits only a statistical description (see \cref{thm:ps_minimal_period_correctness}(iii)).
+\end{enumerate}
+\end{proposition}
+
+\begin{figure}[htbp]
+\centering
+\begin{fittikz}
+\begin{tikzpicture}[>=Stealth, thick, node distance=0.8cm and 0.8cm,
+  dec/.style={draw, rounded corners, align=center, minimum width=2.6cm, minimum height=0.8cm, font=\footnotesize, fill=yellow!12},
+  res/.style={draw, rounded corners, align=center, minimum width=2.6cm, minimum height=0.8cm, font=\footnotesize},
+  arr/.style={-{Stealth[length=2mm]}, thick}]
+\node[dec, fill=yellow!16] (start) {Input\\$(\mathcal{T},x,f)$};
+\node[dec, right=of start] (q1) {Is $x$ constant?};
+\node[res, fill=blue!12, above right=0.4cm and 0.8cm of q1] (t1) {Trivial periodic type};
+\node[dec, right=1.2cm of q1] (q2) {$\operatorname{ord}(f)<\infty$?};
+\node[res, fill=green!12, above right=0.4cm and 0.8cm of q2] (t2) {Uniformly / strictly periodic type};
+\node[dec, right=1.2cm of q2] (q3) {$\mathcal{T}$ compact and dense?};
+\node[res, fill=red!12, above right=0.4cm and 0.8cm of q3] (t3) {Quasi-periodic type};
+\node[res, fill=orange!12, below right=0.4cm and 0.8cm of q3] (t4) {Eventually periodic type\\/ not periodic};
+\node[dec, fill=yellow!16, below=1.4cm of t4, text width=3.2cm] (q4) {Asymptotic approach to a\\closed orbit with decaying residual?};
+\node[res, fill=orange!12, below right=0.4cm and 0.8cm of q4] (t5) {Asymptotically periodic (damped) type};
+\draw[arr] (start) -- (q1);
+\draw[arr] (q1) -- node[above, font=\tiny]{Yes} (t1);
+\draw[arr] (q1) -- node[above, font=\tiny]{No} (q2);
+\draw[arr] (q2) -- node[above, font=\tiny]{Yes} (t2);
+\draw[arr] (q2) -- node[above, font=\tiny]{No} (q3);
+\draw[arr] (q3) -- node[above, font=\tiny]{Yes} (t3);
+\draw[arr] (q3) -- node[below, font=\tiny]{No} (q4);
+\draw[arr] (q4) -- node[left, font=\tiny]{No} (t4);
+\draw[arr] (q4) -- node[above, font=\tiny]{Yes} (t5);
+\end{tikzpicture}
+\end{fittikz}
+\caption{Decision tree for discriminating period types: starting from the decision input, the constancy, the finite order, the compactness of the orbit and the asymptotic approach to closure are tested in turn, determining one of the seven period types.}
+\label{fig:ps_type_decision_tree}
+\end{figure}
+
+\subsection{Looking up the least positive period}
+
+The decision answers `whether the target is periodic'; the immediate next question is `what the period is'.
+
+\begin{definition}[Least positive period lookup algorithm]\label{def:ps_minimal_period_algorithm}
+\textbf{Input}: the target sequence $f(0),\dots,f(N-1)$---generated by the decision map of \cref{def:ps_periodization}, with discretisation sampling interval $\Delta x$ taken as in \cref{def:uniform_sampling_parallel} of the `Discrete Sampling and Intercalation of Periodic Signals' chapter; tolerance $\varepsilon\ge0$.
+\textbf{Output}: the least positive period $T_0$, or the verdict `not periodic'.
+\textbf{Steps}:
+\begin{enumerate}[label=(\arabic*)]
+    \item take the candidate set $\mathcal{P}=\{T\in\mathbb{N}^+:2T\le N\}$ and traverse it in increasing order of $T$;
+    \item for each $T$ compute the maximum deviation $E(T)=\max_{0\le n<N-T}\|f(n+T)-f(n)\|$;
+    \item output the first $T$ satisfying $E(T)\le\varepsilon$ as $T_0$; if the traversal is exhausted with no solution, output `not periodic';
+    \item \textbf{commensurability check}: use the normalised period ratio $\rho=T_x/\Delta x$ (when $\rho=p/q$ in lowest terms, $T_0=p$) to verify the conversion relation between $T_0$ and the continuous period $T_x$; the corresponding continuous duration is $\ell=T_0\Delta x$, which has the dimension of time and must not be confused with the dimensionless ratio $\rho$. The verification rests on \cref{prop:commensurability_periodicity_parallel} and \cref{cor:sampling_period_relation_parallel} of the `Discrete Sampling and Intercalation of Periodic Signals' chapter.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[Correctness of the least positive period algorithm]\label{thm:ps_minimal_period_correctness}
+\begin{enumerate}[label=(\roman*)]
+    \item If $f$ is a strictly periodic sequence with $\varepsilon=0$ and $N\ge2T_0$, then the algorithm outputs its discrete fundamental period $T_0$ (`Discrete Sampling and Intercalation of Periodic Signals' chapter \cref{def:discrete_fundamental_period}).
+    \item If $f$ is obtained by sampling a continuous target of fundamental period $T_x$ at the sampling interval $\Delta x$, and the normalised period ratio $\rho=T_x/\Delta x=p/q$ is in lowest terms, then the algorithm outputs $T_0=p$ (\cref{prop:commensurability_periodicity_parallel}(ii)).
+    \item If $\rho\notin\mathbb{Q}$, then no true period exists: $E(T)>0$ for every $T\in\mathbb{N}^+$ (\cref{prop:commensurability_periodicity_parallel}(iii)).
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) By \cref{def:discrete_fundamental_period}, $T_0$ is the least positive period, hence $E(T_0)=0$; and for $T<T_0$ we have $E(T)>0$---otherwise $T$ would also be a period, contradicting minimality. The algorithm traverses $T$ in increasing order, so the first one satisfying $E(T)=0$ is $T_0$.
+(ii) By \cref{prop:commensurability_periodicity_parallel}(ii), the fundamental period of the sampled sequence is $p$; substitute into (i).
+(iii) By \cref{prop:commensurability_periodicity_parallel}(iii), $\operatorname{Group}_{\mathrm{period}}(f)=\{0\}$, so $E(T)>0$ for every $T$.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.9]
+\draw[->] (-0.3,0) -- (9,0) node[right] {$n$};
+\draw[->] (0,-1.8) -- (0,1.8) node[above] {$f(n)$};
+% the periodic sequence
+\foreach \n in {0,...,17} {
+  \pgfmathsetmacro{\x}{\n*0.5}
+  \pgfmathsetmacro{\y}{1.2*sin(360*\n/5)}
+  \fill[blue] (\x,\y) circle (2pt);
+}
+% annotation of the candidate period
+\draw[dashed, red] (0,-1.6) -- (0,1.6);
+\draw[dashed, red] (2.5,-1.6) -- (2.5,1.6);
+\draw[<->, red, thick] (0,-1.5) -- (2.5,-1.5);
+\node[red, below, font=\footnotesize] at (1.25,-1.55) {$T_0=5$};
+% a candidate that does not match
+\draw[dashed, green!60!black] (0,1.7) -- (1.5,1.7);
+\draw[dashed, green!60!black] (1.5,-1.7) -- (1.5,1.7);
+\draw[<->, green!60!black] (0,1.5) -- (1.5,1.5);
+\node[green!60!black, above, font=\footnotesize] at (0.75,1.55) {$T=3$ does not match};
+\node[align=center, font=\small] at (4.5,-2.5) {Least positive period algorithm: traverse in increasing order from $T=1$; the first $T$ satisfying $E(T)\le\varepsilon$ is $T_0$};
+\end{tikzpicture}
+\caption{Least positive period lookup algorithm: for each candidate period $T$ compute the maximum deviation $E(T)$, and output the first $T$ satisfying $E(T)\le\varepsilon$ as the least positive period.}
+\label{fig:ps_minimal_period}
+\end{figure}
+
+\section{Construction of the period series: from data turning points to the epicycle group}\label{sec:ps_series_construction}
+
+The decision and the least positive period answer `whether the target is periodic and how long the period is'. This section answers `which components the target is composed of': taking the turning points of the data as characteristic time points, it constructs the amplitude series, the frequency series and the phase series, and assembles them into the epicycle group.
+
+\subsection{Data turning points as characteristic time points}
+
+\begin{definition}[Turning-point feature set]\label{def:ps_inflection_features}
+Let the values of the target at the sampling points $t_n=n\Delta x$ after window smoothing (for the window function see \cref{def:ts_window_function} of the `Time Series Analysis' chapter) be $\tilde{x}_n$. A time point satisfying the turning-point criterion (\cref{def:ts_turning_point} of the `Time Series Analysis' chapter) is called a \textbf{turning point} of the target. Let its index set and the corresponding refraction rates (\cref{def:ts_refraction} of the `Time Series Analysis' chapter) be
+\[
+\mathcal{I}_{\mathrm{tp}}=\{n_1<n_2<\cdots<n_r\},\qquad
+\mathcal{K}_{\mathrm{tp}}=\{\kappa_{n_1},\dots,\kappa_{n_r}\},
+\]
+the two together being called the \textbf{turning-point feature set} of the target. The turning-point feature set compresses a continuous target into finitely many `direction-reversal events', and is the data starting point for the construction of the period series.
+\end{definition}
+
+\begin{proposition}[The turning-point feature set carries period information]\label{prop:ps_inflection_carries_period}
+If the target is a discrete periodic sequence with fundamental period $m_0$ (\cref{def:discrete_periodic_function} of the `Discrete Sampling and Intercalation of Periodic Signals' chapter), then its turning-point feature set is periodic with period $m_0$:
+\[
+n\in\mathcal{I}_{\mathrm{tp}}\iff n+m_0\in\mathcal{I}_{\mathrm{tp}},
+\qquad
+\kappa_{n+m_0}=\kappa_n .
+\]
+\end{proposition}
+
+\begin{proof}
+A turning point is defined by a local change of direction (\cref{def:ts_turning_point} of the `Time Series Analysis' chapter), and the direction-change operator commutes with the $m_0$-translation; moreover $\tilde{x}$ is periodic with period $m_0$ (window smoothing preserves the translation structure), so both $\mathcal{I}_{\mathrm{tp}}$ and $\mathcal{K}_{\mathrm{tp}}$ are periodic with period $m_0$.
+\end{proof}
+
+\subsection{Amplitude series, frequency series and phase series}
+
+The formal definitions of the three series have already been given in the `Series and Convolution' chapter; this section explains how to determine them \textbf{from the data}.
+
+\begin{theorem}[Building the period series from turning points]\label{thm:ps_series_reconstruction}
+Let the discrete fundamental period of the target be $T_0$, with Fourier expansion
+\[
+f(n)=\sum_{k}A_ke^{i(2\pi kn/T_0+\phi_k)},\qquad A_k\ge0,\ \phi_k\in[0,2\pi).
+\]
+Then the \textbf{period series} of the target is described jointly by three series:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{amplitude series} $\mathcal{A}_f(t)=\sum_kA_ke^{ikt}$: the coefficients $A_k$ are given by the Fourier moduli of the data,
+    \[
+    A_k=\Bigl|\frac1{T_0}\sum_{n=0}^{T_0-1}f(n)e^{-i2\pi kn/T_0}\Bigr|,
+    \]
+    where the turning-point feature set $\mathcal{I}_{\mathrm{tp}}$ gives the phase-locking positions of the various components (\cref{def:amplitude_series} of the `Series and Convolution' chapter);
+    \item \textbf{frequency series} $\mathcal{F}_f(s)=\frac{2\pi}{T_0}\sum_k ks^k$: determined entirely by the least positive period $T_0$, that is, by the frequency lattice $\{2\pi k/T_0\}$ (\cref{def:frequency_series} of the `Series and Convolution' chapter);
+    \item \textbf{phase series} $\mathcal{P}_f(t)=\sum_ke^{i(kt+\phi_k)}$: the arguments $\phi_k$ of the coefficients are given by the phase spectrum of the data and agree with the turning-point delays (\cref{def:phase_series} of the `Series and Convolution' chapter).
+\end{enumerate}
+Together the three constitute the complete Fourier data of the target on the period $T_0$: the frequency series says `which components there are', whilst the amplitude series and the phase series say `how strong each component is and by how much it is deflected'.
+\end{theorem}
+
+\begin{proof}
+(i)(iii) follow directly from the discrete Fourier coefficient formula and its polar decomposition $c_k=A_ke^{i\phi_k}$; the correspondence between turning-point positions and phase differences is given by \cref{prop:ps_inflection_carries_period} and \cref{lem:ts_turning_equivalence} of the `Time Series Analysis' chapter.
+(ii) By \cref{def:frequency_series}, the frequency lattice is uniquely determined by $T_0$, and every frequency is an integer multiple of the base frequency.
+\end{proof}
+
+\subsection{The epicycle group: radius, phase and rotation speed}
+
+\begin{definition}[Epicycle group]\label{def:ps_epicycle_group}
+The epicycle group is first defined in Chapter~\ref{chap:sampling}, under the section \cref{sec:epicycle_system}, by \cref{def:epicycle_system}; what follows is its form in the notation of the period series (the amplitude, frequency and phase series), together with the correspondence `radius to amplitude, phase to rotation delay, frequency to rotation speed'.
+Let the period series of the target be given by the amplitude series $\{A_k\}$, the frequency series $\{\omega_k=2\pi k/T_0\}$ and the phase series $\{\phi_k\}$. For each $k$ define the \textbf{epicycle}
+\[
+E_k:\ \theta\mapsto A_ke^{i(\theta+\phi_k)},\qquad \theta=\omega_kt=\frac{2\pi k}{T_0}t,
+\]
+whose collection
+\[
+\mathfrak{E}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb{Z}}
+\]
+is called the \textbf{epicycle group} of the target; its superposition is the period series of the target
+\[
+f(t)=\sum_kE_k(\omega_kt)=\sum_kA_ke^{i(\omega_kt+\phi_k)}.
+\]
+\end{definition}
+
+\begin{proposition}[Three-parameter correspondence: radius, phase and speed]\label{prop:ps_epicycle_correspondence}
+The three parameters of the epicycle group $\mathfrak{E}=\{(A_k,\omega_k,\phi_k)\}_{k}$ correspond one-to-one to three geometric--mechanical quantities:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{radius to amplitude}: the radius $|E_k|=A_k$ of the epicycle $E_k$ is the amplitude of that component, and $A_k^2$ contributes energy (\cref{thm:parseval_fourier});
+    \item \textbf{phase to rotation delay}: for $k\ne0$ (that is, $\omega_k\ne0$), the initial phase $\phi_k$ corresponds to the time translation $\tau_k=\phi_k/\omega_k$; when $\phi_k>0$ this component \textbf{leads} the baseline by $\tau_k$ (equivalently, the component coincides with the baseline once the baseline is postponed by $\tau_k$); this quantity is the \textbf{rotation delay} of the epicycle (`Series and Convolution' chapter \cref{prop:phase_translation}); the $k=0$ direct-current component has no rotation delay;
+    \item \textbf{frequency to rotation speed}: $\omega_k$ is the \textbf{angular velocity} of the epicycle about the origin, given by the least positive period as $\omega_k=2\pi k/T_0$ (\cref{def:frequency_series}).
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) By definition $|E_k(\cdot)|=A_k$, together with the energy decomposition of \cref{thm:parseval_fourier}. (ii) By \cref{prop:phase_translation}: a time translation $\tau$ changes the coefficients of the phase series to $e^{i(\phi_k-\omega_k\tau)}$, and taking $\tau=\phi_k/\omega_k$ (for $k\ne0$) cancels the initial phase, so that $\phi_k$ measures precisely the delay, with the \textbf{advanced} direction --- once the reference has been delayed by $\tau_k$ it coincides with the waveform; for $k=0$ we have $\omega_0=0$ and the expression is undefined, the direct-current component having no rotation delay. (iii) By $\theta=\omega_kt$ and \cref{def:frequency_series}.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+% superposition of three epicycles
+\draw[gray!40] (0,0) circle (1.5);
+\draw[->, blue, very thick] (0,0) -- (1.5,0);
+\node[blue, above, font=\footnotesize] at (0.75,0.05) {$A_1e^{i\omega_1 t}$};
+\draw[gray!40] (1.5,0) circle (0.7);
+\draw[->, red, very thick] (1.5,0) -- (2.0,0.5);
+\node[red, above right, font=\footnotesize] at (1.8,0.55) {$A_2e^{i\omega_2 t}$};
+\draw[gray!40] (2.0,0.5) circle (0.3);
+\draw[->, green!60!black, very thick] (2.0,0.5) -- (2.25,0.65);
+\node[green!60!black, right, font=\footnotesize] at (2.3,0.7) {$A_3e^{i\omega_3 t}$};
+\fill (2.25,0.65) circle (2pt);
+% explanation
+\node[align=center, font=\small] at (1,-2.4) {Epicycle group: radius corresponds to amplitude, phase to rotation delay, frequency to rotation speed};
+\end{tikzpicture}
+\caption{Geometric superposition of the epicycle group: each epicycle is determined by the three parameters $(A_k,\omega_k,\phi_k)$, corresponding respectively to radius, angular velocity and initial phase.}
+\label{fig:ps_epicycle_geometry}
+\end{figure}
+
+\subsection{The period series is a complex function}
+
+\begin{theorem}[Complex-function representation of the period series]\label{thm:ps_series_complex_function}
+Let the fundamental period of the target be $T_0$ and the epicycle group be $\mathfrak{E}=\{(A_k,\omega_k,\phi_k)\}_k$; put $\omega_0=2\pi/T_0$ and let $z=e^{i\omega_0t}$ be the complex variable. Provided that \textbf{every component frequency is commensurable with $\omega_0$} (that is, $\omega_k=k\omega_0$ with $k\in\mathbb Z$), the period series of the target equals the complex function on the unit circle
+\[
+f(t)=\sum_{k\in\mathbb{Z}}c_kz^k,\qquad c_k=A_ke^{i\phi_k},
+\]
+that is: the Fourier expansion of the target on the period $T_0$ is equivalent to the values on $|z|=1$ of a Laurent series; a finite harmonic truncation is equivalent to a complex-coefficient polynomial. \textbf{When all components are commensurable with $\omega_0$, the period series is a complex-valued function on the unit circle (otherwise it is a function on the torus)}.
+\end{theorem}
+
+\begin{proof}
+Substituting $z^k=e^{ik\omega_0t}=e^{i\omega_kt}$ gives $\sum_kA_ke^{i(\omega_kt+\phi_k)}=\sum_kc_kz^k$. The coefficients $c_k$ do not depend on $z$, so the right-hand side is a Laurent series in $z$; when only finitely many $k$ satisfy $c_k\neq0$ it degenerates to a polynomial. The identity $z^k=e^{i\omega_kt}$ holds only when $\omega_k/\omega_0\in\mathbb Z$; if a component incommensurable with $\omega_0$ is present, $e^{i\omega_kt}$ is not a single-valued function of $z$, and the period series is merely a function on the torus $\mathbb{T}^n$ rather than a complex-valued function on the unit circle.
+\end{proof}
+
+\section{Dynamic adjustment of the epicycle group}\label{sec:ps_adaptive}
+
+\subsection{One epicycle corresponds to one simple complex function}
+
+\begin{definition}[Simple complex function (single-epicycle function)]\label{def:ps_single_epicycle_function}
+A mapping of the form
+\[
+\varphi_{A,\omega,\phi}:\ \mathbb{R}\to\mathbb{C},\qquad
+\varphi_{A,\omega,\phi}(t)=A\,e^{i(\omega t+\phi)}
+\]
+is called a \textbf{simple complex function}. It is the restriction to the unit circle of the complex function $z\mapsto cz$ ($c=Ae^{i\phi}$), and has only three degrees of freedom $(\log A,\omega,\phi)$---exactly corresponding to the three parameters of one epicycle.
+\end{definition}
+
+\begin{proposition}[The epicycle group is the period-series form of a complex function]\label{prop:ps_group_as_function}
+The relation between the epicycle group $\mathfrak{E}=\{E_k\}_k$ and the target period series $f$ is linear superposition:
+\[
+f=\sum_k\varphi_{A_k,\omega_k,\phi_k}.
+\]
+That is: \textbf{one epicycle corresponds to one simple complex function, and the epicycle group is a finite sum of simple complex functions, that is, a complex function in the form of a period series} (\cref{thm:ps_series_complex_function}).
+\end{proposition}
+
+\begin{proof}
+Add term by term; the parameter set of the finite sum is exactly $\mathfrak{E}$, and by \cref{def:ps_single_epicycle_function} each term is uniquely determined by $(A_k,\omega_k,\phi_k)$.
+\end{proof}
+
+\subsection{Dynamic adjustment of number and parameters}
+
+\begin{definition}[Dynamic adjustment of the epicycle group]\label{def:ps_adaptive_adjustment}
+Let the current epicycle group be $\mathfrak{E}^{(j)}$, the partial sum $f^{(j)}=\sum_{k\in\mathfrak{E}^{(j)}}\varphi_k$ and the residual $r^{(j)}=x-f^{(j)}$. \textbf{Dynamic adjustment} consists of two rules:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{quantity adjustment}: if the residual energy $\|r^{(j)}\|^2>\delta$ (with $\delta>0$ the tolerance), add one epicycle according to the peak of the residual periodogram (\cref{def:ts_period_detection} of the `Time Series Analysis' chapter):
+    \[
+    \mathfrak{E}^{(j+1)}=\mathfrak{E}^{(j)}\cup\{(\hat A,\hat\omega,\hat\phi)\},\qquad
+    \hat\omega=\operatorname*{arg\,max}_{\omega}\bigl|\widehat{X_{r}}(\omega)\bigr|;
+    \]
+    \item \textbf{parameter adjustment}: update the parameters of the existing epicycles by regularised least squares (\cref{prop:ts_harmonic_estimate} of the `Time Series Analysis' chapter)
+    \[
+    (A_k,\phi_k)\leftarrow\operatorname*{arg\,min}_{A,\phi}\ \sum_n\Bigl|x(n)-\sum_kA_ke^{i(\omega_kn+\phi_k)}\Bigr|^2,
+    \]
+    or correct them online by Bayesian updating (\cref{def:bayes-update}, \cref{prop:bayes-sequential}).
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Monotonicity of quantity adjustment]\label{prop:ps_adaptive_growth}
+After a dominant residual frequency component is added as in \cref{def:ps_adaptive_adjustment}(i), the residual energy is monotonically non-increasing:
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+with equality if and only if the residual has no energy at the selected frequency.
+\end{proposition}
+
+\begin{proof}
+Adding an epicycle removes the component of $r^{(j)}$ along $\hat\omega$ from the residual. By the orthogonal decomposition $\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{(the component removed)}\|^2$, the inequality holds, with equality if and only if the norm of the component removed is zero.
+\end{proof}
+
+\begin{theorem}[Convergence of dynamic adjustment]\label{thm:ps_adaptive_convergence}
+Let the target be a \textbf{real-valued finite periodic sequence} of length $T_0$ ($T_0\in\mathbb N$) and let $\delta=0$. Then after at most $\lfloor T_0/2\rfloor+1$ steps of dynamic adjustment the residual is zero, and the resulting epicycle group is the exact Fourier data of the target; for a \textbf{complex-valued} sequence the corresponding number of steps is at most $T_0$. This adjustment process, the sampling layer of the `Discrete Sampling and Intercalation of Periodic Signals' chapter and the Fourier layer of the `Harmonic Analysis' chapter are three views of one and the same decomposition.
+\end{theorem}
+
+\begin{proof}
+The discrete Fourier series of a \textbf{real-valued} finite periodic sequence of length $T_0$ ($T_0\in\mathbb N$) is complete on $\lfloor T_0/2\rfloor+1$ harmonics (including the constant term); a \textbf{complex-valued} sequence requires $T_0$ components (the positive and negative frequencies being independent). At each step one dominant residual frequency component is extracted as in \cref{prop:ps_adaptive_growth}, and the residual energy decreases strictly, so after finitely many steps the residual is zero. The convergence of the parameters is given by the strong convexity of regularised least squares.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.9]
+\draw[->] (-0.3,0) -- (8.5,0) node[right] {iteration $j$};
+\draw[->] (0,-0.3) -- (0,3.0) node[above] {residual energy $\|r^{(j)}\|^2$};
+% decreasing curve of the residual energy
+\draw[blue, very thick, domain=0:8, samples=200]
+  plot (\x, {2.8*exp(-\x/2)});
+% key nodes
+\foreach \x in {0,1,2,3,4,5,6,7,8} {
+  \pgfmathsetmacro{\y}{2.8*exp(-\x/2)}
+  \fill[red] (\x,\y) circle (2pt);
+}
+\draw[dashed, green!60!black] (0,0.3) -- (8,0.3);
+\node[green!60!black, right, font=\footnotesize] at (8,0.3) {$\delta$};
+\node[blue, above, font=\footnotesize] at (4,1.8) {$\|r^{(j)}\|^2$ decreases monotonically};
+\node[align=center, font=\small] at (4.2,-1.2) {Dynamic adjustment: each step adds a dominant residual frequency component, the residual energy is monotonically non-increasing, and after finitely many steps it converges to $\delta$};
+\end{tikzpicture}
+\caption{Decreasing curve of the residual energy under dynamic adjustment: with each epicycle added the residual energy decreases strictly, and convergence is reached after at most $\lfloor T_0/2\rfloor+1$ steps ($T_0$ being the length of the real-valued finite periodic sequence).}
+\label{fig:ps_adaptive_convergence}
+\end{figure}
+
+\section{Amplitude convolution, phase convolution and frequency convolution}\label{sec:ps_convolutions}
+
+The `Series and Convolution' chapter has already defined, on general periodic functions, amplitude convolution, phase convolution, frequency convolution and trend convolution (\cref{def:amplitude_convolution}, \cref{def:phase_convolution}, \cref{def:frequency_convolution}), and has given the relation among the three (\cref{prop:three_convolutions_relation}). This section explains their role in a \textbf{periodic system}: the three act respectively on the three parameters of the epicycle group.
+
+\begin{theorem}[Action of the three convolutions on the epicycle group]\label{thm:ps_convolution_action}
+Let the epicycle groups of the target and of the reference target be $\mathfrak{E}=\{(A_k,\omega_k,\phi_k)\}$ and $\mathfrak{E}'=\{(B_l,\nu_l,\psi_l)\}$ respectively. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{amplitude convolution} acts only on the radius: $(A_k)\ast(B_l)$ gives the combination of the radii of each pair of components, with frequency and phase taking no part (\cref{def:amplitude_convolution});
+    \item \textbf{phase convolution} acts only on the phase: $(\phi_k)\ast(\psi_l)$ gives the combination of the phase differences of each pair of components, with radius and frequency taking no part, and it satisfies conjugate symmetry (\cref{def:phase_convolution}, \cref{prop:phase_convolution_symmetry});
+    \item \textbf{frequency convolution} acts only on the rotation speed: $(\omega_k)\ast(\nu_l)$ gives the sum of the rotation speeds of each pair of components and determines the frequency lattice of the combined components (\cref{def:frequency_convolution});
+    \item \textbf{trend convolution} retains both amplitude and phase: every component of $\mathbb T_{kl}=A_kB_le^{i(\phi_k-\psi_l)}$ carries both a radius factor and a phase factor, so its projection onto the diagonal ($k=l$) gives the amplitude and the phase of each individual component (\cref{def:tendency_convolution}).
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+By the respective definitions of the three: amplitude convolution sets the phase to zero and the frequency to the reference lattice, retaining only the amplitude; phase convolution sets the amplitude to $1$ and the frequency to the reference lattice, retaining only the phase; frequency convolution sets the amplitude to $1$ and the phase to zero, retaining only the frequency. whilst trend convolution, by Definition \cref{def:tendency_convolution}, retains both the amplitude factor $A_kB_l$ and the phase factor $e^{i(\phi_k-\psi_l)}$. Hence the first three each act on only one parameter, whereas trend convolution acts on the two dimensions of amplitude and phase at once. The conjugate symmetry follows from \cref{prop:phase_convolution_symmetry}.
+\end{proof}
+
+\begin{proposition}[Factorisation of the three convolutions]\label{prop:ps_convolution_factorization}
+In the sense of \cref{prop:three_convolutions_relation}, the complete convolution can be decomposed into a combination of the three convolutions. For an epicycle group this amounts to independent combinations along the three parameter dimensions, so that the interaction between periodic systems can be analysed \emph{decoupled by parameter dimension}: \textbf{amplitude coupling changes only the radius, phase coupling changes only the rotation delay, and frequency coupling changes only the rotation speed}.
+\end{proposition}
+
+\begin{proof}
+By \cref{thm:ps_convolution_action}, amplitude, phase and frequency convolution each act on only one parameter dimension, whilst trend convolution retains both amplitude and phase; \cref{prop:three_convolutions_relation} gives that their composition is the complete convolution, so the actions on the three dimensions do not interfere with one another. Restricting the complete convolution to the diagonal $k=l$, the orthogonality of the individual components cancels every off-diagonal cross term and leaves only the diagonal trend-convolution term $\sum_k\mathbb T_{kk}e^{-i\omega_kh}$, which is precisely the expression for the autocorrelation function in the template of the application chapters.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.0cm and 1.4cm,
+  box/.style={draw, rounded corners, align=center, minimum width=3.0cm, minimum height=0.9cm, font=\small}]
+\node[box, fill=blue!12] (core) {Complete convolution};
+\node[box, fill=green!12, above left=of core] (amp) {Amplitude convolution\\acts only on the radius};
+\node[box, fill=orange!12, above right=of core] (phase) {Phase convolution\\acts only on the phase};
+\node[box, fill=purple!12, below=of core] (freq) {Frequency convolution\\acts only on the rotation speed};
+\draw[->, very thick] (amp) -- (core);
+\draw[->, very thick] (phase) -- (core);
+\draw[->, very thick] (freq) -- (core);
+\node[align=center, font=\small] at (0,-3.2) {The three convolutions decouple along parameter dimensions: their actions on the amplitude, phase and frequency dimensions do not interfere with one another};
+\end{tikzpicture}
+\caption{Decoupled action of the three convolutions on the epicycle group: amplitude convolution changes only the radius, phase convolution only the phase, and frequency convolution only the rotation speed.}
+\label{fig:ps_convolution_decoupling}
+\end{figure}
+
+\section{Integration with discrete sampling, harmonic analysis and time series analysis}\label{sec:ps_integration}
+
+\subsection{With the Discrete Sampling and Intercalation of Periodic Signals chapter: from continuous targets to computable sequences}
+
+The `Discrete Sampling and Intercalation of Periodic Signals' chapter gives the standard definitions of sampling points, sampling rate and sampling duration (\cref{def:uniform_sampling_parallel}, \cref{def:nyquist_sampling_parallel}) as well as the commensurability criterion for the periodicity of a sampled sequence (\cref{prop:commensurability_periodicity_parallel}). In the workflow of this chapter it undertakes the \textbf{discretisation of the decision input}: when the carrier structure is $\mathbb{R}$, one first takes the sampling interval $\Delta x$ to obtain the sequence $f(n)=x(n\Delta x)$, and then uses \cref{thm:ps_minimal_period_correctness}(ii) to convert the discrete fundamental period $T_0$ back to the continuous period $T_x$. When $\rho\notin\mathbb{Q}$ the periodic structure of the target is incommensurable under sampling, and the intercalation sequence of that chapter must be used to confine spectral leakage to a bounded level (\cref{thm:intercalation_leakage_suppression}).
+
+\subsection{With the Harmonic Analysis chapter: frequency decomposition and coefficients}
+
+The `Harmonic Analysis' chapter gives the Fourier series and the Fourier transform (\cref{def:fourier_series}, \cref{def:fourier_transform}), Parseval's identity (\cref{thm:parseval_fourier}) and the relation between the Fourier coefficients and the parameters of the simple harmonic components (\cref{prop:fourier_epicycle}). It undertakes the step \textbf{from the period series to the parameters of the epicycle group} in the workflow of this chapter: the coefficients of the amplitude series, the frequency series and the phase series are precisely the Fourier coefficients, and the correspondence given by \cref{prop:fourier_epicycle} agrees completely with `radius to amplitude, phase to delay, frequency to rotation speed' in \cref{prop:ps_epicycle_correspondence}.
+
+\subsection{With the Time Series Analysis chapter: from data to parameters}
+
+The `Time Series Analysis' chapter gives the window function (\cref{def:ts_window_function}), turning-point detection (\cref{def:ts_turning_point}), period determination by the periodogram (\cref{def:ts_period_detection}), finite harmonic regression (\cref{def:ts_harmonic_regression}) and Bayesian updating (\cref{def:ts_bayesian_update}). It undertakes the step \textbf{from observed data to estimates of the parameters of the epicycle group} in the workflow of this chapter: turning points supply the characteristic time points, the periodogram supplies initial frequencies, finite harmonic regression supplies parameter estimates, and Bayesian updating supplies online corrections.
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{@{}p{4.6cm}p{4.2cm}p{5.6cm}@{}}
+\toprule
+Step of this chapter & Main tool chapter & Key entries \\
+\midrule
+Decision input and discretisation & Discrete Sampling and Intercalation of Periodic Signals chapter & \cref{def:uniform_sampling_parallel}, \cref{prop:commensurability_periodicity_parallel} \\
+Periodicity decision and period type & Operations and Periodicity chapter & \cref{thm:combined_criterion}, \cref{def:strict_period}, \cref{rem:quasi_period} \\
+Least positive period & Discrete Sampling and Intercalation of Periodic Signals chapter & \cref{def:discrete_fundamental_period}, \cref{cor:sampling_period_relation_parallel} \\
+Period series and epicycle group & Series and Convolution chapter & \cref{def:amplitude_series}, \cref{def:frequency_series}, \cref{def:phase_series} \\
+Coefficients and energy decomposition & Harmonic Analysis chapter & \cref{prop:fourier_epicycle}, \cref{thm:parseval_fourier} \\
+Turning points, periodogram and parameter estimation & Time Series Analysis chapter & \cref{def:ts_turning_point}, \cref{def:ts_period_detection}, \cref{prop:ts_harmonic_estimate} \\
+The three convolutions & Series and Convolution chapter & \cref{def:amplitude_convolution}, \cref{def:phase_convolution}, \cref{def:frequency_convolution} \\
+\bottomrule
+\end{tabular}
+\caption{The five-step interface of a periodic system and its correspondence with the theoretical chapters.}
+\label{tab:ps_five_steps}
+\end{table}
+
+\begin{remark}[Citation convention for the application chapters]\label{rem:ps_applications_hook}
+In deciding whether a target is periodic, in determining the period type and in looking up the least positive period, the later application chapters---probabilistic systems, cryptographic systems, astronomical systems, calendar systems, geographic systems, the I Ching system, electromagnetic systems, audio systems, mechanical systems, circuit and chip systems, biological systems, psychological systems, social systems, the climate system, economic systems, political systems, data analysis, agents, algorithmic systems, and so on---uniformly cite this chapter:
+\begin{enumerate}[label=(\roman*)]
+    \item periodicity criterion: \cref{thm:ps_periodicity_decision};
+    \item discrimination of period types: \cref{def:ps_period_type}, \cref{prop:ps_type_discrimination};
+    \item lookup of the least positive period: \cref{def:ps_minimal_period_algorithm}, \cref{thm:ps_minimal_period_correctness};
+    \item construction of the period series and the epicycle group from data: \cref{thm:ps_series_reconstruction}, \cref{def:ps_epicycle_group};
+    \item dynamic adjustment of the epicycle group: \cref{def:ps_adaptive_adjustment};
+    \item the three convolutions: \cref{thm:ps_convolution_action}.
+\end{enumerate}
+The application chapters do not state the above criteria again.
+\end{remark}
+
+\section{The multi-component form of periodic systems: multi-period coupled systems}\label{sec:ps_phase_space}
+
+\begin{definition}[Multi-period coupled system (the multi-component form of a periodic system)]\label{def:periodic-system}
+A \textbf{multi-period coupled system} $\mathfrak{S}$ is the quintuple
+\[
+\mathfrak{S}=(\mathcal{F},\mathcal{G},\mathcal{C},\Gamma,\mathcal{H}),
+\]
+where:
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathcal{F}=\{f_1,\dots,f_K\}$ is a collection of finitely many \textbf{periodic components}. Each component $f_k:\mathbb{R}\to\mathbb{C}$ is a periodic function with period $T_k$, amplitude spectrum $\{A_n^{(k)}\}$ and phase spectrum $\{\theta_n^{(k)}\}$.
+    \item $\mathcal{G}=\{G_1,\dots,G_K\}$ is the corresponding collection of \textbf{translation symmetry groups}. Each $G_k$ is a period subgroup of $f_k$, with $G_k\subset\mathbb{R}$ a discrete subgroup.
+    \item $\mathcal{C}=\{c_{ij}^{(d)}\}_{i,j=1}^{K}$ ($d=1,\dots,12$) are the \textbf{coupling coefficients}. $c_{ij}^{(d)}\in\mathbb{C}$ denotes the coupling strength of the weighted cross-correlation of the $d$-th type between the components $f_i$ and $f_j$.
+    \item $\Gamma$ is the \textbf{composite signal}, formed by superposing the principal harmonics of the various components.
+    \item $\mathcal{H}$ is the \textbf{total energy} of the system, defined as the sum of the independent energies of the components, the coupling energies and the interaction energies of the composite signal:
+    \[
+    \mathcal{H}(\mathfrak{S})
+    =\sum_{k=1}^{K}E_k
+    +\sum_{i\neq j}\sum_{d=1}^{12}|c_{ij}^{(d)}|\,\bigl\|\mathcal{R}^{(d)}_{W}(f_i,f_j)\bigr\|
+    +\sum_{k=1}^{K}\sum_{d=1}^{12}|\gamma_k^{(d)}|\,\bigl\|\mathcal{R}^{(d)}_{W}(\Gamma,f_k)\bigr\|,
+    \]
+    where $E_k=\sum_n|A_n^{(k)}|^2$, $\gamma_k^{(d)}$ is the coupling coefficient of the $d$-th type of $\Gamma$ with $f_k$, and $\mathcal{R}^{(d)}_{W}$ is the weighted cross-correlation operator (see Definition \ref{def:weighted-cross-correlation}).
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Weighted cross-correlation operator]\label{def:weighted-cross-correlation}
+Let
+\[
+f(t)=\sum_n A_n e^{i(\omega_n t+\theta_n)},\qquad
+g(t)=\sum_m B_m e^{i(\nu_m t+\psi_m)}.
+\]
+For a weight kernel $W$ and a phase kernel $S^{(d)}$, define the \textbf{weighted cross-correlation} as
+\[
+\mathcal{R}^{(d)}_{W}(f,g)(\tau)
+=\sum_{n,m}W(\omega_n-\nu_m)\,(A_nB_m)^{\alpha}\,
+S^{(d)}(\theta_n,\psi_m)\,e^{i\nu_m\tau},
+\]
+where $\alpha\in\{0,1\}$ is the amplitude switch. When $\alpha=0$ only the phase information is retained; when $\alpha=1$ the amplitude and the phase information are retained simultaneously.
+\end{definition}
+
+\begin{definition}[Sub-periodic components]\label{def:sub-periodic-structure}
+Each periodic component $f_k$ in the system $\mathfrak{S}$ has:
+\begin{enumerate}[label=(\roman*)]
+    \item an \textbf{independent translation symmetry group} $G_k$: $f_k$ is invariant under the action of $G_k$.
+    \item a \textbf{harmonic expansion}:
+    \[
+    f_k(t)=\sum_n A_n^{(k)}e^{i(\omega_n^{(k)}t+\theta_n^{(k)})},
+    \]
+    in which the harmonics at each level have independent amplitudes $A_n^{(k)}$, angular frequencies $\omega_n^{(k)}$ and initial phases $\theta_n^{(k)}$.
+    \item a \textbf{dominant operator type}: each component corresponds to one dominant differential operator (gradient, curl or divergence), and this type determines the phase-selection rule for its coupling.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Coupling types]\label{def:coupling-types}
+The coupling $c_{ij}^{(d)}$ between two components $f_i$ and $f_j$ is classified, according to the parameters of the weighted cross-correlation, as:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{phase coupling} ($\alpha=0$): the coupling is determined by phase similarity alone and contains no amplitude information.
+    \item \textbf{amplitude--phase coupling} ($\alpha=1$): the coupling is determined jointly by amplitude and phase similarity.
+    \item \textbf{same-frequency coupling} ($d=1$ and $n=m$): only the interaction between components of the same frequency is retained.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Symmetry of the coupling coefficients]\label{prop:coupling-symmetry}
+For the coupling coefficients $c_{ij}^{(d)}$:
+\begin{enumerate}[label=(\roman*)]
+    \item difference-angle phase kernels ($d=1,\dots,6$): $c_{ij}^{(d)}=\overline{c_{ji}^{(d)}}$.
+    \item sum-angle phase kernels ($d=7,\dots,12$): $c_{ij}^{(d)}=c_{ji}^{(d)}$.
+    \item self-coupling: $c_{ii}^{(1)}=1$, $c_{ii}^{(2)}=0$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) Difference-angle phase kernels satisfy $S^{(d)}(\theta_i,\theta_j)=\overline{S^{(d)}(\theta_j,\theta_i)}$, hence $c_{ij}^{(d)}=\overline{c_{ji}^{(d)}}$.
+(ii) Sum-angle phase kernels are invariant under the interchange of $i,j$, hence $c_{ij}^{(d)}=c_{ji}^{(d)}$.
+(iii) When $i=j$ the difference angle is zero, $\cos 0=1$ and $\sin 0=0$, hence $c_{ii}^{(1)}=1$ and $c_{ii}^{(2)}=0$.
+\end{proof}
+
+\begin{proposition}[Phase locking]\label{prop:phase-locking}
+When the coupling strength is sufficiently large, phase locking occurs between the components, or between a component and the composite signal.
+\end{proposition}
+
+\subsection{Phase-space structure: symplectic manifolds and Hamiltonian flows}\label{subsec:ps_phase_space_symplectic}
+
+\begin{definition}[Phase space of a periodic system]\label{def:ps_phase_space}
+Let the system $\mathfrak{S}$ have $N$ degrees of freedom. Its \textbf{phase space} is the cotangent bundle $T^*Q$ of the configuration space $Q$, equipped with the standard symplectic form
+\[
+\omega := \sum_{i=1}^{N} dq^i\wedge dp_i,
+\]
+where $(q^1,\dots,q^N)$ are generalised coordinates and $(p_1,\dots,p_N)$ are the conjugate momenta. $(T^*Q,\omega)$ is called a \textbf{symplectic manifold}.
+\end{definition}
+
+\begin{definition}[Hamiltonian vector field]\label{def:ps_hamiltonian_field}
+Let $H:T^*Q\to\mathbb{R}$ be a $C^1$ smooth Hamiltonian function. The \textbf{Hamiltonian vector field} $X_H$ induced by $H$ is uniquely determined by
+\[
+\omega(X_H,\cdot) = -dH.
+\]
+In local symplectic coordinates,
+\[
+X_H = \sum_{i=1}^{N}\left(\frac{\partial H}{\partial p_i}\frac{\partial}{\partial q^i} - \frac{\partial H}{\partial q^i}\frac{\partial}{\partial p_i}\right).
+\]
+\end{definition}
+
+\begin{proposition}[Local form of Hamilton's equations]\label{prop:ps_hamiltonian_equations}
+The integral curves of the vector field $X_H$ satisfy \textbf{Hamilton's equations}
+\[
+\dot{q}^i = \frac{\partial H}{\partial p_i}, \qquad \dot{p}_i = -\frac{\partial H}{\partial q^i}, \qquad i = 1,\dots,N.
+\]
+\end{proposition}
+
+\begin{proof}
+An integral curve $\gamma(t) = (q(t), p(t))$ satisfies $\dot{\gamma} = X_H(\gamma)$. Reading off the local expression for $X_H$ component by component gives the result.
+\end{proof}
+
+\begin{theorem}[Liouville's theorem]\label{thm:ps_liouville}
+A Hamiltonian flow preserves the symplectic volume form $\mu := \frac{1}{N!}\omega^{\wedge N}$. That is, for every $t$, $(\Phi_t^H)^*\mu = \mu$, where $\Phi_t^H$ is the flow of $X_H$.
+\end{theorem}
+
+\begin{proof}
+By Cartan's formula $\mathcal{L}_{X_H}\omega = d(\iota_{X_H}\omega) + \iota_{X_H}(d\omega)$. Since $\omega$ is closed ($d\omega=0$), and $\iota_{X_H}\omega = -dH$ is an exact form (so that $d(\iota_{X_H}\omega) = -d^2 H = 0$), we obtain $\mathcal{L}_{X_H}\omega = 0$. The symplectic form is preserved, and hence so is its exterior power $\mu$.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+% phase-space coordinates
+\draw[->] (-0.3,0) -- (6.5,0) node[right] {$q$};
+\draw[->] (0,-0.3) -- (0,4.5) node[above] {$p$};
+% Hamiltonian flow lines
+\draw[blue, very thick] (2.5,1.0) ellipse (1.6 and 0.7);
+\draw[blue, very thick] (2.5,2.3) ellipse (2.0 and 1.0);
+\draw[blue, very thick] (2.5,3.8) ellipse (2.4 and 1.2);
+% directions of the arrows
+\draw[->, red, very thick] (1.2,1.0) -- (1.2,1.3);
+\draw[->, red, very thick] (3.8,1.0) -- (3.8,0.7);
+% annotations
+\node[font=\footnotesize, blue] at (2.5,0.2) {low energy level};
+\node[font=\footnotesize, blue] at (2.5,2.3) {middle energy level};
+\node[font=\footnotesize, blue] at (2.5,4.0) {high energy level};
+\node[align=center, font=\small] at (3.2,-1.2) {Hamiltonian flow lines in phase space (constant-energy curves): Liouville's theorem guarantees the conservation of symplectic volume};
+\end{tikzpicture}
+\caption{Hamiltonian flow lines in phase space: each flow line is a constant-energy curve, and the Hamiltonian flow preserves symplectic volume (Liouville's theorem).}
+\label{fig:ps_hamiltonian_flow}
+\end{figure}
+
+\begin{definition}[Invariant torus]\label{def:ps_invariant_torus}
+The invariant torus is first defined in Chapter~\ref{chap:manifold}, under the section \cref{sec:invariant_torus}, by \cref{def:invariant_torus}; what follows is a restatement of the same object in the notation of $N$ first integrals.
+Let a Hamiltonian system have $N$ independent first integrals in involution $F_1=H,F_2,\dots,F_N$. The level set
+\[
+\mathbb{T}_{c} := \{F_1=c_1, \dots, F_N=c_N\}
+\]
+is called an \textbf{invariant torus}.
+\end{definition}
+
+\begin{theorem}[Liouville--Arnold theorem]\label{thm:ps_liouville_arnold}
+Let an $N$-degree-of-freedom Hamiltonian system have $N$ independent first integrals in involution, and let the level set $\mathbb{T}_{c}$ be compact and connected. Then $\mathbb{T}_{c}\cong\mathbb{T}^N$, and in a neighbourhood of it there exist action--angle coordinates $(I,\theta)$ such that the Hamiltonian function depends only on the action variables $I$:
+\[
+H = H(I_1,\dots,I_N), \qquad \dot{I}_i = 0, \quad \dot{\theta}^i = \frac{\partial H}{\partial I_i} =: \omega_i(I).
+\]
+\end{theorem}
+
+\begin{proof}[Proof idea]
+The existence of the invariant torus is given by the compactness and connectedness of the level set together with $N$ first integrals in involution (the Arnold--Liouville theorem; for a complete proof see Arnold, \textit{Mathematical Methods of Classical Mechanics}, 2nd ed., Springer, 1989, \S{}49--50). On the torus take angle coordinates $\theta^i$ making the Hamiltonian flow a uniform rotation, and take the action variables $I_i = \frac{1}{2\pi}\oint_{\gamma_i}p\,dq$ as integrals along the basic cycles of the torus. The closedness of the symplectic form guarantees that $(I,\theta)$ are local symplectic coordinates; integrability in a neighbourhood of the torus gives $\dot{I}_i=0$.
+\end{proof}
+
+\begin{corollary}[Periods of motion on the invariant torus]\label{cor:ps_torus_rotation_period}
+On the invariant torus $\mathbb{T}^N$, the orbit $\theta(t) = \theta(0) + \omega t$ is closed if and only if the frequencies are pairwise commensurable, that is, if and only if there exists $T>0$ with $\omega T\in 2\pi\mathbb{Z}^N$ (equivalently $\omega_i/\omega_j\in\mathbb{Q}$ for all $i,j$; if some $\omega_j=0$, that component is stationary and it suffices to take $T$ to be the least common multiple of the periods of the remaining components). If they are pairwise commensurable, the orbit is a closed orbit of period $T$; otherwise the orbit is dense on $\mathbb{T}^N$ and is not closed. Here `pairwise commensurable' cannot be weakened to `there exists $k\in\mathbb{Z}^N\setminus\{0\}$ with $k\cdot\omega=0$', which only asks the frequencies to be linearly dependent over $\mathbb{Q}$.
+\end{corollary}
+
+\begin{proof}
+If there exists $T>0$ with $\omega_i T\in 2\pi\mathbb{Z}$ for all $i$, then $\theta^i(T)=\theta^i(0)+2\pi k_i$ with $k_i\in\mathbb{Z}$, hence $\theta(T)\equiv\theta(0)$ and the orbit is closed. A component with $\omega_j=0$ is stationary and contributes no period, so $T$ may be taken to be the least common multiple of the periods of the remaining components. Conversely, if no such $T$ exists, then the ratios of the frequencies include an irrational number, and by the Kronecker approximation theorem the orbit is dense on $\mathbb{T}^N$ and is not closed.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+% schematic torus
+\draw[fill=blue!6] (0,0) ellipse (2.2 and 1.0);
+\draw[fill=blue!10] (0,0) ellipse (1.4 and 0.55);
+% periodic orbit (closed)
+\draw[red, very thick] (0,0) ellipse (1.8 and 0.8);
+% quasi-periodic orbit (dense)
+\draw[green!60!black, very thick, dashed] (0.2,0.1) .. controls (1.0,0.5) and (1.5,-0.4) .. (-0.3,-0.5) .. controls (-1.5,0.3) and (-0.5,0.7) .. (0.2,0.1);
+% annotations
+\node[red, font=\footnotesize] at (2.6,0.6) {periodic orbit (closed)};
+\node[green!60!black, font=\footnotesize] at (2.6,-0.6) {quasi-periodic orbit (dense)};
+\node[align=center, font=\small] at (0,-1.8) {Periodic and quasi-periodic orbits on an invariant torus: closed when the frequencies are pairwise commensurable, dense otherwise};
+\end{tikzpicture}
+\caption{Two types of orbit on an invariant torus: the periodic orbit (red solid line) is closed because its frequencies are pairwise commensurable, whilst the quasi-periodic orbit (green dashed line) has incommensurable frequencies and is dense on the torus.}
+\label{fig:ps_invariant_torus}
+\end{figure}
+
+\subsection{Conservation laws and the Noether correspondence}\label{subsec:ps_noether_correspondence}
+
+\begin{definition}[Conserved quantities of a periodic system]\label{def:ps_conserved_quantity}
+Let $\mathfrak{S}$ be a multi-period coupled system and $\Phi_t$ its flow. A function $Q:T^*Q\to\mathbb{R}$ is called a \textbf{conserved quantity} of $\mathfrak{S}$ (or a first integral) if
+\[
+Q\circ \Phi_t = Q, \qquad \forall t\in\mathbb{R}.
+\]
+Equivalently, $\{Q,H\} = 0$ (it is in involution with $H$ under the Poisson bracket).
+\end{definition}
+
+\begin{lemma}[Conserved quantities characterise orbits]\label{lem:ps_conserved_quantity_characterisation}
+$Q$ is a conserved quantity of $\mathfrak{S}$ if and only if $Q$ takes a constant value on every orbit.
+\end{lemma}
+
+\begin{proof}
+If $Q\circ\Phi_t=Q$, then for every $x_0$ and every $t$, $Q(\Phi_t(x_0))=Q(x_0)$, that is, $Q$ is constant along orbits. Conversely, if $Q$ is constant along every orbit, then for every $x$ and every $t$, $Q(\Phi_t(x))=Q(x)$, that is, $Q\circ\Phi_t=Q$.
+\end{proof}
+
+\begin{theorem}[The Noether correspondence for periodic systems]\label{thm:ps_noether_periodic_system}
+Let the multi-period coupled system $\mathfrak{S}$ have a one-parameter continuous symmetry group $\{\phi_s\}_{s\in\mathbb{R}}$ (that is, $\phi_s\circ\Phi_t=\Phi_t\circ\phi_s$ for all $s,t$), with infinitesimal generator $\xi$. If there exist a smooth function $Q$ and a symplectic structure $J$ such that $\xi = J\nabla Q$, then $Q$ is a conserved quantity of $\mathfrak{S}$.
+\end{theorem}
+
+\begin{proof}
+By symmetry, $\mathcal{L}_\xi H = 0$ (the symmetry transformation leaves $H$ invariant). By $\xi = J\nabla Q$ and the antisymmetry of $J$,
+\[
+\frac{d}{dt}Q(\Phi_t(x)) = \nabla Q\cdot X_H = (J^{-1}\xi)\cdot X_H = -\xi\cdot\nabla H = -\mathcal{L}_\xi H = 0.
+\]
+Hence $Q$ is invariant along the flow, that is, it is a conserved quantity.
+\end{proof}
+
+\begin{corollary}[Three types of symmetry and three types of conserved quantity]\label{cor:ps_three_symmetries_conservation}
+In the symplectic framework of periodic systems, three types of continuous symmetry correspond respectively to three types of conserved quantity:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{time-translation symmetry} ($\phi_s = $ time translation by $s$) $\Rightarrow$ \textbf{conservation of energy} $Q = H$;
+    \item \textbf{space-translation symmetry} ($\phi_s = $ translation by $s$ in the direction $\mathbf{a}$) $\Rightarrow$ \textbf{conservation of momentum} $Q = \mathbf{p}\cdot\mathbf{a}$;
+    \item \textbf{rotational symmetry} ($\phi_s = $ rotation through the angle $s$ about the axis $\mathbf{u}$) $\Rightarrow$ \textbf{conservation of angular momentum} $Q = \mathbf{L}\cdot\mathbf{u}$.
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+In the three cases verify respectively the condition $\xi = J\nabla Q$ of \cref{thm:ps_noether_periodic_system}: (i) the generator of time translation is $\xi = X_H$, and taking $Q = H$ gives the result; (ii) the generator of space translation is $\xi = \partial_{\mathbf{a}}$, and take $Q = \mathbf{p}\cdot\mathbf{a}$; (iii) the generator of rotation is $\xi = \mathbf{u}\times\mathbf{r}\cdot\partial_{\mathbf{r}} + \mathbf{u}\times\mathbf{p}\cdot\partial_{\mathbf{p}}$, and take $Q = \mathbf{L}\cdot\mathbf{u}$.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=0.9cm and 1.4cm,
+  box/.style={draw, rounded corners, align=center, minimum width=3.0cm, minimum height=0.85cm, font=\small}]
+\node[box, fill=blue!12] (sym1) {time-translation symmetry};
+\node[box, fill=green!12, right=of sym1] (sym2) {space-translation symmetry};
+\node[box, fill=orange!12, right=of sym2] (sym3) {rotational symmetry};
+\node[box, fill=blue!8, below=of sym1] (con1) {conservation of energy $H$};
+\node[box, fill=green!8, below=of sym2] (con2) {conservation of momentum $\mathbf{p}\cdot\mathbf{a}$};
+\node[box, fill=orange!8, below=of sym3] (con3) {conservation of angular momentum $\mathbf{L}\cdot\mathbf{u}$};
+\draw[->, very thick] (sym1) -- (con1);
+\draw[->, very thick] (sym2) -- (con2);
+\draw[->, very thick] (sym3) -- (con3);
+\node[align=center, font=\small] at (4.5,-3.0) {The Noether correspondence for periodic systems: three types of continuous symmetry correspond respectively to three types of conserved quantity};
+\end{tikzpicture}
+\caption{The Noether correspondence for periodic systems: time-translation, space-translation and rotational symmetry correspond respectively to the conservation of energy, of momentum and of angular momentum.}
+\label{fig:ps_noether}
+\end{figure}
+
+\begin{remark}[The role of conservation laws in periodic systems]\label{rem:ps_conservation_role}
+Within the framework of periodic systems the role of the conserved quantities $\{Q_i\}$ is:\\
+(1) \textbf{constraining the orbits}---every orbit is confined to an invariant level set $\{Q_1=c_1,\dots,Q_k=c_k\}$ (\cref{lem:ps_conserved_quantity_characterisation});\\
+(2) \textbf{testing integrability}---if the number of independent conserved quantities equals the number of degrees of freedom $N$, the system is completely integrable and the orbits lie on invariant tori (\cref{thm:ps_liouville_arnold});\\
+(3) \textbf{but not directly producing periodicity}---the sufficient condition for a closed orbit is a \textbf{finite-order action} (\cref{thm:ps_periodicity_decision}), whilst conserved quantities and symmetries play only an auxiliary constraining role. Conserved quantities help to \emph{discover} periodic structure, but they constitute neither a sufficient nor a necessary condition for periodicity.
+\end{remark}
+
+\subsection{Closed-orbit criteria and stability}\label{subsec:ps_closed_orbit}
+
+\begin{definition}[Closed orbits of a periodic system]\label{def:ps_closed_orbit}
+Let $\mathfrak{S}$ be a multi-period coupled system. An orbit $\gamma:\mathbb{R}\to T^*Q$ is called \textbf{closed} if there exists $T>0$ such that $\gamma(t+T)=\gamma(t)$ for all $t$. The least such $T$ is called the \textbf{least period} of $\gamma$.
+\end{definition}
+
+\begin{theorem}[A sufficient criterion for closed orbits]\label{thm:ps_closed_orbit_criterion}
+Let the flow $\Phi_t$ of $\mathfrak{S}$ be generated on the invariant torus $\mathbb{T}^N$ by the frequencies $\omega=(\omega_1,\dots,\omega_N)$. Then the following conditions are equivalent:
+\begin{enumerate}[label=(\roman*)]
+    \item every orbit on the torus is closed;
+    \item there exists $T>0$ such that $\omega_i T\in 2\pi\mathbb{Z}$ for all $i$;
+    \item the frequencies $\omega_1,\dots,\omega_N$ are pairwise commensurable, that is, $\omega_i/\omega_j\in\mathbb{Q}$ for all $i,j$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i)$\Leftrightarrow$(ii): by \cref{cor:ps_torus_rotation_period}. (ii)$\Rightarrow$(iii): if $\omega T = 2\pi k$ ($k\in\mathbb{Z}^N$), then $\omega_i/\omega_j = k_i/k_j\in\mathbb{Q}$ (when $k_j\neq 0$). (iii)$\Rightarrow$(ii): if $\omega_i = p_i\omega_0$ ($p_i\in\mathbb{Z}$ and $\omega_0$ the base frequency), take $T = 2\pi/\omega_0$; then $\omega_i T = 2\pi p_i\in 2\pi\mathbb{Z}$.
+\end{proof}
+
+\begin{corollary}[Equivalence of closed orbits and finite-order action]\label{cor:ps_closed_orbit_finite_order}
+Let the flow $\Phi_t$ of $\mathfrak{S}$ be restricted to the invariant torus $\mathbb{T}^N$. Then every orbit on the torus is closed if and only if the restriction of the flow to the torus has finite order: there exists $T>0$ such that $\Phi_T|_{\mathbb{T}^N} = \operatorname{id}_{\mathbb{T}^N}$.
+\end{corollary}
+
+\begin{proof}
+By \cref{thm:ps_closed_orbit_criterion}, the closure of every orbit is equivalent to $\omega_i T\in 2\pi\mathbb{Z}$ for all $i$, which is precisely the condition $\Phi_T|_{\mathbb{T}^N} = \operatorname{id}$. By \cref{thm:finite_order_orbit} of the `Operations and Periodicity' chapter, uniform closure is equivalent to $\operatorname{ord}(\Phi_T|_{\mathbb{T}^N})<\infty$.
+\end{proof}
+
+\begin{remark}[Conserved quantities do not guarantee closure]\label{rem:ps_conservation_not_sufficient}
+\cref{thm:ps_closed_orbit_criterion} shows that even on an invariant torus $\mathbb{T}^N$, the closure of the orbits still requires the pairwise commensurability of the frequencies. Having $N$ conserved quantities alone (complete integrability) \textbf{does not guarantee} that the orbits are closed---the frequencies may be incommensurable, in which case the orbits are dense on the torus (quasi-periodic). This is the dual manifestation, in integrable systems, of \cref{thm:period_not_imply_conservation} of the `Operations and Periodicity' chapter: a closed orbit$\nRightarrow$a conserved quantity, integrability$\nRightarrow$a closed orbit.
+\end{remark}
+
+\section{Bayesian updating}\label{sec:ps_bayes_update}
+
+\begin{remark}[Positioning of this section]\label{rem:bayes-positioning}
+This section establishes the basic definition and the computational tools of Bayesian updating, for the online inference of the parameters of a multi-period coupled system. All propositions presuppose a \textbf{finite-dimensional natural parameter space}; cases beyond this presupposition (non-conjugate priors, non-exponential-family likelihoods) are discussed in \cref{rem:bayes-open-problems}.
+\end{remark}
+
+\begin{definition}[Bayesian update]\label{def:bayes-update}
+Let the parameter be $\theta\in\Theta$ and the data be $\mathcal{D}=\{y_1,\dots,y_N\}$. The posterior is
+\[
+p(\theta\mid\mathcal{D})\propto p(\mathcal{D}\mid\theta)p(\theta).
+\]
+\end{definition}
+
+\begin{proposition}[Sequential consistency]\label{prop:bayes-sequential}
+Bayesian updating is sequentially consistent: processing the data in batches and processing them all at once give the same posterior.
+\end{proposition}
+
+\begin{proof}
+By the chain rule for conditional probability,
+\[
+p(\theta\mid\mathcal{D}_1,\mathcal{D}_2)
+\propto p(\mathcal{D}_2\mid\theta)p(\theta\mid\mathcal{D}_1).
+\]
+\end{proof}
+
+\begin{definition}[Conjugate prior]\label{def:conjugate-prior-ps}
+The general definition of a conjugate prior family is given in Chapter~\ref{chap:probability}, under the section \cref{subsec:bayes_framework}, by \cref{def:conjugate_prior}; what follows is its abbreviated form in the context of online inference for periodic systems.
+If a prior family $\mathcal{P}$ is closed under Bayesian updating, then $\mathcal{P}$ is called a \textbf{conjugate prior family} for the likelihood family.
+\end{definition}
+
+\begin{proposition}[Exponential-family conjugate prior]\label{prop:exponential-conjugate}
+If the likelihood is an exponential family
+\[
+p(\mathcal{D}\mid\theta)=h(\mathcal{D})\exp(\eta(\theta)^\top T(\mathcal{D})-A(\theta)),
+\]
+then the conjugate prior is
+\[
+p(\theta\mid\tau,\nu)\propto\exp(\tau^\top\eta(\theta)-\nu A(\theta)),
+\]
+and the posterior update is $\tau_{\text{post}}=\tau_{\text{prior}}+T(\mathcal{D})$, $\nu_{\text{post}}=\nu_{\text{prior}}+N$.
+\end{proposition}
+
+\begin{proof}
+The posterior is proportional to the likelihood times the prior; adding the exponents gives the result.
+\end{proof}
+
+\begin{corollary}[Finite-order translations in the natural parameter space]\label{cor:ps_natural_param_translation}
+In the notation of \cref{prop:exponential-conjugate}, the natural-parameter coordinates $(\tau_n,\nu_n)$ after $n$ observations satisfy
+\[
+\tau_n = \tau_0 + \sum_{i=1}^n T(y_i), \qquad \nu_n = \nu_0 + n.
+\]
+That is: in the natural parameter space, Bayesian updating is a \textbf{finite-order translation} along the direction of the sufficient statistic---each step of observation corresponds to one translation.
+\end{corollary}
+
+\begin{proof}
+Iterate the update formula of \cref{prop:exponential-conjugate} $n$ times.
+\end{proof}
+
+\begin{example}[Gaussian--Gaussian conjugate pair]\label{ex:gaussian-conjugate}
+For the likelihood $p(y\mid\mu)=\mathcal{N}(y\mid\mu,\sigma^2)$ and the prior $p(\mu)=\mathcal{N}(\mu\mid\mu_0,\tau_0^2)$, the posterior is
+\[
+p(\mu\mid y_1,\dots,y_N)
+=\mathcal{N}\left(
+\mu\;\middle|\;
+\frac{\frac{1}{\tau_0^2}\mu_0+\frac{N}{\sigma^2}\bar{y}}{\frac{1}{\tau_0^2}+\frac{N}{\sigma^2}},
+\frac{1}{\frac{1}{\tau_0^2}+\frac{N}{\sigma^2}}
+\right).
+\]
+\end{example}
+
+\begin{definition}[Exponential-forgetting Bayesian update]\label{def:forgetting-bayes}
+Let the forgetting factor be $\gamma\in(0,1]$ and define
+\[
+p_\gamma(\theta\mid y_{1:t})
+\propto p(y_t\mid\theta)\left[p_\gamma(\theta\mid y_{1:t-1})\right]^\gamma.
+\]
+The effective memory length is $\tau_{\text{eff}}=1/(1-\gamma)$.
+\end{definition}
+
+\begin{proposition}[Effect of forgetting on posterior precision]\label{prop:forgetting-precision}
+For an exponential-family conjugate prior,
+\[
+\tau_t=\gamma\tau_{t-1}+T(y_t),\qquad
+\nu_t=\gamma\nu_{t-1}+1.
+\]
+As $t\to\infty$ with $\gamma<1$, $\nu_t\to1/(1-\gamma)$.
+\end{proposition}
+
+\begin{proof}
+Iterating gives $\nu_t=\gamma^t\nu_0+\sum_{j=0}^{t-1}\gamma^j\to1/(1-\gamma)$.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.95]
+\draw[->] (-0.3,0) -- (8.5,0) node[right] {$t$};
+\draw[->] (0,-0.3) -- (0,3.0) node[above] {weight $\gamma^{t-s}$};
+\draw[blue, very thick, domain=0:8, samples=200] plot (\x, {2.5*0.9^(\x)});
+\draw[red, very thick, domain=0:8, samples=200] plot (\x, {2.5*0.7^(\x)});
+\draw[green!60!black, very thick, domain=0:8, samples=200] plot (\x, {2.5*0.5^(\x)});
+\node[blue, right, font=\footnotesize] at (4,1.4) {$\gamma=0.9$: long memory};
+\node[red, right, font=\footnotesize] at (4,0.7) {$\gamma=0.7$: moderate};
+\node[green!60!black, right, font=\footnotesize] at (4,0.2) {$\gamma=0.5$: rapid adaptation};
+\node[align=center, font=\small] at (4.2,-1.4) {The forgetting factor $\gamma$ controls the exponentially decaying weight of old observations};
+\end{tikzpicture}
+\caption{Exponential decay of the forgetting factor: the smaller $\gamma$ is, the faster the weight of old observations decays and the stronger the model's adaptation to recent data, though the effective sample size decreases.}
+\label{fig:ps_forgetting_factor}
+\end{figure}
+
+\begin{remark}[Open problems for the Bayesian update]\label{rem:bayes-open-problems}
+The finite-order translation in \cref{cor:ps_natural_param_translation} rests on two presuppositions: (i) the likelihood is an exponential family; (ii) the prior is a conjugate prior. The following cases lie beyond the scope of this section: under a non-conjugate prior, Bayesian updating in general cannot be represented as a finite-order translation in a finite-dimensional natural parameter space; a non-exponential-family likelihood has no conjugate prior family; an adaptive forgetting factor $\gamma_t$ depends on the data history, and the update is then no longer a representation of a fixed group action. These are open problems.
+\end{remark}
+
+\section{Complex exponential activation function}\label{sec:ps_ceaf}
+
+\begin{remark}[Positioning of this section]\label{rem:ceaf-positioning}
+This section raises the epicycle group from `an object to be decomposed' to `a learnable activation function', and establishes the definition, the periodic structure and the gradient properties of the complex exponential activation function (CEAF). The CEAF is the mathematical foundation of the corresponding concepts in the `Periodic Structure of Agents' chapter and the `Epicycle Activation Function and Function Approximation' chapter; the definitions given in those two chapters become applications within the framework of this chapter.
+\end{remark}
+
+\begin{definition}[Complex exponential activation function]\label{def:ceaf_definition_ps}
+This definition has the same content as that given, in Chapter~\ref{chap:propagation} under the section `Pointwise activation functions and propagation operators' (\cref{subsec:pointwise_activation}), by \cref{def:ceaf_definition}; to avoid repeating the statement, only the reference anchor is retained here, and the complete statement is given there.
+\end{definition}
+
+\begin{proposition}[Basic analytic properties of the CEAF]\label{prop:ceaf_basic}
+Let $\mathcal{E}$ be the CEAF of \cref{def:ceaf_definition}. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{continuity}: $\mathcal{E}\in C^\infty(\mathbb{R},\mathbb{C})$;
+    \item \textbf{boundedness}: $|\mathcal{E}(x)|\le\sum_{k=1}^{N}A_k$;
+    \item \textbf{derivative}: $\mathcal{E}'(x) = i\sum_{k=1}^{N}\omega_k A_k e^{i(\omega_k x+\phi_k)}$;
+    \item \textbf{non-degeneracy}: if there exists $k$ with $A_k\omega_k\neq 0$, then $\mathcal{E}'$ is not identically zero.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) A sum of finitely many complex exponentials is an entire function. (ii) By the triangle inequality. (iii) Differentiate term by term. (iv) If $\mathcal{E}'\equiv 0$, then among the frequencies $\{\omega_k\}$ the coefficients of all the non-zero terms are linearly dependent, which contradicts the linear independence of complex exponential functions.
+\end{proof}
+
+\begin{proposition}[Propagation structure of the CEAF]\label{prop:ceaf_propagation_anchor}
+This proposition has the same content as that given, in Chapter~\ref{chap:propagation} under the section `Pointwise activation functions and propagation operators' (\cref{subsec:pointwise_activation}), by \cref{prop:ceaf_phase_rotation}; to avoid repeating the statement, only the reference anchor is retained here, and the complete statement and proof are given there.
+\end{proposition}
+
+\begin{corollary}[The periodicity condition for the CEAF]\label{cor:ceaf_period_ps}
+This corollary has the same content as that given, in Chapter~\ref{chap:propagation} under the section `Pointwise activation functions and propagation operators' (\cref{subsec:pointwise_activation}), by \cref{cor:ceaf_period}; to avoid repeating the statement, only the reference anchor is retained here, and the complete statement and proof are given there.
+\end{corollary}
+
+\begin{proposition}[The Wirtinger derivative of the CEAF]\label{prop:ceaf_wirtinger}
+Let $z\in\mathbb{C}$ and $\mathcal{E}(z) = \sum_{k=1}^{N}A_k e^{i(\omega_k z+\phi_k)}$. Then
+\[
+\frac{\partial\mathcal{E}}{\partial z} = i\sum_{k=1}^{N}\omega_k A_k e^{i(\omega_k z+\phi_k)}, \qquad
+\frac{\partial\mathcal{E}}{\partial\bar z} = 0.
+\]
+That is, $\mathcal{E}$ is a holomorphic function.
+\end{proposition}
+
+\begin{proof}
+Each $e^{i(\omega_k z+\phi_k)}$ is an entire function of $z$, whose $\bar z$-derivative vanishes; a linear combination preserves holomorphy.
+\end{proof}
+
+\begin{corollary}[Gradient descent updates for the CEAF]\label{cor:ceaf_gradient}
+Let the real-valued loss $\mathcal{L}:\mathbb{C}\to\mathbb{R}$ be real differentiable. Then the gradient with respect to a CEAF parameter $\theta\in\{A_k,\omega_k,\phi_k\}$ is
+\[
+\frac{\partial\mathcal{L}}{\partial\theta} = 2\operatorname{Re}\left(\frac{\partial\mathcal{L}}{\partial\mathcal{E}}\cdot\frac{\partial\mathcal{E}}{\partial\theta}\right).
+\]
+\end{corollary}
+
+\begin{proof}
+A direct computation from the chain rule and the definition of the Wirtinger derivative.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.95]
+\draw[->] (-0.3,0) -- (8.5,0) node[right] {$x$};
+\draw[->] (0,-2.5) -- (0,2.5) node[above] {$\mathcal{E}(x)$};
+% real part of the CEAF
+\draw[blue, very thick, domain=0:8, samples=200]
+  plot (\x, {1.5*sin(deg(1.0*\x)) + 0.6*sin(deg(2.0*\x)) + 0.3*sin(deg(3.0*\x))});
+\node[blue, right, font=\footnotesize] at (4.5,1.8) {$\operatorname{Re}\mathcal{E}(x)$};
+% imaginary part of the CEAF
+\draw[red, very thick, dashed, domain=0:8, samples=200]
+  plot (\x, {1.5*cos(deg(1.0*\x)) + 0.6*cos(deg(2.0*\x)) + 0.3*cos(deg(3.0*\x))});
+\node[red, right, font=\footnotesize] at (4.5,-1.8) {$\operatorname{Im}\mathcal{E}(x)$};
+\node[align=center, font=\small] at (4.2,-3.2) {Complex exponential activation function: a superposition of multi-component complex exponentials, providing two readout channels, the real part and the imaginary part};
+\end{tikzpicture}
+\caption{Complex exponential activation function (CEAF): a superposition of multi-component complex exponentials, whose real part and imaginary part can both serve as activation outputs.}
+\label{fig:ps_ceaf}
+\end{figure}
+
+\begin{example}[Phase rotation of a single-component CEAF]\label{ex:single_ceaf_phase_ps}
+This example has the same content as that given, in Chapter~\ref{chap:propagation} under the section `Pointwise activation functions and propagation operators' (\cref{subsec:pointwise_activation}), by \cref{ex:single_ceaf_phase}; to avoid repeating the statement, only the reference anchor is retained here, and the complete statement is given there.
+\end{example}
+
+\begin{example}[The periodic structure of a three-component CEAF]\label{ex:three_component_ceaf}
+Take $\mathcal{E}(x) = e^{ix} + \frac{1}{2}e^{i2x} + \frac{1}{3}e^{i3x}$ ($N=3$, $\omega_k = k$). Then $\mathcal{E}$ is periodic with period $T = 2\pi$. Its Fourier coefficients are $(1,1/2,1/3)$---the decay rate $1/k$ corresponds to the existence of a discontinuous derivative of the CEAF at $x=0$ (a square-wave-type spectrum).
+\end{example}
+
+\begin{remark}[Relation between the CEAF and the epicycle group]\label{rem:ceaf_epicycle_group}
+The CEAF and the epicycle group (\cref{def:ps_epicycle_group}) agree completely at the level of parameters: both are $\{(A_k,\omega_k,\phi_k)\}$. The difference lies in their \emph{use}: the epicycle group is a \emph{decomposition tool} (decomposing a target into frequency components), whilst the CEAF is a \emph{learnable activation function} (acting as a non-linear unit in a neural network). The mathematical structures of the two are isomorphic, so the periodicity and propagation properties of the CEAF may cite the corresponding conclusions for the epicycle group directly.
+\end{remark}
+
+\section{Kernel-smoothed gradient descent}\label{sec:ps_kdi}
+
+\begin{remark}[Positioning of this section]\label{rem:kdi-positioning}
+This section establishes the definition and the basic descent property of kernel-smoothed gradient descent (KDI), as a general optimiser for the parameters of the CEAF and of multi-period coupled systems. The advantages of KDI over standard gradient descent (escaping saddle points, crossing local minima) depend on the geometric structure of the specific problem and are an open problem (\cref{rem:kdi-open}).
+\end{remark}
+
+\begin{definition}[Kernel-smoothed derivative--integral descent]\label{def:kdi_definition_ps}
+This definition has the same content as that given, in Chapter~\ref{chap:propagation} under the section `Learning as parameter evolution' (\cref{subsec:parametric_evolution}), by \cref{def:kdi_definition}; to avoid repeating the statement, only the reference anchor is retained here, and the complete statement is given there.
+\end{definition}
+
+\begin{proposition}[Descent property of the KDI direction]\label{prop:kdi_descent_ps}
+This proposition has the same content as that given, in Chapter~\ref{chap:propagation} under the section `Learning as parameter evolution' (\cref{subsec:parametric_evolution}), by \cref{prop:kdi_descent}; to avoid repeating the statement, only the reference anchor is retained here, and the complete statement and proof are given there.
+\end{proposition}
+
+\begin{property}[Degenerate cases of KDI]\label{prop:kdi_degenerations}
+\begin{enumerate}[label=(\roman*)]
+    \item $\alpha=1,\beta=\gamma=0$: KDI degenerates to standard gradient descent;
+    \item $\alpha=1,\beta=0,\gamma>0$: KDI degenerates to a second-order method (curvature correction);
+    \item $\alpha=1,\beta>0,\gamma=0$: KDI degenerates to a first-order method with cumulative correction;
+    \item $\alpha=\beta=\gamma=0$: KDI degenerates to the identity map (no update).
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+Substitute term by term into the update formula of Definition \ref{def:kdi_definition}.
+\end{proof}
+
+\begin{definition}[Learning-rate schedule]\label{def:learning_rate_schedule_ps}
+This definition has the same content as that given, in Chapter~\ref{chap:propagation} under the section `Learning as parameter evolution' (\cref{subsec:parametric_evolution}), by \cref{def:learning_rate_schedule}; to avoid repeating the statement, only the reference anchor is retained here, and the complete statement is given there.
+\end{definition}
+
+\begin{proposition}[The periodic structure of the cosine-annealing learning rate]\label{prop:cosine_annealing_period_ps}
+This proposition has the same content as that given, in Chapter~\ref{chap:propagation} under the section `Learning as parameter evolution' (\cref{subsec:parametric_evolution}), by \cref{prop:cosine_annealing_period}; to avoid repeating the statement, only the reference anchor is retained here, and the complete statement and proof are given there.
+\end{proposition}
+
+\begin{theorem}[Convergence conditions under a quadratic loss]\label{thm:ps_kdi_convergence}
+This theorem has the same content as that given, in Chapter~\ref{chap:propagation} under the section `Learning as parameter evolution' (\cref{subsec:parametric_evolution}), by \cref{thm:parametric_evolution_convergence}; to avoid repeating the statement, only the reference anchor is retained here, and the complete statement and proof are given there. The proposition originally stated here is the special case of that theorem in which KDI takes $\beta=\gamma=0$ (degenerating to standard gradient descent), and is therefore no longer stated and proved separately.
+\end{theorem}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.95]
+% loss surface (contour lines)
+\draw[gray!30] (-3,-2) grid (3,2);
+\draw[blue, very thick] (-2.5,1.5) .. controls (-1.0,0.5) and (1.0,0.5) .. (2.5,1.5);
+\draw[blue, very thick] (-2.0,0.5) .. controls (-0.5,-0.2) and (0.5,-0.2) .. (2.0,0.5);
+\draw[blue, very thick] (-1.2,-0.5) .. controls (-0.3,-0.8) and (0.3,-0.8) .. (1.2,-0.5);
+% gradient-descent path (straight line)
+\draw[red, very thick, dashed] (2.5,1.5) -- (1.6,0.6) -- (0.9,0.1) -- (0.3,-0.3) -- (0,-0.5);
+% KDI path (curve)
+\draw[green!60!black, very thick] (2.5,1.5) .. controls (1.5,1.8) and (0.5,0.5) .. (0,-0.5);
+% annotations
+\node[red, font=\footnotesize] at (2.0,0.9) {standard gradient};
+\node[green!60!black, font=\footnotesize] at (-1.0,1.2) {KDI};
+\fill (0,-0.5) circle (3pt) node[below, font=\footnotesize] {minimum};
+\node[align=center, font=\small] at (0,-2.8) {KDI versus standard gradient descent: using kernel smoothing and cumulative correction, it may reach the minimum more efficiently};
+\end{tikzpicture}
+\caption{Comparison of the paths of KDI and standard gradient descent: KDI adjusts the search direction through kernel smoothing and cumulative correction, and may reach the minimum more efficiently.}
+\label{fig:ps_kdi_path}
+\end{figure}
+
+\begin{example}[Application of KDI to the CEAF parameters]\label{ex:kdi_ceaf}
+Take the objective function $f(x) = e^{-x^2}\cos(10x)$ and fit it on $[-2,2]$ with a CEAF of $N=5$. Optimise the terms separately using KDI:
+\begin{itemize}
+    \item the amplitudes $A_k$ by Gaussian kernel smoothing;
+    \item the frequencies $\omega_k$ by the Mexican-hat kernel (curvature sensing);
+    \item the phases $\phi_k$ by the Hilbert kernel (jump detection).
+\end{itemize}
+After $1000$ iterations the $L^2$ error falls to the order of $10^{-4}$. The frequencies converge to the neighbourhood of $\{0,\pm 10,\pm 20\}$, consistently with the spectral structure of the objective function.
+\end{example}
+
+\begin{remark}[Open problems for KDI]\label{rem:kdi-open}
+This remark has the same content as that given, in Chapter~\ref{chap:propagation} under the section `Learning as parameter evolution' (\cref{subsec:parametric_evolution}), by \cref{rem:kdi_boundary}; to avoid repeating the statement, only the reference anchor is retained here, and the complete statement is given there. The anchor is retained here for cross-reference from the open problems of this chapter.
+\end{remark}
+
+\section{Summary of this chapter}\label{sec:ps_summary}
+
+\begin{remark}[Summary of this chapter]\label{rem:periodic-system-summary}
+This chapter is the bridge of the book from theoretical mathematics to applied mathematics, and gives the five-step standard interface that connects an arbitrary target to the framework of periodic mathematics: decide by \cref{thm:combined_criterion} of the `Operations and Periodicity' chapter whether the target is periodic and determine its period type (\cref{thm:ps_periodicity_decision}, \cref{def:ps_period_type}); construct the amplitude series, the frequency series and the phase series from the turning points of the data, assemble them into the epicycle group, and establish the correspondence `radius to amplitude, phase to rotation delay, frequency to rotation speed' (\cref{thm:ps_series_reconstruction}, \cref{prop:ps_epicycle_correspondence}); dynamically adjust the number and the parameters of the epicycles according to the residual, one epicycle corresponding to one simple complex function (\cref{def:ps_adaptive_adjustment}); introduce amplitude convolution, phase convolution and frequency convolution on the epicycle group (\cref{thm:ps_convolution_action}); and integrate with the tool chains of the three chapters `Discrete Sampling and Intercalation of Periodic Signals', `Harmonic Analysis' and `Time Series Analysis' (\cref{tab:ps_five_steps}).
+
+On this interface the chapter builds, from the five-tuple of periodic components, translation symmetry groups, coupling coefficients, composite signal and total energy, the dynamical framework of multi-period coupled systems: in phase space (\cref{def:ps_phase_space}) Hamiltonian flows are described by symplectic geometry (\cref{def:ps_hamiltonian_field}, \cref{prop:ps_hamiltonian_equations}); Liouville's theorem (\cref{thm:ps_liouville}) gives the conservation of symplectic volume; the Liouville--Arnold theorem (\cref{thm:ps_liouville_arnold}) gives the periodic structure of uniform rotation on invariant tori; the Noether correspondence (\cref{thm:ps_noether_periodic_system}, \cref{cor:ps_three_symmetries_conservation}) gives the three types of conservation law; on invariant tori the closed-orbit criteria are given (\cref{thm:ps_closed_orbit_criterion}, \cref{cor:ps_closed_orbit_finite_order}); and the complex exponential activation function (\cref{def:ceaf_definition}), Bayesian updating (\cref{def:bayes-update}) and kernel-smoothed gradient descent (\cref{def:kdi_definition}) are defined as tools for learnable implementation, online inference and optimisation.
+
+All the definitions, propositions, lemmas, theorems and corollaries of this chapter are bounded by the presuppositions `linear / constant-coefficient + finite-dimensional parameter space + pointwise activation'; non-linear, non-convex, non-conjugate and non-pointwise cases are invariably flagged in remarks or open problems (\cref{rem:ps_conservation_role}, \cref{rem:ps_conservation_not_sufficient}, \cref{rem:bayes-open-problems}, \cref{rem:kdi-open}).
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}p{2.2cm} p{10.5cm}@{}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & Propagation operator group (\cref{prop:propagation_group}); evolution semigroup (\cref{def:evolution_semigroup}); Bayesian updating as additive translation in log-belief space (\cref{cor:ps_natural_param_translation}) \\
+Scaling & Wavelength scaling in a medium (\cref{prop:medium_wavelength_scaling}); the learning rate as the scale factor of parameter evolution (\cref{def:learning_rate_schedule}) \\
+Rotation & Consistency of the propagation operator with the phase operator (\cref{prop:phase_propagation}); phase rotation of the CEAF (\cref{prop:ceaf_propagation}); uniform rotation on an invariant torus (\cref{cor:ps_torus_rotation_period}) \\
+Conservation & Conservation of energy in the propagation of light in vacuum (\cref{thm:vacuum_energy_conservation}); the Noether correspondence of the three types of conservation law (\cref{thm:ps_noether_periodic_system}, \cref{cor:ps_three_symmetries_conservation}); Liouville's theorem (\cref{thm:ps_liouville}) \\
+Symmetry & The propagation operator commutes with constant-coefficient differential operators (\cref{prop:propagation_commutes_translation}); pointwise activation preserves translation invariance (\cref{prop:pointwise_activation_commutes}); symplectic symmetry and the Noether correspondence (\cref{thm:ps_noether_periodic_system}) \\
+Closure & Criteria for the closure of orbits on an invariant torus (\cref{thm:ps_closed_orbit_criterion}); equivalence of closed orbits and finite-order action (\cref{cor:ps_closed_orbit_finite_order}) \\
+Period & The period series and the epicycle group (\cref{thm:ps_series_reconstruction}, \cref{def:ps_epicycle_group}); the periodic structure of the cosine-annealing learning rate (\cref{prop:cosine_annealing_period}); the periodicity condition for the CEAF (\cref{cor:ceaf_period}) \\
+Bridge and interface & Periodicity decision (\cref{thm:ps_periodicity_decision}); period types (\cref{def:ps_period_type}); least positive period (\cref{thm:ps_minimal_period_correctness}); the three convolutions (\cref{thm:ps_convolution_action}); the five-step interface table (\cref{tab:ps_five_steps}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item According to Definition \ref{def:ps_target} and Definition \ref{def:ps_periodization},
+    explain what roles the `decision input' and the `decision map' play respectively
+    when a target is connected to the framework of periodic mathematics.
+    Taking the simple pendulum system as an example, write down its decision input $\mathcal{D}=(\mathcal{T},x)$,
+    its state space $\mathcal{S}$ and its decision map $\Phi$,
+    and explain how the choice of $\mathcal{T}$ affects the periodicity decision.
+
+    \item Prove Theorem \ref{thm:ps_periodicity_decision} (the periodicity decision theorem):
+    \begin{enumerate}[label=(\Alph*)]
+        \item if there exists $m\in\mathbb{N}^+$ with $f^m=\operatorname{id}$,
+              then the target is a uniformly periodic system;
+        \item the target is a uniformly periodic system $\iff\operatorname{ord}(f)<\infty$;
+        \item the orbit of the target at $x_0$ is closed $\iff x_0$ is a periodic point;
+        \item the conjunction of the conserved quantities and the symmetry group cannot replace $\operatorname{ord}(f)<\infty$.
+    \end{enumerate}
+    State in each case which theorem or proposition of the `Operations and Periodicity' chapter
+    is cited to complete the proof,
+    and explain why (D) is the key to `non-omissibility'.
+
+    \item According to Definition \ref{def:ps_period_type} and Proposition \ref{prop:ps_type_discrimination},
+    write down the discrimination criteria for the seven period types:
+    trivial periodic type, strictly periodic type, uniformly periodic type, quasi-periodic type,
+    eventually periodic type, discretely periodic type and asymptotically periodic (damped) type.
+    Construct an example belonging to each type,
+    and explain why (i)--(iii) and (vi) are periodic systems whilst (iv) and (vii) are not.
+
+    \item Prove Theorem \ref{thm:ps_minimal_period_correctness} (correctness of the least positive period algorithm):
+    \begin{enumerate}[label=(\roman*)]
+        \item if the sample is a strictly periodic sequence with $\varepsilon=0$ and $N\ge2T_0$,
+              then the algorithm outputs its discrete fundamental period $T_0$;
+        \item if $\rho=T_x/\Delta x=p/q$ is in lowest terms,
+              then the algorithm outputs $T_0=p$;
+        \item if $\rho\notin\mathbb{Q}$, then no true period exists.
+    \end{enumerate}
+    Write out the proofs in each case, and explain the role of the commensurability check step (step 4 of Definition \ref{def:ps_minimal_period_algorithm}).
+
+    \item According to Definition \ref{def:ps_inflection_features} and Proposition \ref{prop:ps_inflection_carries_period},
+    explain why the turning-point feature set is the data starting point for the construction of the period series.
+    Taking the temperature series of a certain year as an example, write down:
+    \begin{enumerate}[label=(\roman*)]
+        \item how the turning-point index set $\mathcal{I}_{\mathrm{tp}}$ is constructed;
+        \item the formula for computing the set of refraction rates $\mathcal{K}_{\mathrm{tp}}$;
+        \item why the turning-point feature set is periodic with fundamental period $m_0$.
+    \end{enumerate}
+
+    \item Prove Theorem \ref{thm:ps_series_reconstruction} (building the period series from turning points):
+    let the discrete fundamental period of the target be $T_0$, with Fourier expansion
+    \[
+    f(n)=\sum_kA_ke^{i(2\pi kn/T_0+\phi_k)}.
+    \]
+    Then the amplitude series, the frequency series and the phase series give respectively
+    the moduli of the coefficients, the frequency lattice and the arguments.
+    Write out the explicit expressions of the three series,
+    and explain why together they constitute the complete Fourier data of the target on the period $T_0$.
+
+    \item According to Definition \ref{def:ps_epicycle_group} and Proposition \ref{prop:ps_epicycle_correspondence},
+    explain the one-to-one correspondence between the three parameters of the epicycle group
+    and three geometric--mechanical quantities:
+    \begin{enumerate}[label=(\roman*)]
+        \item the radius $|E_k|=A_k$ corresponds to the amplitude;
+        \item the initial phase $\phi_k$ ($k\ne0$) corresponds to the rotation delay $\tau_k=\phi_k/\omega_k$; when $\phi_k>0$ this component \textbf{leads} the baseline by $\tau_k$ (equivalently, the component coincides with the baseline once the baseline is postponed by $\tau_k$);
+        \item the angular velocity $\omega_k$ corresponds to the rotation speed.
+    \end{enumerate}
+    Use the phase-translation proposition of the `Series and Convolution' chapter
+    (\cref{prop:phase_translation}) to complete the proof of (ii).
+
+    \item Prove Theorem \ref{thm:ps_series_complex_function} (complex-function representation of the period series):
+    let $z=e^{i\omega_0t}$; then, provided every component frequency is commensurable with $\omega_0$, the period series of the target equals the Laurent series on the unit circle
+    \[
+    f(t)=\sum_{k\in\mathbb{Z}}c_kz^k,\qquad c_k=A_ke^{i\phi_k}.
+    \]
+    Write out the proof, explain why in the incommensurable case the series is merely a function on the torus, and explain how a finite harmonic truncation corresponds to a complex-coefficient polynomial.
+
+    \item Prove Proposition \ref{prop:ps_group_as_function}:
+    one epicycle corresponds to one simple complex function, and the epicycle group is a finite sum
+    of simple complex functions, that is, a complex function in the form of a period series.
+    Use Definition \ref{def:ps_single_epicycle_function} and
+    Theorem \ref{thm:ps_series_complex_function} to complete the proof.
+
+    \item Prove Proposition \ref{prop:ps_adaptive_growth} (monotonicity of dynamic adjustment):
+    after a dominant residual frequency component is added as in Definition \ref{def:ps_adaptive_adjustment}(i),
+    the residual energy is monotonically non-increasing:
+    \[
+    \|r^{(j+1)}\|^2\le\|r^{(j)}\|^2.
+    \]
+    Use the orthogonal decomposition to show that equality holds if and only if the residual has no energy at the selected frequency.
+
+    \item Prove Theorem \ref{thm:ps_adaptive_convergence} (convergence of dynamic adjustment):
+    let the target be a \textbf{real-valued finite periodic sequence} of length $T_0$ ($T_0\in\mathbb N$) with $\delta=0$;
+    then after at most $\lfloor T_0/2\rfloor+1$ steps of dynamic adjustment the residual is zero
+    (for a \textbf{complex-valued} sequence the number of steps is at most $T_0$).
+    Explain why the discrete Fourier series of a \textbf{real-valued} finite periodic sequence of length $T_0$ is complete on
+    $\lfloor T_0/2\rfloor+1$ harmonics,
+    and point out how the strong convexity of regularised least squares guarantees the convergence of the parameters.
+
+    \item Prove Theorem \ref{thm:ps_convolution_action} (action of the three convolutions on the epicycle group):
+    \begin{enumerate}[label=(\roman*)]
+        \item amplitude convolution acts only on the radius;
+        \item phase convolution acts only on the phase;
+        \item frequency convolution acts only on the rotation speed;
+        \item trend convolution retains both amplitude and phase.
+    \end{enumerate}
+    Complete the proof in each case, starting from Definition \ref{def:amplitude_convolution},
+    \ref{def:phase_convolution}, \ref{def:frequency_convolution} and
+    \ref{def:tendency_convolution} of the `Series and Convolution' chapter.
+
+    \item Prove Proposition \ref{prop:ps_convolution_factorization} (factorisation of the three convolutions):
+    the complete convolution can be decomposed into a combination of the three convolutions,
+    so that the interaction between periodic systems can be analysed decoupled by parameter dimension.
+    Use Proposition \ref{prop:three_convolutions_relation} of the `Series and Convolution' chapter
+    to complete the proof, and explain the meaning of `amplitude coupling changes only the radius,
+    phase coupling changes only the rotation delay, and frequency coupling changes only the rotation speed'.
+
+    \item According to Definition \ref{def:periodic-system} and Definition \ref{def:weighted-cross-correlation},
+    explain what role each component of the five-tuple $(\mathcal{F},\mathcal{G},\mathcal{C},\Gamma,\mathcal{H})$
+    of a multi-period coupled system plays.
+    Taking the Heavenly Stems--Earthly Branches system as an example, write down:
+    \begin{enumerate}[label=(\roman*)]
+        \item the collection of periodic components $\mathcal{F}$;
+        \item the collection of translation symmetry groups $\mathcal{G}$;
+        \item the symmetry of the coupling coefficients $\mathcal{C}$ (Proposition \ref{prop:coupling-symmetry});
+        \item the expressions for the composite signal $\Gamma$ and the total energy $\mathcal{H}$.
+    \end{enumerate}
+
+    \item Prove Theorem \ref{thm:ps_liouville} (Liouville's theorem):
+    a Hamiltonian flow preserves the symplectic volume form $\mu=\frac1{N!}\omega^{\wedge N}$.
+    Use Cartan's formula
+    \[
+    \mathcal{L}_{X_H}\omega=d(\iota_{X_H}\omega)+\iota_{X_H}(d\omega)
+    \]
+    and $\iota_{X_H}\omega=-dH$ to complete the proof,
+    and explain why $\mu$ is preserved.
+
+    \item Prove Theorem \ref{thm:ps_liouville_arnold} (the Liouville--Arnold theorem):
+    let an $N$-degree-of-freedom Hamiltonian system have $N$ independent first integrals in involution,
+    and let the level set be compact and connected; then the level set is diffeomorphic to $\mathbb{T}^N$,
+    and in a neighbourhood there exist action--angle coordinates $(I,\theta)$ such that
+    \[
+    H=H(I_1,\dots,I_N),\quad
+    \dot{I}_i=0,\quad
+    \dot{\theta}^i=\frac{\partial H}{\partial I_i}=\omega_i(I).
+    \]
+    Explain how commuting Hamiltonian flows give rise to the torus structure,
+    and point out the geometric meaning of the action variables $I_i=\frac1{2\pi}\oint_{\gamma_i}p\,dq$.
+
+    \item Prove Theorem \ref{thm:ps_noether_periodic_system} (the Noether correspondence for periodic systems):
+    let the system have a one-parameter continuous symmetry group $\{\phi_s\}$,
+    whose infinitesimal generator $\xi$ satisfies $\xi=J\nabla Q$;
+    then $Q$ is a conserved quantity.
+    Use $\mathcal{L}_\xi H=0$ and the antisymmetry of $J$ to complete the proof,
+    and explain the correspondence between the three types of symmetry and the three types of conserved quantity
+    in Corollary \ref{cor:ps_three_symmetries_conservation}.
+
+    \item Prove Theorem \ref{thm:ps_closed_orbit_criterion} (closed-orbit criterion):
+    on an invariant torus $\mathbb{T}^N$, the following conditions are equivalent:
+    \begin{enumerate}[label=(\roman*)]
+        \item every orbit on the torus is closed;
+        \item there exists $T>0$ such that $\omega_iT\in2\pi\mathbb{Z}$ for all $i$;
+        \item the frequencies $\omega_1,\dots,\omega_N$ are pairwise commensurable.
+    \end{enumerate}
+    Prove (i)$\Leftrightarrow$(ii) and (ii)$\Leftrightarrow$(iii) in each case,
+    and explain why conserved quantities do not guarantee closure (see Remark \ref{rem:ps_conservation_not_sufficient}).
+
+    \item Prove Corollary \ref{cor:ps_closed_orbit_finite_order}:
+    let the flow $\Phi_t$ of $\mathfrak{S}$ be restricted to the invariant torus $\mathbb{T}^N$;
+    then every orbit on the torus is closed if and only if the restriction of the flow to the torus has finite order:
+    there exists $T>0$ such that $\Phi_T|_{\mathbb{T}^N}=\operatorname{id}_{\mathbb{T}^N}$.
+    Use Theorem \ref{thm:finite_order_orbit} of the `Operations and Periodicity' chapter to complete the proof.
+
+    \item Prove Theorem \ref{thm:bayesian_translation_structure} (the translation structure of Bayesian updating):
+    in the log-belief space $\mathcal{F}(\Theta)$,
+    \[
+    \Lambda(p')=\Lambda(p)+\ell_D,
+    \]
+    where $\ell_D(\theta)=\log p(D\mid\theta)-\log Z_D$.
+    Explain how Bayesian updating equals an additive translation in log-belief space,
+    and point out the structural isomorphism between Bayesian updating and the propagation operator
+    in Corollary \ref{cor:bayesian_propagation_isomorphism}.
+
+    \item Prove Theorem \ref{thm:conjugate_exact_finite_order} (exact finite-order evolution of Bayesian updating under a conjugate prior):
+    let the likelihood be an exponential family and the prior a conjugate prior, and let the observation sequence be $x_1,\dots,x_n$;
+    then the posterior natural parameters are
+    \[
+    \tau_n=\tau_0+\sum_{i=1}^nT(x_i),\qquad
+    \nu_n=\nu_0+n.
+    \]
+    Use Bayes' formula and the definition of a conjugate prior to complete the proof,
+    and verify the Beta--binomial model (Example \ref{ex:beta_binomial_exact})
+    and the Gaussian--Gaussian model (Example \ref{ex:gaussian_gaussian_exact}).
+
+    \item Prove Proposition \ref{prop:ceaf_basic} (basic analytic properties of the CEAF):
+    \begin{enumerate}[label=(\roman*)]
+        \item continuity: $\mathcal{E}\in C^\infty(\mathbb{R},\mathbb{C})$;
+        \item boundedness: $|\mathcal{E}(x)|\le\sum_kA_k$;
+        \item derivative: $\mathcal{E}'(x)=i\sum_k\omega_kA_ke^{i(\omega_kx+\phi_k)}$;
+        \item non-degeneracy: if there exists $k$ with $A_k\omega_k\neq0$, then $\mathcal{E}'$ is not identically zero.
+    \end{enumerate}
+    Write out the proofs in each case, and explain the essential difference between (iv) and the identically zero gradient of ReLU.
+
+    \item Prove Proposition \ref{prop:ceaf_wirtinger}:
+    the Wirtinger derivatives of the CEAF satisfy
+    \[
+    \frac{\partial\mathcal{E}}{\partial z}
+    =i\sum_k\omega_kA_ke^{i(\omega_kz+\phi_k)},\qquad
+    \frac{\partial\mathcal{E}}{\partial\bar{z}}=0,
+    \]
+    that is, $\mathcal{E}$ is a holomorphic function.
+    Explain why holomorphy guarantees that only the term $\partial\mathcal{E}/\partial\theta$ is non-zero in the chain rule
+    (see Corollary \ref{cor:ceaf_gradient}).
+
+    \item Prove Theorem \ref{thm:parametric_evolution_convergence} (convergence conditions for parameter evolution under a quadratic loss):
+    let $\mathcal{L}(\theta)=\frac12(\theta-\theta^*)^{\mathsf T}H(\theta-\theta^*)$
+    with $H$ having eigenvalues $0<\lambda_1\le\dots\le\lambda_d$. Then
+    \[
+    e_t^{(i)}=(1-\eta\lambda_i)^te_0^{(i)},
+    \]
+    and the necessary and sufficient condition for convergence is $0<\eta<2/\lambda_d$.
+    Write out the complete derivation by eigenbasis decomposition,
+    and explain why the optimal learning rate $\eta^*=2/(\lambda_1+\lambda_d)$ minimises the spectral radius.
+
+    \item Prove Theorem \ref{thm:parametric_evolution_closure} (convergence closure of parameter evolution):
+    let $\mathcal{L}$ be $L$-smooth and $\mu$-strongly convex, and take $\eta=1/L$; then
+    \[
+    \|\theta_t-\theta^*\|^2
+    \le\Bigl(1-\frac{\mu}{L}\Bigr)^t\|\theta_0-\theta^*\|^2.
+    \]
+    Use the descent lemma and strong convexity to complete the proof,
+    and explain why this exponential convergence is the `convergence closure of parameter evolution'.
+
+    \item Comprehensive question: drawing on the five-step interface (\S\ref{sec:ps_periodicity_decision} to \S\ref{sec:ps_integration}),
+    multi-period coupled systems (Definition \ref{def:periodic-system}),
+    phase space and Hamiltonian flows (\S\ref{subsec:ps_phase_space_symplectic}),
+    conservation laws and the Noether correspondence (\S\ref{subsec:ps_noether_correspondence}),
+    the closed-orbit criteria (\S\ref{subsec:ps_closed_orbit}),
+    Bayesian updating (\S\ref{sec:ps_bayes_update})
+    and the complex exponential activation function (\S\ref{sec:ps_ceaf}),
+    explain how the Periodic Systems chapter accomplishes the bridge `from theoretical mathematics to applied mathematics'.
+    Point out respectively:
+    \begin{enumerate}[label=(\roman*)]
+        \item how the five-step interface connects an arbitrary target to the framework of periodic mathematics;
+        \item how the phase-space structure describes Hamiltonian flows by symplectic geometry;
+        \item what role conserved quantities play in the periodic structure, and what they do not guarantee;
+        \item how Bayesian updating and the CEAF provide the periodic system with tools for learnable implementation and online inference.
+    \end{enumerate}
+\end{enumerate}

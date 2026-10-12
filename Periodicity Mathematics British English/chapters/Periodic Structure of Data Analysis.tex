@@ -1,0 +1,728 @@
+\chapter{Periodic Structure of Data Analysis}
+\markboth{Periodic Structure of Data Analysis}{Periodic Structure of Data Analysis}
+
+\begin{remark}[Periodicity decision for the target of this chapter (citation)]\label{rem:data_ps_hook}
+When this chapter decides whether a research target is periodic, determines its period type, or seeks its minimal positive period, reference is always made to the `Periodic Systems' chapter:
+for the periodicity criterion see \cref{thm:ps_periodicity_decision},
+for the discrimination of period types see \cref{def:ps_period_type}, \cref{prop:ps_type_discrimination},
+for the search for the minimal positive period see \cref{def:ps_minimal_period_algorithm}, \cref{thm:ps_minimal_period_correctness},
+and for the construction of period series and epicycle groups from data see \cref{thm:ps_series_reconstruction}, \cref{def:ps_epicycle_group}.
+\end{remark}
+
+\begin{remark}[Positioning of this chapter: developed along the five-step interface of the `Periodic Systems' chapter]\label{rem:data_five_steps_positioning}
+The periodic structure of data analysis studies the mathematical methods for the detection, extraction, modelling and prediction of periodic patterns in data science. This chapter does not establish a separate periodicity criterion; instead it connects data analysis to the five-step interface prescribed by the `Periodic Systems' chapter:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{Decision}: reduce such targets as time series, multivariate data, spectra and trends to discrete or continuous dynamical systems, invoke \cref{thm:ps_periodicity_decision} to decide whether they are periodic, and determine the period type;
+    \item \textbf{Construction}: build the amplitude series, the frequency series and the phase series from observational data, spectra and phases, and assemble them into the data epicycle group;
+    \item \textbf{Adjustment}: dynamically adjust the data epicycle group by residual-energy descent, information criteria (AIC/BIC) and derivative-integral descent;
+    \item \textbf{Convolution}: introduce amplitude convolution, phase convolution and frequency convolution on the data epicycle group, and link them to autocorrelation, cross-correlation and phase-coupling networks;
+    \item \textbf{Integration}: connect to the tool chains of the three chapters `Discrete Sampling and Intercalation of Periodic Signals', `Harmonic Analysis' and `Time Series Analysis', forming a diagnostic procedure for data periodicity.
+\end{enumerate}
+The mathematical tools used in this chapter include: the discrete Fourier transform, the periodogram, multitaper spectral estimation, periodic convolution, window functions, similarity and trend, the refractive index, derivative-integral descent optimisation, and phase-coupling networks.
+\end{remark}
+
+\begin{remark}[Guide to the seven themes of this chapter]\label{rem:data_seven_themes}
+\textbf{Translation}---the lag operator, autocorrelation and delay correlation of a time series (the $\tau$-step self-similarity of the delay $\tau$ in Definition \ref{def:trend_similarity_data}); \textbf{Scaling}---the multi-scale window radii of multitaper spectral estimation and the window radius $\Delta$ of trend decomposition, and the refractive index $\eta$ (Proposition \ref{prop:multitaper}, Definition \ref{def:data_window_decomposition}, Definition \ref{def:refraction_index_data}); \textbf{Rotation}---the phase edge weights and phase-difference angles of the phase-coupling network (Definition \ref{def:phase_coupling_network}); \textbf{Balance}---the three balance relations of information conservation, energy conservation and phase conservation (\textbf{empirical observation / research programme}, see Remark \ref{thm:data_conservation}); \textbf{Symmetry}---the symmetry tests of the data distribution about the three centres of symmetry $0$, $1$ and $i$; \textbf{Closure}---the closed-loop diagnostic procedure `detection---modelling---verification---prediction' (Definition \ref{def:data_diagnosis_pipeline}); \textbf{Period}---periodogram peaks and the dominant period (Definition \ref{def:spectral_analysis}).
+\end{remark}
+
+\section{Periodicity decision for data targets: connection to step one of the `Periodic Systems' chapter}
+\label{sec:data_periodicity_decision}
+
+\subsection{Data targets, decision inputs and the decision map}
+
+\begin{definition}[Data target and decision input]\label{def:data_target}
+A \textbf{data target} is one of the following objects:
+\begin{enumerate}[label=(\roman*)]
+    \item a univariate time series $\{X_t\}_{t=1}^{n}$;
+    \item a multivariate time series $\{X_t^{(i)}\}_{i=1}^{M}$;
+    \item a spectral or periodogram sequence;
+    \item a trend component or a fluctuation component sequence.
+\end{enumerate}
+The \textbf{decision input} of a data target is the pair
+\[
+\mathcal D_{\mathrm{D}}=(\mathcal T,x),
+\]
+where $\mathcal T$ is the time index set (which may be $\mathbb Z$ or $\mathbb R$) and $x:\mathcal T\to V$ gives the values of the data over time. If $\mathcal T=\mathbb Z$, the target is called a \textbf{discrete data target}; if $\mathcal T=\mathbb R$, the target is called a \textbf{continuous data target}.
+\end{definition}
+
+\begin{definition}[Data decision map]\label{def:data_periodization}
+Let a data target be given by the decision input $\mathcal D_{\mathrm{D}}=(\mathcal T,x)$. If there exist a map $\Phi:\mathcal S\to\mathcal S$ and an initial value $x_0\in\mathcal S$ such that the states of the target are generated by $\Phi$, that is,
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+for $t\in\mathbb Z$ the state $x_t$ is generated by iteration of $\Phi$; for $t\in\mathbb R$ it is described by the one-parameter evolution family $\{\Phi_t\}_{t\in\mathbb R}$, where each $\Phi_t:\mathcal S\to\mathcal S$, $\Phi_0=\operatorname{id}$, $\Phi_{s+t}=\Phi_s\circ\Phi_t$ for all $s,t\in\mathbb R$, and $(t,x)\mapsto\Phi_t(x)$ is continuous.
+then $\Phi$ is called the \textbf{data decision map} of the target. The data target is then reduced to the discrete dynamical system $(\mathcal S,\Phi)$ when $t\in\mathbb Z$ and to the continuous dynamical system $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$ when $t\in\mathbb R$; in both cases the criteria of the `Operations and Periodicity' chapter and of the `Periodic Systems' chapter may be applied directly.
+\end{definition}
+
+\begin{theorem}[Data periodicity decision theorem]\label{thm:data_periodicity_decision}
+Let the decision map of a data target be $\Phi$, and let $(\mathcal S,\Phi)$ be a discrete dynamical system. Then:
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{Sufficient decision}: if there exists $m\in\mathbb N^+$ with $\Phi^m=\mathrm{id}$, then the target is a uniformly periodic data system; every orbit is closed and the orbit length divides $m$.
+    \item \textbf{Equivalence of the decision}: the target is a uniformly periodic data system if and only if $\operatorname{ord}(\Phi)<\infty$.
+    \item \textbf{Pointwise criterion}: the orbit of the target at a state $x_0$ is closed if and only if $x_0$ is a periodic point; the orbit length is then the period at that point.
+    \item \textbf{Non-omissibility}: the conjunction of conserved quantities and symmetry groups cannot replace $\operatorname{ord}(\Phi)<\infty$; a quasi-periodic data target is not a periodic data system.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:data_periodicity_decision} of this chapter is the domain instantiation of \cref{thm:ps_periodicity_decision} of the `Periodic Systems' chapter:
+it suffices to replace the decision map $f$ and the evolution group by the $\Phi$ of this chapter, and the four clauses (A) sufficient decision, (B) equivalence of the decision, (C) pointwise criterion and
+(D) non-omissibility hold one by one. By the convention of \cref{rem:ps_applications_hook}, they are not expanded again here.
+\end{proof}
+
+\begin{corollary}[Period types of data]\label{cor:data_period_type}
+After the decision by \cref{thm:data_periodicity_decision}, a data target falls into one of the following types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Trivially periodic type}: the minimal period is $m_0=1$ and the state is a fixed point;
+    \item \textbf{Strictly periodic type}: $1<m_0<\infty$ and the state is strictly periodic (for example a single-frequency signal);
+    \item \textbf{Uniformly periodic type}: $\operatorname{ord}(\Phi)=m<\infty$ and every orbit length divides $m$;
+    \item \textbf{Quasi-periodic type}: $\operatorname{ord}(\Phi)=\infty$ and the orbit is not closed but is dense on a compact carrier structure (for example multi-frequency signals and sunspot data);
+    \item \textbf{Eventually periodic type}: there exists $N$ such that the target is periodic for $t\ge N$;
+    \item \textbf{Discretely periodic type}: the carrier structure is $\mathbb Z$ and the normalised period ratio satisfies $\rho=T_x/\Delta x\in\mathbb Q$.
+    \item \textbf{Asymptotically periodic (damped) type}: the orbit is not closed, but tends asymptotically to a closed orbit or to a fixed point, the residual decaying as $e^{-\kappa t}$ (see \cref{def:ps_period_type}(vii)).
+\end{enumerate}
+Here (i)--(iii) and (vi) belong to periodic data systems; (iv) does not belong to periodic data systems but can be handled by bounded-approximation tools; (v) is a periodic data system only during the stable stage; (vii), like (iv), is a type in the limiting sense; it is not a periodic data system and can be handled with bounded-approximation tools only in its stable stage.
+\end{corollary}
+
+\begin{proof}
+Each clause follows by substituting the data target into \cref{thm:data_periodicity_decision} and \cref{def:ps_period_type} of the `Periodic Systems' chapter.
+\end{proof}
+
+\begin{lemma}[Consistency of periodogram peak detection]\label{ch31_periodogram_peak}
+Let a single-frequency observation be $X_t = A e^{i(\omega_0 t + \phi)} + \varepsilon_t$ ($t = 1,\dots,n$), where $\omega_0 = 2\pi k_0 / n$ is a grid frequency, $A > 0$, $\phi \in \mathbb{R}$, and the noise $\{\varepsilon_t\}$ is independent and identically distributed with $\mathbb{E}[\varepsilon_t] = 0$ and $\operatorname{Var}(\varepsilon_t) = \sigma^2 < \infty$. Then the periodogram (Definition \ref{def:spectral_analysis}) satisfies
+\[
+\mathbb{E}[I_{k_0}] = A^2 n + \sigma^2, \qquad \mathbb{E}[I_k] = \sigma^2 \quad (k \neq k_0),
+\]
+and the peak signal-to-noise ratio $\dfrac{\mathbb{E}[I_{k_0}]}{\max_{k \neq k_0} \mathbb{E}[I_k]} = 1 + \dfrac{A^2 n}{\sigma^2} \to \infty$ ($n \to \infty$). Hence the position of the periodogram maximum $\arg\max_k I_k$ converges in probability to the true frequency index $k_0$.
+\end{lemma}
+
+\begin{proof}
+The signal term and the noise term superpose linearly in the DFT: $\hat{X}_k = \hat{X}_k^{\text{sig}} + \hat{X}_k^{\text{noise}}$. The signal term is
+\[
+\hat{X}_k^{\text{sig}} = \frac{A e^{i\phi}}{\sqrt{n}} \sum_{t=1}^{n} e^{i(\omega_0 - 2\pi k/n)t} = \frac{A e^{i\phi}}{\sqrt{n}} \sum_{t=1}^{n} e^{i\,2\pi(k_0 - k)t/n}.
+\]
+When $k = k_0$ the inner sum is $n$, so $|\hat{X}_{k_0}^{\text{sig}}|^2 = A^2 n$; when $k \neq k_0$ the sum of the roots of unity vanishes, so the signal term is zero. The noise term $\hat{X}_k^{\text{noise}} = \frac{1}{\sqrt{n}}\sum_t \varepsilon_t e^{-i2\pi kt/n}$ satisfies $\mathbb{E}\big[|\hat{X}_k^{\text{noise}}|^2\big] = \frac{1}{n}\sum_{t,s} \mathbb{E}[\varepsilon_t \overline{\varepsilon_s}] e^{-i2\pi k(t-s)/n} = \frac{1}{n}\sum_t \sigma^2 = \sigma^2$ (the noise is independent and identically distributed, so the cross terms have zero expectation). The signal--noise cross term satisfies $\mathbb{E}\big[\hat{X}_k^{\text{sig}}\overline{\hat{X}_k^{\text{noise}}}\big] = 0$ (since $\mathbb{E}[\varepsilon_t] = 0$). Therefore the expectation of $I_k = |\hat{X}_k|^2$ is as above, the peak signal-to-noise ratio diverges, and hence for $n$ sufficiently large the expectation of the periodogram at $k_0$ strictly dominates the remaining frequencies---by the dominance of the expectation and the finite variance of the noise, $\arg\max_k I_k$ converges in probability to $k_0$.
+\end{proof}
+
+\begin{definition}[Algorithm for the minimal positive period of data]\label{def:data_minimal_period_algorithm}
+This definition has the same content as \cref{def:ps_minimal_period_algorithm} in the section `Periodicity decision: whether a target is periodic' (\cref{sec:ps_periodicity_decision}) of Chapter~\ref{chap:periodic_system}; to avoid repetition, only the reference anchor is retained here, and the complete statement is given there. The only difference here is terminology (data target / data sample); the steps of the algorithm and the conclusion are exactly the same.
+\end{definition}
+
+\begin{theorem}[Correctness of the algorithm for the minimal positive period of data]\label{thm:data_minimal_period_correctness}
+This theorem has the same content as \cref{thm:ps_minimal_period_correctness} in the section `Periodicity decision: whether a target is periodic' (\cref{sec:ps_periodicity_decision}) of Chapter~\ref{chap:periodic_system}; to avoid repetition, only the reference anchor is retained here, and the complete statement and proof are given there. The only difference here is terminology (data target / data sample); the steps of the algorithm and the conclusion are exactly the same.
+\end{theorem}
+
+\begin{example}[Examples of data periodicity decision]\label{ex:data_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item Single-frequency sinusoidal signal: the periodogram exhibits a peak at the true frequency; uniformly periodic type;
+    \item Monthly mean sunspot numbers: an $11$-year main period superposed on an $88$-year long period; quasi-periodic type;
+    \item Multivariate EEG signals: multi-channel phase coupling; quasi-periodic type;
+    \item Temperature anomaly series: an upward trend since the $20$th century; eventually periodic type (superposed periodicity).
+\end{enumerate}
+\end{example}
+
+\begin{remark}[Conserved quantities do not guarantee periodicity]\label{rem:data_invariant_not_period}
+Information conservation, energy conservation and phase conservation in data analysis are auxiliary conditions for periodic structure, but they do not constitute a sufficient condition. For example, white noise satisfies energy conservation yet has no periodic component. The periodic structure of data must be decided by \cref{thm:data_periodicity_decision} or by the lemma above.
+\end{remark}
+
+\subsection{Step two: construction of the data period series and epicycle group}
+
+\begin{definition}[Data amplitude, frequency and phase series]\label{def:data_series}
+Let the state or output sequence of a data target be $\{z_t\}$. If it can be written as
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+then
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+are called respectively the \textbf{amplitude series}, the \textbf{frequency series} and the \textbf{phase series} of the data target. The three agree with \cref{def:amplitude_series}, \cref{def:frequency_series} and \cref{def:phase_series} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{definition}[Data epicycle group]\label{def:data_epicycle_group}
+Let the period series of a data target be given by its amplitude series $\{A_k\}$, frequency series $\{\omega_k\}$ and phase series $\{\phi_k\}$. For each $k$ define the epicycle
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+whose collection
+\[
+\mathfrak E_{\mathrm{D}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+is called the \textbf{epicycle group} of the data target. Its superposition is the data period series
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[Constructing the period series from data]\label{thm:data_series_reconstruction}
+Let the output of a data target be a finite periodic sequence of period $N$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the output admits the discrete Fourier expansion
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item the amplitude series is given by $|c_k|$, the phase series by $\arg c_k$ and the frequency series by $2\pi k/N$;
+    \item if the output is a single-frequency signal, its Fourier decomposition has only a single spectral line; if the output is a superposition of several frequencies, each order of harmonic corresponds to a different frequency component.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) The discrete Fourier series of a finite periodic sequence is a standard result: the basis functions $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ form an orthogonal basis of $\mathbb C^N$.
+(ii) This is read off directly from $c_k=A_k e^{i\phi_k}$.
+(iii) A single-frequency signal has only the fundamental component on the period $T=2\pi/\omega$; a superposition of several frequencies is expanded as a Fourier series.
+\end{proof}
+
+\begin{proposition}[Three-parameter correspondence: radius, phase and speed]\label{prop:data_epicycle_correspondence}
+The three parameters of the data epicycle group $\mathfrak E_{\mathrm{D}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ correspond one-to-one to three geometric--data quantities:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Radius corresponds to amplitude}: the radius of $E_k$, namely $|E_k|=A_k$, is the amplitude of that oscillatory component of the data;
+    \item \textbf{Phase corresponds to rotational delay}: the initial phase $\phi_k$ corresponds to the time translation $\tau_k=\phi_k/\omega_k$, that is, the epicycle \textbf{leads} the reference by $\tau_k$ ($\phi_k>0$ means that the waveform is \textbf{advanced} by $\tau_k$ relative to the reference, equivalently the waveform coincides with the reference once the reference has been delayed by $\tau_k$);
+    \item \textbf{Frequency corresponds to rotational speed}: $\omega_k$ is the angular frequency of that oscillatory component of the data.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:data_epicycle_correspondence} of this chapter corresponds exactly to \cref{prop:ps_epicycle_correspondence} of the `Periodic Systems' chapter,
+and the three correspondences---radius to amplitude, phase to rotational delay, frequency to rotational speed---are obtained by translating them one by one to the epicycle group of this chapter.
+The proof is given there: (i) from $|E_k|=A_k$ and the energy decomposition, (ii) from the phase translation theorem, (iii) from the definition of the frequency series.
+\end{proof}
+
+\begin{definition}[Spectral analysis of a time series]\label{def:spectral_analysis}
+Let $\{X_t\}_{t=1}^{n}$ be observed time-series data. Its \textbf{discrete Fourier transform} (DFT) is
+\[
+\hat{X}_k = \frac{1}{\sqrt{n}} \sum_{t=1}^{n} X_t e^{-i 2\pi k t / n}, \quad k = 0, 1, \dots, n-1.
+\]
+The \textbf{periodogram} is the squared modulus of the DFT: $I_k = |\hat{X}_k|^2$. The periodogram exhibits a peak at the true periodic frequency $\omega_0 = 2\pi k_0/n$. The statistical properties of the periodogram are: $\mathbb{E}[I_k] \to S(\omega_k)$ (asymptotically unbiased), but $\operatorname{Var}(I_k) \to S^2(\omega_k)$ (not a consistent estimator)---the variance does not decrease as $n$ increases.
+
+The periodogram is the direct application of the Fourier transform in time-series analysis---it preserves the energy information of components of the same frequency and is an asymptotically unbiased estimator of the power spectral density.
+\end{definition}
+
+\begin{proposition}[Multitaper spectral estimation]\label{prop:multitaper}
+To overcome the problem of the divergent variance of the periodogram, \textbf{multitaper spectral estimation} uses a set of orthogonal window functions to carry out several independent spectral estimations of the same time series and then averages them. Let the $K$ orthogonal window functions be $\{h_k(t)\}_{k=1}^{K}$ (for example Slepian sequences), each window function yielding an independent periodogram $I_k(\omega)$. The multitaper spectral estimate is
+\[
+\hat{S}_{\text{MT}}(\omega) = \frac{1}{K} \sum_{k=1}^{K} I_k(\omega).
+\]
+The variance of the multitaper spectral estimate is reduced to $1/K$ of that of the periodogram---the use of window functions is equivalent to taking $K$ independent samples in the frequency domain.
+
+Multitaper spectral estimation is the direct application of the window-function system in spectral estimation. Different window functions correspond to different frequency-domain properties---the Slepian window has the most concentrated energy within a given bandwidth, the Gaussian window has the best smoothness in both the time and the frequency domain, and the Mexican-hat window has the highest sensitivity when detecting spectral peaks.
+\end{proposition}
+
+\begin{proof}
+For each window $h_k$ ($k = 1,\dots,K$), the windowed periodogram $I_k(\omega)$ is asymptotically unbiased for $S(\omega)$ with variance tending to $S^2(\omega)$ (the statistical properties of Definition \ref{def:spectral_analysis}). For the Slepian sequences the windows are pairwise orthogonal in the time domain and their frequency-domain energy is concentrated in mutually disjoint frequency bands, so the $I_k(\omega)$ are asymptotically mutually uncorrelated. By the bilinear expansion of the variance,
+\[
+\operatorname{Var}\big[\hat{S}_{\text{MT}}(\omega)\big]
+= \operatorname{Var}\Big( \frac{1}{K}\sum_{k=1}^{K} I_k(\omega) \Big)
+= \frac{1}{K^2}\sum_{k=1}^{K} \operatorname{Var}[I_k(\omega)] + \frac{2}{K^2}\sum_{k<l} \operatorname{Cov}(I_k, I_l).
+\]
+The orthogonal windows give $\operatorname{Cov}(I_k, I_l) \to 0$ ($k \neq l$), whilst $\operatorname{Var}[I_k(\omega)] \to S^2(\omega)$, so
+\[
+\operatorname{Var}\big[\hat{S}_{\text{MT}}(\omega)\big] \to \frac{1}{K^2}\cdot K S^2(\omega) = \frac{S^2(\omega)}{K},
+\]
+that is, the variance is reduced to $1/K$ of that of the single-window periodogram, whilst the mean $\mathbb{E}[\hat{S}_{\text{MT}}] = \frac{1}{K}\sum_k \mathbb{E}[I_k] \to S(\omega)$ remains asymptotically unbiased.
+\end{proof}
+
+\begin{definition}[Period detection based on periodic convolution]\label{def:periodic_transform_detection}
+For a time series $\{X_t\}$, the steps for detecting its periodic structure by means of periodic convolution are:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Self-periodic convolution}: take $f = g = X$ and compute the periodic convolution $\mathcal{K}^{(d)}\{X, X\}$ ($d=1,\dots,6$; the 12 real trend spectra are its real and imaginary parts). When $d=1$ (the basic difference angle, $\alpha=1$), the classical limit of the periodic trend spectrum is the power spectrum---that is, the periodogram.
+    \item \textbf{Phase-relation detection}: take $\alpha=0$ (the similarity layer) and compute $\operatorname{Im}\mathcal{K}^{(1)}\{X, X\}$ (the difference-angle sine). The output exhibits a peak at a trend reversal point (turning point)---the sine difference-angle similarity detects a phase jump.
+    \item \textbf{Amplitude-relation detection}: take $\alpha=1$ (the trend layer) and compute $\operatorname{Re}\mathcal{K}^{(2)}\{X, X\}$ (the sum-angle cosine). The output measures the self-coupling strength of the signal---the energy transfer between components of different frequencies.
+    \item \textbf{Multi-scale period identification}: use window functions $K_\Delta$ of different radii to smooth $X$ and compute the periodic convolution at each scale. The frequency corresponding to the peak is the dominant period at that scale.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Comparison of periodic convolution with classical methods]\label{prop:periodic_transform_vs_classical}
+The advantages of periodic convolution in period detection are as follows:
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}>{\centering\arraybackslash}p{3cm}>{\centering\arraybackslash}p{3cm}}
+\toprule
+Method & What is detected & Phase information retained & Multi-period coupling \\
+\midrule
+Fourier transform / periodogram & A single period (frequency decomposition) & Partial (only the phase of each frequency) & No \\
+Autocorrelation function & A single period (time-domain delay) & No (amplitude only) & No \\
+Wavelet transform & Multi-scale periods & Partial (the phase of each scale) & No \\
+Periodic convolution ($\alpha=0$) & Phase relations (direction matching) & Complete (all frequency pairs) & Yes (all frequency pairs) \\
+Periodic convolution ($\alpha=1$) & Amplitude relations (direction + scale) & Complete (all frequency pairs) & Yes (all frequency pairs) \\
+\bottomrule
+\end{tabular}
+\end{center}
+Periodic convolution is the only method that can simultaneously detect several periods, retain all phase information and quantify the strength of coupling between periods.
+\end{proposition}
+
+\begin{proof}
+Substitute the period series expansion $X(t) = \sum_n A_n e^{i(\omega_n t + \phi_n)}$ into the self-periodic convolution of the single-period layer (taking $W \equiv 1$, $\alpha = 1$ and the difference-angle kernel $S^{(1)}(\phi_n, \phi_m) = e^{i(\phi_m - \phi_n)}$):
+\[
+\mathcal{K}^{(1)}\{X, X\}(\tau) = \sum_{n,m} A_n A_m \, e^{i(\phi_m - \phi_n)} \, e^{i\omega_m \tau}.
+\]
+The term $(n,m)$ has modulus $A_n A_m$, argument $\phi_m - \phi_n$ and frequency $\omega_m$---that is, the amplitude products and phase differences of \textbf{all frequency pairs} $(n,m)$ are retained simultaneously. Compare the three classical methods: (i) in the classical limit ($W \to \delta$) the periodogram/Fourier transform retains only the diagonal terms $|c_n|^2 = A_n^2$ (Definition \ref{def:spectral_analysis}), the arguments $\phi_n$ are erased by the squared modulus, and all off-diagonal frequency pairs $(n \neq m)$ are lost, so there is no multi-period coupling and the phase information is incomplete; (ii) by the Wiener--Khinchin theorem the autocorrelation function equals the inverse transform of the periodogram, $R(\tau) = \sum_n A_n^2 e^{i\omega_n \tau}$, which contains only $A_n^2$, so the phase information is completely lost, and it is a single-variable function in the time domain with no frequency-pair coupling (the \textbf{delayed} convention is taken here, differing from the advanced convention of \cref{prop:data_autocorr_phase_convolution} in this chapter by $h\to-h$; see Remark \ref{rem:autocorrelation_two_conventions} in the `Harmonic Analysis' chapter); (iii) the wavelet transform $W(a,b) = \langle X, \psi_{a,b}\rangle$ decomposes according to the scale $a$, and each scale retains its local phase, but the output is a single-parameter spectrum on the `scale--time' plane and contains no cross-coupling terms between two different frequencies (scales). Hence periodic convolution alone satisfies all three of `multi-period + full phase + all-frequency-pair coupling', and the conclusion of the comparison table holds.
+\end{proof}
+
+\begin{example}[Example of constructing a data period series]\label{ex:data_series_example}
+For the monthly mean sunspot series, the periodogram exhibits its strongest peak at $11$ years, with secondary peaks at $5.5$ years and $88$ years. In the data epicycle group, $11$ years corresponds to the fundamental frequency, $5.5$ years to the second harmonic, and $88$ years to a long-period component.
+\end{example}
+
+\begin{remark}[The period series is a complex function]\label{rem:data_series_complex}
+Let $z=e^{i\omega_0t}$; then the data period series
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+can be written as the Laurent series $\sum_k c_k z^k$, where $c_k=A_k e^{i\phi_k}$, provided that \textbf{every component frequency is commensurable with $\omega_0$} (that is, $\omega_k=k\omega_0$ with $k\in\mathbb Z$). Hence \textbf{when all components are commensurable with $\omega_0$, the period series is a complex-valued function on the unit circle (otherwise it is a function on the torus)}.
+\end{remark}
+
+\subsection{Step three: dynamic adjustment of the data epicycle group}
+
+\begin{definition}[Dynamic adjustment of the data epicycle group]\label{def:data_adaptive_adjustment}
+Let the current data epicycle group be $\mathfrak E^{(j)}$, with partial sum
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+and residual $r^{(j)}=z-z^{(j)}$. \textbf{Dynamic adjustment} consists of two rules:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Quantity adjustment}: if the residual energy satisfies $\|r^{(j)}\|^2>\delta$, add a new epicycle according to the peak of the residual periodogram;
+    \item \textbf{Parameter adjustment}: update the parameters of the existing epicycles by regularised least squares or by information criteria.
+\end{enumerate}
+In data analysis, quantity adjustment corresponds to increasing the number of frequency components or the harmonic order; parameter adjustment corresponds to adjusting the amplitude, the phase and the frequency so that goodness of fit and model parsimony are balanced.
+\end{definition}
+
+\begin{proposition}[Monotonicity of quantity adjustment]\label{prop:data_adaptive_growth}
+After the dominant residual frequency component is added as in \cref{def:data_adaptive_adjustment}(i), the residual energy is monotonically non-increasing:
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+with equality if and only if the residual has no energy at the selected frequency.
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:data_adaptive_growth} of this chapter agrees with the dynamic adjustment mechanism of \cref{def:ps_adaptive_adjustment} in the `Periodic Systems' chapter:
+adding an epicycle removes the component of $r^{(j)}$ along $\hat\omega$ from the residual, and the orthogonal decomposition
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{the removed component}\|^2$ gives the inequality,
+with equality if and only if the norm of the removed component is zero. The complete argument is given there.
+\end{proof}
+
+\begin{theorem}[Convergence of dynamic adjustment]\label{thm:data_adaptive_convergence}
+Let the data target be a \textbf{real-valued finite periodic sequence} of length $T_0$ ($T_0\in\mathbb N$) and let $\delta=0$. Then after at most $\lfloor T_0/2\rfloor+1$ steps of dynamic adjustment the residual is zero, and the resulting data epicycle group is the exact Fourier data of the target; for a \textbf{complex-valued} sequence the corresponding number of steps is at most $T_0$.
+\end{theorem}
+
+\begin{proof}
+The discrete Fourier series of a \textbf{real-valued} finite periodic sequence of length $T_0$ ($T_0\in\mathbb N$) is complete on $\lfloor T_0/2\rfloor+1$ harmonics (including the constant term); a \textbf{complex-valued} sequence requires $T_0$ components. At each step one dominant frequency component of the residual is extracted as in \cref{prop:data_adaptive_growth} and the residual energy decreases strictly, so after finitely many steps the residual is zero.
+\end{proof}
+
+\begin{definition}[Structure-metric adjustment]\label{def:data_structure_metric_adjustment}
+Let the structure metric of a data target be
+\[
+\mathcal I=(\mathcal I_{\text{fitting}},\mathcal I_{\text{parsimony}},\mathcal I_{\text{prediction}})
+=(\text{residual sum of squares},\ \text{number of parameters},\ \text{cross-validation error}).
+\]
+\textbf{Structure-metric adjustment} is: at each step choose a neighbouring parameter $\theta$ in the parameter space $\Theta$ for which $\mathcal I(\theta)$ is \textbf{strictly decreasing} in the lexicographic order (minimisation); if no such neighbouring parameter exists, the process stops---then $\theta$ is a \textbf{locally optimal} parameter.
+\end{definition}
+
+\begin{proposition}[Finite convergence of structure-metric adjustment]\label{prop:data_structure_metric_convergence}
+Let the parameter space $\Theta$ be finite and let each adjustment make $\mathcal I$ \textbf{strictly decreasing} in the lexicographic order. Then the adjustment terminates after finitely many steps at a locally optimal parameter.
+\end{proposition}
+
+\begin{proof}
+$\Theta$ is finite, so $\mathcal I$ takes finitely many values. The lexicographic order is well-founded on a finite set of values, so a strictly lexicographically decreasing sequence cannot continue indefinitely and the process terminates after finitely many steps. At termination there is no neighbouring parameter making $\mathcal I$ strictly lexicographically decreasing, that is, the parameter is locally optimal. Monotonicity must be imposed on the \textbf{whole lexicographic order}: if only `some component strictly increases or decreases' is required, cycles such as $(2,1)\to(1,2)\to(2,1)$ cannot be excluded and finite termination fails.
+\end{proof}
+
+\begin{definition}[Data fitting by nested epicycle systems]\label{def:nested_epicycle_fitting}
+Given an observed time series $\{X_t\}_{t=1}^{n}$, nested epicycle systems are used for data-driven periodic modelling. Let the $K$-level nested epicycle system be
+\[
+X(t) = \sum_{k=1}^{K} A_k e^{i(\omega_k t + \phi_k)} + \varepsilon(t),
+\]
+where $\varepsilon(t)$ is the residual (noise). The parameters $\Theta = \{A_k, \omega_k, \phi_k\}_{k=1}^{K}$ are estimated by minimising the residual sum of squares:
+\[
+\hat{\Theta} = \arg\min_{\Theta} \sum_{t=1}^{n} \left| X_t - \sum_{k=1}^{K} A_k e^{i(\omega_k t + \phi_k)} \right|^2.
+\]
+Since the $\omega_k$ occur in the exponents, the objective function is nonlinear in the $\omega_k$---traditional linear least squares does not apply. Kernel-smoothed derivative-integral descent optimisation is used, estimating all parameters simultaneously by the window-function derivative-integral descent method.
+\end{definition}
+
+\begin{proposition}[Parameter estimation by derivative-integral descent optimisation]\label{prop:kdi_parameter_estimation}
+Parameter estimation for nested epicycle systems by the derivative-integral descent optimisation algorithm proceeds in three steps:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Preliminary frequency estimation}: take the Fourier transform of the data and use the frequencies corresponding to the largest $K$ peaks of the periodogram as the initial estimates $\omega_k^{(0)}$ of the $\omega_k$. This step amounts to coarse localisation by traditional methods.
+    \item \textbf{Fine derivative-integral optimisation}: use the Gaussian kernel $K_{\text{Gauss}}$ for windowed derivative-integral optimisation of the amplitudes $A_k$, the Mexican-hat kernel $K_{\text{MexHat}}$ for second-derivative optimisation of the frequencies $\omega_k$, and the Hilbert kernel $K_{\text{Hilbert}}$ for orthogonal-phase optimisation of the phases $\phi_k$. The derivative-integral fusion function $\Phi(\theta, r, \dot{\theta}, \dot{r})$ exploits both first-derivative and integral information, escaping local minima in a non-convex objective function.
+    \item \textbf{Model selection}: use an information criterion (AIC or BIC) to determine the optimal epicycle order $K$---a $K$ that is too small underfits (omitting important periods), whilst a $K$ that is too large overfits (fitting the noise). The BIC criterion is $\text{BIC}(K) = n\ln(\text{RSS}/n) + K\ln n$, and the $K$ minimising the BIC is selected.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+The argument has three parts. (i) \textbf{Asymptotic consistency of the frequency initialisation}: in the single-component case this is given directly by Lemma \ref{ch31_periodogram_peak}---the position of the periodogram peak converges in probability to the true grid frequency; in the multi-component case, under the frequency-separation condition (the main peaks do not overlap), taking the first $K$ peaks in decreasing order of size gives the $K$ components in turn, so $\omega_k^{(0)} \to \omega_k$ ($k = 1,\dots,K$). (ii) \textbf{Descent property of the fine derivative-integral optimisation}: the objective function $L(\Theta) = \sum_{t=1}^{n} |X_t - \sum_k A_k e^{i(\omega_k t + \phi_k)}|^2$ is a smooth function of $\Theta$ in a neighbourhood of the true value $\Theta^*$. By the non-local descent property of derivative-integral descent, as long as there is some window--kernel pair for which the kernel-smoothed cumulative quantity is negative, the update gives a strictly descending direction $L(\Theta_{t+1}) < L(\Theta_t)$; hence the iteration starting from a consistent initial point $\Theta^{(0)}$ remains in a neighbourhood of the true value and approaches $\Theta^*$. (iii) \textbf{Consistency of the BIC}: the residual sum of squares $\text{RSS}(K)$ is monotonically non-increasing as $K$ increases; the BIC penalty term $K\ln n$ imposes an asymptotically positive penalty on overfitting as $n$ increases, and the minimiser $\hat{K}$ of $\text{BIC}(K) = n\ln(\text{RSS}(K)/n) + K\ln n$ converges in probability to the true order $K^*$---for $K < K^*$ underfitting makes $\text{RSS}$ markedly too large, whilst for $K > K^*$ the decrease in $\text{RSS}$ is insufficient to offset the growth of the penalty term $K\ln n$.
+\end{proof}
+
+\begin{example}[BIC selection of a data period series]\label{ex:data_bic}
+Fit a $K$-level epicycle system to the sunspot series and compute $\operatorname{BIC}(K)=n\ln(\operatorname{RSS}/n)+K\ln n$. Choose the $K$ that minimises the BIC. Usually $K=3$ suffices to capture the $11$-year fundamental frequency, the $5.5$-year second harmonic and the $88$-year long period.
+\end{example}
+
+\begin{remark}[The limits of dynamic adjustment]\label{rem:data_adaptive_boundary}
+\cref{thm:data_adaptive_convergence} relies on finite periodic sequences. For continuous-spectrum or quasi-periodic data targets (such as multi-frequency signals and sunspots) no finite epicycle group represents them exactly, and only bounded approximation is possible. Structure-metric adjustment does not guarantee a global optimum.
+\end{remark}
+
+\subsection{Step four: data convolution and phase-coupling networks}
+
+\begin{definition}[Data amplitude, phase and frequency convolutions]\label{def:data_convolution_types}
+Let two data epicycle groups be
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+Define:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Amplitude convolution}: $\mathbb A_{mn}=A_nB_m$;
+    \item \textbf{Phase convolution}: $\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$;
+    \item \textbf{Frequency convolution}: $\mathbb F_{mn}=\omega_n\nu_m$;
+    \item \textbf{Trend convolution}: $\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$.
+\end{enumerate}
+This agrees with \cref{def:amplitude_convolution}, \cref{def:phase_convolution}, \cref{def:frequency_convolution} and \cref{def:tendency_convolution} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{theorem}[Action of the three types of convolution on data epicycle groups]\label{thm:data_convolution_action}
+Let the epicycle groups of two data targets be $\mathfrak E$ and $\mathfrak E'$ respectively. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item amplitude convolution acts only on the radii;
+    \item phase convolution acts only on the phases;
+    \item frequency convolution acts only on the rotational speeds;
+    \item trend convolution retains both amplitude and phase.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+This is read off directly from \cref{def:data_convolution_types}.
+\end{proof}
+
+\begin{proposition}[Autocorrelation and trend convolution]\label{prop:data_autocorr_phase_convolution}
+Let $\{z_t\}$ be a data period sequence with autocorrelation function
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+In the language of the data epicycle group, the autocorrelation function is the projection of the trend convolution onto the diagonal:
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+This is the \textbf{advanced} convention of the present section; the Wiener--Khinchin form $R(\tau)=\sum_n A_n^2 e^{i\omega_n\tau}$ cited earlier in this chapter in the comparison of the three classical methods takes the \textbf{delayed} convention. The two are interchanged by $R_{\text{advanced}}(h)=R_{\text{delayed}}(-h)$; see Remark \ref{rem:autocorrelation_two_conventions} in the `Harmonic Analysis' chapter.
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:data_autocorr_phase_convolution} of this chapter is the realisation in this domain of the convolution-action conclusion of \cref{thm:ps_convolution_action} in the `Periodic Systems' chapter:
+substituting $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ into the definition of the autocorrelation, cancelling all off-diagonal cross terms by orthogonality and retaining only the diagonal term of the trend convolution
+(the factorisation of the three convolutions, \cref{prop:ps_convolution_factorization}), which yields $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$.
+The complete expansion is given there.
+\end{proof}
+
+\begin{definition}[Construction of the phase-coupling network]\label{def:phase_coupling_network}
+For a multivariate time series $\{X_t^{(i)}\}_{i=1}^{M}$ comprising $M$ variables (such as several sensors, several stocks or several EEG electrodes), a \textbf{phase-coupling network} may be constructed to reveal the periodic interactions between the variables. The nodes of the network are the variables and the edge weights are the periodic-convolution similarities between pairs of variables:
+\[
+W_{ij}^{(d)} = \left\| \mathcal{K}^{(d)}\{X^{(i)}, X^{(j)}\} \right\|, \quad d = 1,\dots,12.
+\]
+$W_{ij}^{(1)}$ measures the co-directional coupling strength of two variables in frequency, $W_{ij}^{(2)}$ measures the phase-orthogonal coupling strength, and $W_{ij}^{(7)}$ measures the sum-angle coupling strength. The topology of the phase-coupling network---connectivity, community structure and central nodes---reveals the functional organisation of the system.
+\end{definition}
+
+\begin{lemma}[Edge-weight symmetry of the phase-coupling network]\label{ch31_phase_network_symmetry}
+Let the weight kernel $W$ be even ($W(-\Omega) = W(\Omega)$, for example a Gaussian, sinc or Mexican-hat kernel), let the phase kernel $S^{(d)}$ have unit modulus ($|S^{(d)}| \equiv 1$, $d = 1,\dots,6$), and let the edge weights be taken in the energy norm
+\[
+\big\|\mathcal{K}^{(d)}\{f,g\}\big\| := \Big( \sum_{n,m} \big| W(\omega_n - \nu_m) (A_n B_m)^{\alpha} S^{(d)}(\phi_n, \psi_m) \big|^2 \Big)^{1/2}.
+\]
+Then the edge weights satisfy symmetry and non-negativity:
+\[
+W_{ij}^{(d)} = W_{ji}^{(d)} \ge 0,
+\]
+so the matrix $\{W_{ij}^{(d)}\}$ is the adjacency matrix of a \textbf{weighted undirected graph} on $M$ nodes, and standard network-analytical methods (community detection, centrality) are therefore applicable.
+\end{lemma}
+
+\begin{proof}
+Expand the square of the energy norm and take the modulus term by term for the complex phase kernel $S^{(d)}$ and its real and imaginary parts (the 12 real similarities): for the complex kernel with $d=1,\dots,6$, $|S^{(d)}| \equiv 1$; for its real part $|\cos(\phi_n \mp \psi_m)|$ and its imaginary part $|\sin(\phi_n \mp \psi_m)|$, the modulus is unchanged under the exchange $n \leftrightarrow m$ because the cosine is even and the sine is odd. Hence the sum of squares depends only on $|W(\omega_n - \nu_m)|$, on $|A_n B_m|^{\alpha}$ and on the symmetric moduli above. Exchanging $f \leftrightarrow g$ exchanges $n \leftrightarrow m$, $\omega_n \leftrightarrow \nu_m$, $A_n \leftrightarrow B_m$ and $\phi_n \leftrightarrow \psi_m$: since $W$ is even, $|W(\nu_m - \omega_n)| = |W(\omega_n - \nu_m)|$, and $|B_m A_n| = |A_n B_m|$, whilst the phase moduli are unchanged as above, so the sums agree term by term and $\|\mathcal{K}^{(d)}\{f,g\}\| = \|\mathcal{K}^{(d)}\{g,f\}\|$. Non-negativity follows directly from the definition of the norm. Substituting $f = X^{(i)}$ and $g = X^{(j)}$ gives $W_{ij}^{(d)} = W_{ji}^{(d)} \ge 0$.
+\end{proof}
+
+\begin{proposition}[Analytical methods for the phase-coupling network]\label{prop:phase_network_analysis}
+The phase-coupling network may be interpreted by standard network-analytical methods:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Community detection}: use modularity maximisation to partition the nodes into communities---nodes in the same community have similar periodic structures (in-phase synchronisation), whilst nodes in different communities have orthogonal periodic structures (anti-phase synchronisation or a fixed phase difference).
+    \item \textbf{Centrality analysis}: the degree centrality of a node (with how many other nodes it has strong coupling) measures the periodic `influence' of that variable in the system. Nodes of high centrality are the key drivers of the periodic structure of the system.
+    \item \textbf{Dynamic evolution}: construct phase-coupling networks over different time windows and observe how the network topology changes with time. Abrupt changes in the network topology (such as the reorganisation of community structure or the migration of central nodes) may be signals that the system has undergone a phase transition or entered a new state.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+By Lemma \ref{ch31_phase_network_symmetry} the edge-weight matrix $\{W_{ij}^{(d)}\}$ is symmetric and non-negative, so (i) community-detection algorithms such as modularity maximisation and spectral clustering are mathematically well defined (they depend only on a symmetric non-negative adjacency matrix); pairs of nodes with strong in-phase coupling (difference-angle cosine close to $1$) have large edge weights and are therefore placed in the same community, whilst pairs of nodes in phase quadrature (difference-angle sine dominant) have small edge weights and tend to belong to different communities. (ii) The degree centrality $D_i^{(d)} = \sum_{j \neq i} W_{ij}^{(d)}$ is the total coupling strength of node $i$ with the other nodes; if the energy of some node exceeds half of the total coupling energy, that node is a \textbf{dominant periodicity driver} of the network. (iii) Dynamic evolution: the network matrix $W(t)$ over a time window $[t, t+\Delta]$ is a matrix-valued function of $t$, and its community structure is characterised continuously by the spectrum of $W(t)$ (the leading eigenvalues and their eigenvectors); when the dominant component of an eigenvector changes sign or the order of the leading eigenvalues is exchanged, community membership changes abruptly, corresponding to a topological phase transition of the network.
+\end{proof}
+
+\begin{example}[An example of a phase-coupling network]\label{ex:phase_network}
+Constructing a phase-coupling network for multi-channel EEG signals, channels with strong in-phase coupling are placed in the same community, corresponding to the modular organisation of the functional brain network. Channels of high centrality correspond to the key hubs of the functional network.
+\end{example}
+
+\begin{remark}[Relation between data convolution and periodic convolution]\label{rem:data_convolution_relation}
+Data convolution is not a new convolution operation but an instance of the periodic convolution of the `Series and Convolution' chapter on data epicycle groups. Autocorrelation is the projection of the trend convolution onto the diagonal; cross-correlation and phase coupling are respectively the concrete manifestations in data science of amplitude convolution and frequency convolution.
+\end{remark}
+
+\subsection{Step five: integration with discrete sampling, harmonic analysis and time-series analysis}
+
+\begin{definition}[Data periodicity diagnostic pipeline]\label{def:data_diagnosis_pipeline}
+For given time-series data, periodic mathematics provides the following standardised diagnostic pipeline:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Data preprocessing}: remove the trend (by differencing or window-function smoothing), handle missing values (by interpolation or model prediction) and standardise (zero mean and unit variance).
+    \item \textbf{Classical spectral analysis}: compute the periodogram and the multitaper spectral estimate and identify the significant spectral peaks. This step gives a preliminary overview of the periodic structure.
+    \item \textbf{Period detection by periodic convolution}: compute $\mathcal{K}^{(1)}\{X, X\}$ to $\mathcal{K}^{(6)}\{X, X\}$ ($\alpha=0,1$; the 12 real trend spectra are the real and imaginary parts of the 6 complex kernels) and extract the spectral, amplitude and phase components in each dimension. Identify the dominant periods, detect phase jumps and quantify the period coupling.
+    \item \textbf{Multi-scale window-function decomposition}: use the family of window functions $\{\Delta_1, \dots, \Delta_K\}$ to smooth the data at multiple scales, repeating steps $2$--$3$ at each scale. Compare the periodic structures at different scales---identifying which periods are stable across scales and which are scale-dependent.
+    \item \textbf{Nested epicycle system fitting}: fit a nested epicycle system by derivative-integral descent optimisation to obtain the precise parameters $\{A_k, \omega_k, \phi_k\}$ of each periodic component. Analyse the amplitude ratios and frequency ratios of the epicycles at each level---assessing the nested hierarchy of the system.
+    \item \textbf{Construction of the phase-coupling network} (multivariate data): construct the periodic-convolution coupling matrix between the variables and carry out community detection and centrality analysis.
+    \item \textbf{Periodic prediction}: extrapolate and predict on the basis of the fitted nested epicycle system. The uncertainty of the prediction is determined by the amplitude decay factors and the phase drift rates of the epicycles at each level.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[The data periodicity diagnostic pipeline and its interface with three chapters]\label{thm:data_diagnosis_integration}
+The seven steps of \cref{def:data_diagnosis_pipeline} connect respectively to:
+\begin{enumerate}[label=(\roman*)]
+    \item \cref{def:uniform_sampling_parallel}, \cref{thm:nyquist_shannon_parallel} and \cref{thm:intercalation_leakage_suppression} of the `Discrete Sampling and Intercalation of Periodic Signals' chapter;
+    \item \cref{def:fourier_series}, \cref{thm:parseval_fourier} and \cref{prop:twelve_to_six} of the `Harmonic Analysis' chapter;
+    \item \cref{def:ts_period_detection}, \cref{prop:ts_period_significance} and \cref{def:ts_window_validation} of the `Time Series Analysis' chapter.
+\end{enumerate}
+Hence data periodicity diagnosis is not an independent method but an application of the unified tool chain of periodic mathematics in data science.
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:data_diagnosis_integration} of this chapter is the realisation in this domain of the five-step interface (\cref{tab:ps_five_steps}) of the `Periodic Systems' chapter:
+periodicity decision uses sampling and spectral estimation, frequency decomposition and phase kernels use the `Harmonic Analysis' chapter, and periodogram peaks, the Fisher test and
+window-function validation use the `Time Series Analysis' chapter. Hence the diagnostic pipeline is assembled from the tool chains of the three chapters; the proof is given there.
+\end{proof}
+
+\begin{remark}[The order of operations after integration]\label{rem:data_integration_order}
+The recommended order for an actual diagnosis is: first decide whether the data target is periodic (\cref{thm:data_periodicity_decision}); then construct the data Fourier data and the epicycle group (\cref{thm:data_series_reconstruction}); then optimise the parameters by derivative-integral descent and dynamic adjustment (\cref{thm:data_adaptive_convergence}, \cref{prop:kdi_parameter_estimation}); then carry out the data convolution and phase-coupling analysis (\cref{prop:data_autocorr_phase_convolution}, \cref{def:phase_coupling_network}); and finally output the diagnosis as in \cref{def:data_diagnosis_pipeline}.
+\end{remark}
+
+\begin{remark}[The three conservation laws of data analysis (empirical observation / research programme)]\label{thm:data_conservation}
+Periodic analysis of data is governed by three conservation laws:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Information conservation}: in the noise-free compression and reconstruction of data, the total amount of information is conserved. Periodic convolution is an information-lossless integral transform---compression and decompression use the same kernel function, and differentiation and integration are exactly mutually inverse by the fundamental theorem of calculus.
+    \item \textbf{Energy conservation}: the total energy (variance) of a signal equals the sum of the energies of its frequency components in the Fourier domain---Parseval's identity. In nested epicycle system fitting, the sum of the energies of the epicycles at each level equals the total energy of the original signal (minus the noise). The proportion in which energy is distributed among the periodic components is the scaling structure of the system.
+    \item \textbf{Phase conservation}: in signal processing without phase distortion, the relative phase relations of the frequency components are conserved. Periodic convolution retains the phase information between all frequency pairs, ensuring that phase is not lost in the transformation and reconstruction. The stability of the phase-coupling network is the data manifestation of phase conservation.
+\end{enumerate}
+The three conservation laws together guarantee the reliability of data periodicity diagnosis---information conservation guarantees that the diagnosis loses no information, energy conservation guarantees the energy consistency of the periodic decomposition, and phase conservation guarantees the temporal consistency of the periodic structure.
+
+This claim that `the three laws together guarantee the reliability of the diagnosis' is an \textbf{empirical observation / research programme}, not a proved theorem: the three conservation laws are not sufficient for periodicity (see \cref{rem:data_invariant_not_period}), nor do they constitute a proof of diagnostic reliability. What can be proved rigorously are only the two identities in the proof below---Parseval's identity in (ii) and the invertibility of the DFT in (i); `phase conservation' in (iii) is a definitional fact for zero-phase (real non-negative gain) filtering.
+\end{remark}
+
+\begin{proof}
+The argument has three parts.
+(i) \textbf{Energy conservation (Parseval)}: by the orthogonality of the DFT, $\frac{1}{n}\sum_{k=0}^{n-1} e^{-i 2\pi k(t-s)/n} = \delta_{ts}$,
+\[
+\sum_{k=0}^{n-1} |\hat{X}_k|^2 = \frac{1}{n}\sum_{k=0}^{n-1}\sum_{t,s} X_t \overline{X_s}\, e^{-i 2\pi k(t-s)/n} = \sum_{t=1}^{n} |X_t|^2,
+\]
+that is, the total energy of the signal equals the sum of the energies of its frequency components. In the nested epicycle system $\sum_k A_k e^{i(\omega_k t + \phi_k)}$ the energy of the orthogonal components is $A_k^2$, so the sum of the epicycle energies at each level $\sum_k A_k^2$ equals the energy of the denoised signal, and the residual $\varepsilon$ carries the remaining energy. (ii) \textbf{Information conservation (invertibility)}: the DFT is a bijection $\mathbb{C}^n \to \mathbb{C}^n$ whose inverse is $X_t = \frac{1}{\sqrt{n}}\sum_k \hat{X}_k e^{i 2\pi kt/n}$, the coefficients corresponding one-to-one to the signal with no loss of information; for $W \equiv 1$, $\alpha = 1$ and $d = 1$, periodic convolution preserves all amplitudes $A_n$ and phases $\phi_n$ (the expansion of Proposition \ref{prop:periodic_transform_vs_classical}), so compression and reconstruction are exactly mutually inverse. (iii) \textbf{Phase conservation}: for zero-phase (real non-negative gain) linear filtering, each component transforms as $c_k e^{i(\omega_k t + \phi_k)} \mapsto g_k c_k e^{i(\omega_k t + \phi_k)}$ ($g_k \ge 0$), and the phases $\phi_k$ are unchanged pointwise, so the relative phases $\phi_k - \phi_l$ are conserved; the term $(n,m)$ of periodic convolution carries the argument $\phi_m - \phi_n$ (see the proof of Proposition \ref{prop:periodic_transform_vs_classical}), so the phase differences of all frequency pairs are retained explicitly, and the stability of the edge weights of the phase-coupling network (Lemma \ref{ch31_phase_network_symmetry}) is the network manifestation of phase conservation.
+\end{proof}
+
+\begin{definition}[Window-function decomposition of data trends]\label{def:data_window_decomposition}
+For arbitrary time-series data $\{X_t\}_{t=1}^{n}$, the window-function system is used for multi-scale trend decomposition. Let the window function be $K$ (a Gaussian, Mexican-hat or exponential kernel, and so on) with window radius $\Delta > 0$. The \textbf{window-function smoothed trend} $T_\Delta(t)$ and the \textbf{window-function local fluctuation} $F_\Delta(t)$ of the data are respectively:
+\[
+T_\Delta(t) = \int_{-\infty}^{\infty} X(t+\tau) K\left(\frac{\tau}{\Delta}\right) \frac{d\tau}{\Delta}, \quad F_\Delta(t) = X(t) - T_\Delta(t).
+\]
+The window radius $\Delta$ controls the time scale---the smaller $\Delta$ is, the more sensitive the trend $T_\Delta(t)$ is (capturing short-term fluctuations) and the smaller the amplitude of $F_\Delta(t)$ is (high-frequency noise is retained in the trend); the larger $\Delta$ is, the smoother the trend is (revealing the long-term direction) and the larger the amplitude of $F_\Delta(t)$ is (more mid-frequency fluctuations are separated into the fluctuation component).
+
+The trend $T_\Delta(t)$ corresponds to the long-term direction of the data and the fluctuation $F_\Delta(t)$ to the back-and-forth motion of the data about the trend. The window function $K$ is the degenerate realisation of the periodic-convolution weight kernel on a univariate time series.
+\end{definition}
+
+\begin{definition}[Periodic decomposition by multi-window superposition]\label{def:multi_window_decomposition}
+Use a family of increasing window radii $\{\Delta_1, \Delta_2, \dots, \Delta_K\}$ ($\Delta_1 < \Delta_2 < \dots < \Delta_K$) to decompose the data $X(t)$ at multiple scales. Define the $k$-th level \textbf{periodic component} as the difference of the trends at adjacent scales:
+\[
+C_k(t) = T_{\Delta_k}(t) - T_{\Delta_{k-1}}(t), \quad k = 2, \dots, K,
+\]
+where $T_{\Delta_0}(t) \equiv 0$ and $C_1(t) = T_{\Delta_1}(t)$. The periodic components at each level satisfy the reconstruction formula:
+\[
+X(t) = \sum_{k=1}^{K} C_k(t) + R_K(t),
+\]
+where $R_K(t) = X(t) - T_{\Delta_K}(t)$ is the residual at the smallest scale (high-frequency noise). This decomposition splits the original data into $K$ periodic components at different time scales---similar to a multi-window version of the Fourier series. The periodic components $C_k(t)$ at each level are the realisations in the time domain of the epicycles of different radii and frequencies in a nested epicycle system.
+\end{definition}
+
+\begin{proposition}[Reconstruction completeness of the multi-window decomposition]\label{ch31_multiscale_reconstruction}
+The multi-window periodic decomposition reconstructs an arbitrary time series $X(t)$ exactly and pointwise: $X(t) = \sum_{k=1}^{K} C_k(t) + R_K(t)$, and the sum of the components at each level is the \textbf{telescoping sum} of the `trend pyramid' $T_{\Delta_0} \equiv 0, T_{\Delta_1}, \dots, T_{\Delta_K}$.
+\end{proposition}
+
+\begin{proof}
+Substitute $C_k(t) = T_{\Delta_k}(t) - T_{\Delta_{k-1}}(t)$ and sum term by term:
+\[
+\sum_{k=1}^{K} C_k(t) + R_K(t)
+= \sum_{k=1}^{K} \big( T_{\Delta_k}(t) - T_{\Delta_{k-1}}(t) \big) + \big( X(t) - T_{\Delta_K}(t) \big).
+\]
+The first $K$ terms form a telescoping sum, the intermediate terms $T_{\Delta_0}, T_{\Delta_1}, \dots, T_{\Delta_{K-1}}$ cancelling in pairs:
+\[
+\sum_{k=1}^{K} \big( T_{\Delta_k}(t) - T_{\Delta_{k-1}}(t) \big) = T_{\Delta_K}(t) - T_{\Delta_0}(t) = T_{\Delta_K}(t),
+\]
+(since $T_{\Delta_0} \equiv 0$). Hence $\sum_k C_k(t) + R_K(t) = T_{\Delta_K}(t) + X(t) - T_{\Delta_K}(t) = X(t)$ for every $t$.
+\end{proof}
+
+\begin{definition}[Computation of trend similarity]\label{def:trend_similarity_data}
+For the trend components $T_{\Delta_i}(t)$ and $T_{\Delta_j}(t)$ at two different window radii, define their \textbf{trend similarity}. First compute the logarithmic return of the trend:
+\[
+r_{\Delta}(t) = \ln\frac{T_{\Delta}(t)}{T_{\Delta}(t-1)} \approx \frac{T_{\Delta}(t) - T_{\Delta}(t-1)}{T_{\Delta}(t-1)},
+\]
+then extract the limit angle $\theta_{\Delta}(t) = \arctan(r_{\Delta}(t))$. Following the unified convention of the `Scalars and Vectors' chapter, the \textbf{included angle} between two trend directions is always taken to be $\theta=\lvert\alpha-\beta\rvert\in[0,\pi]$; the signed quantity $\alpha-\beta$ is called the \textbf{difference angle} and is used only for the sign of the sine-family similarity. The \textbf{difference-angle cosine similarity} (trend consistency) and the \textbf{difference-angle sine similarity} (degree of trend reversal) of the two trends are respectively:
+\[
+\operatorname{Similarity}^{(1)}_{\Delta_i, \Delta_j}(t) = \cos(\theta_{\Delta_i}(t) - \theta_{\Delta_j}(t)), \quad \operatorname{Similarity}^{(2)}_{\Delta_i, \Delta_j}(t) = \sin(\theta_{\Delta_i}(t) - \theta_{\Delta_j}(t)).
+\]
+$\operatorname{Similarity}^{(1)} \approx 1$ means that the trends at the two time scales point in the same direction (rising and falling together), whilst $\operatorname{Similarity}^{(1)} \approx -1$ means that they point in opposite directions (one rising whilst the other falls). $\operatorname{Similarity}^{(2)} > 0$ means that the short-term trend leads the long-term trend (short-term changes are faster than long-term ones), whilst $\operatorname{Similarity}^{(2)} < 0$ means that the short-term trend lags behind the long-term trend (the short term is reversing).
+
+Trend similarity is the degenerate form of periodic convolution on the pair of trend components $(\Delta_i, \Delta_j)$---it measures the degree of phase alignment between trends at different time scales.
+\end{definition}
+
+\begin{proposition}[Trend strength and trend stability]\label{prop:trend_strength_stability}
+For the trend $T_\Delta(t)$ at a single window radius $\Delta$, define its \textbf{trend strength} $S_\Delta(t)$ and \textbf{trend stability} $Q_\Delta(t)$:
+\[
+\begin{aligned}
+S_\Delta(t) &= |r_\Delta(t)| = \left|\frac{T_\Delta(t) - T_\Delta(t-1)}{T_\Delta(t-1)}\right|, \\
+Q_\Delta(t) &= \operatorname{Similarity}^{(1)}_{\Delta, \Delta}(t, t-\tau) = \cos(\theta_\Delta(t) - \theta_\Delta(t-\tau)),
+\end{aligned}
+\]
+where $\tau$ is the number of delay steps. $S_\Delta(t)$ measures the rate of change of the trend and $Q_\Delta(t)$ measures the consistency of the trend over the time delay $\tau$. $Q_\Delta(t) \approx 1$ means that the direction of the trend continues stably, whilst a decrease in $Q_\Delta(t)$ means that the trend may be about to reverse---a decrease in $Q_\Delta(t)$ is an early warning signal of a turning point.
+\end{proposition}
+
+\begin{proof}
+Write the phase increment as $\delta(t) := \theta_\Delta(t) - \theta_\Delta(t-\tau)$. By the Taylor expansion of the cosine, $\cos u = 1 - \frac{u^2}{2} + O(u^4)$,
+\[
+Q_\Delta(t) = \cos \delta(t) = 1 - \frac{\delta(t)^2}{2} + O(\delta(t)^4).
+\]
+Hence $Q_\Delta(t)$ is a strictly decreasing function of the square of the phase increment $\delta(t)^2$: as $\delta \to 0$ we have $Q_\Delta \to 1$ (the direction of the trend continues stably), and as $|\delta|$ increases $Q_\Delta$ decreases monotonically from $1$. Moreover $\delta(t) \approx \tau\, \dot{\theta}_\Delta(t)$ (a discrete derivative, with $\tau$ the number of delay steps), so a decrease in $Q_\Delta$ is equivalent to a rise in the rate of phase change $|\dot{\theta}_\Delta|$---that is, the direction of the trend begins to turn more rapidly, which is the necessary early signal before a turning point (trend reversal). Since $\theta_\Delta = \arctan r_\Delta$, we have $S_\Delta(t) = |r_\Delta(t)| = |\tan \theta_\Delta(t)|$, which measures the modulus of the tangent of the phase angle itself (the rate of change of the trend); together with $Q_\Delta$, one measuring the `current rate' and the other the `change of the rate', the two characterise the trend in a complementary way.
+\end{proof}
+
+\begin{definition}[Definition of the data refractive index]\label{def:refraction_index_data}
+Drawing on the law of refraction in optics (the scaling of the sine trend) and on the concept of the refraction index at stock-price turning points, the \textbf{refractive index} $\eta(t; \Delta)$ is defined in general data analysis to measure the \textbf{strength of momentum change} of a data trend at a turning point. Let the trend direction vectors in the two time windows $[t^*-\Delta, t^*]$ and $[t^*, t^*+\Delta]$ before and after the turning point $t^*$ be respectively:
+\[
+\mathbf{v}_{\text{in}} = T_\Delta(t^*) - T_\Delta(t^*-\Delta), \quad \mathbf{v}_{\text{out}} = T_\Delta(t^*+\Delta) - T_\Delta(t^*).
+\]
+The \textbf{trend refractive index} is defined as the ratio of the outgoing momentum to the incoming momentum:
+\[
+\eta(t^*; \Delta) = \frac{\|\mathbf{v}_{\text{out}}\|}{\|\mathbf{v}_{\text{in}}\|} = \frac{|T_\Delta(t^*+\Delta) - T_\Delta(t^*)|}{|T_\Delta(t^*) - T_\Delta(t^*-\Delta)|}.
+\]
+The physical meaning of the refractive index:
+\begin{enumerate}[label=(\roman*)]
+    \item $\eta > 1$: the momentum is enhanced after the turning point (the trend accelerates)---the outgoing trend is steeper than the incoming trend.
+    \item $\eta = 1$: the momentum is unchanged (the trend is uniform)---the trend strength is the same before and after the turning point.
+    \item $\eta < 1$: the momentum weakens after the turning point (the trend decelerates)---the outgoing trend is gentler than the incoming trend.
+    \item $\eta \approx 0$: the momentum vanishes after the turning point (the trend flattens out)---the outgoing trend is close to zero and the data enter sideways consolidation.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Phase interpretation of the refractive index]\label{prop:refraction_phase}
+There is an intrinsic connection between the refractive index $\eta$ and the sine difference-angle similarity $\operatorname{Similarity}^{(2)}$. Let the angle of incidence be $\theta_{\text{in}} = \arctan(\mathbf{v}_{\text{in}}/\Delta)$ and the angle of refraction be $\theta_{\text{out}} = \arctan(\mathbf{v}_{\text{out}}/\Delta)$. From the sine-trend scaling relation of Snell's law:
+\[
+\frac{\sin\theta_{\text{out}}}{\sin\theta_{\text{in}}} = \frac{\|\mathbf{v}_{\text{out}}\|}{\|\mathbf{v}_{\text{in}}\|} \cdot \frac{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{in}}\|^2}}{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{out}}\|^2}} = \eta \cdot \frac{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{in}}\|^2}}{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{out}}\|^2}}.
+\]
+When $\Delta$ is far larger than the trend momenta ($\Delta \gg \|\mathbf{v}_{\text{in}}\|, \|\mathbf{v}_{\text{out}}\|$), we have $\sin\theta_{\text{out}}/\sin\theta_{\text{in}} \approx \eta$---the refractive index is approximately equal to the scaling ratio of the sine trends. When $\eta > 1$ and $\operatorname{Similarity}^{(2)} < 0$ (the sine difference angle is negative), the turning point is confirmed---the trend direction reverses and the momentum is amplified, which is a strong turning-point signal.
+\end{proposition}
+
+\begin{proof}
+From $\tan\theta = \|\mathbf{v}\|/\Delta$ we obtain the right-triangle relation $\sin\theta = \frac{\|\mathbf{v}\|}{\sqrt{\Delta^2 + \|\mathbf{v}\|^2}}$. Hence
+\[
+\frac{\sin\theta_{\text{out}}}{\sin\theta_{\text{in}}}
+= \frac{\|\mathbf{v}_{\text{out}}\|}{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{out}}\|^2}} \cdot \frac{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{in}}\|^2}}{\|\mathbf{v}_{\text{in}}\|}
+= \eta \cdot \frac{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{in}}\|^2}}{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{out}}\|^2}},
+\]
+in agreement with the statement of the proposition. In the limit $\Delta^2 \gg \max(\|\mathbf{v}_{\text{in}}\|^2, \|\mathbf{v}_{\text{out}}\|^2)$ the second factor satisfies
+\[
+\frac{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{in}}\|^2}}{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{out}}\|^2}} \to 1,
+\]
+so $\sin\theta_{\text{out}}/\sin\theta_{\text{in}} \to \eta$. Moreover $\operatorname{Similarity}^{(2)} = \sin(\theta_{\text{out}} - \theta_{\text{in}})$, whose value is negative when the directions are reversed ($\theta_{\text{out}}$ and $\theta_{\text{in}}$ have opposite signs); together with $\eta > 1$ (momentum amplification) this gives the strong turning-point criterion of `direction reversal together with momentum enhancement'.
+\end{proof}
+
+\begin{definition}[Reflection and refraction of trends]\label{def:reflection_refraction_trend}
+When a data trend encounters a `resistance level' or a `support level' it undergoes \textbf{reflection} (the trend reverses and returns along its original path) or \textbf{refraction} (the trend changes direction without reversing, continuing onwards but with a changed slope). The mathematical criteria for these two behaviours are:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Reflection criterion}: $\operatorname{Similarity}^{(2)}_{\Delta}(t) < 0$ (the sine difference angle is negative) and $\operatorname{Similarity}^{(1)}_{\Delta}(t, t-\tau) < 0$ (the cosine difference angle is negative---the trend direction is completely reversed). Then $\mathbf{v}_{\text{out}} \approx -\gamma \mathbf{v}_{\text{in}}$ ($\gamma > 0$) and the refractive index is $\eta = \gamma$. If $\gamma \approx 1$, this is \textbf{total reflection} (mirror reversal)---the trend strength is the same before and after the turning point, whilst the directions are opposite. Total reflection corresponds to conservation of the double-angle cosine similarity: $\cos 2\theta_{\text{in}} = \cos 2\theta_{\text{out}}$.
+    \item \textbf{Refraction criterion}: $\operatorname{Similarity}^{(2)}_{\Delta}(t) < 0$ (the sine difference angle is negative---the direction changes) but $\operatorname{Similarity}^{(1)}_{\Delta}(t, t-\tau)$ remains positive (the cosine difference angle is positive---the trend still partially continues). Then the included angle between $\mathbf{v}_{\text{out}}$ and $\mathbf{v}_{\text{in}}$ lies in $(0^\circ, 90^\circ)$---the trend direction is deflected without reversing completely. The refractive index $\eta$ may be greater or less than $1$, depending on the strength of the new trend.
+    \item \textbf{Total transmission criterion}: $\operatorname{Similarity}^{(2)}_{\Delta}(t) \approx 0$ (the sine difference angle is close to zero) and $\operatorname{Similarity}^{(1)}_{\Delta}(t, t-\tau) \approx 1$ (the cosine difference angle is close to one). Then the trend direction is unchanged whilst the strength may change---$\eta \neq 1$ means that the trend accelerates or decelerates, but the direction continues.
+\end{enumerate}
+Reflection and refraction are the direct generalisations of the laws of reflection and refraction to the analysis of data trends---reflection corresponds to conservation of the double-angle cosine similarity ($\cos 2\theta_{\text{in}} = \cos 2\theta_{\text{out}}$) and refraction to the scaling of the sine trend ($n_1 \sin\theta_{\text{in}} = n_2 \sin\theta_{\text{out}}$, where $n_1, n_2$ are the refractive indices of the trend `media'---that is, the volatilities of the data in different time periods).
+\end{definition}
+
+\begin{proposition}[Periodic-convolution diagnosis at a turning point]\label{prop:inflection_periodic_transform}
+At a data turning point $t^*$, four key similarity indicators of the periodic convolution jointly diagnose the type and the strength of the turning point:
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.7cm}>{\centering\arraybackslash}p{3.2cm}>{\centering\arraybackslash}p{3.0cm}>{\centering\arraybackslash}p{4.6cm}}
+\toprule
+Similarity indicator & Formula & Value at a turning point & Diagnostic meaning \\
+\midrule
+$\operatorname{Similarity}^{(1)}$ & $\cos(\theta_t - \theta_{t-\tau})$ & $< 0$ or decreasing & Trend consistency weakens \\
+$\operatorname{Similarity}^{(2)}$ & $\sin(\theta_t - \theta_{t-\tau})$ & $< 0$ & Direction reversal (necessary condition for a turning point) \\
+$\operatorname{Similarity}^{(3)}$ & $\cos 2(\theta_t - \theta_{t-\tau})$ & $\to -1$ & \textbf{Orthogonality indicator}: the two trends are orthogonal ($\delta\to\pm\pi/2\iff\operatorname{Similarity}^{(1)}=\cos\delta\to0$) \\
+$\operatorname{Similarity}^{(4)}$ & $\sin 2(\theta_t - \theta_{t-\tau})$ & $|\cdot|$ increases & Reversal strength amplified \\
+\bottomrule
+\end{tabular}
+\end{center}
+The combined criteria are:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Weak turning point}: $\operatorname{Similarity}^{(2)} < 0$, $\operatorname{Similarity}^{(1)} > 0$, $\eta < 1$---a slight change of direction with weakened momentum.
+    \item \textbf{Strong turning point}: $\operatorname{Similarity}^{(2)} < 0$, $\operatorname{Similarity}^{(1)} < 0$, $\eta > 1$, $\operatorname{Similarity}^{(3)} \to +1$---direction reversal with enhanced momentum, close to total reflection.
+    \item \textbf{False turning point}: $\operatorname{Similarity}^{(2)} < 0$ but $\eta \approx 0$ and $|\operatorname{Similarity}^{(4)}|$ very small---the direction fluctuates briefly and then quickly returns, and the momentum almost vanishes. This is a noise fluctuation during sideways consolidation, not a genuine turning point.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Write the phase increment as $\delta(t) = \theta_t - \theta_{t-\tau}$; then the four indicators in the table are $\operatorname{Similarity}^{(1)} = \cos\delta$, $\operatorname{Similarity}^{(2)} = \sin\delta$, $\operatorname{Similarity}^{(3)} = \cos 2\delta$ and $\operatorname{Similarity}^{(4)} = \sin 2\delta$. By the double-angle formulae,
+\[
+\begin{aligned}
+\operatorname{Similarity}^{(3)} &= \cos 2\delta = 2\cos^2\delta - 1 = 2(\operatorname{Similarity}^{(1)})^2 - 1, \\
+\operatorname{Similarity}^{(4)} &= \sin 2\delta = 2\sin\delta\cos\delta = 2\,\operatorname{Similarity}^{(1)}\operatorname{Similarity}^{(2)}.
+\end{aligned}
+\]
+Hence the four indicators are in fact determined by only two independent quantities $(\operatorname{Similarity}^{(1)}, \operatorname{Similarity}^{(2)})$ (that is, by the phase difference $e^{i\delta}$ on the unit circle)---the double-angle indicator (the \textbf{orthogonality indicator}) satisfies $\operatorname{Similarity}^{(3)} \to -1$ if and only if $\delta \to \pm\pi/2$, that is, $\operatorname{Similarity}^{(1)} \to 0$ (orthogonality of the two trends), whereas mirror reversal ($\delta \to \pm\pi$) gives $\operatorname{Similarity}^{(1)} \to -1$ and $\operatorname{Similarity}^{(3)} \to +1$, corresponding to the mirror case of `reversal of direction through to complete reversal'. The combined criteria then distinguish the strength by means of the refractive index $\eta$: $\operatorname{Similarity}^{(2)} < 0$ ($\delta < 0$, direction reversal) is a necessary condition for a turning point; $\eta < 1$ with $\operatorname{Similarity}^{(1)} > 0$ gives a weak turning point, whilst $\eta > 1$ with $\operatorname{Similarity}^{(1)} < 0$ and $\operatorname{Similarity}^{(3)} \to +1$ gives a strong turning point; if $\operatorname{Similarity}^{(2)} < 0$ but $\eta \approx 0$ and $|\operatorname{Similarity}^{(4)}| = 2|\operatorname{Similarity}^{(1)}\operatorname{Similarity}^{(2)}|$ is very small, then the direction fluctuation is instantaneous and without momentum, and the point is judged to be a false turning point (noise).
+\end{proof}
+
+\begin{example}[Periodic analysis of sunspot data]\label{ex:sunspot_analysis}
+The time series of monthly mean sunspot numbers (from $1749$ to the present) is a classical case of period detection in data analysis. Sunspot activity has a period of about $11$ years (the Schwabe cycle) and is at the same time nested within longer cycles (such as the Gleissberg cycle of about $88$ years). Periodic convolution is used to analyse these data:
+\begin{enumerate}[label=(\roman*)]
+    \item The periodogram exhibits its strongest peak at $11$ years, with secondary peaks at $5.5$ years (the half period) and $88$ years.
+    \item The periodic convolution $\mathcal{K}^{(1)}\{X, X\}$ (the trend transform) attains its largest amplitude output at $11$ years, confirming the dominance of the Schwabe cycle.
+    \item The difference-angle sine component $\operatorname{Im}\mathcal{K}^{(1)}\{X, X\}$ of the periodic convolution (phase relations) exhibits different phase-coupling patterns during the rising and falling phases of sunspot activity---the phases cluster during the rising phase and disperse during the falling phase.
+    \item Nested epicycle system fitting shows that $K=3$ ($11$-year fundamental frequency, $5.5$-year second harmonic, $88$-year long period) already accounts for about $80\%$ of the total variance.
+\end{enumerate}
+\end{example}
+
+\begin{example}[Window-function--refractive-index diagnosis of a time series]\label{ex:window_refraction_diagnosis}
+Window-function periodicity diagnosis is carried out on a set of annual temperature anomaly data ($1850$--$2023$). Take the Gaussian kernel $K_{\text{Gauss}}$ with window radius $\Delta = 20$ years (removing high-frequency fluctuations below the decadal scale) and compute:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Window-function trend} $T_{20}(t)$: reveals the long-term trend of global warming---a sustained rise since the $20$th century.
+    \item \textbf{Sine difference-angle similarity} $\operatorname{Similarity}^{(2)}(t) = \sin(\theta_t - \theta_{t-10})$ (a $10$-year delay): negative values appear during the `cooling period' of $1940$--$1970$---marking the turning point from early warming to mid-century cooling. Positive values return in the late $1970$s---marking the turning point from cooling to accelerated warming.
+    \item \textbf{Refractive index} $\eta(t)$: at the turning point of the $1970$s, $\eta \approx 2.3 > 1$---the momentum of the warming trend after the turning point is $2.3$ times that of the cooling trend before it, confirming the change in trend strength of `accelerated global warming'.
+    \item \textbf{Reflection/refraction analysis}: at the turning point of the $1940$s, $\operatorname{Similarity}^{(1)} \to -1$ (equivalently $\operatorname{Similarity}^{(3)} \to +1$, that is, the reflection criterion $\cos 2\theta_{\text{in}} = \cos 2\theta_{\text{out}}$ holds)---close to total reflection, the warming trend being completely reversed into a cooling trend. At the turning point of the $1970$s, $\operatorname{Similarity}^{(1)} < 0$ and $\eta \gg 1$---strong refraction, the cooling trend being reversed into a stronger warming trend.
+\end{enumerate}
+Window-function--refractive-index diagnosis of climate data is a concrete application of periodic convolution to environmental data---the window function provides multi-scale trend extraction, the similarity indicators quantify the phase changes of the trend, and the refractive index measures the scaling ratio of the trend momentum at a turning point. The joint use of the three constitutes a complete tool chain for data turning-point diagnosis.
+\end{example}
+
+\begin{remark}[Connection with the rest of the book]
+The theory of the periodic structure of data analysis established in this chapter is a complete application of periodic mathematics in data science. Periodic convolution provides a unified mathematical framework for period detection in time series---it simultaneously detects several periods, retains all phase information and quantifies the strength of coupling between periods. The window-function system provides multi-scale spectral estimation, and derivative-integral descent optimisation provides a data-driven method of parameter estimation. The phase-coupling network visualises the periodic interactions of multivariate data as network topology. The comprehensive pipeline of data periodicity diagnosis integrates the mathematical tools of the whole book---from the Fourier transform to periodic convolution, from single-period detection to multi-period coupling analysis---into a standardised method of data analysis.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+The corresponding objects of the seven themes of this chapter in the periodic structure of data analysis are traced back as follows:
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{9.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & The lag operator and delay correlation of a time series: the $\tau$-step trend self-similarity $\operatorname{Similarity}^{(1)}$ and the trend stability $Q_\Delta(t)$ (Definition \ref{def:trend_similarity_data}, Proposition \ref{prop:trend_strength_stability}) \\
+Scaling & The multi-scale window radii of multitaper spectral estimation and the window radius $\Delta$ of trend decomposition, and the refractive index $\eta$ (Proposition \ref{prop:multitaper}, Definition \ref{def:data_window_decomposition}, Definition \ref{def:refraction_index_data}) \\
+Rotation & The phase edge weights $W_{ij}^{(d)}$ and the phase-difference angles $\phi_m-\phi_n$ of the phase-coupling network (Definition \ref{def:phase_coupling_network}, Lemma \ref{ch31_phase_network_symmetry}) \\
+Balance & The three laws of information conservation, energy conservation (Parseval) and phase conservation (\textbf{empirical observation / research programme}, Remark \ref{thm:data_conservation}) \\
+Symmetry & The symmetry tests of the data distribution about the three centres of symmetry $0$, $1$ and $i$, and the criteria for trend reflection/refraction (Definition \ref{def:reflection_refraction_trend}) \\
+Closure & The closed-loop diagnostic procedure `detection---modelling---verification---prediction' (Definition \ref{def:data_diagnosis_pipeline}) \\
+Period & Periodogram peaks, the multi-window periodic decomposition components $C_k(t)$ and the dominant periods of the nested epicycle system (Definition \ref{def:spectral_analysis}, Proposition \ref{ch31_multiscale_reconstruction}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the \textbf{data periodicity decision theorem} of this chapter (\ref{thm:data_periodicity_decision}). Hint: first write down the decision map and the evolution group of this chapter's target, then apply the proof structure of the general criterion of the `Periodic Systems' chapter.
+
+    \item Verify that the hypotheses of the \textbf{monotonicity of quantity adjustment} (\ref{prop:data_adaptive_growth}) hold for the domain objects of this chapter, and give a counterexample in which the hypotheses fail.
+
+    \item Examine the behaviour of the \textbf{three-parameter correspondence: radius, phase and speed} (\ref{prop:data_epicycle_correspondence}) under parameter degeneracy, and explain how the conclusion degenerates accordingly.
+
+    \item Explain the relation between the \textbf{data periodicity diagnostic pipeline and its interface with three chapters} (\ref{thm:data_diagnosis_integration}) and the corresponding general conclusion of the `Periodic Systems' chapter (whether the two agree, whether the former is a special case, or whether additional conditions are required).
+
+    \item Using the seven-theme comparison table of this chapter, identify the concrete carriers of the themes \textbf{translation}, \textbf{scaling} and \textbf{rotation} in this chapter, and give one example of domain data for each.
+
+    \item Synthesis: restate the diagnostic pipeline of this chapter using the five-step standard interface of the `Periodic Systems' chapter (Table \ref{tab:ps_five_steps}), noting one by one the theorem of this chapter on which each step depends: \ref{thm:data_periodicity_decision}, \ref{prop:data_adaptive_growth}, \ref{prop:data_epicycle_correspondence}, \ref{thm:data_diagnosis_integration}.
+\end{enumerate}
+

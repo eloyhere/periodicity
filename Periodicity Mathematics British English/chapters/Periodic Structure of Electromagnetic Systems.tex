@@ -1,0 +1,896 @@
+\chapter{Periodic Structure of Electromagnetic Systems}
+\markboth{Periodic Structure of Electromagnetic Systems}{Periodic Structure of Electromagnetic Systems}
+
+\begin{remark}[Periodicity decision for the target of this chapter (citation)]\label{rem:em_ps_hook}
+When this chapter decides whether a research target is periodic, determines its period type, or seeks its minimal positive period, reference is always made to the `Periodic Systems' chapter:
+for the periodicity criterion see \cref{thm:ps_periodicity_decision},
+for the discrimination of period types see \cref{def:ps_period_type}, \cref{prop:ps_type_discrimination},
+for the search for the minimal positive period see \cref{def:ps_minimal_period_algorithm}, \cref{thm:ps_minimal_period_correctness},
+and for the construction of period series and epicycle groups from data see \cref{thm:ps_series_reconstruction}, \cref{def:ps_epicycle_group}.
+\end{remark}
+
+\begin{remark}[Positioning of this chapter: developed along the five-step interface of the `Periodic Systems' chapter]\label{rem:em_five_steps_positioning}
+The periodic structure of electromagnetic systems studies the mathematical characterisation of periodicity, quasi-periodicity and wave propagation in electromagnetic fields. This chapter does not establish a separate periodicity criterion; instead it connects electromagnetic systems to the five-step interface prescribed by the `Periodic Systems' chapter:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{Decision}: reduce such targets as electromagnetic oscillation, plane waves, cyclotron motion and the retarded potential to discrete or continuous dynamical systems, invoke \cref{thm:ps_periodicity_decision} to decide whether they possess periodicity, and determine the period type;
+    \item \textbf{Construction}: build the amplitude series, the frequency series and the phase series from the time series, spectrum and phase data of the electromagnetic field, and assemble them into the electromagnetic epicycle group;
+    \item \textbf{Adjustment}: dynamically adjust the electromagnetic epicycle group under the constraints of residual-energy descent, charge conservation, energy conservation and momentum conservation;
+    \item \textbf{Convolution}: introduce amplitude convolution, phase convolution and frequency convolution on the electromagnetic epicycle group, and connect them with the Poynting vector, cross-correlation and the retarded potential;
+    \item \textbf{Integration}: connect to the tool chains of the three chapters `Discrete Sampling and Intercalation of Periodic Signals', `Harmonic Analysis' and `Time Series Analysis', forming an electromagnetic periodicity diagnostic procedure.
+\end{enumerate}
+The mathematical tools used in this chapter include: vector analysis, Maxwell's equations, the wave equation, Fourier decomposition, periodic convolution, epicycle groups, phase operators and the retarded potential.
+\end{remark}
+
+\begin{remark}[Seven-theme guide for this chapter]\label{rem:em_seven_themes}
+\textbf{Translation}---an electromagnetic wave propagating at the speed of light $c$, its propagation delay $\tau = r/c$ and the retarded potential (see Theorem \ref{thm:retarded_potential}); \textbf{Scaling}---the inverse-square scaling $\sim 1/r^2$ of Coulomb's law and the Biot--Savart law (see Theorem \ref{thm:gauss_electric_derivation}); \textbf{Rotation}---Amp\`ere's circuital law $\nabla\times\mathbf{B}=\mu_0\mathbf{J}$ and the circular motion of a charge driven by the Lorentz force (see Proposition \ref{prop:cyclotron_motion}); \textbf{Balance}---charge conservation and Poynting energy conservation (see Theorem \ref{thm:electromagnetic_conservation}); \textbf{Symmetry}---gauge symmetry and the structure of Maxwell's equations (see Theorem \ref{thm:maxwell_equations}); \textbf{Closure}---the closed integrals of the Amp\`ere loop and the Faraday loop (see Theorems \ref{thm:ampere_law} and \ref{thm:faraday_law}); \textbf{Period}---electromagnetic oscillation and the period of an electromagnetic wave (see Proposition \ref{prop:plane_wave_periodic}).
+\end{remark}
+
+\section{Connection to the five-step interface of the `Periodic Systems' chapter}
+\label{sec:em_five_steps}
+
+\subsection{Step one: periodicity decision for electromagnetic targets}
+
+\begin{definition}[Electromagnetic targets and decision input]\label{def:em_target}
+An \textbf{electromagnetic target} is one of the following objects:
+\begin{enumerate}[label=(\roman*)]
+    \item an electromagnetic oscillation system, whose state space is the $(q,p)$ phase space or the $(\mathbf E,\mathbf B)$ field space;
+    \item a monochromatic plane wave, whose state space is the phase $\theta=\mathbf k\cdot\mathbf r-\omega t$;
+    \item the cyclotron motion of a charged particle in a uniform magnetic field, whose state space is velocity space;
+    \item a radiation field described by the retarded potential, whose state space is the joint space of the source distribution and the field values at the observation point.
+\end{enumerate}
+The \textbf{decision input} of an electromagnetic target is an ordered pair
+\[
+\mathcal D_{\mathrm{EM}}=(\mathcal S,\Phi),
+\]
+where $\mathcal S$ is the state space and $\Phi:\mathcal S\to\mathcal S$ is the map induced by time translation, phase rotation or cyclotron evolution. If $\mathcal S$ is a finite set, the target is called a \textbf{finite electromagnetic target}; if $\mathcal S$ is an infinite set, the target is called an \textbf{infinite electromagnetic target}.
+\end{definition}
+
+\begin{definition}[Electromagnetic decision map]\label{def:em_periodization}
+Let an electromagnetic target be given by the decision input $\mathcal D_{\mathrm{EM}}=(\mathcal S,\Phi)$. If the states of the target are generated by $\Phi$, that is, if there exists $x_0\in\mathcal S$ such that
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+for $t\in\mathbb Z$ the state $x_t$ is generated by iteration of $\Phi$; for $t\in\mathbb R$ it is described by the one-parameter evolution family $\{\Phi_t\}_{t\in\mathbb R}$, where each $\Phi_t:\mathcal S\to\mathcal S$, $\Phi_0=\operatorname{id}$, $\Phi_{s+t}=\Phi_s\circ\Phi_t$ for all $s,t\in\mathbb R$, and $(t,x)\mapsto\Phi_t(x)$ is continuous.
+then $\Phi$ is called the \textbf{electromagnetic decision map} of the target. The electromagnetic target is then reduced to the discrete dynamical system $(\mathcal S,\Phi)$ when $t\in\mathbb Z$ and to the continuous dynamical system $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$ when $t\in\mathbb R$; in both cases the criteria of the `Operations and Periodicity' chapter and of the `Periodic Systems' chapter may be applied directly.
+\end{definition}
+
+\begin{theorem}[Periodicity decision theorem for electromagnetic systems]\label{thm:em_periodicity_decision}
+Let the decision map of an electromagnetic target be $\Phi$, and let $(\mathcal S,\Phi)$ be a discrete dynamical system. Then:
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{Sufficient decision}: if there exists $m\in\mathbb N^+$ such that $\Phi^m=\mathrm{id}$, then the target is a uniformly periodic electromagnetic system; every orbit is closed, and the orbit length divides $m$.
+    \item \textbf{Equivalence of the decision}: the target is a uniformly periodic electromagnetic system if and only if $\operatorname{ord}(\Phi)<\infty$.
+    \item \textbf{Pointwise criterion}: the orbit of the target at the state $x_0$ is closed if and only if $x_0$ is a periodic point; the orbit length is then the period at that point.
+    \item \textbf{Non-omissibility}: the conjunction of conserved quantities and symmetry groups cannot replace $\operatorname{ord}(\Phi)<\infty$; a quasi-periodic electromagnetic target is not a periodic electromagnetic system.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:em_periodicity_decision} of this chapter is the domain instantiation of \cref{thm:ps_periodicity_decision} in the `Periodic Systems' chapter:
+one need only replace the decision map $f$ and the evolution group by $\Phi$ of this chapter, and the four clauses (A) sufficient decision, (B) equivalence of the decision, (C) pointwise criterion and
+(D) non-omissibility hold one by one. By the convention of \cref{rem:ps_applications_hook}, the argument is not expanded again here.
+\end{proof}
+
+\begin{corollary}[Electromagnetic period types]\label{cor:em_period_type}
+After the decision by \cref{thm:em_periodicity_decision}, an electromagnetic target falls into one of the following types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Trivial periodic type}: least period $m_0=1$, the state is a fixed point;
+    \item \textbf{Strictly periodic type}: $1<m_0<\infty$, the state is strictly periodic;
+    \item \textbf{Uniformly periodic type}: $\operatorname{ord}(\Phi)=m<\infty$, every orbit length divides $m$;
+    \item \textbf{Quasi-periodic type}: $\operatorname{ord}(\Phi)=\infty$, the orbits are not closed but are dense on a compact carrier structure;
+    \item \textbf{Eventually periodic type}: there exists $N$ such that the target is periodic for $t\ge N$;
+    \item \textbf{Discrete periodic type}: the carrier structure is $\mathbb Z$ and the normalised period ratio is $\rho=T_x/\Delta x\in\mathbb Q$.
+    \item \textbf{Asymptotically periodic (damped) type}: the orbit is not closed, but tends asymptotically to a closed orbit or to a fixed point, the residual decaying as $e^{-\kappa t}$ (see \cref{def:ps_period_type}(vii)).
+\end{enumerate}
+Here (i)--(iii) and (vi) belong to periodic electromagnetic systems; (iv) does not belong to periodic electromagnetic systems but can be handled with bounded-approximation tools; (v) is a periodic electromagnetic system only in its stable stage; (vii), like (iv), is a type in the limiting sense; it is not a periodic electromagnetic system and can be handled with bounded-approximation tools only in its stable stage.
+\end{corollary}
+
+\begin{proof}
+Each item follows by substituting the electromagnetic target into \cref{thm:em_periodicity_decision} and \cref{def:ps_period_type} of the `Periodic Systems' chapter.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for LC oscillation]\label{lem:lc_periodic}
+An ideal LC oscillatory circuit consists of an inductance $L$ and a capacitance $C$, and its charge $q(t)$ satisfies
+\[
+\ddot q+\omega_0^2q=0,\qquad \omega_0=\frac{1}{\sqrt{LC}}.
+\]
+Then the LC oscillation is a uniformly periodic system, whose least positive period is
+\[
+T_0=2\pi\sqrt{LC}.
+\]
+\end{lemma}
+
+\begin{proof}
+The general solution of the equation is $q(t)=A\cos(\omega_0t+\phi)$. The time translation $T_0=2\pi/\omega_0=2\pi\sqrt{LC}$ gives $q(t+T_0)=q(t)$, and $T_0$ is the least positive period. Hence the decision map $\Phi$ satisfies $\Phi^{T_0}=\mathrm{id}$, so the system is uniformly periodic.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for a monochromatic plane wave]\label{lem:plane_wave_periodic_decision}
+Let the monochromatic plane wave be
+\[
+\mathbf E(\mathbf r,t)=\mathbf E_0e^{i(\mathbf k\cdot\mathbf r-\omega t)}.
+\]
+Then its temporal period is
+\[
+T=\frac{2\pi}{\omega},
+\]
+its spatial period is
+\[
+\lambda=\frac{2\pi}{|\mathbf k|},
+\]
+and the two are coupled by the dispersion relation $\omega=c|\mathbf k|$ as $\lambda=cT$.
+\end{lemma}
+
+\begin{proof}
+From $e^{-i\omega(t+T)}=e^{-i\omega t}e^{-i\omega T}=e^{-i\omega t}$ we obtain the temporal period $T=2\pi/\omega$. From $e^{i\mathbf k\cdot(\mathbf r+\lambda\hat{\mathbf k})}=e^{i\mathbf k\cdot\mathbf r}e^{i|\mathbf k|\lambda}=e^{i\mathbf k\cdot\mathbf r}$ we obtain the spatial period $\lambda=2\pi/|\mathbf k|$. The dispersion relation is given by Theorem \ref{thm:electromagnetic_wave_equation} and Proposition \ref{prop:plane_wave_periodic}.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for cyclotron motion]\label{lem:cyclotron_periodic}
+Let a charged particle $q$ move in a uniform magnetic field $\mathbf B$, with velocity perpendicular to the field. Then the cyclotron period is
+\[
+T_c=\frac{2\pi m}{|q|B},
+\]
+and $T_c$ is independent of the speed, so the cyclotron motion is a uniformly periodic system.
+\end{lemma}
+
+\begin{proof}
+By Proposition \ref{prop:cyclotron_motion}, the cyclotron angular frequency is $\omega_c=|q|B/m$, so $T_c=2\pi/\omega_c=2\pi m/(|q|B)$. The velocity solution is a periodic function, and the period is independent of the speed.
+\end{proof}
+
+\begin{lemma}[The retarded potential preserves the period of the source]\label{lem:retarded_period_preserved}
+Let the sources $\rho(\mathbf r,t)$ and $\mathbf J(\mathbf r,t)$ both be periodic in time with period $T$. Then the retarded potential
+\[
+\phi(\mathbf r,t)=\frac{1}{4\pi\varepsilon_0}\int\frac{\rho(\mathbf r',t-|\mathbf r-\mathbf r'|/c)}{|\mathbf r-\mathbf r'|}\,dV'
+\]
+is also periodic in time with period $T$:
+\[
+\phi(\mathbf r,t+T)=\phi(\mathbf r,t).
+\]
+The same holds for the vector potential $\mathbf A$.
+\end{lemma}
+
+\begin{proof}
+From the periodicity of the source, $\rho(\mathbf r',t+T-|\mathbf r-\mathbf r'|/c)=\rho(\mathbf r',t-|\mathbf r-\mathbf r'|/c)$, and substitution into the integral gives $\phi(\mathbf r,t+T)=\phi(\mathbf r,t)$. The same argument applies componentwise to $\mathbf A$.
+\end{proof}
+
+\begin{definition}[Electromagnetic least positive period algorithm]\label{def:em_minimal_period_algorithm}
+This definition has the same content as Chapter~\ref{chap:periodic_system}, the section `Periodicity decision: is the target periodic?' (\cref{sec:ps_periodicity_decision}), \cref{def:ps_minimal_period_algorithm}; to avoid repeating the statement, only the reference anchor is retained here, and the complete statement is given there. The only difference here is terminology (electromagnetic target / electromagnetic sample); the algorithm steps and the conclusion are exactly the same.
+\end{definition}
+
+\begin{theorem}[Correctness of the electromagnetic least positive period algorithm]\label{thm:em_minimal_period_correctness}
+This theorem has the same content as Chapter~\ref{chap:periodic_system}, the section `Periodicity decision: is the target periodic?' (\cref{sec:ps_periodicity_decision}), \cref{thm:ps_minimal_period_correctness}; to avoid repeating the statement, only the reference anchor is retained here, and the complete statement and proof are given there. The only difference here is terminology (electromagnetic target / electromagnetic sample); the algorithm steps and the conclusion are exactly the same.
+\end{theorem}
+
+\begin{example}[Examples of electromagnetic periodicity decisions]\label{ex:em_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item LC oscillation: $T_0=2\pi\sqrt{LC}$, uniformly periodic type;
+    \item monochromatic plane wave: temporal period $T=2\pi/\omega$, spatial period $\lambda=2\pi/|\mathbf k|$;
+    \item cyclotron motion: $T_c=2\pi m/(|q|B)$, uniformly periodic type;
+    \item retarded potential of a periodic source: the source period $T$ is transmitted to the potentials and the fields, uniformly periodic type.
+\end{enumerate}
+\end{example}
+
+\begin{remark}[Conserved quantities do not guarantee periodicity]\label{rem:em_invariant_not_period}
+Charge conservation, energy conservation and momentum conservation in electromagnetic systems are auxiliary conditions for periodic structure, but they do not constitute a sufficient condition. For example, a hyperbolic orbit possesses energy conservation and angular momentum conservation, yet the orbit is open and not closed. The periodic structure of an electromagnetic system must be decided by \cref{thm:em_periodicity_decision} or by the lemmas above.
+\end{remark}
+
+\subsection{Step two: construction of the electromagnetic period series and epicycle group}
+
+\begin{definition}[Electromagnetic amplitude, frequency and phase series]\label{def:em_series}
+Let the state or output sequence of an electromagnetic target be $\{z_t\}$. If it can be written as
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+then
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+are called respectively the \textbf{amplitude series}, the \textbf{frequency series} and the \textbf{phase series} of the electromagnetic target. The three agree with \cref{def:amplitude_series}, \cref{def:frequency_series} and \cref{def:phase_series} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{definition}[Electromagnetic epicycle group]\label{def:em_epicycle_group}
+Let the period series of an electromagnetic target be given by its amplitude series $\{A_k\}$, frequency series $\{\omega_k\}$ and phase series $\{\phi_k\}$. For each $k$ define the epicycle
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+whose collection
+\[
+\mathfrak E_{\mathrm{EM}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+is called the \textbf{epicycle group} of the electromagnetic target. Its superposition is the electromagnetic period series
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[Constructing the period series from electromagnetic data]\label{thm:em_series_reconstruction}
+Let the output of an electromagnetic target be a finite periodic sequence of period $N$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the output admits the discrete Fourier expansion
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item the amplitude series is given by $|c_k|$, the phase series by $\arg c_k$ and the frequency series by $2\pi k/N$;
+    \item if the output is a monochromatic plane wave, its Fourier decomposition has only a single spectral line; if the output is a superposition of multiple frequencies, each order of harmonic corresponds to a different frequency component.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) The discrete Fourier series of a finite periodic sequence is a standard result: the basis functions $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ form an orthogonal basis of $\mathbb C^N$.
+(ii) This is read off directly from $c_k=A_k e^{i\phi_k}$.
+(iii) The temporal part of a monochromatic plane wave is $e^{-i\omega t}$, which on the period $T=2\pi/\omega$ has only the fundamental component; a superposition of multiple frequencies expands as a Fourier series.
+\end{proof}
+
+\begin{proposition}[Three-parameter correspondence: radius, phase and rotational speed]\label{prop:em_epicycle_correspondence}
+The three parameters of the electromagnetic epicycle group $\mathfrak E_{\mathrm{EM}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ correspond one-to-one to three geometric--physical quantities:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Radius corresponds to amplitude}: the radius of $E_k$, namely $|E_k|=A_k$, is the amplitude of the electric or magnetic field component;
+    \item \textbf{Phase corresponds to rotational delay}: the initial phase $\phi_k$ corresponds to the time translation $\tau_k=\phi_k/\omega_k$; when $\phi_k>0$ this component \textbf{leads} the baseline by $\tau_k$ (equivalently, the component coincides with the baseline once the baseline is postponed by $\tau_k$);
+    \item \textbf{Frequency corresponds to rotational speed}: $\omega_k$ is the angular frequency of that component.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:em_epicycle_correspondence} of this chapter corresponds exactly to \cref{prop:ps_epicycle_correspondence} of the `Periodic Systems' chapter,
+and the three correspondences---radius to amplitude, phase to rotational delay, frequency to rotational speed---are obtained by translating them one by one to the epicycle group of this chapter.
+The proof is given there: (i) from $|E_k|=A_k$ and the energy decomposition, (ii) from the phase translation theorem, (iii) from the definition of the frequency series.
+\end{proof}
+
+\begin{example}[Period series of a plane wave]\label{ex:em_plane_wave_series}
+At a fixed spatial point the temporal part of the monochromatic plane wave $\mathbf E=\mathbf E_0e^{i(\mathbf k\cdot\mathbf r-\omega t)}$ degenerates to a single-frequency period series, whose epicycle group is $\{(|\mathbf E_0|,\omega,\phi_0)\}$.
+\end{example}
+
+\begin{remark}[The period series is a complex function]\label{rem:em_series_complex}
+Let $z=e^{i\omega_0t}$; then the electromagnetic period series
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+when all components are commensurable with $\omega_0$ (that is, $\omega_k=k\omega_0$, $k\in\mathbb Z$) it can be written as the Laurent series $\sum_k c_k z^k$, where $c_k=A_k e^{i\phi_k}$: in that case the electromagnetic period series is a complex function on the unit circle, and otherwise it is merely a function on the torus.
+\end{remark}
+
+\subsection{Step three: dynamic adjustment of the electromagnetic epicycle group}
+
+\begin{definition}[Dynamic adjustment of the electromagnetic epicycle group]\label{def:em_adaptive_adjustment}
+Let the current electromagnetic epicycle group be $\mathfrak E^{(j)}$, with partial sum
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+and residual $r^{(j)}=z-z^{(j)}$. \textbf{Dynamic adjustment} consists of two rules:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Quantity adjustment}: if the residual energy satisfies $\|r^{(j)}\|^2>\delta$, add a new epicycle according to the peak of the residual periodogram;
+    \item \textbf{Parameter adjustment}: update the parameters of the existing epicycles by regularised least squares or by the conservation constraints.
+\end{enumerate}
+In electromagnetic systems, quantity adjustment corresponds to increasing the number of frequency components or spatial harmonics; parameter adjustment corresponds to adjusting amplitude, phase and frequency so that the charge, energy and momentum constraints are satisfied.
+\end{definition}
+
+\begin{proposition}[Monotonicity of quantity adjustment]\label{prop:em_adaptive_growth}
+After the dominant residual frequency component is added as in \cref{def:em_adaptive_adjustment}(i), the residual energy is monotonically non-increasing:
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+with equality if and only if the residual has no energy at the selected frequency.
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:em_adaptive_growth} of this chapter agrees with the dynamic adjustment mechanism of \cref{def:ps_adaptive_adjustment} in the `Periodic Systems' chapter:
+adding an epicycle removes the component of $r^{(j)}$ along $\hat\omega$ from the residual, and the orthogonal decomposition
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{the removed component}\|^2$ gives the inequality,
+with equality if and only if the norm of the removed component is zero. The complete argument is given there.
+\end{proof}
+
+\begin{theorem}[Convergence of dynamic adjustment]\label{thm:em_adaptive_convergence}
+Let the electromagnetic target be a finite periodic sequence of period $T_0$ and let $\delta=0$. Then after at most $\lfloor T_0/2\rfloor+1$ steps of dynamic adjustment the residual is zero, and the resulting electromagnetic epicycle group is the exact Fourier data of the target.
+\end{theorem}
+
+\begin{proof}
+The discrete Fourier series of a sequence of period $T_0$ is complete on $\lfloor T_0/2\rfloor+1$ harmonics. At each step one dominant frequency component of the residual is extracted as in \cref{prop:em_adaptive_growth} and the residual energy decreases strictly, so after finitely many steps the residual is zero.
+\end{proof}
+
+\begin{definition}[Structural metric adjustment]\label{def:em_structure_metric_adjustment}
+Let the structure metric of an electromagnetic target be
+\[
+\mathcal I=(\mathcal I_{\text{charge}},\mathcal I_{\text{energy}},\mathcal I_{\text{momentum}})
+=(\text{charge conservation degree},\ \text{energy conservation degree},\ \text{momentum conservation degree}).
+\]
+\textbf{Structural-metric adjustment} consists in choosing $\theta$ in the parameter space $\Theta$: at each step take a neighbouring parameter for which $\mathcal I(\theta)$ is \textbf{strictly decreasing} in the lexicographic order (minimisation); if no such parameter exists, the process stops, and the parameter is then locally optimal.
+\end{definition}
+
+\begin{proposition}[Finite convergence of structural metric adjustment]\label{prop:em_structure_metric_convergence}
+Let the parameter space $\Theta$ be finite, and let each adjustment make $\mathcal I$ strictly decreasing in the lexicographic order. Then the adjustment terminates after finitely many steps at a locally optimal parameter.
+\end{proposition}
+
+\begin{proof}
+Since $\Theta$ is finite, $\mathcal I$ takes only finitely many values, and the lexicographic order is a total order on a finite set; a strictly decreasing sequence in that order cannot continue indefinitely, so the adjustment terminates after finitely many steps. At termination there is no neighbouring parameter that makes $\mathcal I$ strictly decrease in the lexicographic order, that is, the parameter is locally optimal.
+\end{proof}
+
+\begin{remark}[Boundaries of dynamic adjustment]\label{rem:em_adaptive_boundary}
+\cref{thm:em_adaptive_convergence} relies on finite periodic sequences. For continuous-spectrum or quasi-periodic electromagnetic targets, no finite epicycle group represents them exactly and only bounded approximation is possible. Structural metric adjustment does not guarantee global optimality.
+\end{remark}
+
+\subsection{Step four: electromagnetic convolution}
+
+\begin{definition}[Electromagnetic amplitude, phase and frequency convolutions]\label{def:em_convolution_types}
+Let two electromagnetic epicycle groups be
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+Define:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Amplitude convolution}: $\mathbb A_{mn}=A_nB_m$;
+    \item \textbf{Phase convolution}: $\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$;
+    \item \textbf{Frequency convolution}: $\mathbb F_{mn}=\omega_n\nu_m$;
+    \item \textbf{Trend convolution}: $\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$.
+\end{enumerate}
+This agrees with \cref{def:amplitude_convolution}, \cref{def:phase_convolution}, \cref{def:frequency_convolution} and \cref{def:tendency_convolution} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{theorem}[Action of the three convolutions on the electromagnetic epicycle group]\label{thm:em_convolution_action}
+Let the epicycle groups of two electromagnetic targets be $\mathfrak E$ and $\mathfrak E'$ respectively. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item amplitude convolution acts only on the radius;
+    \item phase convolution acts only on the phase;
+    \item frequency convolution acts only on the rotational speed;
+    \item trend convolution preserves both amplitude and phase.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+This is read off directly from \cref{def:em_convolution_types}.
+\end{proof}
+
+\begin{proposition}[Autocorrelation and trend convolution]\label{prop:em_autocorr_phase_convolution}
+Let $\{z_t\}$ be an electromagnetic periodic sequence, with autocorrelation function
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+In the language of the electromagnetic epicycle group, the autocorrelation function is the projection of the trend convolution onto the diagonal:
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:em_autocorr_phase_convolution} of this chapter is the realisation in this domain of the convolution-action conclusion of \cref{thm:ps_convolution_action} in the `Periodic Systems' chapter:
+substituting $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ into the definition of the autocorrelation, cancelling all off-diagonal cross terms by orthogonality and retaining only the diagonal term of the trend convolution
+(the factorisation of the three convolutions, \cref{prop:ps_convolution_factorization}), which yields $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$.
+The full expansion is given there.
+\end{proof}
+
+\begin{remark}[Relation between electromagnetic convolution and periodic convolution]\label{rem:em_convolution_relation}
+Electromagnetic convolution is not a new convolution operation but an instance of the periodic convolution of the `Series and Convolution' chapter on the electromagnetic epicycle group. Autocorrelation is the projection of the trend convolution onto the diagonal; the Poynting vector and cross-correlation are respectively the concrete manifestations in electromagnetism of amplitude convolution and trend convolution.
+\end{remark}
+
+\subsection{Step five: integration with discrete sampling, harmonic analysis and time series analysis}
+
+\begin{definition}[Electromagnetic periodicity diagnostic procedure]\label{def:em_periodic_diagnosis}
+For a given electromagnetic system, diagnose it using the framework of periodic mathematics:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Periodicity decision}: verify the period type of the electromagnetic target (\cref{thm:em_periodicity_decision});
+    \item \textbf{Series construction}: build the amplitude, frequency and phase series and the epicycle group from electromagnetic field data (\cref{thm:em_series_reconstruction});
+    \item \textbf{Conservation diagnosis}: verify charge, energy and momentum conservation (\cref{thm:electromagnetic_conservation});
+    \item \textbf{Convolution diagnosis}: compute the autocorrelation (the diagonal projection of the trend convolution, \cref{prop:em_autocorr_phase_convolution}) and the phase convolution;
+    \item \textbf{Integration diagnosis}: connect to the tool chains of discrete sampling, harmonic analysis and time series analysis.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[The electromagnetic periodicity diagnostic procedure and its interfaces with three chapters]\label{thm:em_diagnosis_integration}
+The five steps of \cref{def:em_periodic_diagnosis} connect respectively to:
+\begin{enumerate}[label=(\roman*)]
+    \item the `Discrete Sampling and Intercalation of Periodic Signals' chapter: \cref{def:uniform_sampling_parallel}, \cref{thm:nyquist_shannon_parallel}, \cref{thm:intercalation_leakage_suppression};
+    \item the `Harmonic Analysis' chapter: \cref{def:fourier_series}, \cref{thm:parseval_fourier}, \cref{prop:twelve_to_six};
+    \item the `Time Series Analysis' chapter: \cref{def:ts_period_detection}, \cref{prop:ts_period_significance}, \cref{def:ts_window_validation}.
+\end{enumerate}
+The electromagnetic periodicity diagnostic procedure is therefore not an independent method but an application of the unified tool chain of periodic mathematics to electromagnetic systems.
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:em_diagnosis_integration} of this chapter is the implementation in this domain of the five-step interface of the `Periodic Systems' chapter (\cref{tab:ps_five_steps}):
+the periodicity decision uses sampling and spectral estimation, the frequency decomposition and the phase kernels use the `Harmonic Analysis' chapter, and the periodogram peaks, the Fisher test and
+window-function validation use the `Time Series Analysis' chapter. The diagnostic procedure is therefore a synthesis of the tool chains of the three chapters; the proof is given there.
+\end{proof}
+
+\begin{remark}[Order of operations after integration]\label{rem:em_integration_order}
+The recommended order for an actual diagnosis is: first decide whether the electromagnetic target is periodic (\cref{thm:em_periodicity_decision}); then construct the Fourier data and the epicycle group of the electromagnetic data (\cref{thm:em_series_reconstruction}); then optimise the parameters by the conservation constraints and dynamic adjustment (\cref{thm:em_adaptive_convergence}, \cref{prop:em_structure_metric_convergence}); then perform electromagnetic convolution and autocorrelation analysis (\cref{prop:em_autocorr_phase_convolution}); and finally output the diagnosis as in \cref{def:em_periodic_diagnosis}.
+\end{remark}
+
+\section{Mathematical foundations of the electromagnetic field}
+
+\begin{definition}[Basic quantities of the electromagnetic field]\label{def:electromagnetic_fields}
+An electromagnetic system is described by four basic vector fields:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Electric field strength} $\mathbf{E}(\mathbf{r}, t)$ (unit: V/m)
+    \item \textbf{Magnetic flux density} $\mathbf{B}(\mathbf{r}, t)$ (unit: T)
+    \item \textbf{Electric displacement vector} $\mathbf{D}(\mathbf{r}, t)$ (unit: C/m$^2$), with $\mathbf{D} = \varepsilon_0 \mathbf{E}$ in vacuum
+    \item \textbf{Magnetic field strength} $\mathbf{H}(\mathbf{r}, t)$ (unit: A/m), with $\mathbf{H} = \mathbf{B}/\mu_0$ in vacuum
+\end{enumerate}
+The speed of light is $c = 1/\sqrt{\varepsilon_0 \mu_0}$. The source terms are the charge density $\rho$ and the current density $\mathbf{J}$.
+\end{definition}
+
+\begin{property}[Direct consequences of the vacuum constitutive relations]\label{ch21_vacuum_props}
+From the vacuum constitutive relations $\mathbf{D}=\varepsilon_0\mathbf{E}$ and $\mathbf{H}=\mathbf{B}/\mu_0$ we obtain directly:
+\begin{enumerate}[label=(\roman*)]
+    \item the speed of light $c = 1/\sqrt{\varepsilon_0\mu_0}$ is determined solely by the two fundamental constants of the vacuum and is independent of the frequency of the wave (the vacuum is non-dispersive);
+    \item $\mathbf{E}$ and $\mathbf{D}$ are parallel and in the same direction, and so are $\mathbf{B}$ and $\mathbf{H}$; the vacuum is an isotropic, linear medium.
+\end{enumerate}
+\end{property}
+
+\begin{remark}[Three vector differential operators]\label{rem:three_operators}
+This chapter repeatedly uses the three basic operators of vector analysis:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Gradient} $\nabla f$: maps the scalar field $f$ to a vector field pointing in the direction of fastest increase of $f$.
+    \item \textbf{Divergence} $\nabla \cdot \mathbf{F}$: maps the vector field $\mathbf{F}$ to a scalar field, measuring the strength of the source or sink at each point.
+    \item \textbf{Curl} $\nabla \times \mathbf{F}$: maps the vector field $\mathbf{F}$ to a vector field, measuring the tendency to circulate at each point.
+\end{enumerate}
+The three satisfy the identities $\nabla \times (\nabla f) = \mathbf{0}$ and $\nabla \cdot (\nabla \times \mathbf{F}) = 0$. These two identities play a key role in checking the self-consistency of Maxwell's equations.
+\end{remark}
+
+\section{Magnetostatics and Amp\`ere's circuital law}
+
+\begin{lemma}[Biot--Savart law]\label{ch21_biot_savart}
+The magnetic flux density produced by a steady current density $\mathbf{J}(\mathbf{r}')$ at the observation point $\mathbf{r}$ is
+\[
+\mathbf{B}(\mathbf{r}) = \frac{\mu_0}{4\pi} \int \frac{\mathbf{J}(\mathbf{r}') \times (\mathbf{r}-\mathbf{r}')}{|\mathbf{r}-\mathbf{r}'|^3}\, dV'.
+\]
+\end{lemma}
+
+\begin{proof}
+The Biot--Savart law is a fundamental experimental law of magnetostatics, on a par with Coulomb's law, and is taken here as an axiomatic input for the magnetostatic part of this chapter; its differential form (Amp\`ere's circuital law) is given by the next theorem.
+\end{proof}
+
+\begin{theorem}[Amp\`ere's circuital law]\label{thm:ampere_law}
+In the static magnetic field produced by a steady current, the magnetic flux density satisfies
+\[
+\boxed{\nabla \times \mathbf{B} = \mu_0 \mathbf{J}}.
+\]
+That is, the current is the source of the curl of the magnetic flux density---at every point where the current flows, the magnetic flux density has non-zero curl.
+\end{theorem}
+
+\begin{proof}
+Taking the curl of the integral of Lemma \ref{ch21_biot_savart} with respect to the observation point $\mathbf{r}$, and putting $\mathbf{R}=\mathbf{r}-\mathbf{r}'$. Since $\mathbf{J}(\mathbf{r}')$ is independent of $\mathbf{r}$, the vector identity
+\[
+\nabla\times\left(\mathbf{J}\times\frac{\mathbf{R}}{R^3}\right)
+= \mathbf{J}\left(\nabla\cdot\frac{\mathbf{R}}{R^3}\right)
+- (\mathbf{J}\cdot\nabla)\frac{\mathbf{R}}{R^3}.
+\]
+The first term uses the point-source divergence identity
+\[
+\nabla\cdot\frac{\mathbf{R}}{R^3} = 4\pi\,\delta^{(3)}(\mathbf{R}),
+\]
+which after integration gives $\mu_0\,\mathbf{J}(\mathbf{r})$. In the second term, since $\partial/\partial r_i = -\partial/\partial r_i'$, we have $(\mathbf{J}\cdot\nabla)\frac{\mathbf{R}}{R^3} = -(\mathbf{J}\cdot\nabla')\frac{\mathbf{R}}{R^3}$; integrating this term by parts,
+\[
+\int (\mathbf{J}\cdot\nabla')\frac{\mathbf{R}}{R^3}\,dV'
+= \int\Big[\nabla'\cdot\Big(\frac{\mathbf{R}}{R^3}\,\mathbf{J}\Big) - \frac{\mathbf{R}}{R^3}(\nabla'\cdot\mathbf{J})\Big]dV'
+= 0,
+\]
+where the first term vanishes as a boundary term at infinity by the divergence theorem, and the second term vanishes because the current is steady, $\nabla'\cdot\mathbf{J}=0$. Hence $\nabla\times\mathbf{B} = \mu_0\mathbf{J}$.
+\end{proof}
+
+\begin{theorem}[Vector potential representation of the static magnetic field]\label{thm:magnetic_vector_potential}
+For a steady current distribution there exists a vector field $\mathbf{A}(\mathbf{r})$ (called the \textbf{magnetic vector potential}) such that
+\[
+\boxed{\mathbf{B} = \nabla \times \mathbf{A}}.
+\]
+When the vector potential $\mathbf{A}$ satisfies the Coulomb gauge $\nabla \cdot \mathbf{A} = 0$, Amp\`ere's circuital law gives the Poisson equation
+\[
+\nabla^2 \mathbf{A} = -\mu_0 \mathbf{J},
+\]
+whose solution is
+\[
+\mathbf{A}(\mathbf{r}) = \frac{\mu_0}{4\pi} \int \frac{\mathbf{J}(\mathbf{r}')}{|\mathbf{r}-\mathbf{r}'|}\, dV'.
+\]
+\end{theorem}
+
+\begin{proof}
+$\nabla \cdot \mathbf{B} = 0$ (established independently in Theorem \ref{thm:gauss_magnetic_derivation}) is a universal property of the static magnetic field. A divergence-free vector field necessarily has a vector potential: $\mathbf{B} = \nabla \times \mathbf{A}$. Substituting into Amp\`ere's circuital law and using the identity $\nabla\times(\nabla\times\mathbf{A}) = \nabla(\nabla\cdot\mathbf{A}) - \nabla^2\mathbf{A}$, this reduces, in the Coulomb gauge $\nabla\cdot\mathbf{A} = 0$, to $\nabla^2\mathbf{A} = -\mu_0\mathbf{J}$. The solution of this Poisson equation is the integral expression above, which can be verified by the Green's function method.
+\end{proof}
+
+\section{Faraday's law of electromagnetic induction}
+
+\begin{theorem}[Faraday's law of electromagnetic induction]\label{thm:faraday_law}
+\[
+\boxed{\nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t}}.
+\]
+That is, the time variation of the magnetic flux density is the source of the curl of the electric field strength.
+\end{theorem}
+
+\begin{proof}
+The integral form of Faraday's experimental law is
+\[
+\mathcal{E} = \oint_{\partial S} \mathbf{E}\cdot d\mathbf{l} = -\frac{d}{dt}\int_S \mathbf{B}\cdot d\mathbf{S}.
+\]
+For a fixed loop $S$, moving the time derivative inside the integral sign gives $\oint_{\partial S}\mathbf{E}\cdot d\mathbf{l} = -\int_S \frac{\partial\mathbf{B}}{\partial t}\cdot d\mathbf{S}$. By Stokes' theorem the left-hand side $=\int_S(\nabla\times\mathbf{E})\cdot d\mathbf{S}$, hence
+\[
+\int_S \Big(\nabla\times\mathbf{E} + \frac{\partial\mathbf{B}}{\partial t}\Big)\cdot d\mathbf{S} = 0.
+\]
+Since the surface $S$ is arbitrary we obtain the differential form $\nabla\times\mathbf{E} = -\partial\mathbf{B}/\partial t$ (for its complete derivation see Theorem \ref{thm:faraday_derivation}).
+\end{proof}
+
+\begin{example}[Periodic electromotive force in an AC generator]\label{ex:ac_generator}
+A coil of area $A$ rotates in a uniform magnetic field $B$ with angular velocity $\omega$, and the magnetic flux through the coil is
+\[
+\Phi(t) = BA\cos(\omega t).
+\]
+By Faraday's law (Theorem \ref{thm:faraday_law}) the induced electromotive force is
+\[
+\mathcal{E}(t) = -\frac{d\Phi}{dt} = BA\omega\sin(\omega t),
+\]
+with period $T = 2\pi/\omega$. \textbf{Numerical example}: taking $A = 0.01\,\text{m}^2$, $B = 0.5\,\text{T}$ and $\omega = 100\pi\,\text{rad/s}$ (mains frequency $50\,\text{Hz}$), the peak electromotive force is
+\[
+\mathcal{E}_{\max} = BA\omega = 0.5\times 0.01\times 100\pi = \frac{\pi}{2}\,\text{V} \approx 1.57\,\text{V},
+\]
+completing $50$ full periods each second; this is the prototype of the periodic structure `rotation $\to$ closed-loop magnetic flux $\to$ periodic electromotive force'.
+\end{example}
+
+\begin{theorem}[Scalar and vector potential representation of time-varying fields]\label{thm:scalar_vector_potential}
+In a general time-varying field, introduce a scalar potential $\phi(\mathbf{r}, t)$ and a vector potential $\mathbf{A}(\mathbf{r}, t)$ such that
+\[
+\boxed{\mathbf{B} = \nabla \times \mathbf{A}}, \qquad
+\boxed{\mathbf{E} = -\nabla \phi - \frac{\partial \mathbf{A}}{\partial t}}.
+\]
+The electric field $\mathbf{E}$ consists of two parts: the negative gradient of the scalar potential $-\nabla \phi$ and the time derivative of the vector potential $-\partial\mathbf{A}/\partial t$.
+\end{theorem}
+
+\begin{proof}
+By Theorem \ref{thm:gauss_magnetic_derivation}, $\nabla \cdot \mathbf{B} = 0$ holds for a time-varying field as well (there are no magnetic monopoles), so $\mathbf{B}$ can still be expressed as the curl of some vector potential $\mathbf{A}$: $\mathbf{B} = \nabla \times \mathbf{A}$. Substituting into Faraday's law $\nabla\times\mathbf{E} = -\partial\mathbf{B}/\partial t = -\partial(\nabla\times\mathbf{A})/\partial t$ gives $\nabla\times(\mathbf{E} + \partial\mathbf{A}/\partial t) = \mathbf{0}$. A vector field with zero curl can be expressed as the gradient of some scalar field, so there exists a scalar potential $\phi$ with $\mathbf{E} + \partial\mathbf{A}/\partial t = -\nabla\phi$, that is, $\mathbf{E} = -\nabla\phi - \partial\mathbf{A}/\partial t$.
+\end{proof}
+
+\begin{property}[Gauge freedom]\label{prop:gauge_freedom}
+The definitions of the scalar potential $\phi$ and the vector potential $\mathbf{A}$ are not unique. For any smooth function $\chi(\mathbf{r}, t)$, the transformation
+\[
+\mathbf{A}' = \mathbf{A} + \nabla \chi, \qquad \phi' = \phi - \frac{\partial \chi}{\partial t}
+\]
+leaves $\mathbf{E}$ and $\mathbf{B}$ unchanged. This freedom is called \textbf{gauge freedom}.
+\end{property}
+
+\begin{proof}
+Direct substitution verifies this: $\mathbf{B}' = \nabla\times\mathbf{A}' = \nabla\times\mathbf{A} + \nabla\times(\nabla\chi) = \mathbf{B} + \mathbf{0} = \mathbf{B}$ (using $\nabla\times(\nabla\chi) = \mathbf{0}$); $\mathbf{E}' = -\nabla\phi' - \partial\mathbf{A}'/\partial t = -\nabla\phi + \nabla(\partial\chi/\partial t) - \partial\mathbf{A}/\partial t - \partial(\nabla\chi)/\partial t = -\nabla\phi - \partial\mathbf{A}/\partial t = \mathbf{E}$ (interchanging the order of $\nabla$ and $\partial_t$).
+\end{proof}
+
+\begin{remark}[Lorentz gauge]\label{rem:lorentz_gauge}
+In time-varying field problems one often adopts the \textbf{Lorentz gauge}
+\[
+\nabla \cdot \mathbf{A} + \frac{1}{c^2}\frac{\partial \phi}{\partial t} = 0.
+\]
+The advantage of this gauge is that it decouples the equations for $\phi$ and $\mathbf{A}$ into two independent inhomogeneous wave equations:
+\[
+\Box \phi = -\frac{\rho}{\varepsilon_0}, \qquad \Box \mathbf{A} = -\mu_0 \mathbf{J}, \qquad \Box \equiv \nabla^2 - \frac{1}{c^2}\frac{\partial^2}{\partial t^2}.
+\]
+This makes possible the derivation of the retarded potential (Theorem \ref{thm:retarded_potential}).
+\end{remark}
+
+\section{The Lorentz force}
+
+\begin{axiom}[Lorentz force law]\label{axm:lorentz_force}
+\[
+\boxed{\mathbf{F} = q(\mathbf{E} + \mathbf{v} \times \mathbf{B})}.
+\]
+\end{axiom}
+
+\begin{remark}[Status of the experimental law and the nature of the two forces]
+The Lorentz force law is a fundamental experimental law of classical electrodynamics (on a par with Coulomb's law and the Biot--Savart law); it cannot be derived deductively from the remaining assumptions of this chapter, and is therefore taken here as an axiomatic input. Its electric part $\mathbf{F}_E = q\mathbf{E}$ acts on a charge along the direction of the electric field and can do work on the charge (changing its kinetic energy); its magnetic part $\mathbf{F}_B = q\mathbf{v}\times\mathbf{B}$ is perpendicular to the velocity of the charge and changes only the direction of motion, not the speed---that the magnetic force does no work follows directly from $\mathbf{v}\cdot(q\mathbf{v}\times\mathbf{B}) = 0$. This is the fundamental difference between the electric and magnetic fields in their mechanical action.
+\end{remark}
+
+\begin{proposition}[Circular motion of a charge in a uniform magnetic field]\label{prop:cyclotron_motion}
+The cyclotron frequency is $\omega_c = |q|B/m$, and the cyclotron period $T_c = 2\pi/\omega_c$ is independent of the speed.
+\end{proposition}
+
+\begin{proof}
+Taking $\mathbf{v}\perp\mathbf{B}$, the Lorentz force provides the centripetal force (Axiom~\ref{axm:lorentz_force}), giving
+\[
+|q|vB = m\frac{v^2}{r}
+\quad\Longrightarrow\quad
+r = \frac{mv}{|q|B}.
+\]
+The cyclotron angular frequency is
+\[
+\omega_c = \frac{v}{r} = \frac{|q|B}{m},
+\]
+and the corresponding cyclotron period is
+\[
+T_c = \frac{2\pi}{\omega_c} = \frac{2\pi m}{|q|B},
+\]
+which is indeed independent of the speed $v$ (relativistic corrections aside).
+The equation of motion
+\[
+\dot{\mathbf{v}} = \frac{q}{m}\,\mathbf{v}\times\mathbf{B}
+\]
+has the solution
+\[
+\mathbf{v}(t)
+= v_0\bigl(\cos\omega_c t,\, -\sin\omega_c t,\, 0\bigr),
+\]
+a periodic function of period $T_c$, which is precisely the mathematical statement of the resonance principle of the cyclotron.
+\end{proof}
+
+\section{Derivation of Maxwell's equations}
+
+\begin{theorem}[Derivation of Gauss's law for the electric field]\label{thm:gauss_electric_derivation}
+Gauss's law for the electric field is derived starting from Coulomb's law. A point charge $q$ at the origin produces at distance $r$ the electric field
+\[
+\mathbf{E}(\mathbf{r}) = \frac{q}{4\pi\varepsilon_0} \frac{\hat{\mathbf{r}}}{r^2}.
+\]
+For any closed surface $S$ enclosing the charge, the electric flux is
+\[
+\oint_S \mathbf{E} \cdot d\mathbf{S} = \frac{q}{\varepsilon_0}.
+\]
+Applying the divergence theorem, for a continuous charge distribution $\rho(\mathbf{r})$:
+\[
+\int_V \nabla \cdot \mathbf{E} \, dV = \oint_S \mathbf{E} \cdot d\mathbf{S} = \frac{1}{\varepsilon_0} \int_V \rho \, dV.
+\]
+Since the volume $V$ is arbitrary, we obtain
+\[
+\boxed{\nabla \cdot \mathbf{D} = \rho}, \quad \mathbf{D} = \varepsilon_0 \mathbf{E}.
+\]
+The divergence $\nabla\cdot\mathbf{D}$ corresponds directly to the charge density $\rho$---charge is the source of the divergence of the electric displacement vector.
+\end{theorem}
+
+\begin{proof}
+The electric field of a point charge is given by Coulomb's law. For the electric flux through a closed surface $S$: use the solid-angle integral $\oint_S \hat{\mathbf{r}}\cdot d\mathbf{S}/r^2 = 4\pi$ (if $S$ encloses the charge) or $0$ (if $S$ does not enclose the charge). For a continuous distribution $\rho$, linear superposition gives $\oint_S \mathbf{E}\cdot d\mathbf{S} = Q_{\text{enc}}/\varepsilon_0 = \frac{1}{\varepsilon_0}\int_V \rho dV$. After conversion by the divergence theorem, the arbitrariness of $V$ gives the differential form.
+\end{proof}
+
+\begin{theorem}[Derivation of Gauss's law for the magnetic field]\label{thm:gauss_magnetic_derivation}
+Gauss's law for the magnetic field is derived starting from the fact that no magnetic monopole exists. All magnetic induction lines are closed curves, and the magnetic flux entering any closed surface equals the flux leaving it:
+\[
+\oint_S \mathbf{B} \cdot d\mathbf{S} = 0.
+\]
+Applying the divergence theorem:
+\[
+\int_V \nabla \cdot \mathbf{B} \, dV = 0.
+\]
+Since $V$ is arbitrary:
+\[
+\boxed{\nabla \cdot \mathbf{B} = 0}.
+\]
+That is, the magnetic flux density is a divergence-free field---the magnetic field has no divergence source.
+\end{theorem}
+
+\begin{proof}
+The non-existence of magnetic monopoles means that magnetic field lines have neither beginning nor end. The net magnetic flux through any closed surface is zero. The divergence theorem and the arbitrariness of $V$ give the differential form directly.
+\end{proof}
+
+\begin{theorem}[Derivation of Faraday's law]\label{thm:faraday_derivation}
+Faraday's law of electromagnetic induction is an experimental law, whose differential form is
+\[
+\boxed{\nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t}}.
+\]
+It is derived from the integral form of the rate of change of magnetic flux.
+\end{theorem}
+
+\begin{proof}
+Faraday's experimental law (integral form): $\mathcal{E} = \oint_C \mathbf{E}\cdot d\mathbf{l} = -\frac{d}{dt}\int_S \mathbf{B}\cdot d\mathbf{S}$. Applying Stokes' theorem, $\oint_C \mathbf{E}\cdot d\mathbf{l} = \int_S (\nabla\times\mathbf{E})\cdot d\mathbf{S}$. The arbitrariness of $S$ gives the differential form.
+\end{proof}
+
+\begin{theorem}[Derivation of the Amp\`ere--Maxwell law and the displacement current]\label{thm:ampere_maxwell_derivation}
+Amp\`ere's law of magnetostatics is taken as the starting point, and the displacement current term is derived through the constraint of the charge conservation law.
+
+\textbf{Contradiction}: Amp\`ere's law of magnetostatics $\nabla \times \mathbf{B} = \mu_0 \mathbf{J}$ contains an intrinsic contradiction in a time-varying field. Taking the divergence of both sides:
+\[
+\nabla \cdot (\nabla \times \mathbf{B}) = 0 = \mu_0 \nabla \cdot \mathbf{J}.
+\]
+This requires $\nabla \cdot \mathbf{J} = 0$ to hold at all times. But the charge conservation law requires
+\[
+\frac{\partial \rho}{\partial t} + \nabla \cdot \mathbf{J} = 0.
+\]
+When $\partial\rho/\partial t \neq 0$ (the charge density varies with time), $\nabla \cdot \mathbf{J} \neq 0$, which contradicts Amp\`ere's law of magnetostatics.
+
+\textbf{Correction}: Maxwell introduced the \textbf{displacement current} term $\partial\mathbf{D}/\partial t$, generalising Amp\`ere's law to
+\[
+\boxed{\nabla \times \mathbf{H} = \mathbf{J} + \frac{\partial \mathbf{D}}{\partial t}}.
+\]
+Checking self-consistency: taking the divergence of the corrected equation:
+\[
+\nabla \cdot (\nabla \times \mathbf{H}) = 0 = \nabla \cdot \mathbf{J} + \frac{\partial}{\partial t}(\nabla \cdot \mathbf{D}) = \nabla \cdot \mathbf{J} + \frac{\partial\rho}{\partial t}.
+\]
+This is completely consistent with the charge conservation law. The displacement current $\partial\mathbf{D}/\partial t$ converts the time rate of change of the electric field into a source of the curl of the magnetic field---this is the coupling of the electric and magnetic fields in the time-varying case.
+\end{theorem}
+
+\begin{proof}
+\textbf{Step one (contradiction)}: $\nabla \cdot (\nabla \times \mathbf{B}) = 0$ is an identity. Substituting $\nabla \times \mathbf{B} = \mu_0 \mathbf{J}$ gives $\nabla \cdot \mathbf{J} = 0$. But the continuity of current requires $\nabla \cdot \mathbf{J} = -\partial\rho/\partial t$, which is a contradiction when $\partial\rho/\partial t \neq 0$.
+
+\textbf{Step two (introduction of the displacement current)}: to remove the contradiction, add a term $\mathbf{J}_d$ to the right-hand side of Amp\`ere's law so that $\nabla \cdot (\mathbf{J} + \mathbf{J}_d) = 0$. By charge conservation, $\nabla \cdot \mathbf{J} = -\partial\rho/\partial t = -\partial(\nabla\cdot\mathbf{D})/\partial t = -\nabla \cdot (\partial\mathbf{D}/\partial t)$. Hence $\mathbf{J}_d = \partial\mathbf{D}/\partial t$ exactly satisfies the requirement.
+
+\textbf{Step three (self-consistency)}: the divergence of the corrected equation is zero, which is consistent with the charge conservation law.
+\end{proof}
+
+\begin{corollary}[Automatic satisfaction of the charge conservation law]\label{cor:charge_conservation}
+Taking the divergence of both sides of the Amp\`ere--Maxwell law:
+\[
+\nabla \cdot (\nabla \times \mathbf{H}) = 0 = \nabla \cdot \mathbf{J} + \frac{\partial}{\partial t}(\nabla \cdot \mathbf{D}).
+\]
+Substituting Gauss's law $\nabla \cdot \mathbf{D} = \rho$, we obtain
+\[
+\boxed{\frac{\partial \rho}{\partial t} + \nabla \cdot \mathbf{J} = 0}.
+\]
+The charge conservation law is a self-consistency condition of Maxwell's equations.
+\end{corollary}
+
+\begin{theorem}[Maxwell's equations (complete form)]\label{thm:maxwell_equations}
+\[
+\boxed{\nabla \cdot \mathbf{D} = \rho}, \quad \boxed{\nabla \cdot \mathbf{B} = 0},
+\]
+\[
+\boxed{\nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t}}, \quad \boxed{\nabla \times \mathbf{H} = \mathbf{J} + \frac{\partial \mathbf{D}}{\partial t}}.
+\]
+The four equations correspond respectively to the action of four vector differential operators: the two divergence equations (Gauss's laws) describe the relation between the field and its sources; the two curl equations (Faraday's law and the Amp\`ere--Maxwell law) describe the relation between the circulation of the field and its sources (time-varying fields, currents).
+\end{theorem}
+
+\begin{proof}
+This is the summary of the four formulas of Theorems \ref{thm:gauss_electric_derivation}, \ref{thm:gauss_magnetic_derivation}, \ref{thm:faraday_derivation} and \ref{thm:ampere_maxwell_derivation}. Of the four equations, two are divergence equations and two are curl equations; each is derived independently, and they are stated here grouped by the type of operator.
+\end{proof}
+
+\section{Periodic structure of electromagnetic waves and propagation delay}
+
+\begin{theorem}[Electromagnetic wave equation]\label{thm:electromagnetic_wave_equation}
+In a source-free region ($\rho = 0, \mathbf{J} = 0$), Maxwell's equations reduce to the electromagnetic wave equation:
+\[
+\boxed{\nabla^2 \mathbf{E} - \frac{1}{c^2} \frac{\partial^2 \mathbf{E}}{\partial t^2} = \mathbf{0}}, \quad c = \frac{1}{\sqrt{\mu_0 \varepsilon_0}}.
+\]
+\end{theorem}
+
+\begin{proof}
+Taking the curl of Faraday's law: $\nabla\times(\nabla\times\mathbf{E}) = -\frac{\partial}{\partial t}(\nabla\times\mathbf{B})$. Substituting the Amp\`ere--Maxwell law (source-free) and the constitutive relations, and using the vector identity $\nabla\times(\nabla\times\mathbf{E}) = \nabla(\nabla\cdot\mathbf{E}) - \nabla^2\mathbf{E}$ and Gauss's law (source-free: $\nabla\cdot\mathbf{E}=0$), we obtain the wave equation.
+\end{proof}
+
+\begin{definition}[Propagation delay]\label{def:propagation_delay}
+The \textbf{propagation delay} of an electromagnetic wave from a source point $\mathbf{r}'$ to an observation point $\mathbf{r}$ is
+\[
+\tau_{\text{prop}} = \frac{|\mathbf{r} - \mathbf{r}'|}{c}.
+\]
+The propagation delay converts a spatial distance into a time offset---the greater the distance, the greater the delay.
+\end{definition}
+
+\begin{definition}[Phase delay]\label{def:phase_delay}
+In a monochromatic plane wave, the \textbf{phase delay} corresponding to the spatial phase is
+\[
+\tau_{\text{phase}} = \frac{\mathbf{k}\cdot\mathbf{r}}{\omega} = \frac{|\mathbf{r}|\cos\theta}{c}.
+\]
+Along the direction of propagation ($\theta=0$), $\tau_{\text{phase}} = r/c = \tau_{\text{prop}}$. The phase delay converts the phase lag $\phi = \omega\tau$ into a time offset.
+\end{definition}
+
+\begin{proposition}[Unity of delay and phase]\label{prop:delay_phase_unity}
+Along the direction of propagation, every increase of the spatial phase by $2\pi$ corresponds to an increase of the time offset by one period:
+\[
+\tau = \frac{\lambda}{c} = \frac{2\pi}{\omega} = T.
+\]
+Delay couples the spatial period (wavelength) and the temporal period through the speed of light.
+\end{proposition}
+
+\begin{proof}
+Along the direction of propagation ($\theta=0$), by Definition \ref{def:phase_delay} the phase delay is $\tau_{\text{phase}} = |\mathbf{r}|/c$. Every increase of the spatial phase by $2\pi$ corresponds to a displacement of one wavelength $\lambda$, and the time required is the propagation delay $\tau = \lambda/c$. Moreover, by the dispersion relation $\omega = c|\mathbf{k}|$ and the wavelength $\lambda = 2\pi/|\mathbf{k}|$,
+\[
+\tau = \frac{\lambda}{c} = \frac{2\pi}{|\mathbf{k}|\,c} = \frac{2\pi}{\omega} = T.
+\]
+Hence the spatial period (wavelength) and the temporal period are exactly coupled by the speed of light: $\lambda = cT$.
+\end{proof}
+
+\begin{proposition}[Periodic structure of plane electromagnetic waves]\label{prop:plane_wave_periodic}
+\[
+\mathbf{E}(\mathbf{r}, t) = \mathbf{E}_0 e^{i(\mathbf{k} \cdot \mathbf{r} - \omega t)}, \quad \mathbf{B}(\mathbf{r}, t) = \mathbf{B}_0 e^{i(\mathbf{k} \cdot \mathbf{r} - \omega t)}.
+\]
+The spatial period is $\lambda = 2\pi/|\mathbf{k}|$, the temporal period is $T = 2\pi/\omega$, the phase velocity is $v_p = c$, and the propagation delay is $\tau = r/c$.
+\end{proposition}
+
+\begin{proof}
+Substituting the plane wave into the electromagnetic wave equation (Theorem \ref{thm:electromagnetic_wave_equation}):
+\[
+\nabla^2\mathbf{E} = -|\mathbf{k}|^2\mathbf{E}, \qquad \frac{1}{c^2}\frac{\partial^2\mathbf{E}}{\partial t^2} = -\frac{\omega^2}{c^2}\mathbf{E}.
+\]
+The equality of the two requires $|\mathbf{k}|^2 = \omega^2/c^2$, that is, the dispersion relation $\omega = c|\mathbf{k}|$; hence the phase velocity $v_p = \omega/|\mathbf{k}| = c$. \textbf{Spatial periodicity}: since $|\mathbf{k}|\lambda = 2\pi$, for any integer $n$ we have $e^{i\mathbf{k}\cdot(\mathbf{r}+n\lambda\hat{\mathbf{k}})} = e^{i\mathbf{k}\cdot\mathbf{r}}e^{i n|\mathbf{k}|\lambda} = e^{i\mathbf{k}\cdot\mathbf{r}}$, so the spatial period is $\lambda = 2\pi/|\mathbf{k}|$. \textbf{Temporal periodicity}: since $\omega T = 2\pi$, $e^{-i\omega(t+nT)} = e^{-i\omega t}e^{-i n\omega T} = e^{-i\omega t}$, so the temporal period is $T = 2\pi/\omega$. The propagation delay $\tau = r/c$ is given by Definition \ref{def:propagation_delay}.
+\end{proof}
+
+\section{The retarded potential: electromagnetic realisation of delay}
+
+\begin{lemma}[The retarded potential satisfies the inhomogeneous wave equation]\label{ch21_retarded_green}
+The scalar retarded solution
+\[
+\phi(\mathbf{r},t) = \frac{1}{4\pi\varepsilon_0}\int \frac{\rho(\mathbf{r}', t-|\mathbf{r}-\mathbf{r}'|/c)}{|\mathbf{r}-\mathbf{r}'|}\,dV'
+\]
+satisfies the inhomogeneous wave equation
+\[
+\Box\,\phi \equiv \left(\nabla^2 - \frac{1}{c^2}\frac{\partial^2}{\partial t^2}\right)\phi = -\frac{\rho}{\varepsilon_0}.
+\]
+\end{lemma}
+
+\begin{proof}
+The retarded Green's function
+\[
+G(\mathbf{r},t;\mathbf{r}',t') = \frac{\delta(t'-t+|\mathbf{r}-\mathbf{r}'|/c)}{4\pi|\mathbf{r}-\mathbf{r}'|}
+\]
+satisfies $\Box G = -\delta^{(3)}(\mathbf{r}-\mathbf{r}')\,\delta(t-t')$. Its verification proceeds in two steps: the static part is given by $\nabla^2\bigl(\frac{1}{4\pi|\mathbf{r}-\mathbf{r}'|}\bigr) = -\delta^{(3)}(\mathbf{r}-\mathbf{r}')$; for the delay part, differentiating the composite function with $R=|\mathbf{r}-\mathbf{r}'|$ and $t_{\text{ret}} = t - R/c$, the leading terms of $\nabla^2\delta(t_{\text{ret}}-t')$ and $\frac{1}{c^2}\partial_t^2\delta(t_{\text{ret}}-t')$ in the wave operator cancel on the retarded sphere, leaving only the point-source term $-\delta^{(3)}\delta$. Substituting $\phi = \frac{1}{\varepsilon_0}\iint G\,\rho(\mathbf{r}',t')\,dV'dt'$ and using the sifting property of $\delta$ gives $\Box\phi = -\rho/\varepsilon_0$.
+\end{proof}
+
+\begin{theorem}[Retarded potential]\label{thm:retarded_potential}
+Under the Lorentz gauge (Remark \ref{rem:lorentz_gauge}), the scalar and vector potentials of the electromagnetic field are
+\[
+\phi(\mathbf{r}, t) = \frac{1}{4\pi\varepsilon_0} \int \frac{\rho(\mathbf{r}', t - |\mathbf{r}-\mathbf{r}'|/c)}{|\mathbf{r}-\mathbf{r}'|} dV',
+\]
+\[
+\mathbf{A}(\mathbf{r}, t) = \frac{\mu_0}{4\pi} \int \frac{\mathbf{J}(\mathbf{r}', t - |\mathbf{r}-\mathbf{r}'|/c)}{|\mathbf{r}-\mathbf{r}'|} dV'.
+\]
+The retarded time $t_{\text{ret}} = t - |\mathbf{r}-\mathbf{r}'|/c$ encodes the propagation delay.
+\end{theorem}
+
+\begin{proof}
+Under the Lorentz gauge $\nabla\cdot\mathbf{A} + \frac{1}{c^2}\frac{\partial\phi}{\partial t} = 0$, Maxwell's equations reduce to the two inhomogeneous wave equations $\Box\phi = -\rho/\varepsilon_0$ and $\Box\mathbf{A} = -\mu_0\mathbf{J}$. By Lemma \ref{ch21_retarded_green}, the solution for the scalar potential is the $\phi$ above; the solution for the vector potential $\mathbf{A}$ is obtained by applying the same lemma componentwise to the scalar solution. The retarded time $t_{\text{ret}} = t - |\mathbf{r}-\mathbf{r}'|/c$ encodes the propagation delay: the state of the source at $\mathbf{r}'$ at time $t_{\text{ret}}$ reaches, only after the delay $|\mathbf{r}-\mathbf{r}'|/c$, the observation point $\mathbf{r}$, that is, what the observer `sees' is the past state of the source.
+\end{proof}
+
+\begin{property}[Manifestation of three operations in the retarded potential]\label{prop:retarded_delay_grammar}
+In the expression for the retarded potential one can identify three vector differential operations and their corresponding geometric effects:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Time translation}: $\tau = r/c$ converts a spatial distance into a time offset, relating the past state of the source to the current field value at the observation point.
+    \item \textbf{Phase relation}: $\phi = \omega\tau$ converts the delay into a phase lag, and is the source of the coherence of electromagnetic waves.
+    \item \textbf{Inverse-square scaling}: the factor $1/|\mathbf{r}-\mathbf{r}'|$ is the amplitude decay caused by the spreading of the field of a point source in three-dimensional space.
+\end{enumerate}
+\end{property}
+
+\section{Conservation laws of electromagnetic systems}
+
+\begin{theorem}[Three conservation laws of electromagnetic systems]\label{thm:electromagnetic_conservation}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Charge conservation}: $\partial\rho/\partial t + \nabla \cdot \mathbf{J} = 0$.
+    \item \textbf{Energy conservation}: $\frac{\partial u}{\partial t} + \nabla \cdot \mathbf{S} = -\mathbf{J} \cdot \mathbf{E}$.
+    \item \textbf{Momentum conservation}: $\mathbf{g} = \varepsilon_0 \mathbf{E} \times \mathbf{B}$ satisfies the momentum conservation law.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\textbf{(i) Charge conservation}: taking the divergence of the Amp\`ere--Maxwell law gives it (Corollary \ref{cor:charge_conservation}), so $\partial\rho/\partial t + \nabla\cdot\mathbf{J}=0$.
+
+\textbf{(ii) Energy conservation (Poynting's theorem)}: the energy density is $u = \frac12(\mathbf{E}\cdot\mathbf{D} + \mathbf{B}\cdot\mathbf{H})$ and the Poynting vector is $\mathbf{S} = \mathbf{E}\times\mathbf{H}$. Compute
+\[
+\frac{\partial u}{\partial t} = \mathbf{E}\cdot\frac{\partial\mathbf{D}}{\partial t} + \mathbf{H}\cdot\frac{\partial\mathbf{B}}{\partial t}.
+\]
+Substituting the Amp\`ere--Maxwell law $\partial\mathbf{D}/\partial t = \nabla\times\mathbf{H} - \mathbf{J}$ and Faraday's law $\partial\mathbf{B}/\partial t = -\nabla\times\mathbf{E}$:
+\[
+\frac{\partial u}{\partial t} = \mathbf{E}\cdot(\nabla\times\mathbf{H}) - \mathbf{H}\cdot(\nabla\times\mathbf{E}) - \mathbf{J}\cdot\mathbf{E}.
+\]
+By the vector identity $\nabla\cdot(\mathbf{E}\times\mathbf{H}) = \mathbf{H}\cdot(\nabla\times\mathbf{E}) - \mathbf{E}\cdot(\nabla\times\mathbf{H})$, we obtain
+\[
+\frac{\partial u}{\partial t} + \nabla\cdot\mathbf{S} = -\mathbf{J}\cdot\mathbf{E}.
+\]
+The right-hand side is the power density of the work done by the field on the current; energy is converted between the electromagnetic field and the charges.
+
+\textbf{(iii) Momentum conservation}: the electromagnetic momentum density is $\mathbf{g} = \varepsilon_0\mathbf{E}\times\mathbf{B}$. Combining Maxwell's equations with the Lorentz force density $\mathbf{f} = \rho\mathbf{E} + \mathbf{J}\times\mathbf{B}$ and simplifying by vector identities gives the differential form of momentum conservation $\partial g_i/\partial t + \partial_j T_{ij} = -f_i$, where $T_{ij}$ is the Maxwell stress tensor; $\mathbf{g}$ together with the stress tensor constitutes the momentum--stress conservation structure of the electromagnetic field.
+\end{proof}
+
+\begin{remark}[Connection with the rest of the book]
+The theory of the periodic structure of electromagnetic systems established in this chapter is an application of periodic mathematics in classical electrodynamics. The derivation of Maxwell's equations reveals the cooperative action of the vector differential operators (gradient, divergence, curl) in field theory: the introduction of the displacement current guarantees the self-consistency of the charge conservation law in a time-varying field. The introduction of the scalar and vector potentials expresses $\mathbf{E}$ and $\mathbf{B}$ as combinations of the gradient, the curl and the time derivative of the potentials, whilst gauge freedom embodies the indistinguishability of two sets of potentials representing the same physical field. An electromagnetic wave is a periodic structure in which the electric and magnetic fields propagate self-sustainedly in a source-free region, and the concept of delay couples the spatial period (wavelength) with the temporal period (frequency) through the speed of light. The retarded potential is the electromagnetic realisation of delay---it relates the past state of the source to the current observation of the observer. Charge conservation, energy conservation and momentum conservation are respectively the conservation laws corresponding to the three vector differential operators in electromagnetism.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{9.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & The electromagnetic propagation delay $\tau=r/c$ and the retarded potential (Definition \ref{def:propagation_delay}, Theorem \ref{thm:retarded_potential}) \\
+Scaling & The inverse-square scaling of Coulomb's and Amp\`ere's laws $\sim 1/r^2$ (Theorem \ref{thm:gauss_electric_derivation}) \\
+Rotation & The curl of the magnetic field $\nabla\times\mathbf{B}$ and the cyclotron motion driven by the Lorentz force (Theorem \ref{thm:ampere_law}, Proposition \ref{prop:cyclotron_motion}) \\
+Balance & Charge conservation, Poynting energy conservation and electromagnetic momentum conservation (Theorem \ref{thm:electromagnetic_conservation}) \\
+Symmetry & Gauge freedom and the structural symmetry of Maxwell's equations (Proposition \ref{prop:gauge_freedom}, Theorem \ref{thm:maxwell_equations}) \\
+Closure & The closed integrals of the Amp\`ere loop and the Faraday loop (Theorem \ref{thm:ampere_law}, \ref{thm:faraday_law}) \\
+Period & The period of electromagnetic oscillation and the space--time period of electromagnetic waves (Proposition \ref{prop:plane_wave_periodic}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the \textbf{electromagnetic periodicity decision theorem} of this chapter (\ref{thm:em_periodicity_decision}). Hint: first write down the decision map and the evolution group of this chapter's target, then apply the proof structure of the general criterion of the `Periodic Systems' chapter.
+
+    \item Verify that the hypotheses of the \textbf{periodicity decision for a monochromatic plane wave} (\ref{lem:plane_wave_periodic_decision}) hold for the domain objects of this chapter, and give a counterexample in which the hypotheses fail.
+
+    \item Examine the behaviour of \textbf{monotonicity of quantity adjustment} (\ref{prop:em_adaptive_growth}) under degeneracy of the parameters, and explain how the conclusion degenerates accordingly.
+
+    \item Explain the relation between the \textbf{three-parameter correspondence: radius, phase and rotational speed} (\ref{prop:em_epicycle_correspondence}) and the corresponding general conclusions of the `Periodic Systems' chapter (whether they agree, whether it is a special case, or whether additional conditions are required).
+
+    \item Using the seven-theme comparison table of this chapter, identify the concrete carriers in this chapter of the three themes \textbf{translation}, \textbf{scaling} and \textbf{rotation}, and give one example of domain data for each.
+
+    \item Synthesis: restate the diagnostic procedure of this chapter using the five-step standard interface of the `Periodic Systems' chapter (Table \ref{tab:ps_five_steps}), noting for each step the theorem of this chapter on which it depends: \ref{thm:em_periodicity_decision}, \ref{lem:plane_wave_periodic_decision}, \ref{prop:em_adaptive_growth}, \ref{prop:em_epicycle_correspondence}.
+\end{enumerate}
+
+

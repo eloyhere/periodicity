@@ -1,0 +1,447 @@
+\chapter{总结与展望}
+\markboth{总结与展望}{总结与展望}
+
+本书以“对称性 $\to$ 不变量 $\to$ 闭合轨道 $\to$ 周期”为纲领，构建了一套从第一原理出发统一周期现象的数学框架。全书的核心方法论由四大支柱构成：\textbf{群表示论}提供周期结构的代数基础，\textbf{周期卷积}提供跨周期相位相互作用的统一计算框架，\textbf{窗函数与折射率体系}提供基于相似度和趋势的拐点诊断工具，\textbf{复指数激活函数（CEAF）与核平滑导-积下降法}提供具有内在周期结构的可学习非线性与多尺度优化算法。
+
+全书的旅程始于对三个基本对称中心——$0$、$1$、$i$——的数学刻画，经由群表示论、矢量分析、调和分析、周期流形、周期范畴，中经周期卷积和窗函数折射率体系的建立，终于天文、历法、地理、物理、生物、心理、经济、政治、密码、智能体、数据分析等领域的系统应用，形成了一个从离散信息处理到连续物理定律、从物理动力学到生命与社会的自洽理论体系。
+
+\begin{remark}[本章定位]\label{rem:summary_chapter_positioning}
+本章是全书的收束章。前 45 章已分别建立：一条主链（对称性 $\to$ 不变量 $\to$ 闭合轨道 $\to$ 周期）、三组支撑（群表示论、周期卷积、窗函数与折射率体系、复指数激活与核平滑导-积下降），以及二十余个领域的实例化。本章的任务不是引入新工具，而是\textbf{横向对照}：把全书各章的主链、四支柱与七主题放在同一组表格中比对，指出哪些结论已被严格证明、哪些仍属研究纲领、哪些是尚未解决的问题。读者可先读本章获得全局地图，再回到具体章节。
+
+本章七主题定位：\textbf{平移}——全书以平移群为最基本的演化群；\textbf{缩放}——缩放与对数坐标贯穿数系、调和与时序；\textbf{旋转}——相位与单位根是周期结构的核心载体；\textbf{守恒}——对称与守恒的对应是全书的逻辑枢纽；\textbf{对称}——群作用框架的统一性；\textbf{闭合}——闭合轨道是周期性的几何判据；\textbf{周期}——全书主题本身。
+\end{remark}
+
+\section{回望：一条主链与三组支撑}
+
+如果要用一句话概括全书的理论主线，那就是：
+
+\begin{center}
+\textbf{有限阶作用给出周期；守恒与对称帮助发现、约束和解释周期；周期卷积、窗函数—折射率、CEAF—KDI 分别提供计算、诊断与学习工具。}
+\end{center}
+
+这条主线在“周期基础”章中被严格建立：迭代是起点，不变量与守恒刻画轨道之间的分层，对称是与演化交换的变换，有限阶作用直接产生一致闭合轨道，闭合轨道等价于逐点周期。守恒量并非周期的必要条件，也一般不是充分条件；在保守系统中，它通过诺特定理与连续对称性相关联，为周期结构提供约束与解释，但真正直接产生周期的代数枢纽是有限阶作用。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  node distance=1.5cm and 2.0cm,
+  every node/.style={font=\small},
+  >=stealth,
+  main/.style={draw, rounded corners=3pt, fill=blue!8, minimum width=2.2cm, minimum height=0.85cm, align=center},
+  aux/.style={draw, rounded corners=3pt, fill=green!8, minimum width=2.6cm, minimum height=0.75cm, align=center, font=\footnotesize, text width=2.4cm},
+  arrow/.style={-{stealth}, thick},
+  auxarrow/.style={-{stealth}, thick, dashed, green!50!black}
+]
+\node[main] (iter) {迭代};
+\node[main, right=of iter] (inv) {不变量/守恒};
+\node[main, right=of inv] (sym) {对称};
+
+\node[main, below=of sym] (fin) {有限阶作用};
+\node[main, left=of fin] (clo) {闭合轨道};
+\node[main, left=of clo] (per) {周期};
+
+\draw[arrow] (iter) -- (inv);
+\draw[arrow] (inv) -- (sym);
+\draw[arrow] (sym) -- (fin);
+\draw[arrow] (fin) -- (clo);
+\draw[arrow] (clo) -- (per);
+
+\node[aux, above=of inv] (cons) {守恒量：约束轨道、分层};
+\node[aux, above=of sym] (symaux) {对称群：中心化子、群作用};
+\draw[auxarrow] (cons) -- (inv);
+\draw[auxarrow] (symaux) -- (sym);
+
+\node[font=\footnotesize, align=center] at (2.0,-4.2) {守恒与对称是辅助工具，不是周期链上不可绕过的环节};
+\end{tikzpicture}
+\caption{全书逻辑主链：迭代 $\to$ 不变量/守恒 $\to$ 对称 $\to$ 有限阶作用 $\to$ 闭合轨道 $\to$ 周期。守恒与对称以虚线接入，表示其辅助地位。}
+\label{fig:closing_main_chain}
+\end{figure}
+
+这条主链向下展开为三个层次：\textbf{代数层}研究有限阶作用、群表示与自同构塔；\textbf{几何层}研究流形、纤维丛、周期流形与闭合轨道；\textbf{分析层}研究级数、卷积、调和分析、采样与置闰。三者共同支撑起应用层的跨学科诊断。
+
+\section{全书理论体系架构}
+
+\begin{figure}[htbp]
+    \centering
+    \adjustbox{max width=\textwidth}{%
+    \begin{tikzpicture}[>=stealth,
+        layer/.style={draw, rounded corners, minimum width=2.8cm, minimum height=0.9cm, align=center, font=\small},
+        core/.style={draw, rounded corners, fill=blue!10, minimum width=2.8cm, minimum height=0.9cm, align=center, font=\small\bfseries},
+        tool/.style={draw, rounded corners, fill=green!10, minimum width=2.8cm, minimum height=0.9cm, align=center, font=\small},
+        app/.style={draw, rounded corners, fill=red!10, minimum width=2.2cm, minimum height=0.8cm, align=center, font=\scriptsize},
+        arrow/.style={->, thick, >=stealth}]
+        
+        \node[core] (c0) at (-3, 0) {对称中心 $0$\\加法对称};
+        \node[core] (c1) at (0, 0) {对称中心 $1$\\乘法对称};
+        \node[core] (ci) at (3, 0) {对称中心 $i$\\旋转对称};
+        
+        \node[layer, fill=blue!5] (num) at (-7.5, -2) {数系\\$\mathbb{N}\to\mathbb{Z}\to\mathbb{Q}$\\$\to\mathbb{R}\to\mathbb{C}\to\mathbb{H}$};
+        \node[layer, fill=blue!5] (grp) at (-3.75, -2) {群与群函数\\8组概念对\\传递性矩阵};
+        \node[layer, fill=blue!5] (vec) at (0, -2) {标量与矢量\\12种相似度\\12种趋势};
+        \node[layer, fill=blue!5] (ana) at (3.75, -2) {函数与分析\\极限角\\微分相似度\\积分趋势};
+        \node[layer, fill=blue!5] (lin) at (7.5, -2) {线性代数\\谱定理\\矩阵群\\SVD};
+        
+        \node[layer, fill=green!5] (prob) at (-7.5, -4.5) {概率论\\相位质量分配\\贝叶斯更新};
+        \node[layer, fill=green!5] (vf) at (-3.75, -4.5) {矢量分析\\通量模型\\周转圆\\导-积下降};
+        \node[layer, fill=green!5] (pfunc) at (0, -4.5) {周期函数与具有周期轨道的群\\嵌套周转\\相位算子};
+        \node[layer, fill=green!5] (harm) at (3.75, -4.5) {调和分析\\周期卷积\\周期趋势谱};
+        \node[layer, fill=green!5] (manifold) at (7.5, -4.5) {周期流形\\离散格点\\离散幺正};
+        
+        \node[core] (system) at (-3, -7) {周期系统\\组合周期\\不变量};
+        \node[core] (category) at (0, -7) {周期范畴\\函子与自然变换};
+        \node[core] (method) at (4, -7) {建模与分析\\CEAF + 导-积下降};
+        
+        \node[app] (a1) at (-9, -9.5) {天文};
+        \node[app] (a2) at (-6.5, -9.5) {历法};
+        \node[app] (a3) at (-4, -9.5) {地理};
+        \node[app] (a4) at (-1.5, -9.5) {易经};
+        \node[app] (a5) at (1, -9.5) {电磁};
+        \node[app] (a6) at (3.5, -9.5) {音频};
+        \node[app] (a7) at (6, -9.5) {机械};
+        \node[app] (a8) at (8.5, -9.5) {电路芯片};
+        
+        \node[app] (b1) at (-9, -11) {生物};
+        \node[app] (b2) at (-6.5, -11) {心理};
+        \node[app] (b3) at (-4, -11) {社交};
+        \node[app] (b4) at (-1.5, -11) {气候};
+        \node[app] (b5) at (1, -11) {经济};
+        \node[app] (b6) at (3.5, -11) {政治};
+        \node[app] (b7) at (6, -11) {数据分析};
+        \node[app] (b8) at (8.5, -11) {智能体算法};
+        
+        \draw[arrow] (c0) -- (grp);
+        \draw[arrow] (c0) -- (num);
+        \draw[arrow] (c1) -- (vec);
+        \draw[arrow] (c1) -- (ana);
+        \draw[arrow] (ci) -- (lin);
+        
+        \draw[arrow] (num) -- (prob);
+        \draw[arrow] (grp) -- (vf);
+        \draw[arrow] (vec) -- (pfunc);
+        \draw[arrow] (ana) -- (harm);
+        \draw[arrow] (lin) -- (manifold);
+        
+        \draw[arrow] (prob) -- (system);
+        \draw[arrow] (vf) -- (system);
+        \draw[arrow] (pfunc) -- (category);
+        \draw[arrow] (harm) -- (category);
+        \draw[arrow] (manifold) -- (method);
+        
+        \draw[arrow] (system.south) -- (a4.north);
+        \draw[arrow] (system.south) -- (b4.north);
+        \draw[arrow] (category.south) -- (a5.north);
+        \draw[arrow] (category.south) -- (b5.north);
+        \draw[arrow] (method.south) -- (a7.north);
+        \draw[arrow] (method.south) -- (b7.north);
+        
+        \node[font=\small\bfseries, blue!60!black, left=0.1cm of c0, xshift=-0.8cm] {对称中心};
+        \node[font=\small\bfseries, blue!60!black, left=0.1cm of num, xshift=-1.2cm] {数学基础};
+        \node[font=\small\bfseries, green!60!black, left=0.1cm of prob, xshift=-1.2cm] {核心理论};
+        \node[font=\small\bfseries, purple!60!black, left=0.1cm of system, xshift=-1.2cm] {统一框架};
+        \node[font=\small\bfseries, red!60!black, left=0.1cm of a1, xshift=-1.2cm] {应用领域};
+    \end{tikzpicture}%
+    }
+    \caption{周期数学全书理论体系架构图。从对称中心出发，经数学基础和核心理论，统一于周期系统、周期范畴和建模分析方法论，最终应用于各学科领域。}
+    \label{fig:architecture_summary}
+\end{figure}
+
+从章节结构看，全书可分为三个部分，另以本章收束：
+
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}p{3.2cm}p{8.5cm}@{}}
+\toprule
+\textbf{部分} & \textbf{主要内容} \\
+\midrule
+数学基础与生成元 & 周期基础、数系、标量与矢量、函数与极限、微分方程与复变函数、级数与卷积 \\
+核心结构、工具与方法 & 线性代数、流形基础与纤维丛、周期流形、周期范畴、概率论、矢量分析、群与群函数、高阶群与高阶函数、周期函数与具有周期轨道的群、离散采样逼近与置闰、调和分析、时序分析、周期系统 \\
+跨学科应用与诊断 & 概率、密码、天文、历法、地理、易经、电磁、音频、机械、电路芯片、生物、心理、社交、气候、经济、政治、数据分析、智能体、算法、建模与分析 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+其中，“周期系统”章是由理论数学转入应用数学的衔接章。它给出把任意目标接入周期数学框架的五步接口：\textbf{判定}（目标是否具有周期性、周期类型）、\textbf{构建}（由拐点构建振幅级数、频率级数、相位级数，组装周转圆组）、\textbf{调节}（动态调节周转圆数量与参数）、\textbf{卷积}（振幅卷积、相位卷积、频率卷积）、\textbf{整合}（接入采样、调和分析、时序分析工具链）。后续各应用章均按此接口展开。
+
+\section{四大支柱的关系}
+
+\begin{figure}[htbp]
+    \centering
+    \adjustbox{max width=\textwidth}{%
+    \begin{tikzpicture}[>=stealth,
+        pillar/.style={draw, rounded corners, fill=blue!10, minimum width=3.5cm, minimum height=1.5cm, align=center, font=\small\bfseries},
+        arrow/.style={->, thick, >=stealth}]
+        
+        \node[pillar, fill=blue!15] (group) at (0, 2.5) {群表示论\\周期结构的代数基础};
+        \node[pillar, fill=green!15] (full) at (6, 2.5) {周期卷积\\跨周期相位相互作用};
+        \node[pillar, fill=orange!15] (window) at (0, -2.5) {窗函数与折射率\\拐点诊断工具};
+        \node[pillar, fill=magenta!15] (eaf) at (6, -2.5) {CEAF + 导-积下降\\周期感知与优化};
+        
+        \node[draw, rounded corners, fill=purple!10, minimum width=5cm, minimum height=1cm, align=center, font=\small\bfseries] (core) at (3, 0) {周期数学统一框架};
+        
+        \draw[arrow] (group) -- (core);
+        \draw[arrow] (full) -- (core);
+        \draw[arrow] (window) -- (core);
+        \draw[arrow] (eaf) -- (core);
+        
+        \draw[<->, thick, blue] (group.east) -- (full.west) node[midway, above, font=\footnotesize] {配合};
+        \draw[<->, thick, green!60!black] (full.south) -- (eaf.north) node[midway, right, font=\footnotesize] {集成};
+        \draw[<->, thick, orange!60!black] (window.north) -- (group.south) node[midway, left, font=\footnotesize] {支撑};
+        \draw[<->, thick, magenta!60!black] (window.east) -- (eaf.west) node[midway, below, font=\footnotesize] {协同};
+    \end{tikzpicture}%
+    }
+    \caption{周期数学四大支柱的关系图。}
+    \label{fig:four_pillars}
+\end{figure}
+
+四大支柱并非彼此独立。群表示论回答“周期结构的代数形式是什么”；周期卷积回答“不同周期之间如何相互作用”；窗函数与折射率回答“如何从数据中诊断拐点、转折与泄漏”；CEAF 与 KDI 回答“如何把周期结构变成可学习、可优化的计算单元”。四者通过“相位算子”“周转圆组”“周期级数”“Waveform”这些共同对象连接在一起。
+
+\section{周期卷积：跨周期相位相互作用的统一框架}
+
+\textbf{周期卷积}是本书的重要方法论框架之一。全书的五级阶梯——\textbf{卷积}（传入两个函数与时延、计算时延乘积）、\textbf{相似度卷积}（余弦相似度与正弦相似度打包为复数矩阵）、\textbf{趋势卷积}（相似度卷积乘以彼此的模）、\textbf{周期级数}（以振幅、频率、相位、周期四元组为分量的复变级数）、\textbf{周期卷积}（四参数均作为算子）——将传统积分变换（傅里叶级数、傅里叶变换、DFT、FFT、小波变换、梅林变换、拉普拉斯变换、Chirp-Z变换、希尔伯特变换）统一为周期变换与周期卷积在特定字典、核与算法实现下的特殊情形，并补全了传统方法丢弃的相位相互作用信息。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  node distance=0.8cm,
+  every node/.style={font=\small},
+  >=stealth,
+  ladder/.style={draw, rounded corners=3pt, minimum width=8.5cm, minimum height=0.8cm, align=center},
+  arrow/.style={-{stealth}, thick}
+]
+\node[ladder, fill=blue!8] (s1) {经典卷积：只保留同频率对 $m=n$ 的时延乘积};
+\node[ladder, fill=cyan!10, below=of s1] (s2) {相位卷积 / 振幅卷积 / 频率卷积：保留全部频率对的相位、振幅、频率分量};
+\node[ladder, fill=green!10, below=of s2] (s3) {趋势卷积：保留全部频率对的振幅与相位};
+\node[ladder, fill=orange!10, below=of s3] (s4) {周期级数：多周期层分解，四元组 $(A_{p,n},\omega_{p,n},\phi_{p,n},T_p)$};
+\node[ladder, fill=red!10, below=of s4] (s5) {周期卷积：四参数算子，保留全部频率对与全部周期对的交互};
+
+\draw[arrow] (s1) -- (s2);
+\draw[arrow] (s2) -- (s3);
+\draw[arrow] (s3) -- (s4);
+\draw[arrow] (s4) -- (s5);
+
+\node[font=\footnotesize, align=center] at (0,-6.0) {五级阶梯：信息量逐级递增，每一级都是上一级的退化或推广};
+\end{tikzpicture}
+\caption{周期卷积的五级阶梯。}
+\label{fig:closing_convolution_ladder}
+\end{figure}
+
+周期卷积的核心公式为：
+\[
+(f \circledast g)(\tau) = \sum_{p,q} \Theta_{p,q} \sum_{n,m} W(\omega_{p,n} - \nu_{q,m}) \cdot (A_{p,n} B_{q,m})^{\alpha} \cdot S^{(d)}(\phi_{p,n}, \psi_{q,m}) \cdot e^{i\nu_{q,m} \tau},
+\]
+其中四个因子分别是\textbf{振幅算子}（缩放，开关 $\alpha$）、\textbf{相位算子}（旋转，6 个复相位核 $S^{(d)}$）、\textbf{频率算子}（平移，权重核 $W$ 与时延相子 $e^{i\nu\tau}$）、\textbf{周期算子}（定长，周期对权重 $\Theta_{p,q}$）。
+
+周期卷积的退化链——经典卷积/互相关（核宽极限 $W \to \delta$）、相似度卷积（$\alpha = 0$）、趋势卷积（$\alpha = 1$）、核化卷积（单周期层）——构成了从时域到频域、从单周期到多周期耦合的完整分析工具链。周期趋势谱的经典极限是功率谱，Fisher 检验给出周期显著性的精确阈值。
+
+\textbf{相位算子}概念的引入揭示了每个周期的每个相位都是一种关系算子：$\mathcal{O}_k^{(T)} = e^{i2\pi k/T}$ 不仅标记位置，更通过复乘定义关系。乘以 $\mathcal{O}_0 = 1$（阳算子）得到自身（合同），乘以 $\mathcal{O}_{T/2} = -1$（阴算子）得到反向量（对冲），乘以任意 $\mathcal{O}_k$ 定义旋转 $2\pi k/T$ 的关系。
+
+\textbf{周转圆嵌套生成规则}——外圈每前进一步，内圈旋转一整圈——统一了小周期生成大周期的过程：阴阳 $\times$ 五行 = 天干（$10$），四象 $\times$ 三才 = 地支（$12$），八卦 $\times$ 八卦 = 六十四卦（$64$）。六十甲子由天干与地支的周期卷积生成。
+
+\section{窗函数与折射率：基于相似度和趋势的拐点诊断}
+
+\textbf{窗函数与折射率体系}是本书的另一个重要方法论框架。它将反射定律和折射定律的几何原型推广到时间序列的趋势分析中，建立了基于相似度和趋势的拐点诊断工具链。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  node distance=0.8cm and 0.8cm,
+  every node/.style={font=\small},
+  >=stealth,
+  box/.style={draw, rounded corners=3pt, fill=blue!8, minimum width=2.4cm, minimum height=0.8cm, align=center},
+  arrow/.style={-{stealth}, thick}
+]
+\node[box] (data) {原始时序};
+\node[box, right=of data] (smooth) {窗函数平滑\\$T_\Delta(t)$};
+\node[box, right=of smooth] (angle) {瞬时极限角\\$\theta_t=\arctan(\nabla \tilde X_t)$};
+
+\node[box, below=of angle] (sim) {相似度\\$\cos(\Delta\theta),\sin(\Delta\theta)$};
+\node[box, left=of sim] (turn) {转折率\\$R_{\mathrm{turn}}$};
+\node[box, left=of turn] (refr) {折射率\\$\eta=\sin\theta_1/\sin\theta_2$};
+
+\draw[arrow] (data) -- (smooth);
+\draw[arrow] (smooth) -- (angle);
+\draw[arrow] (angle) -- (sim);  
+\draw[arrow] (sim) -- (turn);  
+\draw[arrow] (turn) -- (refr); 
+\end{tikzpicture}
+\caption{窗函数—折射率拐点诊断流程。}
+\label{fig:closing_window_refraction}
+\end{figure}
+
+窗函数 $K_\Delta$ 对时间序列进行多尺度平滑，提取趋势分量 $T_\Delta(t)$。经瞬时极限角 $\theta_t = \arctan(\nabla \tilde{X}_t)$ 得到方向序列。拐点判据为：$|\theta_t - \theta_{t-1}| > \tau$ 当且仅当基础差角余弦相似度 $\cos(\theta_t - \theta_{t-1}) < \cos\tau$；倍角方向相似度 $\sin 2(\theta_t - \theta_{t-1})$ 的符号给出转向、绝对值给出拐点强度。转折率 $R_{\text{turn}} = |\sin\theta_1 - \sin\theta_2|$ 度量拐点两侧正弦趋势之差，其半角分解为
+\[
+R_{\text{turn}} = 2\left|\cos\frac{\theta_1+\theta_2}{2}\right| \cdot \left|\sin\frac{\theta_1-\theta_2}{2}\right|.
+\]
+折射率比 $\eta = \sin\theta_1/\sin\theta_2$ 作为斯涅尔定律 $n_1\sin\theta_1 = n_2\sin\theta_2$ 的形式类比——时序中不存在物理折射率，$\eta$ 仅在类比意义下使用；方向反转 $\theta_2 = -\theta_1$ 对应“全反射”类比，此时 $R_{\text{turn}} = 2|\sin\theta_1|$。时延概念将相位与时间偏移关联：相位时延 $\tau = \phi/\omega$ 将旋转相位转换为时间偏移，传播时延 $\tau = r/c$ 将空间距离转换为时间偏移。
+
+\section{复指数激活函数与核平滑导-积下降}
+
+\textbf{复指数激活函数（CEAF）}将嵌套周转系统作为神经网络的可学习激活函数：
+\[
+\mathcal{E}(x) = \sum_{k=1}^{N} A_k e^{i(\omega_k x + \phi_k)}.
+\]
+CEAF 的复值输出天然保留了相位信息，导数在全实轴上不恒为零。其参数 $\{A_k,\omega_k,\phi_k\}$ 可由数据分析阶段的周期图峰值、相位耦合网络与导-积下降估计初始化，再通过反向传播或 KDI 更新。这样，从数据中提取的周期结构可以端到端地进入神经网络。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  node distance=1.2cm and 1.2cm,
+  every node/.style={font=\small},
+  >=stealth,
+  box/.style={draw, rounded corners=3pt, fill=blue!8, minimum width=2.6cm, minimum height=0.85cm, align=center},
+  arrow/.style={-{stealth}, thick},
+  back/.style={-{stealth}, thick, dashed, blue}
+]
+\node[box] (data) {数据\\时间序列};
+\node[box, right=of data] (spec) {频谱初始化\\$\omega_k^{(0)}$};
+
+\node[box, below=of spec] (ceaf) {CEAF 网络\\$\mathcal E(x)$};
+\node[box, left=of ceaf] (kdi) {KDI 优化\\$A_k,\omega_k,\phi_k$};
+\node[box, left=of kdi] (wave) {Waveform\\复变函数};
+\node[box, left=of wave] (pred) {预测与诊断};
+
+\draw[arrow] (data) -- (spec);
+\draw[arrow] (spec) -- (ceaf); 
+\draw[arrow] (ceaf) -- (kdi);  
+\draw[arrow] (kdi) -- (wave); 
+\draw[arrow] (wave) -- (pred); 
+
+\draw[back] (pred.west) to[bend left=70] 
+    node[midway, above, font=\footnotesize] {反馈：残差诊断与参数重估} 
+    (data.west);
+\end{tikzpicture}
+\caption{CEAF—KDI 学习闭环：从数据到 Waveform，再回到数据诊断。}
+\label{fig:closing_ceaf_kdi_loop}
+\end{figure}
+
+\textbf{核平滑导-积下降法}通过核函数同时利用 $N$ 阶导数和 $N$ 阶积分信息。曲率修正项利用二阶导数检测曲率变化，累积变化修正项利用积分信息检测长期趋势。对 CEAF 参数，振幅 $A_k$ 适合高斯核光滑调整，频率 $\omega_k$ 适合墨西哥帽核做曲率感知，相位 $\phi_k$ 适合 Hilbert 核做跳变检测。
+
+\textbf{晶振作为基本固定的周转圆}是芯片系统周期结构的核心观察：晶振输出振幅、频率和相位都固定的周转圆，是芯片内所有其他周转圆的主周转圆。锁相环实现周转圆的频率缩放，时钟树是嵌套周转圆系统，芯片是参数化周转圆波形/频谱处理单元。
+
+\section{全书的逻辑闭环}
+
+\begin{remark}[全书逻辑闭环（经验观察／研究纲领）]\label{thm:closing_loop}
+周期数学从三个对称中心 $0$、$1$、$i$ 出发，经数系扩张、群表示论、矢量分析与通量模型、周期卷积、周期系统、周期流形与周期范畴，最终抵达各应用系统，给出以下理论闭环的\textbf{研究纲领}：
+\begin{enumerate}[label=(\roman*)]
+    \item 由旋转对称 $i$ 出发，通过局域 $U(1)$ 规范不变性导出完整的麦克斯韦方程组及电荷守恒——电磁系统是旋转操作在物理学中的最纯粹实现（已证，见「电磁系统之周期结构」章 \ref{thm:maxwell_equations}）。
+    \item 由平移对称 $0$ 出发，通过时间平移不变性导出能量守恒——平移操作在机械系统、电路系统、气候系统中驱动了周期结构的产生和维持（已证，见「机械系统之周期结构」章 \ref{thm:mechanical_conservation}）。
+    \item 由缩放对称 $1$ 出发，通过标度不变性导出\textbf{幂律指数的存在性}——标度不变性给出幂律指数的存在性，而指数在跨期上的稳定性仍是\textbf{经验事实}（\textbf{经验观察／研究纲领}，见「经济系统之周期结构」章 \ref{prop:pareto_growth} 与「生物系统之周期结构」章 \ref{thm:biological_conservation}；前一处的稳定性一项已自注为经验观察与类比解释，非数学定理）。
+\end{enumerate}
+因此本「闭环」是全书结构的整体描述与\textbf{研究纲领}，不是一条已证定理：其中 (i)(ii) 两条线索各自对应相应章节的定理，第 (iii) 条中「标度指数跨期稳定」这一环节为经验观察／研究纲领。三条线索分别对应拉格朗日力学、诺特定理和幂律标度分析中的标准结果，其严格陈述分别在对应章节的定理中给出。
+\end{remark}
+
+\section{跨学科应用的统一诊断矩阵}
+
+全书的应用章并非彼此孤立，而是共享同一套诊断矩阵。下表把主要应用领域按其主导对称中心、典型周期类型与主要工具列在一起，以便读者从整体上把握全书的应用布局。
+
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{@{}p{2.2cm}p{2.5cm}p{3.2cm}p{4.8cm}@{}}
+\toprule
+\textbf{领域} & \textbf{主导对称中心} & \textbf{典型周期类型} & \textbf{主要工具} \\
+\midrule
+天文 & $i$，$0$ & 轨道周期、共振、多体准周期 & 开普勒定律、Floquet、KAM、周期卷积 \\
+历法 & $0$，$1$ & 回归年、朔望月、六十甲子 & 置闰、连分数、同余角、周期卷积 \\
+地理 & $i$，$1$ & 米兰科维奇旋回、ENSO、季节循环 & 多尺度窗、谱分析、跨尺度共振 \\
+易经 & $i$，$0$，$1$ & 卦象周期、干支周期、河图洛书 & 相位算子、周转圆嵌套、周期卷积 \\
+电磁 & $i$ & 电磁波、振荡、推迟势 & 麦克斯韦方程、矢量分析、时延 \\
+音频 & $0$，$i$ & 简谐振动、谐波、拍频 & 傅里叶级数、十二平均律、时延 \\
+机械 & $0$，$i$ & 弹簧振子、单摆、共振、进动 & 极限环、椭圆积分、相位响应 \\
+电路芯片 & $i$，$0$ & 晶振、PLL、时钟树、数据周期 & 周转圆、锁相环、嵌套时钟 \\
+生物 & $i$，$1$ & 昼夜节律、心率、细胞周期、种群周期 & 极限环、延迟反馈、Lotka--Volterra \\
+心理 & $0$，$i$ & 睡眠周期、注意振荡、情绪周期 & 双过程模型、RC 充放电、相位锁定 \\
+社交 & $i$ & 社交节律、信息传播、群体同步 & SIR/SIRS、Kuramoto、相位耦合网络 \\
+气候 & $i$，$1$ & 季节、ENSO、PDO、IOD、米兰科维奇 & 红噪声、Hurst 指数、多窗谱估计 \\
+经济 & $1$，$i$ & 库存周期、投资周期、长波 & 乘数--加速数、蛛网模型、窗函数诊断 \\
+政治 & $0$，$i$ & 王朝周期、霸权周期、统一--分裂 & 正反馈、财政衰减、嵌套周期 \\
+数据分析 & $i$，$1$ & 周期图峰值、多窗分解、相位耦合 & 周期卷积、多窗谱、相位网络 \\
+智能体算法 & $i$，$1$ & 学习率周期、同步周期、训练振荡 & CEAF、KDI、参数平均、位置编码 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+这张矩阵说明：不同领域的“周期”在现象层面千差万别，但在数学结构上往往可以归结为三种基本操作的复合、有限阶作用、闭合轨道、相位耦合与标度嵌套。周期数学的作用不是代替各学科的具体机制，而是提供一套统一的语法，使这些结构可以被严格描述、比较和诊断。
+
+\section{展望：未完成的任务与开放问题}
+
+全书建立了周期数学的基本框架，但仍有大量问题等待解决。下面按理论、算法、应用、方法论四类列出开放问题。
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\small
+\begin{tabular}{@{}p{2.2cm}p{10.5cm}@{}}
+\toprule
+\textbf{类别} & \textbf{开放问题} \\
+\midrule
+理论 & 有限阶作用在连续、耗散、非自治系统中的推广；周期范畴的高阶结构（修改、$2$-态射）；同余角与多频联合置闰的最优逼近理论；守恒律与闭合轨道之间的充分条件分类。 \\
+算法 & 周期卷积的快速算法（基于 FFT，从 $O(N^2)$ 降至 $O(N\log N)$）；KDI 在非凸损失下的全局收敛性与逃离鞍点时间估计；CEAF 深度网络的表达力与参数效率下界；位置编码与周期卷积的精确对应。 \\
+应用 & 气候多尺度周期的联合诊断；经济长波与结构变迁的定量模型；生物多尺度选择—变异—遗传循环的周期分析；多智能体相位同步的实验验证；密码系统周期安全性的统一度量。 \\
+方法论 & 从数据到 Waveform 的自动化流程；窗半径与折射率的自动选择与统计显著性检验；周期卷积在深度学习中的集成；CEAF 与 KDI 在大型模型中的规模化应用。 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+具体而言，以下十个问题尤为关键：
+
+\begin{enumerate}[leftmargin=*]
+\rightskip=0pt plus1fil\relax
+\item \textbf{周期卷积的快速算法}：开发基于 FFT 的周期卷积快速计算算法，将时间复杂度从 $O(N^2)$ 降至 $O(N\log N)$。
+
+\item \textbf{窗函数—折射率体系的自动化}：建立基于核平滑导-积下降的窗半径自动选择算法，开发折射率的统计显著性检验。
+
+\item \textbf{周期卷积在深度学习中的集成}：将周期卷积作为神经网络的特征提取层。
+
+\item \textbf{复指数激活函数的规模化应用}：在大型语言模型和时间序列预测模型中使用复指数激活函数替代标准激活函数。
+
+\item \textbf{核平滑导-积下降的深度学习集成}：将导-积下降作为神经网络训练中的优化器。
+
+\item \textbf{相位耦合网络的应用扩展}：应用于 EEG、fMRI 和金融市场的高维时间序列数据。
+
+\item \textbf{窗函数—折射率体系在金融市场的实证检验}：验证正弦差角相似度和折射率在预测趋势反转中的有效性。
+
+\item \textbf{多智能体相位同步的实验验证}：探索通信频率和耦合强度对群体智能涌现的影响。
+
+\item \textbf{时延概念的深化}：在电磁系统、音频系统、机械系统和芯片系统中进一步展开时延在平移、旋转、缩放三种操作下的具体角色。
+
+\item \textbf{相位算子体系的扩展}：将易经系统的相位算子框架推广到任意周期 $T$ 的符号体系，建立统一的相位编码理论。
+\end{enumerate}
+
+\section{结语：周期作为统一的语言}
+
+周期是自然最普遍的语言。从原子内部的电子云振动到行星的公转，从心跳的节律到经济波动的循环，从个体的学习与感受到种群的选择与进化，对称性与不变量编织了宇宙演化的韵律。本书试图为这一韵律谱写一部统一的数学乐章——从最抽象的对称中心出发，经由周期卷积的跨周期相位分析、窗函数与折射率的拐点诊断、复指数激活函数与核平滑导-积下降的智能优化，一路延伸到天文、历法、地理、物理、生物、心理、经济、政治、密码、智能体、数据分析等具体领域。
+
+需要再次强调：周期数学并不先验地宣称所有被考察的系统都“具有周期结构”。它在每个应用章节中首先提问：这个系统是否具有可识别的对称群？是否存在对应的守恒量？其状态空间中的演化轨道是否闭合？对于满足条件的系统，本书给出严格的周期结构描述；对于部分满足条件的系统，本书精确测量其偏离闭合轨道的程度；对于不满足条件的系统，本书明确指出其“周期性”只是现象层面的隐喻。这种诊断功能，是周期数学区别于一般跨学科类比的关键所在。
+
+帷幕刚刚拉开，更广阔的理论图景正待展开。我们希望本书提供的这套语法，能够帮助不同领域的研究者在各自的系统中识别出共同的周期结构，并在数学的层面上展开对话。
+
+\section*{全书七主题对照总表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}p{2.2cm} p{10.5cm}@{}}
+\toprule
+主题 & 全书对应（章节） \\
+\midrule
+平移 & 周期基础（三种基本变换）；数系（整数平移周期判据）；函数与分析基础（导数/卷积平移）；时序分析（滞后算子）；各应用章的平移周期 \\
+缩放 & 数系（有理数比例/对数）；矢量分析（散度/投影衰减律）；音频（十二平均律）；各应用章的标度周期 \\
+旋转 & 数系（复数/四元数）；周期函数（相位算子）；调和分析（相位核 $S^{(d)}$）；各应用章的旋转周期 \\
+守恒 & 周期基础（诺特对应/刘维尔-阿诺德）；周期函数（周转圆三守恒）；各章守恒律定理 \\
+对称 & 周期基础（对称中心 $0,1,i$）；群与群函数（自同构塔）；各应用章的对称群 \\
+闭合 & 周期基础（闭合双重判据）；周期流形（离散曲率/Wilson 环）；时序分析（工具链闭环）；各应用章的闭合轨道 \\
+周期 & 调和分析（周期趋势谱）；时序分析（周期确定）；历法（回归年/朔望月/六十甲子）；各应用章的多尺度周期 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 说明本章的\textbf{全书逻辑闭环}（\textbf{经验观察／研究纲领}，见注 \ref{thm:closing_loop}）中哪些环节已被严格证明、哪些仍属研究纲领，并指出各自的出处。提示：逐条核对三个对称中心对应的导出结果及其所在章节。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章结论：\ref{thm:closing_loop}（\textbf{经验观察／研究纲领}）。
+\end{enumerate}
+

@@ -1,0 +1,709 @@
+\chapter{Periodic Structure of Mechanical Systems}
+\markboth{Periodic Structure of Mechanical Systems}{Periodic Structure of Mechanical Systems}
+
+\begin{remark}[Periodicity decision for the target of this chapter (citation)]\label{rem:mech_ps_hook}
+When this chapter decides whether a research target is periodic, determines its period type, or seeks its minimal positive period, reference is always made to the `Periodic Systems' chapter:
+for the periodicity criterion see \cref{thm:ps_periodicity_decision},
+for the discrimination of period types see \cref{def:ps_period_type}, \cref{prop:ps_type_discrimination},
+for the search for the minimal positive period see \cref{def:ps_minimal_period_algorithm}, \cref{thm:ps_minimal_period_correctness},
+and for the construction of period series and epicycle groups from data see \cref{thm:ps_series_reconstruction}, \cref{def:ps_epicycle_group}.
+\end{remark}
+
+\begin{remark}[Positioning of this chapter: developing via the five-step interface of the `Periodic Systems' chapter]\label{rem:mech_five_steps_positioning}
+The periodic structure of mechanical systems studies the mathematical characterisation of periodicity, quasi-periodicity and resonance phenomena in classical mechanics. This chapter does not establish a separate periodicity criterion; instead it connects mechanical systems to the five-step interface prescribed by the `Periodic Systems' chapter:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{Decision}: reduce targets such as the spring oscillator, the simple pendulum, coupled oscillators, the forced oscillator and gyroscopic precession to discrete or continuous dynamical systems, invoke \cref{thm:ps_periodicity_decision} to decide whether they possess periodicity, and determine the period type;
+    \item \textbf{Construction}: build the amplitude series, the frequency series and the phase series from the generalised coordinates, momenta and phase data, and assemble them into the mechanical epicycle group;
+    \item \textbf{Adjustment}: dynamically adjust the mechanical epicycle group under the constraints of residual-energy descent, conservation of momentum, conservation of angular momentum and conservation of energy;
+    \item \textbf{Convolution}: introduce amplitude convolution, phase convolution and frequency convolution on the mechanical epicycle group, and connect them with autocorrelation, cross-correlation and beat-frequency delay;
+    \item \textbf{Integration}: connect to the tool chains of the three chapters `Discrete Sampling and Intercalation of Periodic Signals', `Harmonic Analysis' and `Time Series Analysis', forming a mechanical periodicity diagnostic pipeline.
+\end{enumerate}
+The mathematical tools used in this chapter include: Lagrangian mechanics, Hamiltonian mechanics, elliptic integrals, resonance theory, periodic convolution, epicycle groups, phase operators and delay.
+\end{remark}
+
+\begin{remark}[Seven-theme guide for this chapter]\label{rem:mech_seven_themes}
+\textbf{Translation}---the time translation and phase delay $\tau = \phi\sqrt{m/k}$ of the spring oscillator (Definition \ref{def:spring_phase_delay}); \textbf{scaling}---the scaling correction $\Delta T(\theta_{\max})$ for the large amplitude of the pendulum (Definition \ref{def:pendulum_amplitude_delay}); \textbf{rotation}---the phase lag $\delta(\omega)$ and the precession of the forced oscillator (Definition \ref{def:forced_phase_delay}, \ref{def:gyroscope}); \textbf{conservation}---conservation of momentum, of angular momentum and of energy (Theorem \ref{thm:mechanical_conservation}) and energy conservation of the spring oscillator (Proposition \ref{prop:spring_energy_period}); \textbf{symmetry}---the symmetric--antisymmetric decomposition of the normal coordinates and time-reversal symmetry; \textbf{closure}---the closure of the periodic orbit of the pendulum and of the gyroscopic precession circle; \textbf{period}---the spring oscillator $T = 2\pi\sqrt{m/k}$ (isochronism), the elliptic-integral period of the pendulum (Theorem \ref{thm:pendulum_exact_period}) and the beat period $T_{\text{beat}} = \pi/\Delta\omega$ (Proposition \ref{prop:beat_phenomenon}).
+\end{remark}
+
+\section{Connection to the five-step interface of the `Periodic Systems' chapter}
+\label{sec:mech_five_steps}
+
+\subsection{Step one: periodicity decision for mechanical targets}
+
+\begin{definition}[Mechanical targets and decision input]\label{def:mech_target}
+A \textbf{mechanical target} is one of the following objects:
+\begin{enumerate}[label=(\roman*)]
+    \item a spring-oscillator system, whose state space is the $(x,p)$ phase space;
+    \item a simple-pendulum system, whose state space is the $(\theta,\dot\theta)$ phase space;
+    \item a coupled-oscillator system, whose state space is the $(x_1,x_2,\dot x_1,\dot x_2)$ phase space;
+    \item a forced-oscillator system, whose state space is the joint space of the driving phase and the response phase;
+    \item a gyroscope system, whose state space is the joint space of the angular momentum $\mathbf L$ and the spin-axis direction $\hat{\mathbf e}_3$.
+\end{enumerate}
+The \textbf{decision input} of a mechanical target is the ordered pair
+\[
+\mathcal D_{\mathrm{M}}=(\mathcal S,\Phi),
+\]
+where $\mathcal S$ is the state space and $\Phi:\mathcal S\to\mathcal S$ is the map induced by time translation, phase rotation or orbit evolution. If $\mathcal S$ is a finite set, the target is called a \textbf{finite mechanical target}; if $\mathcal S$ is an infinite set, the target is called an \textbf{infinite mechanical target}.
+\end{definition}
+
+\begin{definition}[Mechanical decision map]\label{def:mech_periodization}
+Let a mechanical target be given by the decision input $\mathcal D_{\mathrm{M}}=(\mathcal S,\Phi)$. If the states of the target are generated by $\Phi$, that is, if there exists $x_0\in\mathcal S$ such that
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+for $t\in\mathbb Z$ the state $x_t$ is generated by iteration of $\Phi$; for $t\in\mathbb R$ it is described by the one-parameter evolution family $\{\Phi_t\}_{t\in\mathbb R}$, where each $\Phi_t:\mathcal S\to\mathcal S$, $\Phi_0=\operatorname{id}$, $\Phi_{s+t}=\Phi_s\circ\Phi_t$ for all $s,t\in\mathbb R$, and $(t,x)\mapsto\Phi_t(x)$ is continuous.
+then $\Phi$ is called the \textbf{mechanical decision map} of the target. The mechanical target is then reduced to the discrete dynamical system $(\mathcal S,\Phi)$ when $t\in\mathbb Z$ and to the continuous dynamical system $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$ when $t\in\mathbb R$; in both cases the criteria of the `Operations and Periodicity' chapter and of the `Periodic Systems' chapter may be applied directly.
+\end{definition}
+
+\begin{theorem}[Periodicity decision theorem for mechanical systems]\label{thm:mech_periodicity_decision}
+Let the decision map of a mechanical target be $\Phi$, and let $(\mathcal S,\Phi)$ be a discrete dynamical system. Then:
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{Sufficient criterion}: if there exists $m\in\mathbb N^+$ such that $\Phi^m=\mathrm{id}$, then the target is a uniformly periodic mechanical system; every orbit is closed, and the orbit length divides $m$.
+    \item \textbf{Equivalence of the decision}: the target is a uniformly periodic mechanical system if and only if $\operatorname{ord}(\Phi)<\infty$.
+    \item \textbf{Pointwise criterion}: the orbit of the target at the state $x_0$ is closed if and only if $x_0$ is a periodic point; the orbit length is then the period at that point.
+    \item \textbf{Non-omissibility}: the conjunction of conserved quantities and symmetry groups cannot replace $\operatorname{ord}(\Phi)<\infty$; a quasi-periodic mechanical target is not a periodic mechanical system.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:mech_periodicity_decision} of this chapter is the domain instantiation of \cref{thm:ps_periodicity_decision} in the `Periodic Systems' chapter:
+one need only replace the decision map $f$ and the evolution group by $\Phi$ of this chapter, and the four clauses (A) sufficient criterion, (B) equivalence of the decision, (C) pointwise criterion and
+(D) non-omissibility hold one by one. By the convention of \cref{rem:ps_applications_hook}, the argument is not expanded again here.
+\end{proof}
+
+\begin{corollary}[Mechanical period types]\label{cor:mech_period_type}
+After the decision by \cref{thm:mech_periodicity_decision}, a mechanical target falls into one of the following types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Trivially periodic type}: the least period is $m_0=1$, and the states are fixed points;
+    \item \textbf{Strictly periodic type}: $1<m_0<\infty$, and the states are strictly periodic;
+    \item \textbf{Uniformly periodic type}: $\operatorname{ord}(\Phi)=m<\infty$, and all orbit lengths divide $m$;
+    \item \textbf{Quasi-periodic type}: $\operatorname{ord}(\Phi)=\infty$, and the orbits are not closed but are dense on a compact carrier structure;
+    \item \textbf{Eventually periodic type}: there exists $N$ such that the target is periodic for $t\ge N$;
+    \item \textbf{Discretely periodic type}: the carrier structure is $\mathbb Z$, and the normalised period ratio is $\rho=T_x/\Delta x\in\mathbb Q$.
+    \item \textbf{Asymptotically periodic (damped) type}: the orbit is not closed, but tends asymptotically to a closed orbit or to a fixed point, the residual decaying as $e^{-\kappa t}$ (see \cref{def:ps_period_type}(vii)).
+\end{enumerate}
+Of these, (i)--(iii) and (vi) are periodic mechanical systems; (iv) is not a periodic mechanical system, but can be handled with bounded-approximation tools; (v) is a periodic mechanical system only in its stable stage; (vii), like (iv), is a type in the limiting sense; it is not a periodic mechanical system and can be handled with bounded-approximation tools only in its stable stage.
+\end{corollary}
+
+\begin{proof}
+Substituting the mechanical target clause by clause into \cref{thm:mech_periodicity_decision} and \cref{def:ps_period_type} of the `Periodic Systems' chapter yields the result.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for the spring oscillator]\label{lem:spring_periodic}
+Let the equation of motion of the spring oscillator be
+\[
+\ddot x+\omega_0^2x=0,\qquad \omega_0=\sqrt{k/m}.
+\]
+Then the spring oscillator is a uniformly periodic system, and its least positive period is
+\[
+T_0=\frac{2\pi}{\omega_0}=2\pi\sqrt{\frac{m}{k}}.
+\]
+\end{lemma}
+
+\begin{proof}
+By Definition \ref{def:spring_oscillator}, the general solution is $x(t)=A\cos(\omega_0t+\phi)$. The time translation $T_0=2\pi/\omega_0$ gives $x(t+T_0)=x(t)$, and $T_0$ is the least positive period. Hence the decision map $\Phi$ satisfies $\Phi^{T_0}=\mathrm{id}$, so the system is uniformly periodic.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for the pendulum]\label{lem:pendulum_periodic}
+Let the equation of motion of the simple pendulum be
+\[
+\ddot\theta+\omega_0^2\sin\theta=0,\qquad \omega_0=\sqrt{g/l}.
+\]
+Then the simple pendulum is a uniformly periodic system, and its oscillation period is given by the complete elliptic integral of the first kind:
+\[
+T(\theta_{\max})=4\sqrt{\frac{l}{g}}\,K(k),\qquad k=\sin\frac{\theta_{\max}}{2}.
+\]
+\end{lemma}
+
+\begin{proof}
+By Theorem \ref{thm:pendulum_exact_period}, a simple pendulum released from the maximum deflection angle $\theta_{\max}$ performs periodic motion with period $T(\theta_{\max})=4\sqrt{l/g}\,K(k)$. By conservation of energy the orbit oscillates to and fro within the bounded interval $[-\theta_{\max},\theta_{\max}]$; hence the decision map $\Phi$ satisfies $\Phi^{T(\theta_{\max})}=\mathrm{id}$, so the system is uniformly periodic.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for coupled oscillators]\label{lem:coupled_periodic}
+Let a coupled-oscillator system be in its symmetric mode and its antisymmetric mode, with corresponding normal frequencies
+\[
+\omega_1=\sqrt{k/m},\qquad \omega_2=\sqrt{(k+2k_c)/m}.
+\]
+Then, when $\omega_1/\omega_2\in\mathbb Q$, the system is uniformly periodic; when $\omega_1/\omega_2\notin\mathbb Q$, the system is quasi-periodic.
+\end{lemma}
+
+\begin{proof}
+Introducing the normal coordinates $\eta_1=x_1+x_2$ and $\eta_2=x_1-x_2$, the system decouples into two independent simple harmonic oscillations. By the commensurability criterion of \cref{thm:finite_order_orbit} in the `Operations and Periodicity' chapter, the orbit formed by superposing the two simple harmonic oscillations is closed if and only if the frequency ratio $\omega_1/\omega_2$ is rational. Hence the conclusion holds.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for the forced oscillator]\label{lem:forced_periodic}
+Let the steady-state response of a forced oscillator be
+\[
+x(t)=A(\omega)\cos(\omega t-\delta(\omega)).
+\]
+Then the forced oscillator is a uniformly periodic system, and its least positive period is the driving period
+\[
+T=\frac{2\pi}{\omega}.
+\]
+\end{lemma}
+
+\begin{proof}
+The steady-state response is periodic with the driving frequency $\omega$, and its least positive period is $T=2\pi/\omega$. The transient response decays as $e^{-\beta t}$ and tends to the steady-state periodic orbit as $t\to\infty$; the steady-state response is a uniformly periodic system, whilst the transient phase is of asymptotically periodic (damped) type (not of eventually periodic type: at no finite time is the orbit closed).
+\end{proof}
+
+\begin{lemma}[Periodicity decision for gyroscopic precession]\label{lem:gyroscope_periodic}
+Let a gyroscope precess under the action of the gravitational torque, with precession angular velocity
+\[
+\Omega_p=\frac{mgr}{I_3\omega_3}.
+\]
+Then the precession of the spin axis is a uniformly periodic system, and its precession period is
+\[
+T_p=\frac{2\pi}{\Omega_p}=\frac{2\pi I_3\omega_3}{mgr}.
+\]
+\end{lemma}
+
+\begin{proof}
+By Proposition \ref{prop:precession_nutation}, the precession angular velocity is $\Omega_p=mgr/(I_3\omega_3)$, and the spin axis rotates uniformly about the vertical axis with period $T_p=2\pi/\Omega_p$. Hence the decision map $\Phi$ satisfies $\Phi^{T_p}=\mathrm{id}$, so the system is uniformly periodic.
+\end{proof}
+
+\begin{definition}[Least positive period algorithm for mechanical systems]\label{def:mech_minimal_period_algorithm}
+This definition has the same content as that given, in Chapter~\ref{chap:periodic_system} under the section `Periodicity decision: whether the target is periodic' (\cref{sec:ps_periodicity_decision}), by \cref{def:ps_minimal_period_algorithm}; to avoid repetition only the reference anchor is retained here, and the complete statement is given there. The only difference here is the terminology (mechanical target / mechanical sample); the steps of the algorithm and the conclusion are exactly the same.
+\end{definition}
+
+\begin{theorem}[Correctness of the least positive period algorithm for mechanical systems]\label{thm:mech_minimal_period_correctness}
+This theorem has the same content as that given, in Chapter~\ref{chap:periodic_system} under the section `Periodicity decision: whether the target is periodic' (\cref{sec:ps_periodicity_decision}), by \cref{thm:ps_minimal_period_correctness}; to avoid repetition only the reference anchor is retained here, and the complete statement and proof are given there. The only difference here is the terminology (mechanical target / mechanical sample); the steps of the algorithm and the conclusion are exactly the same.
+\end{theorem}
+
+\begin{example}[Instances of mechanical periodicity decisions]\label{ex:mech_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item Spring oscillator: $T_0=2\pi\sqrt{m/k}$, uniformly periodic type;
+    \item Simple pendulum: $T(\theta_{\max})=4\sqrt{l/g}\,K(k)$, uniformly periodic type;
+    \item Coupled oscillators: uniformly periodic type when $\omega_1/\omega_2\in\mathbb Q$, otherwise quasi-periodic type;
+    \item Forced oscillator: steady-state period $T=2\pi/\omega$, uniformly periodic type;
+    \item Gyroscopic precession: $T_p=2\pi I_3\omega_3/(mgr)$, uniformly periodic type.
+\end{enumerate}
+\end{example}
+
+\begin{remark}[Conserved quantities do not guarantee periodicity]\label{rem:mech_invariant_not_period}
+In mechanical systems, conservation of momentum, conservation of angular momentum and conservation of energy are auxiliary conditions for periodic structure, but they do not constitute a sufficient condition. For example, a hyperbolic orbit possesses conservation of energy and conservation of angular momentum, yet the orbit is open and does not close. Periodic structure in mechanics must be decided by \cref{thm:mech_periodicity_decision} or by the lemmas above.
+\end{remark}
+
+\subsection{Step two: construction of the mechanical period series and the epicycle group}
+
+\begin{definition}[Amplitude, frequency and phase series of a mechanical target]\label{def:mech_series}
+Let the state or output sequence of a mechanical target be $\{z_t\}$. If it can be written as
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+then
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+are called respectively the \textbf{amplitude series}, the \textbf{frequency series} and the \textbf{phase series} of the mechanical target. The three agree with \cref{def:amplitude_series}, \cref{def:frequency_series} and \cref{def:phase_series} in the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{definition}[Mechanical epicycle group]\label{def:mech_epicycle_group}
+Let the period series of a mechanical target be given by the amplitude series $\{A_k\}$, the frequency series $\{\omega_k\}$ and the phase series $\{\phi_k\}$. For each $k$ define the epicycle
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+and call the set
+\[
+\mathfrak E_{\mathrm{M}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+the \textbf{epicycle group} of the mechanical target. Its superposition is the mechanical period series
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[Building the period series from mechanical data]\label{thm:mech_series_reconstruction}
+Let the output of a mechanical target be a finite periodic sequence of period $N$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the output can be expanded as a discrete Fourier series
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item the amplitude series is given by $|c_k|$, the phase series by $\arg c_k$ and the frequency series by $2\pi k/N$;
+    \item if the output is a single-frequency simple harmonic oscillation, the Fourier decomposition has only one spectral line; if the output is that of a coupled oscillator, the successive harmonics correspond to the normal modes.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) The discrete Fourier series of a finite periodic sequence is a standard result: the basis functions $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ form an orthogonal basis of $\mathbb C^N$.
+(ii) This is read off directly from $c_k=A_k e^{i\phi_k}$.
+(iii) The time part of a single-frequency simple harmonic oscillation is $e^{-i\omega t}$, which over the period $T=2\pi/\omega$ has only the fundamental component; a coupled oscillator is expanded in the normal modes as its successive harmonics.
+\end{proof}
+
+\begin{proposition}[Three-parameter correspondence: radius, phase and speed]\label{prop:mech_epicycle_correspondence}
+The three parameters of the mechanical epicycle group $\mathfrak E_{\mathrm{M}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ correspond one-to-one to three geometric--physical quantities:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Radius corresponds to amplitude}: the radius $|E_k|=A_k$ of $E_k$ is the amplitude of the corresponding generalised-coordinate component;
+    \item \textbf{Phase corresponds to rotational delay}: the initial phase $\phi_k$ corresponds to the time translation $\tau_k=\phi_k/\omega_k$; when $\phi_k>0$ this component \textbf{leads} the baseline by $\tau_k$ (equivalently, the component coincides with the baseline once the baseline is postponed by $\tau_k$);
+    \item \textbf{Frequency corresponds to rotational speed}: $\omega_k$ is the angular frequency of that normal mode.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:mech_epicycle_correspondence} of this chapter corresponds exactly to \cref{prop:ps_epicycle_correspondence} in the `Periodic Systems' chapter,
+and the three correspondences---radius to amplitude, phase to rotational delay, frequency to rotational speed---are obtained by translating each clause to the epicycle group of this chapter.
+For the proof see that passage: (i) from $|E_k|=A_k$ and the energy decomposition, (ii) from the phase-translation theorem, (iii) from the definition of the frequency series.
+\end{proof}
+
+\begin{example}[Period series of the spring oscillator]\label{ex:mech_spring_series}
+Over the period $T=2\pi/\omega_0$, the spring oscillator $x(t)=A\cos(\omega_0t+\phi)$ is a single-frequency period series, and its epicycle group is $\{(A,\omega_0,\phi)\}$.
+\end{example}
+
+\begin{remark}[The period series is a complex function]\label{rem:mech_series_complex}
+Let $z=e^{i\omega_0t}$; then the mechanical period series
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+when all components are commensurable with $\omega_0$ (that is, $\omega_k=k\omega_0$, $k\in\mathbb Z$) it can be written as the Laurent series $\sum_k c_k z^k$, where $c_k=A_k e^{i\phi_k}$: in that case the mechanical period series is a complex function on the unit circle, and otherwise it is merely a function on the torus.
+\end{remark}
+
+\subsection{Step three: dynamic adjustment of the mechanical epicycle group}
+
+\begin{definition}[Dynamic adjustment of the mechanical epicycle group]\label{def:mech_adaptive_adjustment}
+Let the current mechanical epicycle group be $\mathfrak E^{(j)}$, with partial sum
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+and residual $r^{(j)}=z-z^{(j)}$. \textbf{Dynamic adjustment} consists of two rules:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Number adjustment}: if the residual energy $\|r^{(j)}\|^2>\delta$, add one epicycle according to the peak of the residual periodogram;
+    \item \textbf{Parameter adjustment}: update the parameters of the existing epicycles by regularised least squares or by the conservation constraints.
+\end{enumerate}
+In mechanical systems, number adjustment corresponds to adding normal modes or harmonic orders; parameter adjustment corresponds to tuning the amplitude, the phase and the frequency so that the momentum, angular momentum and energy constraints are satisfied.
+\end{definition}
+
+\begin{proposition}[Monotonicity of number adjustment]\label{prop:mech_adaptive_growth}
+After the dominant-frequency component of the residual has been added as in \cref{def:mech_adaptive_adjustment}(i), the residual energy is monotonically non-increasing:
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+with equality if and only if the residual has no energy at the selected frequency.
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:mech_adaptive_growth} of this chapter agrees with the dynamic-adjustment mechanism of \cref{def:ps_adaptive_adjustment} in the `Periodic Systems' chapter:
+adding an epicycle removes the component of $r^{(j)}$ along $\hat\omega$ from the residual, and the orthogonal decomposition
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{the removed component}\|^2$ yields the inequality,
+with equality if and only if the norm of the removed component is zero. The complete argument is given there.
+\end{proof}
+
+\begin{theorem}[Convergence of dynamic adjustment]\label{thm:mech_adaptive_convergence}
+Let the mechanical target be a finite periodic sequence of period $T_0$, with $\delta=0$. Then after at most $\lfloor T_0/2\rfloor+1$ steps of dynamic adjustment the residual is zero, and the resulting mechanical epicycle group is the exact Fourier data of the target.
+\end{theorem}
+
+\begin{proof}
+The discrete Fourier series of a sequence of period $T_0$ is complete over $\lfloor T_0/2\rfloor+1$ harmonics. At each step \cref{prop:mech_adaptive_growth} extracts one dominant-frequency component of the residual and the residual energy decreases strictly, so after finitely many steps the residual is zero.
+\end{proof}
+
+\begin{definition}[Structural-metric adjustment]\label{def:mech_structure_metric_adjustment}
+Let the structural metric of a mechanical target be
+\[
+\mathcal I=(\mathcal I_{\text{momentum}},\mathcal I_{\text{angular momentum}},\mathcal I_{\text{energy}})
+=(\text{degree of momentum conservation},\ \text{degree of angular momentum conservation},\ \text{degree of energy conservation}).
+\]
+\textbf{Structural-metric adjustment} consists in choosing $\theta$ in the parameter space $\Theta$: at each step take a neighbouring parameter for which $\mathcal I(\theta)$ is \textbf{strictly decreasing} in the lexicographic order (minimisation); if no such parameter exists, the process stops, and the parameter is then locally optimal.
+\end{definition}
+
+\begin{proposition}[Finite convergence of structural-metric adjustment]\label{prop:mech_structure_metric_convergence}
+Let the parameter space $\Theta$ be finite, and let each adjustment make $\mathcal I$ strictly decreasing in the lexicographic order. Then the adjustment terminates after finitely many steps at a locally optimal parameter.
+\end{proposition}
+
+\begin{proof}
+Since $\Theta$ is finite, $\mathcal I$ takes only finitely many values, and the lexicographic order is a total order on a finite set; a strictly decreasing sequence in that order cannot continue indefinitely, so the adjustment terminates after finitely many steps. At termination there is no neighbouring parameter that makes $\mathcal I$ strictly decrease in the lexicographic order, that is, the parameter is locally optimal.
+\end{proof}
+
+\begin{remark}[Boundary of dynamic adjustment]\label{rem:mech_adaptive_boundary}
+\cref{thm:mech_adaptive_convergence} relies on a finite periodic sequence. For a continuous spectrum or a quasi-periodic mechanical target there is no exact representation by a finite epicycle group, and only bounded approximation is possible. Structural-metric adjustment does not guarantee global optimality.
+\end{remark}
+
+\subsection{Step four: mechanical convolution}
+
+\begin{definition}[Mechanical amplitude, phase and frequency convolutions]\label{def:mech_convolution_types}
+Let two mechanical epicycle groups be
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+Define:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Amplitude convolution}: $\mathbb A_{mn}=A_nB_m$;
+    \item \textbf{Phase convolution}: $\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$;
+    \item \textbf{Frequency convolution}: $\mathbb F_{mn}=\omega_n\nu_m$;
+    \item \textbf{Trend convolution}: $\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$.
+\end{enumerate}
+These agree with \cref{def:amplitude_convolution}, \cref{def:phase_convolution}, \cref{def:frequency_convolution} and \cref{def:tendency_convolution} in the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{theorem}[Action of the three convolutions on the mechanical epicycle group]\label{thm:mech_convolution_action}
+Let the epicycle groups of two mechanical targets be $\mathfrak E$ and $\mathfrak E'$ respectively. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item amplitude convolution acts only on the radius;
+    \item phase convolution acts only on the phase;
+    \item frequency convolution acts only on the rotational speed;
+    \item trend convolution preserves both amplitude and phase.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+This is read off directly from \cref{def:mech_convolution_types}.
+\end{proof}
+
+\begin{proposition}[Autocorrelation and trend convolution]\label{prop:mech_autocorr_phase_convolution}
+Let $\{z_t\}$ be a mechanical period sequence, with autocorrelation function
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+In the language of the mechanical epicycle group, the autocorrelation function is the projection of the trend convolution onto the diagonal:
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:mech_autocorr_phase_convolution} of this chapter is the realisation in this domain of the convolution-action conclusion of \cref{thm:ps_convolution_action} in the `Periodic Systems' chapter:
+substituting $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ into the definition of the autocorrelation, cancelling all off-diagonal cross terms by orthogonality and retaining only the diagonal term of the trend convolution
+(the factorisation of the three convolutions, \cref{prop:ps_convolution_factorization}), which yields $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$.
+The full expansion is given there.
+\end{proof}
+
+\begin{remark}[Relation between mechanical convolution and periodic convolution]\label{rem:mech_convolution_relation}
+Mechanical convolution is not a new convolution operation, but an instance on the mechanical epicycle group of the periodic convolution of the `Series and Convolution' chapter. Autocorrelation is the projection of the trend convolution onto the diagonal; cross-correlation and beat frequency are respectively the concrete manifestations in classical mechanics of amplitude convolution and frequency convolution.
+\end{remark}
+
+\subsection{Step five: integration with discrete sampling, harmonic analysis and time-series analysis}
+
+\begin{definition}[Mechanical periodicity diagnostic pipeline]\label{def:mech_periodic_diagnosis}
+For a given mechanical system, diagnosis is carried out using the framework of periodic mathematics:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Periodicity decision}: verify the period type of the mechanical target (\cref{thm:mech_periodicity_decision});
+    \item \textbf{Series construction}: build the amplitude, frequency and phase series and the epicycle group from the generalised-coordinate and momentum data (\cref{thm:mech_series_reconstruction});
+    \item \textbf{Conservation diagnosis}: verify conservation of momentum, of angular momentum and of energy (\cref{thm:mechanical_conservation});
+    \item \textbf{Convolution diagnosis}: compute the autocorrelation (the diagonal projection of the trend convolution, \cref{prop:mech_autocorr_phase_convolution}) and the phase convolution;
+    \item \textbf{Integration diagnosis}: connect to the tool chains of discrete sampling, harmonic analysis and time-series analysis.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[The mechanical periodicity diagnostic pipeline and its interface with three chapters]\label{thm:mech_diagnosis_integration}
+The five steps of \cref{def:mech_periodic_diagnosis} connect respectively to:
+\begin{enumerate}[label=(\roman*)]
+    \item the `Discrete Sampling and Intercalation of Periodic Signals' chapter: \cref{def:uniform_sampling_parallel}, \cref{thm:nyquist_shannon_parallel}, \cref{thm:intercalation_leakage_suppression};
+    \item the `Harmonic Analysis' chapter: \cref{def:fourier_series}, \cref{thm:parseval_fourier}, \cref{prop:twelve_to_six};
+    \item the `Time Series Analysis' chapter: \cref{def:ts_period_detection}, \cref{prop:ts_period_significance}, \cref{def:ts_window_validation}.
+\end{enumerate}
+Hence mechanical periodicity diagnosis is not an independent method, but the application of the unified tool chain of periodic mathematics to mechanical systems.
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:mech_diagnosis_integration} of this chapter is the concretisation in this domain of the five-step interface of the `Periodic Systems' chapter (\cref{tab:ps_five_steps}):
+the periodicity decision uses sampling and spectral estimation, the frequency decomposition and the phase kernel use the `Harmonic Analysis' chapter, and the periodogram peak, the Fisher test and the
+window-function validation use the `Time Series Analysis' chapter. Hence the diagnostic pipeline is assembled from the tool chains of the three chapters; for the proof see that passage.
+\end{proof}
+
+\begin{remark}[Order of operations after integration]\label{rem:mech_integration_order}
+The recommended order for practical diagnosis is: first decide whether the mechanical target is periodic (\cref{thm:mech_periodicity_decision}); then construct the Fourier data and the epicycle group of the mechanical data (\cref{thm:mech_series_reconstruction}); then optimise the parameters using the conservation constraints and dynamic adjustment (\cref{thm:mech_adaptive_convergence}, \cref{prop:mech_structure_metric_convergence}); then perform the mechanical convolution and autocorrelation analysis (\cref{prop:mech_autocorr_phase_convolution}); and finally output the diagnosis according to \cref{def:mech_periodic_diagnosis}.
+\end{remark}
+
+\section{Mathematical foundations of mechanical systems}
+
+\begin{definition}[Basic quantities of mechanical systems]\label{def:mechanical_quantities}
+Let a mechanical system have $n$ degrees of freedom. Its description involves the following basic quantities:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Generalised coordinates} $q_i$ ($i = 1, \dots, n$): the independent coordinates that determine the position of the system.
+    \item \textbf{Generalised velocities} $\dot{q}_i = dq_i/dt$.
+    \item \textbf{Kinetic energy} $T = \frac{1}{2}\sum_{i,j} m_{ij}\dot{q}_i\dot{q}_j$ (the $m_{ij}$ are the symmetric entries of the generalised mass matrix).
+    \item \textbf{Potential energy} $V(q_1, \dots, q_n)$: the part that depends only on the coordinates and not on the velocities.
+    \item \textbf{Lagrangian} $L = T - V$.
+    \item \textbf{Hamiltonian} $H = T + V$ (for conservative systems); in terms of the canonical momenta $p_i = \partial L/\partial\dot{q}_i$, $H$ is a function on the phase space $(q_i, p_i)$.
+\end{enumerate}
+For a conservative system, the value of the Hamiltonian $H$ is conserved along an orbit, that is, $\frac{dH}{dt} = 0$.
+\end{definition}
+
+\section{Spring oscillator}
+
+\begin{definition}[Spring oscillator]\label{def:spring_oscillator}
+A particle of mass $m$ is attached to a spring of stiffness $k$ and moves on a frictionless horizontal plane. Let $x$ denote the displacement of the particle from its equilibrium position; its equation of motion is
+\[
+m\ddot{x} + kx = 0 \quad \Longleftrightarrow \quad \ddot{x} + \omega_0^2 x = 0, \quad \omega_0 = \sqrt{\frac{k}{m}}.
+\]
+This equation is called the \textbf{simple harmonic oscillation equation}, and $\omega_0$ is called the \textbf{natural angular frequency}. Its general solution is
+\[
+x(t) = A\cos(\omega_0 t + \phi),
+\]
+where the amplitude $A \ge 0$ and the initial phase $\phi \in [0, 2\pi)$ are uniquely determined by the initial conditions $(x_0, \dot{x}_0)$.
+\end{definition}
+
+\begin{proposition}[Energy conservation and isochronism of the spring oscillator]\label{prop:spring_energy_period}
+The total mechanical energy $E = \frac{1}{2}kA^2$ of the spring oscillator is conserved; the oscillation period $T = 2\pi\sqrt{m/k}$ is independent of the amplitude $A$ (isochronism).
+\end{proposition}
+
+\begin{proof}
+Energy: $E = \frac{1}{2}m\dot x^2 + \frac{1}{2}kx^2$. Substituting $x(t) = A\cos(\omega_0 t + \phi)$ and $\dot x(t) = -A\omega_0\sin(\omega_0 t + \phi)$, and using $\omega_0^2 = k/m$:
+\[
+E = \frac{1}{2}mA^2\omega_0^2\sin^2(\omega_0 t+\phi) + \frac{1}{2}kA^2\cos^2(\omega_0 t+\phi) = \frac{1}{2}kA^2\big(\sin^2 + \cos^2\big) = \frac{1}{2}kA^2,
+\]
+independently of $t$.
+
+Period: the least $T$ for which the general solution $x(t) = A\cos(\omega_0 t + \phi)$ satisfies $x(t+T) = x(t)$ is given by $\omega_0 T = 2\pi$, that is, $T = 2\pi/\omega_0 = 2\pi\sqrt{m/k}$---independently of the amplitude $A$. This property stems from the linearity of the restoring force $F = -kx$ in $x$.
+\end{proof}
+
+\begin{definition}[Phase delay of the spring oscillator]\label{def:spring_phase_delay}
+For the spring oscillator $x(t) = A\cos(\omega_0 t + \phi)$, the \textbf{phase delay} corresponding to the initial phase $\phi$ is
+\[
+\tau = \frac{\phi}{\omega_0} = \phi \sqrt{\frac{m}{k}}.
+\]
+The phase delay converts a phase angle into a time offset: an initial phase $\phi>0$ means that the oscillation \textbf{leads} the baseline by $\tau$ (that is, it begins $\tau$ earlier; equivalently, the two coincide once the baseline is postponed by $\tau$). When $\phi \to 2\pi^-$, $\tau \to T$---a complete period.
+\end{definition}
+
+\section{Simple pendulum}
+
+\begin{definition}[Simple pendulum]\label{def:simple_pendulum}
+A particle of mass $m$ is suspended from a fixed point by a light, inextensible string of length $l$ and swings in a vertical plane. Let $\theta$ be the angle between the string and the vertical; its equation of motion is
+\[
+\ddot{\theta} + \omega_0^2 \sin\theta = 0, \quad \omega_0 = \sqrt{\frac{g}{l}}.
+\]
+This equation is nonlinear---the restoring force $F = -mg\sin\theta$ is not linear in $\theta$. At small amplitudes $\sin\theta \approx \theta$, and the equation degenerates into the simple harmonic oscillation equation $\ddot{\theta} + \omega_0^2 \theta = 0$.
+\end{definition}
+
+\begin{theorem}[Exact period of the pendulum---amplitude correction]\label{thm:pendulum_exact_period}
+The oscillation period of a simple pendulum released from the maximum deflection angle $\theta_{\max}$ is
+\[
+T(\theta_{\max}) = 4\sqrt{\frac{l}{g}} \, K(k), \quad k = \sin\frac{\theta_{\max}}{2},
+\]
+where $K(k)$ is the complete elliptic integral of the first kind.
+\end{theorem}
+
+\begin{proof}
+By conservation of energy, the angular velocity satisfies
+\[
+\frac{1}{2}ml^2\dot\theta^2 + mgl(1-\cos\theta) = mgl(1-\cos\theta_{\max}).
+\]
+Solving gives
+\[
+\dot\theta = \pm \sqrt{\frac{2g}{l}\big(\cos\theta - \cos\theta_{\max}\big)}.
+\]
+Using the half-angle identity $\cos\theta - \cos\theta_{\max} = 2\big(\sin^2\frac{\theta_{\max}}{2} - \sin^2\frac{\theta}{2}\big)$ and making the change of variable $u = \sin\frac{\theta}{2}/\sin\frac{\theta_{\max}}{2}$, the integral for a quarter period becomes
+\[
+\frac{T}{4} = \sqrt{\frac{l}{g}} \int_0^1 \frac{du}{\sqrt{(1-u^2)(1-k^2u^2)}}, \qquad k = \sin\frac{\theta_{\max}}{2},
+\]
+that is, the complete elliptic integral of the first kind $K(k)$; hence $T = 4\sqrt{l/g}\, K(k)$.
+\end{proof}
+
+\begin{definition}[Amplitude delay of the pendulum]\label{def:pendulum_amplitude_delay}
+The amplitude-dependent period of a simple pendulum can be restated as an \textbf{amplitude delay}: relative to the small-amplitude period $T_0 = 2\pi\sqrt{l/g}$, the increase in period at large amplitude
+\[
+\Delta T(\theta_{\max}) = T(\theta_{\max}) - T_0 = 4\sqrt{\frac{l}{g}}\left(K(k) - \frac{\pi}{2}\right)
+\]
+is the \textbf{additional delay} introduced by the amplitude. The larger the amplitude, the longer the additional delay. In the small-amplitude limit $K(k) \approx \frac{\pi}{2}(1 + k^2/4)$; substituting $k \approx \theta_{\max}/2$ gives $\Delta T \approx \frac{\pi}{8}\theta_{\max}^2\sqrt{l/g}$.
+\end{definition}
+
+\section{Coupled oscillators and the beat phenomenon}
+
+\begin{definition}[Coupled spring-oscillator system]\label{def:coupled_oscillators}
+Consider two identical spring oscillators, each attached to a fixed end by a spring of stiffness $k$, with the two oscillators joined to one another by a coupling spring of stiffness $k_c$. Let $x_1, x_2$ be the displacements of the two oscillators from their respective equilibrium positions; then the equations of motion are
+\[
+m\ddot{x}_1 + kx_1 + k_c(x_1 - x_2) = 0, \qquad m\ddot{x}_2 + kx_2 + k_c(x_2 - x_1) = 0.
+\]
+Introducing the \textbf{normal coordinates}
+\[
+\eta_1 = x_1 + x_2 \quad (\text{symmetric mode}), \qquad \eta_2 = x_1 - x_2 \quad (\text{antisymmetric mode}),
+\]
+the system decouples into two independent simple harmonic oscillation equations.
+\end{definition}
+
+\begin{proposition}[Beat phenomenon---energy transfer under weak coupling]\label{prop:beat_phenomenon}
+In the coupled-oscillator system above, take the initial conditions $x_1(0) = A$, $x_2(0) = 0$, $\dot x_1(0) = \dot x_2(0) = 0$. Then
+\[
+x_1(t) = A\cos(\Delta\omega \, t)\cos(\bar{\omega} t), \qquad x_2(t) = A\sin(\Delta\omega \, t)\sin(\bar{\omega} t),
+\]
+where $\bar\omega = (\omega_1 + \omega_2)/2$ and $\Delta\omega = (\omega_2 - \omega_1)/2$. Energy alternates between the two oscillators with beat period $T_{\text{beat}} = \pi/\Delta\omega$.
+\end{proposition}
+
+\begin{proof}
+The normal coordinates satisfy
+\[
+m\ddot\eta_1 + k\eta_1 = 0 \quad \Rightarrow \quad \omega_1 = \sqrt{k/m},
+\]
+\[
+m\ddot\eta_2 + (k + 2k_c)\eta_2 = 0 \quad \Rightarrow \quad \omega_2 = \sqrt{(k+2k_c)/m}.
+\]
+From the initial conditions, $\eta_1(0) = A$, $\dot\eta_1(0) = 0$, $\eta_2(0) = A$, $\dot\eta_2(0) = 0$, hence $\eta_1(t) = A\cos\omega_1 t$ and $\eta_2(t) = A\cos\omega_2 t$. Solving back gives
+\[
+x_1 = \frac{\eta_1 + \eta_2}{2} = A\cos(\Delta\omega\, t)\cos(\bar\omega t), \qquad
+x_2 = \frac{\eta_1 - \eta_2}{2} = A\sin(\Delta\omega\, t)\sin(\bar\omega t).
+\]
+The envelope $A\cos(\Delta\omega\, t)$ first vanishes at $t = \pi/(2\Delta\omega)$---the energy of oscillator 1 is transferred completely to oscillator 2---and returns after the same interval. Hence the beat period is $T_{\text{beat}} = \pi/\Delta\omega$.
+\end{proof}
+
+\begin{definition}[Beat-frequency delay of coupled oscillators]\label{def:coupled_beat_delay}
+In a coupled-oscillator system, the \textbf{beat-frequency delay} required for the energy to be transferred completely from one oscillator to the other is
+\[
+\tau_{\text{beat}} = T_{\text{beat}} = \frac{\pi}{\Delta\omega}.
+\]
+Under weak coupling ($k_c \ll k$), $\Delta\omega = (\omega_2-\omega_1)/2 \approx k_c/(2\sqrt{km})$, hence
+\[
+\tau_{\text{beat}} \approx \frac{2\pi\sqrt{km}}{k_c}.
+\]
+The weaker the coupling (the smaller $k_c$), the longer the beat-frequency delay---the slower the energy transfer.
+\end{definition}
+
+\section{Forced oscillation}
+
+\begin{definition}[Forced simple harmonic oscillator]\label{def:forced_oscillator}
+Under the combined action of viscous damping and a periodic external force, the equation of motion of a forced simple harmonic oscillator is
+\[
+\ddot{x} + 2\beta\dot{x} + \omega_0^2 x = \frac{F_0}{m}\cos(\omega t),
+\]
+where $\beta > 0$ is the damping coefficient, and $F_0$ and $\omega$ are the amplitude and the angular frequency of the driving force respectively.
+\end{definition}
+
+\begin{theorem}[Steady-state response---amplitude amplification and phase lag]\label{thm:resonance}
+The steady-state solution of the forced oscillator above is
+\[
+x(t) = A(\omega)\cos(\omega t - \delta(\omega)),
+\]
+where
+\[
+A(\omega) = \frac{F_0/m}{\sqrt{(\omega_0^2 - \omega^2)^2 + (2\beta\omega)^2}}, \qquad \delta(\omega) = \begin{cases} \arctan\frac{2\beta\omega}{\omega_0^2 - \omega^2}, & \omega < \omega_0, \\ \pi/2, & \omega = \omega_0, \\ \pi + \arctan\frac{2\beta\omega}{\omega_0^2 - \omega^2}, & \omega > \omega_0. \end{cases}
+\]
+\end{theorem}
+
+\begin{proof}
+Use the complex method: writing $x = \operatorname{Re}[\tilde x e^{i\omega t}]$, the equation becomes
+\[
+\big(-\omega^2 + 2i\beta\omega + \omega_0^2\big)\tilde x = F_0/m,
+\]
+that is,
+\[
+\tilde x = \frac{F_0/m}{\omega_0^2 - \omega^2 + 2i\beta\omega} = A(\omega) e^{-i\delta(\omega)},
+\]
+where $A(\omega)$ is the modulus of the complex number and $-\delta(\omega)$ its argument (satisfying $\tan\delta = \frac{2\beta\omega}{\omega_0^2-\omega^2}$). Taking the real part gives the steady-state solution. The extremum of the amplitude $A(\omega)$ is given by $\frac{dA^2}{d\omega^2} = 0$, namely $\omega_r^2 = \omega_0^2 - 2\beta^2$ (which requires $\beta < \omega_0/\sqrt{2}$).
+\end{proof}
+
+\begin{definition}[Phase-response delay of the forced oscillator]\label{def:forced_phase_delay}
+In the steady-state response of a forced oscillator, the \textbf{phase-response delay} corresponding to the phase lag $\delta(\omega)$ is
+\[
+\tau(\omega) = \frac{\delta(\omega)}{\omega}.
+\]
+The three limiting cases are:
+\begin{enumerate}[label=(\roman*)]
+    \item The low-frequency limit ($\omega \to 0$): $\delta \to 0$, $\tau \to 0$---the response follows the driving force instantaneously.
+    \item The resonance frequency ($\omega = \omega_0$): $\delta = \pi/2$, $\tau = \pi/(2\omega_0) = T_0/4$---the response lags by a quarter period.
+    \item The high-frequency limit ($\omega \to \infty$): $\delta \to \pi$, $\tau \to \pi/\omega$---the response is reversed.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Relation between resonance delay and system parameters]\label{prop:resonance_delay_parameters}
+At the resonance frequency $\omega = \omega_0$, the phase-response delay is
+\[
+\tau_{\text{res}} = \frac{\pi}{2\omega_0} = \frac{T_0}{4} = \frac{\pi}{2}\sqrt{\frac{m}{k}}.
+\]
+The resonance delay depends only on the intrinsic parameters $m$ and $k$ of the system, and not on the damping coefficient $\beta$ or the driving-force amplitude $F_0$. The resonance delay is a measure of the intrinsic time scale of the system.
+\end{proposition}
+
+\begin{lemma}[Damping dependence of the resonance amplitude]\label{ch23_resonance_amplitude}
+The amplitude at the resonance frequency $\omega_r = \sqrt{\omega_0^2 - 2\beta^2}$ is
+\[
+A_{\max} = \frac{F_0/m}{2\beta\sqrt{\omega_0^2 - \beta^2}},
+\]
+and $\lim_{\beta \to 0^+} A_{\max} = +\infty$, $\lim_{\beta \to \infty} A(\omega_0) = 0$. Damping is the sole limiting factor on the resonance amplification factor.
+\end{lemma}
+
+\begin{proof}
+From the amplitude formula of Theorem \ref{thm:resonance}, put $f(\omega) = (\omega_0^2 - \omega^2)^2 + 4\beta^2\omega^2$. Then $\frac{df}{d\omega} = -4\omega(\omega_0^2-\omega^2) + 8\beta^2\omega = 4\omega(\omega^2 - \omega_0^2 + 2\beta^2) = 0$. The non-zero solution gives $\omega_r^2 = \omega_0^2 - 2\beta^2$ (which requires $\beta < \omega_0/\sqrt{2}$, since otherwise there is no resonance peak). Substituting into $A(\omega)$ gives $A_{\max} = \frac{F_0/m}{2\beta\sqrt{\omega_0^2-\beta^2}}$. The two limits are verified by taking limits directly in the expression.
+\end{proof}
+
+\section{Rigid-body rotation and precession}
+
+\begin{definition}[Precession and nutation of a gyroscope]\label{def:gyroscope}
+A rapidly spinning gyroscope under the action of the gravitational torque exhibits two kinds of motion:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Precession}: the spin axis rotates slowly about the vertical axis. The precession angular velocity satisfies $\boldsymbol{\tau} = \boldsymbol{\Omega}_p \times \mathbf{L}$, where $\boldsymbol{\tau}$ is the external torque and $\mathbf{L}$ the angular momentum.
+    \item \textbf{Nutation}: a high-frequency oscillation of the angle between the spin axis and the vertical axis, superposed on the precession.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Precession frequency and nutation frequency]\label{prop:precession_nutation}
+For a rapidly spinning gyroscope (spin angular velocity $\omega_3$ much greater than the precession angular velocity),
+\[
+\Omega_p = \frac{mgr}{I_3\omega_3}, \qquad \omega_n = \frac{I_3\omega_3}{I_1},
+\]
+where $I_3$ is the moment of inertia about the spin axis, $I_1$ the moment of inertia about a transverse axis, $r$ the distance from the pivot to the centre of mass, and $g$ the acceleration due to gravity.
+\end{proposition}
+
+\begin{proof}
+By the angular-momentum theorem $\frac{d\mathbf{L}}{dt} = \boldsymbol{\tau}$. For a rapidly spinning gyroscope, $|\mathbf{L}| \approx I_3\omega_3$ is approximately constant (only its direction changes). The gravitational torque $\boldsymbol{\tau} = mgr\,(\hat{\mathbf{e}}_z \times \hat{\mathbf{L}})$ is always perpendicular to $\mathbf{L}$, so the direction of $\mathbf{L}$ rotates about the vertical axis with angular velocity
+\[
+\Omega_p = \frac{|\boldsymbol{\tau}|}{|\mathbf{L}|} = \frac{mgr}{I_3\omega_3}
+\]
+---that is, precession. Nutation can be obtained by linearising Euler's equations: under a perturbation the angle $\gamma$ between the spin axis and the vertical axis satisfies $\ddot\gamma + \omega_n^2 \gamma = 0$, with frequency $\omega_n = I_3\omega_3/I_1$.
+\end{proof}
+
+\begin{definition}[Precession-response delay of a gyroscope]\label{def:gyroscope_precession_delay}
+For a gyroscope under the action of the gravitational torque, the \textbf{precession-response delay} required for the spin axis to precess through an angle $\Delta\phi$ from its initial direction is
+\[
+\tau_{\text{prec}} = \frac{\Delta\phi}{\Omega_p} = \frac{I_3\omega_3 \cdot \Delta\phi}{mgr}.
+\]
+The faster the spin (the larger $\omega_3$), the longer the precession-response delay---the greater the angular momentum, the greater the `inertia' required to change its direction. The precession-response delay measures the speed with which the system responds to a change in the direction of the angular momentum.
+\end{definition}
+
+\section{Conservation laws of mechanical systems}
+
+\begin{theorem}[Three conservation laws of mechanical systems]\label{thm:mechanical_conservation}
+For a mechanical system consisting of $N$ particles:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Conservation of momentum}: if there is no external force, the total momentum $\mathbf{P} = \sum_i m_i\mathbf{v}_i$ of the system is conserved.
+    \item \textbf{Conservation of angular momentum}: if there is no external torque (the total external torque about some fixed point or centre of mass is zero), the total angular momentum $\mathbf{L} = \sum_i \mathbf{r}_i\times m_i\mathbf{v}_i$ of the system is conserved about that point.
+    \item \textbf{Conservation of energy}: if all forces acting on the system are conservative and the system does not depend explicitly on time, then the total mechanical energy $E = T + V$ is conserved.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) Summing over the $N$ particles: $\frac{d\mathbf{P}}{dt} = \sum_i \mathbf{F}_i^{\text{ext}}$ (internal forces cancel in pairs by Newton's third law). In the absence of external forces $\mathbf{P}$ is a constant vector.
+
+(ii) Taking moments about a fixed point $O$: $\frac{d\mathbf{L}}{dt} = \boldsymbol{\tau}^{\text{ext}}$, where $\boldsymbol{\tau}^{\text{ext}}$ is the total torque of the external forces about $O$ (internal torques cancel in pairs). In the absence of external torque $\mathbf{L}$ is conserved.
+
+(iii) Integrating $\mathbf{F} = m\ddot{\mathbf{r}}$ along the orbit: for a conservative force $\mathbf{F} = -\nabla V$ we have $\frac{d}{dt}(T+V) = 0$---$E = T + V$ is constant.
+\end{proof}
+
+\begin{remark}[Connection with the rest of the book]
+The theory of the periodic structure of mechanical systems established in this chapter is an application of periodic mathematics to classical mechanics. The introduction of the concept of delay reveals the temporal structure of the periodic structure of mechanical systems: the phase delay $\tau = \phi/\omega$ converts a phase angle into a time offset; the amplitude delay $\Delta T(\theta_{\max})$ converts a nonlinear scaling correction into a time offset; the beat-frequency delay $\tau_{\text{beat}} = \pi/\Delta\omega$ converts the coupling strength into an energy-transfer period; the phase-response delay $\tau = \delta/\omega$ converts the lag of the system's response to the driving force into a time offset; and the precession-response delay $\tau_{\text{prec}} = \Delta\phi/\Omega_p$ converts the response of the direction of the angular momentum to a change into a time offset. These five delays are associated respectively with the manifestations in the time domain of the three basic operations (translation, rotation and scaling), and together they constitute the complete delay spectrum of the periodic structure of mechanical systems.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & The time translation and phase delay $\tau = \phi\sqrt{m/k}$ of the spring oscillator (Definition \ref{def:spring_phase_delay}); the time-translation invariance of conservation of momentum (Theorem \ref{thm:mechanical_conservation}) \\
+Scaling & The amplitude delay of the pendulum at large amplitude $\Delta T(\theta_{\max}) \approx \frac{\pi}{8}\theta_{\max}^2\sqrt{l/g}$ (Definition \ref{def:pendulum_amplitude_delay}); the damping scaling of the resonance amplitude (Lemma \ref{ch23_resonance_amplitude}) \\
+Rotation & The phase lag $\delta(\omega)$ of the forced oscillator (Theorem \ref{thm:resonance}); gyroscopic precession $\Omega_p = mgr/(I_3\omega_3)$ (Proposition \ref{prop:precession_nutation}) \\
+Conservation & Energy conservation and isochronism of the spring oscillator (Proposition \ref{prop:spring_energy_period}); conservation of momentum, angular momentum and energy (Theorem \ref{thm:mechanical_conservation}) \\
+Symmetry & The symmetric--antisymmetric decomposition of the normal coordinates (proof of Proposition \ref{prop:beat_phenomenon}); time-reversal symmetry \\
+Closure & The periodic orbit of the pendulum (elliptic-integral period, Theorem \ref{thm:pendulum_exact_period}); the closure of the gyroscopic precession circle and of the beat energy exchange \\
+Period & The spring oscillator $T = 2\pi\sqrt{m/k}$ (isochronism); the pendulum $T = 4\sqrt{l/g}\,K(k)$ (Theorem \ref{thm:pendulum_exact_period}); the beat period $T_{\text{beat}} = \pi/\Delta\omega$ (Proposition \ref{prop:beat_phenomenon}); the resonance delay $\tau_{\text{res}} = T_0/4$ (Proposition \ref{prop:resonance_delay_parameters}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the \textbf{periodicity decision theorem for mechanical systems} of this chapter (\ref{thm:mech_periodicity_decision}). Hint: first write down the decision map and the evolution group of this chapter's target, then apply the proof structure of the general criterion of the `Periodic Systems' chapter.
+
+    \item Verify that the hypotheses of the \textbf{monotonicity of number adjustment} (\ref{prop:mech_adaptive_growth}) hold for the domain objects of this chapter, and give a counterexample in which the hypotheses fail.
+
+    \item Examine the behaviour of the \textbf{three-parameter correspondence: radius, phase and speed} (\ref{prop:mech_epicycle_correspondence}) under parameter degeneracy, and explain how the conclusion degenerates accordingly.
+
+    \item Explain the relation between the \textbf{mechanical periodicity diagnostic pipeline and its interface with three chapters} (\ref{thm:mech_diagnosis_integration}) and the corresponding general conclusion of the `Periodic Systems' chapter (whether the two agree, whether the former is a special case, or whether additional conditions are required).
+
+    \item Using the seven-theme comparison table of this chapter, identify the concrete carriers of the themes \textbf{translation}, \textbf{scaling} and \textbf{rotation} in this chapter, and give one example of domain data for each.
+
+    \item Synthesis: restate the diagnostic pipeline of this chapter using the five-step standard interface of the `Periodic Systems' chapter (Table \ref{tab:ps_five_steps}), noting one by one the theorem of this chapter on which each step depends: \ref{thm:mech_periodicity_decision}, \ref{prop:mech_adaptive_growth}, \ref{prop:mech_epicycle_correspondence}, \ref{thm:mech_diagnosis_integration}.
+\end{enumerate}
+
+

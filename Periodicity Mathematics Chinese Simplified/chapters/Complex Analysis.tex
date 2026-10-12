@@ -1,0 +1,1361 @@
+\chapter{复数分析}
+\label{chap:complex_analysis}
+\markboth{复数分析}{复数分析}
+
+\begin{remark}[本章定位]\label{rem:complex_analysis_positioning}
+本章在「数系」「函数与极限」「实数分析」「级数与卷积」的基础上，建立复变函数的解析理论。本章不重复「数系」章中复数域的构造，也不重复「级数与卷积」章中泰勒级数与洛朗级数的一般理论；本章聚焦于复分析特有的内容：解析函数、Cauchy--Riemann 方程、Cauchy 积分定理、Cauchy 积分公式、解析函数的局部展开、孤立奇点分类、留数定理、辐角原理、Rouché 定理、调和函数与共形映射初步。
+
+本章为「调和分析」中的 Fourier 变换、Laplace 变换、留数计算提供基础，为「矢量分析」中二维复势与调和函数提供工具，为「微分方程」中复特征值与解析解提供语言。
+
+\textbf{七主题导引}：平移——复平面上的平移与解析函数在平移下的不变性；缩放——复数的模长伸缩与 Cauchy--Riemann 方程的保角性；旋转——复数乘法作为旋转，$e^{i\theta}$ 的周期性与单位根；守恒——Cauchy 积分定理的环路积分守恒；对称——解析函数的共轭对称与 Schwarz 反射原理；闭合——Cauchy 积分定理中闭合路径的积分为零；周期——复指数函数的 $2\pi i$-周期与单位根群。
+
+\textbf{约定}：凡使用泰勒级数、洛朗级数、Cauchy--Hadamard 收敛半径公式等一般级数结论之处，一律引用第~\ref{chap:series_conv}~章「级数与卷积」中已建立的相应定义与定理（如 \cref{def:taylor_series}、\cref{def:laurent_series}、\cref{thm:cauchy_hadamard}、\cref{thm:laurent_expansion}）；凡使用一致收敛、含参积分、曲线积分等分析工具之处，一律引用第~\ref{chap:real_analysis}~章「实数分析」中已建立的相应定义与定理（如 \cref{def:uniform_convergence}、\cref{thm:uniform_continuity_integral}、\cref{thm:uniform_continuity_derivative}、\cref{def:line_integral_second_kind}）。本章不再重复这些一般理论，只在复分析语境下使用其结论。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  >=Stealth, thick,
+  node distance=0.7cm and 0.9cm,
+  box/.style={draw, rounded corners, align=center, minimum width=2.4cm, minimum height=0.75cm, font=\small, fill=blue!8},
+  arr/.style={-{Stealth[length=2.2mm]}, very thick}
+]
+\node[box, fill=blue!12]  (alg) {复数代数\\模/辐角/共轭};
+\node[box, fill=cyan!12, right=of alg] (lim) {复极限与连续\\紧集/一致连续};
+\node[box, fill=green!12, right=of lim] (der) {复导数\\Cauchy--Riemann};
+\node[box, fill=orange!12, right=of der] (int) {复积分\\Cauchy 积分定理};
+\node[box, fill=red!12, below=of alg] (exp) {局部展开\\Taylor/Laurent};
+\node[box, fill=purple!12, right=of exp] (sing) {孤立奇点\\留数};
+\node[box, fill=magenta!12, right=of sing] (res) {留数定理\\辐角原理/Rouché};
+\node[box, fill=yellow!16, right=of res] (harm) {调和函数\\共形映射};
+\draw[arr] (alg) -- (lim);
+\draw[arr] (lim) -- (der);
+\draw[arr] (der) -- (int);
+\draw[arr] (int) -- (exp);
+\draw[arr] (exp) -- (sing);
+\draw[arr] (sing) -- (res);
+\draw[arr] (res) -- (harm);
+\draw[arr, dashed] (int) -- (res);
+\end{tikzpicture}
+\caption{本章结构总览：复数代数 $\to$ 复极限与连续 $\to$ 复导数 $\to$ 复积分 $\to$ 局部展开 $\to$ 孤立奇点与留数 $\to$ 调和函数与共形映射。}
+\label{fig:complex_analysis_overview}
+\end{figure}
+
+\section{复数与复平面回顾}
+
+\subsection{复数域与基本运算}
+
+\begin{definition}[复数域]\label{def:ca_complex_field}
+设 $\mathbb{C} = \{(a,b) : a, b \in \mathbb{R}\}$，配备加法 $(a,b) + (c,d) = (a+c, b+d)$ 与乘法 $(a,b)(c,d) = (ac - bd, ad + bc)$。记 $i = (0,1)$，则任意复数可写为 $z = a + bi$。$a = \operatorname{Re} z$ 称为\textbf{实部}，$b = \operatorname{Im} z$ 称为\textbf{虚部}。
+\end{definition}
+
+\begin{proposition}[复数域的基本性质]\label{prop:ca_complex_field_props}
+\begin{enumerate}[label=(\roman*)]
+    \item $(\mathbb{C}, +, \times)$ 是域，加法的单位元为 $0$，乘法的单位元为 $1$。
+    \item $i^2 = -1$，且 $\mathbb{C} = \mathbb{R}[i] \cong \mathbb{R}[x]/(x^2+1)$。
+    \item 对任意 $z \in \mathbb{C}$，$z = \operatorname{Re} z + i \operatorname{Im} z$。
+    \item 共轭映射 $\overline{a+bi} = a - bi$ 满足 $\overline{z+w} = \bar{z} + \bar{w}$，$\overline{zw} = \bar{z} \bar{w}$，$\overline{\bar{z}} = z$。
+    \item 模长 $|z| = \sqrt{z\bar{z}} = \sqrt{a^2 + b^2} \ge 0$，满足 $|zw| = |z| |w|$，$|z+w| \le |z| + |w|$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由「数系」章中复数域的构造得到。加法的结合律、交换律、零元 $(0,0)$、逆元 $-(a,b) = (-a,-b)$ 逐分量继承自 $\mathbb{R}$ 的加法群结构。乘法的结合律、交换律、单位元 $(1,0)$ 由定义直接验证；乘法逆元为 $(a,b)^{-1} = (a/(a^2+b^2), -b/(a^2+b^2))$（当 $(a,b) \neq (0,0)$ 时）。分配律逐分量展开验证。域公理全部满足。
+
+(ii) 由 $(0,1)(0,1) = (-1,0) = -1$ 得到 $i^2 = -1$。映射 $\mathbb{R}[x]/(x^2+1) \to \mathbb{C}$，$[x] \mapsto i$，是域同构。
+
+(iii) 由定义，$a + bi = (a,0) + (0,1)(b,0) = (a,0) + (0,b) = (a,b)$。
+
+(iv) $\overline{z+w} = \overline{(a+c) + (b+d)i} = (a+c) - (b+d)i = (a - bi) + (c - di) = \bar{z} + \bar{w}$。$\overline{zw} = \overline{(ac-bd) + (ad+bc)i} = (ac-bd) - (ad+bc)i = (a-bi)(c-di) = \bar{z}\bar{w}$。$\overline{\bar{z}} = \overline{a-bi} = a+bi = z$。
+
+(v) $z\bar{z} = (a+bi)(a-bi) = a^2 + b^2 \ge 0$，故 $|z| = \sqrt{a^2+b^2} \ge 0$。$|zw|^2 = (zw)\overline{(zw)} = zw\bar{z}\bar{w} = (z\bar{z})(w\bar{w}) = |z|^2|w|^2$，开方得 $|zw| = |z||w|$。三角不等式由 Cauchy--Schwarz 不等式（应用于 $\mathbb{R}^2$）得到。
+\end{proof}
+
+\begin{definition}[极坐标与辐角]\label{def:ca_polar_argument}
+非零复数 $z = a + bi$ 可唯一写为
+\[
+z = r e^{i\theta}, \qquad r = |z| > 0,\ \theta \in \mathbb{R},
+\]
+其中 $e^{i\theta} = \cos\theta + i \sin\theta$（Euler 公式），$\theta$ 称为 $z$ 的\textbf{辐角}，记作 $\theta = \arg z$。辐角不唯一：若 $\theta$ 是 $z$ 的辐角，则 $\theta + 2k\pi$（$k \in \mathbb{Z}$）也是。规定 $\operatorname{Arg} z \in (-\pi, \pi]$ 为\textbf{主辐角}。
+\end{definition}
+
+\begin{theorem}[Euler 公式]\label{thm:ca_euler_formula}
+对任意 $\theta \in \mathbb{R}$，
+\[
+e^{i\theta} = \cos\theta + i \sin\theta.
+\]
+\end{theorem}
+
+\begin{proof}
+由幂级数展开，
+\[
+e^{i\theta} = \sum_{k=0}^{\infty} \frac{(i\theta)^k}{k!} = \sum_{j=0}^{\infty} \frac{(i\theta)^{2j}}{(2j)!} + \sum_{j=0}^{\infty} \frac{(i\theta)^{2j+1}}{(2j+1)!}.
+\]
+由于 $i^{2j} = (-1)^j$，$i^{2j+1} = (-1)^j i$，故
+\[
+e^{i\theta} = \sum_{j=0}^{\infty} \frac{(-1)^j \theta^{2j}}{(2j)!} + i \sum_{j=0}^{\infty} \frac{(-1)^j \theta^{2j+1}}{(2j+1)!} = \cos\theta + i \sin\theta.
+\]
+其中两个级数分别是 $\cos\theta$ 与 $\sin\theta$ 的泰勒展开。
+\end{proof}
+
+\begin{proposition}[极坐标下的乘法与除法]\label{prop:ca_polar_multiplication}
+设 $z_1 = r_1 e^{i\theta_1}$，$z_2 = r_2 e^{i\theta_2}$（$r_1, r_2 > 0$）。则：
+\begin{enumerate}[label=(\roman*)]
+    \item $z_1 z_2 = r_1 r_2 e^{i(\theta_1 + \theta_2)}$；
+    \item $z_1 / z_2 = (r_1/r_2) e^{i(\theta_1 - \theta_2)}$；
+    \item $z_1^n = r_1^n e^{in\theta_1}$（$n \in \mathbb{Z}$，$n \ge 0$ 时 $z_1^0 = 1$，$n < 0$ 时 $z_1^n = (z_1^{-1})^{-n}$）。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由指数函数的加法定理 $e^{i\theta_1} e^{i\theta_2} = e^{i(\theta_1 + \theta_2)}$（由 Euler 公式与三角恒等式）：
+\[
+z_1 z_2 = r_1 e^{i\theta_1} r_2 e^{i\theta_2} = r_1 r_2 e^{i(\theta_1 + \theta_2)}.
+\]
+(ii) $z_2^{-1} = r_2^{-1} e^{-i\theta_2}$，故 $z_1 / z_2 = z_1 z_2^{-1} = (r_1/r_2) e^{i(\theta_1 - \theta_2)}$。
+(iii) 对 $n$ 归纳，(i) 的直接推论。
+\end{proof}
+
+\begin{theorem}[单位根群]\label{thm:ca_unit_roots}
+对任意 $n \in \mathbb{N}^+$，方程 $z^n = 1$ 在 $\mathbb{C}$ 中恰有 $n$ 个解：
+\[
+\zeta_k = e^{2\pi i k/n}, \qquad k = 0, 1, \dots, n-1.
+\]
+这 $n$ 个解构成 $n$ 阶循环群 $C_n$。
+\end{theorem}
+
+\begin{proof}
+设 $z = re^{i\theta}$。$z^n = r^n e^{in\theta} = 1$ 要求 $r^n = 1$ 且 $n\theta \in 2\pi\mathbb{Z}$。因 $r \ge 0$，$r = 1$；$\theta = 2\pi k/n$（$k \in \mathbb{Z}$）。在 $[0, 2\pi)$ 内有 $n$ 个不同值 $\theta_k = 2\pi k/n$，$k = 0, \dots, n-1$。故 $n$ 个解为 $\zeta_k = e^{2\pi i k/n}$。乘法封闭：$\zeta_j \zeta_k = e^{2\pi i(j+k)/n} = \zeta_{(j+k) \bmod n}$。单位元 $\zeta_0 = 1$，逆元 $\zeta_k^{-1} = \zeta_{n-k}$。由 $\zeta_1$ 生成，故 $C_n$。
+\end{proof}
+
+\begin{example}[复数运算的实例]\label{ex:ca_complex_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item $(3+4i)(1-2i) = 3 - 6i + 4i - 8i^2 = 3 - 2i + 8 = 11 - 2i$。
+    \item $z = 1 + i$ 的极坐标形式：$r = \sqrt{2}$，$\theta = \pi/4$，故 $z = \sqrt{2} e^{i\pi/4}$。
+    \item $z^4 = (1+i)^4 = (\sqrt{2} e^{i\pi/4})^4 = 4 e^{i\pi} = -4$。
+    \item 单位根的 $n = 4$ 情形：$\zeta_0 = 1$，$\zeta_1 = i$，$\zeta_2 = -1$，$\zeta_3 = -i$。
+\end{enumerate}
+\end{example}
+
+\subsection{复平面上的拓扑}
+
+\begin{definition}[复平面上的开集、闭集与紧集]\label{def:ca_topology}
+将 $\mathbb{C}$ 与 $\mathbb{R}^2$ 等同（$a + bi \leftrightarrow (a, b)$），从而 $\mathbb{C}$ 上的所有拓扑概念（开集、闭集、紧集、连通、单连通）都继承自 $\mathbb{R}^2$ 的标准拓扑。
+\begin{enumerate}[label=(\roman*)]
+    \item 开球 $B(z_0, r) = \{z : |z - z_0| < r\}$，称为\textbf{开圆盘}。
+    \item 闭球 $\overline{B}(z_0, r) = \{z : |z - z_0| \le r\}$，称为\textbf{闭圆盘}。
+    \item 圆周 $S(z_0, r) = \{z : |z - z_0| = r\}$。
+    \item 区域：连通的开集。
+    \item 单连通区域：基本群为平凡群的区域。
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[复数列的收敛与 Cauchy 序列]\label{def:ca_seq_convergence}
+设 $\{z_k\}$ 是 $\mathbb{C}$ 中的序列，$z \in \mathbb{C}$。
+\begin{enumerate}[label=(\roman*)]
+    \item $z_k \to z$：$\forall \varepsilon > 0$，$\exists K$，$\forall k \ge K$，$|z_k - z| < \varepsilon$。
+    \item $\{z_k\}$ 是 \textbf{Cauchy 序列}：$\forall \varepsilon > 0$，$\exists K$，$\forall m, k \ge K$，$|z_m - z_k| < \varepsilon$。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[复数列收敛的坐标刻画]\label{prop:ca_seq_coordinate}
+设 $z_k = x_k + i y_k$，$z = x + iy$。则 $z_k \to z$ 当且仅当 $x_k \to x$ 且 $y_k \to y$。
+\end{proposition}
+
+\begin{proof}
+$|x_k - x| \le |z_k - z|$，$|y_k - y| \le |z_k - z|$，$|z_k - z| \le |x_k - x| + |y_k - y|$。故等价。
+\end{proof}
+
+\begin{theorem}[$\mathbb{C}$ 的完备性]\label{thm:ca_completeness}
+$\mathbb{C}$ 中每个 Cauchy 序列都收敛。
+\end{theorem}
+
+\begin{proof}
+设 $\{z_k\}$ 是 Cauchy 序列，$z_k = x_k + iy_k$。由 $|x_m - x_k| \le |z_m - z_k|$，$\{x_k\}$ 是 $\mathbb{R}$ 中的 Cauchy 序列，由 $\mathbb{R}$ 完备性收敛于 $x$。同理 $\{y_k\}$ 收敛于 $y$。故 $z_k \to x + iy = z$。
+\end{proof}
+
+\begin{definition}[紧致性与连通性]\label{def:ca_compact_connected}
+\begin{enumerate}[label=(\roman*)]
+    \item $K \subseteq \mathbb{C}$ 紧致，若 $K$ 在 $\mathbb{C} \cong \mathbb{R}^2$ 中是有界闭集（由 Heine--Borel 定理等价）。
+    \item $K \subseteq \mathbb{C}$ 连通，若不能分为两个非空相对开集的不交并。
+    \item $K \subseteq \mathbb{C}$ 道路连通，若任意两点可由连续曲线连接。
+    \item 区域 $\Omega$ 单连通，若 $\Omega$ 中任意闭曲线可在 $\Omega$ 内连续收缩为一点。
+\end{enumerate}
+\end{definition}
+
+\begin{example}[复平面上的拓扑实例]\label{ex:ca_topology_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item 开圆盘 $B(0, 1)$ 是单连通区域。
+    \item 去心圆盘 $B(0, 1) \setminus \{0\}$ 是区域，但不单连通（圆周不可收缩）。
+    \item 上半平面 $\{z : \operatorname{Im} z > 0\}$ 是单连通区域。
+    \item 圆环 $\{z : 1 < |z| < 2\}$ 是区域，但不单连通。
+    \item 带缝平面 $\mathbb{C} \setminus (-\infty, 0]$ 是单连通区域。
+\end{enumerate}
+\end{example}
+
+\section{复变函数、极限与连续}
+
+\subsection{复变函数}
+
+\begin{definition}[复变函数]\label{def:ca_complex_function}
+设 $\Omega \subseteq \mathbb{C}$，$f: \Omega \to \mathbb{C}$。称 $f$ 为\textbf{复变函数}。写 $z = x + iy$，则
+\[
+f(z) = u(x, y) + i v(x, y),
+\]
+其中 $u, v: \Omega_{\mathbb{R}} \to \mathbb{R}$ 是实值函数，$\Omega_{\mathbb{R}} = \{(x, y) \in \mathbb{R}^2 : x + iy \in \Omega\}$。$u = \operatorname{Re} f$ 称为\textbf{实部}，$v = \operatorname{Im} f$ 称为\textbf{虚部}。
+\end{definition}
+
+\begin{definition}[复极限与连续]\label{def:ca_limit_continuous}
+设 $\Omega \subseteq \mathbb{C}$，$f: \Omega \to \mathbb{C}$，$z_0 \in \Omega$。
+\begin{enumerate}[label=(\roman*)]
+    \item $f$ 在 $z_0$ 处\textbf{连续}，若
+    \[
+    \forall \varepsilon > 0,\ \exists \delta > 0,\ \forall z \in \Omega,\quad |z - z_0| < \delta \implies |f(z) - f(z_0)| < \varepsilon.
+    \]
+    \item $f$ 在 $\Omega$ 上连续，若在每一点连续。
+    \item $f$ 在 $\Omega$ 上\textbf{一致连续}，若
+    \[
+    \forall \varepsilon > 0,\ \exists \delta > 0,\ \forall z, w \in \Omega,\quad |z - w| < \delta \implies |f(z) - f(w)| < \varepsilon.
+    \]
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[连续的等价刻画]\label{prop:ca_continuity_equivalent}
+设 $\Omega \subseteq \mathbb{C}$，$f: \Omega \to \mathbb{C}$，$z_0 \in \Omega$。则以下条件等价：
+\begin{enumerate}[label=(\roman*)]
+    \item $f$ 在 $z_0$ 处连续；
+    \item 对 $\Omega$ 中任意序列 $z_k \to z_0$，有 $f(z_k) \to f(z_0)$；
+    \item $u = \operatorname{Re} f$ 与 $v = \operatorname{Im} f$ 在 $z_0$ 处连续。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\Rightarrow$ (ii)：同实数分析中连续性的序列刻画。
+
+(ii) $\Rightarrow$ (i)：反证。
+
+(i) $\Leftrightarrow$ (iii)：由 $|u(z) - u(z_0)| \le |f(z) - f(z_0)|$ 与 $|f(z) - f(z_0)| \le |u(z) - u(z_0)| + |v(z) - v(z_0)|$，等价。
+\end{proof}
+
+\begin{theorem}[紧集上连续函数的性质]\label{thm:ca_continuous_compact}
+设 $K \subseteq \mathbb{C}$ 紧致，$f: K \to \mathbb{C}$ 连续。则：
+\begin{enumerate}[label=(\roman*)]
+    \item $f(K)$ 紧致；
+    \item $f$ 在 $K$ 上有界；
+    \item $|f|$ 在 $K$ 上取得最大值与最小值；
+    \item $f$ 在 $K$ 上一致连续。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 $\mathbb{C} \cong \mathbb{R}^2$ 与实数分析中紧集上连续函数的性质（定理 \ref{thm:continuous_compact}）逐条得到。
+\end{proof}
+
+\begin{example}[复变函数的实例]\label{ex:ca_function_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item 多项式 $f(z) = a_n z^n + \cdots + a_0$（$a_i \in \mathbb{C}$），在 $\mathbb{C}$ 上连续。
+    \item 指数函数 $f(z) = e^z = e^x (\cos y + i \sin y)$，在 $\mathbb{C}$ 上连续。
+    \item 三角函数 $f(z) = \sin z = (e^{iz} - e^{-iz})/(2i)$，在 $\mathbb{C}$ 上连续。
+    \item $f(z) = 1/z$ 在 $\mathbb{C}^\times = \mathbb{C} \setminus \{0\}$ 上连续。
+    \item $f(z) = \operatorname{Re} z$ 与 $g(z) = \operatorname{Im} z$ 在 $\mathbb{C}$ 上连续。
+\end{enumerate}
+\end{example}
+
+\section{复导数与解析函数}
+
+\subsection{复导数}
+
+\begin{definition}[复导数]\label{def:ca_complex_derivative}
+设 $\Omega \subseteq \mathbb{C}$ 为开集，$f: \Omega \to \mathbb{C}$，$z_0 \in \Omega$。$f$ 在 $z_0$ 处\textbf{复可导}，若极限
+\[
+f'(z_0) := \lim_{h \to 0} \frac{f(z_0 + h) - f(z_0)}{h}
+\]
+存在（$h \in \mathbb{C}$，$h \neq 0$）。$f'(z_0)$ 称为 $f$ 在 $z_0$ 处的\textbf{复导数}。
+\end{definition}
+
+\begin{remark}[复导数与实导数的本质区别]\label{rem:ca_derivative_difference}
+复导数要求在 $h \to 0$ 时，无论 $h$ 沿复平面上哪条路径趋于零，商 $(f(z_0 + h) - f(z_0))/h$ 都收敛到同一值。这与实导数只要求 $h$ 沿实轴的两个方向趋于零不同。因此复可导是比实可导更强的条件——它要求 $f$ 在 $z_0$ 附近的局部行为具有“复线性”结构。
+\end{remark}
+
+\begin{theorem}[Cauchy--Riemann 方程]\label{thm:ca_cauchy_riemann}
+设 $\Omega \subseteq \mathbb{C}$ 为开集，$f = u + iv: \Omega \to \mathbb{C}$，$z_0 = x_0 + iy_0 \in \Omega$。若 $f$ 在 $z_0$ 处复可导，则 $u, v$ 在 $(x_0, y_0)$ 处偏导数存在，且满足 \textbf{Cauchy--Riemann 方程}
+\[
+\frac{\partial u}{\partial x} = \frac{\partial v}{\partial y}, \qquad \frac{\partial u}{\partial y} = -\frac{\partial v}{\partial x}.
+\]
+此时
+\[
+f'(z_0) = \frac{\partial u}{\partial x} + i \frac{\partial v}{\partial x} = \frac{\partial v}{\partial y} - i \frac{\partial u}{\partial y}.
+\]
+\end{theorem}
+
+\begin{proof}
+考虑 $h \to 0$ 沿实轴方向（$h = \Delta x$，$\Delta y = 0$）：
+\[
+f'(z_0) = \lim_{\Delta x \to 0} \frac{f(x_0 + \Delta x, y_0) - f(x_0, y_0)}{\Delta x} = \frac{\partial u}{\partial x}(x_0, y_0) + i \frac{\partial v}{\partial x}(x_0, y_0).
+\]
+沿虚轴方向（$h = i \Delta y$，$\Delta x = 0$）：
+\[
+f'(z_0) = \lim_{\Delta y \to 0} \frac{f(x_0, y_0 + \Delta y) - f(x_0, y_0)}{i \Delta y} = \frac{1}{i} \left( \frac{\partial u}{\partial y} + i \frac{\partial v}{\partial y} \right) = \frac{\partial v}{\partial y}(x_0, y_0) - i \frac{\partial u}{\partial y}(x_0, y_0).
+\]
+（用了 $1/i = -i$。）由于 $f$ 复可导，两个极限必须相等。比较实部与虚部：
+\[
+\frac{\partial u}{\partial x} = \frac{\partial v}{\partial y}, \qquad \frac{\partial v}{\partial x} = -\frac{\partial u}{\partial y}.
+\]
+即 Cauchy--Riemann 方程成立。
+\end{proof}
+
+\begin{remark}[Cauchy--Riemann 方程的充分性]\label{rem:ca_cr_sufficiency}
+Cauchy--Riemann 方程是复可导的必要条件，但不是充分条件。若 $u, v$ 在 $(x_0, y_0)$ 处偏导数存在、满足 Cauchy--Riemann 方程，且偏导数在 $(x_0, y_0)$ 处连续，则 $f$ 在 $z_0$ 处复可导（见推论 \ref{cor:ca_cr_sufficient}）。
+\end{remark}
+
+\begin{theorem}[Cauchy--Riemann 方程与 $C^1$ 充分性]\label{thm:ca_cr_sufficient}
+设 $\Omega \subseteq \mathbb{C}$ 为开集，$f = u + iv: \Omega \to \mathbb{C}$。若 $u, v$ 在 $\Omega$ 上 $C^1$（即具有连续一阶偏导数），且处处满足 Cauchy--Riemann 方程
+\[
+\frac{\partial u}{\partial x} = \frac{\partial v}{\partial y}, \qquad \frac{\partial u}{\partial y} = -\frac{\partial v}{\partial x},
+\]
+则 $f$ 在 $\Omega$ 上复可导，且
+\[
+f'(z) = \frac{\partial u}{\partial x}(x, y) + i \frac{\partial v}{\partial x}(x, y).
+\]
+\end{theorem}
+
+\begin{proof}
+固定 $z_0 = x_0 + iy_0 \in \Omega$。因 $u, v \in C^1$，由实数分析中可微性定义，
+\[
+u(x_0 + \Delta x, y_0 + \Delta y) - u(x_0, y_0) = u_x \Delta x + u_y \Delta y + o(\sqrt{\Delta x^2 + \Delta y^2}),
+\]
+\[
+v(x_0 + \Delta x, y_0 + \Delta y) - v(x_0, y_0) = v_x \Delta x + v_y \Delta y + o(\sqrt{\Delta x^2 + \Delta y^2}),
+\]
+其中偏导数在 $(x_0, y_0)$ 处取值。故
+\[
+f(z_0 + h) - f(z_0) = (u_x + iv_x)\Delta x + (u_y + iv_y)\Delta y + o(|h|).
+\]
+由 Cauchy--Riemann 方程，$u_y = -v_x$，$v_y = u_x$。故
+\[
+(u_y + iv_y) = (-v_x + i u_x) = i(u_x + i v_x).
+\]
+因此
+\[
+\begin{aligned}
+f(z_0 + h) - f(z_0) &= (u_x + iv_x)\Delta x + i(u_x + iv_x)\Delta y + o(|h|)\\
+&= (u_x + iv_x)(\Delta x + i\Delta y) + o(|h|) = (u_x + iv_x)h + o(|h|).
+\end{aligned}
+\]
+故
+\[
+\lim_{h \to 0} \frac{f(z_0 + h) - f(z_0)}{h} = u_x + iv_x.
+\]
+即 $f$ 在 $z_0$ 处复可导，$f'(z_0) = u_x + iv_x$。
+\end{proof}
+
+\begin{corollary}[$C^1$ 且满足 Cauchy--Riemann 方程蕴含解析]\label{cor:ca_cr_sufficient}
+若 $u, v \in C^1(\Omega)$ 且处处满足 Cauchy--Riemann 方程，则 $f = u + iv$ 在 $\Omega$ 上复可导。
+\end{corollary}
+
+\begin{proof}
+即定理 \ref{thm:ca_cr_sufficient}。
+\end{proof}
+
+\subsection{解析函数}
+
+\begin{definition}[解析函数]\label{def:ca_analytic_function}
+设 $\Omega \subseteq \mathbb{C}$ 为开集，$f: \Omega \to \mathbb{C}$。若 $f$ 在 $\Omega$ 上每一点都复可导，则称 $f$ 在 $\Omega$ 上\textbf{解析}（或\textbf{全纯}）。若 $f$ 在 $z_0$ 的某邻域内解析，则称 $f$ 在 $z_0$ 处解析。
+\end{definition}
+
+\begin{definition}[整函数]\label{def:ca_entire_function}
+在 $\mathbb{C}$ 上处处解析的函数称为\textbf{整函数}。
+\end{definition}
+
+\begin{proposition}[解析函数的运算性质]\label{prop:ca_analytic_operations}
+设 $f, g$ 在 $\Omega$ 上解析。则：
+\begin{enumerate}[label=(\roman*)]
+    \item $f + g$ 在 $\Omega$ 上解析，$(f+g)' = f' + g'$；
+    \item $fg$ 在 $\Omega$ 上解析，$(fg)' = f'g + fg'$；
+    \item 若 $g$ 在 $\Omega$ 上无零点，则 $f/g$ 在 $\Omega$ 上解析，$(f/g)' = (f'g - fg')/g^2$；
+    \item 若 $f$ 在 $\Omega$ 上解析，$g$ 在 $f(\Omega)$ 上解析，则 $g \circ f$ 在 $\Omega$ 上解析，$(g \circ f)' = (g' \circ f) f'$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+每一条均可由复导数定义直接验证，与实数分析中相应的求导法则相同（用复极限代替实极限）。
+
+(i) 直接由极限的线性性。
+
+(ii) 由定义展开
+\[
+\frac{f(z+h)g(z+h) - f(z)g(z)}{h} = f(z+h)\frac{g(z+h)-g(z)}{h} + g(z)\frac{f(z+h)-f(z)}{h}.
+\]
+由 $f$ 复可导蕴含连续，$f(z+h) \to f(z)$。取极限得 $(fg)'(z) = f(z)g'(z) + g(z)f'(z)$。
+
+(iii) 先证 $(1/g)' = -g'/g^2$：
+\[
+\frac{1/g(z+h) - 1/g(z)}{h} = -\frac{g(z+h)-g(z)}{h} \cdot \frac{1}{g(z+h)g(z)} \to -\frac{g'(z)}{g(z)^2}.
+\]
+再用 (ii) 得 $(f/g)' = f' \cdot 1/g + f \cdot (-g'/g^2) = (f'g - fg')/g^2$。
+
+(iv) 链式法则与实数分析中的复合函数求导相同：将 $(g \circ f)(z+h) - (g \circ f)(z)$ 分解为 $g(f(z+h)) - g(f(z))$，除以 $f(z+h) - f(z)$（当 $f(z+h) \neq f(z)$）再乘 $f(z+h) - f(z)$ 除以 $h$，取极限即得。
+\end{proof}
+
+\begin{theorem}[解析函数的实部与虚部是调和函数]\label{thm:ca_harmonic_parts}
+设 $f = u + iv$ 在 $\Omega$ 上解析，且 $u, v \in C^2(\Omega)$。则 $u$ 与 $v$ 都是\textbf{调和函数}：
+\[
+\Delta u = \frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} = 0, \qquad
+\Delta v = \frac{\partial^2 v}{\partial x^2} + \frac{\partial^2 v}{\partial y^2} = 0.
+\]
+\end{theorem}
+
+\begin{proof}
+由 Cauchy--Riemann 方程，$u_x = v_y$，$u_y = -v_x$。若 $u, v \in C^2$，则混合偏导数可交换，故
+\[
+u_{xx} = (v_y)_x = v_{yx} = v_{xy} = (-u_y)_y = -u_{yy},
+\]
+即 $u_{xx} + u_{yy} = 0$。同理 $v_{xx} + v_{yy} = 0$。
+\end{proof}
+
+\begin{definition}[调和共轭]\label{def:ca_harmonic_conjugate}
+设 $u: \Omega \to \mathbb{R}$ 是调和函数。若存在调和函数 $v: \Omega \to \mathbb{R}$ 使 $u + iv$ 在 $\Omega$ 上解析，则称 $v$ 为 $u$ 的\textbf{调和共轭}。
+\end{definition}
+
+\begin{proposition}[单连通区域上调和函数存在调和共轭]\label{prop:ca_harmonic_conjugate_existence}
+设 $\Omega \subseteq \mathbb{C}$ 为单连通区域，$u: \Omega \to \mathbb{R}$ 为调和函数。则 $u$ 在 $\Omega$ 上存在调和共轭 $v$。
+\end{proposition}
+
+\begin{proof}
+由 $u$ 调和，$u_{xx} + u_{yy} = 0$，即 $(u_x)_x = (-u_y)_y$，故 $(u_x, -u_y)$ 满足可积性条件。定义
+\[
+v(x, y) := \int_{(x_0, y_0)}^{(x, y)} (-u_y) \, dx + u_x \, dy,
+\]
+其中积分沿 $\Omega$ 内任一从 $(x_0, y_0)$ 到 $(x, y)$ 的路径。因 $\Omega$ 单连通且向量场 $(-u_y, u_x)$ 满足旋度为零条件，积分与路径无关，$v$ 良定义。计算得 $v_x = -u_y$，$v_y = u_x$，即 $v$ 是 $u$ 的调和共轭。
+\end{proof}
+
+\begin{example}[解析函数的实例]\label{ex:ca_analytic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item 多项式 $f(z) = \sum_{k=0}^{n} a_k z^k$ 在 $\mathbb{C}$ 上解析，$f'(z) = \sum_{k=1}^{n} k a_k z^{k-1}$。
+    \item 指数函数 $f(z) = e^z = e^x(\cos y + i \sin y)$，$u = e^x \cos y$，$v = e^x \sin y$。验证 Cauchy--Riemann 方程：$u_x = e^x \cos y = v_y$，$u_y = -e^x \sin y = -v_x$。故 $e^z$ 整函数，且 $(e^z)' = e^z$。
+    \item 三角函数 $\sin z = (e^{iz} - e^{-iz})/(2i)$，$\cos z = (e^{iz} + e^{-iz})/2$，整函数，满足 $(\sin z)' = \cos z$，$(\cos z)' = -\sin z$。
+    \item $f(z) = 1/z$ 在 $\mathbb{C} \setminus \{0\}$ 上解析，$f'(z) = -1/z^2$。
+    \item $f(z) = \operatorname{Re} z = x$ 在 $\mathbb{C}$ 上连续但处处不解析：$u_x = 1$，$v_y = 0$，Cauchy--Riemann 方程不成立。
+    \item $f(z) = |z|^2 = x^2 + y^2$ 在 $\mathbb{C}$ 上连续，但只在 $z = 0$ 处满足 Cauchy--Riemann 方程，故只在 $z=0$ 处复可导，在 $\mathbb{C}$ 上不解析。
+\end{enumerate}
+\end{example}
+
+\begin{theorem}[复指数函数的周期性与导数]\label{thm:ca_exp_periodicity}
+$f(z) = e^z$ 是整函数，满足 $(e^z)' = e^z$，且
+\[
+e^{z + 2\pi i} = e^z, \qquad \forall z \in \mathbb{C}.
+\]
+即 $e^z$ 具有纯虚周期 $2\pi i$。
+\end{theorem}
+
+\begin{proof}
+由例 \ref{ex:ca_analytic_examples}(ii)，$e^z$ 整函数且 $(e^z)' = e^z$。
+
+周期性：$e^{z + 2\pi i} = e^{x + i(y + 2\pi)} = e^x(\cos(y + 2\pi) + i \sin(y + 2\pi)) = e^x(\cos y + i \sin y) = e^z$。
+\end{proof}
+
+\begin{corollary}[复指数函数的核]\label{cor:ca_exp_kernel}
+$\{z \in \mathbb{C} : e^z = 1\} = 2\pi i \mathbb{Z}$。
+\end{corollary}
+
+\begin{proof}
+$e^z = e^x(\cos y + i \sin y) = 1$ 要求 $e^x = 1$ 且 $\cos y + i \sin y = 1$。故 $x = 0$，$y = 2\pi k$（$k \in \mathbb{Z}$）。即 $z = 2\pi i k$。
+\end{proof}
+
+\begin{example}[复对数函数的多值性]\label{ex:ca_log_multivalued}
+复对数定义为 $z = e^w$ 的反函数。若 $z = re^{i\theta}$（$r > 0$），则
+\[
+\log z = \ln r + i(\theta + 2k\pi), \qquad k \in \mathbb{Z}.
+\]
+$\log z$ 是多值函数；主值 $\operatorname{Log} z = \ln r + i\theta$（$\theta \in (-\pi, \pi]$）在 $\mathbb{C} \setminus (-\infty, 0]$ 上解析，且 $(\operatorname{Log} z)' = 1/z$。
+\end{example}
+
+\section{复积分}
+
+\subsection{复路径积分}
+
+\begin{definition}[复路径与积分]\label{def:ca_contour_integral}
+设 $\gamma: [a, b] \to \mathbb{C}$ 是分段 $C^1$ 曲线（即 $\gamma$ 连续，且除去有限个点外可导、导数连续）。设 $f: \gamma([a, b]) \to \mathbb{C}$ 连续。$f$ 沿 $\gamma$ 的\textbf{复积分}定义为
+\[
+\int_\gamma f(z) \, dz := \int_a^b f(\gamma(t)) \gamma'(t) \, dt.
+\]
+其中右端是复值函数的 Riemann 积分（分量分别积分）。
+\end{definition}
+
+\begin{proposition}[复积分的基本性质]\label{prop:ca_contour_integral_props}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{线性性}：$\int_\gamma (\alpha f + \beta g) \, dz = \alpha \int_\gamma f \, dz + \beta \int_\gamma g \, dz$。
+    \item \textbf{方向反向}：$\int_{\gamma^-} f \, dz = -\int_\gamma f \, dz$。
+    \item \textbf{路径可加性}：若 $\gamma = \gamma_1 \cup \gamma_2$（首尾相接），则 $\int_\gamma f \, dz = \int_{\gamma_1} f \, dz + \int_{\gamma_2} f \, dz$。
+    \item \textbf{参数化不变性}：若 $\tilde{\gamma}$ 是 $\gamma$ 的 $C^1$ 重新参数化（保持方向），则 $\int_{\tilde{\gamma}} f \, dz = \int_\gamma f \, dz$。
+    \item \textbf{估计不等式}：$\left| \int_\gamma f \, dz \right| \le \int_\gamma |f| \, |dz| = \int_a^b |f(\gamma(t))| |\gamma'(t)| \, dt$。特别地，若 $|f| \le M$ 在 $\gamma$ 上，则 $\left| \int_\gamma f \, dz \right| \le M L(\gamma)$，其中 $L(\gamma)$ 是 $\gamma$ 的弧长。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由 Riemann 积分的线性性。
+
+(ii) 若 $\gamma^- (t) = \gamma(a + b - t)$，则 $(\gamma^-)'(t) = -\gamma'(a + b - t)$。故
+\[
+\int_{\gamma^-} f \, dz = \int_a^b f(\gamma(a+b-t)) (-\gamma'(a+b-t)) \, dt = -\int_a^b f(\gamma(s)) \gamma'(s) \, ds = -\int_\gamma f \, dz.
+\]
+
+(iii) 由 Riemann 积分的区间可加性。
+
+(iv) 设 $\tilde{\gamma}(s) = \gamma(\varphi(s))$，$\varphi$ 是 $C^1$ 双射。由换元积分公式，
+\[
+\int_{\tilde{\gamma}} f \, dz = \int_{a'}^{b'} f(\gamma(\varphi(s))) \gamma'(\varphi(s)) \varphi'(s) \, ds.
+\]
+令 $t = \varphi(s)$，$dt = \varphi'(s) ds$，得 $\int_a^b f(\gamma(t)) \gamma'(t) \, dt = \int_\gamma f \, dz$。
+
+(v) 由 Riemann 积分的绝对值不等式与 $|f(\gamma(t)) \gamma'(t)| = |f(\gamma(t))| |\gamma'(t)|$。
+\end{proof}
+
+\begin{example}[基本复积分]\label{ex:ca_basic_integrals}
+\begin{enumerate}[label=(\roman*)]
+    \item $\int_\gamma dz = \gamma(b) - \gamma(a)$（由微积分基本定理）。
+    \item $\int_\gamma z \, dz = (\gamma(b)^2 - \gamma(a)^2)/2$。
+    \item 设 $\gamma$ 是单位圆周 $|z| = 1$ 逆时针一周。则 $\int_\gamma z^n \, dz = 0$ 对 $n \neq -1$，$\int_\gamma z^{-1} \, dz = 2\pi i$。
+\end{enumerate}
+\end{example}
+
+\begin{theorem}[Cauchy 积分定理]\label{thm:ca_cauchy_integral}
+设 $\Omega \subseteq \mathbb{C}$ 为单连通区域，$f$ 在 $\Omega$ 上解析，$\gamma$ 是 $\Omega$ 内的一条分段 $C^1$ 闭合路径。则
+\[
+\oint_\gamma f(z) \, dz = 0.
+\]
+\end{theorem}
+
+\begin{proof}
+设 $f = u + iv$，$dz = dx + i \, dy$。展开复积分：
+\[
+\oint_\gamma f(z) \, dz = \oint_\gamma (u + iv)(dx + i \, dy) = \oint_\gamma (u \, dx - v \, dy) + i \oint_\gamma (v \, dx + u \, dy).
+\]
+对每个实线积分应用 Green 公式（\cref{thm:green_plane}）。设 $D$ 是 $\gamma$ 所围的区域。则
+\[
+\oint_\gamma (u \, dx - v \, dy) = \iint_D \left( -\frac{\partial v}{\partial x} - \frac{\partial u}{\partial y} \right) dx \, dy.
+\]
+\[
+\oint_\gamma (v \, dx + u \, dy) = \iint_D \left( \frac{\partial u}{\partial x} - \frac{\partial v}{\partial y} \right) dx \, dy.
+\]
+由 Cauchy--Riemann 方程（定理 \ref{thm:ca_cauchy_riemann}），$u_x = v_y$，$u_y = -v_x$，故两个二重积分的被积函数均为零。因此两个实线积分均为零，从而复积分为零。
+\end{proof}
+
+\begin{corollary}[Cauchy 积分定理的等价表述]\label{cor:ca_cauchy_integral_equivalent}
+在单连通区域上，解析函数的积分与路径无关：若 $\gamma_1$ 与 $\gamma_2$ 是从 $z_0$ 到 $z_1$ 的两条分段 $C^1$ 路径，则 $\int_{\gamma_1} f \, dz = \int_{\gamma_2} f \, dz$。
+\end{corollary}
+
+\begin{proof}
+取 $\gamma = \gamma_1 \cup \gamma_2^-$（从 $z_0$ 沿 $\gamma_1$ 到 $z_1$，再沿 $\gamma_2$ 反向从 $z_1$ 回到 $z_0$）。$\gamma$ 是闭合路径，由定理 \ref{thm:ca_cauchy_integral}，$\oint_\gamma f \, dz = 0$。即 $\int_{\gamma_1} f \, dz - \int_{\gamma_2} f \, dz = 0$，故相等。
+\end{proof}
+
+\begin{theorem}[Cauchy 积分公式]\label{thm:ca_cauchy_formula}
+设 $\Omega \subseteq \mathbb{C}$ 为区域，$f$ 在 $\Omega$ 上解析，$\overline{B}(z_0, r) \subseteq \Omega$。则
+\[
+f(z_0) = \frac{1}{2\pi i} \oint_{|z - z_0| = r} \frac{f(z)}{z - z_0} \, dz,
+\]
+其中积分路径取正向（逆时针）。
+\end{theorem}
+
+\begin{proof}
+\textbf{步骤 1：将被积函数分解}。在 $|z - z_0| = r$ 上，$z \neq z_0$。对任意 $\rho \in (0, r)$，考虑小圆 $|z - z_0| = \rho$。由 Cauchy 积分定理（应用于区域 $\{\rho < |z - z_0| < r\}$，该区域是多连通区域，但可由割线化为单连通），
+\[
+\oint_{|z - z_0| = r} \frac{f(z)}{z - z_0} \, dz = \oint_{|z - z_0| = \rho} \frac{f(z)}{z - z_0} \, dz.
+\]
+
+\textbf{步骤 2：在小圆上计算}。参数化 $z = z_0 + \rho e^{i\theta}$，$\theta \in [0, 2\pi]$。则 $dz = i\rho e^{i\theta} d\theta$，
+\[
+\oint_{|z - z_0| = \rho} \frac{f(z)}{z - z_0} \, dz = \int_0^{2\pi} \frac{f(z_0 + \rho e^{i\theta})}{\rho e^{i\theta}} i\rho e^{i\theta} \, d\theta = i \int_0^{2\pi} f(z_0 + \rho e^{i\theta}) \, d\theta.
+\]
+
+\textbf{步骤 3：取极限 $\rho \to 0$}。由 $f$ 在 $z_0$ 处连续，$f(z_0 + \rho e^{i\theta}) \to f(z_0)$ 关于 $\theta$ 一致。故
+\[
+\lim_{\rho \to 0} i \int_0^{2\pi} f(z_0 + \rho e^{i\theta}) \, d\theta = i \int_0^{2\pi} f(z_0) \, d\theta = 2\pi i f(z_0).
+\]
+因此 $\oint_{|z - z_0| = r} f(z)/(z - z_0) \, dz = 2\pi i f(z_0)$，即 $f(z_0) = (1/(2\pi i)) \oint_{|z - z_0| = r} f(z)/(z - z_0) \, dz$。
+\end{proof}
+
+\begin{corollary}[解析函数的无穷可微性]\label{cor:ca_infinite_differentiable}
+若 $f$ 在区域 $\Omega$ 上解析，则 $f$ 在 $\Omega$ 上无穷次复可导，且
+\[
+f^{(n)}(z_0) = \frac{n!}{2\pi i} \oint_{|z - z_0| = r} \frac{f(z)}{(z - z_0)^{n+1}} \, dz, \qquad n = 0, 1, 2, \dots
+\]
+\end{corollary}
+
+\begin{proof}
+对 Cauchy 积分公式（定理 \ref{thm:ca_cauchy_formula}）关于 $z_0$ 形式求导。由积分号下求导（含参积分与一致收敛，见 \cref{thm:leibniz_rule}），
+\[
+f'(z_0) = \frac{1}{2\pi i} \oint_{|z - z_0| = r} \frac{f(z)}{(z - z_0)^2} \, dz.
+\]
+归纳得
+\[
+f^{(n)}(z_0) = \frac{n!}{2\pi i} \oint_{|z - z_0| = r} \frac{f(z)}{(z - z_0)^{n+1}} \, dz.
+\]
+\end{proof}
+
+\begin{theorem}[Liouville 定理]\label{thm:ca_liouville}
+若 $f$ 是有界整函数，则 $f$ 是常值函数。
+\end{theorem}
+
+\begin{proof}
+设 $|f(z)| \le M$ 对所有 $z \in \mathbb{C}$ 成立。对任意 $z_0 \in \mathbb{C}$ 与任意 $R > 0$，由推论 \ref{cor:ca_infinite_differentiable} 取 $n = 1$，沿 $|z - z_0| = R$：
+\[
+|f'(z_0)| = \left| \frac{1}{2\pi i} \oint_{|z - z_0| = R} \frac{f(z)}{(z - z_0)^2} \, dz \right| \le \frac{1}{2\pi} \cdot \frac{M}{R^2} \cdot 2\pi R = \frac{M}{R}.
+\]
+令 $R \to \infty$，得 $f'(z_0) = 0$。因 $z_0$ 任意，$f' \equiv 0$，$f$ 为常值。
+\end{proof}
+
+\begin{corollary}[代数基本定理]\label{cor:ca_fundamental_theorem_algebra}
+任何次数 $n \ge 1$ 的复系数多项式在 $\mathbb{C}$ 中有根。
+\end{corollary}
+
+\begin{proof}
+设 $p(z)$ 是无根的 $n \ge 1$ 次多项式。则 $1/p(z)$ 是整函数。当 $|z| \to \infty$ 时 $|p(z)| \to \infty$，故 $1/p(z)$ 有界。由 Liouville 定理（定理 \ref{thm:ca_liouville}），$1/p$ 是常值，从而 $p$ 是常值，与 $n \ge 1$ 矛盾。
+\end{proof}
+
+\subsection{Cauchy 积分定理的多连通版本}
+
+\begin{theorem}[Cauchy 积分定理的多连通版本]\label{thm:ca_cauchy_multiply_connected}
+设 $\Omega$ 是多连通区域，其边界由 $m$ 条简单闭曲线 $\gamma_1, \dots, \gamma_m$ 组成（$\gamma_1$ 为外边界，$\gamma_2, \dots, \gamma_m$ 为内边界，均取正向：外边界逆时针，内边界顺时针）。若 $f$ 在 $\Omega$ 上解析，则
+\[
+\oint_{\gamma_1} f(z) \, dz + \oint_{\gamma_2} f(z) \, dz + \cdots + \oint_{\gamma_m} f(z) \, dz = 0.
+\]
+\end{theorem}
+
+\begin{proof}
+用割线将多连通区域 $\Omega$ 转化为单连通区域：从每个内边界引一条割线连接到外边界。沿割线两侧的积分方向相反，互相抵消，故转化后的区域边界为 $\gamma_1 \cup \gamma_2 \cup \cdots \cup \gamma_m$。对转化后的单连通区域应用 Cauchy 积分定理（定理 \ref{thm:ca_cauchy_integral}），得 $\sum_{i=1}^{m} \oint_{\gamma_i} f \, dz = 0$。
+\end{proof}
+
+\begin{example}[多连通区域的 Cauchy 积分定理]\label{ex:ca_multiply_connected}
+设 $\Omega = \{z : 1 < |z| < 2\}$，$f(z) = 1/z$ 在 $\Omega$ 上解析。外边界 $\gamma_1$ 为 $|z| = 2$ 逆时针，内边界 $\gamma_2$ 为 $|z| = 1$ 顺时针。则
+\[
+\oint_{\gamma_1} \frac{dz}{z} = 2\pi i, \qquad \oint_{\gamma_2} \frac{dz}{z} = -2\pi i,
+\]
+两者之和为零，验证定理 \ref{thm:ca_cauchy_multiply_connected}。
+\end{example}
+
+\section{解析函数的局部展开与零点}
+
+\begin{remark}[与「级数与卷积」章的接口]\label{rem:ca_series_interface}
+本节使用第~\ref{chap:series_conv}~章「级数与卷积」中建立的泰勒级数、洛朗级数、Cauchy--Hadamard 收敛半径公式等一般理论。特别地：泰勒级数的定义与收敛条件见 \cref{def:taylor_series}、\cref{thm:taylor_lagrange}；洛朗级数的定义见 \cref{def:laurent_series}；洛朗展开定理见 \cref{thm:laurent_expansion}；Cauchy--Hadamard 收敛半径公式见 \cref{thm:cauchy_hadamard}。本节不再重复这些一般理论，只给出它们在复分析语境下的直接应用。
+\end{remark}
+
+\subsection{解析函数的 Taylor 展开}
+
+\begin{theorem}[解析函数的 Taylor 展开]\label{thm:ca_taylor_expansion}
+设 $f$ 在圆盘 $B(z_0, R)$ 上解析（$R > 0$）。则对每个 $z \in B(z_0, R)$，
+\[
+f(z) = \sum_{n=0}^{\infty} \frac{f^{(n)}(z_0)}{n!} (z - z_0)^n,
+\]
+且收敛半径至少为 $R$。
+\end{theorem}
+
+\begin{proof}
+由 Cauchy 积分公式（定理 \ref{thm:ca_cauchy_formula}），对任意 $|z - z_0| < r < R$ 与 $|\zeta - z_0| = r$，
+\[
+f(z) = \frac{1}{2\pi i} \oint_{|\zeta - z_0| = r} \frac{f(\zeta)}{\zeta - z} \, d\zeta.
+\]
+将 $1/(\zeta - z)$ 展开为几何级数：
+\[
+\frac{1}{\zeta - z} = \frac{1}{(\zeta - z_0) - (z - z_0)} = \frac{1}{\zeta - z_0} \cdot \frac{1}{1 - \frac{z - z_0}{\zeta - z_0}} = \sum_{n=0}^{\infty} \frac{(z - z_0)^n}{(\zeta - z_0)^{n+1}}.
+\]
+因 $|z - z_0| < r = |\zeta - z_0|$，几何级数一致收敛。代入并逐项积分：
+\[
+f(z) = \frac{1}{2\pi i} \sum_{n=0}^{\infty} (z - z_0)^n \oint_{|\zeta - z_0| = r} \frac{f(\zeta)}{(\zeta - z_0)^{n+1}} \, d\zeta = \sum_{n=0}^{\infty} \frac{f^{(n)}(z_0)}{n!} (z - z_0)^n,
+\]
+其中最后一步用了推论 \ref{cor:ca_infinite_differentiable}。收敛半径至少为 $R$（因对任意 $|z - z_0| < R$ 展开成立）。
+\end{proof}
+
+\begin{corollary}[解析函数的零点孤立性]\label{cor:ca_zero_isolated}
+设 $f$ 在区域 $\Omega$ 上解析且不恒为零。则 $f$ 的零点集在 $\Omega$ 中没有聚点。等价地，若 $f$ 在 $\Omega$ 内某个\textbf{互异}的点列 $\{z_n\}$（$z_n \to z_0 \in \Omega$）上为零，则 $f \equiv 0$。
+\end{corollary}
+
+\begin{proof}
+反设零点有聚点 $z_0 \in \Omega$。由 Taylor 展开（定理 \ref{thm:ca_taylor_expansion}），$f$ 在 $z_0$ 附近可展开为 $\sum_n a_n (z - z_0)^n$。
+
+若展开式非零，则存在最小 $k \ge 0$ 使 $a_k \neq 0$。在 $z_0$ 附近，
+\[
+f(z) = (z - z_0)^k g(z), \qquad g(z) = \sum_{n=0}^{\infty} a_{n+k} (z - z_0)^n, \quad g(z_0) = a_k \neq 0.
+\]
+由 $g$ 连续，存在 $z_0$ 的邻域 $U$ 使 $g \neq 0$ 在 $U$ 上成立。故 $f \neq 0$ 在 $U \setminus \{z_0\}$ 上成立，与零点有聚点矛盾。
+
+故 $a_n = 0$ 对一切 $n$，即 $f \equiv 0$ 在 $z_0$ 的邻域内。由连通性，$f \equiv 0$ 在 $\Omega$ 上成立（因 $\Omega$ 连通，局部为零的函数在整个 $\Omega$ 上为零）。
+\end{proof}
+
+\begin{corollary}[解析函数的唯一性定理]\label{cor:ca_identity_theorem}
+设 $f, g$ 在区域 $\Omega$ 上解析。若 $\{z \in \Omega : f(z) = g(z)\}$ 在 $\Omega$ 中有聚点，则 $f \equiv g$ 在 $\Omega$ 上成立。
+\end{corollary}
+
+\begin{proof}
+令 $h = f - g$，应用推论 \ref{cor:ca_zero_isolated}。
+\end{proof}
+
+\begin{example}[解析函数零点孤立性的应用]\label{ex:ca_zero_isolated_application}
+\begin{enumerate}[label=(\roman*)]
+    \item $\sin z$ 的零点为 $z = k\pi$（$k \in \mathbb{Z}$），这些零点在 $\mathbb{C}$ 中无聚点。
+    \item $e^z - 1$ 的零点为 $z = 2\pi i k$（$k \in \mathbb{Z}$），无聚点。
+    \item 若解析函数在 $[0, 1]$ 上为零，则它在包含 $[0, 1]$ 的整个区域上为零。
+\end{enumerate}
+\end{example}
+
+\subsection{解析函数的洛朗展开}
+
+\begin{definition}[孤立奇点]\label{def:ca_isolated_singularity}
+设 $f$ 在 $z_0$ 的某个去心邻域 $0 < |z - z_0| < R$ 上解析，但在 $z_0$ 处不解析。称 $z_0$ 为 $f$ 的\textbf{孤立奇点}。
+\end{definition}
+
+\begin{theorem}[洛朗展开定理]\label{thm:ca_laurent_expansion}
+设 $f$ 在圆环 $r < |z - z_0| < R$ 上解析（$0 \le r < R \le \infty$）。则 $f$ 在该圆环内可唯一展开为洛朗级数
+\[
+f(z) = \sum_{n=-\infty}^{\infty} a_n (z - z_0)^n,
+\]
+其中
+\[
+a_n = \frac{1}{2\pi i} \oint_{|z - z_0| = \rho} \frac{f(z)}{(z - z_0)^{n+1}} \, dz, \qquad n \in \mathbb{Z},
+\]
+$\rho \in (r, R)$ 任意。
+\end{theorem}
+
+\begin{proof}
+对任意 $z$ 满足 $r < |z - z_0| < R$，取 $\rho_1, \rho_2$ 使 $r < \rho_1 < |z - z_0| < \rho_2 < R$。由 Cauchy 积分公式的多连通版本（定理 \ref{thm:ca_cauchy_multiply_connected}），
+\[
+f(z) = \frac{1}{2\pi i} \oint_{|\zeta - z_0| = \rho_2} \frac{f(\zeta)}{\zeta - z} \, d\zeta - \frac{1}{2\pi i} \oint_{|\zeta - z_0| = \rho_1} \frac{f(\zeta)}{\zeta - z} \, d\zeta.
+\]
+对第一个积分，在 $|\zeta - z_0| = \rho_2$ 上 $|z - z_0| < \rho_2$，展开 $1/(\zeta - z)$ 为 $(z - z_0)$ 的幂级数；对第二个积分，在 $|\zeta - z_0| = \rho_1$ 上 $|z - z_0| > \rho_1$，展开 $1/(\zeta - z)$ 为 $(z - z_0)^{-1}$ 的幂级数。合并得
+\[
+f(z) = \sum_{n=0}^{\infty} a_n^{(+)} (z - z_0)^n + \sum_{n=1}^{\infty} a_{-n}^{(-)} (z - z_0)^{-n}.
+\]
+设 $a_n = a_n^{(+)}$（$n \ge 0$），$a_{-n} = a_{-n}^{(-)}$（$n \ge 1$），则 $f(z) = \sum_{n=-\infty}^{\infty} a_n (z - z_0)^n$。
+
+系数公式由逐项积分得到（利用 $|z - z_0| = \rho$ 上 $(z - z_0)^m$ 的积分正交性）。
+\end{proof}
+
+\begin{definition}[孤立奇点的分类]\label{def:ca_singularity_types}
+设 $z_0$ 是 $f$ 的孤立奇点，洛朗展开为 $f(z) = \sum_{n=-\infty}^{\infty} a_n (z - z_0)^n$。称
+\[
+\text{主部} = \sum_{n=1}^{\infty} a_{-n} (z - z_0)^{-n}
+\]
+为洛朗展开的主部。则：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{可去奇点}：主部为零，即 $a_n = 0$ 对一切 $n < 0$。
+    \item \textbf{$m$ 阶极点}：主部为有限的非零和，最高负幂次为 $m$，即 $a_{-m} \neq 0$ 且 $a_n = 0$ 对 $n < -m$。
+    \item \textbf{本质奇点}：主部有无穷多项，即有无穷多个 $n < 0$ 使 $a_n \neq 0$。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[可去奇点的刻画]\label{thm:ca_removable_singularity}
+设 $z_0$ 是 $f$ 的孤立奇点。则以下条件等价：
+\begin{enumerate}[label=(\roman*)]
+    \item $z_0$ 是可去奇点；
+    \item $f$ 在 $z_0$ 附近有界；
+    \item $\lim_{z \to z_0} f(z)$ 存在且有限。
+\end{enumerate}
+此时可定义 $f(z_0) = \lim_{z \to z_0} f(z)$，使 $f$ 在 $z_0$ 处解析。
+\end{theorem}
+
+\begin{proof}
+(i) $\Rightarrow$ (iii)：若主部为零，$f(z) = \sum_{n=0}^{\infty} a_n (z - z_0)^n$ 在 $z_0$ 附近。则 $\lim_{z \to z_0} f(z) = a_0$ 存在且有限。
+
+(iii) $\Rightarrow$ (ii)：由极限存在，$f$ 在 $z_0$ 附近有界。
+
+(ii) $\Rightarrow$ (i)：设 $|f(z)| \le M$ 在 $0 < |z - z_0| < R$ 上成立。由洛朗系数公式，对 $n < 0$，
+\[
+|a_n| = \left| \frac{1}{2\pi i} \oint_{|z - z_0| = \rho} \frac{f(z)}{(z - z_0)^{n+1}} \, dz \right| \le \frac{1}{2\pi} \cdot \frac{M}{\rho^{n+1}} \cdot 2\pi \rho = \frac{M}{\rho^n} \cdot \rho \to 0 \quad (\rho \to 0)
+\]
+（因 $n < 0$ 时 $1/\rho^n = \rho^{-n} \to 0$）。故 $a_n = 0$ 对一切 $n < 0$ 成立，主部为零，$z_0$ 是可去奇点。
+\end{proof}
+
+\begin{example}[三类孤立奇点的实例]\label{ex:ca_singularity_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{可去奇点}：$f(z) = \sin z / z$ 在 $z_0 = 0$ 处。洛朗展开为 $1 - z^2/6 + \cdots$，主部为零。补充定义 $f(0) = 1$ 后解析。
+    \item \textbf{极点}：$f(z) = 1/z^2$ 在 $z_0 = 0$ 处。洛朗展开为 $z^{-2}$，主部为 $z^{-2}$，二阶极点。
+    \item \textbf{极点}：$f(z) = 1/(z^2(z-1))$ 在 $z_0 = 0$ 处。展开为 $-1/z^2 - 1/z - 1 - z - \cdots$，二阶极点。
+    \item \textbf{本质奇点}：$f(z) = e^{1/z}$ 在 $z_0 = 0$ 处。洛朗展开为 $\sum_{n=0}^{\infty} z^{-n}/n!$，主部有无穷多项。由 Picard 大定理，$e^{1/z}$ 在 $z_0 = 0$ 的任何去心邻域内取遍 $\mathbb{C} \setminus \{0\}$ 中所有值。
+\end{enumerate}
+\end{example}
+
+\section{留数定理及其应用}
+
+\subsection{留数}
+
+\begin{definition}[留数]\label{def:ca_residue}
+设 $z_0$ 是 $f$ 的孤立奇点。$f$ 在 $z_0$ 处的\textbf{留数}定义为洛朗展开中 $(z - z_0)^{-1}$ 项的系数：
+\[
+\operatorname{Res}(f, z_0) = a_{-1} = \frac{1}{2\pi i} \oint_\gamma f(z) \, dz,
+\]
+其中 $\gamma$ 是 $z_0$ 附近的小正向圆。
+\end{definition}
+
+\begin{proposition}[留数的计算]\label{prop:ca_residue_calculation}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{简单极点}：若 $f(z) = g(z)/(z - z_0)$，$g(z_0) \neq 0$，则 $\operatorname{Res}(f, z_0) = g(z_0)$。
+    \item \textbf{两个函数之商}：若 $f = g/h$，$h(z_0) = 0$，$h'(z_0) \neq 0$，$g(z_0) \neq 0$，则 $\operatorname{Res}(f, z_0) = g(z_0)/h'(z_0)$。
+    \item \textbf{$m$ 阶极点}：$\operatorname{Res}(f, z_0) = \frac{1}{(m-1)!} \lim_{z \to z_0} \frac{d^{m-1}}{dz^{m-1}} [(z - z_0)^m f(z)]$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 若 $f(z) = g(z)/(z - z_0)$，$g$ 在 $z_0$ 附近解析，则 $g$ 的泰勒展开为 $g(z) = g(z_0) + g'(z_0)(z - z_0) + \cdots$。故 $f(z) = g(z_0)/(z - z_0) + g'(z_0) + \cdots$。$(z - z_0)^{-1}$ 的系数为 $g(z_0)$。
+
+(ii) 由 $h(z_0) = 0$，$h'(z_0) \neq 0$，$h$ 在 $z_0$ 处有简单零点。$f = g/h$ 在 $z_0$ 处有简单极点。由 (i)，令 $g_{\text{new}}(z) = g(z)/((h(z) - h(z_0))/(z - z_0))$（当 $z \neq z_0$），则 $g_{\text{new}}(z_0) = g(z_0)/h'(z_0)$。故 $\operatorname{Res}(f, z_0) = g(z_0)/h'(z_0)$。
+
+(iii) 若 $z_0$ 是 $m$ 阶极点，$(z - z_0)^m f(z)$ 在 $z_0$ 处可去奇点（或解析）。其泰勒展开为 $\sum_{k=0}^{\infty} b_k (z - z_0)^k$，其中 $b_k = \frac{1}{k!} \lim_{z \to z_0} \frac{d^k}{dz^k} [(z - z_0)^m f(z)]$。故 $f(z) = \sum_{k=0}^{\infty} b_k (z - z_0)^{k-m}$。$(z - z_0)^{-1}$ 对应 $k = m-1$，系数为 $b_{m-1} = \frac{1}{(m-1)!} \lim_{z \to z_0} \frac{d^{m-1}}{dz^{m-1}} [(z - z_0)^m f(z)]$。
+\end{proof}
+
+\begin{theorem}[留数定理]\label{thm:ca_residue_theorem}
+设 $f$ 在单连通区域 $\Omega$ 内除有限个孤立奇点 $z_1, \dots, z_m$ 外解析。设 $\gamma$ 是 $\Omega$ 内不经过任何奇点的正向简单闭曲线，且 $z_1, \dots, z_m$ 都在 $\gamma$ 内部。则
+\[
+\oint_\gamma f(z) \, dz = 2\pi i \sum_{k=1}^{m} \operatorname{Res}(f, z_k).
+\]
+\end{theorem}
+
+\begin{proof}
+对每个 $z_k$，取小圆 $\gamma_k$（$|z - z_k| = \rho_k$），使 $\gamma_k$ 互不相交且都在 $\gamma$ 内。由 Cauchy 积分定理的多连通版本（定理 \ref{thm:ca_cauchy_multiply_connected}），
+\[
+\oint_\gamma f(z) \, dz = \sum_{k=1}^{m} \oint_{\gamma_k} f(z) \, dz.
+\]
+由留数定义（定义 \ref{def:ca_residue}），$\oint_{\gamma_k} f(z) \, dz = 2\pi i \operatorname{Res}(f, z_k)$。故 $\oint_\gamma f(z) \, dz = 2\pi i \sum_{k=1}^{m} \operatorname{Res}(f, z_k)$。
+\end{proof}
+
+\begin{corollary}[留数定理的实积分应用]\label{cor:ca_residue_real_integral}
+\begin{enumerate}[label=(\roman*)]
+    \item 形如 $\int_{-\infty}^{\infty} f(x) \, dx$ 的积分，其中 $f$ 在实轴上无奇点，在上半平面有有限个奇点，且 $|f(z)| \le C/|z|^2$ 当 $|z| \to \infty$。则
+    \[
+    \int_{-\infty}^{\infty} f(x) \, dx = 2\pi i \sum_{\operatorname{Im} z_k > 0} \operatorname{Res}(f, z_k).
+    \]
+    \item 形如 $\int_0^{2\pi} R(\cos\theta, \sin\theta) \, d\theta$ 的积分，其中 $R$ 是有理函数。令 $z = e^{i\theta}$，$\cos\theta = (z + z^{-1})/2$，$\sin\theta = (z - z^{-1})/(2i)$，$d\theta = dz/(iz)$。则
+    \[
+    \begin{aligned}
+    \int_0^{2\pi} R(\cos\theta, \sin\theta) \, d\theta
+      &= \oint_{|z| = 1} R\left( \frac{z + z^{-1}}{2}, \frac{z - z^{-1}}{2i} \right) \frac{dz}{iz}\\
+      &= 2\pi i \sum_{|z_k| < 1} \operatorname{Res}(\text{被积函数}, z_k).
+    \end{aligned}
+    \]
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+(i) 取大圆 $\gamma_R$（$|z| = R$）与实轴上的线段 $[-R, R]$ 构成闭合路径。当 $R \to \infty$ 时，大圆上的积分趋于零（由 $|f(z)| \le C/|z|^2$ 与估计不等式），故 $\int_{-\infty}^{\infty} f(x) \, dx = 2\pi i \sum_{\operatorname{Im} z_k > 0} \operatorname{Res}(f, z_k)$。
+
+(ii) 令 $z = e^{i\theta}$，$|z| = 1$，$dz = i e^{i\theta} d\theta = iz \, d\theta$。故 $d\theta = dz/(iz)$。$\cos\theta = (z + z^{-1})/2$，$\sin\theta = (z - z^{-1})/(2i)$。代入得单位圆周上的复积分，由留数定理计算。
+\end{proof}
+
+\begin{example}[留数定理的实积分计算]\label{ex:ca_residue_real_integral}
+\begin{enumerate}[label=(\roman*)]
+    \item 计算 $\displaystyle\int_{-\infty}^{\infty} \frac{dx}{1 + x^2}$。$f(z) = 1/(1 + z^2)$ 在 $z = \pm i$ 处有简单极点。在上半平面有 $z = i$。由命题 \ref{prop:ca_residue_calculation}(ii)，
+    \[
+    \operatorname{Res}(f, i) = \frac{1}{(1 + z^2)'|_{z=i}} = \frac{1}{2i} = -\frac{i}{2}.
+    \]
+    故 $\int_{-\infty}^{\infty} \frac{dx}{1 + x^2} = 2\pi i \cdot (-i/2) = \pi$。
+    \item 计算 $\displaystyle\int_0^{2\pi} \frac{d\theta}{2 + \cos\theta}$。令 $z = e^{i\theta}$，被积函数化为
+    \[
+    \frac{1}{2 + (z + z^{-1})/2} \cdot \frac{1}{iz} = \frac{2}{iz(4 + z + z^{-1})} = \frac{2}{i(z^2 + 4z + 1)}.
+    \]
+    $z^2 + 4z + 1 = 0$ 的根为 $z = -2 \pm \sqrt{3}$。在单位圆内有 $z_1 = -2 + \sqrt{3}$。留数为 $2/(i(2z_1 + 4)) = 1/(i(z_1 + 2)) = 1/(i\sqrt{3})$。故积分 $= 2\pi i \cdot 1/(i\sqrt{3}) = 2\pi/\sqrt{3}$。
+\end{enumerate}
+\end{example}
+
+\begin{theorem}[辐角原理]\label{thm:ca_argument_principle}
+设 $f$ 在区域 $\Omega$ 内除有限个极点外解析，$\gamma$ 是 $\Omega$ 内不经过 $f$ 的零点和极点的正向简单闭曲线。则
+\[
+\frac{1}{2\pi i} \oint_\gamma \frac{f'(z)}{f(z)} \, dz = N - P,
+\]
+其中 $N$ 是 $f$ 在 $\gamma$ 内部零点的个数（按重数计），$P$ 是 $f$ 在 $\gamma$ 内部极点的个数（按阶数计）。
+\end{theorem}
+
+\begin{proof}
+设 $f$ 在 $z_0$ 处有 $m$ 阶零点（或 $m$ 阶极点，$m < 0$）。则 $f(z) = (z - z_0)^m g(z)$，$g(z_0) \neq 0$ 且 $g$ 解析。故
+\[
+\frac{f'(z)}{f(z)} = \frac{m}{z - z_0} + \frac{g'(z)}{g(z)}.
+\]
+由 $g(z_0) \neq 0$，$g'/g$ 在 $z_0$ 处解析，故 $f'/f$ 在 $z_0$ 处有简单极点，留数为 $m$（零点时 $m > 0$，极点时 $m < 0$）。由留数定理（定理 \ref{thm:ca_residue_theorem}），
+\[
+\frac{1}{2\pi i} \oint_\gamma \frac{f'(z)}{f(z)} \, dz = \sum_{z_k \text{ 零点}} m_k + \sum_{z_k \text{ 极点}} m_k = N - P.
+\]
+\end{proof}
+
+\begin{corollary}[Rouché 定理]\label{cor:ca_rouche}
+设 $f, g$ 在区域 $\Omega$ 内解析，$\gamma$ 是 $\Omega$ 内正向简单闭曲线。若对 $\gamma$ 上所有 $z$ 有 $|g(z)| < |f(z)|$，则 $f$ 与 $f + g$ 在 $\gamma$ 内部有相同个数的零点（按重数计）。
+\end{corollary}
+
+\begin{proof}
+考虑 $h_t(z) = f(z) + t g(z)$（$t \in [0, 1]$）。在 $\gamma$ 上，$|g| < |f|$ 蕴含 $|t g| < |f|$，故 $h_t$ 在 $\gamma$ 上无零点。定义
+\[
+N(t) := \frac{1}{2\pi i} \oint_\gamma \frac{h_t'(z)}{h_t(z)} \, dz.
+\]
+由辐角原理（定理 \ref{thm:ca_argument_principle}），$N(t)$ 是 $h_t$ 在 $\gamma$ 内部零点的个数。$N(t)$ 关于 $t$ 连续（被积函数连续依赖于 $t$ 且分母不为零）。$N(t)$ 取整数值，连续取值整数值的函数必为常值。故 $N(0) = N(1)$，即 $f$ 与 $f + g$ 在 $\gamma$ 内部有相同个数的零点。
+\end{proof}
+
+\begin{example}[Rouché 定理的应用]\label{ex:ca_rouche_application}
+\begin{enumerate}[label=(\roman*)]
+    \item 证明 $z^4 + 3z^2 + 1 = 0$ 在 $|z| < 1$ 内有四个根。取 $f(z) = 3z^2$，$g(z) = z^4 + 1$。在 $|z| = 1$ 上，$|g| \le 2 < 3 = |f|$。由 Rouché 定理，$f$ 与 $f + g$ 在 $|z| < 1$ 内有相同个数的零点。$3z^2$ 在 $|z| < 1$ 内有 $2$ 个零点（$z = 0$ 二阶）。但 $z^4 + 3z^2 + 1 = 0$ 在 $|z| < 1$ 内有 $4$ 个根——这与 Rouché 定理的结论矛盾。原因：$|g|$ 在 $|z| = 1$ 上取最大值为 $2$，$|f| = 3$，$|g| < |f|$ 成立。但 $f = 3z^2$ 在 $|z| < 1$ 内有 $2$ 个零点（按重数计），$f + g = z^4 + 3z^2 + 1$ 应有 $2$ 个零点（按重数计），而非 $4$ 个。$z^4 + 3z^2 + 1 = 0$ 在 $|z| < 1$ 内的根数：令 $w = z^2$，$w^2 + 3w + 1 = 0$，$w = (-3 \pm \sqrt{5})/2 \approx -0.382$ 或 $-2.618$。$|w| < 1$ 对应 $|z|^2 < 1$，故只有 $w \approx -0.382$ 给出 $|z| < 1$ 的两个根 $z = \pm i\sqrt{0.382}$。故 $z^4 + 3z^2 + 1 = 0$ 在 $|z| < 1$ 内有 $2$ 个根，与 Rouché 定理一致。
+    \item 证明 $e^z = 3z$ 在 $|z| < 1$ 内有一个根。取 $f(z) = -3z$，$g(z) = e^z$。在 $|z| = 1$ 上，$|g| = |e^z| = e^{\operatorname{Re} z} \le e < 3 = |f|$。由 Rouché 定理，$f$ 与 $f + g = e^z - 3z$ 在 $|z| < 1$ 内有相同个数的零点。$f = -3z$ 在 $|z| < 1$ 内有一个零点（$z = 0$），故 $e^z - 3z$ 在 $|z| < 1$ 内有一个零点。
+\end{enumerate}
+\end{example}
+
+\section{调和函数与共形映射初步}
+
+\subsection{调和函数}
+
+\begin{definition}[调和函数]\label{def:ca_harmonic_function}
+设 $\Omega \subseteq \mathbb{R}^2 \cong \mathbb{C}$ 为区域，$u: \Omega \to \mathbb{R}$ 是 $C^2$ 函数。称 $u$ 为\textbf{调和函数}，若
+\[
+\Delta u = \frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} = 0
+\]
+在 $\Omega$ 上处处成立。
+\end{definition}
+
+\begin{theorem}[解析函数的实部与虚部是调和函数]\label{thm:ca_analytic_implies_harmonic}
+设 $f = u + iv$ 在区域 $\Omega$ 上解析。则 $u$ 与 $v$ 都是调和函数。
+\end{theorem}
+
+\begin{proof}
+由定理 \ref{thm:ca_harmonic_parts}，$f$ 解析蕴含 $u, v \in C^\infty$（由推论 \ref{cor:ca_infinite_differentiable}）且满足 Cauchy--Riemann 方程。故 $\Delta u = 0$，$\Delta v = 0$。
+\end{proof}
+
+\begin{theorem}[调和函数的均值性质]\label{thm:ca_harmonic_mean_value}
+设 $u$ 在区域 $\Omega$ 上调和，$\overline{B}(z_0, r) \subseteq \Omega$。则
+\[
+u(z_0) = \frac{1}{2\pi} \int_0^{2\pi} u(z_0 + re^{i\theta}) \, d\theta.
+\]
+即调和函数在圆心的值等于其在圆周上的平均值。
+\end{theorem}
+
+\begin{proof}
+由命题 \ref{prop:ca_harmonic_conjugate_existence}，在 $\overline{B}(z_0, r)$ 上存在 $u$ 的调和共轭 $v$，使 $f = u + iv$ 在 $\overline{B}(z_0, r)$ 上解析。由 Cauchy 积分公式（定理 \ref{thm:ca_cauchy_formula}），
+\[
+f(z_0) = \frac{1}{2\pi i} \oint_{|z - z_0| = r} \frac{f(z)}{z - z_0} \, dz.
+\]
+参数化 $z = z_0 + re^{i\theta}$，得
+\[
+f(z_0) = \frac{1}{2\pi} \int_0^{2\pi} f(z_0 + re^{i\theta}) \, d\theta.
+\]
+取实部得 $u(z_0) = \frac{1}{2\pi} \int_0^{2\pi} u(z_0 + re^{i\theta}) \, d\theta$。
+\end{proof}
+
+\begin{corollary}[调和函数的最大值原理]\label{cor:ca_harmonic_max_principle}
+设 $u$ 在区域 $\Omega$ 上调和且非常值。则 $u$ 在 $\Omega$ 内不能取得局部最大值或最小值。
+\end{corollary}
+
+\begin{proof}
+反设 $u$ 在 $z_0 \in \Omega$ 处取得局部最大值 $M$。取 $r > 0$ 使 $\overline{B}(z_0, r) \subseteq \Omega$ 且 $u \le M$ 在 $B(z_0, r)$ 上成立。由均值性质（定理 \ref{thm:ca_harmonic_mean_value}），
+\[
+M = u(z_0) = \frac{1}{2\pi} \int_0^{2\pi} u(z_0 + re^{i\theta}) \, d\theta \le M.
+\]
+等号成立要求 $u(z_0 + re^{i\theta}) = M$ 对所有 $\theta$ 成立。由 $r$ 任意，$u \equiv M$ 在 $B(z_0, r)$ 上成立。由连通性，$u \equiv M$ 在 $\Omega$ 上成立，与非常值矛盾。故 $u$ 不能在 $\Omega$ 内取得局部最大值。最小值同理（考虑 $-u$）。
+\end{proof}
+
+\subsection{共形映射初步}
+
+\begin{definition}[共形映射]\label{def:ca_conformal_map}
+设 $\Omega, \Omega' \subseteq \mathbb{C}$ 为区域，$f: \Omega \to \Omega'$ 是双射。称 $f$ 为\textbf{共形映射}，若 $f$ 在 $\Omega$ 上解析且 $f'(z) \neq 0$ 对所有 $z \in \Omega$ 成立。
+\end{definition}
+
+\begin{proposition}[共形映射的保角性]\label{prop:ca_conformal_angle_preserving}
+设 $f$ 在 $z_0$ 处解析且 $f'(z_0) \neq 0$。则 $f$ 在 $z_0$ 处保持曲线之间的夹角（包括方向）。
+\end{proposition}
+
+\begin{proof}
+设两条曲线 $\gamma_1, \gamma_2$ 过 $z_0$，切向量分别为 $\gamma_1'(0), \gamma_2'(0)$。在 $f$ 下，像曲线的切向量为 $f'(z_0) \gamma_1'(0)$，$f'(z_0) \gamma_2'(0)$。两切向量的夹角为
+\[
+\arg(f'(z_0) \gamma_1'(0)) - \arg(f'(z_0) \gamma_2'(0)) = \arg \gamma_1'(0) - \arg \gamma_2'(0).
+\]
+即夹角不变。因 $f'(z_0) \neq 0$，乘以 $f'(z_0)$ 是旋转与伸缩，保持夹角。
+\end{proof}
+
+\begin{example}[共形映射的实例]\label{ex:ca_conformal_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item Möbius 变换 $f(z) = (az + b)/(cz + d)$（$ad - bc \neq 0$）在上半平面、单位圆盘等区域上有共形映射。
+    \item $f(z) = e^z$ 将带形区域 $\{z : 0 < \operatorname{Im} z < \pi\}$ 共形映射到上半平面。
+    \item $f(z) = (z - i)/(z + i)$ 将上半平面共形映射到单位圆盘。
+    \item $f(z) = z^2$ 将第一象限共形映射到上半平面。
+\end{enumerate}
+\end{example}
+
+\begin{theorem}[Riemann 映射定理]\label{thm:ca_riemann_mapping}
+设 $\Omega \subsetneq \mathbb{C}$ 是单连通区域。则存在共形映射 $f: \Omega \to B(0, 1)$。
+\end{theorem}
+
+\begin{proof}
+证明超出本章范围。参见 Ahlfors, \textit{Complex Analysis}, 3rd ed., McGraw-Hill, 1979, Chapter 6。核心思想是利用正规族与极值问题构造共形映射。
+\end{proof}
+
+\section{四元数分析初步}
+
+\begin{definition}[四元数代数]\label{def:ca_quaternion_algebra}
+\textbf{四元数代数} $\mathbb{H}$ 是 $\mathbb{R}$ 上的四维结合代数，基为 $\{1, i, j, k\}$，乘法由
+\[
+i^2 = j^2 = k^2 = ijk = -1
+\]
+双线性延拓。任意四元数写为 $q = a + bi + cj + dk$（$a, b, c, d \in \mathbb{R}$）。
+\end{definition}
+
+\begin{proposition}[四元数的基本性质]\label{prop:ca_quaternion_props}
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathbb{H}$ 是可除代数：每个非零元有乘法逆元。
+    \item $\mathbb{H}$ 非交换：$ij = k \neq -k = ji$。
+    \item 共轭 $\bar{q} = a - bi - cj - dk$ 满足 $\overline{pq} = \bar{q} \bar{p}$。
+    \item 模长 $|q| = \sqrt{q\bar{q}} = \sqrt{a^2 + b^2 + c^2 + d^2}$，满足 $|pq| = |p| |q|$。
+    \item 单位四元数群 $S^3 = \{q : |q| = 1\}$ 同构于 $SU(2)$，通过共轭作用 $v \mapsto qvq^{-1}$ 实现三维旋转。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 对 $q = a + bi + cj + dk \neq 0$，$q\bar{q} = a^2 + b^2 + c^2 + d^2 > 0$，故 $q^{-1} = \bar{q}/|q|^2$。
+
+(ii) 由 $ij = k$，$ji = -k$。
+
+(iii) 逐分量验证。
+
+(iv) $|pq|^2 = pq \overline{pq} = pq \bar{q} \bar{p} = p|q|^2 \bar{p} = |p|^2 |q|^2$。
+
+(v) 见「矢量分析」章。
+\end{proof}
+
+\begin{definition}[四元数解析函数]\label{def:ca_quaternion_analytic}
+设 $f: \mathbb{H} \supseteq \Omega \to \mathbb{H}$。若极限
+\[
+f'(q_0) = \lim_{h \to 0} [f(q_0 + h) - f(q_0)] h^{-1}
+\]
+存在，则称 $f$ 在 $q_0$ 处\textbf{右可导}。
+\end{definition}
+
+\begin{remark}[四元数解析函数的稀缺性]\label{rem:ca_quaternion_analytic_rarity}
+与复解析函数不同，四元数解析函数极为稀少。这里必须区分两个不同的条件。设 $f = f_0 + f_1 i + f_2 j + f_3 k$，并记 $e_1 = i$、$e_2 = j$、$e_3 = k$。
+
+\textbf{(a) 差商可导}（定义 \ref{def:ca_quaternion_analytic} 的右可导）等价于
+\[
+\frac{\partial f}{\partial x_\mu} = \Bigl(\frac{\partial f}{\partial x_0}\Bigr) e_\mu, \qquad \mu = 1, 2, 3,
+\]
+即三个分量方程。
+
+\textbf{(b) Cauchy--Riemann--Fueter 方程}刻画的是另一类对象，即\textbf{正则}（regular）函数：
+\[
+\frac{\partial f}{\partial \bar{q}} := \frac{\partial f}{\partial x_0} + i \frac{\partial f}{\partial x_1} + j \frac{\partial f}{\partial x_2} + k \frac{\partial f}{\partial x_3} = 0,
+\]
+即四个分量函数满足一阶线性偏微分方程组。
+
+两个条件\textbf{并不等价}：$f(q) = q$ 按差商定义右可导（$[h]h^{-1} \equiv 1$），但 $\partial f/\partial\bar q = 1 + i\cdot i + j\cdot j + k\cdot k = -2 \neq 0$；反之 $f(q) = x_0 + x_1 i$ 满足 $\partial f/\partial\bar q = 1 + i\cdot i = 0$，却不右可导（此时 $\partial_{x_2}f = 0$，而 $(\partial_{x_0}f)e_2 = j \neq 0$，违反 (a)）。
+
+CRF 方程含四个一阶方程，比复数情形（两个方程）严格得多。CRF 方程刻画的\textbf{正则}函数也不是唯一的四元数解析函数类：四元数幂级数 $\sum q^n a_n$、四元数多项式与 $(q-q_0)^n$ 型局部展开属于 \textbf{slice 正则}函数类，两类函数的分工见「四元数分析」章（\S\ref{sec:q_slice_vs_fueter}）。
+\end{remark}
+
+\begin{example}[四元数指数函数的旋转周期性]\label{ex:ca_quaternion_exp}
+对任意纯虚单位四元数 $\mathbf{u}$（$\mathbf{u}^2 = -1$），
+\[
+e^{\mathbf{u}\theta} = \cos\theta + \mathbf{u} \sin\theta
+\]
+满足 $e^{\mathbf{u}(\theta + 2\pi)} = e^{\mathbf{u}\theta}$。对于不同的旋转轴 $\mathbf{u}_1 \neq \mathbf{u}_2$，$e^{\mathbf{u}_1\theta_1}$ 与 $e^{\mathbf{u}_2\theta_2}$ 的乘积一般不可交换。
+\end{example}
+
+\section{与后续章节的接口}
+
+\begin{remark}[与「调和分析」章的接口]\label{rem:ca_to_harmonic}
+本章为「调和分析」章提供：
+\begin{enumerate}[label=(\roman*)]
+    \item Fourier 变换的复分析基础：解析函数的 Cauchy 积分公式与留数定理用于计算 Fourier 变换；
+    \item Laplace 变换的复分析基础：Laplace 变换的收敛域与解析性由复分析保证；
+    \item 留数计算：用于计算形如 $\int_{-\infty}^{\infty} f(x) e^{i\omega x} \, dx$ 的 Fourier 型积分；
+    \item 复指数函数的周期性：$e^{i\theta}$ 的 $2\pi$-周期性是 Fourier 级数的基础。
+\end{enumerate}
+\end{remark}
+
+\begin{remark}[与「矢量分析」章的接口]\label{rem:ca_to_vector_analysis}
+本章为「矢量分析」章提供：
+\begin{enumerate}[label=(\roman*)]
+    \item 二维复势：解析函数 $f = u + iv$ 的实部 $u$ 与虚部 $v$ 是调和函数，可用于描述二维无旋无散场；
+    \item Cauchy--Riemann 方程与旋度/散度的联系：解析函数对应无旋无散场；
+    \item 共形映射：用于求解二维 Laplace 方程的边值问题。
+\end{enumerate}
+\end{remark}
+
+\begin{remark}[与「微分方程」章的接口]\label{rem:ca_to_diffeq}
+本章为「微分方程」章提供：
+\begin{enumerate}[label=(\roman*)]
+    \item 常微分方程的复特征值与复指数解；
+    \item 解析函数用于构造微分方程的解析解；
+    \item Floquet 理论中复乘子的分析；
+    \item 留数定理用于求解微分方程的边值问题。
+\end{enumerate}
+\end{remark}
+
+\begin{remark}[与「概率论与分布」章的接口]\label{rem:ca_to_probability}
+本章为「概率论与分布」章提供：
+\begin{enumerate}[label=(\roman*)]
+    \item 特征函数的复分析基础：特征函数是复值函数，其解析性由复分析保证；
+    \item 留数定理用于计算特征函数与概率分布的关系；
+    \item 复指数函数的周期性与 Fourier 分析在概率论中的应用。
+\end{enumerate}
+\end{remark}
+
+\begin{remark}[本章开放问题]\label{rem:ca_open}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Riemann 映射定理的构造性证明}：本章只陈述了 Riemann 映射定理，未给出证明。完整证明需要正规族与极值方法。
+    \item \textbf{Picard 定理}：大 Picard 定理与小 Picard 定理的深刻结论，超出本章范围。
+    \item \textbf{共形映射的边界行为}：Carathéodory 定理关于共形映射边界连续性的结论，需要更深入的拓扑与几何工具。
+    \item \textbf{四元数解析函数的分类}：四元数解析函数的完整分类与性质，是复分析在非交换情形的自然推广，目前仍是研究前沿。
+    \item \textbf{多复变函数}：本章只处理单复变函数，多复变函数（$\mathbb{C}^n$ 上的解析函数）具有与单复变截然不同的性质，需要独立的理论框架。
+\end{enumerate}
+\end{remark}
+
+\section{单位根、有限阶与旋转周期}
+\label{sec:unit_roots_rotation_period}
+
+本章建立的复指数函数与辐角结构，使「旋转周期」第一次获得可计算的判据。本节把它以单位根的形式固定下来；这一判据随后是「调和分析」与「离散采样逼近、同余角与置闰」两章处理有限阶周期的基础。
+
+\begin{proposition}[复指数的有限阶判据]\label{prop:complex_exp_finite_order}
+对 $\theta\in\mathbb{R}$，记 $\omega:=e^{i\theta}\in U(1)$。则
+\begin{enumerate}[label=(\roman*)]
+    \item $\operatorname{ord}(\omega)<\infty\iff\theta/(2\pi)\in\mathbb{Q}$；
+    \item 若 $\theta/(2\pi)=p/q$ 既约（$q\ge1$），则 $\operatorname{ord}(\omega)=q$，且 $\omega$ 是 $q$ 次\textbf{本原单位根}；
+    \item 映射 $\alpha+\mathbb{Z}\mapsto e^{2\pi i\alpha}$ 给出单同态 $\mathbb{Q}/\mathbb{Z}\hookrightarrow U(1)$，其像为 $U(1)$ 的扭子群，且在 $U(1)$ 中稠密。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由复指数的加法公式 $\omega^n=e^{in\theta}$，故
+\[
+\omega^n=1\iff n\theta\in2\pi\mathbb{Z}\iff \theta/(2\pi)\in\tfrac1n\mathbb{Z}.
+\]
+存在 $n\ge1$ 使上式成立当且仅当 $\theta/(2\pi)\in\mathbb{Q}$。
+
+(ii) 设 $\theta/(2\pi)=p/q$ 既约。则 $\omega^n=1\iff q\mid np\iff q\mid n$（因 $\gcd(p,q)=1$），最小正整数解为 $n=q$；又 $\omega^j\neq1$ 对 $0<j<q$ 成立，故 $\omega$ 为本原 $q$ 次单位根。
+
+(iii) $\alpha\mapsto e^{2\pi i\alpha}$ 是满同态 $(\mathbb{R},+)\to U(1)$，核为 $\mathbb{Z}$（本章复指数以 $2\pi$ 为周期），故诱导单同态 $\mathbb{R}/\mathbb{Z}\hookrightarrow U(1)$；限制在 $\mathbb{Q}/\mathbb{Z}$ 上即为所求。其像为全体单位根，即 $U(1)$ 的扭子群。稠密性由 $\mathbb{Q}$ 在 $\mathbb{R}$ 中稠密与 $e^{2\pi i\cdot}$ 的连续性推得。
+\end{proof}
+
+\begin{corollary}[有限阶旋转 $\Leftrightarrow$ 有理辐角比]\label{cor:rational_angle_finite_order}
+设 $R_\theta(z)=e^{i\theta}z$ 为复平面上的旋转。则
+\[
+\operatorname{ord}(R_\theta)<\infty\iff\theta/(2\pi)\in\mathbb{Q},
+\]
+且此时 $\operatorname{ord}(R_\theta)$ 等于 $\theta/(2\pi)$ 的既约分母，$R_\theta$ 的每条非零轨道是 $q$ 个等分点构成的 $q$-周期闭合轨道。
+\end{corollary}
+
+\begin{proof}
+$R_\theta^n=R_{n\theta}$（本章复指数函数的周期性），故 $\operatorname{ord}(R_\theta)=\operatorname{ord}(e^{i\theta})$，由命题 \ref{prop:complex_exp_finite_order} 即得判据与阶。轨道 $\{e^{in\theta}z\}_{n\ge0}$ 位于以 $|z|$ 为半径的圆上，恰有 $q$ 个互异点且第 $q$ 步复位，故为 $q$-周期闭合轨道。
+\end{proof}
+
+\begin{remark}[与「周期」主题的接口]\label{rem:complex_period_interface}
+命题 \ref{prop:complex_exp_finite_order} 与推论 \ref{cor:rational_angle_finite_order} 把复数层面的周期判据压缩为一句话：\textbf{周期 = 辐角比的有理性}。这一判据是后续多处结论的共同来源：离散傅里叶变换的周期性（$\omega_N=e^{-2\pi i/N}$ 的阶为 $N$）、采样序列基本周期中归一化周期比 $\rho\in\mathbb{Q}$ 的条件，以及有限阶旋转群 $C_q$ 与循环群表示的对应。
+\end{remark}
+
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 复平面上的平移与解析函数在平移下的不变性（定义 \ref{def:ca_complex_function}）；复指数函数的纯虚周期 $2\pi i$（定理 \ref{thm:ca_exp_periodicity}） \\
+缩放 & 复数的模长伸缩与 Cauchy--Riemann 方程（定义 \ref{def:ca_polar_argument}、定理 \ref{thm:ca_cauchy_riemann}）；共形映射的保角性（命题 \ref{prop:ca_conformal_angle_preserving}） \\
+旋转 & 复数乘法作为旋转，$e^{i\theta}$ 的周期性与单位根（定理 \ref{thm:ca_unit_roots}、定理 \ref{thm:ca_euler_formula}）；四元数共轭作用实现三维旋转（命题 \ref{prop:ca_quaternion_props}） \\
+守恒 & Cauchy 积分定理的环路积分守恒（定理 \ref{thm:ca_cauchy_integral}）；Cauchy 积分公式（定理 \ref{thm:ca_cauchy_formula}） \\
+对称 & 解析函数的共轭对称与 Schwarz 反射原理；调和函数的均值性质（定理 \ref{thm:ca_harmonic_mean_value}） \\
+闭合 & Cauchy 积分定理中闭合路径的积分为零（定理 \ref{thm:ca_cauchy_integral}）；留数定理中的闭合积分（定理 \ref{thm:ca_residue_theorem}） \\
+周期 & 复指数函数的 $2\pi i$-周期（定理 \ref{thm:ca_exp_periodicity}）与单位根群（定理 \ref{thm:ca_unit_roots}）；四元数指数函数的旋转周期（例 \ref{ex:ca_quaternion_exp}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\clearpage
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+
+    \item 证明命题 \ref{prop:ca_complex_field_props}：
+    复数域 $\mathbb{C}$ 满足域公理，且
+    \begin{enumerate}[label=(\roman*)]
+        \item $\overline{z+w}=\bar{z}+\bar{w}$，$\overline{zw}=\bar{z}\bar{w}$；
+        \item $|zw|=|z||w|$，$|z+w|\le|z|+|w|$。
+    \end{enumerate}
+    请写出完整的逐分量验证。
+
+    \item 证明定理 \ref{thm:ca_euler_formula}（Euler 公式）：
+    \[
+    e^{i\theta}=\cos\theta+i\sin\theta.
+    \]
+    请用幂级数展开与 $\cos\theta$、$\sin\theta$ 的泰勒级数完成证明。
+
+    \item 证明定理 \ref{thm:ca_unit_roots}：
+    方程 $z^n=1$ 在 $\mathbb{C}$ 中恰有 $n$ 个解
+    \[
+    \zeta_k=e^{2\pi ik/n},\quad k=0,1,\dots,n-1,
+    \]
+    且构成循环群 $C_n$。
+    请验证封闭性、单位元、逆元与生成元。
+
+    \item 证明定理 \ref{thm:ca_completeness}：
+    $\mathbb{C}$ 中每个 Cauchy 序列都收敛。
+    请用实部与虚部的坐标刻画完成证明，
+    并说明为什么 $\mathbb{C}$ 的完备性继承自 $\mathbb{R}$ 的完备性。
+
+    \item 证明定理 \ref{thm:ca_cauchy_riemann}（Cauchy--Riemann 方程）：
+    若 $f=u+iv$ 在 $z_0$ 处复可导，则
+    \[
+    \frac{\partial u}{\partial x}=\frac{\partial v}{\partial y},\qquad
+    \frac{\partial u}{\partial y}=-\frac{\partial v}{\partial x}.
+    \]
+    请分别沿实轴与虚轴计算 $f'(z_0)$，并比较实部与虚部。
+
+    \item 证明定理 \ref{thm:ca_cr_sufficient}：
+    若 $u,v\in C^1(\Omega)$ 且满足 Cauchy--Riemann 方程，
+    则 $f=u+iv$ 在 $\Omega$ 上解析。
+    请用可微性定义与 Cauchy--Riemann 方程完成证明，
+    并说明为什么 $C^1$ 条件不可省略。
+
+    \item 验证例 \ref{ex:ca_analytic_examples} 中各函数的解析性：
+    \begin{enumerate}[label=(\roman*)]
+        \item $f(z)=e^z$，$u=e^x\cos y$，$v=e^x\sin y$；
+        \item $f(z)=\sin z$，$f(z)=\cos z$；
+        \item $f(z)=1/z$ 在 $\mathbb{C}\setminus\{0\}$ 上。
+    \end{enumerate}
+    请分别验证 Cauchy--Riemann 方程，
+    并计算相应的复导数。
+
+    \item 证明定理 \ref{thm:ca_cauchy_integral}（Cauchy 积分定理）：
+    单连通区域上解析函数的闭合路径积分为零。
+    请用 Green 公式（定理 \ref{thm:green_plane}）与
+    Cauchy--Riemann 方程完成证明，
+    并说明为什么单连通性条件不可省略。
+
+    \item 证明定理 \ref{thm:ca_cauchy_formula}（Cauchy 积分公式）：
+    \[
+    f(z_0)=\frac{1}{2\pi i}\oint_{|z-z_0|=r}
+    \frac{f(z)}{z-z_0}\,dz.
+    \]
+    请按“分解被积函数、在小圆上计算、取极限”三步完成证明。
+
+    \item 证明推论 \ref{cor:ca_infinite_differentiable}：
+    解析函数无穷次复可导，且
+    \[
+    f^{(n)}(z_0)=\frac{n!}{2\pi i}\oint_{|z-z_0|=r}
+    \frac{f(z)}{(z-z_0)^{n+1}}\,dz.
+    \]
+    请用 Cauchy 积分公式的积分号下求导完成证明。
+
+    \item 证明定理 \ref{thm:ca_liouville}（Liouville 定理）：
+    有界整函数必为常值。
+    请用 Cauchy 积分公式估计 $|f'(z_0)|$，
+    并说明为什么该估计随半径 $R\to\infty$ 趋于零。
+
+    \item 用 Liouville 定理证明推论 \ref{cor:ca_fundamental_theorem_algebra}
+    （代数基本定理）：
+    任何次数 $n\ge 1$ 的复系数多项式在 $\mathbb{C}$ 中有根。
+    请用反证法，假设无根并构造有界整函数。
+
+    \item 证明定理 \ref{thm:ca_cauchy_multiply_connected}：
+    多连通区域上的 Cauchy 积分定理：
+    \[
+    \oint_{\gamma_1}f\,dz+\cdots+\oint_{\gamma_m}f\,dz=0.
+    \]
+    请说明如何用割线将多连通区域转化为单连通区域，
+    并验证割线两侧积分相互抵消。
+
+    \item 证明定理 \ref{thm:ca_taylor_expansion}：
+    解析函数在圆盘上可展开为 Taylor 级数。
+    请用 Cauchy 积分公式与几何级数展开完成证明，
+    并说明为什么收敛半径至少为圆盘半径。
+
+    \item 证明推论 \ref{cor:ca_zero_isolated}（零点孤立性）：
+    不恒为零的解析函数的零点集无聚点。
+    请写出反证法的完整论证，
+    并说明为什么最小 $k$ 的存在性由 $f\neq 0$ 保证。
+
+    \item 证明推论 \ref{cor:ca_identity_theorem}（唯一性定理）：
+    若两个解析函数在区域内有聚点集上相等，则恒等。
+    请应用零点孤立性定理完成证明。
+
+    \item 证明定理 \ref{thm:ca_laurent_expansion}（洛朗展开定理）：
+    圆环上的解析函数可展开为洛朗级数
+    \[
+    f(z)=\sum_{n=-\infty}^{\infty}a_n(z-z_0)^n.
+    \]
+    请用 Cauchy 积分公式的多连通版本，
+    将积分分解为内、外两个圆周上的积分，分别展开。
+
+    \item 证明定理 \ref{thm:ca_removable_singularity}：
+    孤立奇点 $z_0$ 是可去奇点，当且仅当 $f$ 在 $z_0$ 附近有界。
+    请用洛朗系数公式估计 $|a_n|$（$n<0$），
+    并说明为什么 $\rho\to 0$ 时 $a_n\to 0$。
+
+    \item 验证例 \ref{ex:ca_singularity_examples} 中各类奇点：
+    \begin{enumerate}[label=(\roman*)]
+        \item $\sin z/z$ 在 $z_0=0$ 处（可去奇点）；
+        \item $1/z^2$ 在 $z_0=0$ 处（二阶极点）；
+        \item $e^{1/z}$ 在 $z_0=0$ 处（本质奇点）。
+    \end{enumerate}
+    请写出各自的洛朗展开，
+    并指出主部的形态。
+
+    \item 证明命题 \ref{prop:ca_residue_calculation}（留数计算）：
+    \begin{enumerate}[label=(\roman*)]
+        \item 简单极点：$\operatorname{Res}(f,z_0)=g(z_0)$（$f=g/(z-z_0)$）；
+        \item 两个函数之商：$\operatorname{Res}(f,z_0)=g(z_0)/h'(z_0)$（$f=g/h$）；
+        \item $m$ 阶极点：$\operatorname{Res}(f,z_0)=\frac{1}{(m-1)!}\lim_{z\to z_0}\frac{d^{m-1}}{dz^{m-1}}[(z-z_0)^m f(z)]$。
+    \end{enumerate}
+    请分别写出证明。
+
+    \item 证明定理 \ref{thm:ca_residue_theorem}（留数定理）：
+    \[
+    \oint_\gamma f(z)\,dz=2\pi i\sum_{k=1}^m\operatorname{Res}(f,z_k).
+    \]
+    请用 Cauchy 积分定理的多连通版本，
+    将 $\gamma$ 上的积分分解为围绕各奇点的小圆积分之和。
+
+    \item 计算下列实积分，并写出完整过程：
+    \begin{enumerate}[label=(\roman*)]
+        \item $\displaystyle\int_{-\infty}^{\infty}\frac{dx}{1+x^2}$；
+        \item $\displaystyle\int_0^{2\pi}\frac{d\theta}{2+\cos\theta}$；
+        \item $\displaystyle\int_{-\infty}^{\infty}\frac{\cos x}{1+x^2}\,dx$（提示：考虑 $e^{iz}/(1+z^2)$ 沿半圆路径的积分）。
+    \end{enumerate}
+    请说明留数定理在实积分计算中的关键作用。
+
+    \item 证明定理 \ref{thm:ca_argument_principle}（辐角原理）：
+    \[
+    \frac{1}{2\pi i}\oint_\gamma\frac{f'(z)}{f(z)}\,dz=N-P.
+    \]
+    请计算 $f'/f$ 在零点与极点处的留数，
+    并用留数定理完成证明。
+
+    \item 用辐角原理证明推论 \ref{cor:ca_rouche}（Rouché 定理）：
+    若 $|g|<|f|$ 在 $\gamma$ 上成立，
+    则 $f$ 与 $f+g$ 在 $\gamma$ 内有相同个数的零点。
+    请用 $h_t=f+tg$ 与 $N(t)$ 的连续性完成证明。
+
+    \item 验证例 \ref{ex:ca_rouche_application}：
+    \begin{enumerate}[label=(\roman*)]
+        \item 证明 $z^4+3z^2+1=0$ 在 $|z|<1$ 内有 $2$ 个根；
+        \item 证明 $e^z=3z$ 在 $|z|<1$ 内有 $1$ 个根。
+    \end{enumerate}
+    请分别写出应用 Rouché 定理的完整过程。
+
+    \item 证明定理 \ref{thm:ca_harmonic_mean_value}（均值性质）：
+    调和函数在圆心的值等于其在圆周上的平均值。
+    请用 Cauchy 积分公式的实部完成证明。
+
+    \item 用均值性质证明推论 \ref{cor:ca_harmonic_max_principle}
+    （调和函数最大值原理）：
+    非常值调和函数在区域内不能取得局部最大值或最小值。
+    请写出反证法的完整论证。
+
+    \item 证明命题 \ref{prop:ca_conformal_angle_preserving}：
+    若 $f'(z_0)\neq 0$，则 $f$ 在 $z_0$ 处保持曲线间的夹角。
+    请用切向量在 $f$ 下的像与 $f'(z_0)$ 的旋转伸缩作用完成证明。
+
+    \item 综合题：结合本章的复导数、Cauchy 积分定理、
+    Cauchy 积分公式、Taylor 展开、洛朗展开、留数定理、
+    辐角原理与 Rouché 定理，
+    说明复数分析如何为「调和分析」中的
+    \begin{enumerate}[label=(\roman*)]
+        \item Fourier 变换的计算（留数定理）；
+        \item Laplace 变换的解析性（Cauchy 积分公式）；
+        \item 特征函数的复分析基础（复指数函数）
+    \end{enumerate}
+    提供工具，并分别指出本章中对应的定义、定理或命题。
+
+\end{enumerate}
+

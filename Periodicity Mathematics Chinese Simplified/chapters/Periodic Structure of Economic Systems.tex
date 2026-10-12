@@ -1,0 +1,712 @@
+\chapter{经济系统之周期结构}
+\markboth{经济系统之周期结构}{经济系统之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:econ_ps_hook}
+本章判定研究目标是否具有周期性、确定其周期类型、以及查找最小正周期时，一律引用「周期系统」章：
+周期性判据见 \cref{thm:ps_periodicity_decision}，
+周期类型判别见 \cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}，
+最小正周期查找见 \cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}，
+由数据构建周期级数与周转圆组见 \cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}。
+\end{remark}
+
+\begin{remark}[本章定位：按「周期系统」章五步接口展开]\label{rem:econ_five_steps_positioning}
+经济系统之周期结构研究经济活动中周期性波动、长程相关和结构变迁的数学表征。本章不另立周期性判据，而是把经济系统接入「周期系统」章规定的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把宏观经济变量、价格序列、投资周期、长波等目标化为离散或连续动力系统，引用 \cref{thm:ps_periodicity_decision} 判定是否具有周期性，并确定周期类型；
+    \item \textbf{构建}：由 GDP、价格、利率、失业率、投资、消费、货币供应量等数据构建振幅级数、频率级数、相位级数，组装为经济周转圆组；
+    \item \textbf{调节}：用残差能量下降、信息准则（AIC/BIC）与贝叶斯模型选择动态调节经济周转圆组；
+    \item \textbf{卷积}：在经济周转圆组上引入振幅卷积、相位卷积、频率卷积，并与自相关、互相关、相位耦合衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成经济周期诊断流程。
+\end{enumerate}
+本章使用的数学工具包括：梯度流、延迟负反馈、阻尼振子、二阶线性差分方程、傅里叶分析、窗函数、相似度与趋势、折射率、周期卷积、周转圆组、相位算子。
+\end{remark}
+
+\begin{remark}[本章七主题导引]\label{rem:econ_seven_themes}
+\textbf{平移}——供需均衡的价格平移调整与蛛网模型的时滞振荡（定义 \ref{def:supply_demand}、命题 \ref{prop:cobweb_convergence}）；\textbf{缩放}——乘数效应 $1/(1-c)$ 与加速数 $v$ 的正/逆向缩放（定义 \ref{def:multiplier_accelerator}），Pareto 指数 $\alpha$（定义 \ref{def:pareto_distribution}）；\textbf{旋转}——商业周期的扩张-收缩交替与动量-反转的相位旋转（定义 \ref{def:momentum_reversal}）；\textbf{守恒}——价值恒等、货币约束、信息约束（定理 \ref{thm:economic_conservation}）；\textbf{对称}——蛛网模型高价-低价交替的反射对称（周期 $T=2$，命题 \ref{prop:cobweb_convergence}）；\textbf{闭合}——乘数-加速数的反馈回路闭合与价格回归均值的闭合（命题 \ref{prop:mult_acc_periodic}、定义 \ref{def:momentum_reversal}）；\textbf{周期}——库存周期（$3$—$5$ 年）、投资周期（$7$—$11$ 年）、康德拉季耶夫长波（$45$—$60$ 年）三级嵌套（命题 \ref{prop:nested_business_cycles}）及股价多窗周期分解（命题 \ref{prop:multi_window_stock}）。
+\end{remark}
+
+\section{经济目标的周期性判定：接入「周期系统」章第一步}
+\label{sec:econ_periodicity_decision}
+
+\subsection{经济目标、判定输入与判定映射}
+
+\begin{definition}[经济目标与判定输入]\label{def:econ_target}
+一个\textbf{经济目标}是指下列对象之一：
+\begin{enumerate}[label=(\roman*)]
+    \item 一个宏观经济变量序列，如国内生产总值 $Y(t)$、价格水平 $P(t)$、利率 $r(t)$、失业率 $u(t)$；
+    \item 一个市场均衡系统，其状态空间为价格-产量相空间；
+    \item 一个投资-消费反馈系统，其状态空间为收入-资本相空间；
+    \item 一个金融市场时间序列，如股票价格 $P(t)$、收益率 $r_t$；
+    \item 一个收入分配分布，其状态空间为收入或财富的取值集合。
+\end{enumerate}
+经济目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal D_{\mathrm{E}}=(\mathcal T,x),
+\]
+其中 $\mathcal T$ 是时间指标集（可为 $\mathbb Z$ 或 $\mathbb R$），$x:\mathcal T\to V$ 是经济变量在时间上的取值。若 $\mathcal T=\mathbb Z$，称目标为\textbf{离散经济目标}；若 $\mathcal T=\mathbb R$，称目标为\textbf{连续经济目标}。
+\end{definition}
+
+\begin{definition}[经济判定映射]\label{def:econ_periodization}
+设经济目标由判定输入 $\mathcal D_{\mathrm{E}}=(\mathcal T,x)$ 给出。若存在映射 $\Phi:\mathcal S\to\mathcal S$ 及初值 $x_0\in\mathcal S$，使目标状态由 $\Phi$ 生成，即
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+当 $t\in\mathbb Z$ 时 $x_t$ 由 $\Phi$ 迭代生成；当 $t\in\mathbb R$ 时，以单参数演化族 $\{\Phi_t\}_{t\in\mathbb R}$（其中每个 $\Phi_t:\mathcal S\to\mathcal S$，且 $\Phi_0=\operatorname{id}$、$\Phi_{s+t}=\Phi_s\circ\Phi_t$ 对一切 $s,t\in\mathbb R$ 成立、$(t,x)\mapsto\Phi_t(x)$ 连续）记之。
+则称 $\Phi$ 为目标的\textbf{经济判定映射}。此时当 $t\in\mathbb Z$ 时经济目标化为离散动力系统 $(\mathcal S,\Phi)$，当 $t\in\mathbb R$ 时化为连续动力系统 $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$，两种情形均可直接套用「周期基础」章与「周期系统」章的判据。
+\end{definition}
+
+\begin{theorem}[经济周期性判定定理]\label{thm:econ_periodicity_decision}
+设经济目标的判定映射为 $\Phi$，且 $(\mathcal S,\Phi)$ 为离散动力系统。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 $m\in\mathbb N^+$ 使 $\Phi^m=\mathrm{id}$，则目标为一致周期经济系统；每条轨道闭合，且轨道长度整除 $m$。
+    \item \textbf{判定等价}：目标为一致周期经济系统当且仅当 $\operatorname{ord}(\Phi)<\infty$。
+    \item \textbf{逐点判据}：目标在状态 $x_0$ 处的轨道闭合当且仅当 $x_0$ 为周期点；此时轨道长度即该点处的周期。
+    \item \textbf{不可省略性}：守恒量与对称群的合取不能替代 $\operatorname{ord}(\Phi)<\infty$；准周期经济目标不属于周期经济系统。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:econ_periodicity_decision} 是「周期系统」章 \cref{thm:ps_periodicity_decision} 的领域实例化：
+只需把判定映射 $f$ 与演化群替换为本章的 $\Phi$，(A) 充分判定、(B) 判定等价、(C) 逐点判据、
+(D) 不可省略性四条即逐条成立。依 \cref{rem:ps_applications_hook} 的约定，此处不再重复展开。
+\end{proof}
+
+\begin{corollary}[经济周期类型]\label{cor:econ_period_type}
+经 \cref{thm:econ_periodicity_decision} 判定后，经济目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 $m_0=1$，状态为不动点（如静态均衡）；
+    \item \textbf{严格周期型}：$1<m_0<\infty$，状态严格周期（如蛛网模型的 $T=2$ 振荡、库存周期）；
+    \item \textbf{一致周期型}：$\operatorname{ord}(\Phi)=m<\infty$，所有轨道长度整除 $m$；
+    \item \textbf{准周期型}：$\operatorname{ord}(\Phi)=\infty$，轨道不闭合但在紧致承载结构上稠密（如康德拉季耶夫长波的叠加、金融市场多重周期）；
+    \item \textbf{最终周期型}：存在 $N$，使 $t\ge N$ 后目标为周期；
+    \item \textbf{离散周期型}：承载结构为 $\mathbb Z$，且归一化周期比 $\rho=T_x/\Delta x\in\mathbb Q$。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，残差按 $e^{-\kappa t}$ 衰减（见 \cref{def:ps_period_type}(vii)）。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于周期经济系统；(iv) 不属于周期经济系统，但可用有界逼近工具处理；(v) 只在稳定阶段是周期经济系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期经济系统，只在稳定阶段可用有界逼近工具处理。
+\end{corollary}
+
+\begin{proof}
+逐条由 \cref{thm:econ_periodicity_decision} 与「周期系统」章 \cref{def:ps_period_type} 代入经济目标即得。
+\end{proof}
+
+\begin{lemma}[蛛网模型的周期判定]\label{lem:econ_cobweb_periodic}
+设蛛网模型由差分方程 $P_t = \frac{a-c}{b} - \frac{d}{b}P_{t-1}$ 描述。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $d/b<1$，价格收敛于均衡，系统为渐近周期（阻尼）型（趋于不动点）；
+    \item 若 $d/b=1$，价格以周期 $T=2$ 等幅振荡，系统为一致周期型；
+    \item 若 $d/b>1$，价格发散，系统不周期。
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:cobweb_convergence}，周期解为 $P_t=P^*+(P_0-P^*)(-d/b)^t$。当 $d/b<1$ 时 $(-d/b)^t\to0$，趋于均衡；当 $d/b=1$ 时 $(-1)^t$ 交替，周期 $2$；当 $d/b>1$ 时模发散。
+\end{proof}
+
+\begin{lemma}[乘数-加速数模型的周期判定]\label{lem:econ_mult_acc_periodic}
+设乘数-加速数模型的特征方程为 $\lambda^2-c(1+v)\lambda+cv=0$。若判别式 $\Delta<0$，则收入 $Y_t$ 以阻尼正弦波振荡：
+\[
+Y_t=Y^*+Ar^t\cos(\omega t+\phi),\qquad r=\sqrt{cv}.
+\]
+当 $cv<1$ 时收敛，属渐近周期（阻尼）型；$cv=1$ 时等幅（一致周期型），$cv>1$ 时发散。
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:mult_acc_periodic}，特征根为复共轭时给出阻尼振荡；阻尼因子 $r=\sqrt{cv}$ 决定收敛性。
+\end{proof}
+
+\begin{lemma}[库存周期与投资周期的嵌套判定]\label{lem:econ_nested_business_cycles}
+库存周期（$T_K\approx4$ 年）与固定资产投资周期（$T_J\approx9$ 年）构成嵌套结构：$\omega_K/\omega_J\approx2.25\in(2,3)$。两者叠加后整体为准周期型（若频率比无理）或一致周期型（若频率比有理）。
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:nested_business_cycles}，频率比 $\omega_K/\omega_J=T_J/T_K=9/4=2.25\in\mathbb Q$，故叠加轨道闭合，公共周期为 $4T_J=36$ 年，属于一致周期型；仅当频率比取无理近似时才为准周期型。
+\end{proof}
+
+\begin{definition}[经济最小正周期算法]\label{def:econ_minimal_period_algorithm}
+本定义与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{def:ps_minimal_period_algorithm} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处的差别仅为术语（经济目标 / 经济样本），算法步骤与结论完全相同。
+\end{definition}
+
+\begin{theorem}[经济最小正周期算法的正确性]\label{thm:econ_minimal_period_correctness}
+本定理与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{thm:ps_minimal_period_correctness} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。本处的差别仅为术语（经济目标 / 经济样本），算法步骤与结论完全相同。
+\end{theorem}
+
+\begin{example}[经济周期判定实例]\label{ex:econ_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item 蛛网模型：$d/b=1$ 时 $T=2$，一致周期型；$d/b<1$ 时渐近周期（阻尼）型。
+    \item 乘数-加速数：$cv=1$ 时等幅振荡，一致周期型。
+    \item 库存周期：$T_K\approx4$ 年，一致周期型（局部）。
+    \item 投资周期：$T_J\approx9$ 年，一致周期型（局部）。
+    \item 康德拉季耶夫长波：$T_{\mathrm{Kond}}\approx55$ 年，准周期型（受技术革命随机性影响）。
+    \item 股价序列：多尺度嵌套，准周期型。
+\end{enumerate}
+\end{example}
+
+\begin{remark}[守恒量不保证周期]\label{rem:econ_invariant_not_period}
+经济系统中的价值恒等、货币约束与信息约束是周期结构的辅助条件，但不构成充分条件。例如一个满足价值恒等的静态均衡经济不会自发产生周期振荡。经济周期结构必须由 \cref{thm:econ_periodicity_decision} 或上述引理判定。
+\end{remark}
+
+\subsection{第二步：经济周期级数与周转圆组的构建}
+
+\begin{definition}[经济振幅级数、频率级数、相位级数]\label{def:econ_series}
+设经济目标的状态或输出序列为 $\{z_t\}$。若其可写为
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+则称
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+分别为经济目标的\textbf{振幅级数}、\textbf{频率级数}与\textbf{相位级数}。三者与「级数与卷积」章 \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} 一致。
+\end{definition}
+
+\begin{definition}[经济周转圆组]\label{def:econ_epicycle_group}
+设经济目标的周期级数由振幅级数 $\{A_k\}$、频率级数 $\{\omega_k\}$ 与相位级数 $\{\phi_k\}$ 给出。对每个 $k$ 定义周转圆
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+其集合
+\[
+\mathfrak E_{\mathrm{E}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+称为经济目标的\textbf{周转圆组}。其叠加即经济周期级数
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[由经济数据构建周期级数]\label{thm:econ_series_reconstruction}
+设经济目标的输出为有限周期序列，周期为 $N$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 输出可展开为离散傅里叶级数
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item 振幅级数由 $|c_k|$ 给出，相位级数由 $\arg c_k$ 给出，频率级数由 $2\pi k/N$ 给出；
+    \item 若输出为 GDP 增长率序列，则基频对应长期增长趋势，谐波对应库存周期与投资周期；若输出为股价序列，则各级谐波对应不同时间尺度的市场周期。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 有限周期序列的离散傅里叶级数是标准结论：基函数 $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ 构成 $\mathbb C^N$ 的正交基。
+(ii) 由 $c_k=A_k e^{i\phi_k}$ 直接读出。
+(iii) 对 GDP 增长率序列 $N$ 为样本数，基频对应样本长度内的平均增长，低次谐波对应经济周期；对股价序列同理。
+\end{proof}
+
+\begin{proposition}[三参数对应：半径、相位与转速]\label{prop:econ_epicycle_correspondence}
+经济周转圆组 $\mathfrak E_{\mathrm{E}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ 的三个参数与三个几何—经济量一一对应：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{半径对应振幅}：$E_k$ 的半径 $|E_k|=A_k$ 即该经济振荡分量的振幅；
+    \item \textbf{相位对应旋转时延}：初相 $\phi_k$ 对应时间平移 $\tau_k=\phi_k/\omega_k$；$\phi_k>0$ 时该分量相对基准\textbf{超前} $\tau_k$（等价于把基准延后 $\tau_k$ 后二者重合）；
+    \item \textbf{频率对应旋转速度}：$\omega_k$ 即该经济振荡分量的角频率。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:econ_epicycle_correspondence} 与「周期系统」章 \cref{prop:ps_epicycle_correspondence} 完全对应，
+三条对应——半径对应振幅、相位对应旋转时延、频率对应旋转速度——逐条平移至本章的周转圆组即得。
+证明见该处：(i) 由 $|E_k|=A_k$ 与能量分解，(ii) 由相位平移定理，(iii) 由频率级数定义。
+\end{proof}
+
+\begin{example}[经济时间序列的周期级数]\label{ex:econ_series_example}
+GDP 增长率可分解为长期趋势、库存周期（约 4 年）、投资周期（约 9 年）和长波（约 55 年）。在周转圆组中，长波对应外层大周转圆（低频高幅），库存周期对应内层小周转圆（高频低幅）。
+\end{example}
+
+\begin{remark}[周期级数即复变函数]\label{rem:econ_series_complex}
+设 $z=e^{i\omega_0t}$，则经济周期级数
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+当所有分量与 $\omega_0$ 可公度（即 $\omega_k=k\omega_0$，$k\in\mathbb Z$）时可写为洛朗级数 $\sum_k c_k z^k$，其中 $c_k=A_k e^{i\phi_k}$：此时经济周期级数即单位圆上的复变函数，否则为环面上的函数。
+\end{remark}
+
+\subsection{第三步：经济周转圆组的动态调节}
+
+\begin{definition}[经济周转圆组的动态调节]\label{def:econ_adaptive_adjustment}
+设当前经济周转圆组为 $\mathfrak E^{(j)}$，部分和
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+残差 $r^{(j)}=z-z^{(j)}$。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 $\|r^{(j)}\|^2>\delta$，则依残差周期图峰值新增一个周转圆；
+    \item \textbf{参数调节}：对已有周转圆参数按正则化最小二乘或信息准则更新。
+\end{enumerate}
+在经济系统中，数量调节对应增加经济周期分量（如新增一个识别出的周期）；参数调节对应调整振幅、相位与频率，使拟合优度与模型简约性平衡。
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:econ_adaptive_growth}
+按 \cref{def:econ_adaptive_adjustment}(i) 加入残差主频分量后，残差能量单调不增：
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+等号成立当且仅当残差在被选频率上无能量。
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:econ_adaptive_growth} 与「周期系统」章 \cref{def:ps_adaptive_adjustment} 的动态调节机制一致：
+新增周转圆即把 $r^{(j)}$ 沿 $\hat\omega$ 的分量从残差中移出，由正交分解
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{被移出的分量}\|^2$ 即得不等式，
+等号当且仅当被移出分量的范数为零。完整论证见该处。
+\end{proof}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:econ_adaptive_convergence}
+设经济目标为周期 $T_0$ 的有限周期序列且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得经济周转圆组即目标的精确傅里叶数据。若目标为复值序列，则独立谐波数为 $T_0$，相应结论为「至多 $T_0$ 步」。
+\end{theorem}
+
+\begin{proof}
+周期 $T_0$ 的序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波上完备。每步按 \cref{prop:econ_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。
+\end{proof}
+
+\begin{definition}[结构指标调节]\label{def:econ_structure_metric_adjustment}
+设经济目标的结构指标为
+\[
+\mathcal I=(\mathcal I_{\text{拟合}},\mathcal I_{\text{简约}},\mathcal I_{\text{预测}})
+=(\text{残差平方和},\ \text{参数个数},\ \text{交叉验证误差}).
+\]
+\textbf{结构指标调节}为：在参数空间 $\Theta$ 中选取 $\theta$，每步取使 $\mathcal I(\theta)$ 按字典序\textbf{严格递减}（极小化）的邻近参数；若不存在则停止，此时为局部最优（即优先降低残差，再控制参数个数，最后优化预测误差）。
+\end{definition}
+
+\begin{proposition}[结构指标调节的有限收敛]\label{prop:econ_structure_metric_convergence}
+设参数空间 $\Theta$ 有限，且每次调节使 $\mathcal I$ 按字典序严格递减。则调节在有限步内终止于局部最优参数。
+\end{proposition}
+
+\begin{proof}
+$\Theta$ 有限，故 $\mathcal I$ 只取有限多个值，而字典序是有限集上的全序；按字典序严格递减的序列不能无限延续，故调节在有限步终止。终止时不存在使 $\mathcal I$ 按字典序严格递减的邻近参数，即局部最优。
+\end{proof}
+
+\begin{example}[BIC 选择经济周期级数]\label{ex:econ_bic}
+对 GDP 增长率序列拟合 $K$ 级周转圆，计算 $\operatorname{BIC}(K)=n\ln(\operatorname{RSS}/n)+K\ln n$。选择使 BIC 最小的 $K$。通常 $K=3$—$5$ 即可捕捉主要周期。
+\end{example}
+
+\begin{remark}[动态调节的边界]\label{rem:econ_adaptive_boundary}
+\cref{thm:econ_adaptive_convergence} 依赖有限周期序列。对连续谱或准周期经济目标（如长波、股价），不存在有限周转圆组精确表示，只能作有界逼近。结构指标调节不保证全局最优。
+\end{remark}
+
+\subsection{第四步：经济卷积}
+
+\begin{definition}[经济振幅卷积、相位卷积与频率卷积]\label{def:econ_convolution_types}
+设两个经济周转圆组为
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+定义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅卷积}：$\mathbb A_{mn}=A_nB_m$；
+    \item \textbf{相位卷积}：$\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$；
+    \item \textbf{频率卷积}：$\mathbb F_{mn}=\omega_n\nu_m$；
+    \item \textbf{趋势卷积}：$\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$。
+\end{enumerate}
+这与「级数与卷积」章 \cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution}、\cref{def:tendency_convolution} 一致。
+\end{definition}
+
+\begin{theorem}[三类卷积在经济周转圆组上的作用]\label{thm:econ_convolution_action}
+设两个经济目标的周转圆组分别为 $\mathfrak E$ 与 $\mathfrak E'$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 振幅卷积只作用于半径；
+    \item 相位卷积只作用于相位；
+    \item 频率卷积只作用于转速；
+    \item 趋势卷积同时保留振幅与相位。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:econ_convolution_types} 直接读出。
+\end{proof}
+
+\begin{proposition}[自相关与趋势卷积]\label{prop:econ_autocorr_phase_convolution}
+设 $\{z_t\}$ 为经济周期序列，其自相关函数为
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+在经济周转圆组语言中，自相关函数是趋势卷积在对角线上的投影：
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:econ_autocorr_phase_convolution} 是「周期系统」章 \cref{thm:ps_convolution_action} 的卷积作用结论在本领域的实现：
+将 $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ 代入自相关定义，由正交性消去全部非对角交叉项，只保留趋势卷积的对角线项
+（三类卷积的因式分解，\cref{prop:ps_convolution_factorization}），即得 $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$。
+完整展开见该处。
+\end{proof}
+
+\begin{remark}[经济卷积与周期卷积的关系]\label{rem:econ_convolution_relation}
+经济卷积不是新的卷积运算，而是「级数与卷积」章周期卷积在经济周转圆组上的实例。自相关是趋势卷积在对角线上的投影，互相关、相位耦合分别是振幅卷积和频率卷积在经济学中的具体表现。
+\end{remark}
+
+\subsection{第五步：与离散采样、调和分析、时序分析的整合}
+
+\begin{definition}[经济周期诊断流程]\label{def:econ_periodic_diagnosis}
+对于给定经济系统，使用周期数学框架进行诊断：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{周期判定}：验证经济目标的周期类型（\cref{thm:econ_periodicity_decision}）；
+    \item \textbf{级数构建}：由 GDP、价格、利率等数据构建振幅、频率、相位级数与周转圆组（\cref{thm:econ_series_reconstruction}）；
+    \item \textbf{守恒诊断}：验证价值恒等、货币约束与信息约束（\cref{thm:economic_conservation}）；
+    \item \textbf{卷积诊断}：计算自相关（趋势卷积的对角线投影，\cref{prop:econ_autocorr_phase_convolution}）与相位卷积；
+    \item \textbf{整合诊断}：接入离散采样、调和分析、时序分析工具链。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[经济周期诊断流程与三章接口]\label{thm:econ_diagnosis_integration}
+\cref{def:econ_periodic_diagnosis} 的五个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}、\cref{thm:intercalation_leakage_suppression}；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}、\cref{prop:twelve_to_six}；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}、\cref{def:ts_window_validation}。
+\end{enumerate}
+因此经济周期诊断不是独立方法，而是周期数学统一工具链在经济系统上的应用。
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:econ_diagnosis_integration} 是「周期系统」章五步接口（\cref{tab:ps_five_steps}）在本领域的落地：
+周期判定用采样与谱估计，频率分解与相位核用「调和分析」章，周期图峰值、Fisher 检验与
+窗函数验证用「时序分析」章。故诊断流程由三章工具链合成，证明见该处。
+\end{proof}
+
+\begin{remark}[整合后的操作顺序]\label{rem:econ_integration_order}
+实际诊断建议顺序为：先判定经济目标是否周期（\cref{thm:econ_periodicity_decision}）；再构建经济数据的傅里叶数据与周转圆组（\cref{thm:econ_series_reconstruction}）；再用守恒约束与动态调节优化参数（\cref{thm:econ_adaptive_convergence}、\cref{prop:econ_structure_metric_convergence}）；再作经济卷积与自相关分析（\cref{prop:econ_autocorr_phase_convolution}）；最后按 \cref{def:econ_periodic_diagnosis} 输出诊断。
+\end{remark}
+
+\section{经济系统的数学基础}
+
+\begin{definition}[经济系统的基本量]\label{def:economic_quantities}
+经济系统由以下基本变量描述：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{国内生产总值（GDP）} $Y(t)$：一国在时刻$t$生产的最终商品和服务的总价值。GDP的增长率$\dot{Y}/Y$是经济周期的核心指标。
+    \item \textbf{价格水平} $P(t)$：一篮子代表性商品和服务的加权平均价格。通货膨胀率$\pi(t) = \dot{P}/P$度量了货币购买力的衰减速率。
+    \item \textbf{利率} $r(t)$：借贷资金的使用成本。名义利率$i$和实际利率$r = i - \pi$的差值反映了通货膨胀预期。
+    \item \textbf{失业率} $u(t)$：劳动力中正在寻找工作但未找到的比例。失业率与GDP增长率之间存在负相关（奥肯定律）。
+    \item \textbf{投资} $I(t)$和\textbf{消费} $C(t)$：总支出的两个主要组成部分。投资的波动幅度远大于消费，是经济周期的主要驱动力。
+    \item \textbf{货币供应量} $M(t)$：经济中流通的货币总量。货币供应量的增长率与通货膨胀率在长期中高度相关（货币数量论）。
+\end{enumerate}
+经济系统的核心特征是\textbf{多尺度嵌套周期}——不同时间尺度的周期（库存周期、固定资产投资周期、康德拉季耶夫长波）在同一经济系统中并存。
+\end{definition}
+
+\section{供需均衡与蛛网模型}
+
+\begin{definition}[供需均衡]\label{def:supply_demand}
+市场经济的核心机制是\textbf{价格调节供需}。设需求函数$D(P)$（价格上升时需求下降，$D' < 0$），供给函数$S(P)$（价格上升时供给增加，$S' > 0$）。均衡价格$P^*$满足$D(P^*) = S(P^*)$。当市场价格偏离均衡时，超额需求$D(P) - S(P)$驱动价格调整：
+\[
+\frac{dP}{dt} = \lambda \cdot (D(P) - S(P)),
+\]
+其中$\lambda > 0$是价格调整速度。当$D(P) > S(P)$（超额需求）时价格上涨，当$D(P) < S(P)$（超额供给）时价格下跌。
+
+价格调节机制可视为势函数$V(P) = -\int (D - S)\,dP$上的梯度流：$dP/dt = -\lambda \nabla V(P)$。均衡价格是势函数的极小值点，市场价格在均衡点附近的波动是梯度流中的振荡。
+\end{definition}
+
+\begin{definition}[蛛网模型]\label{def:cobweb_model}
+当供给对价格的反应存在时滞时（农产品播种时决定产量，收获时价格才确定），市场出现\textbf{蛛网周期}。设需求函数$D(P_t) = a - bP_t$，供给函数$S(P_{t-1}) = c + dP_{t-1}$（本期供给由上期价格决定）。市场出清条件$D(P_t) = S(P_{t-1})$给出差分方程：
+\[
+P_t = \frac{a-c}{b} - \frac{d}{b} P_{t-1}.
+\]
+蛛网模型是延迟负反馈产生周期振荡的经典实例：本期价格$P_t$由本期需求和本期供给（由上期价格决定）的均衡确定。当$d/b < 1$（需求曲线比供给曲线更陡）时，价格收敛于均衡；当$d/b > 1$时，价格发散；当$d/b = 1$时，价格以恒定振幅振荡。
+\end{definition}
+
+\begin{proposition}[蛛网周期的收敛条件]\label{prop:cobweb_convergence}
+蛛网模型的周期解为$P_t = P^* + (P_0 - P^*)(-d/b)^t$。收敛条件为$d/b < 1$（需求弹性大于供给弹性）。收敛时，价格围绕均衡以周期$T = 2$振荡——每两个时间单位完成一个完整的“高价-低价”循环。发散条件$d/b > 1$对应价格波动逐期放大，系统失稳。
+
+蛛网模型是梯度流和延迟反馈的耦合：价格调整驱动系统向均衡运动，时滞在相空间中产生旋转分量。当散度强度（$d/b$）超过$1$时，旋转分量的放大效应超过梯度的恢复效应，系统发散。
+\end{proposition}
+
+\begin{proof}
+由市场出清条件$a - bP_t = c + dP_{t-1}$，解出$P_t = \frac{a-c}{b} - \frac{d}{b}P_{t-1}$。均衡价格$P^*$满足$P^* = \frac{a-c}{b} - \frac{d}{b}P^*$，得$P^* = \frac{a-c}{b+d}$。令$\Delta P_t = P_t - P^*$，则$\Delta P_t = -\frac{d}{b}\Delta P_{t-1}$。递推得$\Delta P_t = (-\frac{d}{b})^t \Delta P_0$。当$d/b < 1$时，$|\Delta P_t| \to 0$（收敛）。收敛时，$\Delta P_t$的符号每期反转一次——高价期与低价期交替，周期为$2$。
+\end{proof}
+
+\section{乘数-加速数模型}
+
+\begin{definition}[乘数-加速数模型]\label{def:multiplier_accelerator}
+萨缪尔森（Samuelson）的乘数-加速数模型解释了商业周期的内生驱动机制。模型由三个方程构成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{消费函数}：$C_t = cY_{t-1}$（本期消费由上期收入决定，$c \in (0,1)$是边际消费倾向）。
+    \item \textbf{投资函数}：$I_t = v(C_t - C_{t-1}) + I_0$（引致投资由消费变化驱动，$v > 0$是加速数；$I_0$是自主投资）。
+    \item \textbf{收入恒等式}：$Y_t = C_t + I_t + G_t$（封闭经济中政府购买$G_t$为外生变量）。
+\end{enumerate}
+合并得二阶线性差分方程：$Y_t - c(1+v)Y_{t-1} + cvY_{t-2} = I_0 + G_t$。
+
+乘数-加速数模型的核心机制：乘数效应（$1/(1-c)$）是正向缩放——$1$元自主支出通过多轮消费-收入循环产生$1/(1-c)$元总收入增加。加速数效应（$v$）是逆向缩放——消费增长减速引发投资下降（加速原理）。乘数和加速数的耦合产生收入$Y_t$的周期性波动——波动的幅度和持续性取决于参数$c$和$v$的取值。
+\end{definition}
+
+\begin{proposition}[乘数-加速数模型的周期解]\label{prop:mult_acc_periodic}
+乘数-加速数模型的特征方程为$\lambda^2 - c(1+v)\lambda + cv = 0$。周期解的存在条件为判别式$\Delta = c^2(1+v)^2 - 4cv < 0$。当特征根为复共轭时，收入$Y_t$以阻尼正弦波形式围绕均衡振荡：
+\[
+Y_t = Y^* + Ar^t\cos(\omega t + \phi),
+\]
+其中$r = \sqrt{cv}$是阻尼因子，$\omega = \arccos(c(1+v)/(2\sqrt{cv}))$是振荡角频率。当$cv < 1$时$r < 1$（阻尼振荡，收敛于均衡），当$cv = 1$时$r = 1$（等幅振荡），当$cv > 1$时$r > 1$（发散振荡）。
+
+乘数-加速数模型的周期解是旋转反馈和阻尼衰减的耦合：$c(1+v)$项是反馈耦合（本期收入通过消费和投资反馈到下期收入），$cv$项是阻尼（二阶滞后对一阶滞后的衰减）。周期$T = 2\pi/\omega$由$c$和$v$共同决定——$c$越大（边际消费倾向越高），$v$越大（加速数越大），周期越长。
+\end{proposition}
+
+\begin{proof}
+特征方程$\lambda^2 - c(1+v)\lambda + cv = 0$的根为$\lambda_{1,2} = \frac{c(1+v) \pm \sqrt{c^2(1+v)^2 - 4cv}}{2}$。当判别式$\Delta < 0$时，$\lambda_{1,2} = \sqrt{cv} \cdot e^{\pm i\omega}$，其中$\omega = \arctan(\sqrt{4cv - c^2(1+v)^2} / c(1+v))$。阻尼因子$r = |\lambda| = \sqrt{cv}$。振荡周期$T = 2\pi/\omega$。当$cv < 1$时，$r < 1$，振荡衰减。当$cv = 1$时，$r = 1$，等幅振荡。
+\end{proof}
+
+\section{库存周期与固定资产投资周期}
+
+\begin{definition}[库存周期（Kitchin周期）]\label{def:kitchin_cycle}
+\textbf{库存周期}（Kitchin Cycle）是经济中最短的商业周期，持续约$3$—$5$年。库存周期的驱动力是企业对库存水平的调整：当需求意外增加时，企业消耗库存以满足订单，随后增加生产补充库存（库存投资正增长）；当需求意外减少时，企业积累了非意愿库存，随后削减生产消化库存（库存投资负增长）。库存投资$I_{\text{inv}}(t)$的周期性波动是库存周期的核心。
+
+库存周期是梯度流在微观企业行为中的实现：库存水平偏离目标库存时，企业通过调整生产使库存回归目标——$dI_{\text{inv}}/dt = -\alpha(H - H^*)$（$H$是实际库存，$H^*$是目标库存）。库存调整的时滞（从订单到交货的时间）引入延迟反馈，产生$3$—$5$年的周期振荡。
+\end{definition}
+
+\begin{definition}[固定资产投资周期（Juglar周期）]\label{def:juglar_cycle}
+\textbf{固定资产投资周期}（Juglar Cycle）是中等长度的商业周期，持续约$7$—$11$年。固定资产投资周期的驱动力是企业的设备更新和产能扩张：经济繁荣时企业大量投资新设备（投资热潮），产能过剩后投资骤降（投资低谷），旧设备折旧完毕后开始新一轮更新（投资复苏）。
+
+固定资产投资周期是旋转运动在宏观投资行为中的实现：投资$I(t)$和资本存量$K(t)$在相空间中构成极限环——繁荣期投资高、资本增长快，衰退期投资低、资本折旧。投资周期的长度由设备的平均使用寿命（约$10$年）决定。
+\end{definition}
+
+\begin{proposition}[库存周期与投资周期的嵌套结构]\label{prop:nested_business_cycles}
+库存周期（$3$—$5$年）嵌套在固定资产投资周期（$7$—$11$年）之中。一个典型的Juglar周期包含$2$—$3$个Kitchin周期。这种嵌套结构对应于多层级周转系统：库存周期是内层快速小周转圆（高频低幅），投资周期是外层慢速大周转圆（低频高幅）。
+
+设库存周期的主导频率为$\omega_K = 2\pi/T_K$（$T_K \approx 4$年），投资周期的主导频率为$\omega_J = 2\pi/T_J$（$T_J \approx 9$年）。两者的频率比$\omega_K/\omega_J \approx 2.25$——库存周期在投资周期的每个相位中完成约$2$—$3$个完整循环。当两者同相位时（繁荣叠加），经济过热；当两者反相位时（库存衰退叠加投资衰退），经济萧条。
+\end{proposition}
+
+\begin{proof}
+频率比 $\omega_K/\omega_J = T_J/T_K \approx 9/4 = 2.25$，即一个 Juglar 周期含 $2.25$ 个 Kitchin 周期。相位差 $\Delta\theta(t) = (\omega_K - \omega_J)t$ 以拍频 $\omega_K - \omega_J = 2\pi(1/T_K - 1/T_J)$ 演化；两周期同相位的时刻为 $t = nT_KT_J/(T_J-T_K)\approx7.2n$ 年，而 $t = \operatorname{lcm}(T_K, T_J) \cdot n = 36n$ 年时联合状态完全重复——此时繁荣叠加，经济过热；反相位（相位差 $\pi$）时库存衰退与投资衰退叠加，经济萧条。嵌套结构即 $\omega_K/\omega_J \approx 2.25 \in (2,3)$：内层周期在外层周期内完成约 $2$—$3$ 个整循环。
+\end{proof}
+
+\section{康德拉季耶夫长波}
+
+\begin{definition}[康德拉季耶夫长波]\label{def:kondratiev_wave}
+\textbf{康德拉季耶夫长波}（Kondratiev Wave）是经济中最长的周期，持续约$45$—$60$年。康德拉季耶夫认为，资本主义经济存在约半个世纪的长期波动——每个长波包含上升期（约$25$年）和下降期（约$25$年）。长波的驱动力是重大技术创新的集群式涌现和扩散：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{第一波（约1780—1840年）}：蒸汽机、纺织机械化——工业革命。
+    \item \textbf{第二波（约1840—1890年）}：铁路、钢铁——铁路时代。
+    \item \textbf{第三波（约1890—1940年）}：电力、内燃机、化学工业——电气化时代。
+    \item \textbf{第四波（约1940—1980年）}：石油化工、电子、核能——战后繁荣。
+    \item \textbf{第五波（约1980—2020年）}：信息技术、互联网——数字经济。
+    \item \textbf{第六波（约2020年—）}：人工智能、可再生能源、生物技术。
+\end{enumerate}
+康德拉季耶夫长波是技术创新驱动的标度周期：技术创新是正向缩放——新技术突破带来生产率的阶跃式增长；技术扩散的饱和是逆向缩放——旧技术范式达到极限，增长放缓。每一波长波的$45$—$60$年周期由重大技术从发明到成熟的生命周期决定。
+\end{definition}
+
+\begin{proposition}[康德拉季耶夫长波的傅里叶分析]\label{prop:kondratiev_fourier}
+对世界GDP增长率时间序列（约$200$年）做傅里叶分析，可识别出约$55$年的主导周期（峰值在$0.018$年$^{-1}$附近）。康德拉季耶夫长波的频谱能量在低频段集中——这是$1/f$噪声在宏观经济中的体现。长波周期的长度$T_{\mathrm{Kond}} \approx 55$年与两代人的工作时间大致相当——一代人在技术上升期进入劳动力市场，在技术成熟期退休。
+
+康德拉季耶夫长波是嵌套商业周期的外层结构：一个长波约包含$5$—$6$个Juglar投资周期和$10$—$15$个Kitchin库存周期。三级嵌套结构（Kitchin $\subset$ Juglar $\subset$ Kondratiev）是经济系统中多尺度周期耦合的宏观表现。
+\end{proposition}
+
+\section{金融市场的周期结构}
+
+\begin{definition}[资产价格的动量与反转]\label{def:momentum_reversal}
+金融市场中的资产价格在不同时间尺度上呈现\textbf{动量效应}（趋势延续）和\textbf{均值回归}（趋势反转）的交替：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{短期动量}（$1$—$12$个月）：过去表现好的股票在短期内倾向于继续表现好——价格趋势延续。这是价格沿趋势方向的平移。
+    \item \textbf{长期反转}（$3$—$5$年）：过去表现好的股票在长期内倾向于表现变差——价格趋势反转。这是价格在相空间中旋转，从高估区回归到合理估值。
+\end{enumerate}
+动量-反转的交替是趋势分量和旋转分量在资产定价中的耦合：动量对应价格惯性，反转对应价格回归均值。动量效应的持续期约$12$个月由投资者对信息的反应不足（underreaction）和信息的逐步扩散决定。反转效应的持续期约$3$—$5$年由投资者对信息的过度反应（overreaction）和估值的均值回归决定。
+\end{definition}
+
+\begin{proposition}[价格动量的自相关结构]\label{prop:momentum_autocorr}
+动量策略的收益率在$1$—$12$个月的持有期内呈现正自相关：$\rho(h) > 0$（$h = 1,\dots,12$月）。反转策略的收益率在$3$—$5$年的持有期内呈现负自相关：$\rho(h) < 0$（$h = 36,\dots,60$月）。自相关函数$\rho(h)$的符号变化（从正到负）是市场周期相位转换的标志——正相关区间对应动量主导，负相关区间对应反转主导。
+
+价格的自相关结构与相位相似度相关：当$\rho(h) > 0$时，价格在两个时刻的方向一致（$\cos(\theta_t - \theta_{t+h}) \approx 1$）；当$\rho(h) < 0$时，价格在两个时刻的方向相反（$\cos(\theta_t - \theta_{t+h}) \approx -1$）。
+\end{proposition}
+
+\begin{proof}
+自相关函数定义为 $\rho(h) = \operatorname{Corr}(r_t, r_{t+h})$（$r_t$ 为收益率）。动量与反转的经验规律（Jegadeesh–Titman 1993；De Bondt–Thaler 1985）给出 $\rho(h)$ 在短滞后为正、长滞后为负的观测事实——本命题的数值区间（$1$—$12$ 月、$36$—$60$ 月）是对该经验规律的引用而非定理推导。其与相似度的对应是恒等式层面的：$\cos(\theta_t - \theta_{t+h})$ 是方向向量的内积，符号与收益率的同向性一致。
+\end{proof}
+
+\section{收入分配与幂律指数}
+
+\begin{definition}[Pareto分布]\label{def:pareto_distribution}
+\textbf{Pareto分布}描述了收入和财富在高收入群体中的幂律分布。设$X$为收入或财富，其互补累积分布函数为
+\[
+\mathbb{P}(X > x) = \left(\frac{x_{\min}}{x}\right)^\alpha, \quad x \ge x_{\min} > 0, \quad \alpha > 0,
+\]
+其中$\alpha$是\textbf{Pareto指数}。$\alpha$越小，收入分布越不平等（少数人占有大部分财富）。实证研究表明，各国收入分布的Pareto指数$\alpha$在$1.5$—$2.5$之间，且在不同国家和不同时期保持相对稳定。
+
+Pareto分布具有标度不变性：$\mathbb{P}(X > \lambda x) = \lambda^{-\alpha} \mathbb{P}(X > x)$——收入分布的尾部在缩放变换下保持形式不变。$\alpha$的稳定性（跨国家和跨时期）是经济系统中幂律指数稳定性的实证。
+\end{definition}
+
+\begin{remark}[Pareto指数与经济增长周期（经验观察）]\label{prop:pareto_growth}
+Pareto指数$\alpha$在长期中围绕均值缓慢波动，其波动周期与康德拉季耶夫长波同步。在技术革命爆发期（长波上升期），$\alpha$下降（不平等加剧）——创新者获得超额回报；在技术扩散成熟期（长波下降期），$\alpha$上升（不平等缓解）——技术红利向大众扩散。$\alpha$的波动周期约$50$—$60$年，与康德拉季耶夫长波一致。
+
+Pareto指数的周期性波动是幂律指数在经济不平等维度的周期调制——技术创新的“创造性破坏”（Schumpeterian creative destruction）在宏观层面体现为幂律指数的周期性涨落。以上为经验观察与类比解释，非数学定理；其严格性依赖于长时段收入分布数据的可获得性。
+\end{remark}
+
+\section{经济系统的恒等式与约束}
+
+\begin{theorem}[经济系统的三种恒等式与约束]\label{thm:economic_conservation}
+经济系统的动力学由三种恒等式与约束支配：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{价值恒等（梯度流）}：在封闭经济中，总产出$Y$等于总收入$Y$等于总支出$Y$——国民收入核算恒等式$Y = C + I + G + (X - M)$。价值不会凭空产生或消灭，只能在不同部门之间转移。在长期中，劳动生产率的增长是实际工资增长的根本来源——价值创造由技术进步驱动。
+    \item \textbf{货币约束（散度流）}：货币数量方程$MV = PY$描述了货币供应量$M$、货币流通速度$V$、价格水平$P$和实际产出$Y$之间的关系。在长期中，货币流通速度$V$相对稳定，货币供应量$M$的增长超过实际产出$Y$的增长时，价格水平$P$上升（通货膨胀）。货币总量的变化$=$货币发行$-$货币回笼——中央银行通过货币政策调控货币供应。
+    \item \textbf{信息约束（旋转流）}：市场价格包含了市场参与者关于供给和需求的全部信息（有效市场假说）。在强有效市场中，价格已经反映了所有公开和私人信息——任何人都无法通过分析已有信息获得超额收益。信息在市场参与者之间的传播满足约束——一个人的信息优势必然以另一个人的信息劣势为代价。内幕交易是信息约束被破坏的实例。
+\end{enumerate}
+三种恒等式与约束的层级关系为：价值恒等是经济活动的实质基础，货币约束是名义变量的约束条件，信息约束是市场效率的理论保证。三者共同构成了经济系统周期结构的自洽性保证。
+\end{theorem}
+
+\begin{proof}
+(i) 价值恒等：国民收入核算恒等式$Y = C + I + G + NX$（$NX = X - M$为净出口）是会计恒等式——每一笔支出对应一笔收入。GDP的三种核算方法（生产法、收入法、支出法）在理论上给出相同结果。在封闭经济中，$Y = C + S + T$（收入$=$消费$+$储蓄$+$税收），$Y = C + I + G$（支出$=$消费$+$投资$+$政府购买），两式相减得$S - I = G - T$（私人部门盈余$=$政府部门赤字）。
+
+(ii) 货币约束：货币数量方程$MV = PY$是恒等式——左边是货币换手的总价值，右边是商品交易的总价值。取对数差分：$\Delta\ln M + \Delta\ln V = \pi + \Delta\ln Y$。在长期中$\Delta\ln V \approx 0$（流通速度稳定），$\Delta\ln Y \approx 2\%$—$3\%$（长期增长趋势），因此$\pi \approx \Delta\ln M - \Delta\ln Y$——通货膨胀率约等于货币增长率减去实际增长率。
+
+(iii) 信息约束：Fama的有效市场假说存在三个层次。弱有效：价格反映所有历史交易信息——技术分析无效。半强有效：价格反映所有公开信息——基本面分析无效。强有效：价格反映所有信息（包括内幕信息）——任何人都无法获得超额收益。实证上，市场通常是半强有效的——公开信息迅速被价格吸收，但内幕信息和长期反转异常存在。
+\end{proof}
+
+\section{股票市场的窗函数周期诊断}
+
+\begin{definition}[股票价格的周期结构]\label{def:stock_price_cycle}
+股票价格$P(t)$的时间序列包含多重嵌套周期：日内周期（开盘-收盘的日内波动）、周度周期（周初-周末效应）、月度周期（月初-月末资金流动）、季度周期（财报季的预期与兑现）和年度周期（一月效应、圣诞老人反弹）。这些周期在价格走势图上叠加，形成复杂的波动模式。股票价格$P(t)$可展开为嵌套周转系统：
+\[
+P(t) = \sum_{k=1}^{K} A_k(t) e^{i(\omega_k t + \phi_k(t))},
+\]
+其中各级周转圆的振幅$A_k(t)$和相位$\phi_k(t)$随时间缓慢变化——这对应于趋势的演化和拐点的形成。
+\end{definition}
+
+\begin{definition}[窗函数在股价周期诊断中的应用]\label{def:window_function_stock}
+窗函数$W(t; \Delta)$在股价分析中用于提取特定时间尺度内的周期信号。对于给定的窗口半径$\Delta$，股价$P(t)$的\textbf{窗函数平滑趋势}和\textbf{窗函数局部波动}分别为：
+\[
+P_{\text{trend}}(t; \Delta) = \int_{-\infty}^{\infty} P(t+\tau) K\left(\frac{\tau}{\Delta}\right) \frac{d\tau}{\Delta},
+\]
+\[
+P_{\text{fluct}}(t; \Delta) = P(t) - P_{\text{trend}}(t; \Delta),
+\]
+其中$K$是核函数（高斯核、墨西哥帽核、指数核等）。窗函数的作用类似于移动平均，但核函数$K$赋予了不同时间距离的观测以不同权重。窗半径$\Delta$控制了时间尺度——$\Delta$越小，趋势越灵敏（捕捉短期波动）；$\Delta$越大，趋势越平滑（揭示长期方向）。
+
+窗函数平滑是周期卷积在单变量时间序列上的退化形式——取$f = g = P$，$\alpha = 1$，$d = 1$，核函数$K$为权重核，输出为趋势分量。窗函数局部波动$P_{\text{fluct}}$是原始信号与趋势的差——它对应于周期卷积中的方向趋势（$d=2$，差角正弦），度量了价格偏离趋势的旋转强度。
+\end{definition}
+
+\begin{lemma}[窗函数趋势提取的谱滤波性质]\label{ch29_window_spectral}
+窗函数平滑
+\[
+P_{\text{trend}}(t;\Delta) = \int P(t+\tau) K(\tau/\Delta)\, d\tau/\Delta
+\]
+是 $P$ 与核 $K_\Delta$ 的卷积，其频域形式为
+\[
+\widehat{P_{\text{trend}}}(\omega; \Delta) = \hat K(\Delta\omega) \cdot \hat P(\omega).
+\]
+即窗半径为 $\Delta$ 的平滑在频域上是以 $\hat K(\Delta\omega)$ 为通带的滤波：保留 $|\omega| \lesssim 1/\Delta$ 的低频、抑制高频——$\Delta$ 越大，通带越窄。
+\end{lemma}
+
+\begin{proof}
+由卷积的傅里叶性质 $\widehat{P * K_\Delta}(\omega) = \hat P(\omega)\cdot \widehat{K_\Delta}(\omega)$，其中 $\widehat{K_\Delta}(\omega) = \hat K(\Delta\omega)$（缩放变量的傅里叶变换）。高斯核情形 $\hat K(\Delta\omega) = e^{-\Delta^2\omega^2/2}$，通带宽度 $\sim 1/\Delta$。
+\end{proof}
+
+\begin{proposition}[多窗函数叠加的周期分解]\label{prop:multi_window_stock}
+使用一组不同半径的窗函数$\{\Delta_1, \Delta_2, \dots, \Delta_K\}$（$\Delta_1 < \Delta_2 < \dots < \Delta_K$）可对股价进行多尺度周期分解。各窗函数提取的趋势分量$\{P_{\text{trend}}(t; \Delta_k)\}_{k=1}^{K}$对应不同时间尺度的周期结构：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{小窗}（$\Delta_1 \approx 5$—$20$个交易日）：提取日内至周度周期——对应高频交易信号。
+    \item \textbf{中窗}（$\Delta_2 \approx 50$—$120$个交易日）：提取月度至季度周期——对应中期趋势。
+    \item \textbf{大窗}（$\Delta_3 \approx 250$个交易日）：提取年度周期——对应长期趋势。
+\end{enumerate}
+多窗分解是嵌套周转系统在股价分析中的实现——小窗对应内层快速小周转圆（高频低幅），大窗对应外层慢速大周转圆（低频高幅）。各窗函数提取的趋势分量$P_{\text{trend}}(t; \Delta_k)$之间的周期卷积$\mathcal{K}^{(d)}\{P_{\text{trend}}(\cdot; \Delta_i), P_{\text{trend}}(\cdot; \Delta_j)\}$度量了不同时间尺度趋势之间的相位耦合强度。
+\end{proposition}
+
+\begin{proof}
+由引理 \ref{ch29_window_spectral}，窗 $\Delta_k$ 的平滑在频域上保留 $|\omega| \lesssim 1/\Delta_k$ 的低频带。取 $\Delta_1 < \Delta_2 < \Delta_3$，则三个趋势分量 $P_{\text{trend}}(\cdot;\Delta_k)$ 依次承载 高频带/中频带/低频带 的信息——小窗提取短周期、大窗提取长周期，构成按频带分层的多尺度分解。分量对之间的周期卷积 $\mathcal{K}^{(d)}\{P_i, P_j\}$ 计算两频带趋势的相位交互；当 $i \neq j$ 时两频带不重叠，$\mathcal{K}^{(d)}$ 的非平凡值即跨尺度耦合（如月度趋势与年度趋势的相位对齐）。
+\end{proof}
+
+\section{拐点检测：折射率、相似度与趋势}
+
+\begin{definition}[股价拐点的数学定义]\label{def:stock_inflection_point}
+股价的\textbf{拐点}是指价格走势从一种状态转换到另一种状态的临界点。在周期数学中，拐点对应于相位$\theta(t) = \arctan(\dot{P}(t)/P(t))$的突变——当$\dot{\theta}(t)$的绝对值超过阈值时，趋势方向或速率发生显著变化。拐点分为两种类型：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{峰拐点}（由涨转跌）：$\dot{P}(t) > 0$变为$\dot{P}(t) < 0$，相位$\theta(t)$从正（上升）转为负（下降）。对应正弦差角相似度$\operatorname{Similarity}^{(2)}(\theta_t, \theta_{t-\Delta t})$从正变负。
+    \item \textbf{谷拐点}（由跌转涨）：$\dot{P}(t) < 0$变为$\dot{P}(t) > 0$，相位$\theta(t)$从负（下降）转为正（上升）。对应正弦差角相似度$\operatorname{Similarity}^{(2)}(\theta_t, \theta_{t-\Delta t})$从负变正。
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[折射率：拐点处的动量变化度量]\label{def:refraction_index_stock}
+\textbf{折射率}（refraction index）$\eta(t)$借鉴光学中斯涅尔定律，用于度量股价在拐点处的\textbf{动量变化强度}。设拐点前后两个时间窗口内的趋势方向分别为$\mathbf{v}_{\text{in}}$（入射方向）和$\mathbf{v}_{\text{out}}$（折射方向），趋势强度（动量）分别为$m_{\text{in}}$和$m_{\text{out}}$。折射率定义为
+\[
+\eta(t) = \frac{m_{\text{out}}}{m_{\text{in}}} = \frac{\|\mathbf{v}_{\text{out}}\|}{\|\mathbf{v}_{\text{in}}\|},
+\]
+其中$\mathbf{v}_{\text{in}} = P_{\text{trend}}(t; \Delta) - P_{\text{trend}}(t-\Delta; \Delta)$（拐点前的趋势动量），$\mathbf{v}_{\text{out}} = P_{\text{trend}}(t+\Delta; \Delta) - P_{\text{trend}}(t; \Delta)$（拐点后的趋势动量）。$\eta > 1$表示拐点后动量增强（加速上涨或加速下跌），$\eta < 1$表示拐点后动量减弱（减速上涨或减速下跌），$\eta = 1$表示动量不变（匀速运动）。
+
+折射率是折射定律（正弦趋势的缩放）在股价拐点分析中的推广：拐点前的趋势动量$m_{\text{in}}$和拐点后的趋势动量$m_{\text{out}}$通过折射率$\eta$关联——$\eta = m_{\text{out}}/m_{\text{in}}$。当$\eta > 1$时，动量放大；当$\eta < 1$时，动量衰减。
+\end{definition}
+
+\begin{proposition}[正弦差角相似度与拐点判据]\label{prop:sine_diff_inflection}
+\textbf{正弦差角相似度}是检测股价拐点的最敏感指标。设$\theta_t$为$t$时刻价格对数收益率的极限角：$\theta_t = \arctan(r_t)$，其中$r_t = \ln(P_t/P_{t-1})$。$t$时刻与$t-\Delta t$时刻的\textbf{正弦差角方向相似度}为
+\[
+\operatorname{Similarity}^{(2)}(\theta_t, \theta_{t-\Delta t}) = \sin(\theta_t - \theta_{t-\Delta t}).
+\]
+拐点判据为：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{$\operatorname{Similarity}^{(2)} < 0$（正弦差角为负数）}：$\theta_t < \theta_{t-\Delta t}$——当前相位落后于过去相位，趋势方向正在发生反转。这是\textbf{拐点的必要条件}。
+    \item \textbf{$\operatorname{Similarity}^{(2)}$穿越零线（从正变负或从负变正）}：趋势方向从延续（正）转为反转（负），或从反转（负）转为延续（正）。穿越时刻对应\textbf{精确拐点位置}。
+    \item \textbf{$\operatorname{Similarity}^{(2)}$的绝对值$|\operatorname{Similarity}^{(2)}|$超过阈值$\eta_{\text{th}}$（如$0.5$）}：趋势反转的强度足够大，拐点信号可靠。
+\end{enumerate}
+正弦差角相似度是旋转运动在拐点检测中的直接应用：$\sin(\theta_t - \theta_{t-\Delta t})$度量了价格相位在时间$\Delta t$内的旋转量——正值表示相位前进（趋势延续），负值表示相位倒退（趋势反转）。拐点是相位漂移量超过稳定范围的临界时刻。
+\end{proposition}
+
+\begin{proof}
+对数收益率$r_t = \ln(P_t/P_{t-1})$近似等于价格变动的百分比。极限角$\theta_t = \arctan(r_t)$将收益率映射到$(-\pi/2, \pi/2)$区间。在趋势延续期，$\theta_t \approx \theta_{t-\Delta t}$，$\sin(\theta_t - \theta_{t-\Delta t}) \approx 0$。在拐点处，$\theta_t$与$\theta_{t-\Delta t}$的符号相反（上升转为下降，或下降转为上升），$\sin(\theta_t - \theta_{t-\Delta t})$偏离零线。峰拐点处$\theta_t < 0 < \theta_{t-\Delta t}$，$\sin(\theta_t - \theta_{t-\Delta t}) < 0$。谷拐点处$\theta_t > 0 > \theta_{t-\Delta t}$，$\sin(\theta_t - \theta_{t-\Delta t}) > 0$。因此正弦差角相似度的符号变化精确标记了拐点。
+\end{proof}
+
+\begin{proposition}[趋势相似度与趋势强度确认]\label{prop:trend_similarity_stock}
+\textbf{差角余弦相似度}（基础差角值相似度）$\operatorname{Similarity}^{(1)}(\theta_t, \theta_{t-\Delta t}) = \cos(\theta_t - \theta_{t-\Delta t})$度量了趋势的一致性。在强趋势中，$\cos(\theta_t - \theta_{t-\Delta t}) \approx 1$（相位一致，趋势延续）。在拐点附近，$\cos(\theta_t - \theta_{t-\Delta t})$下降，表示趋势的连贯性减弱。\textbf{倍角相似度}$\operatorname{Similarity}^{(3)}(\theta_t, \theta_{t-\Delta t}) = \cos(2(\theta_t - \theta_{t-\Delta t}))$和$\operatorname{Similarity}^{(4)}(\theta_t, \theta_{t-\Delta t}) = \sin(2(\theta_t - \theta_{t-\Delta t}))$分别度量了二阶趋势一致性和二阶趋势反转强度，对拐点具有放大检测效应。
+
+拐点确认的综合判据为：
+\begin{enumerate}[label=(\roman*)]
+    \item $\operatorname{Similarity}^{(2)} < 0$（正弦差角为负——拐点必要条件）。
+    \item $\operatorname{Similarity}^{(1)}$从$\approx 1$下降（趋势连贯性减弱——拐点辅助条件）。
+    \item $|\operatorname{Similarity}^{(4)}|$增大（二阶反转强度放大——拐点增强条件）。
+    \item 折射率$\eta(t)$偏离$1$（动量变化——拐点强度条件）。
+\end{enumerate}
+当四个条件同时满足时，拐点信号具有高置信度。
+\end{proposition}
+
+\begin{proof}
+四个判据的三角关系：(1) $\sin(\theta_t - \theta_{t-\Delta t}) < 0$ 当且仅当方向角回退（$\theta_t < \theta_{t-\Delta t}$，对 $|\Delta\theta| < \pi$）——反转的必要条件；(2) 强趋势中 $\theta_t \approx \theta_{t-\Delta t}$ 由连续性给出 $\cos\Delta\theta \approx 1$，反转临近时 $|\Delta\theta|$ 增大使 $\cos\Delta\theta$ 下降；(3) $|\sin 2\Delta\theta| = 2|\sin\Delta\theta\cos\Delta\theta|$ 在 $|\Delta\theta| < \pi/4$ 内对 $|\Delta\theta|$ 严格递增（倍角放大）；(4) $\eta \neq 1$ 即动量变化，由折射率定义直接给出。四条件同时成立等价于“方向回退 + 连贯性减弱 + 二阶放大 + 动量变化”——即高置信度拐点。
+\end{proof}
+
+\begin{example}[股价拐点检测的窗函数应用]
+以某股票$P(t)$的日收盘价数据为例，取窗半径$\Delta = 20$个交易日（约一个自然月），使用高斯核$K_{\text{Gauss}}$进行平滑。计算以下指标：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{窗函数平滑趋势} $P_{\text{trend}}(t; 20)$。
+    \item \textbf{极限角} $\theta_t = \arctan(r_t)$，其中$r_t = \ln(P_{\text{trend}}(t)/P_{\text{trend}}(t-1))$。
+    \item \textbf{正弦差角相似度} $\operatorname{Similarity}^{(2)}(t) = \sin(\theta_t - \theta_{t-5})$（$5$日延迟）。
+    \item \textbf{余弦差角相似度} $\operatorname{Similarity}^{(1)}(t) = \cos(\theta_t - \theta_{t-5})$。
+    \item \textbf{折射率} $\eta(t) = \|\mathbf{v}_{\text{out}}\|/\|\mathbf{v}_{\text{in}}\|$。
+\end{enumerate}
+当$\operatorname{Similarity}^{(2)}(t)$穿越零线向下（从正变负）且$\eta(t) > 1$时，检测到峰拐点——价格从上涨转为加速下跌。当$\operatorname{Similarity}^{(2)}(t)$穿越零线向上（从负变正）且$\eta(t) > 1$时，检测到谷拐点——价格从下跌转为加速上涨。若$\operatorname{Similarity}^{(2)}(t) < 0$但$\eta(t) < 1$，动量衰减——拐点信号较弱，可能是假拐点或横盘整理。
+
+这一诊断流程是周期卷积在单变量金融时间序列上的应用：正弦差角相似度$\operatorname{Similarity}^{(2)}$度量了相位旋转强度，余弦差角相似度$\operatorname{Similarity}^{(1)}$度量了趋势一致性，折射率$\eta$度量了动量标度变换。三者的联合使用构成了股价拐点诊断的完整工具链。
+\end{example}
+
+\begin{remark}[与全书的统一]
+本章建立的经济系统周期结构理论是周期数学在经济学中的系统应用。供需均衡和蛛网模型是梯度流在价格机制中的实现——超额需求驱动价格上涨，超额供给驱动价格下跌，时滞引入旋转分量产生周期振荡。乘数-加速数模型是反馈耦合在宏观收入决定中的实现——乘数效应（正向缩放）和加速数效应（逆向缩放）的耦合驱动商业周期。库存周期、固定资产投资周期和康德拉季耶夫长波构成三级嵌套的周期结构。金融市场的动量-反转交替是趋势分量和旋转分量在资产定价中的耦合。窗函数多尺度分解与拐点诊断（正弦/余弦差角相似度、折射率）是周期卷积在金融时间序列上的直接应用。Pareto分布的幂律指数$\alpha$在技术和制度变迁中保持相对稳定。经济系统的三种恒等式与约束——价值恒等、货币约束、信息约束——共同构成了经济系统周期结构的自洽性保证。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 供需均衡的价格平移调整（定义 \ref{def:supply_demand}）；蛛网模型的时滞振荡（命题 \ref{prop:cobweb_convergence}） \\
+缩放 & 乘数效应 $1/(1-c)$ 与加速数 $v$ 的正/逆向缩放（定义 \ref{def:multiplier_accelerator}）；Pareto 指数 $\alpha$（定义 \ref{def:pareto_distribution}） \\
+旋转 & 商业周期的扩张-收缩交替（库存/投资周期）；动量-反转的相位旋转（定义 \ref{def:momentum_reversal}） \\
+守恒 & 价值恒等（$Y=C+I+G+NX$）、货币约束（$MV=PY$）、信息约束（有效市场）（定理 \ref{thm:economic_conservation}） \\
+对称 & 蛛网模型高价-低价交替的反射对称（周期 $T=2$，命题 \ref{prop:cobweb_convergence}） \\
+闭合 & 乘数-加速数的反馈回路闭合（特征方程周期解，命题 \ref{prop:mult_acc_periodic}）；价格回归均值的闭合（定义 \ref{def:momentum_reversal}） \\
+周期 & 库存周期（$3$—$5$ 年，定义 \ref{def:kitchin_cycle}）、投资周期（$7$—$11$ 年，定义 \ref{def:juglar_cycle}）、康德拉季耶夫长波（$45$—$60$ 年，定义 \ref{def:kondratiev_wave}）三级嵌套（命题 \ref{prop:nested_business_cycles}）；股价多窗周期分解（命题 \ref{prop:multi_window_stock}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{经济周期性判定定理}（\ref{thm:econ_periodicity_decision}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 验证\textbf{数量调节的单调性}（\ref{prop:econ_adaptive_growth}）的前提在本章领域对象上成立，并给出一个不满足前提的反例。
+
+    \item 考察\textbf{三参数对应：半径、相位与转速}（\ref{prop:econ_epicycle_correspondence}）在参数退化时的行为，说明结论如何随之退化。
+
+    \item 说明\textbf{经济周期诊断流程与三章接口}（\ref{thm:econ_diagnosis_integration}）与「周期系统」章相应通用结论的关系（是一致、特例还是需要附加条件）。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{thm:econ_periodicity_decision}、\ref{prop:econ_adaptive_growth}、\ref{prop:econ_epicycle_correspondence}、\ref{thm:econ_diagnosis_integration}。
+\end{enumerate}
+
+

@@ -1,0 +1,344 @@
+\chapter{Periodic Structure of Algorithmic Systems}
+\label{chap:algorithm-periodic}
+\markboth{Periodic Structure of Algorithmic Systems}{Periodic Structure of Algorithmic Systems}
+
+\begin{remark}[Periodicity decision for the target of this chapter's target (citation)]\label{rem:algorithm_ps_hook}
+Every application chapter of this book shares a single cross-reference list; its full statement is given in the opening of Chapter~\ref{chap:probability-periodic}, `Periodic Structures in Probabilistic Systems', at \cref{rem:prob_ps_hook}. It is not repeated here, and reference is made to that passage throughout.
+\end{remark}
+
+\begin{definition}[Positioning of this chapter: from activation functions to algorithmic components]\label{def:algorithm_positioning}
+The periodic structure of algorithmic systems studies the mathematical characterisation of periodicity, iterative convergence and computational rhythm in computer algorithms. This chapter applies the elementary tools of periodic mathematics---the three elementary operations (translation, scaling and rotation), together with the corresponding bounds and trade-offs---to the analysis of the periodic structure of algorithmic systems.
+
+\textbf{Interface with the preceding chapter}: the CEAF defined in the preceding chapter, `Epicycle Activation Function and Function Approximation' (\cref{def:epicycle-activation}), and the KDI optimiser (Chapter~\ref{chap:agent-periodic}, \cref{def:kdi_agent}) are the \textbf{core differentiable components} of the algorithms of this chapter. Specifically:
+\begin{enumerate}[label=(\arabic*)]
+    \item the parameter translation of fixed-point iteration and gradient descent (\cref{def:fixed_point_iteration}, \cref{def:gd_convergence_cycle}), whose objective functions may be parameterised by the CEAF;
+    \item the scaling structure of recursive algorithms (\cref{def:recursion}) and the multilevel epicycle nesting of activation functions (the series order $N$ of \cref{def:epicycle-activation}) share one and the same hierarchical logic: `scale by $1/b$, multiply by $a$';
+    \item the PRNG period in cryptographic algorithms (\cref{def:prng_period}) and the periodicity condition for activation functions (\cref{prop:epicycle-basic-properties}(v)) are characterised by the same rational/irrational frequency-ratio criterion.
+\end{enumerate}
+
+The core content of this chapter is the following:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{Periodic convergence of iterative algorithms}: the convergence trajectories of Newton's method, gradient descent and fixed-point iteration form spirals in phase space;
+    \item \textbf{Periodic structure of recursive algorithms}: recursion depth corresponds to the number of periods, and recursive unfolding corresponds to nested structure;
+    \item \textbf{Periodic optimisation of loop structures}: loop unrolling and vectorisation are the classical techniques of periodic optimisation;
+    \item \textbf{Periodic comparison of sorting algorithms}: the information-theoretic lower bound for comparison sorting;
+    \item \textbf{Periodic security of cryptographic algorithms}: the period length of a PRNG determines cryptographic strength.
+\end{enumerate}
+
+\textbf{Guide to the seven themes of this chapter}: translation---the step-by-step translational convergence of fixed-point iteration and gradient descent (\cref{def:fixed_point_iteration}); scaling---the scaling of recursion ($a$ subproblems of size $1/b$, \cref{def:recursion}) and the complexity scaling $O(\cdot)$; rotation---the rotational correction of the Newton Jacobian and the pivot rotation of quicksort; balance---complexity lower bounds (the sorting bound $\Omega(n\log n)$, \cref{thm:sorting_lower_bound}), precision trade-offs and resource trade-offs (\cref{thm:algorithm_conservation}); symmetry---the left--right symmetry of divide-and-conquer recursion; closure---the closed orbit of cycle detection (\cref{ch33_floyd_cycle}) and the round-by-round diffusion of hash avalanche (an \textbf{empirical observation / research programme}; see the remark at \cref{prop:avalanche_effect}); period---the spiral of iterative convergence, the recursion-tree depth $\log_b n$, and the PRNG period (\cref{def:prng_period}).
+
+\textbf{Interface with the next chapter}: the algorithmic convergence structures (\cref{ch33_gd_bound}, \cref{prop:newton_quadratic}) and algorithmic rhythms (\cref{def:lr_scheduler}, \cref{ch33_floyd_cycle}) established here become direct tools for the training dynamics and many-body synchronisation treated in the next chapter, `Periodic Structure of Agents'.
+\end{definition}
+
+\section{Mathematical foundations of algorithmic systems}
+
+\begin{definition}[Elementary quantities of an algorithmic system]\label{def:algorithm_quantities}
+An algorithmic system is described by the following elementary variables:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Iteration count} $t \in \mathbb{N}$: the number of loops an iterative algorithm requires in passing from its initial state to its terminal state. The iteration count measures the `time' of convergence and corresponds to the phase index $k$.
+    \item \textbf{Iteration map} $\Phi: \mathbb{R}^d \to \mathbb{R}^d$: the evolution rule of an iterative algorithm in phase space, $\mathbf{x}_{t+1} = \Phi(\mathbf{x}_t)$. A fixed point $\mathbf{x}^*$ satisfies $\Phi(\mathbf{x}^*) = \mathbf{x}^*$.
+    \item \textbf{Recursion depth} $d$: the number of nesting levels at which a recursive function calls itself. The recursion depth corresponds to the number of levels $K$ of a nested epicycle system.
+    \item \textbf{Time complexity} $T(n)$: the number of elementary operations performed by an algorithm, as a function of the input size $n$. $T(n) = O(g(n))$ describes the asymptotic scaling behaviour of the algorithm.
+    \item \textbf{Space complexity} $S(n)$: the storage required by an algorithm, as a function of the input size $n$. The space complexity measures the `volume' occupied by the algorithm in phase space.
+\end{enumerate}
+The defining feature of an algorithmic system is the \textbf{evolution of state under the iteration map}---each iteration translates the state from its present position to the next, and the dynamics of the iteration map determine the convergence, the rate of convergence and the stability of the algorithm.
+\end{definition}
+
+\section{Periodic convergence of iterative algorithms}
+
+\subsection{Fixed-point iteration}
+
+\begin{definition}[Fixed-point iteration]\label{def:fixed_point_iteration}
+The fixed-point iteration for solving the equation $\mathbf{x} = \Phi(\mathbf{x})$ starts from an initial guess $\mathbf{x}_0$ and applies the iteration map repeatedly:
+\[
+\mathbf{x}_{t+1} = \Phi(\mathbf{x}_t), \quad t = 0, 1, 2, \dots.
+\]
+If $\Phi$ is a contraction in a neighbourhood of the fixed point $\mathbf{x}^*$---that is, if there exists $0 \le L < 1$ such that $\|\Phi(\mathbf{x}) - \Phi(\mathbf{y})\| \le L \|\mathbf{x} - \mathbf{y}\|$---then the iteration converges to $\mathbf{x}^*$ from any initial point.
+
+The mechanism of fixed-point iteration is as follows: each step translates the state towards the fixed point by a factor $L$ of the remaining distance. The rate of convergence $L$ measures the degree of contraction---the smaller $L$ is, the faster the convergence. Linear convergence $\|\mathbf{x}_t - \mathbf{x}^*\| \le L^t \|\mathbf{x}_0 - \mathbf{x}^*\|$ is exponential decay.
+\end{definition}
+
+\begin{theorem}[Banach fixed-point theorem]\label{thm:banach_fixed_point_algo}
+Let $(X, d)$ be a complete metric space and let $\Phi: X \to X$ be a contraction ($L < 1$). Then $\Phi$ has a unique fixed point $\mathbf{x}^*$ in $X$, and for every $\mathbf{x}_0 \in X$ the iteration $\mathbf{x}_{t+1} = \Phi(\mathbf{x}_t)$ converges to $\mathbf{x}^*$, with rate of convergence $\|\mathbf{x}_t - \mathbf{x}^*\| \le L^t \|\mathbf{x}_0 - \mathbf{x}^*\|$.
+\end{theorem}
+
+\begin{proof}
+(Uniqueness) Let $\mathbf{x}^*, \mathbf{y}^*$ be two fixed points. Then $d(\mathbf{x}^*, \mathbf{y}^*) = d(\Phi(\mathbf{x}^*), \Phi(\mathbf{y}^*)) \le L\, d(\mathbf{x}^*, \mathbf{y}^*)$; since $L < 1$ we must have $d(\mathbf{x}^*, \mathbf{y}^*) = 0$, so the fixed point is unique.
+
+(Existence) For the sequence $\{\mathbf{x}_t\}$, contractivity gives $d(\mathbf{x}_{t+1}, \mathbf{x}_t) \le L\, d(\mathbf{x}_t, \mathbf{x}_{t-1}) \le \dots \le L^t d(\mathbf{x}_1, \mathbf{x}_0)$. For $m > n$,
+\[
+d(\mathbf{x}_m, \mathbf{x}_n) \le \sum_{k=n}^{m-1} d(\mathbf{x}_{k+1}, \mathbf{x}_k) \le d(\mathbf{x}_1, \mathbf{x}_0) \sum_{k=n}^{m-1} L^k \le \frac{L^n}{1-L} d(\mathbf{x}_1, \mathbf{x}_0) \to 0.
+\]
+Hence $\{\mathbf{x}_t\}$ is a Cauchy sequence and, by completeness, converges to some $\mathbf{x}^* \in X$. By the continuity of $\Phi$, $\Phi(\mathbf{x}^*) = \mathbf{x}^*$.
+
+(Rate of convergence) $d(\mathbf{x}_t, \mathbf{x}^*) = d(\Phi(\mathbf{x}_{t-1}), \Phi(\mathbf{x}^*)) \le L\, d(\mathbf{x}_{t-1}, \mathbf{x}^*)$, and the claim follows by induction.
+\end{proof}
+
+\begin{proposition}[Quadratic convergence of Newton's method]\label{prop:newton_quadratic}
+The Newton iteration for solving $F(\mathbf{x}) = \mathbf{0}$ is
+\[
+\mathbf{x}_{t+1} = \mathbf{x}_t - [J_F(\mathbf{x}_t)]^{-1} F(\mathbf{x}_t),
+\]
+where $J_F$ is the Jacobian matrix of $F$. If $F$ is twice continuously differentiable near the fixed point $\mathbf{x}^*$ and $J_F(\mathbf{x}^*)$ is non-singular, then there is a neighbourhood $U$ of $\mathbf{x}^*$ such that for every $\mathbf{x}_0 \in U$ the iteration satisfies \textbf{quadratic convergence}:
+\[
+\|\mathbf{x}_{t+1} - \mathbf{x}^*\| \le C \|\mathbf{x}_t - \mathbf{x}^*\|^2.
+\]
+The quadratic convergence of Newton's method results from the coupling of a translational correction with the rotational correction furnished by the Jacobian matrix: $[J_F]^{-1}F$ rotates the error vector from the original space into the correction direction, so that the error of each iteration decays quadratically. Quadratic convergence is the fastest class of convergence among iterative algorithms.
+\end{proposition}
+
+\begin{proof}
+Let $\mathbf{x}^*$ satisfy $F(\mathbf{x}^*) = \mathbf{0}$. Expand $F(\mathbf{x}_t)$ to first order about $\mathbf{x}^*$: $F(\mathbf{x}_t) = J_F(\mathbf{x}^*)(\mathbf{x}_t - \mathbf{x}^*) + O(\|\mathbf{x}_t - \mathbf{x}^*\|^2)$. The iteration formula gives
+\[
+\mathbf{x}_{t+1} - \mathbf{x}^* = \mathbf{x}_t - \mathbf{x}^* - [J_F(\mathbf{x}_t)]^{-1} F(\mathbf{x}_t).
+\]
+Substituting the expansion of $F(\mathbf{x}_t)$ and using $[J_F(\mathbf{x}_t)]^{-1} J_F(\mathbf{x}^*) = \mathbf{I} + O(\|\mathbf{x}_t - \mathbf{x}^*\|)$ (which follows from the invertibility and continuity of $J_F$), we obtain
+\[
+\mathbf{x}_{t+1} - \mathbf{x}^* = [J_F(\mathbf{x}_t)]^{-1} \left( J_F(\mathbf{x}_t) - J_F(\mathbf{x}^*) \right)(\mathbf{x}_t - \mathbf{x}^*) + O(\|\mathbf{x}_t - \mathbf{x}^*\|^2).
+\]
+By the Lipschitz continuity of $J_F$, $J_F(\mathbf{x}_t) - J_F(\mathbf{x}^*) = O(\|\mathbf{x}_t - \mathbf{x}^*\|)$, whence $\|\mathbf{x}_{t+1} - \mathbf{x}^*\| = O(\|\mathbf{x}_t - \mathbf{x}^*\|^2)$.
+\end{proof}
+
+\subsection{The iterative cycle of gradient descent}
+
+\begin{definition}[Convergence cycle of gradient descent]\label{def:gd_convergence_cycle}
+The gradient descent iteration for $\min_{\mathbf{x}} f(\mathbf{x})$ is $\mathbf{x}_{t+1} = \mathbf{x}_t - \eta \nabla f(\mathbf{x}_t)$. On a convex function the rate of convergence of gradient descent is $O(1/t)$---see Proposition \cref{ch33_gd_bound}.
+
+The linear convergence of gradient descent embodies translational decay: each step translates a distance $\eta \|\nabla f\|$ along the gradient direction. The step size $\eta$ and the curvature (the eigenvalues of the Hessian) together determine the efficiency of the translation---directions of large curvature require a small step size (otherwise the iteration oscillates), whilst directions of small curvature admit a large step size.
+\end{definition}
+
+\begin{proposition}[Convergence bound for gradient descent]\label{ch33_gd_bound}
+Let $f$ be convex and let $\nabla f$ be $L$-Lipschitz continuous. With step size $\eta = 1/L$, after $t$ iterations
+\[
+f(\mathbf{x}_t) - f(\mathbf{x}^*) \le \frac{L \|\mathbf{x}_0 - \mathbf{x}^*\|^2}{2t}.
+\]
+The number of iterations required to reach precision $\varepsilon$ is $T = O(L\|\mathbf{x}_0-\mathbf{x}^*\|^2/\varepsilon) = O(1/\varepsilon)$.
+\end{proposition}
+
+\begin{proof}
+By the Lipschitz property of $\nabla f$ (the descent lemma),
+\[
+f(\mathbf{x}_{k+1}) \le f(\mathbf{x}_k) + \langle \nabla f(\mathbf{x}_k), \mathbf{x}_{k+1}-\mathbf{x}_k\rangle + \frac{L}{2}\|\mathbf{x}_{k+1}-\mathbf{x}_k\|^2.
+\]
+Substituting $\mathbf{x}_{k+1} = \mathbf{x}_k - \frac{1}{L}\nabla f(\mathbf{x}_k)$ gives $f(\mathbf{x}_{k+1}) \le f(\mathbf{x}_k) - \frac{1}{2L}\|\nabla f(\mathbf{x}_k)\|^2$. By convexity, $f(\mathbf{x}_k) - f(\mathbf{x}^*) \le \langle \nabla f(\mathbf{x}_k), \mathbf{x}_k - \mathbf{x}^*\rangle \le \|\nabla f(\mathbf{x}_k)\|\|\mathbf{x}_k - \mathbf{x}^*\|$. Writing $\delta_k = f(\mathbf{x}_k) - f(\mathbf{x}^*)$, we obtain
+\[
+\delta_{k+1} \le \delta_k - \frac{\delta_k^2}{2L\|\mathbf{x}_k - \mathbf{x}^*\|^2} \le \delta_k - \frac{\delta_k^2}{2L\|\mathbf{x}_0 - \mathbf{x}^*\|^2},
+\]
+where we have used $\|\mathbf{x}_k - \mathbf{x}^*\| \le \|\mathbf{x}_0 - \mathbf{x}^*\|$ (monotonicity of the distance under gradient descent on a convex function). For the reciprocal $u_k = 1/\delta_k$ we have $u_{k+1} \ge u_k + \frac{1}{2L\|\mathbf{x}_0-\mathbf{x}^*\|^2}$; induction yields $1/\delta_t \ge \frac{t}{2L\|\mathbf{x}_0-\mathbf{x}^*\|^2}$, that is, $\delta_t \le \frac{L\|\mathbf{x}_0-\mathbf{x}^*\|^2}{2t}$.
+\end{proof}
+
+\section{Periodic structure of recursive algorithms}
+
+\begin{definition}[Mathematical definition of recursion]\label{def:recursion}
+A recursive function $f$ decomposes a problem of size $n$ into subproblems of size $n/b$ by calling itself. The general form of a recursion is
+\[
+T(n) = a \cdot T\left(\frac{n}{b}\right) + f(n),
+\]
+where $a$ is the number of subproblems, $b$ is the factor by which the subproblem size is reduced, and $f(n)$ is the cost of splitting and merging. The recursion tree of the unfolding has $\log_b n$ levels, and the $k$-th level contains $a^k$ subproblems of size $n/b^k$.
+
+Recursion is the realisation of the scaling operation within algorithmic structure: each level of recursion reduces the problem size by a factor $b$ (scaling factor $1/b$) and increases the number of subproblems by a factor $a$ (scaling factor $a$). The number of levels $\log_b n$ of the recursion tree is the nesting depth---analogous to the series order $K$ of a nested epicycle system (compare \cref{def:epicycle-activation}).
+\end{definition}
+
+\begin{theorem}[Master theorem]\label{thm:master_theorem}
+Let $T(n) = a T(n/b) + f(n)$ with $a \ge 1$, $b > 1$ and $f(n)$ non-negative. Put $c^* = \log_b a$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item if $f(n) = O(n^{c^*-\varepsilon})$ for some $\varepsilon > 0$, then $T(n) = \Theta(n^{c^*})$;
+    \item if $f(n) = \Theta(n^{c^*})$, then $T(n) = \Theta(n^{c^*} \log n)$;
+    \item if $f(n) = \Omega(n^{c^*+\varepsilon})$ for some $\varepsilon > 0$ and $a f(n/b) \le c f(n)$ for some $c < 1$ (the regularity condition), then $T(n) = \Theta(f(n))$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(Unfolding the recursion tree) $T(n) = \sum_{k=0}^{\log_b n} a^k f(n/b^k)$.
+
+(i) Let $f(n) = O(n^{c^*-\varepsilon})$. Then $a^k f(n/b^k) = O(a^k (n/b^k)^{c^*-\varepsilon}) = O(n^{c^*-\varepsilon} (a b^{-(c^*-\varepsilon)})^k) = O(n^{c^*-\varepsilon} b^{\varepsilon k})$. The sum satisfies $\sum_k b^{\varepsilon k} = \Theta(b^{\varepsilon \log_b n}) = \Theta(n^\varepsilon)$, so $T(n) = O(n^{c^*})$. The lower bound follows from $f \ge 0$ together with the term $k = \log_b n$, giving $T(n) = \Omega(n^{c^*})$.
+
+(ii) Let $f(n) = \Theta(n^{c^*})$. Then $a^k f(n/b^k) = a^k (n/b^k)^{c^*} = n^{c^*}$, and the sum is $(\log_b n + 1) n^{c^*} = \Theta(n^{c^*} \log n)$.
+
+(iii) By the regularity condition, $\sum_k a^k f(n/b^k) \le \sum_k c^k f(n) \le \frac{f(n)}{1-c}$, so $T(n) = O(f(n))$. The lower bound $T(n)\ge f(n)$ follows immediately from the non-negativity of the terms.
+\end{proof}
+
+\begin{proposition}[Recursive cycle of merge sort]\label{prop:mergesort_cycle}
+Merge sort divides the array evenly into two halves ($a=2$, $b=2$), sorts each half recursively, and then merges the two sorted subarrays ($f(n) = O(n)$). The recursion depth is $\log_2 n$ levels and the total time complexity is $T(n) = O(n \log n)$.
+
+The recursion tree of merge sort is the algorithmic realisation of a nested epicycle system: each level of recursion corresponds to one epicycle---the outer epicycles handle large-scale data (low frequency, large amplitude) and the inner epicycles handle small-scale data (high frequency, small amplitude). The $\log_2 n$ levels of recursion correspond to $\log_2 n$ levels of nested epicycles---each level deeper halves the data size (halving the bandwidth) and doubles the number of subproblems (doubling the bit width).
+\end{proposition}
+
+\begin{proof}
+Merge sort satisfies the hypotheses of the master theorem: $a = 2$, $b = 2$, $f(n) = O(n)$. Since $\log_b a = \log_2 2 = 1$ and $f(n) = \Theta(n^{\log_b a})$, the second case of the master theorem gives $T(n) = \Theta(n^{\log_b a}\log n) = \Theta(n\log n)$. The recursion depth $\log_2 n$ is obtained from $n/2^d = 1$, that is, $d = \log_2 n$; the $k$-th level has $2^k$ subarrays and each level costs $\Theta(n)$ to merge, so the total cost is $\sum_{k=0}^{\log_2 n} 2^k \cdot \Theta(n/2^k) = \Theta(n\log n)$.
+\end{proof}
+
+\section{Periodic optimisation of loop structures}
+
+\begin{definition}[Loop unrolling]\label{def:loop_unrolling}
+Loop unrolling repeats the loop body $k$ times in order to reduce loop-control overhead. The original loop
+\[
+\text{for } i = 0 \text{ to } n-1: \; A[i] = B[i] + C[i]
+\]
+becomes, after unrolling by a factor $4$,
+\[
+\begin{aligned}
+&\text{for } i = 0 \text{ to } n-1 \text{ step } 4: \\
+&\quad A[i] = B[i] + C[i]; \quad A[i+1] = B[i+1] + C[i+1]; \\
+&\quad A[i+2] = B[i+2] + C[i+2]; \quad A[i+3] = B[i+3] + C[i+3].
+\end{aligned}
+\]
+Loop unrolling is an amplification of the step size of the translation operation---the step of the loop index $i$ grows from $1$ to $4$, so that each translation covers four elements. The unrolling factor $k$ measures the ratio of the new step size to the original one. Loop unrolling reduces the number of cycles devoted to loop-control instructions (the number of translational steps), but increases the amount of work performed by each translation (the `amplitude' of the translation).
+\end{definition}
+
+\begin{definition}[Vectorisation]\label{def:vectorization}
+Vectorisation converts scalar operations into vector operations, exploiting SIMD (single instruction, multiple data) instruction sets to process several data at once. A vectorised loop proceeds vector by vector rather than element by element---the vector length $L$ (for example the sixteen 32-bit floating-point numbers of AVX-512) is the number of elements processed at once.
+
+Vectorisation is an amplification of the bit width---the bit width grows from $1$ (scalar) to $L$ (vector), and $L$ data are processed per period. The bandwidth (the time taken to process a single datum) shrinks to $1/L$ of its former value. The bit-width--bandwidth duality holds exactly under vectorisation: the bit width is $W = L$ and the bandwidth is $\Delta t = T/L$ (where $T$ is the time taken to process one vector), so that $W \cdot \Delta t = T$. This duality is structurally the same as the duality between time-domain and frequency-domain concentration for the Slepian window in the data-analysis chapter (\cref{prop:multitaper}) and as the `depth versus width' duality of the recursion tree in this chapter.
+\end{definition}
+
+\section{Periodic comparison of sorting algorithms}
+
+\begin{theorem}[Periodic lower bound for comparison sorting]\label{thm:sorting_lower_bound}
+Any comparison-based sorting algorithm requires at least $\log_2(n!) \approx n \log_2 n$ comparisons in the worst case.
+\end{theorem}
+
+\begin{proof}
+There are $n!$ permutations of $n$ elements. Each comparison partitions the set of possible permutations into two subsets (`less than' and `greater than') and eliminates at most half of them. After $k$ comparisons at most $n!/2^k$ permutations remain possible. To determine the sorted order uniquely we need $n!/2^k \le 1$, that is, $k \ge \log_2(n!)$. By Stirling's formula, $\log_2(n!) = n \log_2 n - n \log_2 e + O(\log n) = \Omega(n \log n)$.
+\end{proof}
+
+\begin{proposition}[Recursive cycle of quicksort]\label{prop:quicksort_cycle}
+Quicksort selects a pivot element, partitions the array into those elements smaller than the pivot and those greater than it, and then sorts the two subarrays recursively. The recursion tree of quicksort is an unbalanced binary tree---in the worst case it degenerates into a linked list of depth $n$ (complexity $O(n^2)$), whilst on average the depth is $\log_2 n$ (complexity $O(n \log n)$).
+
+The recursion tree of quicksort is the realisation of the rotation operation within sorting: the choice of pivot amounts to rotating the array in phase space---rotating the array about the pivot so that elements smaller than the pivot move to the left and elements greater than it move to the right. The pivot-selection strategy (random, median-of-three) determines the balance of the rotation.
+\end{proposition}
+
+\begin{proof}
+Let $T(n)$ be the expected number of comparisons for size $n$. A random pivot falls on each of the $n$ positions with equal probability, giving the recurrence
+\[
+T(n) = (n-1) + \frac{1}{n}\sum_{k=1}^{n}\big( T(k-1) + T(n-k) \big)
+= (n-1) + \frac{2}{n}\sum_{k=0}^{n-1} T(k).
+\]
+Multiplying by $n$ and subtracting the version for $n-1$ eliminates the sum: $nT(n) - (n-1)T(n-1) = 2(n-1) + 2T(n-1)$, that is, $T(n)/(n+1) = T(n-1)/n + 2(n-1)/(n(n+1))$. Writing $S_n = T(n)/(n+1)$ gives $S_n = S_{n-1} + \frac{2(n-1)}{n(n+1)} \approx S_{n-1} + 2/n$, so $S_n = 2\sum_{k=1}^{n} \frac{1}{k} + O(1) = 2\ln n + O(1)$---whence $T(n) = O(n\log n)$. In the worst case (the pivot always the least element) the recursion tree has depth $n$ and $T(n) = \sum_{k=1}^{n}(k-1) = O(n^2)$.
+\end{proof}
+
+\section{Periodic security of cryptographic algorithms}
+
+\begin{definition}[Period of a pseudorandom number generator]\label{def:prng_period}
+A pseudorandom number generator (PRNG) produces a sequence that appears random by means of a deterministic algorithm. The \textbf{period} of a PRNG is the length of the sequence before it begins to repeat. The recurrence of the linear congruential generator (LCG) is
+\[
+X_{n+1} = (a X_n + c) \bmod m,
+\]
+whose period is at most $m$ (attained when the parameters satisfy the Hull--Dobell conditions). The period of the Mersenne Twister is $2^{19937}-1$.
+
+The period of a PRNG is the realisation of the translation period on a finite state space: the state $X_n$ is translated on $\{0,1,\dots,m-1\}$ according to the recurrence.
+
+The length $m$ of the period is the bit width---the larger $m$ is, the longer the period and the greater the security.
+\end{definition}
+
+\begin{lemma}[Hull--Dobell theorem]\label{lem:hull_dobell}
+The LCG $X_{n+1} = (a X_n + c) \bmod m$ has period $m$ if and only if:
+\begin{enumerate}[label=(\roman*)]
+    \item $\gcd(c, m) = 1$;
+    \item $a - 1$ is divisible by every prime factor of $m$;
+    \item if $4 \mid m$, then $4 \mid (a - 1)$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(Sufficiency) Under conditions (i)--(iii) the map $X \mapsto aX + c \bmod m$ is a permutation of $\mathbb Z/m\mathbb Z$, and by (ii) and (iii) this permutation has but a single orbit on $\mathbb Z/m\mathbb Z$ (for a detailed proof see Knuth, \textit{TAOCP} Vol.~2, \S{}3.2.1.2, Theorem~A).
+
+(Necessity) If $X \mapsto aX+c$ has period $m$ on $\mathbb Z/m\mathbb Z$, then it must be an $m$-cycle. Analysis of the permutation shows that conditions (i)--(iii) are all necessary.
+\end{proof}
+
+\begin{lemma}[Correctness of Floyd's cycle-detection algorithm]\label{ch33_floyd_cycle}
+Let the orbit of the iteration map $\Phi$ start from $x_0$ and enter a cycle of length $\lambda$ after $\mu$ steps (that is, $x_{\mu+\lambda} = x_\mu$ with $\mu$ and $\lambda$ minimal). Floyd's algorithm advances a slow pointer $x_s$ (one step at a time) and a fast pointer $x_f$ (two steps at a time) simultaneously. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the two pointers must meet within finitely many steps, and the meeting occurs inside the cycle;
+    \item after they meet, advancing a pointer from $x_0$ and another from the meeting point in step, the first coincidence is the entry of the cycle, from which $\mu$ and $\lambda$ may be read off.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(i) Inside the cycle (indices $\ge \mu$) the fast pointer gains one step on the slow pointer per step; since the initial separation is finite ($\le \lambda$), it must catch up within at most $\lambda$ steps.
+
+(ii) Suppose the pointers have taken $t$ steps when they meet. Then $t \equiv 2t \pmod \lambda$ (they meet at the same point of the cycle), that is, $t \equiv 0 \pmod{\lambda}$. The meeting point lies at distance $\lambda - (t - \mu)$ from the cycle entry, whilst the entry lies at distance $\mu$ from $x_0$. A new pointer starting from $x_0$ reaches the entry after $\mu$ steps; the pointer at the meeting point, after a further $\mu$ steps, arrives at the position $\mu$ beyond the meeting point---and since $t \equiv 0 \pmod \lambda$, that position is precisely the entry. Hence the two pointers coincide at the entry, and the number of steps read off is $\mu$; the number of steps for one further circuit is then $\lambda$.
+\end{proof}
+
+\begin{remark}[Avalanche effect of cryptographic hashing (empirical observation / research programme)]\label{prop:avalanche_effect}
+Let an idealised single-round compression function $f: \{0,1\}^m \to \{0,1\}^m$ operate under the random-permutation model. If one input bit $x_i$ is flipped, then every output bit $y_j$ flips with probability $1/2$---so after one round the expected number of affected output bits is $m/2$; this step is a direct computation under the idealised model.
+The further assertion---that after $r$ rounds of iteration the \textbf{correlation} between the initial bit and any output bit decays at rate $O(2^{-r})$, and that for $r$ sufficiently large (for example the $64$ rounds of SHA-256) it falls below any threshold of distinguishability---is an \textbf{empirical observation / research programme}, not a proved theorem: (1) `correlation' is not defined here; (2) under the random-permutation model the expected correlation between $f(X)$ and the flipped bit is already $0$ after one round (rather than $2^{-r}$), and $2^{-r}$ cannot be deduced from the expansion of the set of affected bits either; (3) the assertion about SHA-256 extrapolates the rate of the idealised model to a concrete algorithm and, consistently with the empirical character stated in \cref{rem:avalanche_rigor}, should likewise be read as an empirical assertion.
+\end{remark}
+
+\begin{remark}[The rigour of the avalanche effect]\label{rem:avalanche_rigor}
+The proof above holds under the \textbf{ideal random-permutation model}. Actual hash functions use fixed Boolean functions, and the avalanche effect is realised through carefully designed non-linear S-boxes and linear diffusion layers (see Daemen--Rijmen, \textit{The Design of Rijndael}, Springer, 2002); its proof rests on counts of active S-boxes under differential and linear cryptanalysis. The `avalanche effect' is therefore, strictly speaking, an \textbf{empirical property}, for which only a probabilistic proof under an idealised model is available.
+\end{remark}
+
+\section{Bounds and trade-offs of algorithmic systems}
+
+\begin{theorem}[The three bounds and trade-offs of algorithmic systems]\label{thm:algorithm_conservation}
+The performance of an algorithmic system is governed by three bounds and trade-offs:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Complexity lower bound}: under the decision-tree or algebraic-decision-tree model, the intrinsic computational complexity of a problem has a determinate lower bound---no algorithm can solve the problem with complexity below that bound. The lower bound $\Omega(n \log n)$ for sorting is an instance of a complexity lower bound under the decision-tree model (\cref{thm:sorting_lower_bound}).
+    \item \textbf{Precision trade-off}: in numerical computation the total computational error is traded off between \textbf{truncation error} and \textbf{rounding error}. Specifically, for the composite trapezoidal rule the truncation error is $\sim C_1 h^2$ and the rounding error is $\sim C_2 \varepsilon_{\text{mach}}/h$ (where $h$ is the step size), so that the total error $\sim C_1 h^2 + C_2 \varepsilon_{\text{mach}}/h$ is minimised at $h^* \sim (C_2 \varepsilon_{\text{mach}}/(2 C_1))^{1/3}$. This trade-off is the manifestation of scale invariance in numerical analysis.
+    \item \textbf{Resource trade-off}: in concurrent and distributed systems the total computational resource (CPU time, memory, bandwidth) is apportioned among several tasks. Load balancing is the dynamic realisation of the resource trade-off.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) Complexity lower bound: take sorting as the example. The lower bound $\Omega(n \log n)$ for comparison sorting comes from the decision-tree model---any comparison-based sorting algorithm corresponds to a binary decision tree with at least $n!$ leaves, and the height of the tree is at least $\log_2(n!) = \Omega(n \log n)$. No algorithm can break through this \textbf{information-theoretic lower bound}.
+
+(ii) Precision trade-off: the truncation error of the composite trapezoidal rule is $E_{\text{trunc}} = O(h^2)$. The rounding error accumulates during summation and in the worst case is $E_{\text{round}} = O(\varepsilon_{\text{mach}}/h)$. The total error $E_{\text{total}}(h) = C_1 h^2 + C_2 \varepsilon_{\text{mach}}/h$ is minimised at $h^* = (C_2 \varepsilon_{\text{mach}}/(2 C_1))^{1/3}$, where $E_{\text{total}} = O(\varepsilon_{\text{mach}}^{2/3})$.
+
+(iii) Resource trade-off: in a distributed system of $N$ nodes the total computational resource is $R_{\text{total}} = \sum_i R_i$. Load balancing brings the resource utilisations $u_i = R_i^{\text{used}}/R_i$ of the nodes as close together as possible. When all the $u_i$ are equal, $\sum_i u_i R_i = u \sum_i R_i = u R_{\text{total}}$---that is, load balancing maximises the throughput of the system when the total load is fixed.
+\end{proof}
+
+\section{Interface with the next chapter: the transmission of algorithmic structure to agents}
+\label{sec:algorithm_to_agent_interface}
+
+\begin{proposition}[Inheritance of algorithmic periodic structure by agents]\label{prop:algorithm_to_agent_inheritance}
+The algorithmic periodic structures established in this chapter are inherited level by level in the next chapter, `Periodic Structure of Agents':
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{the damped oscillation of gradient descent} (\cref{ch33_gd_bound}) $\to$ analysis of convergence and oscillation in agent training dynamics;
+    \item \textbf{the quadratic convergence of Newton's method} (\cref{prop:newton_quadratic}) $\to$ convergence analysis of second-order optimisers in agents;
+    \item \textbf{learning-rate scheduling} (\cref{def:lr_scheduler}, in the agents chapter) $\to$ periodic modulation of the agent training process;
+    \item \textbf{periodic convergence of parameter averaging} (\cref{prop:parameter_averaging}, in the agents chapter) $\to$ synchronisation periods in distributed multi-agent training;
+    \item \textbf{the PRNG period} (\cref{def:prng_period}) $\to$ the source of randomness in agent exploration strategies.
+\end{enumerate}
+This chapter is therefore the bridge joining `pure algorithms' to `learning agents'.
+\end{proposition}
+
+\begin{proof}
+The correspondences are as follows.
+(i) Lemma \cref{ch32_gd_eigen} (agents chapter) cites directly the convergence analysis of gradient descent given here.
+(ii) The quadratic convergence of \cref{prop:newton_quadratic} extends to second-order optimisers in agents (such as Newton's method and natural-gradient methods).
+(iii) The periodic modulation of \cref{def:lr_scheduler} (agents chapter) inherits the convergence framework of gradient descent established here.
+(iv) The distributed-training synchronisation of \cref{prop:parameter_averaging} (agents chapter) inherits the convergence mechanism of fixed-point iteration established here.
+(v) \cref{def:prng_period} supplies the source of randomness for the $\varepsilon$-greedy strategy of an agent.
+\end{proof}
+
+\begin{remark}[Unity with the rest of the book]\label{rem:algorithm_chapter_unity}
+The theory of the periodic structure of algorithmic systems established in this chapter is a systematic application of periodic mathematics in computer science. Fixed-point iteration and Newton's method are the convergence of the translation operation in phase space---the contraction mapping guarantees monotone convergence of the translation towards the fixed point. Recursive algorithms are the realisation of the scaling operation within algorithmic structure---each level of the recursion tree scales the problem size by $1/b$ and the number of subproblems by $a$. Loop unrolling and vectorisation are direct applications of the bit-width--bandwidth duality in code optimisation. The lower bound on the number of comparisons in sorting is the algorithmic expression of an information-entropy constraint. The period length of a PRNG determines the security of a cryptographic system.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & Contractive translational convergence of fixed-point iteration (\cref{def:fixed_point_iteration}, \cref{thm:banach_fixed_point_algo}); successive translation in gradient descent (\cref{ch33_gd_bound}); step-size amplification in loop unrolling (\cref{def:loop_unrolling}) \\
+Scaling & Scaling of problem size in recursion ($a$ subproblems of size $1/b$, \cref{def:recursion}); complexity scaling $T(n)=O(g(n))$; bit-width amplification in vectorisation (\cref{def:vectorization}) \\
+Rotation & Rotational correction by the Newton Jacobian (\cref{prop:newton_quadratic}); pivot rotation in quicksort (\cref{prop:quicksort_cycle}) \\
+Balance & Complexity lower bounds: the comparison-sorting bound $\Omega(n\log n)$ (\cref{thm:sorting_lower_bound}); precision and resource trade-offs (\cref{thm:algorithm_conservation}) \\
+Symmetry & Left--right symmetry of divide-and-conquer recursion (merge sort, $a=b=2$, \cref{prop:mergesort_cycle}) \\
+Closure & The closed orbit of Floyd's cycle detection (\cref{ch33_floyd_cycle}); round-by-round diffusion of the hash avalanche (an \textbf{empirical observation / research programme}; see the remark at \cref{prop:avalanche_effect}) \\
+Period & The spiral of iterative convergence (rate $L^t$); recursion-tree depth $\log_b n$; the PRNG period (maximum LCG period $m$, Mersenne Twister $2^{19937}-1$, \cref{def:prng_period}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the \textbf{three bounds and trade-offs of algorithmic systems} of this chapter (\ref{thm:algorithm_conservation}). Hint: first write down the decision map and the evolution group of this chapter's target, then apply the proof structure of the general criterion given in the `Periodic Systems' chapter.
+
+    \item Using the seven-theme comparison table of this chapter, identify the concrete carriers of the themes \textbf{translation}, \textbf{scaling} and \textbf{rotation} in this chapter, and give one example of domain data for each.
+
+    \item Synthesis: restate the diagnostic procedure of this chapter using the five-step standard interface of the `Periodic Systems' chapter (Table \ref{tab:ps_five_steps}), noting for each step the theorem of this chapter on which it depends: \ref{thm:algorithm_conservation}.
+\end{enumerate}

@@ -1,0 +1,797 @@
+\chapter{电路与芯片系统之周期结构}
+\markboth{电路与芯片系统之周期结构}{电路与芯片系统之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:circuit_ps_hook}
+本章判定研究目标是否具有周期性、确定其周期类型、以及查找最小正周期时，一律引用「周期系统」章：
+周期性判据见 \cref{thm:ps_periodicity_decision}，
+周期类型判别见 \cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}，
+最小正周期查找见 \cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}，
+由数据构建周期级数与周转圆组见 \cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}。
+\end{remark}
+
+\begin{remark}[本章定位：按「周期系统」章五步接口展开]\label{rem:circuit_five_steps_positioning}
+电路与芯片系统之周期结构研究电路中周期性、谐振现象以及芯片作为周转圆波形/频谱处理单元的数学表征。本章不另立周期性判据，而是把电路与芯片系统接入「周期系统」章规定的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把晶振振荡、PLL 相位锁定、时钟树传播、LC 振荡等目标化为离散或连续动力系统，引用 \cref{thm:ps_periodicity_decision} 判定是否具有周期性，并确定周期类型；
+    \item \textbf{构建}：由晶振波形、时钟信号、数据信号、频谱数据构建振幅级数、频率级数、相位级数，组装为电路周转圆组；
+    \item \textbf{调节}：用残差能量下降、电荷守恒、能量守恒与磁通守恒约束动态调节电路周转圆组；
+    \item \textbf{卷积}：在电路周转圆组上引入振幅卷积、相位卷积、频率卷积，并与自相关、互相关、时钟偏移衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成电路周期诊断流程。
+\end{enumerate}
+本章的核心内容是：\textbf{芯片在周期数学的视角下，是一个拥有参数的周转圆波形/频谱处理单元}。芯片的所有输入与输出都是基于周转圆波形/频谱的处理。具体而言：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{晶振作为基本固定的周转圆}：石英晶体振荡器是芯片中最核心的周期源——它输出一个振幅、频率和相位都基本固定的正弦/方波振荡。晶振是芯片内所有其他周转圆的\textbf{主周转圆}（外圈驱动）。
+    \item \textbf{锁相环作为周转圆的倍频/分频器}：PLL将晶振周转圆倍频到 GHz 级别，或分频到 kHz 级别——它是周转圆的\textbf{缩放操作}。
+    \item \textbf{时钟树作为嵌套周转圆系统}：从晶振到各寄存器的时钟分布是层层嵌套的周转圆结构——全局时钟（主周转圆）驱动模块时钟（次级周转圆），模块时钟驱动寄存器时钟（更内层周转圆）。
+    \item \textbf{数据信号作为调制周转圆}：数据信号通过调制嵌套在时钟周转圆上——数据的“1”和“0”对应相位算子的两个状态（$C_2$ 群）。
+    \item \textbf{芯片作为频谱处理单元}：FFT 芯片直接实现了离散傅里叶变换——将时域周转圆分解为频域分量。滤波器芯片实现了特定频率分量的选择。
+\end{enumerate}
+本章使用的数学工具包括：周转圆模型、LC 振荡、相位锁定、反馈回路、周期卷积、周转圆组、相位算子、时延。
+\end{remark}
+
+\begin{remark}[本章七主题导引]\label{rem:circuit_seven_themes}
+\textbf{平移}——时钟节拍推进与信号传播时延（时钟树传播时延 $\tau_i$、流水线时延 $\tau_{\text{pipe}}$，定义 \ref{def:clock_skew}、\ref{def:chip_delay_types}）；\textbf{缩放}——工艺制程缩放（摩尔定律，定义 \ref{ch24_moore_scaling}）与 PLL 倍频/分频（定义 \ref{def:pll_epicycle}）；\textbf{旋转}——锁相环的相位旋转与锁定（定义 \ref{def:pll_delay}、命题 \ref{prop:pll_phase_lock}）；\textbf{守恒}——能量守恒（功耗）与电荷/信息守恒（定理 \ref{thm:circuit_conservation}、注释 \ref{ch24_power_info_conservation}）；\textbf{对称}——时钟树 H 树对称（例 \ref{ex:h_tree_clock}）与差分信号对称（定义 \ref{def:op_amp}）；\textbf{闭合}——锁相环反馈回路的闭合（定义 \ref{def:pll_epicycle}）；\textbf{周期}——晶振周期 $T_0=1/f_0$（定义 \ref{def:quartz_oscillator}）与时钟周期 $T_{\text{clk}}$（定义 \ref{def:cpu_epicycle}）。
+\end{remark}
+
+\section{接入「周期系统」章的五步接口}
+\label{sec:circuit_five_steps}
+
+\subsection{第一步：电路目标的周期性判定}
+
+\begin{definition}[电路目标与判定输入]\label{def:circuit_target}
+一个\textbf{电路目标}是指下列对象之一：
+\begin{enumerate}[label=(\roman*)]
+    \item 一个晶振振荡系统，其状态空间为 $(V,i)$ 相空间；
+    \item 一个 LC 谐振回路，其状态空间为电荷-电流相空间；
+    \item 一个锁相环系统，其状态空间为输入相位与输出相位的联合空间；
+    \item 一个时钟树系统，其状态空间为各叶节点时钟相位的联合空间；
+    \item 一个数据调制信号，其状态空间为 $C_2$ 相位状态的序列空间。
+\end{enumerate}
+电路目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal D_{\mathrm{C}}=(\mathcal S,\Phi),
+\]
+其中 $\mathcal S$ 是状态空间，$\Phi:\mathcal S\to\mathcal S$ 是时间平移、相位旋转或反馈演化所诱导的映射。若 $\mathcal S$ 为有限集，称目标为\textbf{有限电路目标}；若 $\mathcal S$ 为无限集，称目标为\textbf{无限电路目标}。
+\end{definition}
+
+\begin{definition}[电路判定映射]\label{def:circuit_periodization}
+设电路目标由判定输入 $\mathcal D_{\mathrm{C}}=(\mathcal S,\Phi)$ 给出。若目标的状态由 $\Phi$ 生成，即存在 $x_0\in\mathcal S$ 使
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+当 $t\in\mathbb Z$ 时 $x_t$ 由 $\Phi$ 迭代生成；当 $t\in\mathbb R$ 时，以单参数演化族 $\{\Phi_t\}_{t\in\mathbb R}$（其中每个 $\Phi_t:\mathcal S\to\mathcal S$，且 $\Phi_0=\operatorname{id}$、$\Phi_{s+t}=\Phi_s\circ\Phi_t$ 对一切 $s,t\in\mathbb R$ 成立、$(t,x)\mapsto\Phi_t(x)$ 连续）记之。
+则称 $\Phi$ 为目标的\textbf{电路判定映射}。此时当 $t\in\mathbb Z$ 时电路目标化为离散动力系统 $(\mathcal S,\Phi)$，当 $t\in\mathbb R$ 时化为连续动力系统 $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$，两种情形均可直接套用「周期基础」章与「周期系统」章的判据。
+\end{definition}
+
+\begin{theorem}[电路周期性判定定理]\label{thm:circuit_periodicity_decision}
+设电路目标的判定映射为 $\Phi$，且 $(\mathcal S,\Phi)$ 为离散动力系统。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 $m\in\mathbb N^+$ 使 $\Phi^m=\mathrm{id}$，则目标为一致周期电路系统；每条轨道闭合，且轨道长度整除 $m$。
+    \item \textbf{判定等价}：目标为一致周期电路系统当且仅当 $\operatorname{ord}(\Phi)<\infty$。
+    \item \textbf{逐点判据}：目标在状态 $x_0$ 处的轨道闭合当且仅当 $x_0$ 为周期点；此时轨道长度即该点处的周期。
+    \item \textbf{不可省略性}：守恒量与对称群的合取不能替代 $\operatorname{ord}(\Phi)<\infty$；准周期电路目标不属于周期电路系统。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:circuit_periodicity_decision} 是「周期系统」章 \cref{thm:ps_periodicity_decision} 的领域实例化：
+只需把判定映射 $f$ 与演化群替换为本章的 $\Phi$，(A) 充分判定、(B) 判定等价、(C) 逐点判据、
+(D) 不可省略性四条即逐条成立。依 \cref{rem:ps_applications_hook} 的约定，此处不再重复展开。
+\end{proof}
+
+\begin{corollary}[电路周期类型]\label{cor:circuit_period_type}
+经 \cref{thm:circuit_periodicity_decision} 判定后，电路目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 $m_0=1$，状态为不动点；
+    \item \textbf{严格周期型}：$1<m_0<\infty$，状态严格周期；
+    \item \textbf{一致周期型}：$\operatorname{ord}(\Phi)=m<\infty$，所有轨道长度整除 $m$；
+    \item \textbf{准周期型}：$\operatorname{ord}(\Phi)=\infty$，轨道不闭合但在紧致承载结构上稠密；
+    \item \textbf{最终周期型}：存在 $N$，使 $t\ge N$ 后目标为周期；
+    \item \textbf{离散周期型}：承载结构为 $\mathbb Z$，且归一化周期比 $\rho=T_x/\Delta x\in\mathbb Q$。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，残差按 $e^{-\kappa t}$ 衰减（见 \cref{def:ps_period_type}(vii)）。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于周期电路系统；(iv) 不属于周期电路系统，但可用有界逼近工具处理；(v) 只在稳定阶段是周期电路系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期电路系统，只在稳定阶段可用有界逼近工具处理。
+\end{corollary}
+
+\begin{proof}
+逐条由 \cref{thm:circuit_periodicity_decision} 与「周期系统」章 \cref{def:ps_period_type} 代入电路目标即得。
+\end{proof}
+
+\begin{lemma}[LC 振荡的周期判定]\label{lem:lc_oscillator_periodic}
+设 LC 振荡回路由电感 $L$ 与电容 $C$ 构成，电荷 $q(t)$ 满足
+\[
+\ddot q+\omega_0^2q=0,\qquad \omega_0=\frac{1}{\sqrt{LC}}.
+\]
+则 LC 振荡为一致周期系统，其最小正周期为
+\[
+T_0=2\pi\sqrt{LC}.
+\]
+\end{lemma}
+
+\begin{proof}
+方程的通解为 $q(t)=A\cos(\omega_0t+\phi)$。时间平移 $T_0=2\pi/\omega_0=2\pi\sqrt{LC}$ 使 $q(t+T_0)=q(t)$，且 $T_0$ 为最小正周期。故判定映射 $\Phi$ 满足 $\Phi^{T_0}=\mathrm{id}$，为一致周期系统。
+\end{proof}
+
+\begin{lemma}[晶振振荡的周期判定]\label{lem:quartz_periodic}
+设晶振输出信号为
+\[
+V_{\text{晶振}}(t)=A_{\text{固定}}e^{i(\omega_{\text{固定}}t+\phi_0)},\qquad \omega_{\text{固定}}=2\pi f_0.
+\]
+则晶振振荡为一致周期系统，其最小正周期为
+\[
+T_0=\frac{1}{f_0}=\frac{t}{K}.
+\]
+其中 $K\approx 1.67\ \text{MHz}\cdot\text{mm}$，$t$ 为晶片厚度。
+\end{lemma}
+
+\begin{proof}
+由定义 \ref{def:quartz_oscillator}，晶振输出为固定频率的复指数信号，其最小正周期为 $T_0=2\pi/\omega_{\text{固定}}=1/f_0$。谐振频率 $f_0=K/t$ 由晶片厚度决定。故判定映射 $\Phi$ 满足 $\Phi^{T_0}=\mathrm{id}$，为一致周期系统。
+\end{proof}
+
+\begin{lemma}[PLL 相位锁定的周期判定]\label{lem:pll_periodic}
+设 PLL 处于锁定状态，输出频率 $f_{\text{out}}=Nf_{\text{ref}}$。则输出时钟为一致周期系统，其最小正周期为
+\[
+T_{\text{out}}=\frac{1}{Nf_{\text{ref}}}=\frac{T_{\text{ref}}}{N}.
+\]
+且输出相位与输入相位满足 $\phi_{\text{out}}(t)-N\phi_{\text{ref}}(t)=\text{常数}$。
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:pll_phase_lock}，锁定状态下 $\phi_{\text{out}}=N\phi_{\text{ref}}+\text{常数}$，故输出频率为参考频率的 $N$ 倍。输出时钟的最小正周期为 $T_{\text{out}}=1/(Nf_{\text{ref}})$。由于相位锁定，输出相位与输入相位差的整数倍为常数，故整个系统为一致周期系统。
+\end{proof}
+
+\begin{lemma}[时钟树传播的周期判定]\label{lem:clock_tree_periodic}
+设时钟树从根节点到叶节点 $i$ 的传播时延为 $\tau_i$。则所有叶节点的时钟信号均为一致周期系统，其公共周期为
+\[
+T_{\text{clk}}=\frac{1}{f_{\text{clk}}},
+\]
+各叶节点时钟的相对相位差为时钟偏移 $\delta_{ij}=\tau_i-\tau_j$。
+\end{lemma}
+
+\begin{proof}
+时钟树的每个叶节点接收与根节点同频的时钟信号，最小正周期均为 $T_{\text{clk}}=1/f_{\text{clk}}$。各叶节点时钟的相位差由传播时延差决定，$\delta_{ij}=\tau_i-\tau_j$。故各叶节点时钟均为一致周期系统，公共周期为 $T_{\text{clk}}$。
+\end{proof}
+
+\begin{definition}[电路最小正周期算法]\label{def:circuit_minimal_period_algorithm}
+本定义与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{def:ps_minimal_period_algorithm} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处的差别仅为术语（电路目标 / 电路样本），算法步骤与结论完全相同。
+\end{definition}
+
+\begin{theorem}[电路最小正周期算法的正确性]\label{thm:circuit_minimal_period_correctness}
+本定理与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{thm:ps_minimal_period_correctness} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。本处的差别仅为术语（电路目标 / 电路样本），算法步骤与结论完全相同。
+\end{theorem}
+
+\begin{example}[电路周期判定实例]\label{ex:circuit_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item LC 振荡：$T_0=2\pi\sqrt{LC}$，一致周期型；
+    \item 晶振振荡：$T_0=1/f_0=t/K$，一致周期型；
+    \item PLL 锁定：$T_{\text{out}}=T_{\text{ref}}/N$，一致周期型；
+    \item 时钟树：公共周期 $T_{\text{clk}}=1/f_{\text{clk}}$，各叶节点时钟偏移 $\delta_{ij}$；
+    \item FFT 蝶形运算：$N$ 点相位算子构成 $C_N$ 循环群。
+\end{enumerate}
+\end{example}
+
+\begin{remark}[守恒量不保证周期]\label{rem:circuit_invariant_not_period}
+电路系统中的电荷守恒、能量守恒与磁通守恒是周期结构的辅助条件，但不构成充分条件。例如一个理想的 RC 放电回路具有电荷守恒，但输出信号随时间为指数衰减而非周期。电路周期结构必须由 \cref{thm:circuit_periodicity_decision} 或上述引理判定。
+\end{remark}
+
+\subsection{第二步：电路周期级数与周转圆组的构建}
+
+\begin{definition}[电路振幅级数、频率级数、相位级数]\label{def:circuit_series}
+设电路目标的状态或输出序列为 $\{z_t\}$。若其可写为
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+则称
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+分别为电路目标的\textbf{振幅级数}、\textbf{频率级数}与\textbf{相位级数}。三者与「级数与卷积」章 \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} 一致。
+\end{definition}
+
+\begin{definition}[电路周转圆组]\label{def:circuit_epicycle_group}
+设电路目标的周期级数由振幅级数 $\{A_k\}$、频率级数 $\{\omega_k\}$ 与相位级数 $\{\phi_k\}$ 给出。对每个 $k$ 定义周转圆
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+其集合
+\[
+\mathfrak E_{\mathrm{C}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+称为电路目标的\textbf{周转圆组}。其叠加即电路周期级数
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[由电路数据构建周期级数]\label{thm:circuit_series_reconstruction}
+设电路目标的输出为有限周期序列，周期为 $N$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 输出可展开为离散傅里叶级数
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item 振幅级数由 $|c_k|$ 给出，相位级数由 $\arg c_k$ 给出，频率级数由 $2\pi k/N$ 给出；
+    \item 若输出为晶振时钟，则傅里叶分解只有一根谱线；若输出为方波时钟，则各级奇次谐波对应方波分量。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 有限周期序列的离散傅里叶级数是标准结论：基函数 $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ 构成 $\mathbb C^N$ 的正交基。
+(ii) 由 $c_k=A_k e^{i\phi_k}$ 直接读出。
+(iii) 晶振时钟的时间部分为 $e^{-i\omega t}$，在周期 $T=2\pi/\omega$ 上只有基频分量；方波按傅里叶级数展开为各次奇次谐波。
+\end{proof}
+
+\begin{proposition}[三参数对应：半径、相位与转速]\label{prop:circuit_epicycle_correspondence}
+电路周转圆组 $\mathfrak E_{\mathrm{C}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ 的三个参数与三个几何—物理量一一对应：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{半径对应振幅}：$E_k$ 的半径 $|E_k|=A_k$ 即电压或电流分量的振幅；
+    \item \textbf{相位对应旋转时延}：初相 $\phi_k$ 对应时间平移 $\tau_k=\phi_k/\omega_k$；$\phi_k>0$ 时该分量相对基准\textbf{超前} $\tau_k$（等价于把基准延后 $\tau_k$ 后二者重合）；
+    \item \textbf{频率对应旋转速度}：$\omega_k$ 即该时钟分量的角频率。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:circuit_epicycle_correspondence} 与「周期系统」章 \cref{prop:ps_epicycle_correspondence} 完全对应，
+三条对应——半径对应振幅、相位对应旋转时延、频率对应旋转速度——逐条平移至本章的周转圆组即得。
+证明见该处：(i) 由 $|E_k|=A_k$ 与能量分解，(ii) 由相位平移定理，(iii) 由频率级数定义。
+\end{proof}
+
+\begin{example}[晶振时钟的周期级数]\label{ex:circuit_quartz_series}
+晶振输出 $V(t)=A\cos(\omega_0t+\phi_0)$ 在周期 $T_0=1/f_0$ 上为单频周期级数，其周转圆组为 $\{(A,\omega_0,\phi_0)\}$。
+\end{example}
+
+\begin{remark}[周期级数即复变函数]\label{rem:circuit_series_complex}
+设 $z=e^{i\omega_0t}$，则电路周期级数
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+当所有分量与 $\omega_0$ 可公度（即 $\omega_k=k\omega_0$，$k\in\mathbb Z$）时可写为洛朗级数 $\sum_k c_k z^k$，其中 $c_k=A_k e^{i\phi_k}$：此时电路周期级数即单位圆上的复变函数，否则为环面上的函数。
+\end{remark}
+
+\subsection{第三步：电路周转圆组的动态调节}
+
+\begin{definition}[电路周转圆组的动态调节]\label{def:circuit_adaptive_adjustment}
+设当前电路周转圆组为 $\mathfrak E^{(j)}$，部分和
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+残差 $r^{(j)}=z-z^{(j)}$。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 $\|r^{(j)}\|^2>\delta$，则依残差周期图峰值新增一个周转圆；
+    \item \textbf{参数调节}：对已有周转圆参数按正则化最小二乘或守恒约束更新。
+\end{enumerate}
+在电路系统中，数量调节对应增加频率分量或时钟域；参数调节对应调整振幅、相位与频率，使电荷、能量与磁通约束满足。
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:circuit_adaptive_growth}
+按 \cref{def:circuit_adaptive_adjustment}(i) 加入残差主频分量后，残差能量单调不增：
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+等号成立当且仅当残差在被选频率上无能量。
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:circuit_adaptive_growth} 与「周期系统」章 \cref{def:ps_adaptive_adjustment} 的动态调节机制一致：
+新增周转圆即把 $r^{(j)}$ 沿 $\hat\omega$ 的分量从残差中移出，由正交分解
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{被移出的分量}\|^2$ 即得不等式，
+等号当且仅当被移出分量的范数为零。完整论证见该处。
+\end{proof}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:circuit_adaptive_convergence}
+设电路目标为周期 $T_0$ 的有限周期序列且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得电路周转圆组即目标的精确傅里叶数据。若目标为复值序列，则独立谐波数为 $T_0$，相应结论为「至多 $T_0$ 步」。
+\end{theorem}
+
+\begin{proof}
+周期 $T_0$ 的序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波上完备。每步按 \cref{prop:circuit_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。
+\end{proof}
+
+\begin{definition}[结构指标调节]\label{def:circuit_structure_metric_adjustment}
+设电路目标的结构指标为
+\[
+\mathcal I=(\mathcal I_{\text{电荷}},\mathcal I_{\text{能量}},\mathcal I_{\text{磁通}})
+=(\text{电荷守恒度},\ \text{能量守恒度},\ \text{磁通守恒度}).
+\]
+\textbf{结构指标调节}为：在参数空间 $\Theta$ 中选取 $\theta$，每步取使 $\mathcal I(\theta)$ 按字典序\textbf{严格递减}（极小化）的邻近参数；若不存在则停止，此时为局部最优。
+\end{definition}
+
+\begin{proposition}[结构指标调节的有限收敛]\label{prop:circuit_structure_metric_convergence}
+设参数空间 $\Theta$ 有限，且每次调节使 $\mathcal I$ 按字典序严格递减。则调节在有限步内终止于局部最优参数。
+\end{proposition}
+
+\begin{proof}
+$\Theta$ 有限，故 $\mathcal I$ 只取有限多个值，而字典序是有限集上的全序；按字典序严格递减的序列不能无限延续，故调节在有限步终止。终止时不存在使 $\mathcal I$ 按字典序严格递减的邻近参数，即局部最优。
+\end{proof}
+
+\begin{remark}[动态调节的边界]\label{rem:circuit_adaptive_boundary}
+\cref{thm:circuit_adaptive_convergence} 依赖有限周期序列。对连续谱或准周期电路目标，不存在有限周转圆组精确表示，只能作有界逼近。结构指标调节不保证全局最优。
+\end{remark}
+
+\subsection{第四步：电路卷积}
+
+\begin{definition}[电路振幅卷积、相位卷积与频率卷积]\label{def:circuit_convolution_types}
+设两个电路周转圆组为
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+定义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅卷积}：$\mathbb A_{mn}=A_nB_m$；
+    \item \textbf{相位卷积}：$\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$；
+    \item \textbf{频率卷积}：$\mathbb F_{mn}=\omega_n\nu_m$；
+    \item \textbf{趋势卷积}：$\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$。
+\end{enumerate}
+这与「级数与卷积」章 \cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution}、\cref{def:tendency_convolution} 一致。
+\end{definition}
+
+\begin{theorem}[三类卷积在电路周转圆组上的作用]\label{thm:circuit_convolution_action}
+设两个电路目标的周转圆组分别为 $\mathfrak E$ 与 $\mathfrak E'$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 振幅卷积只作用于半径；
+    \item 相位卷积只作用于相位；
+    \item 频率卷积只作用于转速；
+    \item 趋势卷积同时保留振幅与相位。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:circuit_convolution_types} 直接读出。
+\end{proof}
+
+\begin{proposition}[自相关与趋势卷积]\label{prop:circuit_autocorr_phase_convolution}
+设 $\{z_t\}$ 为电路周期序列，其自相关函数为
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+在电路周转圆组语言中，自相关函数是趋势卷积在对角线上的投影：
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:circuit_autocorr_phase_convolution} 是「周期系统」章 \cref{thm:ps_convolution_action} 的卷积作用结论在本领域的实现：
+将 $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ 代入自相关定义，由正交性消去全部非对角交叉项，只保留趋势卷积的对角线项
+（三类卷积的因式分解，\cref{prop:ps_convolution_factorization}），即得 $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$。
+完整展开见该处。
+\end{proof}
+
+\begin{remark}[电路卷积与周期卷积的关系]\label{rem:circuit_convolution_relation}
+电路卷积不是新的卷积运算，而是「级数与卷积」章周期卷积在电路周转圆组上的实例。自相关是趋势卷积在对角线上的投影，互相关、时钟偏移分别是振幅卷积和频率卷积在电子工程中的具体表现。FFT 蝶形运算单元是相位算子周期卷积在硬件中的最简实现。
+\end{remark}
+
+\subsection{第五步：与离散采样、调和分析、时序分析的整合}
+
+\begin{definition}[电路周期诊断流程]\label{def:circuit_periodic_diagnosis}
+对于给定电路系统，使用周期数学框架进行诊断：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{周期判定}：验证电路目标的周期类型（\cref{thm:circuit_periodicity_decision}）；
+    \item \textbf{级数构建}：由晶振波形、时钟信号、数据信号构建振幅、频率、相位级数与周转圆组（\cref{thm:circuit_series_reconstruction}）；
+    \item \textbf{守恒诊断}：验证电荷、能量与磁通守恒（\cref{thm:circuit_conservation}）；
+    \item \textbf{卷积诊断}：计算自相关（趋势卷积的对角线投影，\cref{prop:circuit_autocorr_phase_convolution}）与相位卷积；
+    \item \textbf{整合诊断}：接入离散采样、调和分析、时序分析工具链。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[电路周期诊断流程与三章接口]\label{thm:circuit_diagnosis_integration}
+\cref{def:circuit_periodic_diagnosis} 的五个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}、\cref{thm:intercalation_leakage_suppression}；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}、\cref{prop:twelve_to_six}；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}、\cref{def:ts_window_validation}。
+\end{enumerate}
+因此电路周期诊断不是独立方法，而是周期数学统一工具链在电路系统上的应用。
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:circuit_diagnosis_integration} 是「周期系统」章五步接口（\cref{tab:ps_five_steps}）在本领域的落地：
+周期判定用采样与谱估计，频率分解与相位核用「调和分析」章，周期图峰值、Fisher 检验与
+窗函数验证用「时序分析」章。故诊断流程由三章工具链合成，证明见该处。
+\end{proof}
+
+\begin{remark}[整合后的操作顺序]\label{rem:circuit_integration_order}
+实际诊断建议顺序为：先判定电路目标是否周期（\cref{thm:circuit_periodicity_decision}）；再构建电路数据的傅里叶数据与周转圆组（\cref{thm:circuit_series_reconstruction}）；再用守恒约束与动态调节优化参数（\cref{thm:circuit_adaptive_convergence}、\cref{prop:circuit_structure_metric_convergence}）；再作电路卷积与自相关分析（\cref{prop:circuit_autocorr_phase_convolution}）；最后按 \cref{def:circuit_periodic_diagnosis} 输出诊断。
+\end{remark}
+
+\section{晶振：基本固定的周转圆}
+
+\subsection{晶振的物理原理}
+
+\begin{definition}[石英晶体振荡器]\label{def:quartz_oscillator}
+\textbf{石英晶体振荡器}（简称晶振）利用石英晶体的\textbf{压电效应}产生稳定的振荡。石英晶体具有正压电效应（机械形变产生电场）和逆压电效应（电场产生机械形变）。当施加交变电场时，晶片产生机械振动；机械振动又通过压电效应反馈为电场——正反馈维持了稳定的自激振荡。
+
+石英晶体的\textbf{谐振频率}由晶片的物理尺寸和切割角度决定。对于 AT 切割的石英晶片，谐振频率为
+\[
+f_0 = \frac{K}{t},
+\]
+其中 $K \approx 1.67 \text{ MHz}\cdot\text{mm}$ 是频率常数，$t$ 是晶片厚度。例如，$t = 0.1$ mm 的晶片谐振频率约为 $16.7$ MHz。一旦晶片被切割和抛光，其谐振频率就\textbf{基本固定}——频率由几何尺寸决定，受温度和老化影响极小。
+
+从周期数学的视角看，晶振是一个\textbf{基本固定的周转圆}：
+\[
+V_{\text{晶振}}(t) = A_{\text{固定}} \cdot e^{i(\omega_{\text{固定}} t + \phi_0)},
+\]
+其中振幅 $A_{\text{固定}}$、角频率 $\omega_{\text{固定}} = 2\pi f_0$ 和初始相位 $\phi_0$ 在稳态运行中保持恒定。
+\end{definition}
+
+\begin{lemma}[晶振的起振条件与稳态条件（巴克豪森准则）]\label{ch24_quartz_startup_lemma}
+设振荡环路绕一圈的总复增益为 $H(\omega)=\beta(\omega)A(\omega)$，其中 $A$ 为放大器的电压增益，$\beta$ 为反馈网络的传输系数。则：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{（起振的必要条件，线性化下亦充分）}晶振自激起振要求
+\[
+|H(\omega_0)| > 1, \qquad \arg H(\omega_0) = 0 \ (\text{mod}\ 2\pi),
+\]
+即幅度条件（环路增益大于 $1$）与相位条件（正反馈，总相移为 $2\pi$ 的整数倍）同时成立；
+    \item \textbf{（稳态振荡的充分条件）}振幅增大使放大器进入非线性饱和区后，有效环路增益的模降至 $|H|=1$，此时振幅不再增长，系统停留在稳态极限环上。
+\end{enumerate}
+两条判据不可互换：起振看的是小信号环路增益 $|H|>1$，而\textbf{维持}振荡时有效增益已降至 $|H|=1$，故 $|H|>1$ 并不是维持振荡的必要条件；反之从小信号线性化也推不出起振的充分性，须借助饱和非线性。
+\end{lemma}
+
+\begin{proof}
+设输入端存在幅度为 $V_0$ 的微小扰动，绕环路一周后返回输入端的信号为 $V_1 = H(\omega)V_0$。在线性化（小信号）模型下，若 $|H(\omega)|<1$，则第 $n$ 圈的幅度 $|V_n| = |H|^n V_0 \to 0$，扰动逐圈衰减，不能起振；若 $\arg H \neq 0$，则各圈反馈相位失配，无法同相增强。故起振要求 $|H|>1$ 且 $\arg H = 0$。
+
+反向（充分性）不能由线性化模型得出：线性化下 $|H|>1$ 加正反馈只给出扰动逐圈按 $|H|^n$ 增长，振幅是否稳定在有限值取决于放大器的非线性。石英晶体在其串联谐振频率 $f_0$ 附近提供最陡峭的相位-频率斜率，使相位条件仅在 $f_0$ 附近满足，从而把振荡频率锁定在 $f_0$。当振幅增大到使放大器进入非线性饱和区时，有效增益 $|H|$ 随振幅增大而单调下降，最终稳定在 $|H|=1$——振幅不再增长，系统停留在稳态极限环上（与“机械系统之周期结构”章的极限环机制一致）。
+\end{proof}
+
+\begin{proposition}[晶振的三个固定属性]\label{prop:quartz_three_fixed}
+晶振作为基本固定的周转圆，具有三个层面的固定属性：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{频率固定}：谐振频率 $f_0 = K/t$ 由晶片厚度决定。一旦切割完成，频率基本不变——短期稳定性达 $10^{-12}$ 量级（OCXO）。频率的固定性源于石英晶体的高 Q 值共振，使振荡频率被锁定在晶片的机械谐振频率上。
+    \item \textbf{振幅固定}：振荡器的振幅由非线性增益饱和机制稳定。起振后振幅迅速增长至稳态值，此后保持不变。振幅的固定性源于环路增益在稳态极限环上的自稳定——振幅增大使有效增益下降，直至 $|H|=1$。
+    \item \textbf{相位稳定}：晶振的相位噪声极低，短期相位稳定性极高。相位噪声在时域中表现为\textbf{抖动}（jitter）——时钟沿的实际到达时间偏离理想时间。低抖动意味着相位在时间平移下高度稳定，其统计描述为相位扩散模型（见“概率论”章）。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 频率固定由石英晶体的物理尺寸决定。AT 切割的频率常数 $K$ 是石英材料的物理常数。晶片厚度 $t$ 在制造过程中精确控制，使用中几乎不变。频率随温度的变化由 AT 切割的温度特性曲线给出——在 $25^\circ$C 附近频率-温度系数接近于零。
+
+(ii) 振幅固定由振荡器的非线性极限环机制保证。起振条件要求环路增益 $> 1$，振幅增长直至非线性效应使环路增益降至 $= 1$。此时振幅稳定在由电路参数决定的稳态值。这是“机械系统之周期结构”章中极限环的电路实现。
+
+(iii) 相位稳定性由晶体的高 Q 值保证——石英晶体的品质因数 $Q \approx 10^5$ 至 $10^7$，远高于 LC 回路（$Q \approx 10^2$）。高 Q 值意味着相位噪声极低。抖动的统计分布近似高斯分布，标准差 $\sigma_{\text{jitter}} \approx 1/(2\pi f_0 Q)$。
+\end{proof}
+
+\subsection{晶振作为主周转圆}
+
+\begin{definition}[晶振的主周转圆地位]\label{def:quartz_master_epicycle}
+晶振输出的时钟信号是芯片中\textbf{所有其他周转圆的主周转圆}。芯片内的一切时序活动——寄存器翻转、状态机转换、数据通路的计算——都以晶振时钟为全局时间基准。从周期数学的视角看，晶振是\textbf{最外层的大周转圆}（$k=1$ 级），其半径为振幅 $A_{\text{clk}}$，角速度为 $\omega_{\text{clk}} = 2\pi f_0$。
+
+芯片内部其他周转圆都嵌套在晶振时钟周转圆上：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{倍频后的高速周转圆}：通过 PLL 倍频，晶振时钟被放大为更高频率的周转圆（如 CPU 核心时钟）。
+    \item \textbf{分频后的低速周转圆}：通过分频器，晶振时钟被缩小为更低频率的周转圆（如串口波特率时钟）。
+    \item \textbf{数据信号周转圆}：数据信号通过调制嵌套在时钟周转圆上，数据的每个比特对应一个时钟周期的相位状态。
+\end{enumerate}
+这是“矢量分析”章中嵌套周转系统的芯片实现——晶振是大周转圆（低频），PLL 倍频时钟是小周转圆（高频），数据信号是最内层的调制周转圆。
+\end{definition}
+
+\section{锁相环}
+
+\begin{definition}[锁相环的周转圆解释]\label{def:pll_epicycle}
+\textbf{锁相环}（Phase-Locked Loop, PLL）是一种将输出时钟相位锁定到输入参考时钟的反馈控制系统。PLL 的核心组件包括：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{鉴相器}（Phase Detector, PD）：比较输入参考时钟与反馈时钟的相位差。
+    \item \textbf{环路滤波器}（Loop Filter, LF）：低通滤波相位误差信号。
+    \item \textbf{压控振荡器}（Voltage-Controlled Oscillator, VCO）：输出频率随控制电压线性变化。
+    \item \textbf{分频器}（Frequency Divider）：将 VCO 输出频率除以 $N$ 反馈给鉴相器。
+\end{enumerate}
+PLL 将晶振时钟频率 $f_{\text{ref}}$ 倍频为输出频率 $f_{\text{out}} = N \cdot f_{\text{ref}}$。从周期数学的视角看，PLL 是\textbf{周转圆的缩放操作}：它将晶振周转圆的角速度 $\omega_{\text{ref}}$ 缩放为 $\omega_{\text{out}} = N\omega_{\text{ref}}$，同时保持相位锁定——输出周转圆的相位与输入周转圆的相位差恒定。
+\end{definition}
+
+\begin{proposition}[PLL 的相位锁定与缩放比例]\label{prop:pll_phase_lock}
+PLL 的稳态运行满足\textbf{相位锁定}：输出时钟的相位与输入参考时钟的相位差 $\Delta\phi$ 保持恒定。分频器确保输出频率是参考频率的整数倍：$f_{\text{out}} = N f_{\text{ref}}$。比例因子 $N$ 是 PLL 的\textbf{缩放比例}——它度量了周转圆缩放的倍率。
+
+在锁定状态下，PLL 满足：$\phi_{\text{out}}(t) - N\phi_{\text{ref}}(t) = \text{常数}$。这意味着输出周转圆每旋转 $N$ 圈，输入周转圆旋转 $1$ 圈——内外周转圆的嵌套关系为：\textbf{输入周转圆每前进一步，输出周转圆旋转 $N$ 步}。这是“易经系统之周期结构”章中周转圆嵌套生成规则（定义 \ref{def:epicycle_nesting_rule}）在芯片时钟系统中的实现。
+\end{proposition}
+
+\begin{proof}
+PLL 的相位锁定由反馈机制保证。鉴相器输出 $\varepsilon(t) = K_d \cdot (\phi_{\text{ref}}(t) - \phi_{\text{fb}}(t))$，其中 $\phi_{\text{fb}} = \phi_{\text{out}}/N$ 是分频后的反馈相位。VCO 的瞬时频率为 $\omega_{\text{out}}(t) = \omega_0 + K_v \cdot v_c(t)$，其中 $v_c$ 是环路滤波后的控制电压。在稳态锁定下，$\varepsilon = 0$，即 $\phi_{\text{ref}} = \phi_{\text{fb}} = \phi_{\text{out}}/N$，故 $\phi_{\text{out}} = N\phi_{\text{ref}}$。输出相位是输入相位的 $N$ 倍——这是缩放操作在相位域中的实现。
+\end{proof}
+
+\begin{lemma}[锁相环的同步（锁定保持）范围]\label{ch24_pll_lock_range_lemma}
+设 PLL 的环路直流增益为 $K = K_d K_v K_F / N$，其中 $K_d$ 为鉴相器增益，$K_v$ 为压控振荡器增益，$K_F$ 为环路滤波器直流增益，$N$ 为分频比。则已锁定 PLL 能保持锁定的最大频率偏移（同步范围）为
+\[
+\Delta\omega_{\text{lock}} \approx \pm \frac{\pi}{2} K \quad (\text{rad/s}).
+\]
+当参考频率与 VCO 自由振荡频率折算到鉴相器输入端的差 $|\omega_{\text{ref}} - \omega_0/N|$ 落在 $\Delta\omega_{\text{lock}}$ 之内时，锁相环保持锁定；超出此范围则失锁。
+\end{lemma}
+
+\begin{proof}
+锁定状态下鉴相器输出的平均误差电压为 $v_c = K_d(\phi_{\text{ref}} - \phi_{\text{fb}})$，经环路滤波器（直流增益 $K_F$）后驱动 VCO，使输出频率 $\omega_{\text{out}} = \omega_0 + K_v K_F v_c$。反馈到鉴相器端的频率为 $\omega_{\text{out}}/N$，锁定条件 $\omega_{\text{ref}} = \omega_{\text{out}}/N$ 给出
+\[
+\omega_{\text{ref}} = \frac{\omega_0 + K_v K_F K_d \Delta\phi}{N},
+\]
+其中 $\Delta\phi = \phi_{\text{ref}} - \phi_{\text{fb}}$ 为稳态相位差。鉴相器的线性输出范围以最大相位差 $\Delta\phi_{\max} \approx \pm\pi/2$ 为界，故可被环路补偿的最大频率偏移为
+\[
+\Delta\omega_{\max} = \frac{K_v K_F K_d}{N}\cdot \Delta\phi_{\max} \approx \pm \frac{\pi}{2}\frac{K_v K_F K_d}{N} = \pm \frac{\pi}{2}K.
+\]
+因此同步范围与环路直流增益 $K$ 成正比，与分频比 $N$ 成反比。
+\end{proof}
+
+\begin{remark}[同步范围的数值例]\label{ch24_pll_lock_range_example}
+取典型参数：$K_d = 0.5$ V/rad，$K_v = 2\pi\times 10^8$ rad/s/V（即每伏控制电压改变频率 $100$ MHz），$K_F = 1$，$N = 10$。则环路直流增益
+\[
+K = \frac{0.5 \times 2\pi\times 10^8}{10} = \pi\times 10^7\ \text{rad/s},
+\]
+对应的频率域同步范围 $\Delta f_{\text{lock}} = \Delta\omega_{\text{lock}}/(2\pi) = K/4 \approx 7.85$ MHz。这意味着参考频率即使偏离锁定值约 $\pm 7.85$ MHz，锁相环仍能维持锁定——这是 PLL 作为倍频器的鲁棒性来源。
+\end{remark}
+
+\begin{definition}[PLL 的时延特性]\label{def:pll_delay}
+PLL 的输出时钟相对于输入参考时钟存在\textbf{相位时延}：
+\[
+\tau_{\text{PLL}} = \frac{\Delta\phi}{\omega_{\text{out}}} = \frac{\Delta\phi}{N\omega_{\text{ref}}},
+\]
+其中 $\Delta\phi$ 是锁定状态下的稳态相位差。在理想锁定下，$\Delta\phi \approx 0$ 或 $\pi/2$（取决于鉴相器类型）。PLL 的相位时延将相位差转换为时间偏移——输出周转圆滞后输入周转圆一个固定的时间偏移。这一时延在芯片时序分析中称为\textbf{时钟偏移}（clock skew）。
+\end{definition}
+
+\section{时钟树}
+
+\begin{definition}[时钟树]\label{def:clock_tree}
+\textbf{时钟树}是从晶振/PLL 输出到芯片内各寄存器的时钟分布网络。时钟树由多级缓冲器和导线构成，将全局时钟分发到各个时序元件。从周期数学的视角看，时钟树是\textbf{嵌套周转圆系统}在芯片中的实现：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{根节点}：晶振/PLL 输出——主周转圆（外圈，$k=1$）。
+    \item \textbf{中间节点}：时钟缓冲器——次级周转圆（$k=2, 3, \dots$），每个缓冲器放大时钟信号并驱动下一级负载。
+    \item \textbf{叶节点}：寄存器时钟输入——最内层周转圆（$k=K$），寄存器的时序逻辑以此时钟为参考。
+\end{enumerate}
+时钟树的每个节点都输出一个与根节点同频但可能存在\textbf{时延偏移}的周转圆。理想时钟树应使所有叶节点时钟与根节点时钟的相位差为零（零偏移，zero skew）。
+\end{definition}
+
+\begin{definition}[时钟树时延与时钟偏移]\label{def:clock_skew}
+时钟信号从根节点传播到叶节点 $i$ 所需的\textbf{传播时延}为
+\[
+\tau_i = \sum_{j \in \text{路径}_i} \tau_j,
+\]
+其中 $\tau_j$ 是第 $j$ 个缓冲器的门级时延加上导线的传播时延。不同叶节点的传播时延之差称为\textbf{时钟偏移}：
+\[
+\delta_{ij} = \tau_i - \tau_j.
+\]
+从周期数学的视角看，时钟偏移是嵌套周转圆系统中各内圈周转圆相对于外圈周转圆的\textbf{相位差}。零偏移时钟树等价于所有内圈周转圆与主周转圆的相位完全对齐——这是嵌套周转系统的理想状态（“矢量分析”章中嵌套周转圆的完美同步）。
+\end{definition}
+
+\begin{example}[H 树时钟分布]
+\label{ex:h_tree_clock}
+H 树是一种对称的时钟分布拓扑，用于实现低偏移的时钟树。
+H 树从根节点（芯片中心）出发，对称地分支到四个象限，
+并逐级递归展开。
+其对称结构保证了所有叶节点到根节点的路径长度相等，
+从而传播时延一致，时钟偏移接近于零。
+
+从周期数学的视角看，H 树是嵌套周转圆系统的\textbf{对称展开}：
+每一级分支将时钟周转圆对称地分配为四个子周转圆，
+所有子周转圆的相位与外圈保持精确对齐。
+此外，H 树具有自相似的分形结构——
+每一级分支与上一级几何相似，缩放因子为 $1/2$，
+因而构成高度对称的时钟分布网络。
+
+以一片 $10\,\text{mm} \times 10\,\text{mm}$ 的芯片为例进行具体计算。
+设每级缓冲器门级时延为 $\tau_{\text{buf}} = 50\,\text{ps}$，
+导线单位长度时延为 $\tau_{\text{wire}} = 100\,\text{ps/mm}$。
+H 树自根至叶共 $K = 4$ 级分支，
+各级导线段长度依次为
+$L_1 = 5\,\text{mm}$、
+$L_2 = 2.5\,\text{mm}$、
+$L_3 = 1.25\,\text{mm}$、
+$L_4 = 0.625\,\text{mm}$。
+则叶节点 $i$ 的总传播时延为
+\[
+\begin{aligned}
+\tau_i
+&= \sum_{k=1}^{4}\bigl(\tau_{\text{buf}} + L_k\,\tau_{\text{wire}}\bigr) \\
+&= 4 \times 50\,\text{ps}
+   + (5 + 2.5 + 1.25 + 0.625)\times 100\,\text{ps} \\
+&= 200\,\text{ps} + 937.5\,\text{ps} \\
+&= 1137.5\,\text{ps}.
+\end{aligned}
+\]
+
+由于 H 树四个分支路径严格对称，
+所有叶节点的时延相等，
+时钟偏移 $\delta_{ij} = \tau_i - \tau_j = 0$。
+
+作为对照，若时钟树不对称，
+两叶节点路径长度仅差 $1\,\text{mm}$，
+即引入 $100\,\text{ps}$ 的时钟偏移。
+在时钟频率 $f_{\text{clk}} = 1\,\text{GHz}$
+（周期 $T_{\text{clk}} = 1000\,\text{ps}$）下，
+该偏移消耗 $10\%$ 的时钟周期，
+显著压缩时序裕量。
+这正是时钟树采用对称拓扑（H 树）的量化依据。
+\end{example}
+
+\section{芯片：参数化周转圆波形/频谱处理单元}
+
+\begin{definition}[芯片的周转圆处理模型]\label{def:chip_epicycle_model}
+\textbf{芯片}在周期数学的视角下，是一个\textbf{拥有参数的周转圆波形/频谱处理单元}。芯片接收输入的周转圆波形（时钟信号、数据信号、模拟信号），通过内部参数化周转圆网络进行处理，输出处理后的周转圆波形/频谱。
+
+芯片的处理能力由以下参数化周转圆组件构成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{参数化周转圆振荡器}：晶振、PLL、分频器——产生不同频率的时钟周转圆。参数：频率 $f$、振幅 $A$、相位 $\phi$。
+    \item \textbf{参数化周转圆放大器}：运算放大器、缓冲器——放大或衰减信号周转圆的振幅。参数：增益 $G$。
+    \item \textbf{参数化周转圆滤波器}：低通、高通、带通、带阻滤波器——选择特定频率范围的周转圆分量。参数：截止频率 $f_c$、品质因数 $Q$。
+    \item \textbf{参数化周转圆调制器}：混频器、调制器——将两个周转圆的频率相加或相减。参数：本振频率 $f_{\text{LO}}$。
+    \item \textbf{参数化周转圆变换器}：FFT 芯片、DCT 芯片——将时域周转圆分解为频域分量。参数：变换长度 $N$。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[芯片的输入输出都是周转圆]\label{prop:chip_io_epicycle}
+芯片的所有输入和输出本质上都是周转圆波形。具体而言：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{时钟输入}：基本固定的周转圆——由外部晶振或时钟源提供。
+    \item \textbf{数据输入}：调制在时钟周转圆上的数据周转圆——每个比特对应一个时钟周期的相位状态（$C_2$ 群：$0$ 和 $1$）。
+    \item \textbf{模拟输入}：连续幅度的周转圆——如音频信号是多个频率分量的嵌套周转圆。
+    \item \textbf{时钟输出}：经 PLL 缩放后的周转圆——如 CPU 核心时钟、总线时钟、外设时钟。
+    \item \textbf{数据输出}：经芯片处理后的调制周转圆——如计算结果、控制信号。
+    \item \textbf{模拟输出}：经滤波或放大的周转圆——如音频功放输出、传感器信号调理输出。
+\end{enumerate}
+因此，\textbf{芯片的功能等价于对周转圆波形的参数化变换}：频率变换（倍频/分频/混频）、振幅变换（放大/衰减）、相位变换（时延/相移）、频谱变换（滤波/FFT）。
+\end{proposition}
+
+\begin{proof}
+(i) 时钟输入的周转圆属性由晶振的定义（定义 \ref{def:quartz_oscillator}）直接给出。
+
+(ii) 数据信号可以表示为时钟周转圆上的调制：$V_{\text{data}}(t) = \sum_n a_n \cdot \text{rect}(t - nT_{\text{clk}})$，其中 $a_n \in \{0, 1\}$ 是第 $n$ 个比特，$\text{rect}$ 是单位矩形脉冲。在频域中，数据信号是基带频谱的周转圆展开。
+
+(iii) 模拟信号可展开为傅里叶级数——$V_{\text{analog}}(t) = \sum_k A_k e^{i(\omega_k t + \phi_k)}$，这是嵌套周转圆系统的数学形式。
+
+(iv)-(vi) 输出信号的处理属性由芯片各功能模块的参数化定义给出。
+\end{proof}
+
+\begin{definition}[工艺制程缩放：摩尔定律的缩放操作]\label{ch24_moore_scaling}
+芯片工艺制程的持续微缩是周期数学中\textbf{缩放操作}在产业尺度上的体现。设制程特征尺寸为 $L$，则单位芯片面积上可容纳的晶体管数目满足 $M \propto 1/L^2$——特征尺寸每缩小 $\sqrt{2}$ 倍（$L \to L/\sqrt{2}$），晶体管密度翻倍。摩尔定律的经验表述是：单位面积芯片上的晶体管数目约每两年翻一番。例如特征尺寸从 $28$ nm 微缩到 $7$ nm（缩放因子 $\lambda = 1/4$），晶体管密度理论上提高约 $\lambda^{-2} = 16$ 倍；伴随微缩，时钟频率同步提升——频率是周期 $T$ 的倒数（$f = 1/T$），这是周期主题下缩放的倒数对偶。这种几何尺度上的自相似缩放与 H 树时钟分布的分形缩放（每级缩放因子 $1/2$，例 \ref{ex:h_tree_clock}）同属缩放操作的实例。
+\end{definition}
+
+\section{常见芯片的周期数学分析}
+
+\subsection{运算放大器}
+
+\begin{definition}[运算放大器]\label{def:op_amp}
+\textbf{运算放大器}（运放）是一种高增益差模放大器。理想运放的特性：无限开环增益、无限输入阻抗、零输出阻抗、无限带宽。实际运放的开环增益 $A_{\text{OL}} \approx 10^5 \sim 10^7$，单位增益带宽 $f_T \approx 1 \sim 100$ MHz。运放的差模结构是\textbf{差分信号对称}的电路实现：正、负输入端关于参考点对称，共模扰动在两输入端对称出现，经差模放大后被对消（共模抑制比 $\text{CMRR} = A_{\text{DM}}/A_{\text{CM}}$，典型值 $80 \sim 120$ dB），只有差模分量被放大——这是基于信号对的结构对称性实现共模抑制。
+
+从周期数学的视角看，运放是\textbf{参数化周转圆放大器}——它将输入周转圆的振幅按增益 $G$ 缩放。在负反馈配置中，运放的闭环增益由反馈网络参数决定：$A_{\text{CL}} = -R_f/R_i$（反相放大器）或 $A_{\text{CL}} = 1 + R_f/R_i$（同相放大器）。运放的频率响应由主极点决定——$A(s) = A_{\text{OL}}/(1 + s/\omega_p)$，增益带宽积 $GBW = A_{\text{OL}} \cdot \omega_p$ 是缩放比例的带宽表现。
+\end{definition}
+
+\subsection{模数转换器与数模转换器}
+
+\begin{definition}[ADC 与 DAC 的周转圆解释]\label{def:adc_dac}
+\textbf{模数转换器}（ADC）将连续模拟信号（连续幅度周转圆）转换为离散数字信号（离散相位状态序列）。\textbf{数模转换器}（DAC）执行逆操作。
+
+从周期数学的视角看，ADC 和 DAC 是\textbf{连续周转圆与离散相位算子的转换器}：
+\begin{enumerate}[label=(\roman*)]
+    \item ADC 将连续周转圆 $V(t) = \sum_k A_k e^{i(\omega_k t + \phi_k)}$ 在采样率 $f_s$ 下离散化，每个采样点量化为 $2^N$ 个离散电平（$C_{2^N}$ 相位算子）。
+    \item DAC 将离散相位算子序列重建为连续周转圆波形。
+\end{enumerate}
+ADC 的采样率 $f_s$ 和量化位数 $N$ 是决定转换精度的参数——$f_s$ 决定了可分辨的最高频率（奈奎斯特频率 $f_s/2$，见「离散采样逼近、同余角与置闰」章 \cref{def:nyquist_sampling_parallel}），$N$ 决定了振幅分辨率（信噪比 $SNR \approx 6.02N + 1.76$ dB）。
+\end{definition}
+
+\subsection{处理器与微控制器}
+
+\begin{definition}[处理器的周转圆解释]\label{def:cpu_epicycle}
+\textbf{处理器}（CPU）是芯片中最复杂的参数化周转圆处理单元。处理器以晶振时钟为主周转圆，通过流水线、多级缓存和并行执行单元处理数据周转圆：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{时钟周期}：处理器的最小时间单位——主周转圆的周期 $T_{\text{clk}} = 1/f_{\text{clk}}$。
+    \item \textbf{指令周期}：一条指令执行所需的时钟周期数——指令周转圆嵌套在时钟周转圆上。
+    \item \textbf{流水线级}：指令执行的各个阶段（取指、译码、执行、访存、写回）——每个流水线级是一个独立的周转圆，各级之间通过寄存器传递数据。
+    \item \textbf{多核并行}：多个核心各自独立地处理数据周转圆，通过共享缓存和总线同步。
+\end{enumerate}
+处理器的性能指标——时钟频率 $f_{\text{clk}}$、指令每周期数（IPC）、核心数 $N_{\text{core}}$——都是参数化周转圆的参数。
+\end{definition}
+
+\subsection{数字信号处理器与 FFT 芯片}
+
+\begin{definition}[DSP 与 FFT 芯片]\label{def:dsp_fft}
+\textbf{数字信号处理器}（DSP）是专门优化了乘加运算的处理器，擅长实现数字滤波和频谱分析。\textbf{FFT 芯片}是专用硬件，直接实现快速傅里叶变换。
+
+从周期数学的视角看，FFT 芯片是\textbf{周转圆分解的硬件实现}——它将输入信号的时域周转圆分解为频域分量。FFT 芯片的输入是 $N$ 个时域采样点（$N$ 个离散相位），输出是 $N$ 个频域分量（$N$ 个频谱相位算子）。FFT 芯片的核心是\textbf{蝶形运算单元}——它将两个输入的相位算子通过旋转因子 $\mathcal{O}_k^{(N)} = e^{-i2\pi k/N}$ 合成两个输出：
+\[
+X_{\text{out},0} = X_{\text{in},0} + \mathcal{O}_k^{(N)} \cdot X_{\text{in},1}, \quad X_{\text{out},1} = X_{\text{in},0} - \mathcal{O}_k^{(N)} \cdot X_{\text{in},1}.
+\]
+蝶形运算是相位算子周期卷积（“易经系统之周期结构”章定义 \ref{def:PPO_periodic_convolution}）在硬件中的最简实现——两个输入相位通过一个旋转因子产生两个输出相位。
+\end{definition}
+
+\subsection{存储器与寄存器}
+
+\begin{definition}[存储器的周转圆解释]\label{def:memory_epicycle}
+\textbf{存储器}（RAM、ROM、Flash）和\textbf{寄存器}是芯片中存储相位状态的元件。从周期数学的视角看：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{寄存器}：存储 $1$ 比特信息——对应 $C_2$ 相位算子的两个状态（$0$ 和 $1$）。$N$ 个寄存器存储 $N$ 比特——对应 $C_{2^N}$ 相位算子的 $2^N$ 个状态。
+    \item \textbf{静态随机存取存储器}（SRAM）：每位由 $6$ 个晶体管构成的双稳态电路——存储的相位状态在供电期间保持稳定。
+    \item \textbf{动态随机存取存储器}（DRAM）：每位由 $1$ 个晶体管和 $1$ 个电容构成——电容的电荷状态存储相位，需要周期性刷新（刷新周期约 $64$ ms）。
+\end{enumerate}
+存储器的时钟周期决定了读写速度——数据周转圆的频率必须与存储器的读写周转圆匹配（时序约束）。存储器的容量（比特数）决定了可存储的相位状态数量。
+\end{definition}
+
+\section{芯片中的时延}
+
+\begin{definition}[芯片时延的类型]\label{def:chip_delay_types}
+芯片系统中存在多种类型的时延，每种对应周期数学中的不同物理机制：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{传播时延}：信号从芯片输入到输出所需的时间——$\tau_{\text{prop}} = \sum \tau_{\text{gate}} + \sum \tau_{\text{wire}}$。这是空间距离在时间轴上的直接映射。
+    \item \textbf{时钟时延}：时钟信号从晶振到各寄存器的传播时间——$\tau_{\text{clk},i}$。时钟偏移 $\delta_{ij} = \tau_{\text{clk},i} - \tau_{\text{clk},j}$ 是不同寄存器的相位差，是同一个时钟周转圆在不同位置的相位分裂。
+    \item \textbf{流水线时延}：数据通过流水线各级所需的总时间——$\tau_{\text{pipe}} = K \cdot T_{\text{clk}}$（$K$ 为流水线级数）。这是多个时钟周期的累积。
+    \item \textbf{建立时间与保持时间}：寄存器的建立时间 $t_{\text{setup}}$ 和保持时间 $t_{\text{hold}}$ 是时序约束——它们定义了数据周转圆与时钟周转圆之间的相位关系。违反时序约束将导致\textbf{亚稳态}——相位状态不确定。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[芯片时序约束的周期数学表述]\label{prop:chip_timing_constraints}
+芯片的时序约束可统一表述为相位关系约束。设数据到达寄存器的时间为 $t_{\text{data}}$，时钟到达时间为 $t_{\text{clk}}$。寄存器的建立时间要求：
+\[
+t_{\text{clk}} - t_{\text{data}} \ge t_{\text{setup}},
+\]
+保持时间要求：
+\[
+t_{\text{data}} - t_{\text{clk}} \ge t_{\text{hold}}.
+\]
+从周期数学的视角看，这些约束确保了数据周转圆的相位在时钟周转圆的采样窗口中处于稳定状态。建立时间 $t_{\text{setup}}$ 和保持时间 $t_{\text{hold}}$ 是寄存器的\textbf{相位容差}——它们定义了数据相位与时钟相位之间允许的相对偏移范围。违反约束等价于数据周转圆与时钟周转圆的相位差超出容差——系统进入亚稳态，相位不确定（类似于“概率论”章中的相位不确定性）。
+\end{proposition}
+
+\begin{proof}
+寄存器在时钟有效沿 $t_{\text{clk}}$ 采样数据。建立时间约束 $t_{\text{clk}} - t_{\text{data}} \ge t_{\text{setup}}$ 要求数据的到达（稳定）时刻 $t_{\text{data}}$ 至少领先时钟沿 $t_{\text{setup}}$，否则采样时数据尚未稳定；保持时间约束 $t_{\text{data}} - t_{\text{clk}} \ge t_{\text{hold}}$ 要求数据至少晚于时钟沿 $t_{\text{hold}}$ 才允许翻转，否则数据在采样窗口内变化。两条约束分别界定数据相位相对时钟相位的\textbf{上限}与\textbf{下限}，共同构成寄存器的相位容差带：数据跳变必须落在以时钟沿为中心、前后各留 $t_{\text{setup}}$ 与 $t_{\text{hold}}$ 的窗口之外。当数据跳变落入该窗口时，采样器捕获到的是正在翻转的中间电平，寄存器输出进入\textbf{亚稳态}——输出相位不确定。亚稳态最终被后续时钟沿或噪声解出，解出所需时间服从指数分布（与“概率论”章的相位不确定性一致）。
+\end{proof}
+
+\section{电路系统的守恒律}
+
+\begin{theorem}[电路系统的三种守恒律]\label{thm:circuit_conservation}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{电荷守恒}：基尔霍夫电流定律（KCL）——$\sum i_{\text{in}} = \sum i_{\text{out}}$。节点处电荷不累积。
+    \item \textbf{能量守恒}：基尔霍夫电压定律（KVL）——$\sum v_k = 0$。单位电荷绕闭合回路一周电场做功为零。
+    \item \textbf{磁通守恒}：电感的磁通 $\Phi = Li$ 在无外部磁通注入时连续。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 电荷守恒（KCL）：取电路任一节点，设流出电流为 $i_1,\dots,i_m$、流入电流为 $i_{m+1},\dots,i_{m+n}$。由电荷守恒律，节点电荷量 $Q$ 的变化率等于净流入电流的负值：$dQ/dt = \sum_{k=m+1}^{m+n}i_k - \sum_{k=1}^{m}i_k$。集总参数假设节点不存储电荷（$Q\equiv 0$），故 $dQ/dt=0$，得 $\sum_{k=1}^{m}i_k = \sum_{k=m+1}^{m+n}i_k$——流入电流之和等于流出电流之和，此即 KCL。
+
+(ii) 能量守恒（KVL）：在无时变磁通的静电场近似下，电场为保守场，存在电势 $\varphi$ 使 $\vec{E} = -\nabla\varphi$。单位电荷沿闭合回路 $L$ 绕行一周，电场做功为
+\[
+\oint_L \vec{E}\cdot d\vec{l} = -\oint_L \nabla\varphi\cdot d\vec{l} = -\oint_L d\varphi = 0,
+\]
+即闭合回路中各元件电压降之和为零：$\sum_k v_k = 0$。若回路中存在时变磁通，则由法拉第定律 $\oint_L \vec{E}\cdot d\vec{l} = -d\Phi/dt$，KVL 需修正为 $\sum_k v_k = -d\Phi/dt$——这正是感应电动势（“电磁系统之周期结构”章）的来源。
+
+(iii) 磁通守恒：电感电流 $i$ 的磁通为 $\Phi = Li$，由法拉第定律 $d\Phi/dt = v_L$（$v_L$ 为电感端电压）。在无外部磁通突变（无理想开关瞬间切断电感电流）时，$\Phi$ 连续变化，故电感电流 $i = \Phi/L$ 不能突变——这是开关电源中“电感电流连续”的数学根源。
+\end{proof}
+
+\begin{remark}[功耗与信息守恒]\label{ch24_power_info_conservation}
+守恒主题在芯片中有两条延伸。(i) \textbf{能量守恒与功耗}：动态功耗 $P_{\text{dyn}} = \alpha C V_{\text{dd}}^2 f$ 刻画每个时钟周期对负载电容 $C$ 充放电所耗散的能量——每周期耗散 $\Delta E = C V_{\text{dd}}^2$，乘以翻转活动因子 $\alpha$ 与时钟频率 $f$ 即得功耗；这是定理 \ref{thm:circuit_conservation} 的能量守恒在周期节拍下的耗散形式。(ii) \textbf{信息守恒}：寄存器与存储器存储的相位状态（比特）在理想无噪声器件中不丢失，只有被改写或掉电时才改变——这是信息守恒的电路实现，对应“概率论”章的信息度量。
+\end{remark}
+
+\begin{remark}[与全书的衔接]
+本章建立的电路与芯片系统周期结构理论是周期数学在电子工程中的应用。核心洞察是\textbf{芯片 = 参数化周转圆波形/频谱处理单元}——芯片的所有输入与输出本质上都是周转圆波形。晶振是基本固定的周转圆，是芯片内所有其他周转圆的主周转圆。PLL 是周转圆的缩放操作，时钟树是嵌套周转圆系统，数据信号是调制在时钟周转圆上的相位状态序列。运算放大器是参数化周转圆放大器，ADC/DAC 是连续周转圆与离散相位算子的转换器，FFT 芯片是周转圆分解的硬件实现，存储器是相位状态的存储单元。芯片中的时延——传播时延、时钟时延、流水线时延、时序约束——完整覆盖了周期数学中空间距离、相位差、周期累积与相位容差四种时延结构。电路系统的三种守恒律——KCL（电荷守恒）、KVL（能量守恒）和磁通守恒——共同构成了芯片工作的物理基础。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 时钟节拍推进与信号传播时延：时钟树传播时延 $\tau_i = \sum_{j}\tau_j$（定义 \ref{def:clock_skew}）；传播时延与流水线时延 $\tau_{\text{pipe}} = K T_{\text{clk}}$（定义 \ref{def:chip_delay_types}）；晶振相位的时间平移稳定性（命题 \ref{prop:quartz_three_fixed}） \\
+缩放 & 工艺制程缩放（摩尔定律，$M\propto 1/L^2$，定义 \ref{ch24_moore_scaling}）；PLL 倍频/分频 $f_{\text{out}} = N f_{\text{ref}}$（定义 \ref{def:pll_epicycle}）；H 树分形缩放因子 $1/2$（例 \ref{ex:h_tree_clock}） \\
+旋转 & 锁相环的相位旋转与锁定 $\phi_{\text{out}} = N\phi_{\text{ref}}$（命题 \ref{prop:pll_phase_lock}）；PLL 相位时延 $\tau_{\text{PLL}} = \Delta\phi/(N\omega_{\text{ref}})$（定义 \ref{def:pll_delay}）；FFT 蝶形旋转因子 $e^{-i2\pi k/N}$（定义 \ref{def:dsp_fft}） \\
+守恒 & 电荷守恒（KCL）、能量守恒（KVL）、磁通守恒（定理 \ref{thm:circuit_conservation}）；动态功耗 $P = \alpha C V_{\text{dd}}^2 f$ 与信息守恒（注释 \ref{ch24_power_info_conservation}） \\
+对称 & 时钟树 H 树对称（零偏移，例 \ref{ex:h_tree_clock}）；差分信号对称与共模抑制（定义 \ref{def:op_amp}）；晶振三属性中频率、振幅、相位的稳定性（命题 \ref{prop:quartz_three_fixed}） \\
+闭合 & 锁相环反馈回路的闭合：鉴相器-环路滤波器-VCO-分频器闭环（定义 \ref{def:pll_epicycle}）；PLL 同步范围 $\Delta\omega_{\text{lock}} \approx \pm\frac{\pi}{2}K$（引理 \ref{ch24_pll_lock_range_lemma}）；晶振起振的环路闭合 $|H|\ge 1$（引理 \ref{ch24_quartz_startup_lemma}） \\
+周期 & 晶振周期 $T_0 = 1/f_0$（定义 \ref{def:quartz_oscillator}）；时钟周期 $T_{\text{clk}} = 1/f_{\text{clk}}$（定义 \ref{def:cpu_epicycle}）；DRAM 刷新周期约 $64$ ms（定义 \ref{def:memory_epicycle}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{电路周期性判定定理}（\ref{thm:circuit_periodicity_decision}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 验证\textbf{数量调节的单调性}（\ref{prop:circuit_adaptive_growth}）的前提在本章领域对象上成立，并给出一个不满足前提的反例。
+
+    \item 考察\textbf{三参数对应：半径、相位与转速}（\ref{prop:circuit_epicycle_correspondence}）在参数退化时的行为，说明结论如何随之退化。
+
+    \item 说明\textbf{芯片的输入输出都是周转圆}（\ref{prop:chip_io_epicycle}）与「周期系统」章相应通用结论的关系（是一致、特例还是需要附加条件）。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{thm:circuit_periodicity_decision}、\ref{prop:circuit_adaptive_growth}、\ref{prop:circuit_epicycle_correspondence}、\ref{prop:chip_io_epicycle}。
+\end{enumerate}
+
+

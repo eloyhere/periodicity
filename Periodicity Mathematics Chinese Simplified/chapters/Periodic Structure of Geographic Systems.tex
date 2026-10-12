@@ -1,0 +1,782 @@
+\chapter{地理系统之周期结构}
+\label{chap:geo-periodic}
+\markboth{地理系统之周期结构}{地理系统之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:geo_ps_hook}
+本章判定研究目标是否具有周期性、确定其周期类型、以及查找最小正周期时，一律引用「周期系统」章：
+周期性判据见 \cref{thm:ps_periodicity_decision}，
+周期类型判别见 \cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}，
+最小正周期查找见 \cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}，
+由数据构建周期级数与周转圆组见 \cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}。
+\end{remark}
+
+\begin{remark}[本章定位：按「周期系统」章五步接口展开]\label{rem:geo_chapter_positioning}
+地理系统之周期结构研究地球表层系统中周期性、准周期性和标度不变性的数学表征。地理系统处于天文系统、地质系统和气候系统的交汇地带——天文周期（地球轨道三要素的长期变化）驱动了万年至十万年尺度的冰期-间冰期旋回，地质周期（板块运动、造山运动、火山活动、地震活动）塑造了百万年至亿年尺度的地表形态，气候周期（大气环流、洋流、季风）控制了季节至年代际尺度的环境变迁，而地表地形与经纬度系统则构成了这些过程的几何框架。本章不另立周期性判据，而是把地理系统接入「周期系统」章规定的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把米兰科维奇旋回、季节循环、地质旋回、经纬度网格化为离散动力系统，引用 \cref{thm:ps_periodicity_decision} 判定是否具有周期性，并确定周期类型；
+    \item \textbf{构建}：由天文轨道要素、太阳辐射分布、地质时间序列、经纬度坐标构建振幅级数、频率级数、相位级数，组装为地理周转圆组；
+    \item \textbf{调节}：用跨尺度共振窗口、地壳均衡约束、残差能量下降动态调节地理周转圆组；
+    \item \textbf{卷积}：在地理周转圆组上引入振幅卷积、相位卷积、频率卷积，并与米兰科维奇旋回、季风相位、经纬度旋转衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成地理周期诊断流程。
+\end{enumerate}
+本章使用的数学知识包括：群作用、闭合轨道、周期级数、周期卷积、连续群的离散子群、紧致拓扑空间的旋转流；使用的物理知识包括：角动量守恒、能量守恒、质量守恒、地壳均衡、板块构造、太阳辐射的经向分布、米兰科维奇旋回、ENSO 耦合振子、地震复发周期、Gutenberg–Richter 定律。
+\end{remark}
+
+\begin{remark}[本章七主题导引]\label{rem:geo_seven_themes}
+平移——地质时间的推移与季节循环（回归年的平移周期，\cref{def:monsoon_system}）；
+缩放——气候带随纬度的标度分布（\cref{ch19_insolation_gradient_example}）、火山喷发频率的幂律分布（\cref{prop:volcanic_frequency}）；
+旋转——米兰科维奇旋回（岁差、倾角、偏心率三要素的准周期旋转，\cref{def:milankovitch_cycles}）、地球自转与经纬度坐标系（\cref{def:geographic_coordinate}）；
+守恒——角动量守恒、能量守恒、质量守恒（\cref{thm:geographic_conservation_laws}）；
+对称——南北半球季节的相位对称（\cref{def:solar_insolation_gradient}）；
+闭合——威尔逊旋回、地震周期、海侵-海退旋回的闭合（\cref{def:wilson_cycle}、\cref{def:seismic_cycle}、\cref{def:transgression_regression}）；
+周期——昼夜、季节、岁差、米兰科维奇、火山与地质旋回的多尺度嵌套（\cref{thm:geographic_four_layer}）。
+\end{remark}
+
+\section{地理目标的周期性判定：接入「周期系统」章第一步}
+\label{sec:geo_periodicity_decision}
+
+\subsection{地理目标、判定输入与判定映射}
+
+\begin{definition}[地理目标与判定输入]\label{def:geo_target}
+一个\textbf{地理目标}是指下列对象之一：
+\begin{enumerate}[label=(\roman*)]
+    \item 一个天文驱动的地理周期系统，其状态空间为轨道要素空间 $\mathcal S\subset\mathbb R^3$（偏心率 $e$、倾角 $\varepsilon$、岁差指数 $e\sin\varpi$）；
+    \item 一个气候响应的时间序列，其状态空间为气候要素集合（温度、降水、海温等）；
+    \item 一个地质过程的时间记录，其状态空间为地质事件序列；
+    \item 一个经纬度坐标网格，其状态空间为地球表面点集 $S^2$。
+\end{enumerate}
+地理目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal D_{\mathrm{G}}=(\mathcal S,\Phi),
+\]
+其中 $\mathcal S$ 是状态空间，$\Phi:\mathcal S\to\mathcal S$ 是演化映射。若 $\mathcal S$ 为紧致流形或紧致流形的子集，称目标为\textbf{紧致地理目标}；若 $\mathcal S$ 为有限集，称目标为\textbf{有限地理目标}。
+\end{definition}
+
+\begin{definition}[地理判定映射]\label{def:geo_periodization}
+设地理目标由判定输入 $\mathcal D_{\mathrm{G}}=(\mathcal S,\Phi)$ 给出。若目标的状态由 $\Phi$ 生成，即存在 $x_0\in\mathcal S$ 使
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+当 $t\in\mathbb Z$ 时 $x_t$ 由 $\Phi$ 迭代生成；当 $t\in\mathbb R$ 时，以单参数演化族 $\{\Phi_t\}_{t\in\mathbb R}$（其中每个 $\Phi_t:\mathcal S\to\mathcal S$，且 $\Phi_0=\operatorname{id}$、$\Phi_{s+t}=\Phi_s\circ\Phi_t$ 对一切 $s,t\in\mathbb R$ 成立、$(t,x)\mapsto\Phi_t(x)$ 连续）记之。
+则称 $\Phi$ 为目标的\textbf{地理判定映射}。此时当 $t\in\mathbb Z$ 时地理目标化为离散动力系统 $(\mathcal S,\Phi)$，当 $t\in\mathbb R$ 时化为连续动力系统 $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$，两种情形均可直接套用「周期基础」章与「周期系统」章的判据。
+\end{definition}
+
+\begin{theorem}[地理周期性判定定理]\label{thm:geo_periodicity_decision}
+设地理目标的判定映射为 $\Phi$，且 $(\mathcal S,\Phi)$ 为离散动力系统。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 $m\in\mathbb N^+$ 使 $\Phi^m=\mathrm{id}$，则目标为一致周期地理系统；每条轨道闭合，且轨道长度整除 $m$。
+    \item \textbf{判定等价}：目标为一致周期地理系统当且仅当 $\operatorname{ord}(\Phi)<\infty$。
+    \item \textbf{逐点判据}：目标在状态 $x_0$ 处的轨道闭合当且仅当 $x_0$ 为周期点；此时轨道长度即该点处的周期。
+    \item \textbf{不可省略性}：守恒量与对称群的合取不能替代 $\operatorname{ord}(\Phi)<\infty$；准周期地理目标不属于周期地理系统。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:geo_periodicity_decision} 是「周期系统」章 \cref{thm:ps_periodicity_decision} 的领域实例化：
+只需把判定映射 $f$ 与演化群替换为本章的 $\Phi$，(A) 充分判定、(B) 判定等价、(C) 逐点判据、
+(D) 不可省略性四条即逐条成立。依 \cref{rem:ps_applications_hook} 的约定，此处不再重复展开。
+\end{proof}
+
+\begin{corollary}[地理周期类型]\label{cor:geo_period_type}
+经 \cref{thm:geo_periodicity_decision} 判定后，地理目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 $m_0=1$，状态为不动点；
+    \item \textbf{严格周期型}：$1<m_0<\infty$，状态严格周期（如季节循环 $m_0=1$ 年、潮汐 $m_0\approx 12.42$ 小时）；
+    \item \textbf{一致周期型}：$\operatorname{ord}(\Phi)=m<\infty$，所有轨道长度整除 $m$；
+    \item \textbf{准周期型}：$\operatorname{ord}(\Phi)=\infty$，轨道不闭合但在紧致承载结构上稠密（如米兰科维奇旋回的整体运动、ENSO 的准周期振荡）；
+    \item \textbf{最终周期型}：存在 $N$，使 $t\ge N$ 后目标为周期；
+    \item \textbf{离散周期型}：承载结构为 $\mathbb Z$，且归一化周期比 $\rho=T_x/\Delta x\in\mathbb Q$。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，残差按 $e^{-\kappa t}$ 衰减（见 \cref{def:ps_period_type}(vii)）。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于周期地理系统；(iv) 不属于周期地理系统，但可用跨尺度共振或有界逼近工具处理；(v) 只在稳定阶段是周期地理系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期地理系统，只在稳定阶段可用有界逼近工具处理。
+\end{corollary}
+
+\begin{proof}
+逐条由 \cref{thm:geo_periodicity_decision} 与「周期系统」章 \cref{def:ps_period_type} 代入地理目标即得。
+\end{proof}
+
+\begin{lemma}[季节循环的周期判定]\label{lem:geo_seasonal_period}
+设季节循环的判定映射为 $\Phi$，其状态空间为太阳直射点纬度 $\delta\in[-23.44^\circ,+23.44^\circ]$。则 $\Phi$ 的周期为 $1$ 回归年：
+\[
+\operatorname{ord}(\Phi)=1\ \text{年}=365.2422\ \text{日}.
+\]
+季节循环为严格周期型，最小周期即回归年。
+\end{lemma}
+
+\begin{proof}
+太阳直射点纬度 $\delta(t)$ 满足 $\delta(t+T)=\delta(t)$，其中 $T$ 为回归年。太阳直射点在一年内从南回归线到北回归线再返回南回归线，恰好完成一次完整振荡，故 $\Phi$ 的周期为 $1$ 回归年。由 \cref{thm:kepler_third}（历法章），回归年长 $T_{\text{trop}}=365.2422$ 日。
+\end{proof}
+
+\begin{lemma}[地轴倾角的长周期判定]\label{lem:geo_obliquity_period}
+设地轴倾角的演化映射为 $\Phi$，其状态空间为 $\varepsilon\in[22.1^\circ,24.5^\circ]$。则 $\Phi$ 为准周期映射，主周期约 $41,000$ 年。
+\end{lemma}
+
+\begin{proof}
+地轴倾角的演化由行星摄动驱动，其 Fourier 展开为多频率准周期函数，主频率对应 $41$ ka 周期。由 \cref{prop:milankovitch_structure}，三个轨道要素的周期不可公度，故整体为准周期型。
+\end{proof}
+
+\begin{lemma}[岁差指数的多频率判定]\label{lem:geo_precession_period}
+设岁差指数的演化映射为 $\Phi$，其状态空间为 $e\sin\varpi$。则 $\Phi$ 为准周期映射，主周期约 $19$ ka 和 $23$ ka。
+\end{lemma}
+
+\begin{proof}
+岁差由地球自转轴进动（周期约 $26$ ka）和轨道长轴进动（周期约 $112$ ka）联合调制，其合成频率的主分量对应 $19$ ka 与 $23$ ka。由 \cref{def:milankovitch_cycles}。
+\end{proof}
+
+\begin{lemma}[潮汐循环的周期判定]\label{lem:geo_tidal_period}
+设潮汐循环的判定映射为 $\Phi$，其状态空间为海平面高度。则 $\Phi$ 的周期为 $M_2$ 潮汐周期：
+\[
+T_{M_2}\approx 12.42\ \text{小时},
+\]
+为主太阴半日潮的周期。
+\end{lemma}
+
+\begin{proof}
+$M_2$ 潮汐由月球引潮力驱动。月球连续两次通过同一子午圈的时间间隔为 $1$ 太阴日 $=24.84$ 小时，由于 $M_2$ 为半日潮，周期为 $12.42$ 小时。由 \cref{lem:kepler_period}（天文系统章），月球轨道周期为 $27.32$ 日。
+\end{proof}
+
+\begin{definition}[地理最小正周期算法]\label{def:geo_minimal_period_algorithm}
+\textbf{输入}：地理目标样本 $x_0,\dots,x_{N-1}$，容差 $\varepsilon\ge0$。
+\textbf{输出}：最小正周期 $T_0$，或判定“不周期”。
+\textbf{步骤}：
+\begin{enumerate}[label=(\arabic*)]
+    \item 取候选集 $\mathcal P=\{T\in\mathbb N^+:2T\le N\}$，按 $T$ 递增遍历；
+    \item 对每个 $T$ 计算最大偏差
+    \[
+    E(T)=\max_{0\le n<N-T}\|x_{n+T}-x_n\|;
+    \]
+    \item 输出首个满足 $E(T)\le\varepsilon$ 的 $T$ 作为 $T_0$；若遍历完毕无解，输出“不周期”；
+    \item 公度性校核：以归一化周期比 $\rho=T_x/\Delta x$ 与对应连续时长 $\ell=T_0\Delta x$，同「离散采样逼近、同余角与置闰」章 \cref{prop:commensurability_periodicity_parallel}、\cref{cor:sampling_period_relation_parallel} 核对 $T_0$ 与连续周期 $T_x$ 的换算关系。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[地理最小正周期算法的正确性]\label{thm:geo_minimal_period_correctness}
+\begin{enumerate}[label=(\roman*)]
+    \item 若样本为严格周期序列且 $\varepsilon=0$、$N\ge2T_0$，则算法输出其离散基本周期 $T_0$。
+    \item 若样本由基本周期为 $T_x$ 的连续地理目标以采样间隔 $\Delta x$ 采样得到，且归一化周期比 $\rho=T_x/\Delta x=p/q$ 既约，则算法输出 $T_0=p$。
+    \item 若 $\rho\notin\mathbb Q$，则不存在真周期：对任何 $T\in\mathbb N^+$ 都有 $E(T)>0$。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 由「离散采样逼近、同余角与置闰」章 \cref{def:discrete_fundamental_period}，$T_0$ 为最小正周期，故 $E(T_0)=0$；而 $T<T_0$ 时 $E(T)>0$。算法按 $T$ 递增遍历，故首个满足 $E(T)=0$ 者即 $T_0$。
+(ii) 由 \cref{prop:commensurability_periodicity_parallel}(ii)，采样序列的基本周期为 $p$，代入 (i)。
+(iii) 由 \cref{prop:commensurability_periodicity_parallel}(iii)，$\operatorname{Group}_{\mathrm{period}}(f)=\{0\}$，故任何 $T$ 都有 $E(T)>0$。
+\end{proof}
+
+\begin{example}[季节循环的周期判定实例]\label{ex:geo_seasonal_period}
+取地表气温记录 $T(t)$（以日为采样单位）。由 \cref{lem:geo_seasonal_period}，最小周期为 $T_0=365$ 日（近似）。以 365 日为窗口的周期检验给出 $E(365)<\varepsilon$；以更小窗口（如 300 日）给出 $E(300)>\varepsilon$。
+\end{example}
+
+\begin{example}[米兰科维奇旋回的准周期判定]\label{ex:geo_milankovitch_quasi}
+取地轴倾角记录 $\varepsilon(t)$（以千年为采样单位）。由 \cref{lem:geo_obliquity_period}，$\varepsilon(t)$ 为准周期，不存在严格最小周期。以任何候选 $T$ 检验均得 $E(T)>0$；谱分析在 $41$ ka 处给出主峰。
+\end{example}
+
+\begin{remark}[守恒量不保证周期]\label{rem:geo_invariant_not_period}
+地理系统的守恒量（角动量、能量、质量）是周期结构的辅助条件，但不构成充分条件。例如，双曲轨道具有能量守恒和角动量守恒，但轨道开放不闭合。地理周期结构必须由 \cref{thm:geo_periodicity_decision} 或 \cref{lem:geo_seasonal_period} 等判据判定。
+\end{remark}
+
+\section{地理周期级数与周转圆组的构建：接入「周期系统」章第二步}
+\label{sec:geo_series_construction}
+
+\begin{definition}[地理振幅级数、频率级数、相位级数]\label{def:geo_series}
+设地理目标的状态或输出序列为 $\{z_t\}$。若其可写为
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+则称
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+分别为地理目标的\textbf{振幅级数}、\textbf{频率级数}与\textbf{相位级数}。三者与「级数与卷积」章 \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} 一致。
+\end{definition}
+
+\begin{definition}[地理周转圆组]\label{def:geo_epicycle_group}
+设地理目标的周期级数由振幅级数 $\{A_k\}$、频率级数 $\{\omega_k\}$ 与相位级数 $\{\phi_k\}$ 给出。对每个 $k$ 定义周转圆
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+其集合
+\[
+\mathfrak E_{\mathrm{G}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+称为地理目标的\textbf{周转圆组}。其叠加即地理周期级数
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[由地理数据构建周期级数]\label{thm:geo_series_reconstruction}
+设地理目标的输出为有限周期序列，周期为 $N$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 输出可展开为离散傅里叶级数
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item 振幅级数由 $|c_k|$ 给出，相位级数由 $\arg c_k$ 给出，频率级数由 $2\pi k/N$ 给出；
+    \item 若输出为米兰科维奇旋回序列，则其谐波分解给出 $100$ ka、$41$ ka、$23$ ka、$19$ ka 四个主分量；
+    \item 若输出为地震序列，则其谐波分解给出与断层复发间隔 $\Delta t$ 对应的主频。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 有限周期序列的离散傅里叶级数是标准结论：基函数 $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ 构成 $\mathbb C^N$ 的正交基。
+(ii) 由 $c_k=A_k e^{i\phi_k}$ 直接读出。
+(iii) 由 \cref{def:milankovitch_cycles}，三个轨道要素的主频率分别为 $1/100$ ka$^{-1}$、$1/41$ ka$^{-1}$、$1/23$ ka$^{-1}$、$1/19$ ka$^{-1}$。离散傅里叶变换将这些主频率分离到不同的谐波通道。
+(iv) 由 \cref{def:seismic_cycle}，地震复发间隔 $T_{\text{rec}}=d_s/v_s$ 给出主频 $1/T_{\text{rec}}$。
+\end{proof}
+
+\begin{definition}[地理周期系统与周期结构]\label{def:geographic_periodic_system}
+一个\textbf{地理周期系统}是由天文驱动力、地质构造力、气候反馈力和地形约束共同作用的地球表层动力学系统。系统的状态变量包括：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{天文驱动力}：太阳辐射在地球表面的时空分布，由地球轨道三要素（偏心率 $e$、地轴倾角 $\varepsilon$、岁差指数 $e\sin\varpi$）决定。
+    \item \textbf{地质构造力}：板块运动速度场 $\mathbf{v}_{\text{plate}}(\mathbf{x}, t)$、地壳均衡补偿、断层滑移速率、火山活动时空分布、地震震级-频率分布。
+    \item \textbf{气候反馈力}：大气温度场 $T(\mathbf{x}, t)$、降水量场 $P(\mathbf{x}, t)$、洋流速度场 $\mathbf{u}_{\text{ocean}}(\mathbf{x}, t)$、冰盖体积 $V_{\text{ice}}(t)$。
+    \item \textbf{地形约束}：海拔高度场 $h(\mathbf{x})$、地表坡度 $\nabla h(\mathbf{x})$、经纬度坐标 $(\lambda, \phi)$、时区系统。
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[地理系统的周期结构]\label{def:geographic_periodic_structure}
+地理系统的\textbf{周期结构}分为四种基本类型：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{天文地理周期}：$10^4$--$10^5$ 年尺度，由米兰科维奇旋回驱动，守恒量为地-日-行星系统总角动量；
+    \item \textbf{气候地理周期}：季节至年代际尺度，由太阳辐射的经向梯度驱动，守恒量为地-气系统总能量；
+    \item \textbf{地质地理周期}：$10^6$--$10^9$ 年尺度，由地球内部热能和板块运动驱动，守恒量为地壳物质总质量；
+    \item \textbf{地形-经纬周期}：由地球自转给出的经纬度坐标系统与地形高度分层，守恒量为自转与公转角动量。
+\end{enumerate}
+\end{definition}
+
+\section{地理周转圆组的动态调节：接入「周期系统」章第三步}
+\label{sec:geo_adaptive}
+
+\begin{definition}[地理周转圆组的动态调节]\label{def:geo_adaptive_adjustment}
+设当前地理周转圆组为 $\mathfrak E^{(j)}$，部分和
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+残差 $r^{(j)}=z-z^{(j)}$。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 $\|r^{(j)}\|^2>\delta$，则依残差周期图峰值新增一个周转圆；
+    \item \textbf{参数调节}：对已有周转圆参数按正则化最小二乘或跨尺度共振约束更新。
+\end{enumerate}
+在地理系统中，数量调节对应增加轨道谐波阶数、增加气候模态或增加地质事件层；参数调节对应调整轨道要素、共振宽度或地质时间尺度参数。
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:geo_adaptive_growth}
+按 \cref{def:geo_adaptive_adjustment}(i) 加入残差主频分量后，残差能量单调不增：
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+等号成立当且仅当残差在被选频率上无能量。
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:geo_adaptive_growth} 与「周期系统」章 \cref{def:ps_adaptive_adjustment} 的动态调节机制一致：
+新增周转圆即把 $r^{(j)}$ 沿 $\hat\omega$ 的分量从残差中移出，由正交分解
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{被移出的分量}\|^2$ 即得不等式，
+等号当且仅当被移出分量的范数为零。完整论证见该处。
+\end{proof}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:geo_adaptive_convergence}
+设地理目标为周期 $T_0$ 的有限周期序列且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得地理周转圆组即目标的精确傅里叶数据。
+\end{theorem}
+
+\begin{proof}
+周期 $T_0$ 的序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波上完备。每步按 \cref{prop:geo_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。
+\end{proof}
+
+\begin{definition}[跨尺度共振指标]\label{def:geo_cross_scale_resonance}
+设地理目标具有 $L$ 个时间尺度的子结构，其周期分别为 $T_1<\dots<T_L$。定义\textbf{跨尺度共振指标}
+\[
+\mathcal R=\max_{i<j}\left|\frac{T_j}{T_i}-\operatorname{round}\left(\frac{T_j}{T_i}\right)\right|.
+\]
+$\mathcal R$ 越小，各尺度周期越接近整数比，跨尺度共振越强。
+\end{definition}
+
+\begin{proposition}[跨尺度共振指标的界]\label{prop:geo_cross_scale_bound}
+跨尺度共振指标满足 $0\le\mathcal R\le 1/2$。若所有 $T_j/T_i\in\mathbb Q$，则各尺度周期可公度，即存在公共周期；$\mathcal R$ 度量各周期比接近整数的程度，$\mathcal R\to0$ 需每个 $T_j/T_i$ 接近整数。
+\end{proposition}
+
+\begin{proof}
+对任意实数 $x$，$|x-\operatorname{round}(x)|\le 1/2$。上界由定义直接给出。
+\end{proof}
+
+\begin{remark}[动态调节的边界]\label{rem:geo_adaptive_boundary}
+\cref{thm:geo_adaptive_convergence} 依赖有限周期序列。对米兰科维奇旋回等准周期地理目标，不存在有限周转圆组精确表示，只能作跨尺度共振分析或有界逼近。跨尺度共振指标 $\mathcal R$ 只度量整数比接近程度，不保证共振确实发生。
+\end{remark}
+
+\section{地理卷积：接入「周期系统」章第四步}
+\label{sec:geo_convolution}
+
+\begin{definition}[地理振幅卷积、相位卷积与频率卷积]\label{def:geo_convolution_types}
+设两个地理周转圆组为
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+定义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅卷积}：$\mathbb A_{mn}=A_nB_m$；
+    \item \textbf{相位卷积}：$\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$；
+    \item \textbf{频率卷积}：$\mathbb F_{mn}=\omega_n\nu_m$；
+    \item \textbf{趋势卷积}：$\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$。
+\end{enumerate}
+这与「级数与卷积」章 \cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution}、\cref{def:tendency_convolution} 一致。
+\end{definition}
+
+\begin{theorem}[三类卷积在地理周转圆组上的作用]\label{thm:geo_convolution_action}
+设两个地理目标的周转圆组分别为 $\mathfrak E$ 与 $\mathfrak E'$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 振幅卷积只作用于半径；
+    \item 相位卷积只作用于相位；
+    \item 频率卷积只作用于转速；
+    \item 趋势卷积同时保留振幅与相位。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:geo_convolution_types} 直接读出。
+\end{proof}
+
+\begin{proposition}[米兰科维奇旋回与气候响应的相位卷积]\label{prop:geo_milankovitch_climate_convolution}
+设米兰科维奇旋回周转圆组为 $\mathfrak E_{\mathrm{M}}$，气候响应序列周转圆组为 $\mathfrak E_{\mathrm{C}}$。两者的相位卷积
+\[
+\mathbb P_{mn}=e^{i(\phi_m^{\mathrm{M}}-\phi_n^{\mathrm{C}})}
+\]
+度量了天文驱动与气候响应之间的相位差。冰期终止对应相位差的特定零点——此时天文驱动的极大值与气候响应的极大值对齐，形成冰盖消融。
+\end{proposition}
+
+\begin{proof}
+由 \cref{prop:glacial_phase_locking}，冰期旋回与米兰科维奇旋回之间存在相位关系。冰期终止对应于岁差和倾角同时处于高日照配置的时段，此时天文驱动的相位与气候响应相位重合，$\mathbb P_{mn}$ 的辐角为零。相位卷积记录了这一对齐关系的全部信息。
+\end{proof}
+
+\begin{proposition}[自相关与趋势卷积]\label{prop:geo_autocorr_phase_convolution}
+设 $\{z_t\}$ 为地理周期序列，其自相关函数为
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+在地理周转圆组语言中，自相关函数是趋势卷积在对角线上的投影：
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:geo_autocorr_phase_convolution} 是「周期系统」章 \cref{thm:ps_convolution_action} 的卷积作用结论在本领域的实现：
+将 $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ 代入自相关定义，由正交性消去全部非对角交叉项，只保留趋势卷积的对角线项
+（三类卷积的因式分解，\cref{prop:ps_convolution_factorization}），即得 $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$。
+完整展开见该处。
+\end{proof}
+
+\begin{remark}[地理卷积与周期卷积的关系]\label{rem:geo_convolution_relation}
+地理卷积不是新的卷积运算，而是「级数与卷积」章周期卷积在地理周转圆组上的实例。自相关是趋势卷积在对角线上的投影，米兰科维奇—气候相位差、跨尺度共振分别是相位卷积和频率卷积在地理学中的具体表现。
+\end{remark}
+
+\section{与离散采样、调和分析、时序分析的整合：接入「周期系统」章第五步}
+\label{sec:geo_integration}
+
+\begin{definition}[地理周期诊断流程]\label{def:geo_periodic_diagnosis}
+对于给定地理系统，使用周期数学框架进行诊断：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{周期判定}：验证地理目标的周期类型（\cref{thm:geo_periodicity_decision}）；
+    \item \textbf{级数构建}：由地理数据构建振幅、频率、相位级数与周转圆组（\cref{thm:geo_series_reconstruction}）；
+    \item \textbf{跨尺度诊断}：计算跨尺度共振指标 $\mathcal R$（\cref{def:geo_cross_scale_resonance}）；
+    \item \textbf{卷积诊断}：计算自相关（趋势卷积的对角线投影，\cref{prop:geo_autocorr_phase_convolution}）与米兰科维奇—气候相位卷积（\cref{prop:geo_milankovitch_climate_convolution}）；
+    \item \textbf{守恒诊断}：验证角动量、能量、质量守恒（\cref{thm:geographic_conservation_laws}）。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[地理周期诊断流程与三章接口]\label{thm:geo_diagnosis_integration}
+\cref{def:geo_periodic_diagnosis} 的五个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}、\cref{thm:intercalation_leakage_suppression}（地理时间序列的采样与谱估计）；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}、\cref{prop:twelve_to_six}（地理数据的频率分解）；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}、\cref{def:ts_window_validation}（地理时间序列的周期显著性检验）。
+\end{enumerate}
+因此地理周期诊断不是独立方法，而是周期数学统一工具链在地理系统上的应用。
+\end{theorem}
+
+\begin{proof}
+逐条对应：
+(i) 地理周期诊断需要采样与谱估计；
+(ii) 频率分解与相位核见调和分析章；
+(iii) 周期图峰值、Fisher 检验与窗函数验证见时序分析章。
+故诊断流程由三章工具链合成。
+\end{proof}
+
+\begin{remark}[整合后的操作顺序]\label{rem:geo_integration_order}
+实际诊断建议顺序为：先判定地理目标是否周期（\cref{thm:geo_periodicity_decision}）；再构建地理数据的傅里叶数据与周转圆组（\cref{thm:geo_series_reconstruction}）；再用跨尺度共振与动态调节优化参数（\cref{thm:geo_adaptive_convergence}、\cref{def:geo_cross_scale_resonance}）；再作地理卷积与相位关系分析（\cref{prop:geo_milankovitch_climate_convolution}、\cref{prop:geo_autocorr_phase_convolution}）；最后按 \cref{def:geo_periodic_diagnosis} 输出诊断。
+\end{remark}
+
+\section{天文地理周期}
+\label{sec:astro_geographic_cycles}
+
+\subsection{米兰科维奇旋回}
+
+\begin{definition}[米兰科维奇旋回]\label{def:milankovitch_cycles}
+\textbf{米兰科维奇旋回}是地球轨道三要素的准周期变化，由太阳系其他行星对地球的引力摄动引起。三要素及其主要周期为：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{偏心率} $e$：主要周期约为 $100,000$ 年（$100$ ka）和 $413,000$ 年（$413$ ka）。
+    \item \textbf{地轴倾角} $\varepsilon$：变化范围约 $22.1^\circ$ 至 $24.5^\circ$，主要周期约 $41,000$ 年（$41$ ka）。
+    \item \textbf{岁差指数} $e\sin\varpi$：主要周期约 $19,000$ 年和 $23,000$ 年（$19$--$23$ ka）。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[米兰科维奇旋回的结构性质]\label{prop:milankovitch_structure}
+米兰科维奇旋回具有以下结构性质：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{相空间旋转}：地球轨道三要素的准周期变化对应于地-日系统在相空间中的旋转。
+    \item \textbf{角动量守恒}：地-日-行星系统的总角动量守恒；地球的轨道与自转角动量因行星摄动与日月潮汐力矩而缓慢演化——这正是米兰科维奇旋回的动力学来源。
+    \item \textbf{准周期性}：三个轨道要素的周期不可公度，整体运动为准周期。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 地球轨道三要素的变化由拉格朗日行星运动方程描述。在相空间中，偏心率 $e$ 和近点经度 $\varpi$ 构成共轭变量，其长期演化等价于相空间中的旋转。
+(ii) 行星摄动是保守力，地-日-行星系统总角动量严格守恒。
+(iii) 由行星摄动理论得到的三要素主频率在 $\mathbb{Q}$ 上线性无关，故整体运动为三维环面上的准周期流；$100:41:23$ 只是量级近似，不能用来判定不可公度性。
+\end{proof}
+
+\subsection{冰期-间冰期旋回}
+
+\begin{definition}[冰期-间冰期旋回]\label{def:glacial_interglacial_cycles}
+\textbf{冰期-间冰期旋回}是第四纪（最近 $2.58$ Ma）地球气候在寒冷冰期和温暖间冰期之间的周期性交替。冰期时，北半球大陆冰盖大规模扩张，海平面下降 $100$--$130$ 米。间冰期时，冰盖退缩，海平面回升。
+
+冰期-间冰期旋回是米兰科维奇天文周期在地理系统中的\textbf{非线性响应}。
+\end{definition}
+
+\begin{proposition}[冰期旋回的相位关系]\label{prop:glacial_phase_locking}
+冰期-间冰期旋回与米兰科维奇天文周期之间存在相位关系：
+\begin{enumerate}[label=(\roman*)]
+    \item 早更新世（$2.58$--$1.0$ Ma），冰期旋回以 $41$ ka 周期为主导。
+    \item 中更新世转型（$1.0$--$0.8$ Ma）之后，冰期旋回转变为以 $100$ ka 周期为主导。
+    \item 冰期终止对应岁差和倾角同时处于高日照配置的时段。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+冰期旋回与天文周期的相位关系通过氧同位素地层学建立。对 $\delta^{18}O$ 时间序列做频谱分析，可识别出 $100$ ka、$41$ ka、$23$ ka、$19$ ka 四个主频率。中更新世转型前后，主导频率由 $41$ ka 转为 $100$ ka，与偏心率周期同步。冰期终止对应多个天文周期相位重合的时段。
+\end{proof}
+
+\section{气候地理周期}
+\label{sec:climate_geographic_cycles}
+
+\subsection{太阳辐射梯度与大气环流的季节周期}
+
+\begin{definition}[太阳辐射的经向梯度]\label{def:solar_insolation_gradient}
+地球气候系统的根本能量驱动力是\textbf{太阳辐射的经向梯度}。太阳辐射在大气顶部的纬向平均分布可近似为
+\[
+Q(\phi)=\frac{S_0}{4}\cdot\bar{s}(\phi),
+\]
+其中 $S_0\approx 1361$ W/m$^2$ 是太阳常数，$\bar{s}(\phi)$ 是纬度 $\phi$ 处的年平均日射分布函数。
+\end{definition}
+
+\begin{example}[太阳辐射经向梯度的具体计算]\label{ch19_insolation_gradient_example}
+采用年平均日射分布的勒让德近似 $\bar{s}(\phi)\approx 1-0.482\,P_2(\sin\phi)$，得
+\[
+Q(0)\approx 422\ \text{W/m}^2,\qquad Q(90^\circ)\approx 176\ \text{W/m}^2.
+\]
+赤道-极地年平均日射差约 $246$ W/m$^2$，是驱动大气经向环流的太阳辐射梯度的量级来源。
+\end{example}
+
+\begin{definition}[季风系统]\label{def:monsoon_system}
+\textbf{季风}是大气环流在季节尺度上的大规模翻转。夏季，大陆比海洋升温快，形成大陆低压和海洋高压，驱动湿润的海洋气流向大陆输送；冬季相反。
+\end{definition}
+
+\begin{proposition}[季风系统的周期性质]\label{prop:monsoon_periodicity}
+季风系统具有以下周期性质：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平移周期}：基本周期是回归年。
+    \item \textbf{能量守恒}：总能量在季节循环中近似守恒。
+    \item \textbf{梯度约束}：年平均经向温度梯度在长期气候平衡中近似保持不变。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 太阳直射点在南北回归线之间做回归运动，太阳辐射梯度的极大值位置随季节往返，海陆热力差异及其驱动的季风风向因此每年翻转一次。
+(ii) 夏季风期间海洋以潜热形式释放能量，冬季风期间大陆辐射冷却驱动下沉；潜热、感热与动能在海陆之间以回归年为周期循环。
+(iii) 年平均经向温度梯度由能量平衡决定，低纬净辐射盈余与高纬净辐射亏损由大气与海洋的经向输送补偿。
+\end{proof}
+
+\subsection{大洋环流的周期结构}
+
+\begin{definition}[热盐环流]\label{def:thermohaline_circulation}
+\textbf{热盐环流}是由海水温度和盐度差异驱动的全球深海环流系统，完整循环周期约 $1000$--$2000$ 年。
+\end{definition}
+
+\begin{definition}[厄尔尼诺-南方涛动]\label{def:enso_geo}
+\textbf{厄尔尼诺-南方涛动}（ENSO）是热带太平洋海-气耦合系统在年际尺度上（$2$--$7$ 年）的准周期振荡，具有厄尔尼诺（暖相）和拉尼娜（冷相）两个极端相位。
+\end{definition}
+
+\begin{lemma}[阻尼谐振子的旋转-衰减分解]\label{ch19_enso_oscillator_lemma}
+设 $(T_E(t),H_W(t))$ 满足线性方程组
+\[
+\frac{d}{dt}\begin{pmatrix}T_E\\H_W\end{pmatrix}
+= M\begin{pmatrix}T_E\\H_W\end{pmatrix},\qquad
+M=\begin{pmatrix}-\alpha & \beta\\ -\gamma & -\delta\end{pmatrix},
+\]
+其中 $\alpha,\beta,\gamma,\delta>0$。若 $4\beta\gamma>(\alpha-\delta)^2$，则 $M$ 有一对共轭复特征值
+\[
+\lambda_{\pm}=-\rho\pm i\omega,\qquad
+\rho=\frac{\alpha+\delta}{2}>0,\qquad
+\omega=\frac{1}{2}\sqrt{4\beta\gamma-(\alpha-\delta)^2}>0.
+\]
+\end{lemma}
+
+\begin{proof}
+矩阵 $M$ 的特征多项式为 $\lambda^2+(\alpha+\delta)\lambda+(\alpha\delta+\beta\gamma)$，判别式 $\Delta=(\alpha-\delta)^2-4\beta\gamma$。当 $4\beta\gamma>(\alpha-\delta)^2$ 时 $\Delta<0$，得共轭复根。实部 $-\rho<0$ 使解指数衰减，虚部 $\pm i\omega$ 使解在相空间中旋转。
+\end{proof}
+
+\begin{proposition}[ENSO 的耦合振子模型]\label{prop:enso_periodic_system}
+ENSO 可建模为双子系统耦合的周期系统，演化方程为
+\[
+\frac{dT_E}{dt}=-\alpha T_E+\beta H_W,\qquad
+\frac{dH_W}{dt}=-\gamma T_E-\delta H_W.
+\]
+这一方程组等价于阻尼谐振子，随机大气扰动为其注入能量，维持持续振荡。
+\end{proposition}
+
+\begin{proof}
+由 \cref{ch19_enso_oscillator_lemma}，当 $4\beta\gamma>(\alpha-\delta)^2$ 时，$(T_E,H_W)$ 在平衡点附近以频率 $\omega$ 做衰减旋转，周期 $T=2\pi/\omega$。
+\end{proof}
+
+\section{地质与火山活动的周期结构}
+\label{sec:geological_cycles}
+
+\subsection{威尔逊旋回}
+
+\begin{definition}[威尔逊旋回]\label{def:wilson_cycle}
+\textbf{威尔逊旋回}是地球板块构造在 $200$--$500$ Ma 时间尺度上的超长周期，包括大陆裂谷、海底扩张、大洋张开、俯冲起始、大洋闭合、大陆碰撞六个阶段。
+\end{definition}
+
+\begin{proposition}[威尔逊旋回的结构性质]\label{prop:wilson_structure}
+威尔逊旋回具有以下结构性质：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{标度结构}：周期约 $200$--$500$ Ma。
+    \item \textbf{质量守恒}：海陆面积比例长期保持恒定（约 $71\%$ 海洋，$29\%$ 陆地）。
+    \item \textbf{自相似性}：在不同尺度上呈现相似的阶段序列。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 全球洋壳最大年龄约 $200$ Ma，以北大西洋为例，约 $200$ Ma 张开，平均扩张速率约 $2.5$ cm/年。
+(ii) 洋壳产生率与消亡率在显生宙内均约为 $3$ km$^2$/年。
+(iii) 日本海与大西洋张开过程均经历相同阶段序列，仅时间尺度相差约一个量级。
+\end{proof}
+
+\subsection{造山-剥蚀旋回与地壳均衡}
+
+\begin{definition}[造山-剥蚀旋回]\label{def:orogenic_denudation_cycle}
+\textbf{造山-剥蚀旋回}是地壳在构造抬升与地表侵蚀之间的动态平衡过程，时间尺度为 $10^6$--$10^8$ 年。
+\end{definition}
+
+\begin{proposition}[地壳均衡的定量模型]\label{prop:isostasy_model}
+设地壳密度 $\rho_c$、地幔密度 $\rho_m>\rho_c$、地壳参考厚度 $H_0$、地表海拔 $h$、地壳增厚 $\Delta H$。则艾里均衡满足
+\[
+h\cdot\rho_c=\Delta H\cdot(\rho_m-\rho_c),
+\]
+即 $h=(\rho_m-\rho_c)/\rho_c\cdot\Delta H$。对典型参数 $\rho_c\approx 2.7$ g/cm$^3$、$\rho_m\approx 3.3$ g/cm$^3$，比例系数约 $0.22$。
+\end{proposition}
+
+\begin{proof}
+取补偿深度处的压力平衡条件：$\rho_cH_0g+\rho_m\Delta Hg=\rho_c(h+H_0+\Delta H)g$，展开即得 $h\rho_c=\Delta H(\rho_m-\rho_c)$。
+\end{proof}
+
+\subsection{海侵-海退旋回与沉积层序}
+
+\begin{definition}[海侵-海退旋回]\label{def:transgression_regression}
+\textbf{海侵-海退旋回}是海平面相对于大陆边缘的周期性升降过程，由多层级周期驱动：一级旋回（$50$--$100$ Ma）、二级旋回（$5$--$50$ Ma）、三级旋回（$0.5$--$5$ Ma）、四级旋回（$0.1$--$0.5$ Ma）。
+\end{definition}
+
+\subsection{火山活动的周期结构}
+
+\begin{definition}[火山活动的多尺度周期]\label{def:volcanic_periodicity}
+\textbf{火山活动}呈现多层级周期性：喷发周期（分钟至小时）、活动期-休眠期周期（年至千年）、超级喷发周期（$10^4$--$10^5$ 年）、全球火山活动速率周期（$10^7$--$10^8$ 年）。
+\end{definition}
+
+\begin{proposition}[火山喷发频率-震级的幂律分布]\label{prop:volcanic_frequency}
+全球火山喷发事件的频率 $N$ 与喷发规模 $M$ 满足幂律分布
+\[
+N(>M)\propto M^{-b},\qquad b\approx 0.7\text{--}1.0.
+\]
+\end{proposition}
+
+\begin{proof}
+全球火山数据库中，$M_0\in[10^{-2},10^3]$ km$^3$ 范围内拟合得 $b\approx 0.7$--$1.0$，与地震 Gutenberg-Richter 关系结构相同。
+\end{proof}
+
+\subsection{地震活动的周期结构}
+
+\begin{definition}[地震周期与复发间隔]\label{def:seismic_cycle}
+\textbf{地震}是地壳应力累积与释放的周期性过程。复发间隔 $T_{\text{rec}}=d_s/v_s$，其中 $d_s$ 为同震滑动量、$v_s$ 为滑移速率。
+\end{definition}
+
+\begin{proposition}[地震频率-震级的幂律分布]\label{prop:seismic_frequency}
+地震满足 \textbf{Gutenberg-Richter 定律}
+\[
+\log_{10}N(>M)=a-bM,\qquad b\approx 1.0.
+\]
+\end{proposition}
+
+\begin{proof}
+将震级 $M$ 与地震释放能量 $E$ 的关系 $\log_{10}E\approx 1.5M+4.8$ 代入，得 $N(>E)\propto E^{-b/1.5}\approx E^{-0.67}$。
+\end{proof}
+
+\begin{example}[地震复发间隔的具体计算]\label{ex:geo_seismic_rec}
+圣安德烈亚斯断层南段 $v_s=34$ mm/年、$d_s\approx 5.5$ m，得
+\[
+T_{\text{rec}}=\frac{5.5}{0.034}\approx 160\ \text{年}.
+\]
+\end{example}
+
+\section{地形地貌与经纬度系统}
+\label{sec:terrain_coordinates}
+
+\subsection{经纬度坐标系统}
+
+\begin{definition}[地理坐标系统]\label{def:geographic_coordinate}
+\textbf{地理坐标系统}由地球自转轴与赤道面确定，包括纬度 $\phi$、经度 $\lambda$、海拔 $h$。经度以 $360^\circ$ 为周期，纬度以 $180^\circ$ 为半周期，海拔无周期但存在标度分层。
+\end{definition}
+
+\begin{proposition}[时区系统的周期性]\label{prop:timezone_periodicity}
+国际时区系统将地球按经度划分为 $24$ 个时区，每个时区跨越 $15^\circ$，对应 $1$ 小时的时间差：
+\[
+n=\left\lfloor\frac{\lambda+7.5^\circ}{15^\circ}\right\rfloor,\qquad \lambda_n=15^\circ\times n.
+\]
+\end{proposition}
+
+\begin{proof}
+地球自转角速度为 $\omega_E=2\pi/24\text{h}$。经度差 $\Delta\lambda$ 对应地方时差 $\Delta t=\Delta\lambda\cdot(24\text{h}/360^\circ)=\Delta\lambda/15^\circ$ 小时。相邻时区中心角距 $15^\circ$，恰为 $1$ 小时的地方时差。
+\end{proof}
+
+\subsection{纬度气候带}
+
+\begin{definition}[纬度气候带]\label{def:climate_zones}
+地球表面按纬度划分为五个主要气候带：热带、副热带、温带、副极地、极地。气候带边界纬度（$23.44^\circ$ 与 $66.56^\circ$）由地轴倾角 $\varepsilon=23.44^\circ$ 决定。
+\end{definition}
+
+\begin{proposition}[气候带的气温标度]\label{prop:climate_temperature_scaling}
+年平均地表气温 $T(\phi)$ 满足标度关系
+\[
+T(\phi)\approx T_0-\Delta T\cdot\left(\frac{\sin\phi}{\sin 90^\circ}\right)^2,
+\]
+其中 $T_0\approx 27^\circ$C 为赤道年平均温度，$\Delta T\approx 40^\circ$C 为赤道-极地温差。
+\end{proposition}
+
+\begin{proof}
+纬度为 $\phi$ 处的年平均太阳辐射与 $\cos\phi$ 成正比。将辐射输入与经向热输送共同考虑，可导出气温随纬度分布近似正比于 $\cos^2\phi$。经验拟合表明 $T(\phi)\approx T_0-\Delta T\sin^2\phi$ 在 $|\phi|\le 60^\circ$ 内与观测吻合良好。
+\end{proof}
+
+\subsection{海拔地形与高度分层}
+
+\begin{definition}[地形高度分层]\label{def:terrain_elevation}
+地球陆地表面按海拔分为三层：低地（$0$--$500$ m，约 $57\%$）、中海拔（$500$--$2000$ m，约 $28\%$）、高海拔（$>2000$ m，约 $15\%$）。
+\end{definition}
+
+\begin{proposition}[陆地海拔分布的幂律特征]\label{prop:hypsometric_curve}
+陆地海拔的累积分布满足近似幂律
+\[
+P(h>h_0)\propto h_0^{-\alpha},\qquad \alpha\approx 1.5\text{--}2.0.
+\]
+\end{proposition}
+
+\begin{proof}
+全球地形数据库的统计分析表明，陆地面积随海拔的累积分布在对数-对数坐标上近似为直线，斜率 $\alpha\approx 1.5$--$2.0$。这一特征与「构造抬升-侵蚀剥蚀」过程的分形结构一致。
+\end{proof}
+
+\section{地理周期系统的多层嵌套结构}
+\label{sec:geo_nested}
+
+\begin{theorem}[地理周期系统的四层嵌套]\label{thm:geographic_four_layer}
+地理周期系统构成四层嵌套结构：
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}>{\centering\arraybackslash}p{2.5cm}}
+\toprule
+地理周期层 & 时间尺度 & 主导机制 & 守恒量/参考尺度 \\
+\midrule
+天文驱动层 & $10^4$--$10^5$ 年 & 地-日-行星系统旋转 & 角动量 \\
+气候响应层 & $10^0$--$10^3$ 年 & 太阳辐射经向梯度 & 能量 \\
+地质构造层 & $10^6$--$10^9$ 年 & 板块运动与地幔对流 & 质量 \\
+地形-经纬层 & $10^{-1}$--$10^1$ 年 & 地球自转与公转几何 & 自转/公转量 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{theorem}
+
+\begin{proof}
+四层嵌套结构的数学基础是时间尺度分离。天文周期远长于气候周期，气候周期又远长于天气系统时间尺度。在气候系统的演化方程中，天文驱动力可视为缓变参数，在气候响应层的时间尺度上近似为常数。地质构造力在气候响应层的时间尺度上视为固定边界条件。地形-经纬层在所有时间尺度上作为坐标框架。
+\end{proof}
+
+\begin{corollary}[地理系统的跨尺度共振]\label{cor:geographic_cross_scale_resonance}
+在四层嵌套结构中，不同层级的周期发生共振时，可产生显著的跨尺度放大效应。
+\end{corollary}
+
+\begin{proof}
+任一响应子结构可视为受迫振荡子，其稳态振幅与 $1/|\omega_0^2-\omega^2|$ 成正比，故当驱动频率 $\omega$ 接近响应子结构固有频率 $\omega_0$ 时，响应振幅显著增大。
+\end{proof}
+
+\begin{remark}[跨尺度共振的经验观察与形式类比]\label{rem:geo_cross_scale_empirical}
+以下三例为经验观察与形式类比，非定理：(i) 中更新世转型可能是天文驱动层、气候响应层和地质构造层之间跨尺度共振的结果；(ii) 超级大陆旋回与银河系旋臂穿越的准同步性；(iii) 超级火山喷发与米兰科维奇旋回在时间尺度上的重叠。
+\end{remark}
+
+\section{地理周期系统的守恒律}
+\label{sec:geo_conservation}
+
+\begin{theorem}[地理系统的三种守恒律]\label{thm:geographic_conservation_laws}
+地理周期系统的动力学由三种守恒律支配：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{角动量守恒}：地球-大气-海洋系统的总角动量在外部天文力矩作用下缓慢演化，内部各圈层之间的角动量交换满足守恒律。
+    \item \textbf{能量守恒}：地球气候系统的总能量输入与输出在年平均值上平衡。太阳辐射的经向梯度驱动了全球环流。
+    \item \textbf{质量守恒}：地球表层物质在储库之间的循环满足质量守恒。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 地球-大气-海洋系统总角动量变化率等于外部天文力矩。地球自转轴的岁差（周期约 $25772$ 年）与章动（主周期 $18.6$ 年）分别对应角动量在赤道隆起与外部引力力矩之间交换的长期与短期分量。
+(ii) 地球大气顶部接收的净太阳辐射为 $S_0(1-A)/4\approx 240$ W/m$^2$，地球红外辐射输出为 $\sigma T_e^4$，$T_e\approx 255$ K。年平均值上输入与输出平衡。
+(iii) 全球海平面变化由海水体积变化和洋盆容积变化共同决定。火山喷发将地幔物质转移至地表，俯冲将地表物质带回地幔，两者在威尔逊旋回的时间尺度上平衡。
+\end{proof}
+
+\begin{remark}[与全书的衔接]\label{rem:geo_book_interface}
+本章建立的地理系统周期结构理论是周期数学在地球表层系统中的应用。天文周期、气候周期、地质周期、地形-经纬周期构成地球表层系统最完整的周期谱系。地理系统是周期数学框架在自然科学中较复杂的应用场域——它跨越了从季节到亿年的全部时间尺度，耦合了天文、大气、海洋、地质和生物五大圈层的周期过程。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 地质时间的推移与季节循环：回归年的平移周期（\cref{def:monsoon_system}、\cref{prop:monsoon_periodicity}） \\
+缩放 & 气候带随纬度的标度分布（\cref{ch19_insolation_gradient_example}、\cref{prop:climate_temperature_scaling}）；火山喷发频率-震级的幂律分布（\cref{prop:volcanic_frequency}）；陆地海拔分布的幂律（\cref{prop:hypsometric_curve}） \\
+旋转 & 米兰科维奇旋回（\cref{def:milankovitch_cycles}、\cref{prop:milankovitch_structure}）；地球自转与经纬度坐标系（\cref{def:geographic_coordinate}、\cref{prop:timezone_periodicity}） \\
+守恒 & 角动量守恒、能量守恒、质量守恒（\cref{thm:geographic_conservation_laws}） \\
+对称 & 南北半球对称与纬度对称：太阳辐射关于赤道的对称分布（\cref{def:solar_insolation_gradient}） \\
+闭合 & 水循环与岩石圈循环的闭合：威尔逊旋回（\cref{def:wilson_cycle}）、地震周期（\cref{def:seismic_cycle}）、海侵-海退旋回（\cref{def:transgression_regression}） \\
+周期 & 昼夜、季节、岁差、米兰科维奇、火山与地质旋回的多尺度周期（\cref{thm:geographic_four_layer}）；跨尺度共振（\cref{cor:geographic_cross_scale_resonance}、\cref{def:geo_cross_scale_resonance}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{地理周期性判定定理}（\ref{thm:geo_periodicity_decision}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 验证\textbf{数量调节的单调性}（\ref{prop:geo_adaptive_growth}）的前提在本章领域对象上成立，并给出一个不满足前提的反例。
+
+    \item 考察\textbf{地理周期诊断流程与三章接口}（\ref{thm:geo_diagnosis_integration}）在参数退化时的行为，说明结论如何随之退化。
+
+    \item 说明\textbf{自相关与趋势卷积}（\ref{prop:geo_autocorr_phase_convolution}）与「周期系统」章相应通用结论的关系（是一致、特例还是需要附加条件）。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{thm:geo_periodicity_decision}、\ref{prop:geo_adaptive_growth}、\ref{thm:geo_diagnosis_integration}、\ref{prop:geo_autocorr_phase_convolution}。
+\end{enumerate}
+
+

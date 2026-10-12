@@ -1,0 +1,1102 @@
+\chapter{天文系统之周期结构}
+\label{chap:astro-periodic}
+\markboth{天文系统之周期结构}{天文系统之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:astro_ps_hook}
+本章判定研究目标是否具有周期性、确定其周期类型、以及查找最小正周期时，一律引用「周期系统」章：
+周期性判据见 \cref{thm:ps_periodicity_decision}，
+周期类型判别见 \cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}，
+最小正周期查找见 \cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}，
+由数据构建周期级数与周转圆组见 \cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}。
+\end{remark}
+
+\begin{remark}[本章定位：按「周期系统」章五步接口展开]\label{rem:astro_chapter_positioning}
+天文系统之周期结构研究天体运动中周期性、准周期性和轨道共振的数学表征。本章不另立周期性判据，而是把天文系统接入「周期系统」章规定的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把行星轨道、径向振荡、轨道共振、时间计量系统化为离散动力系统，引用 \cref{thm:ps_periodicity_decision} 判定是否具有周期性，并确定周期类型；
+    \item \textbf{构建}：由轨道要素、观测角度或时间序列构建振幅级数、频率级数、相位级数，组装为天文周转圆组；
+    \item \textbf{调节}：用轨道共振宽度、能量与角动量约束、观测残差动态调节周转圆组；
+    \item \textbf{卷积}：在天文周转圆组上引入振幅卷积、相位卷积、频率卷积，并与自相关、角动量、共振比衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成天文周期诊断流程。
+\end{enumerate}
+本章使用的天文与数学知识包括：牛顿引力方程、二体问题、开普勒三定律、比内公式、贝塞尔函数与开普勒方程、径向有效势、伯特兰定理、轨道共振与共振角、长期共振、KAM 理论、时间计量系统、岁差与章动、原子时与历书时。
+\end{remark}
+
+\begin{remark}[本章七主题导引]\label{rem:astro_seven_themes}
+平移——行星沿轨道的时间平移与公转周期（回归年、恒星年、平太阳时）；
+缩放——轨道半径--周期的开普勒标度 \(T^2\propto a^3\)；
+旋转——轨道运动与自转的角动量守恒（面积速度守恒）；
+守恒——角动量守恒、能量守恒、质心动量守恒与共振比守恒；
+对称——有心力场的旋转对称及其诺特对应角动量守恒；
+闭合——椭圆轨道的闭合（开普勒第一定律、伯特兰定理）；
+周期——公转、自转与共振周期（平均运动共振、长期共振）。
+\end{remark}
+
+\section{天文目标的周期性判定：接入「周期系统」章第一步}
+\label{sec:astro_periodicity_decision}
+
+\subsection{天文目标、判定输入与判定映射}
+
+\begin{definition}[天文目标与判定输入]\label{def:astro_target}
+一个\textbf{天文目标}是指下列对象之一：
+\begin{enumerate}[label=(\roman*)]
+    \item 一个受引力相互作用的天体系统，其状态空间为位置--速度空间 \(\mathcal S=(\mathbb R^3)^N\times(\mathbb R^3)^N\)；
+    \item 一条轨道，其状态空间为相空间中的一条曲线；
+    \item 一个时间计量系统，其状态空间为时间标度集合；
+    \item 一个观测得到的角度或距离时间序列。
+\end{enumerate}
+天文目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal D_{\mathrm{A}}=(\mathcal S,\Phi),
+\]
+其中 \(\mathcal S\) 是状态空间或序列空间，\(\Phi:\mathcal S\to\mathcal S\) 是演化映射（如牛顿引力流、轨道平移、时间标度变换）。若 \(\mathcal S\) 为有限集，称目标为\textbf{有限天文目标}；若 \(\mathcal S\) 为无限集，称目标为\textbf{无限天文目标}。
+\end{definition}
+
+\begin{definition}[天文判定映射]\label{def:astro_periodization}
+设天文目标由判定输入 \(\mathcal D_{\mathrm{A}}=(\mathcal S,\Phi)\) 给出。若目标的状态或输出由 \(\Phi\) 生成，即存在 \(x_0\in\mathcal S\) 使
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+当 \(t\in\mathbb Z\) 时 \(x_t\) 由 \(\Phi\) 迭代生成；当 \(t\in\mathbb R\) 时，以单参数演化族 \(\{\Phi_t\}_{t\in\mathbb R}\)（其中每个 \(\Phi_t:\mathcal S\to\mathcal S\)，且 \(\Phi_0=\operatorname{id}\)、\(\Phi_{s+t}=\Phi_s\circ\Phi_t\) 对一切 \(s,t\in\mathbb R\) 成立、\((t,x)\mapsto\Phi_t(x)\) 连续）记之。
+则称 \(\Phi\) 为目标的\textbf{天文判定映射}。此时当 \(t\in\mathbb Z\) 时天文目标化为离散动力系统 \((\mathcal S,\Phi)\)，当 \(t\in\mathbb R\) 时化为连续动力系统 \((\mathcal S,\{\Phi_t\}_{t\in\mathbb R})\)，两种情形均可直接套用「周期基础」章与「周期系统」章的判据。
+\end{definition}
+
+\begin{theorem}[天文周期性判定定理]\label{thm:astro_periodicity_decision}
+设天文目标的判定映射为 \(\Phi\)，且 \((\mathcal S,\Phi)\) 为离散动力系统。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 \(m\in\mathbb N^+\) 使 \(\Phi^m=\mathrm{id}\)，则目标为一致周期天文系统；每条轨道闭合，且轨道长度整除 \(m\)。
+    \item \textbf{判定等价}：目标为一致周期天文系统当且仅当 \(\operatorname{ord}(\Phi)<\infty\)。
+    \item \textbf{逐点判据}：目标在状态 \(x_0\) 处的轨道闭合当且仅当 \(x_0\) 为周期点；此时轨道长度即该点处的周期。
+    \item \textbf{不可省略性}：守恒量与对称群的合取不能替代 \(\operatorname{ord}(\Phi)<\infty\)；准周期天文目标不属于周期天文系统。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:astro_periodicity_decision} 是「周期系统」章 \cref{thm:ps_periodicity_decision} 的领域实例化：
+只需把判定映射 $f$ 与演化群替换为本章的 $\Phi$，(A) 充分判定、(B) 判定等价、(C) 逐点判据、
+(D) 不可省略性四条即逐条成立。依 \cref{rem:ps_applications_hook} 的约定，此处不再重复展开。
+\end{proof}
+
+\begin{corollary}[天文周期类型]\label{cor:astro_period_type}
+经 \cref{thm:astro_periodicity_decision} 判定后，天文目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 \(m_0=1\)，状态为不动点；
+    \item \textbf{严格周期型}：\(1<m_0<\infty\)，状态严格周期（如开普勒椭圆轨道）；
+    \item \textbf{一致周期型}：\(\operatorname{ord}(\Phi)=m<\infty\)，所有轨道长度整除 \(m\)；
+    \item \textbf{准周期型}：\(\operatorname{ord}(\Phi)=\infty\)，轨道不闭合但在紧致承载结构上稠密（如多体系统在 KAM 环面上的运动）；
+    \item \textbf{最终周期型}：存在 \(N\)，使 \(t\ge N\) 后目标为周期；
+    \item \textbf{离散周期型}：承载结构为 \(\mathbb Z\)，且归一化周期比 \(\rho=T_x/\Delta x\in\mathbb Q\)。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，残差按 \(e^{-\kappa t}\) 衰减（见 \cref{def:ps_period_type}(vii)）。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于周期天文系统；(iv) 不属于周期天文系统，但可用有界逼近工具处理；(v) 只在稳定阶段是周期天文系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期天文系统，只在稳定阶段可用有界逼近工具处理。
+\end{corollary}
+
+\begin{proof}
+逐条由 \cref{thm:astro_periodicity_decision} 与「周期系统」章 \cref{def:ps_period_type} 代入天文目标即得。
+\end{proof}
+
+\begin{lemma}[开普勒轨道的周期判定]\label{lem:kepler_period}
+设天体在平方反比有心力场中运动，总机械能 \(E<0\)。则其轨道为椭圆，径向运动与角向运动均为周期运动，且径向周期与角向周期相等：
+\[
+T_r=T_\theta=T=\frac{2\pi a^{3/2}}{\sqrt{GM}}.
+\]
+\end{lemma}
+
+\begin{proof}
+由开普勒第一定律（\cref{thm:kepler_first}），\(E<0\) 对应椭圆轨道。由有效势（\cref{def:radial_motion}）知径向运动在 \(r_{\min}\) 与 \(r_{\max}\) 之间往返，周期有限。由 \cref{prop:radial_oscillation_period}，平方反比力场中 \(T_r=T_\theta\)。由开普勒第三定律（\cref{thm:kepler_third}），
+\[
+T^2=\frac{4\pi^2}{GM}a^3,
+\]
+故 \(T=2\pi a^{3/2}/\sqrt{GM}\)。
+\end{proof}
+
+\begin{definition}[天文最小正周期算法]\label{def:astro_minimal_period_algorithm}
+\textbf{输入}：天文目标样本 \(x_0,\dots,x_{N-1}\)，容差 \(\varepsilon\ge0\)。
+\textbf{输出}：最小正周期 \(T_0\)，或判定“不周期”。
+\textbf{步骤}：
+\begin{enumerate}[label=(\arabic*)]
+    \item 取候选集 \(\mathcal P=\{T\in\mathbb N^+:2T\le N\}\)，按 \(T\) 递增遍历；
+    \item 对每个 \(T\) 计算最大偏差
+    \[
+    E(T)=\max_{0\le n<N-T}\|x_{n+T}-x_n\|;
+    \]
+    \item 输出首个满足 \(E(T)\le\varepsilon\) 的 \(T\) 作为 \(T_0\)；若遍历完毕无解，输出“不周期”；
+    \item 公度性校核：以 \(\rho=T_x/\Delta x\)（\(\rho=p/q\) 既约时 \(T_0=p\)；另记 \(\ell=T_0\Delta x=qT_x\) 为 \(T_0\) 个采样点对应的连续时长）与「离散采样逼近、同余角与置闰」章 \cref{prop:commensurability_periodicity_parallel}、\cref{cor:sampling_period_relation_parallel} 核对 \(T_0\) 与连续周期 \(T_x\) 的换算关系。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[天文最小正周期算法的正确性]\label{thm:astro_minimal_period_correctness}
+\begin{enumerate}[label=(\roman*)]
+    \item 若样本为严格周期序列且 \(\varepsilon=0\)、\(N\ge2T_0\)，则算法输出其离散基本周期 \(T_0\)。
+    \item 若样本由基本周期为 \(T_x\) 的连续天文目标以采样间隔 \(\Delta x\) 采样得到，且归一化周期比 \(\rho=T_x/\Delta x=p/q\) 既约，则算法输出 \(T_0=p\)。
+    \item 若 \(\rho\notin\mathbb Q\)，则不存在真周期：对任何 \(T\in\mathbb N^+\) 都有 \(E(T)>0\)。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:astro_minimal_period_correctness} 直接沿用「离散采样逼近、同余角与置闰」章的两条结论：
+(i) 由 \cref{def:discrete_fundamental_period}，$T_0$ 为最小正周期故 $E(T_0)=0$，而 $T<T_0$ 时 $E(T)>0$，
+算法按 $T$ 递增遍历，首个满足 $E(T)=0$ 者即 $T_0$；
+(ii)(iii) 分别由 \cref{prop:commensurability_periodicity_parallel}(ii)(iii) 代入即得。完整论证见该章。
+\end{proof}
+
+\begin{example}[开普勒轨道周期判定实例]\label{ex:astro_kepler_period}
+地球绕太阳公转，\(a=1\) AU，\(M=M_\odot\)。由 \cref{lem:kepler_period}，\(T=2\pi a^{3/2}/\sqrt{GM}\approx1\) 年。太阳系行星的 \(T^2/a^3\) 近似为常数，验证开普勒第三定律。
+\end{example}
+
+\begin{example}[多体系统的准周期判定]\label{ex:astro_nbody_quasiperiodic}
+太阳系多体系统在 KAM 框架下多数初值位于不变环面上，运动为多频率准周期，\(\operatorname{ord}(\Phi)=\infty\)，不属于周期天文系统，但可用有界逼近与谱分析处理。
+\end{example}
+
+\begin{remark}[守恒量不保证周期]\label{rem:astro_invariant_not_period}
+角动量守恒和能量守恒是周期结构的辅助条件，但不构成充分条件。例如双曲轨道具有能量守恒和角动量守恒，但轨道开放不闭合。天文周期结构必须由 \cref{thm:astro_periodicity_decision} 或 \cref{lem:kepler_period} 等判据判定。
+\end{remark}
+
+\section{天文周期级数与周转圆组的构建：接入「周期系统」章第二步}
+\label{sec:astro_series_construction}
+
+\begin{definition}[天文振幅级数、频率级数、相位级数]\label{def:astro_series}
+设天文目标的状态或输出序列为 \(\{z_t\}\)。若其可写为
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+则称
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+分别为天文目标的\textbf{振幅级数}、\textbf{频率级数}与\textbf{相位级数}。三者与「级数与卷积」章 \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} 一致。
+\end{definition}
+
+\begin{definition}[天文周转圆组]\label{def:astro_epicycle_group}
+设天文目标的周期级数由振幅级数 \(\{A_k\}\)、频率级数 \(\{\omega_k\}\) 与相位级数 \(\{\phi_k\}\) 给出。对每个 \(k\) 定义周转圆
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+其集合
+\[
+\mathfrak E_{\mathrm{A}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+称为天文目标的\textbf{周转圆组}。其叠加即天文周期级数
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[由天文数据构建周期级数]\label{thm:astro_series_reconstruction}
+设天文目标的输出为有限周期序列，周期为 \(N\)。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 输出可展开为离散傅里叶级数
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item 振幅级数由 \(|c_k|\) 给出，相位级数由 \(\arg c_k\) 给出，频率级数由 \(2\pi k/N\) 给出；
+    \item 若输出为开普勒椭圆轨道的坐标，则傅里叶--贝塞尔展开的谐波振幅按离心率 \(e^{|n|}\) 衰减。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 有限周期序列的离散傅里叶级数是标准结论。
+(ii) 由 \(c_k=A_k e^{i\phi_k}\) 直接读出。
+(iii) 由 \cref{prop:elliptic_epicycle_expansion} 即得。
+\end{proof}
+
+\begin{definition}[天文周期系统]\label{def:astronomical_periodic_system}
+一个\textbf{天文周期系统}由 \(N\) 个受引力相互作用的天体构成。每个天体 \(i\) 的位置向量为 \(\mathbf r_i(t)\in\mathbb R^3\)，质量分别为 \(m_i\)。系统的动力学由牛顿引力方程给出：
+\[
+m_i\ddot{\mathbf r}_i=-G\sum_{j\neq i}\frac{m_im_j}{|\mathbf r_i-\mathbf r_j|^3}(\mathbf r_i-\mathbf r_j).
+\]
+当 \(N=2\) 时，系统退化为\textbf{二体问题}；当 \(N\ge3\) 时，系统为\textbf{三体问题}或\textbf{多体问题}。
+\end{definition}
+
+\begin{definition}[天文系统的周期结构]\label{def:astronomical_periodic_structure}
+天文系统的\textbf{周期结构}分为三种基本类型：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{旋转周期}：天体在有心力场中的角向运动，守恒量为角动量；
+    \item \textbf{径向周期}：天体在引力场中的径向振荡，守恒量为能量；
+    \item \textbf{共振周期}：天体之间的轨道共振，特征参数为共振比 \(p:q\)。
+\end{enumerate}
+\end{definition}
+
+\section{天文周转圆组的动态调节：接入「周期系统」章第三步}
+\label{sec:astro_adaptive}
+
+\begin{definition}[天文周转圆组的动态调节]\label{def:astro_adaptive_adjustment}
+设当前天文周转圆组为 \(\mathfrak E^{(j)}\)，部分和
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+残差 \(r^{(j)}=z-z^{(j)}\)。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 \(\|r^{(j)}\|^2>\delta\)，则依残差周期图峰值新增一个周转圆：
+    \[
+    \mathfrak E^{(j+1)}=\mathfrak E^{(j)}\cup\{(\hat A,\hat\omega,\hat\phi)\},\qquad
+    \hat\omega=\arg\max_\omega|\widehat{z_r}(\omega)|;
+    \]
+    \item \textbf{参数调节}：对已有周转圆参数按正则化最小二乘或轨道约束更新：
+    \[
+    (A_k,\phi_k)\leftarrow\arg\min_{A,\phi}\sum_n\left|z(n)-\sum_kA_ke^{i(\omega_kn+\phi_k)}\right|^2.
+    \]
+\end{enumerate}
+在天文系统中，数量调节对应增加轨道谐波阶数、增加共振项或增加时间标度层；参数调节对应调整轨道要素、共振宽度或时间标度参数，使结构指标单调提升。
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:astro_adaptive_growth}
+按 \cref{def:astro_adaptive_adjustment}(i) 加入残差主频分量后，残差能量单调不增：
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+等号成立当且仅当残差在被选频率上无能量。
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:astro_adaptive_growth} 与「周期系统」章 \cref{def:ps_adaptive_adjustment} 的动态调节机制一致：
+新增周转圆即把 $r^{(j)}$ 沿 $\hat\omega$ 的分量从残差中移出，由正交分解
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{被移出的分量}\|^2$ 即得不等式，
+等号当且仅当被移出分量的范数为零。完整论证见该处。
+\end{proof}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:astro_adaptive_convergence}
+设天文目标为长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值有限周期序列}且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得天文周转圆组即目标的精确傅里叶数据；若序列为\textbf{复值}，则相应步数为至多 $T_0$ 步。
+\end{theorem}
+
+\begin{proof}
+长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值}有限周期序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波（含常数项）上完备；\textbf{复值}序列则需 $T_0$ 个分量。每步按 \cref{prop:astro_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。
+\end{proof}
+
+\begin{definition}[结构指标调节]\label{def:astro_structure_metric_adjustment}
+设天文目标的结构指标为
+\[
+\mathcal I=(\mathcal I_{\mathrm{旋转}},\mathcal I_{\mathrm{径向}},\mathcal I_{\mathrm{共振}})
+=(\text{角动量守恒度},\ \text{能量约束度},\ \text{共振比锁定度}).
+\]
+\textbf{结构指标调节}为：在参数空间 $\Theta$ 中每步选取使 $\mathcal I(\theta)$ 按字典序\textbf{严格递减}（极小化）的邻近参数 $\theta$；若不存在这样的邻近参数，则停止——此时 $\theta$ 为\textbf{局部最优}参数。
+\end{definition}
+
+\begin{proposition}[结构指标调节的有限收敛]\label{prop:astro_structure_metric_convergence}
+设参数空间 $\Theta$ 有限，且每次调节使 $\mathcal I$ 按字典序\textbf{严格递减}。则调节在有限步内终止于局部最优参数。
+\end{proposition}
+
+\begin{proof}
+$\Theta$ 有限，$\mathcal I$ 取值有限。字典序在有限值集上是良基的，故字典序严格递减的序列不能无限延续，调节在有限步终止。终止时不存在使 $\mathcal I$ 按字典序严格递减的邻近参数，即局部最优。这里必须按\textbf{整条字典序}给出单调性：若只要求「某一分量严格增加／减小」，则 $(2,1)\to(1,2)\to(2,1)$ 这类循环无法排除，有限终止性不成立。
+\end{proof}
+
+\begin{remark}[动态调节的边界]\label{rem:astro_adaptive_boundary}
+\cref{thm:astro_adaptive_convergence} 依赖有限周期序列。对多体准周期天文目标，不存在有限周转圆组精确表示，只能作有界逼近。结构指标调节不保证全局最优，也不保证长期稳定性；长期稳定性依赖 KAM 条件与摄动大小。
+\end{remark}
+
+\section{天文卷积：接入「周期系统」章第四步}
+\label{sec:astro_convolution}
+
+\begin{definition}[天文振幅卷积、相位卷积与频率卷积]\label{def:astro_convolution_types}
+设两个天文周转圆组为
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+定义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅卷积}：\(\mathbb A_{mn}=A_nB_m\)；
+    \item \textbf{相位卷积}：\(\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}\)；
+    \item \textbf{频率卷积}：\(\mathbb F_{mn}=\omega_n\nu_m\)；
+    \item \textbf{趋势卷积}：\(\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}\)。
+\end{enumerate}
+这与「级数与卷积」章 \cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution}、\cref{def:tendency_convolution} 一致。
+\end{definition}
+
+\begin{theorem}[三类卷积在天文周转圆组上的作用]\label{thm:astro_convolution_action}
+设两个天文目标的周转圆组分别为 \(\mathfrak E\) 与 \(\mathfrak E'\)。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 振幅卷积只作用于半径；
+    \item 相位卷积只作用于相位；
+    \item 频率卷积只作用于转速；
+    \item 趋势卷积同时保留振幅与相位。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:astro_convolution_types} 直接读出。
+\end{proof}
+
+\begin{proposition}[自相关与趋势卷积]\label{prop:astro_autocorr_phase_convolution}
+设 \(\{z_t\}\) 为周期序列，其自相关函数为
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+在天文周转圆组语言中，自相关函数是趋势卷积在对角线上的投影：
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:astro_autocorr_phase_convolution} 是「周期系统」章 \cref{thm:ps_convolution_action} 的卷积作用结论在本领域的实现：
+将 $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ 代入自相关定义，由正交性消去全部非对角交叉项，只保留趋势卷积的对角线项
+（三类卷积的因式分解，\cref{prop:ps_convolution_factorization}），即得 $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$。
+完整展开见该处。
+\end{proof}
+
+\begin{proposition}[角动量与振幅卷积]\label{prop:astro_angular_momentum_phase}
+椭圆轨道的角动量大小 \(L=m\sqrt{GMa(1-e^2)}\) 可视为轨道基频分量的振幅卷积模长。面积速度守恒
+\[
+\frac{dA}{dt}=\frac{L}{2m}
+\]
+是振幅卷积在时间平移下的不变投影。
+\end{proposition}
+
+\begin{proof}
+由 \cref{thm:kepler_third} 证明中 \(L=m\sqrt{GMa(1-e^2)}\)。面积速度由 \cref{ch17_lemma_areal_velocity} 给出。振幅卷积保留轨道分量的振幅，其模长对应角动量大小。
+\end{proof}
+
+\begin{remark}[天文卷积与周期卷积的关系]\label{rem:astro_convolution_relation}
+天文卷积不是新的卷积运算，而是「级数与卷积」章周期卷积在天文周转圆组上的实例。自相关是趋势卷积在对角线上的投影，角动量、共振比分别是振幅卷积和频率卷积在天文学中的具体表现。
+\end{remark}
+
+\section{与离散采样、调和分析、时序分析的整合：接入「周期系统」章第五步}
+\label{sec:astro_integration}
+
+\begin{definition}[天文周期诊断流程]\label{def:astro_periodic_diagnosis}
+对于给定天文系统，使用周期数学框架进行诊断：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{轨道周期诊断}：计算轨道坐标的时间序列自相关与功率谱，识别主导频率；
+    \item \textbf{径向周期诊断}：计算径向距离 \(r(t)\) 的周期，验证 \(T_r=T_\theta\)；
+    \item \textbf{共振诊断}：计算共振角 \(\phi\) 的天平动或环流，判定共振锁定；
+    \item \textbf{时间标度诊断}：计算时间计量系统的相位差与闰秒对齐。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[天文周期诊断流程与三章接口]\label{thm:astro_diagnosis_integration}
+\cref{def:astro_periodic_diagnosis} 的四个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}、\cref{thm:intercalation_leakage_suppression}；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}、\cref{prop:twelve_to_six}；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}、\cref{def:ts_window_validation}。
+\end{enumerate}
+因此天文周期诊断不是独立方法，而是周期数学统一工具链在天文系统上的应用。
+\end{theorem}
+
+\begin{proof}
+逐条对应：
+(i) 轨道周期诊断需要采样与谱估计；
+(ii) 频率分解与相位核见调和分析章；
+(iii) 周期图峰值、Fisher 检验与窗函数验证见时序分析章。
+故诊断流程由三章工具链合成。
+\end{proof}
+
+\begin{remark}[整合后的操作顺序]\label{rem:astro_integration_order}
+实际诊断建议顺序为：先判定天文目标是否周期（\cref{thm:astro_periodicity_decision}）；再构建轨道或观测数据的傅里叶数据与周转圆组（\cref{thm:astro_series_reconstruction}）；再用结构指标调节与动态调节优化参数（\cref{thm:astro_adaptive_convergence}、\cref{prop:astro_structure_metric_convergence}）；再作天文卷积与自相关、角动量、共振比分析（\cref{prop:astro_autocorr_phase_convolution}、\cref{prop:astro_angular_momentum_phase}）；最后按 \cref{def:astro_periodic_diagnosis} 输出诊断。
+\end{remark}
+
+\section{旋转与轨道运动}
+\label{sec:astro_rotation}
+
+\subsection{开普勒三定律与角动量守恒}
+
+\begin{lemma}[有心力场面积速度守恒]\label{ch17_lemma_areal_velocity}
+设天体在有心力场中运动，受力 \(\mathbf F=F(r)\hat{\mathbf e}_r\) 恒沿矢径方向。则天体的角动量 \(\mathbf L=m\mathbf r\times\dot{\mathbf r}\) 是常向量，且面积速度
+\[
+\frac{dA}{dt}=\frac12|\mathbf r\times\dot{\mathbf r}|=\frac{|\mathbf L|}{2m}
+\]
+为常数。
+\end{lemma}
+
+\begin{proof}
+角动量的时间导数为
+\[
+\frac{d\mathbf L}{dt}=m\frac{d}{dt}(\mathbf r\times\dot{\mathbf r})=m(\dot{\mathbf r}\times\dot{\mathbf r}+\mathbf r\times\ddot{\mathbf r})=m\mathbf r\times\ddot{\mathbf r},
+\]
+因 \(\dot{\mathbf r}\times\dot{\mathbf r}=\mathbf 0\)。由牛顿第二定律 \(\ddot{\mathbf r}=\mathbf F/m=F(r)\hat{\mathbf e}_r/m\)，而 \(\hat{\mathbf e}_r\parallel\mathbf r\)，故 \(\mathbf r\times\ddot{\mathbf r}=\mathbf 0\)。因此 \(\dot{\mathbf L}=\mathbf 0\)。
+在极坐标中 \(\mathbf r=r\hat{\mathbf e}_r\)，\(\dot{\mathbf r}=\dot r\hat{\mathbf e}_r+r\dot\theta\hat{\mathbf e}_\theta\)，故 \(\mathbf r\times\dot{\mathbf r}=r^2\dot\theta\hat{\mathbf e}_z\)。面积元素 \(dA=\frac12r^2d\theta\)，故面积速度
+\[
+\frac{dA}{dt}=\frac12r^2|\dot\theta|=\frac12|\mathbf r\times\dot{\mathbf r}|=\frac{|\mathbf L|}{2m}
+\]
+为常数。
+\end{proof}
+
+\begin{theorem}[开普勒第一定律——椭圆轨道]\label{thm:kepler_first}
+在平方反比有心力场中，天体的轨道是圆锥曲线。椭圆轨道的极坐标方程为
+\[
+r(\theta)=\frac{a(1-e^2)}{1+e\cos\theta},
+\]
+其中 \(a\) 是半长轴，\(e\) 是离心率。
+\end{theorem}
+
+\begin{proof}
+由角动量守恒，运动保持在垂直于 \(\mathbf L\) 的平面内。在极坐标中，作 \(u=1/r\) 代换得比内公式
+\[
+\frac{d^2u}{d\theta^2}+u=-\frac{m}{L^2u^2}F(1/u).
+\]
+代入平方反比引力 \(F=-GMm/r^2=-GMm u^2\)，得
+\[
+\frac{d^2u}{d\theta^2}+u=\frac{GMm^2}{L^2}.
+\]
+通解为
+\[
+u(\theta)=\frac{GMm^2}{L^2}+C\cos(\theta-\theta_0),
+\]
+即
+\[
+r(\theta)=\frac{p}{1+e\cos(\theta-\theta_0)},
+\]
+其中 \(p=L^2/(GMm^2)\)，\(e=CL^2/(GMm^2)\)。\(e<1\) 为椭圆，\(e=1\) 为抛物线，\(e>1\) 为双曲线。椭圆情形下 \(p=a(1-e^2)\)。
+\end{proof}
+
+\begin{theorem}[开普勒第二定律——面积速度守恒]\label{thm:kepler_second}
+天体在有心力场中的面积速度为常数：
+\[
+\frac{dA}{dt}=\frac12|\mathbf r\times\dot{\mathbf r}|=\frac{L}{2m}.
+\]
+\end{theorem}
+
+\begin{proof}
+由 \cref{ch17_lemma_areal_velocity}，\(\mathbf L=m\mathbf r\times\dot{\mathbf r}\) 为常向量，故面积速度 \(dA/dt=|\mathbf L|/(2m)\) 为常数。
+\end{proof}
+
+\begin{theorem}[开普勒第三定律——周期--半长轴关系]\label{thm:kepler_third}
+对于椭圆轨道，公转周期 \(T\) 与半长轴 \(a\) 满足
+\[
+T^2=\frac{4\pi^2}{GM}a^3.
+\]
+\end{theorem}
+
+\begin{proof}
+由面积速度守恒，一个周期内扫过椭圆面积 \(\pi a^2\sqrt{1-e^2}\)，故
+\[
+\frac{dA}{dt}=\frac{\pi a^2\sqrt{1-e^2}}{T}.
+\]
+另一方面 \(dA/dt=L/(2m)\)，且 \(L=m\sqrt{GMa(1-e^2)}\)。于是
+\[
+\frac{\pi a^2\sqrt{1-e^2}}{T}=\frac12\sqrt{GMa(1-e^2)}.
+\]
+两边平方约去 \(1-e^2\)，得
+\[
+T^2=\frac{4\pi^2}{GM}a^3.
+\]
+\end{proof}
+
+\begin{lemma}[开普勒方程的拉格朗日反演解]\label{lem:kepler_equation_solution}
+设偏近点角 \(E\) 满足开普勒方程 \(M=E-e\sin E\)（\(0\le e<1\)）。则
+\[
+E=M+\sum_{n=1}^{\infty}\frac2nJ_n(ne)\sin(nM),
+\]
+其中 \(J_n\) 为第一类贝塞尔函数。对 \(e\ll1\)，\(E\approx M+e\sin M\)。
+\end{lemma}
+
+\begin{proof}
+由 Lagrange 反演定理，设 \(E=M+w\)，\(w=e\sin(M+w)\)。\(w\) 关于 \(e\) 的幂级数系数由 \(\frac{d^{n-1}}{dM^{n-1}}[\sin^n M]\) 给出。利用 \(\sin^n M\) 的 Fourier 展开与贝塞尔函数积分表示即得。
+\end{proof}
+
+\subsection{椭圆轨道的傅里叶展开}
+
+\begin{proposition}[椭圆轨道的傅里叶--贝塞尔展开]\label{prop:elliptic_epicycle_expansion}
+椭圆轨道可展开为无穷级周转圆的和。在复平面 \(\mathbb C\) 上，
+\[
+z(t)=\sum_{n=-\infty}^{\infty}c_n e^{in\omega_0 t},
+\]
+其中 \(\omega_0=2\pi/T\)。当 \(e\ll1\) 时，高次谐波振幅按 \(e^{|n|}\) 衰减。
+\end{proposition}
+
+\begin{proof}
+椭圆轨道位置为
+\[
+z=a(\cos E-e)+ia\sqrt{1-e^2}\sin E,
+\]
+其中 \(M=E-e\sin E\)，\(M=\omega_0t\)。由 \cref{lem:kepler_equation_solution} 将 \(E\) 展为 \(M\) 的傅里叶级数，系数由贝塞尔函数给出。由 \(J_n(ne)\sim(ne/2)^n/n!\)（\(e\ll1\)），第 \(n\) 次谐波系数 \(\sim e^n\)。
+\end{proof}
+
+\subsection{太阳系公转与自转周期数据}
+\label{subsec:solar_system_periods}
+
+本节以太阳系八大行星与月球为对象，给出公转轨道示意图、公转周期数据表与自转周期数据表。这些数据既验证了 \cref{thm:kepler_third} 的开普勒第三定律，也展示了天文系统在不同时间尺度上的多重周期结构。
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.0,>=stealth]
+        % 太阳
+        \coordinate (sun) at (0,0);
+        \shade[ball color=yellow!80!orange] (sun) circle (0.30);
+        \node[font=\footnotesize, below=0.15cm of sun] {太阳};
+
+        % 轨道半径（示意性，非等比例；按 a^{1/2} 压缩以便于阅读）
+        \def\rMer{0.9}
+        \def\rVen{1.25}
+        \def\rEar{1.65}
+        \def\rMar{2.10}
+        \def\rJup{3.00}
+        \def\rSat{3.65}
+        \def\rUra{4.25}
+        \def\rNep{4.80}
+
+        % 八大行星轨道
+        \draw[gray!70,thin] (0,0) circle (\rMer);
+        \draw[gray!70,thin] (0,0) circle (\rVen);
+        \draw[blue!70,thick] (0,0) circle (\rEar);
+        \draw[gray!70,thin] (0,0) circle (\rMar);
+        \draw[orange!80,thick] (0,0) circle (\rJup);
+        \draw[orange!60,thick] (0,0) circle (\rSat);
+        \draw[cyan!70,thick] (0,0) circle (\rUra);
+        \draw[blue!50,thick] (0,0) circle (\rNep);
+
+        % 行星位置（示意性）
+        \filldraw[gray!70!black] (\rMer,0) circle (1.2pt);
+        \node[font=\scriptsize, right=1pt] at (\rMer,0) {水星};
+
+        \filldraw[gray!50!black] ({cos(50)*\rVen},{sin(50)*\rVen}) circle (1.4pt);
+        \node[font=\scriptsize, above right=1pt] at ({cos(50)*\rVen},{sin(50)*\rVen}) {金星};
+
+        \filldraw[blue!80!black] ({cos(140)*\rEar},{sin(140)*\rEar}) circle (2.0pt);
+        \node[font=\scriptsize, above left=1pt] at ({cos(140)*\rEar},{sin(140)*\rEar}) {地球};
+
+        % 月球绕地球
+        \def\rmoo{0.16}
+        \draw[gray!70,thin] ({cos(140)*\rEar},{sin(140)*\rEar}) circle (\rmoo);
+        \filldraw[gray!50!white] ({cos(140)*\rEar + cos(210)*\rmoo},{sin(140)*\rEar + sin(210)*\rmoo}) circle (1.0pt);
+        \node[font=\tiny, below right=0pt] at ({cos(140)*\rEar + cos(210)*\rmoo},{sin(140)*\rEar + sin(210)*\rmoo}) {月球};
+
+        \filldraw[red!70!black] ({cos(220)*\rMar},{sin(220)*\rMar}) circle (1.6pt);
+        \node[font=\scriptsize, below left=1pt] at ({cos(220)*\rMar},{sin(220)*\rMar}) {火星};
+
+        \filldraw[orange!90!black] ({cos(20)*\rJup},{sin(20)*\rJup}) circle (3.2pt);
+        \node[font=\scriptsize, right=2pt] at ({cos(20)*\rJup},{sin(20)*\rJup}) {木星};
+
+        \filldraw[orange!70!black] ({cos(300)*\rSat},{sin(300)*\rSat}) circle (2.8pt);
+        \node[font=\scriptsize, below right=1pt] at ({cos(300)*\rSat},{sin(300)*\rSat}) {土星};
+
+        % 土星环
+        \draw[orange!60,thin] ({cos(300)*\rSat},{sin(300)*\rSat}) ++(0,0) ellipse (0.22 and 0.08);
+
+        \filldraw[cyan!90!black] ({cos(180)*\rUra},{sin(180)*\rUra}) circle (2.2pt);
+        \node[font=\scriptsize, left=2pt] at ({cos(180)*\rUra},{sin(180)*\rUra}) {天王星};
+
+        \filldraw[blue!70!black] ({cos(260)*\rNep},{sin(260)*\rNep}) circle (2.2pt);
+        \node[font=\scriptsize, below left=1pt] at ({cos(260)*\rNep},{sin(260)*\rNep}) {海王星};
+
+        % 说明文字
+        \node[font=\footnotesize, align=center] at (0,-5.6)
+            {太阳系八大行星公转轨道示意（按 $a^{1/2}$ 压缩比例，非真实尺度）\\
+             月球绕地球的轨道以放大的比例单独示意};
+    \end{tikzpicture}
+    \caption{太阳系八大行星与月球公转轨道示意图。图中轨道半径经过 $a^{1/2}$ 压缩，以便在同一页内同时显示内行星与外行星；月球绕地球的轨道被显著放大以便显示。}
+    \label{fig:solar_system_orbits}
+\end{figure}
+
+\begin{table}[htbp]
+    \centering
+    \caption{太阳系八大行星与月球公转周期数据}
+    \label{tab:planetary_orbital_periods}
+    \small
+    \renewcommand{\arraystretch}{1.15}
+    \begin{tabular}{@{}l S[table-format=2.3] S[table-format=3.3] S[table-format=1.2] S[table-format=1.3] S[table-format=5.4]@{}}
+        \toprule
+        天体 & \multicolumn{1}{c}{半长轴 $a$／AU} & \multicolumn{1}{c}{公转周期／年} & \multicolumn{1}{c}{离心率 $e$} & \multicolumn{1}{c}{$T^2/a^3$} & \multicolumn{1}{c}{公转周期／日} \\
+        \midrule
+        水星   & 0.387  & 0.241    & 0.206 & 1.00 & 87.969  \\
+        金星   & 0.723  & 0.615    & 0.007 & 1.00 & 224.701 \\
+        地球   & 1.000  & 1.000    & 0.017 & 1.00 & 365.256 \\
+        火星   & 1.524  & 1.881    & 0.093 & 1.00 & 686.980 \\
+        木星   & 5.203  & 11.862   & 0.048 & 1.00 & 4332.59 \\
+        土星   & 9.537  & 29.457   & 0.054 & 1.00 & 10759.2 \\
+        天王星 & 19.191 & 84.011   & 0.047 & 1.00 & 30685.4 \\
+        海王星 & 30.069 & 164.79   & 0.009 & 1.00 & 60189.0 \\
+        月球   & 0.00257 & 0.0748 & 0.055 & {--} & 27.322  \\
+        \bottomrule
+    \end{tabular}
+
+    \smallskip
+    \footnotesize 注：\(T^2/a^3\) 列以地球绕日公转的数值归一化（基准为 \(GM_\odot\)），仅适用于绕日公转的八大行星。月球绕地球运行，其 \(T^2/a^3=4\pi^2/(GM_\oplus)\) 的归一化基准为 \(GM_\oplus\)（约为前者的 \(3.3\times10^5\) 倍），故不列入该列。
+\end{table}
+
+\begin{table}[htbp]
+    \centering
+    \caption{太阳系八大行星与月球自转周期数据}
+    \label{tab:planetary_rotation_periods}
+    \small
+    \renewcommand{\arraystretch}{1.15}
+    \begin{tabular}{@{}l S[table-format=-3.5] l l@{}}
+        \toprule
+        天体 & \multicolumn{1}{c}{自转周期／日} & \multicolumn{1}{c}{自转周期／时:分:秒} & \multicolumn{1}{c}{自转方向} \\
+        \midrule
+        水星   & 58.6462    & 1407:30:32 & 顺行 \\
+        金星   & -243.025   & 5832:36:00 & 逆行 \\
+        地球   & 0.99727    & 23:56:04   & 顺行 \\
+        火星   & 1.02595    & 24:37:22   & 顺行 \\
+        木星   & 0.41354    & 09:55:30   & 顺行 \\
+        土星   & 0.44401    & 10:33:38   & 顺行 \\
+        天王星 & -0.71833   & 17:14:24   & 逆行 \\
+        海王星 & 0.67125    & 16:06:36   & 顺行 \\
+        月球   & 27.32166   & 655:43:12  & 顺行（潮汐锁定） \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{proposition}[公转周期与开普勒第三定律的验证]\label{prop:astro_kepler_data}
+\cref{tab:planetary_orbital_periods} 中，\textbf{八大行星}的 $T^2/a^3$ 数值均为 $1.00$（以地球归一化），即
+\[
+\frac{T^2}{a^3}\Big/(\text{地球的}T^2/a^3)\approx 1.000,
+\]
+与 \cref{thm:kepler_third} 的断言一致。太阳系行星的数据因此构成开普勒第三定律的实验验证。
+\end{proposition}
+
+\begin{proof}
+由 \cref{thm:kepler_third}，\(T^2=4\pi^2 a^3/(GM)\)。以地球的 \(a_\oplus\)、\(T_\oplus\) 为单位归一化，即得 \(T^2/a^3\) 为常数 \(1\)。表中各数值均由天文观测给出，逐行核对即得结论（月球行的归一化基准为 \(GM_\oplus\)，不属该列，见表下注）。
+\end{proof}
+
+\begin{proposition}[自转周期与公转周期的量级分离]\label{prop:astro_rotation_scales}
+\cref{tab:planetary_rotation_periods} 显示，行星的自转周期通常比公转周期短 $2$ 至 $4$ 个数量级（例如地球自转 $1$ 日，公转 $365$ 日，比约 $1/365$），而月球的自转周期与其公转周期相等（潮汐锁定）。这是天文系统中\textbf{多尺度周期}的直观示例。
+\end{proposition}
+
+\begin{proof}
+由 \cref{tab:planetary_rotation_periods} 与 \cref{tab:planetary_orbital_periods} 直接比较即得。地球自转/公转比约 $1/365$，木星自转/公转比约 $0.414/4333\approx 9.6\times 10^{-5}$。月球的 $T_{\text{rot}}=T_{\text{orb}}=27.32$ 日即潮汐锁定。
+\end{proof}
+
+\begin{remark}[自转方向与角动量守恒]\label{rem:astro_retrograde}
+金星和天王星的自转方向为逆行（自转周期取负号）。逆行自转表明这两颗行星的自转角动量与公转角动量方向接近相反。这可能是早期太阳系天体碰撞或潮汐演化的结果，展示了角动量守恒在\textbf{系统层面}（自转 + 公转 + 其他天体）成立，而非仅在单颗行星的自转层面成立。
+\end{remark}
+
+\begin{remark}[潮汐锁定与相位锁定]\label{rem:astro_tidal_lock}
+月球的自转周期与公转周期精确相等（$T_{\text{rot}}=T_{\text{orb}}=27.32$ 日），这是\textbf{潮汐锁定}的典型实例。在周期数学的框架下，潮汐锁定等价于\textbf{相位锁定}：月球的自转相位与公转相位保持固定关系（这里为 $1:1$），对应 \cref{prop:phase-locking} 中相位锁定在自转--公转耦合系统中的具体实现。同样地，木卫一、木卫二、木卫三之间的 $4:2:1$ 轨道共振是\textbf{多体相位锁定}的实例（见 \cref{def:orbital_resonance} 与 \cref{prop:resonance_structure}）。
+\end{remark}
+
+\begin{example}[太阳系行星的轨道周期数值验证]\label{ex:astro_solar_system_data}
+以 \cref{tab:planetary_orbital_periods} 中的数据逐行验证 \cref{thm:kepler_third}：
+\begin{enumerate}[label=(\roman*)]
+    \item 水星：$T^2=0.241^2=0.0581$，$a^3=0.387^3=0.0580$，比值 $1.002$；
+    \item 木星：$T^2=11.862^2=140.71$，$a^3=5.203^3=140.85$，比值 $0.999$；
+    \item 海王星：$T^2=164.79^2=27155.8$，$a^3=30.069^3=27156.5$，比值 $1.000$。
+\end{enumerate}
+上述数值在观测精度内一致，验证 $T^2\propto a^3$。
+\end{example}
+
+\begin{example}[自转周期的多尺度结构]\label{ex:astro_rotation_multi_scale}
+将 \cref{tab:planetary_rotation_periods} 中的自转周期按对数尺度排列：
+\[
+\begin{aligned}
+&0.41\ (\text{木星})<0.44\ (\text{土星})<0.67\ (\text{海王星})<0.72\ (\text{天王星})\\
+&<0.997\ (\text{地球})<1.03\ (\text{火星})<27.3\ (\text{月球})<58.6\ (\text{水星})<243.0\ (\text{金星}).
+\end{aligned}
+\]
+自转周期的分布跨越近 $3$ 个数量级。金星与月球、水星的慢自转源于潮汐演化与自转--公转的长期耦合。
+\end{example}
+
+\begin{remark}[本节数据的组织方式]\label{rem:astro_data_organisation}
+本节的数据表与 TikZ 图是天文周期结构的实例化：
+\begin{itemize}
+    \item \cref{fig:solar_system_orbits} 给出轨道系统的空间几何；
+    \item \cref{tab:planetary_orbital_periods} 给出公转周期的时间结构，可直接验证 \cref{thm:kepler_third}；
+    \item \cref{tab:planetary_rotation_periods} 给出行星自转的时间结构，包含顺行、逆行与潮汐锁定三种基本模式。
+\end{itemize}
+三者的共同点是：每一个天体既是\textbf{公转周期系统}（绕太阳或行星的旋转），又是\textbf{自转周期系统}（自身的旋转），两个周期的量级分离或锁定关系决定了天体系统的整体节律。
+\end{remark}
+
+\section{径向运动与能量守恒}
+
+\begin{definition}[径向运动]\label{def:radial_motion}
+在有心力场中，天体的\textbf{径向运动} \(r(t)\) 由有效势中的一维动力学方程描述：
+\[
+\frac12m\dot r^2+U_{\text{eff}}(r)=E,
+\]
+其中 \(U_{\text{eff}}(r)=-GMm/r+L^2/(2mr^2)\)。
+\end{definition}
+
+\begin{proposition}[径向振荡的周期]\label{prop:radial_oscillation_period}
+对于椭圆轨道，径向运动的周期与角向运动的周期相等：\(T_r=T_\theta=T\)。伯特兰定理指出：只有平方反比力场和胡克力场能产生闭合的束缚轨道。
+\end{proposition}
+
+\begin{proof}
+由有效势径向运动方程，径向周期
+\[
+T_r=2\int_{r_{\min}}^{r_{\max}}\frac{dr}{\sqrt{\frac2m(E-U_{\text{eff}}(r))}},
+\]
+角向周期
+\[
+T_\theta=\frac{2m}{L}\int_{r_{\min}}^{r_{\max}}\frac{r^2dr}{\sqrt{\frac2m(E-U_{\text{eff}}(r))}}.
+\]
+当 \(U\propto-1/r\) 时，两个积分在 \(u=1/r\) 代换下相等，故 \(T_r=T_\theta\)。
+\end{proof}
+
+\begin{proposition}[能量守恒与轨道类型]\label{prop:energy_orbital_type}
+天体的总机械能 \(E=\frac12mv^2-GMm/r\) 决定轨道类型：
+\begin{enumerate}[label=(\roman*)]
+    \item \(E<0\)：束缚轨道（椭圆）；
+    \item \(E=0\)：逃逸轨道（抛物线）；
+    \item \(E>0\)：非束缚轨道（双曲线）。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+有效势 \(U_{\text{eff}}(r)=-GMm/r+L^2/(2mr^2)\) 在 \(r_0=L^2/(GMm^2)\) 处取极小值。当 \(E<0\) 时有两个正根 \(r_{\min}<r_{\max}\)，径向运动受限；当 \(E=0\) 时只有一个有限根且 \(r_{\max}=\infty\)；当 \(E>0\) 时无上界。
+\end{proof}
+
+\section{轨道共振}
+\label{sec:astro_resonance}
+
+\begin{definition}[轨道共振]\label{def:orbital_resonance}
+两个天体的\textbf{轨道共振}是指它们的公转周期满足整数比关系：
+\[
+\frac{T_2}{T_1}=\frac pq,\qquad p,q\in\mathbb N^+,\ \gcd(p,q)=1.
+\]
+\(p:q\) 称为\textbf{共振比}。
+\end{definition}
+
+\begin{definition}[共振角]\label{def:resonance_angle}
+对于 \(p:q\) 轨道共振，定义\textbf{共振角}
+\[
+\phi=p\lambda_2-q\lambda_1+(p-q)\varpi,
+\]
+其中 \(\lambda_i\) 是平黄经，\(\varpi\) 是近心点经度。若 \(\phi\) 在平衡值附近振荡（天平动），则系统处于\textbf{共振锁定}。
+\end{definition}
+
+\begin{proposition}[共振的结构性质]\label{prop:resonance_structure}
+轨道共振具有以下结构性质：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{周期比结构}：共振比 \(p:q\) 决定两个轨道在时间尺度上的缩放关系；
+    \item \textbf{共振宽度}：共振宽度与质量比和离心率有关；
+    \item \textbf{共振锁定的稳定性}：共振角 \(\phi\) 被限制在天平动区域内；若外部扰动使 \(\phi\) 突破天平动势垒，系统脱离共振。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由开普勒第三定律，\(T\propto a^{3/2}\)，故 \(p/q=(a_2/a_1)^{3/2}\)，即 \(a_2/a_1=(p/q)^{2/3}\)。
+(ii) 在 \(p:q\) 共振附近，共振哈密顿量化简为单摆形式
+\[
+H_{\text{res}}=\frac32p^2n^2\frac{(\Delta a)^2}{a_{\text{res}}^2}+\alpha e n^2\cos\phi.
+\]
+由单摆分界线能量给出共振半宽 \(\Delta a_{\max}/a\approx\sqrt{\alpha e m/M}\)。
+(iii) 共振锁定等价于 \(\phi\) 作有界振荡；若扰动使 \(\phi\) 超过分界线，进入环流区，共振比不再守恒。
+\end{proof}
+
+\begin{example}[太阳系中的轨道共振]
+木星--土星 \(5:2\) 近共振；海王星--冥王星 \(3:2\) 共振；木卫系统 \(4:2:1\) 拉普拉斯共振。这些共振实例与 \cref{tab:planetary_orbital_periods} 给出的公转周期数据直接相关：例如海王星与冥王星的周期比 $164.79/247.94\approx 0.665\approx 2/3$，即 $3:2$ 共振。
+\end{example}
+
+\begin{definition}[长期共振]\label{def:secular_resonance}
+\textbf{长期共振}是指轨道要素进动频率之间的有理关系：
+\[
+\frac{\dot\varpi_2}{\dot\varpi_1}=\frac pq
+\quad\text{或}\quad
+\frac{\dot\Omega_2}{\dot\Omega_1}=\frac pq.
+\]
+\end{definition}
+
+\begin{example}[太阳系中的长期共振]
+\(\nu_6\) 长期共振是柯克伍德空隙的主要成因；水星--木星长期共振可能导致混沌变化。
+\end{example}
+
+\section{多体系统的周期结构}
+
+\begin{theorem}[多体系统的准周期轨道]\label{thm:n_body_quasiperiodic}
+在 \(N\) 体引力系统中（\(N\ge3\)），系统的运动一般不是严格周期的，而是\textbf{准周期}的。在 KAM 理论框架下，若行星质量足够小且轨道足够接近圆形，则大部分初始条件对应的轨道位于不变环面上，运动可用 \(3N\) 个独立频率的准周期函数描述。
+\end{theorem}
+
+\begin{proof}
+KAM 定理：设未扰动哈密顿量 \(H_0\) 可积，扰动 \(\varepsilon H_1\) 足够小且满足非共振条件，则存在正测度的不变环面，在扰动下保持准周期运动。太阳系中行星质量比 \(\varepsilon\sim10^{-3}\) 至 \(10^{-6}\)，多数轨道周期比为无理数，KAM 条件大致满足。
+\end{proof}
+
+\begin{remark}[太阳系的长期稳定性——扰动理论概览]\label{rem:solar_system_stability}
+太阳系长期稳定性问题的扰动理论框架如下：以可积二体运动为未扰系统 \(H_0\)，行星间引力为扰动 \(\varepsilon H_1\)。逐阶正则摄动可消去快角变量，得到长期平均哈密顿量；截断至二阶给出拉普拉斯--拉格朗日长期解。Poincaré 已证明一般三体问题的幂级数解不收敛。数值模拟表明内行星轨道可能是混沌的。太阳系在数十亿年时间尺度上是否严格稳定仍是开放问题。
+\end{remark}
+
+\section{天文周期系统的守恒量}
+
+\begin{theorem}[天文系统的三种守恒量]\label{thm:astronomical_conservation_laws}
+天文周期系统的动力学受到三种守恒量的约束：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{角动量守恒}：在有心力场中，\(\mathbf L=m\mathbf r\times\dot{\mathbf r}\) 是常向量；
+    \item \textbf{能量守恒}：在保守引力场中，\(E=\frac12mv^2-GMm/r\) 是常数；
+    \item \textbf{共振比守恒}：在轨道共振中，共振比 \(p:q\) 在锁定状态下保持不变。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 有心力场旋转对称性由诺特定理给出角动量守恒。
+(ii) 引力势保守，\(\nabla\times\mathbf F_g=\mathbf 0\)，机械能守恒。
+(iii) 在 \(p:q\) 共振附近，平均化后共振角满足单摆方程；当天平动时共振比锁定。
+\end{proof}
+
+\begin{proposition}[守恒量破缺与轨道不稳定性]\label{prop:astronomical_conservation_breaking}
+天文周期系统中守恒量的破缺导致轨道不稳定性：
+\begin{enumerate}[label=(\roman*)]
+    \item 角动量破缺：非径向力使轨道平面进动；
+    \item 能量破缺：非保守力使半长轴缓慢变化；
+    \item 共振比破缺：外部扰动使共振角突破天平动势垒。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 若 \(\mathbf F\) 有非径向分量，则 \(\dot{\mathbf L}=\mathbf r\times\mathbf F\neq\mathbf 0\)。
+(ii) 潮汐摩擦与引力波辐射使 \(\dot E<0\)，由 \(E=-GMm/(2a)\) 得 \(a\) 减小。
+(iii) 当 \(\phi\) 的幅度超过分界线，进入环流区，共振比不再守恒。
+\end{proof}
+
+\section{双星与多星系统}
+
+\begin{definition}[双星系统的相对运动]\label{def:binary_episphere}
+双星系统中，
+\[
+\mathbf r(t)=\mathbf r_2(t)-\mathbf r_1(t),\qquad
+\mathbf R_{\text{cm}}(t)=\frac{m_1\mathbf r_1+m_2\mathbf r_2}{m_1+m_2}.
+\]
+轨道角动量方向
+\[
+\mathbf n(t)=\frac{\mathbf r(t)\times\dot{\mathbf r}(t)}{\|\mathbf r(t)\times\dot{\mathbf r}(t)\|}.
+\]
+二体问题中 \(\mathbf n(t)\) 为常向量；多体系统中缓慢进动。
+\end{definition}
+
+\begin{proposition}[双星轨道的四元数展开]\label{prop:binary_episphere_approximation}
+双星轨道运动可用四元数展开为
+\[
+\mathbf r(t)=\sum_{m=1}^{M}A_m\mathbf d_m(t),\qquad
+\mathbf d_m(t)=q_m(t)\hat{\mathbf e}_r q_m(t)^{-1},
+\]
+其中 \(q_m(t)=e^{\mathbf u_m\omega_mt/2}\)。截断误差 \(\sim e^{M+1}\)。
+\end{proposition}
+
+\begin{proof}
+双星相对运动在轨道平面内等价于二维椭圆运动。由 \cref{prop:elliptic_epicycle_expansion}，椭圆轨道可展开为周期分量。使用四元数将二维展开嵌入三维空间。由谐波振幅按 \(e^{|m|}\) 衰减，得截断误差。
+\end{proof}
+
+\begin{definition}[多星系统的层次化轨道角动量]\label{def:multiple_star_dynamic_axes}
+在三星或 \(N\) 星系统中，定义层次化轨道角动量方向 \(\mathbf n_1(t),\mathbf n_2(t),\dots\)，各层随时间缓慢演化，由层间引力耦合（Kozai--Lidov 机制）驱动。
+\end{definition}
+
+\begin{proposition}[多星系统的层次化展开]\label{prop:multiple_star_episphere}
+三星系统可作层次化嵌套展开。当 \(\mathbf n_1\) 与 \(\mathbf n_2\) 不平行时，系统呈现非共面轨道，这是 Kozai--Lidov 振荡的几何条件。
+\end{proposition}
+
+\begin{proof}
+设内层双星半长轴 \(a_1\ll a_2\)。外层天体对内层双星的引力势作 \(a_1/a_2\) 展开，首阶非零为四极项。对内层轨道平均得 Kozai--Lidov 势。当相互倾角 \(I>39.2^\circ\) 时，内层离心率与倾角大幅振荡。
+\end{proof}
+
+\begin{theorem}[轨道角动量方向的演化方程]\label{thm:dynamic_axis_evolution}
+设第 \(k\) 层轨道角动量方向为 \(\mathbf n_k(t)\)。则
+\[
+\frac{d\mathbf n_k}{dt}=\sum_{j\neq k}\Omega_{kj}(\mathbf n_k\times\mathbf n_j)
++\sum_{j\neq k}\Gamma_{kj}(\mathbf n_k\times(\mathbf n_k\times\mathbf n_j)),
+\]
+其中 \(\Omega_{kj}\) 为进动频率，\(\Gamma_{kj}\) 为耗散系数。
+\end{theorem}
+
+\begin{proof}
+第 \(k\) 层角动量 \(\mathbf L_k=L_k\mathbf n_k\) 满足 \(d\mathbf L_k/dt=\sum_{j\neq k}\boldsymbol\tau_{kj}\)。将力矩展为引力势梯度，取轨道平均，保守部分给出 \(\mathbf n_k\times\mathbf n_j\)，耗散部分给出 \(\mathbf n_k\times(\mathbf n_k\times\mathbf n_j)\)。
+\end{proof}
+
+\begin{corollary}[耗散主导下的轴对齐]\label{cor:dynamic_axis_alignment}
+若演化方程以耗散系数 \(\Gamma_{kj}\) 为主，则各 \(\mathbf n_k\) 趋于相互平行；若以进动频率 \(\Omega_{kj}\) 为主，则系统保持非共面构型。
+\end{corollary}
+
+\begin{proof}
+耗散主导时，\(\dot{\mathbf n}_k=\sum_j\Gamma_{kj}(\mathbf n_j-\mathbf n_k)\)，各 \(\mathbf n_k\) 收敛到公共方向。进动主导时，\(\dot{\mathbf n}_k=\sum_j\Omega_{kj}\mathbf n_j\times\mathbf n_k\)，内积守恒，系统保持非共面。
+\end{proof}
+
+\begin{example}[南门二三合星系统]
+南门二 A 和 B 构成内层双星，比邻星绕 A--B 质心运动。两层轨道角动量方向夹角约 \(107^\circ\)，系统显著非共面。
+\end{example}
+
+\section{天文时间系统的周期结构}
+\label{sec:astro_time_systems}
+
+天文时间系统由多种具有不同物理意义和数学结构的周期构成。
+
+\subsection{回归年与恒星年}
+
+\begin{definition}[回归年]\label{def:tropical_year}
+\textbf{回归年}是太阳连续两次通过春分点的时间间隔：
+\[
+T_{\text{trop}}=365.2421897-0.0000062T\quad\text{平太阳日}.
+\]
+\end{definition}
+
+\begin{definition}[恒星年]\label{def:sidereal_year}
+\textbf{恒星年}是太阳连续两次通过同一固定恒星方向的时间间隔：
+\[
+T_{\text{sid}}=365.2563630\quad\text{平太阳日}.
+\]
+恒星年与回归年之差由岁差引起。
+\end{definition}
+
+\subsection{朔望月与恒星月}
+
+\begin{definition}[朔望月]\label{def:synodic_month}
+\textbf{朔望月}是月球连续两次通过同一月相的时间间隔：
+\[
+T_{\text{syn}}=29.5305889\quad\text{平太阳日}.
+\]
+\end{definition}
+
+\begin{definition}[恒星月]\label{def:sidereal_month}
+\textbf{恒星月}是月球连续两次通过同一固定恒星方向的时间间隔：
+\[
+T_{\text{sm}}=27.3216615\quad\text{平太阳日}.
+\]
+与 \cref{tab:planetary_orbital_periods} 给出的月球公转周期 $27.322$ 日一致。
+\end{definition}
+
+\subsection{近点月与交点月}
+
+\begin{definition}[近点月]\label{def:anomalistic_month}
+\textbf{近点月}是月球连续两次通过轨道近地点的时间间隔：
+\[
+T_{\text{anom}}=27.5545509\quad\text{平太阳日}.
+\]
+\end{definition}
+
+\begin{definition}[交点月]\label{def:nodal_month}
+\textbf{交点月}是月球连续两次通过同一黄道交点的时间间隔：
+\[
+T_{\text{nod}}=27.2122208\quad\text{平太阳日}.
+\]
+\end{definition}
+
+\subsection{朔望年}
+
+\begin{definition}[朔望年]\label{def:synodic_year}
+\textbf{朔望年}是太阳连续两次通过同一月相位置的时间间隔：
+\[
+\frac1{T_{\text{syn-year}}}=\frac1{T_{\text{syn}}}-\frac1{T_{\text{trop}}}.
+\]
+\end{definition}
+
+\subsection{岁与岁差}
+
+\begin{definition}[岁]\label{def:sui}
+中国古代天文历法中，\textbf{年}对应朔望月整数倍，\textbf{岁}对应冬至到冬至的回归年。两者协调通过置闰实现。
+\end{definition}
+
+\begin{definition}[岁差]\label{def:precession}
+\textbf{岁差}是地球自转轴的缓慢圆锥运动，周期约
+\[
+T_{\text{prec}}\approx25772\quad\text{年}.
+\]
+其方程与多星系统轨道角动量方向的进动方程同构。
+\end{definition}
+
+\subsection{章动}
+
+\begin{definition}[章动]\label{def:nutation}
+\textbf{章动}是地球自转轴在岁差圆锥上的短周期摆动，主周期 \(18.6\) 年。
+\end{definition}
+
+\section{时间计量系统的周期结构}
+\label{sec:astro_time_measurement}
+
+\subsection{真太阳时与平太阳时}
+
+\begin{definition}[真太阳时]\label{def:true_solar_time}
+\textbf{真太阳时}以实际太阳位置为依据，正午为太阳中心过子午圈。其周期不均匀。
+\end{definition}
+
+\begin{definition}[平太阳时]\label{def:mean_solar_time}
+\textbf{平太阳时}以假想匀速平太阳为依据。时差
+\[
+E(t)=T_{\text{true}}-T_{\text{mean}}.
+\]
+\end{definition}
+
+\subsection{法定时}
+
+\begin{definition}[法定时]\label{def:legal_time}
+\textbf{法定时}是国家以法律形式规定的统一时间。
+\end{definition}
+
+\begin{definition}[北京时间]\label{def:beijing_time}
+\textbf{北京时间}是东八区标准时间，基准点位于上海市（东经 \(121.43^\circ\)）。
+\end{definition}
+
+\subsection{恒星时}
+
+\begin{definition}[恒星时]\label{def:sidereal_time}
+\textbf{恒星时}以春分点位置为依据，恒星日
+\[
+T_{\text{sid-day}}=23^{\text{h}}56^{\text{m}}04.0905^{\text{s}}\quad\text{平太阳时}.
+\]
+\end{definition}
+
+\subsection{历书时与原子时}
+
+\begin{definition}[历书时]\label{def:ephemeris_time}
+\textbf{历书时}以地球公转运动为基准，秒定义为 \(1900\) 年回归年长度的 \(1/31556925.9747\)。
+\end{definition}
+
+\begin{definition}[原子时]\label{def:atomic_time}
+\textbf{原子时}以铯 \(133\) 原子基态超精细能级跃迁频率为基准，秒定义为 \(9192631770\) 个周期。
+\end{definition}
+
+\section{时间计量系统的三层结构}
+
+\begin{theorem}[时间计量系统的三层结构]\label{thm:time_system_grammar_unity}
+天文时间计量系统构成三层嵌套结构：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{旋转层}：真太阳时、恒星时——以天体真实旋转为基准；
+    \item \textbf{平移层}：平太阳时、历书时——通过均匀化得到；
+    \item \textbf{缩放层}：法定时、原子时——通过标度变换统一。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 真太阳时由太阳视黄经定义，不均匀性源于轨道椭圆性与黄赤交角。
+(ii) 平太阳时取真太阳视黄经的长期平均，时差 \(|E(t)|\le16\) 分钟。
+(iii) 法定时把地方时差统一为时区整数小时；原子时把时间标度转移到量子频率。
+\end{proof}
+
+\begin{corollary}[闰秒与周期对齐]\label{cor:leap_second_periodic_alignment}
+闰秒是两种不可公度周期之间的相位锁定操作，使 UTC 与平太阳时的日长差不超过 \(0.9\) 秒。
+\end{corollary}
+
+\section{时间计量系统的守恒量}
+
+\begin{proposition}[时间计量的标度守恒]\label{prop:time_scale_charge_conservation}
+时间计量系统的核心守恒量是\textbf{时间标度}：
+\begin{enumerate}[label=(\roman*)]
+    \item 旋转层标度：真太阳日、恒星日长度；
+    \item 平移层标度：平太阳日长度；
+    \item 缩放层标度：原子时秒长。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 旋转层标度由地球自转决定，潮汐摩擦使地球自转减速。
+(ii) 平移层标度继承旋转层，并平滑周期波动。
+(iii) 原子时秒长由量子力学常数决定，实测精度 \(10^{-16}\)。
+\end{proof}
+
+\begin{remark}[与全书的衔接]
+本章建立的天文系统周期结构理论是周期数学在天体力学和时间计量中的应用。它将守恒量约束、周期分量展开、多层级周期结构与相位锁定统一应用于天文系统分析。开普勒三定律由牛顿引力定律在有心力场中导出；轨道共振是不同尺度周期之间的周期比关系；多体准周期系统是周期结构理论的天体力学实现；时间计量系统的三层结构是周期数学框架在时间认知与计量实践中的综合体现。
+\end{remark}
+
+\section*{本章七主题对照表}
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{9.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 行星沿轨道的时间平移与公转周期（\cref{tab:planetary_orbital_periods}）；径向振荡在近、远心点间的往返平移（回归年/恒星年、平太阳时） \\
+缩放 & 轨道半径--周期的开普勒标度 \(T^2\propto a^3\)（\cref{thm:kepler_third}、\cref{tab:planetary_orbital_periods}）；共振比 \(p:q\) 诱导的半长轴标度 \((p/q)^{2/3}\)（\cref{prop:resonance_structure}） \\
+旋转 & 轨道运动与自转的角动量守恒：面积速度守恒（\cref{ch17_lemma_areal_velocity}）、自转周期与方向（\cref{tab:planetary_rotation_periods}）、轨道角动量方向 \(\mathbf n_k\) 的进动（\cref{thm:dynamic_axis_evolution}） \\
+守恒 & 角动量守恒、能量守恒、质心动量守恒与共振比守恒（\cref{thm:astronomical_conservation_laws}） \\
+对称 & 有心力场的旋转对称及其诺特对应角动量守恒（\cref{thm:astronomical_conservation_laws}）；月球潮汐锁定的相位对称（\cref{rem:astro_tidal_lock}） \\
+闭合 & 椭圆轨道的闭合：开普勒第一定律（\cref{thm:kepler_first}）、伯特兰定理（\cref{prop:radial_oscillation_period}） \\
+周期 & 公转/自转周期分解（\cref{prop:elliptic_epicycle_expansion}、\cref{tab:planetary_orbital_periods}、\cref{tab:planetary_rotation_periods}）、平均运动共振（\cref{def:orbital_resonance}）、长期共振（\cref{def:secular_resonance}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{天文周期性判定定理}（\ref{thm:astro_periodicity_decision}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 验证\textbf{数量调节的单调性}（\ref{prop:astro_adaptive_growth}）的前提在本章领域对象上成立，并给出一个不满足前提的反例。
+
+    \item 考察\textbf{椭圆轨道的傅里叶--贝塞尔展开}（\ref{prop:elliptic_epicycle_expansion}）在参数退化时的行为，说明结论如何随之退化。
+
+    \item 说明\textbf{天文周期诊断流程与三章接口}（\ref{thm:astro_diagnosis_integration}）与「周期系统」章相应通用结论的关系（是一致、特例还是需要附加条件）。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{thm:astro_periodicity_decision}、\ref{prop:astro_adaptive_growth}、\ref{prop:elliptic_epicycle_expansion}、\ref{thm:astro_diagnosis_integration}。
+\end{enumerate}
+
+

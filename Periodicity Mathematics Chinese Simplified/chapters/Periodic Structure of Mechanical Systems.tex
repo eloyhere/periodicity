@@ -1,0 +1,709 @@
+\chapter{机械系统之周期结构}
+\markboth{机械系统之周期结构}{机械系统之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:mech_ps_hook}
+本章判定研究目标是否具有周期性、确定其周期类型、以及查找最小正周期时，一律引用「周期系统」章：
+周期性判据见 \cref{thm:ps_periodicity_decision}，
+周期类型判别见 \cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}，
+最小正周期查找见 \cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}，
+由数据构建周期级数与周转圆组见 \cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}。
+\end{remark}
+
+\begin{remark}[本章定位：按「周期系统」章五步接口展开]\label{rem:mech_five_steps_positioning}
+机械系统之周期结构研究经典力学中周期性、准周期性和共振现象的数学表征。本章不另立周期性判据，而是把机械系统接入「周期系统」章规定的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把弹簧振子、单摆、耦合振子、受迫振子、陀螺进动等目标化为离散或连续动力系统，引用 \cref{thm:ps_periodicity_decision} 判定是否具有周期性，并确定周期类型；
+    \item \textbf{构建}：由广义坐标、动量、相位数据构建振幅级数、频率级数、相位级数，组装为机械周转圆组；
+    \item \textbf{调节}：用残差能量下降、动量守恒、角动量守恒与能量守恒约束动态调节机械周转圆组；
+    \item \textbf{卷积}：在机械周转圆组上引入振幅卷积、相位卷积、频率卷积，并与自相关、互相关、拍频时延衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成机械周期诊断流程。
+\end{enumerate}
+本章使用的数学工具包括：拉格朗日力学、哈密顿力学、椭圆积分、共振理论、周期卷积、周转圆组、相位算子、时延。
+\end{remark}
+
+\begin{remark}[本章七主题导引]\label{rem:mech_seven_themes}
+\textbf{平移}——弹簧振子的时间平移与相位时延 $\tau = \phi\sqrt{m/k}$（定义 \ref{def:spring_phase_delay}）；\textbf{缩放}——单摆大振幅的标度修正 $\Delta T(\theta_{\max})$（定义 \ref{def:pendulum_amplitude_delay}）；\textbf{旋转}——受迫振子的相位滞后 $\delta(\omega)$ 与进动（定义 \ref{def:forced_phase_delay}、\ref{def:gyroscope}）；\textbf{守恒}——动量/角动量/能量守恒（定理 \ref{thm:mechanical_conservation}）与弹簧振子能量守恒（命题 \ref{prop:spring_energy_period}）；\textbf{对称}——简正坐标的对称-反对称分解与时间反演对称；\textbf{闭合}——单摆周期轨道与陀螺进动圆环的闭合；\textbf{周期}——弹簧振子 $T = 2\pi\sqrt{m/k}$（等时性）、单摆椭圆积分周期（定理 \ref{thm:pendulum_exact_period}）、拍周期 $T_{\text{beat}} = \pi/\Delta\omega$（命题 \ref{prop:beat_phenomenon}）。
+\end{remark}
+
+\section{接入「周期系统」章的五步接口}
+\label{sec:mech_five_steps}
+
+\subsection{第一步：机械目标的周期性判定}
+
+\begin{definition}[机械目标与判定输入]\label{def:mech_target}
+一个\textbf{机械目标}是指下列对象之一：
+\begin{enumerate}[label=(\roman*)]
+    \item 一个弹簧振子系统，其状态空间为 $(x,p)$ 相空间；
+    \item 一个单摆系统，其状态空间为 $(\theta,\dot\theta)$ 相空间；
+    \item 一个耦合振子系统，其状态空间为 $(x_1,x_2,\dot x_1,\dot x_2)$ 相空间；
+    \item 一个受迫振子系统，其状态空间为驱动相位与响应相位的联合空间；
+    \item 一个陀螺系统，其状态空间为角动量 $\mathbf L$ 与自转轴方向 $\hat{\mathbf e}_3$ 的联合空间。
+\end{enumerate}
+机械目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal D_{\mathrm{M}}=(\mathcal S,\Phi),
+\]
+其中 $\mathcal S$ 是状态空间，$\Phi:\mathcal S\to\mathcal S$ 是时间平移、相位旋转或轨道演化所诱导的映射。若 $\mathcal S$ 为有限集，称目标为\textbf{有限机械目标}；若 $\mathcal S$ 为无限集，称目标为\textbf{无限机械目标}。
+\end{definition}
+
+\begin{definition}[机械判定映射]\label{def:mech_periodization}
+设机械目标由判定输入 $\mathcal D_{\mathrm{M}}=(\mathcal S,\Phi)$ 给出。若目标的状态由 $\Phi$ 生成，即存在 $x_0\in\mathcal S$ 使
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+当 $t\in\mathbb Z$ 时 $x_t$ 由 $\Phi$ 迭代生成；当 $t\in\mathbb R$ 时，以单参数演化族 $\{\Phi_t\}_{t\in\mathbb R}$（其中每个 $\Phi_t:\mathcal S\to\mathcal S$，且 $\Phi_0=\operatorname{id}$、$\Phi_{s+t}=\Phi_s\circ\Phi_t$ 对一切 $s,t\in\mathbb R$ 成立、$(t,x)\mapsto\Phi_t(x)$ 连续）记之。
+则称 $\Phi$ 为目标的\textbf{机械判定映射}。此时当 $t\in\mathbb Z$ 时机械目标化为离散动力系统 $(\mathcal S,\Phi)$，当 $t\in\mathbb R$ 时化为连续动力系统 $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$，两种情形均可直接套用「周期基础」章与「周期系统」章的判据。
+\end{definition}
+
+\begin{theorem}[机械周期性判定定理]\label{thm:mech_periodicity_decision}
+设机械目标的判定映射为 $\Phi$，且 $(\mathcal S,\Phi)$ 为离散动力系统。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 $m\in\mathbb N^+$ 使 $\Phi^m=\mathrm{id}$，则目标为一致周期机械系统；每条轨道闭合，且轨道长度整除 $m$。
+    \item \textbf{判定等价}：目标为一致周期机械系统当且仅当 $\operatorname{ord}(\Phi)<\infty$。
+    \item \textbf{逐点判据}：目标在状态 $x_0$ 处的轨道闭合当且仅当 $x_0$ 为周期点；此时轨道长度即该点处的周期。
+    \item \textbf{不可省略性}：守恒量与对称群的合取不能替代 $\operatorname{ord}(\Phi)<\infty$；准周期机械目标不属于周期机械系统。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:mech_periodicity_decision} 是「周期系统」章 \cref{thm:ps_periodicity_decision} 的领域实例化：
+只需把判定映射 $f$ 与演化群替换为本章的 $\Phi$，(A) 充分判定、(B) 判定等价、(C) 逐点判据、
+(D) 不可省略性四条即逐条成立。依 \cref{rem:ps_applications_hook} 的约定，此处不再重复展开。
+\end{proof}
+
+\begin{corollary}[机械周期类型]\label{cor:mech_period_type}
+经 \cref{thm:mech_periodicity_decision} 判定后，机械目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 $m_0=1$，状态为不动点；
+    \item \textbf{严格周期型}：$1<m_0<\infty$，状态严格周期；
+    \item \textbf{一致周期型}：$\operatorname{ord}(\Phi)=m<\infty$，所有轨道长度整除 $m$；
+    \item \textbf{准周期型}：$\operatorname{ord}(\Phi)=\infty$，轨道不闭合但在紧致承载结构上稠密；
+    \item \textbf{最终周期型}：存在 $N$，使 $t\ge N$ 后目标为周期；
+    \item \textbf{离散周期型}：承载结构为 $\mathbb Z$，且归一化周期比 $\rho=T_x/\Delta x\in\mathbb Q$。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，残差按 $e^{-\kappa t}$ 衰减（见 \cref{def:ps_period_type}(vii)）。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于周期机械系统；(iv) 不属于周期机械系统，但可用有界逼近工具处理；(v) 只在稳定阶段是周期机械系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期机械系统，只在稳定阶段可用有界逼近工具处理。
+\end{corollary}
+
+\begin{proof}
+逐条由 \cref{thm:mech_periodicity_decision} 与「周期系统」章 \cref{def:ps_period_type} 代入机械目标即得。
+\end{proof}
+
+\begin{lemma}[弹簧振子的周期判定]\label{lem:spring_periodic}
+设弹簧振子运动方程为
+\[
+\ddot x+\omega_0^2x=0,\qquad \omega_0=\sqrt{k/m}.
+\]
+则弹簧振子为一致周期系统，其最小正周期为
+\[
+T_0=\frac{2\pi}{\omega_0}=2\pi\sqrt{\frac{m}{k}}.
+\]
+\end{lemma}
+
+\begin{proof}
+由定义 \ref{def:spring_oscillator}，通解为 $x(t)=A\cos(\omega_0t+\phi)$。时间平移 $T_0=2\pi/\omega_0$ 使 $x(t+T_0)=x(t)$，且 $T_0$ 为最小正周期。故判定映射 $\Phi$ 满足 $\Phi^{T_0}=\mathrm{id}$，为一致周期系统。
+\end{proof}
+
+\begin{lemma}[单摆的周期判定]\label{lem:pendulum_periodic}
+设单摆运动方程为
+\[
+\ddot\theta+\omega_0^2\sin\theta=0,\qquad \omega_0=\sqrt{g/l}.
+\]
+则单摆为一致周期系统，其振动周期由第一类完全椭圆积分给出：
+\[
+T(\theta_{\max})=4\sqrt{\frac{l}{g}}\,K(k),\qquad k=\sin\frac{\theta_{\max}}{2}.
+\]
+\end{lemma}
+
+\begin{proof}
+由定理 \ref{thm:pendulum_exact_period}，单摆从最大偏离角 $\theta_{\max}$ 释放后作周期运动，周期为 $T(\theta_{\max})=4\sqrt{l/g}\,K(k)$。由能量守恒，轨道在 $[-\theta_{\max},\theta_{\max}]$ 上有界往返，故判定映射 $\Phi$ 满足 $\Phi^{T(\theta_{\max})}=\mathrm{id}$，为一致周期系统。
+\end{proof}
+
+\begin{lemma}[耦合振子的周期判定]\label{lem:coupled_periodic}
+设耦合振子系统处于对称模式与反对称模式，对应的简正频率为
+\[
+\omega_1=\sqrt{k/m},\qquad \omega_2=\sqrt{(k+2k_c)/m}.
+\]
+则当 $\omega_1/\omega_2\in\mathbb Q$ 时，系统为一致周期系统；当 $\omega_1/\omega_2\notin\mathbb Q$ 时，系统为准周期系统。
+\end{lemma}
+
+\begin{proof}
+引入简正坐标 $\eta_1=x_1+x_2$、$\eta_2=x_1-x_2$，系统解耦为两个独立简谐振动。由「周期基础」章 \cref{thm:finite_order_orbit} 的可公度判据，两简谐振动合成的轨道闭合当且仅当频率比 $\omega_1/\omega_2$ 为有理数。故结论成立。
+\end{proof}
+
+\begin{lemma}[受迫振子的周期判定]\label{lem:forced_periodic}
+设受迫振子稳态响应为
+\[
+x(t)=A(\omega)\cos(\omega t-\delta(\omega)).
+\]
+则受迫振子为一致周期系统，其最小正周期为驱动周期
+\[
+T=\frac{2\pi}{\omega}.
+\]
+\end{lemma}
+
+\begin{proof}
+稳态响应以驱动频率 $\omega$ 为周期，其最小正周期为 $T=2\pi/\omega$。瞬态响应按 $e^{-\beta t}$ 衰减，$t\to\infty$ 时趋于稳态周期轨道；稳态响应为一致周期系统，而瞬态阶段为渐近周期（阻尼）型（不是最终周期型：任何有限时刻的轨道都尚未闭合）。
+\end{proof}
+
+\begin{lemma}[陀螺进动的周期判定]\label{lem:gyroscope_periodic}
+设陀螺在重力矩作用下进动，进动角速度为
+\[
+\Omega_p=\frac{mgr}{I_3\omega_3}.
+\]
+则自转轴进动为一致周期系统，其进动周期为
+\[
+T_p=\frac{2\pi}{\Omega_p}=\frac{2\pi I_3\omega_3}{mgr}.
+\]
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:precession_nutation}，进动角速度为 $\Omega_p=mgr/(I_3\omega_3)$，自转轴绕竖直轴均匀旋转，周期为 $T_p=2\pi/\Omega_p$。故判定映射 $\Phi$ 满足 $\Phi^{T_p}=\mathrm{id}$，为一致周期系统。
+\end{proof}
+
+\begin{definition}[机械最小正周期算法]\label{def:mech_minimal_period_algorithm}
+本定义与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{def:ps_minimal_period_algorithm} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处的差别仅为术语（机械目标 / 机械样本），算法步骤与结论完全相同。
+\end{definition}
+
+\begin{theorem}[机械最小正周期算法的正确性]\label{thm:mech_minimal_period_correctness}
+本定理与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{thm:ps_minimal_period_correctness} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。本处的差别仅为术语（机械目标 / 机械样本），算法步骤与结论完全相同。
+\end{theorem}
+
+\begin{example}[机械周期判定实例]\label{ex:mech_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item 弹簧振子：$T_0=2\pi\sqrt{m/k}$，一致周期型；
+    \item 单摆：$T(\theta_{\max})=4\sqrt{l/g}\,K(k)$，一致周期型；
+    \item 耦合振子：$\omega_1/\omega_2\in\mathbb Q$ 时一致周期型，否则准周期型；
+    \item 受迫振子：稳态周期 $T=2\pi/\omega$，一致周期型；
+    \item 陀螺进动：$T_p=2\pi I_3\omega_3/(mgr)$，一致周期型。
+\end{enumerate}
+\end{example}
+
+\begin{remark}[守恒量不保证周期]\label{rem:mech_invariant_not_period}
+机械系统中的动量守恒、角动量守恒与能量守恒是周期结构的辅助条件，但不构成充分条件。例如双曲轨道具有能量守恒和角动量守恒，但轨道开放不闭合。机械周期结构必须由 \cref{thm:mech_periodicity_decision} 或上述引理判定。
+\end{remark}
+
+\subsection{第二步：机械周期级数与周转圆组的构建}
+
+\begin{definition}[机械振幅级数、频率级数、相位级数]\label{def:mech_series}
+设机械目标的状态或输出序列为 $\{z_t\}$。若其可写为
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+则称
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+分别为机械目标的\textbf{振幅级数}、\textbf{频率级数}与\textbf{相位级数}。三者与「级数与卷积」章 \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} 一致。
+\end{definition}
+
+\begin{definition}[机械周转圆组]\label{def:mech_epicycle_group}
+设机械目标的周期级数由振幅级数 $\{A_k\}$、频率级数 $\{\omega_k\}$ 与相位级数 $\{\phi_k\}$ 给出。对每个 $k$ 定义周转圆
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+其集合
+\[
+\mathfrak E_{\mathrm{M}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+称为机械目标的\textbf{周转圆组}。其叠加即机械周期级数
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[由机械数据构建周期级数]\label{thm:mech_series_reconstruction}
+设机械目标的输出为有限周期序列，周期为 $N$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 输出可展开为离散傅里叶级数
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item 振幅级数由 $|c_k|$ 给出，相位级数由 $\arg c_k$ 给出，频率级数由 $2\pi k/N$ 给出；
+    \item 若输出为单频简谐振动，则傅里叶分解只有一根谱线；若输出为耦合振子，则各级谐波对应简正模式。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 有限周期序列的离散傅里叶级数是标准结论：基函数 $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ 构成 $\mathbb C^N$ 的正交基。
+(ii) 由 $c_k=A_k e^{i\phi_k}$ 直接读出。
+(iii) 单频简谐振动的时间部分为 $e^{-i\omega t}$，在周期 $T=2\pi/\omega$ 上只有基频分量；耦合振子按简正模式展开为各次谐波。
+\end{proof}
+
+\begin{proposition}[三参数对应：半径、相位与转速]\label{prop:mech_epicycle_correspondence}
+机械周转圆组 $\mathfrak E_{\mathrm{M}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ 的三个参数与三个几何—物理量一一对应：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{半径对应振幅}：$E_k$ 的半径 $|E_k|=A_k$ 即广义坐标分量的振幅；
+    \item \textbf{相位对应旋转时延}：初相 $\phi_k$ 对应时间平移 $\tau_k=\phi_k/\omega_k$；$\phi_k>0$ 时该分量相对基准\textbf{超前} $\tau_k$（等价于把基准延后 $\tau_k$ 后二者重合）；
+    \item \textbf{频率对应旋转速度}：$\omega_k$ 即该简正模式的角频率。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:mech_epicycle_correspondence} 与「周期系统」章 \cref{prop:ps_epicycle_correspondence} 完全对应，
+三条对应——半径对应振幅、相位对应旋转时延、频率对应旋转速度——逐条平移至本章的周转圆组即得。
+证明见该处：(i) 由 $|E_k|=A_k$ 与能量分解，(ii) 由相位平移定理，(iii) 由频率级数定义。
+\end{proof}
+
+\begin{example}[弹簧振子的周期级数]\label{ex:mech_spring_series}
+弹簧振子 $x(t)=A\cos(\omega_0t+\phi)$ 在周期 $T=2\pi/\omega_0$ 上为单频周期级数，其周转圆组为 $\{(A,\omega_0,\phi)\}$。
+\end{example}
+
+\begin{remark}[周期级数即复变函数]\label{rem:mech_series_complex}
+设 $z=e^{i\omega_0t}$，则机械周期级数
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+当所有分量与 $\omega_0$ 可公度（即 $\omega_k=k\omega_0$，$k\in\mathbb Z$）时可写为洛朗级数 $\sum_k c_k z^k$，其中 $c_k=A_k e^{i\phi_k}$：此时机械周期级数即单位圆上的复变函数，否则为环面上的函数。
+\end{remark}
+
+\subsection{第三步：机械周转圆组的动态调节}
+
+\begin{definition}[机械周转圆组的动态调节]\label{def:mech_adaptive_adjustment}
+设当前机械周转圆组为 $\mathfrak E^{(j)}$，部分和
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+残差 $r^{(j)}=z-z^{(j)}$。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 $\|r^{(j)}\|^2>\delta$，则依残差周期图峰值新增一个周转圆；
+    \item \textbf{参数调节}：对已有周转圆参数按正则化最小二乘或守恒约束更新。
+\end{enumerate}
+在机械系统中，数量调节对应增加简正模式或谐波阶数；参数调节对应调整振幅、相位与频率，使动量、角动量与能量约束满足。
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:mech_adaptive_growth}
+按 \cref{def:mech_adaptive_adjustment}(i) 加入残差主频分量后，残差能量单调不增：
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+等号成立当且仅当残差在被选频率上无能量。
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:mech_adaptive_growth} 与「周期系统」章 \cref{def:ps_adaptive_adjustment} 的动态调节机制一致：
+新增周转圆即把 $r^{(j)}$ 沿 $\hat\omega$ 的分量从残差中移出，由正交分解
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{被移出的分量}\|^2$ 即得不等式，
+等号当且仅当被移出分量的范数为零。完整论证见该处。
+\end{proof}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:mech_adaptive_convergence}
+设机械目标为周期 $T_0$ 的有限周期序列且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得机械周转圆组即目标的精确傅里叶数据。
+\end{theorem}
+
+\begin{proof}
+周期 $T_0$ 的序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波上完备。每步按 \cref{prop:mech_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。
+\end{proof}
+
+\begin{definition}[结构指标调节]\label{def:mech_structure_metric_adjustment}
+设机械目标的结构指标为
+\[
+\mathcal I=(\mathcal I_{\text{动量}},\mathcal I_{\text{角动量}},\mathcal I_{\text{能量}})
+=(\text{动量守恒度},\ \text{角动量守恒度},\ \text{能量守恒度}).
+\]
+\textbf{结构指标调节}为：在参数空间 $\Theta$ 中选取 $\theta$，每步取使 $\mathcal I(\theta)$ 按字典序\textbf{严格递减}（极小化）的邻近参数；若不存在则停止，此时为局部最优。
+\end{definition}
+
+\begin{proposition}[结构指标调节的有限收敛]\label{prop:mech_structure_metric_convergence}
+设参数空间 $\Theta$ 有限，且每次调节使 $\mathcal I$ 按字典序严格递减。则调节在有限步内终止于局部最优参数。
+\end{proposition}
+
+\begin{proof}
+$\Theta$ 有限，故 $\mathcal I$ 只取有限多个值，而字典序是有限集上的全序；按字典序严格递减的序列不能无限延续，故调节在有限步终止。终止时不存在使 $\mathcal I$ 按字典序严格递减的邻近参数，即局部最优。
+\end{proof}
+
+\begin{remark}[动态调节的边界]\label{rem:mech_adaptive_boundary}
+\cref{thm:mech_adaptive_convergence} 依赖有限周期序列。对连续谱或准周期机械目标，不存在有限周转圆组精确表示，只能作有界逼近。结构指标调节不保证全局最优。
+\end{remark}
+
+\subsection{第四步：机械卷积}
+
+\begin{definition}[机械振幅卷积、相位卷积与频率卷积]\label{def:mech_convolution_types}
+设两个机械周转圆组为
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+定义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅卷积}：$\mathbb A_{mn}=A_nB_m$；
+    \item \textbf{相位卷积}：$\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$；
+    \item \textbf{频率卷积}：$\mathbb F_{mn}=\omega_n\nu_m$；
+    \item \textbf{趋势卷积}：$\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$。
+\end{enumerate}
+这与「级数与卷积」章 \cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution}、\cref{def:tendency_convolution} 一致。
+\end{definition}
+
+\begin{theorem}[三类卷积在机械周转圆组上的作用]\label{thm:mech_convolution_action}
+设两个机械目标的周转圆组分别为 $\mathfrak E$ 与 $\mathfrak E'$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 振幅卷积只作用于半径；
+    \item 相位卷积只作用于相位；
+    \item 频率卷积只作用于转速；
+    \item 趋势卷积同时保留振幅与相位。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:mech_convolution_types} 直接读出。
+\end{proof}
+
+\begin{proposition}[自相关与趋势卷积]\label{prop:mech_autocorr_phase_convolution}
+设 $\{z_t\}$ 为机械周期序列，其自相关函数为
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+在机械周转圆组语言中，自相关函数是趋势卷积在对角线上的投影：
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:mech_autocorr_phase_convolution} 是「周期系统」章 \cref{thm:ps_convolution_action} 的卷积作用结论在本领域的实现：
+将 $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ 代入自相关定义，由正交性消去全部非对角交叉项，只保留趋势卷积的对角线项
+（三类卷积的因式分解，\cref{prop:ps_convolution_factorization}），即得 $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$。
+完整展开见该处。
+\end{proof}
+
+\begin{remark}[机械卷积与周期卷积的关系]\label{rem:mech_convolution_relation}
+机械卷积不是新的卷积运算，而是「级数与卷积」章周期卷积在机械周转圆组上的实例。自相关是趋势卷积在对角线上的投影，互相关、拍频分别是振幅卷积和频率卷积在经典力学中的具体表现。
+\end{remark}
+
+\subsection{第五步：与离散采样、调和分析、时序分析的整合}
+
+\begin{definition}[机械周期诊断流程]\label{def:mech_periodic_diagnosis}
+对于给定机械系统，使用周期数学框架进行诊断：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{周期判定}：验证机械目标的周期类型（\cref{thm:mech_periodicity_decision}）；
+    \item \textbf{级数构建}：由广义坐标、动量数据构建振幅、频率、相位级数与周转圆组（\cref{thm:mech_series_reconstruction}）；
+    \item \textbf{守恒诊断}：验证动量、角动量与能量守恒（\cref{thm:mechanical_conservation}）；
+    \item \textbf{卷积诊断}：计算自相关（趋势卷积的对角线投影，\cref{prop:mech_autocorr_phase_convolution}）与相位卷积；
+    \item \textbf{整合诊断}：接入离散采样、调和分析、时序分析工具链。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[机械周期诊断流程与三章接口]\label{thm:mech_diagnosis_integration}
+\cref{def:mech_periodic_diagnosis} 的五个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}、\cref{thm:intercalation_leakage_suppression}；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}、\cref{prop:twelve_to_six}；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}、\cref{def:ts_window_validation}。
+\end{enumerate}
+因此机械周期诊断不是独立方法，而是周期数学统一工具链在机械系统上的应用。
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:mech_diagnosis_integration} 是「周期系统」章五步接口（\cref{tab:ps_five_steps}）在本领域的落地：
+周期判定用采样与谱估计，频率分解与相位核用「调和分析」章，周期图峰值、Fisher 检验与
+窗函数验证用「时序分析」章。故诊断流程由三章工具链合成，证明见该处。
+\end{proof}
+
+\begin{remark}[整合后的操作顺序]\label{rem:mech_integration_order}
+实际诊断建议顺序为：先判定机械目标是否周期（\cref{thm:mech_periodicity_decision}）；再构建机械数据的傅里叶数据与周转圆组（\cref{thm:mech_series_reconstruction}）；再用守恒约束与动态调节优化参数（\cref{thm:mech_adaptive_convergence}、\cref{prop:mech_structure_metric_convergence}）；再作机械卷积与自相关分析（\cref{prop:mech_autocorr_phase_convolution}）；最后按 \cref{def:mech_periodic_diagnosis} 输出诊断。
+\end{remark}
+
+\section{机械系统的数学基础}
+
+\begin{definition}[机械系统的基本量]\label{def:mechanical_quantities}
+设机械系统的自由度为 $n$。系统的描述涉及以下基本量：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{广义坐标} $q_i$（$i = 1, \dots, n$）：确定系统位置的独立坐标。
+    \item \textbf{广义速度} $\dot{q}_i = dq_i/dt$。
+    \item \textbf{动能} $T = \frac{1}{2}\sum_{i,j} m_{ij}\dot{q}_i\dot{q}_j$（$m_{ij}$ 为广义质量矩阵的对称元素）。
+    \item \textbf{势能} $V(q_1, \dots, q_n)$：只依赖于坐标、不依赖速度的部分。
+    \item \textbf{拉格朗日函数} $L = T - V$。
+    \item \textbf{哈密顿函数} $H = T + V$（保守系统）；在正则动量 $p_i = \partial L/\partial\dot{q}_i$ 下，$H$ 为相空间 $(q_i, p_i)$ 上的函数。
+\end{enumerate}
+对保守系统，哈密顿函数 $H$ 沿轨道的值守恒，即 $\frac{dH}{dt} = 0$。
+\end{definition}
+
+\section{弹簧振子}
+
+\begin{definition}[弹簧振子]\label{def:spring_oscillator}
+一个质量为 $m$ 的质点固定在劲度系数为 $k$ 的弹簧上，在无摩擦水平面上运动。设 $x$ 表示质点相对平衡位置的位移，其运动方程为
+\[
+m\ddot{x} + kx = 0 \quad \Longleftrightarrow \quad \ddot{x} + \omega_0^2 x = 0, \quad \omega_0 = \sqrt{\frac{k}{m}}.
+\]
+该方程称为\textbf{简谐振动方程}，$\omega_0$ 称为\textbf{固有角频率}。其通解为
+\[
+x(t) = A\cos(\omega_0 t + \phi),
+\]
+其中振幅 $A \ge 0$ 与初相 $\phi \in [0, 2\pi)$ 由初始条件 $(x_0, \dot{x}_0)$ 唯一确定。
+\end{definition}
+
+\begin{proposition}[弹簧振子的能量守恒与等时性]\label{prop:spring_energy_period}
+弹簧振子的总机械能 $E = \frac{1}{2}kA^2$ 守恒；振动周期 $T = 2\pi\sqrt{m/k}$ 与振幅 $A$ 无关（等时性）。
+\end{proposition}
+
+\begin{proof}
+能量：$E = \frac{1}{2}m\dot x^2 + \frac{1}{2}kx^2$。代入 $x(t) = A\cos(\omega_0 t + \phi)$ 与 $\dot x(t) = -A\omega_0\sin(\omega_0 t + \phi)$，并利用 $\omega_0^2 = k/m$：
+\[
+E = \frac{1}{2}mA^2\omega_0^2\sin^2(\omega_0 t+\phi) + \frac{1}{2}kA^2\cos^2(\omega_0 t+\phi) = \frac{1}{2}kA^2\big(\sin^2 + \cos^2\big) = \frac{1}{2}kA^2,
+\]
+与 $t$ 无关。
+
+周期：通解 $x(t) = A\cos(\omega_0 t + \phi)$ 满足 $x(t+T) = x(t)$ 的最小 $T$ 由 $\omega_0 T = 2\pi$ 给出，即 $T = 2\pi/\omega_0 = 2\pi\sqrt{m/k}$——与振幅 $A$ 无关。这一性质源于恢复力 $F = -kx$ 对 $x$ 的线性性。
+\end{proof}
+
+\begin{definition}[弹簧振子的相位时延]\label{def:spring_phase_delay}
+弹簧振子 $x(t) = A\cos(\omega_0 t + \phi)$ 中，初相 $\phi$ 对应的\textbf{相位时延}为
+\[
+\tau = \frac{\phi}{\omega_0} = \phi \sqrt{\frac{m}{k}}.
+\]
+相位时延将相位角转换为时间偏移：初相 $\phi>0$ 时振动相对基准\textbf{超前} $\tau$（即振动开始时刻提前了 $\tau$；等价于把基准延后 $\tau$ 后二者重合）。当 $\phi \to 2\pi^-$ 时，$\tau \to T$——完整周期。
+\end{definition}
+
+\section{单摆}
+
+\begin{definition}[单摆]\label{def:simple_pendulum}
+一个质量为 $m$ 的质点由长度为 $l$ 的轻质不可伸长的细线悬挂于固定点，在竖直平面内摆动。设 $\theta$ 为摆线与竖直方向的夹角，其运动方程为
+\[
+\ddot{\theta} + \omega_0^2 \sin\theta = 0, \quad \omega_0 = \sqrt{\frac{g}{l}}.
+\]
+该方程是非线性的——恢复力 $F = -mg\sin\theta$ 对 $\theta$ 不是线性的。小振幅下 $\sin\theta \approx \theta$，方程退化为简谐振动方程 $\ddot{\theta} + \omega_0^2 \theta = 0$。
+\end{definition}
+
+\begin{theorem}[单摆的精确周期——振幅修正]\label{thm:pendulum_exact_period}
+单摆从最大偏离角 $\theta_{\max}$ 释放的振动周期为
+\[
+T(\theta_{\max}) = 4\sqrt{\frac{l}{g}} \, K(k), \quad k = \sin\frac{\theta_{\max}}{2},
+\]
+其中 $K(k)$ 是第一类完全椭圆积分。
+\end{theorem}
+
+\begin{proof}
+由能量守恒，角速度满足
+\[
+\frac{1}{2}ml^2\dot\theta^2 + mgl(1-\cos\theta) = mgl(1-\cos\theta_{\max}).
+\]
+解出
+\[
+\dot\theta = \pm \sqrt{\frac{2g}{l}\big(\cos\theta - \cos\theta_{\max}\big)}.
+\]
+用半角恒等式 $\cos\theta - \cos\theta_{\max} = 2\big(\sin^2\frac{\theta_{\max}}{2} - \sin^2\frac{\theta}{2}\big)$，并作变量代换 $u = \sin\frac{\theta}{2}/\sin\frac{\theta_{\max}}{2}$，四分之一周期的积分化为
+\[
+\frac{T}{4} = \sqrt{\frac{l}{g}} \int_0^1 \frac{du}{\sqrt{(1-u^2)(1-k^2u^2)}}, \qquad k = \sin\frac{\theta_{\max}}{2},
+\]
+即第一类完全椭圆积分 $K(k)$，故 $T = 4\sqrt{l/g}\, K(k)$。
+\end{proof}
+
+\begin{definition}[单摆的振幅时延]\label{def:pendulum_amplitude_delay}
+单摆的振幅依赖周期可重新表述为\textbf{振幅时延}：相对于小振幅周期 $T_0 = 2\pi\sqrt{l/g}$，大振幅下的周期增长量
+\[
+\Delta T(\theta_{\max}) = T(\theta_{\max}) - T_0 = 4\sqrt{\frac{l}{g}}\left(K(k) - \frac{\pi}{2}\right)
+\]
+是振幅引入的\textbf{附加时延}。振幅越大，附加时延越长。小振幅极限下 $K(k) \approx \frac{\pi}{2}(1 + k^2/4)$，代入 $k \approx \theta_{\max}/2$，得 $\Delta T \approx \frac{\pi}{8}\theta_{\max}^2\sqrt{l/g}$。
+\end{definition}
+
+\section{耦合振子与拍现象}
+
+\begin{definition}[耦合弹簧振子系统]\label{def:coupled_oscillators}
+考虑两个相同的弹簧振子，各由劲度系数 $k$ 的弹簧连于固定端，两振子之间由劲度系数 $k_c$ 的耦合弹簧连接。设 $x_1, x_2$ 为两振子相对各自平衡位置的位移，则运动方程为
+\[
+m\ddot{x}_1 + kx_1 + k_c(x_1 - x_2) = 0, \qquad m\ddot{x}_2 + kx_2 + k_c(x_2 - x_1) = 0.
+\]
+引入\textbf{简正坐标}
+\[
+\eta_1 = x_1 + x_2 \quad (\text{对称模式}), \qquad \eta_2 = x_1 - x_2 \quad (\text{反对称模式}),
+\]
+则系统解耦为两个独立的简谐振动方程。
+\end{definition}
+
+\begin{proposition}[拍现象——弱耦合下的能量转移]\label{prop:beat_phenomenon}
+在上述耦合振子系统中，取初始条件 $x_1(0) = A$、$x_2(0) = 0$、$\dot x_1(0) = \dot x_2(0) = 0$。则
+\[
+x_1(t) = A\cos(\Delta\omega \, t)\cos(\bar{\omega} t), \qquad x_2(t) = A\sin(\Delta\omega \, t)\sin(\bar{\omega} t),
+\]
+其中 $\bar\omega = (\omega_1 + \omega_2)/2$，$\Delta\omega = (\omega_2 - \omega_1)/2$。能量以拍周期 $T_{\text{beat}} = \pi/\Delta\omega$ 在两个振子之间交替。
+\end{proposition}
+
+\begin{proof}
+简正坐标满足
+\[
+m\ddot\eta_1 + k\eta_1 = 0 \quad \Rightarrow \quad \omega_1 = \sqrt{k/m},
+\]
+\[
+m\ddot\eta_2 + (k + 2k_c)\eta_2 = 0 \quad \Rightarrow \quad \omega_2 = \sqrt{(k+2k_c)/m}.
+\]
+由初值条件，$\eta_1(0) = A$、$\dot\eta_1(0) = 0$、$\eta_2(0) = A$、$\dot\eta_2(0) = 0$，故 $\eta_1(t) = A\cos\omega_1 t$、$\eta_2(t) = A\cos\omega_2 t$。反解出
+\[
+x_1 = \frac{\eta_1 + \eta_2}{2} = A\cos(\Delta\omega\, t)\cos(\bar\omega t), \qquad
+x_2 = \frac{\eta_1 - \eta_2}{2} = A\sin(\Delta\omega\, t)\sin(\bar\omega t).
+\]
+包络 $A\cos(\Delta\omega\, t)$ 在 $t = \pi/(2\Delta\omega)$ 处首次过零——振子 1 的能量完全转移至振子 2；再经同样的时间返回。故拍周期 $T_{\text{beat}} = \pi/\Delta\omega$。
+\end{proof}
+
+\begin{definition}[耦合振子的拍频时延]\label{def:coupled_beat_delay}
+耦合振子系统中，能量从一个振子完全转移到另一个振子所需的\textbf{拍频时延}为
+\[
+\tau_{\text{beat}} = T_{\text{beat}} = \frac{\pi}{\Delta\omega}.
+\]
+弱耦合下（$k_c \ll k$），$\Delta\omega = (\omega_2-\omega_1)/2 \approx k_c/(2\sqrt{km})$，故
+\[
+\tau_{\text{beat}} \approx \frac{2\pi\sqrt{km}}{k_c}.
+\]
+耦合越弱（$k_c$ 越小），拍频时延越长——能量转移越慢。
+\end{definition}
+
+\section{受迫振动}
+
+\begin{definition}[受迫简谐振子]\label{def:forced_oscillator}
+在粘性阻尼与周期外力共同作用下，受迫简谐振子的运动方程为
+\[
+\ddot{x} + 2\beta\dot{x} + \omega_0^2 x = \frac{F_0}{m}\cos(\omega t),
+\]
+其中 $\beta > 0$ 为阻尼系数，$F_0$ 与 $\omega$ 分别为驱动力的振幅与角频率。
+\end{definition}
+
+\begin{theorem}[稳态响应——振幅放大与相位滞后]\label{thm:resonance}
+上述受迫振子的稳态解为
+\[
+x(t) = A(\omega)\cos(\omega t - \delta(\omega)),
+\]
+其中
+\[
+A(\omega) = \frac{F_0/m}{\sqrt{(\omega_0^2 - \omega^2)^2 + (2\beta\omega)^2}}, \qquad \delta(\omega) = \begin{cases} \arctan\frac{2\beta\omega}{\omega_0^2 - \omega^2}, & \omega < \omega_0, \\ \pi/2, & \omega = \omega_0, \\ \pi + \arctan\frac{2\beta\omega}{\omega_0^2 - \omega^2}, & \omega > \omega_0. \end{cases}
+\]
+\end{theorem}
+
+\begin{proof}
+用复数法：设 $x = \operatorname{Re}[\tilde x e^{i\omega t}]$，方程化为
+\[
+\big(-\omega^2 + 2i\beta\omega + \omega_0^2\big)\tilde x = F_0/m,
+\]
+即
+\[
+\tilde x = \frac{F_0/m}{\omega_0^2 - \omega^2 + 2i\beta\omega} = A(\omega) e^{-i\delta(\omega)},
+\]
+其中 $A(\omega)$ 为复数的模、$-\delta(\omega)$ 为辐角（满足 $\tan\delta = \frac{2\beta\omega}{\omega_0^2-\omega^2}$）。取实部即得稳态解。振幅 $A(\omega)$ 的极值由 $\frac{dA^2}{d\omega^2} = 0$ 给出，$\omega_r^2 = \omega_0^2 - 2\beta^2$（要求 $\beta < \omega_0/\sqrt{2}$）。
+\end{proof}
+
+\begin{definition}[受迫振子的相位响应时延]\label{def:forced_phase_delay}
+受迫振子的稳态响应中，相位滞后 $\delta(\omega)$ 对应的\textbf{相位响应时延}为
+\[
+\tau(\omega) = \frac{\delta(\omega)}{\omega}.
+\]
+三个极限情形：
+\begin{enumerate}[label=(\roman*)]
+    \item 低频极限（$\omega \to 0$）：$\delta \to 0$，$\tau \to 0$——响应瞬时跟随驱动力。
+    \item 共振频率（$\omega = \omega_0$）：$\delta = \pi/2$，$\tau = \pi/(2\omega_0) = T_0/4$——响应滞后四分之一周期。
+    \item 高频极限（$\omega \to \infty$）：$\delta \to \pi$，$\tau \to \pi/\omega$——响应反向。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[共振时延与系统参数的关系]\label{prop:resonance_delay_parameters}
+在共振频率 $\omega = \omega_0$ 处，相位响应时延为
+\[
+\tau_{\text{res}} = \frac{\pi}{2\omega_0} = \frac{T_0}{4} = \frac{\pi}{2}\sqrt{\frac{m}{k}}.
+\]
+共振时延仅依赖于系统固有参数 $m$ 与 $k$，与阻尼系数 $\beta$ 和驱动力振幅 $F_0$ 无关。共振时延是系统固有时间尺度的度量。
+\end{proposition}
+
+\begin{lemma}[共振幅值的阻尼依赖]\label{ch23_resonance_amplitude}
+共振频率 $\omega_r = \sqrt{\omega_0^2 - 2\beta^2}$ 处的振幅为
+\[
+A_{\max} = \frac{F_0/m}{2\beta\sqrt{\omega_0^2 - \beta^2}},
+\]
+且 $\lim_{\beta \to 0^+} A_{\max} = +\infty$、$\lim_{\beta \to \infty} A(\omega_0) = 0$。阻尼是共振放大倍数的唯一限制因子。
+\end{lemma}
+
+\begin{proof}
+由定理 \ref{thm:resonance} 的振幅公式，令 $f(\omega) = (\omega_0^2 - \omega^2)^2 + 4\beta^2\omega^2$。$\frac{df}{d\omega} = -4\omega(\omega_0^2-\omega^2) + 8\beta^2\omega = 4\omega(\omega^2 - \omega_0^2 + 2\beta^2) = 0$。非零解给出 $\omega_r^2 = \omega_0^2 - 2\beta^2$（要求 $\beta < \omega_0/\sqrt{2}$，否则无共振峰）。代入 $A(\omega)$ 得 $A_{\max} = \frac{F_0/m}{2\beta\sqrt{\omega_0^2-\beta^2}}$。两个极限由表达式直接取极限验证。
+\end{proof}
+
+\section{刚体转动与进动}
+
+\begin{definition}[陀螺的进动与章动]\label{def:gyroscope}
+高速旋转陀螺在重力矩作用下产生两种运动：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{进动}：自转轴绕竖直轴缓慢旋转。进动角速度满足 $\boldsymbol{\tau} = \boldsymbol{\Omega}_p \times \mathbf{L}$，其中 $\boldsymbol{\tau}$ 为外力矩、$\mathbf{L}$ 为角动量。
+    \item \textbf{章动}：自转轴与竖直轴夹角的高频振荡，叠加在进动之上。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[进动频率与章动频率]\label{prop:precession_nutation}
+对快转陀螺（自转角速度 $\omega_3$ 远大于进动角速度），
+\[
+\Omega_p = \frac{mgr}{I_3\omega_3}, \qquad \omega_n = \frac{I_3\omega_3}{I_1},
+\]
+其中 $I_3$ 为绕自转轴的转动惯量、$I_1$ 为绕横轴的转动惯量、$r$ 为支点到质心的距离、$g$ 为重力加速度。
+\end{proposition}
+
+\begin{proof}
+由角动量定理 $\frac{d\mathbf{L}}{dt} = \boldsymbol{\tau}$。对快转陀螺，$|\mathbf{L}| \approx I_3\omega_3$ 近似不变（只改变方向）。重力矩 $\boldsymbol{\tau} = mgr\,(\hat{\mathbf{e}}_z \times \hat{\mathbf{L}})$ 始终垂直于 $\mathbf{L}$，故 $\mathbf{L}$ 的方向以角速度
+\[
+\Omega_p = \frac{|\boldsymbol{\tau}|}{|\mathbf{L}|} = \frac{mgr}{I_3\omega_3}
+\]
+绕竖直轴旋转——即进动。章动可由欧拉方程线性化得到：扰动下自转轴与竖直轴的夹角 $\gamma$ 满足 $\ddot\gamma + \omega_n^2 \gamma = 0$，频率 $\omega_n = I_3\omega_3/I_1$。
+\end{proof}
+
+\begin{definition}[陀螺的进动响应时延]\label{def:gyroscope_precession_delay}
+陀螺在重力矩作用下，自转轴从初始方向进动角度 $\Delta\phi$ 所需的\textbf{进动响应时延}为
+\[
+\tau_{\text{prec}} = \frac{\Delta\phi}{\Omega_p} = \frac{I_3\omega_3 \cdot \Delta\phi}{mgr}.
+\]
+自转越快（$\omega_3$ 越大），进动响应时延越长——角动量越大，改变其方向所需的“惯性”越大。进动响应时延度量了系统对角动量方向变化的响应速度。
+\end{definition}
+
+\section{机械系统的守恒律}
+
+\begin{theorem}[机械系统的三种守恒律]\label{thm:mechanical_conservation}
+对由 $N$ 个质点组成的机械系统：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{动量守恒}：若无外力，系统总动量 $\mathbf{P} = \sum_i m_i\mathbf{v}_i$ 守恒。
+    \item \textbf{角动量守恒}：若无外力矩（外力矩关于某固定点或质心的总和为零），系统总角动量 $\mathbf{L} = \sum_i \mathbf{r}_i\times m_i\mathbf{v}_i$ 关于该点守恒。
+    \item \textbf{能量守恒}：若系统所受一切力为保守力且不受时不显含时间，则总机械能 $E = T + V$ 守恒。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 对 $N$ 个质点求和：$\frac{d\mathbf{P}}{dt} = \sum_i \mathbf{F}_i^{\text{ext}}$（内力按牛顿第三定律成对相消）。无外力时 $\mathbf{P}$ 为常向量。
+
+(ii) 对固定点 $O$ 取矩：$\frac{d\mathbf{L}}{dt} = \boldsymbol{\tau}^{\text{ext}}$，其中 $\boldsymbol{\tau}^{\text{ext}}$ 是外力对 $O$ 的总力矩（内力矩成对相消）。无外力矩时 $\mathbf{L}$ 守恒。
+
+(iii) 沿轨道积分 $\mathbf{F} = m\ddot{\mathbf{r}}$：由保守力 $\mathbf{F} = -\nabla V$，有 $\frac{d}{dt}(T+V) = 0$——$E = T + V$ 为常数。
+\end{proof}
+
+\begin{remark}[与全书的衔接]
+本章建立的机械系统周期结构理论是周期数学在经典力学中的应用。时延概念的引入揭示了机械系统周期结构的时间结构：相位时延 $\tau = \phi/\omega$ 将相位角转换为时间偏移；振幅时延 $\Delta T(\theta_{\max})$ 将非线性标度修正转换为时间偏移；拍频时延 $\tau_{\text{beat}} = \pi/\Delta\omega$ 将耦合强度转换为能量转移周期；相位响应时延 $\tau = \delta/\omega$ 将系统对驱动力的响应滞后转换为时间偏移；进动响应时延 $\tau_{\text{prec}} = \Delta\phi/\Omega_p$ 将角动量方向变化的响应转换为时间偏移。这五种时延分别与三种基本操作（平移、旋转、缩放）在时间域中的表现相关联，共同构成了机械系统周期结构的完整时延谱系。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 弹簧振子的时间平移与相位时延 $\tau = \phi\sqrt{m/k}$（定义 \ref{def:spring_phase_delay}）；动量守恒的时间平移不变性（定理 \ref{thm:mechanical_conservation}） \\
+缩放 & 单摆大振幅的振幅时延 $\Delta T(\theta_{\max}) \approx \frac{\pi}{8}\theta_{\max}^2\sqrt{l/g}$（定义 \ref{def:pendulum_amplitude_delay}）；共振振幅的阻尼缩放（引理 \ref{ch23_resonance_amplitude}） \\
+旋转 & 受迫振子的相位滞后 $\delta(\omega)$（定理 \ref{thm:resonance}）；陀螺进动 $\Omega_p = mgr/(I_3\omega_3)$（命题 \ref{prop:precession_nutation}） \\
+守恒 & 弹簧振子能量守恒与等时性（命题 \ref{prop:spring_energy_period}）；动量/角动量/能量守恒（定理 \ref{thm:mechanical_conservation}） \\
+对称 & 简正坐标的对称-反对称分解（命题 \ref{prop:beat_phenomenon} 证明）；时间反演对称 \\
+闭合 & 单摆周期轨道（椭圆积分周期，定理 \ref{thm:pendulum_exact_period}）；陀螺进动圆环与拍能量往返的闭合 \\
+周期 & 弹簧振子 $T = 2\pi\sqrt{m/k}$（等时性）；单摆 $T = 4\sqrt{l/g}\,K(k)$（定理 \ref{thm:pendulum_exact_period}）；拍周期 $T_{\text{beat}} = \pi/\Delta\omega$（命题 \ref{prop:beat_phenomenon}）；共振时延 $\tau_{\text{res}} = T_0/4$（命题 \ref{prop:resonance_delay_parameters}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{机械周期性判定定理}（\ref{thm:mech_periodicity_decision}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 验证\textbf{数量调节的单调性}（\ref{prop:mech_adaptive_growth}）的前提在本章领域对象上成立，并给出一个不满足前提的反例。
+
+    \item 考察\textbf{三参数对应：半径、相位与转速}（\ref{prop:mech_epicycle_correspondence}）在参数退化时的行为，说明结论如何随之退化。
+
+    \item 说明\textbf{机械周期诊断流程与三章接口}（\ref{thm:mech_diagnosis_integration}）与「周期系统」章相应通用结论的关系（是一致、特例还是需要附加条件）。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{thm:mech_periodicity_decision}、\ref{prop:mech_adaptive_growth}、\ref{prop:mech_epicycle_correspondence}、\ref{thm:mech_diagnosis_integration}。
+\end{enumerate}
+
+

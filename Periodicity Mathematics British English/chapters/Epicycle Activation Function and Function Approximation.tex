@@ -1,0 +1,505 @@
+\chapter{Epicycle Activation Function and Function Approximation}
+\label{chap:epicycle-activation}
+\markboth{Epicycle Activation Function and Function Approximation}{Epicycle Activation Function and Function Approximation}
+
+\begin{remark}[Periodicity decision for the target of this chapter (citation)]\label{rem:epicycle_act_ps_hook}
+Every application chapter of this book shares a single cross-reference list; its full statement is given in the opening of Chapter~\ref{chap:probability-periodic}, `Periodic Structures in Probabilistic Systems', at \cref{rem:prob_ps_hook}. It is not repeated here, and reference is made uniformly to that passage.
+\end{remark}
+
+\begin{remark}[Positioning of this chapter: from data analysis to learnable activation]\label{rem:epicycle-activation-positioning}
+This chapter takes up the output of the preceding chapter, `Periodic Structure of Data Analysis', and raises the \textbf{periodic-structure parameters extracted from the data} $(A_k,\omega_k,\phi_k)$ to the status of a \textbf{learnable activation function} in a neural network. The core object is the complex exponential sum
+\[
+\mathcal E(x)=\sum_{k=1}^{N}A_k e^{i(\omega_k x+\phi_k)},
+\]
+in which the amplitude $A_k>0$, the frequency $\omega_k\in\mathbb R$ and the phase $\phi_k\in[0,2\pi)$ are all learnable.
+
+\textbf{Interface with the preceding chapter}: the four classes of parameter output by the data periodicity diagnosis procedure of the preceding chapter (\cref{def:data_diagnosis_pipeline})---the amplitude spectrum, the frequency spectrum, the phase spectrum and the phase-coupling matrix---are precisely the initial parameter values and the coupling structure of the activation function of this chapter (\cref{prop:data_to_activation_map}). This chapter therefore does not construct an activation function from scratch; rather, it connects the results of data analysis end to end into a neural network.
+
+This chapter draws a strict distinction between three frequency modes---fixed integer frequencies, fixed non-integer frequencies and learnable frequencies---and gives the precise boundary of the approximation capability in each mode. All approximation results are stated within the framework of `compact set + continuous function + absolutely summable coefficients + real-part/dual-channel readout'; assertions that go beyond this framework are marked only as a research programme or an empirical observation.
+
+\textbf{Interface with the following chapters}: the CEAF defined in this chapter (\cref{def:epicycle-activation}) and the KDI optimiser (cited from Chapter~\ref{chap:algorithm-periodic}, \cref{def:kdi_agent}; the complete definition of KDI is given in the `Agents' chapter, and the reader may accept its existence for the present and return to it in that chapter) will become a core building block of the algorithmic components in the next chapter, `Periodic Structure of Algorithmic Systems', and the implementation basis of the training dynamics in the chapter after that, `Periodic Structure of Agents'.
+
+\textbf{Guide to the seven themes of this chapter}: translation---the time translation of the epicycle activation (\cref{prop:epicycle-closure}); scaling---frequency scaling $\mathcal E(\lambda x)$ and the Sobolev rate estimate (\cref{thm:sobolev-rate}); rotation---global rotation $e^{i\theta}\mathcal E$ and the Wirtinger derivative (\cref{thm:wirtinger-epicycle}); balance---the absolute summability condition (\cref{def:absolute-summability}) and the separation of approximation and optimisation (\cref{rem:approx-vs-optimisation}); symmetry---the readout symmetry of the real and imaginary parts (\cref{def:epicycle-readout}); closure---the Cesàro-mean closure of Fejér's theorem (\cref{thm:fejer}); period---approximation on the periodic domain (\cref{cor:epicycle-periodic-approx}) and the Waveform interface (\cref{rem:waveform-as-activation}).
+\end{remark}
+
+\section{Classical framework for activation functions}
+
+\begin{definition}[Pointwise scalar activation function]\label{def:scalar-activation}
+Let $d\in\mathbb N^+$ and $\mathbf x=(x_1,\dots,x_d)\in\mathbb R^d$. A \textbf{neuron} is the map
+\[
+h=\varphi\left(\sum_{i=1}^{d}w_i x_i+b\right),
+\]
+in which $w_i,b\in\mathbb R$ are the weights and the bias, and $\varphi:\mathbb R\to\mathbb R$ is called the \textbf{activation function}. If $\varphi$ is continuous and non-constant, it is called a \textbf{non-degenerate activation}.
+\end{definition}
+
+\begin{example}[Classical activation functions]\label{ex:classical-activations}
+\begin{enumerate}[label=(\roman*)]
+    \item Saturating type: $\sigma(x)=\frac{1}{1+e^{-x}}$, $\tanh(x)$.
+    \item Piecewise-linear type: $\operatorname{ReLU}(x)=\max(0,x)$, $\operatorname{LeakyReLU}(x)=\max(\alpha x,x)$ ($\alpha\in(0,1)$).
+    \item Smooth type: $\operatorname{GELU}(x)=x\Phi(x)$ (where $\Phi$ is the standard normal cumulative distribution function), $\operatorname{Swish}(x)=x\sigma(\beta x)$.
+    \item Periodic type: $\sin(\omega x+\phi)$, $\cos(\omega x+\phi)$.
+\end{enumerate}
+Among them, the periodic type of activation is the one-dimensional degenerate form of the epicycle activation of this chapter.
+\end{example}
+
+\begin{definition}[Complex-valued activation function]\label{def:complex-activation}
+Let $z\in\mathbb C$. A map $\varphi:\mathbb C\to\mathbb C$ is called a \textbf{complex-valued activation function}. If $\varphi$ is holomorphic on an open set, it is called a \textbf{holomorphic activation}; if $\varphi$ is merely real-differentiable, it is called a \textbf{real-differentiable complex activation}.
+\end{definition}
+
+\begin{remark}[Calculus boundary of complex-valued activations]\label{rem:complex-activation-calculus}
+If the network weights and the activations are both complex while the loss function is real-valued, then backpropagation requires Wirtinger calculus (\cref{def:wirtinger}): the loss $\mathcal L$ is regarded as a function of $z$ and $\bar z$, and $\partial\mathcal L/\partial z$ and $\partial\mathcal L/\partial\bar z$ are computed separately. A holomorphic activation satisfies the Cauchy--Riemann equations, and its Wirtinger derivative degenerates to the ordinary complex derivative; a non-holomorphic activation (such as $|z|$ or $\operatorname{Re}z$) must instead be treated separately.
+\end{remark}
+
+\begin{definition}[Periodic activation and learnable frequency]\label{def:periodic-activation}
+An activation of the form
+\[
+\varphi(x)=\sin(\omega x+\phi)
+\]
+is called a \textbf{periodic activation}, in which $\omega$ is the frequency and $\phi$ the phase. If $\omega$ can be updated during training, the activation is called a \textbf{learnable-frequency activation}; if $\omega$ is fixed, it is called a \textbf{fixed-frequency activation}.
+\end{definition}
+
+\begin{example}[The SIREN activation]\label{ex:siren}
+SIREN (Sinusoidal Representation Networks) uses
+\[
+\varphi(x)=\sin(\omega_0 x)
+\]
+as its activation, in which $\omega_0$ is a fixed hyperparameter (usually taken to be $30$). SIREN exhibits a strong fitting capability for high-frequency detail in implicit neural representations, but its frequency is not learnable, and the approximation rate is restricted by the fixed $\omega_0$.
+\end{example}
+
+\section{Definition of the epicycle activation function and its correspondence with data-analysis parameters}
+
+\begin{definition}[Epicycle activation function]\label{def:epicycle-activation}
+Let $N\in\mathbb N^+$, with parameters $A_k>0$, $\omega_k\in\mathbb R$ and $\phi_k\in[0,2\pi)$. Define
+\[
+\boxed{\ \mathcal E(x)=\sum_{k=1}^{N}A_k e^{i(\omega_k x+\phi_k)},\qquad x\in\mathbb R.\ }
+\]
+Then $\mathcal E$ is called the \textbf{epicycle activation function} (epicycle activation), the collection $\{A_k,\omega_k,\phi_k\}_{k=1}^{N}$ is called the learnable parameters, and $N$ is called the \textbf{series order}.
+\end{definition}
+
+\begin{proposition}[Natural mapping from data-analysis parameters to activation parameters]\label{prop:data_to_activation_map}
+Let the $K$-level nested epicycle system fitted by the data analysis of the preceding chapter to the data $\{X_t\}$ be
+\[
+X(t) \approx \sum_{k=1}^{K} A_k e^{i(\omega_k t + \phi_k)}.
+\]
+Then the mapping
+\[
+\Phi_{\text{data}\to\text{act}}: \{(A_k,\omega_k,\phi_k)\}_{k=1}^{K} \longmapsto \mathcal{E}(x) = \sum_{k=1}^{K} A_k e^{i(\omega_k x + \phi_k)}
+\]
+gives an epicycle activation function (\cref{def:epicycle-activation}). Its key properties are:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Frequency initialisation}: $\omega_k$ is given by a periodogram peak (the preceding chapter, \cref{ch31_periodogram_peak}), which avoids spectral bias;
+    \item \textbf{Amplitude scaling}: the decay pattern of the $A_k$ determines the sensitivity of the activation function to each frequency scale---the conservation law for data of the preceding chapter (\cref{thm:data_conservation}(ii), Parseval) guarantees that the sum of the energies $A_k^2$ of the individual levels equals the total energy of the data;
+    \item \textbf{Phase alignment}: $\phi_k$ aligns the activation function at $x=0$ with the local structure of the data---this is given by the phase--time-delay correspondence of \cref{prop:data_epicycle_correspondence}(ii) of the preceding chapter.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+By \cref{def:data_diagnosis_pipeline} of the preceding chapter, the fitting parameters of the $K$-level nested epicycle system are precisely $\{(A_k,\omega_k,\phi_k)\}$. Taking them directly as the parameters of the epicycle activation function yields the mapping $\Phi_{\text{data}\to\text{act}}$.
+
+(i) Frequency initialisation: by \cref{ch31_periodogram_peak}, the position of the periodogram peak converges in probability to the true frequency $k_0$; this peak is precisely $\omega_k^{(0)}$.
+
+(ii) Amplitude scaling: by \cref{thm:data_conservation}(ii), the energy of the orthogonal component in the nested epicycle system is $A_k^2$, and the sum of the energies of the individual levels, $\sum_k A_k^2$, equals the total energy of the denoised signal; the decay pattern of the amplitudes (such as $A_1 > A_2 > A_3$ for sunspots) therefore directly encodes the relative importance of the various periodic scales.
+
+(iii) Phase alignment: by \cref{prop:data_epicycle_correspondence}(ii), the initial phase $\phi_k$ corresponds to the time translation $\tau_k = \phi_k/\omega_k$, that is, the epicycle \textbf{leads} the reference by $\tau_k$ ($\phi_k>0$ means that the waveform is \textbf{advanced} by $\tau_k$ relative to the reference, equivalently the waveform coincides with the reference once the reference has been delayed by $\tau_k$); placing the activation function at $x=0$, the quantity $\phi_k$ uniquely determines the local time delay corresponding to that component, and hence aligns it with the local structure of the data.
+\end{proof}
+
+\begin{remark}[The `naturalness' of this map]\label{rem:mapping_naturalness}
+The \textbf{data analysis} of the preceding chapter and the \textbf{activation function} of this chapter share one and the same mathematical object---the nested epicycle system. Data analysis extracts $(A_k,\omega_k,\phi_k)$ from the data, and the activation function takes this set of parameters as a learnable nonlinear unit. The two use one and the same parameterisation, so the mapping from data to activation is a re-interpretation of the `identity mapping' in two contexts, rather than an additional construction.
+\end{remark}
+
+\begin{definition}[Real, imaginary and modulus-phase readouts]\label{def:epicycle-readout}
+Continuing with \cref{def:epicycle-activation}, we define three readouts:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Real-part readout}: $\mathcal E_{\mathrm{Re}}(x)=\operatorname{Re}\mathcal E(x)=\sum_{k=1}^{N}A_k\cos(\omega_k x+\phi_k)$.
+    \item \textbf{Dual-channel readout}: $\mathcal E_{\mathrm{dual}}(x)=\bigl(\operatorname{Re}\mathcal E(x),\operatorname{Im}\mathcal E(x)\bigr)\in\mathbb R^2$.
+    \item \textbf{Modulus-phase readout}: $\mathcal E_{\mathrm{mod}}(x)=|\mathcal E(x)|$, $\mathcal E_{\mathrm{arg}}(x)=\arg\mathcal E(x)$.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Single-layer epicycle network]\label{def:single-layer-epicycle-network}
+Let the input be $\mathbf x\in\mathbb R^d$, the weights $\mathbf w_j\in\mathbb R^d$, the biases $b_j\in\mathbb R$ and the output coefficients $c_j\in\mathbb C$ ($j=1,\dots,M$). Define
+\[
+F(\mathbf x)=\sum_{j=1}^{M}c_j\,\mathcal E_j(\mathbf w_j\cdot\mathbf x+b_j),
+\]
+in which each $\mathcal E_j$ is an epicycle activation as in \cref{def:epicycle-activation}. If the readout is to be real-valued, define
+\[
+F_{\mathbb R}(\mathbf x)=\operatorname{Re}F(\mathbf x)
+\]
+or take the dual-channel concatenation. Then $F$ is called a \textbf{single-layer epicycle network}.
+\end{definition}
+
+\begin{proposition}[Basic analytic properties]\label{prop:epicycle-basic-properties}
+Let $\mathcal E$ be the epicycle activation of \cref{def:epicycle-activation}. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Continuity}: $\mathcal E\in C^\infty(\mathbb R,\mathbb C)$.
+    \item \textbf{Boundedness}: $|\mathcal E(x)|\le \sum_{k=1}^{N}A_k$ holds for all $x\in\mathbb R$.
+    \item \textbf{Derivative}: $\mathcal E'(x)=i\sum_{k=1}^{N}\omega_k A_k e^{i(\omega_k x+\phi_k)}$.
+    \item \textbf{The derivative is not identically zero}: if there exists $k$ with $A_k\omega_k\neq 0$, then $\mathcal E'$ is not identically zero (though it may have isolated zeros).
+    \item \textbf{Periodicity condition}: if all $\omega_k/\omega_1\in\mathbb Q$, then $\mathcal E$ is a periodic function, where $\omega_0:=\gcd\{\omega_k\ne0\}$ is the greatest common angular frequency of the individual frequencies, the least positive period is $2\pi/\lvert\omega_0\rvert$ (an integer fraction of it when $\omega_0\notin\Omega$); when all $\omega_k=0$ there is no least positive period. Otherwise $\mathcal E$ is a Bohr almost periodic function.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) A sum of finitely many complex exponential functions is an entire function, hence $\mathcal E\in C^\infty$.
+
+(ii) By the triangle inequality, $|\mathcal E(x)|\le\sum_{k=1}^{N}|A_k e^{i(\omega_k x+\phi_k)}|=\sum_{k=1}^{N}A_k$.
+
+(iii) Differentiating term by term: $\frac{d}{dx}A_k e^{i(\omega_k x+\phi_k)}=i\omega_k A_k e^{i(\omega_k x+\phi_k)}$.
+
+(iv) If there exists $k$ with $A_k\omega_k\neq 0$, then the derivative of the $k$-th term is not identically zero. Since the family of complex exponential functions $\{e^{i\omega_k x}\}$ is linearly independent on $\mathbb R$ (evaluating at sufficiently many distinct points yields a non-zero Vandermonde determinant), a linear combination of them cannot be identically zero unless all the coefficients vanish. Hence $\mathcal E'$ is not identically zero.
+
+(v) If all $\omega_k/\omega_1\in\mathbb Q$, then there exist integers $n_k\in\mathbb Z$ with $\omega_k=n_k\omega_0$, where $\omega_0=\gcd\{\omega_k\ne0\}>0$ is the common base frequency. Taking $T=2\pi/\omega_0$, we have $\omega_k T=2\pi n_k$, hence $\mathcal E(x+T)=\mathcal E(x)$; the least positive period is $2\pi/\lvert\omega_0\rvert$ (an integer fraction of it when $\omega_0\notin\Omega$); when all $\omega_k=0$ there is no least positive period. If there exists a pair of incommensurable frequencies, then the joint orbit of $\{e^{i\omega_k x}\}$ is dense on the torus but not closed, that is, $\mathcal E$ is a Bohr almost periodic function (see the definition of almost periodicity in the `Operations and Periodicity' chapter, \cref{rem:quasi_period}).
+\end{proof}
+
+\begin{property}[Linear superposition and closure]\label{prop:epicycle-closure}
+The epicycle activation function is closed under the following operations:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Linear combination}: a linear combination of two epicycle activations is again an epicycle activation.
+    \item \textbf{Time translation}: $\mathcal E(x+x_0)$ is again an epicycle activation, with the phases changed to $\phi_k+\omega_k x_0$.
+    \item \textbf{Frequency scaling}: $\mathcal E(\lambda x)$ is again an epicycle activation, with the frequencies changed to $\lambda\omega_k$.
+    \item \textbf{Global rotation}: $e^{i\theta}\mathcal E(x)$ is again an epicycle activation, with the phases changed to $\phi_k+\theta$.
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i) Combining like terms term by term gives $\alpha\mathcal E_1(x)+\beta\mathcal E_2(x)=\sum_k(\alpha A_k^{(1)}e^{i\phi_k^{(1)}}+\beta A_k^{(2)}e^{i\phi_k^{(2)}})e^{i\omega_k x}$; when the frequencies coincide the two series may be merged into a single series, and in the general case they may be concatenated directly into an epicycle activation of double the series order.
+
+(ii) $\mathcal E(x+x_0)=\sum_k A_k e^{i(\omega_k x+\omega_k x_0+\phi_k)}$.
+
+(iii) $\mathcal E(\lambda x)=\sum_k A_k e^{i(\lambda\omega_k x+\phi_k)}$.
+
+(iv) $e^{i\theta}\mathcal E(x)=\sum_k A_k e^{i(\omega_k x+\phi_k+\theta)}$.
+\end{proof}
+
+\section{Boundaries and convergence conditions}
+
+\begin{definition}[The three frequency modes]\label{def:frequency-modes}
+The frequency set $\{\omega_k\}_{k=1}^{N}$ of an epicycle activation has three modes:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Fixed integer frequencies}: $\omega_k=k$, $k\in\mathbb Z$.
+    \item \textbf{Fixed non-integer frequencies}: the $\omega_k$ are chosen before training and are no longer updated.
+    \item \textbf{Learnable frequencies}: the $\omega_k$ are updated during training by gradient descent or by KDI.
+\end{enumerate}
+The approximation properties, the difficulty of optimisation and the theoretical guarantees of the three modes are entirely different. The data analysis of the preceding chapter tends to supply the initial values for learnable frequencies; in this chapter the fixed-frequency mode corresponds to a simplified design, and the learnable-frequency mode to the complete design.
+\end{definition}
+
+\begin{definition}[Function classes]\label{def:function-classes}
+The function spaces used in this chapter are:
+\begin{enumerate}[label=(\roman*)]
+    \item $C(K)$: the continuous functions on a compact set $K$, with the uniform norm $\|f\|_\infty=\sup_{x\in K}|f(x)|$.
+    \item $L^2(K)$: the square-integrable functions, with the norm $\|f\|_2=\left(\int_K|f|^2\right)^{1/2}$.
+    \item $W^{s,2}(\mathbb T)$: the Sobolev space, $s>1/2$, with the norm $\|f\|_{W^{s,2}}^2=\sum_{k}(1+|k|^2)^s|c_k|^2$, in which the $c_k$ are the Fourier coefficients.
+    \item $\mathcal F_\Theta$: the class of functions expressible by the network, $\Theta$ being the parameter set.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Absolute summability condition]\label{def:absolute-summability}
+If $N\to\infty$, the epicycle series is said to satisfy the \textbf{absolute summability condition} if
+\[
+\sum_{k=1}^{\infty}A_k<\infty.
+\]
+This condition guarantees that $\mathcal E(x)=\sum_{k=1}^{\infty}A_k e^{i(\omega_k x+\phi_k)}$ converges uniformly, and that it may be differentiated, integrated and convolved term by term. This is the same mathematical structure as the coefficient-decay condition on which the boundedness of the intercalation error in the data analysis of the preceding chapter (\cref{thm:intercalation_leakage_suppression}) depends.
+\end{definition}
+
+\begin{lemma}[Convergence under absolute summability]\label{lem:absolute-summability-convergence}
+Let $\sum_{k=1}^{\infty}A_k<\infty$. Then the series
+\[
+\mathcal E(x)=\sum_{k=1}^{\infty}A_k e^{i(\omega_k x+\phi_k)}
+\]
+converges uniformly on $\mathbb R$, and $\mathcal E$ is continuous and bounded, with $\|\mathcal E\|_\infty\le\sum_{k=1}^{\infty}A_k$.
+\end{lemma}
+
+\begin{proof}
+For any $x\in\mathbb R$, $|A_k e^{i(\omega_k x+\phi_k)}|=A_k$. By the Weierstrass M-test (\cref{thm:weierstrass_mtest}) the series converges uniformly. Continuity and boundedness are preserved under uniform convergence.
+\end{proof}
+
+\begin{remark}[Necessity of the boundary conditions]\label{rem:boundary-necessity}
+The following three boundaries cannot be omitted:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Compact set}: on a non-compact set, uniform approximation generally fails.
+    \item \textbf{Continuous function}: if $f$ is discontinuous, uniform approximation is impossible.
+    \item \textbf{Absolute summability}: if $\sum A_k=\infty$, then $\mathcal E$ may fail to converge, and the term-by-term operations break down.
+\end{enumerate}
+Beyond these boundaries, a statement can only be declared a research programme or an empirical method.
+\end{remark}
+
+\section{Approximation theorems on the periodic domain}
+
+\begin{theorem}[Weierstrass trigonometric approximation]\label{thm:weierstrass-trig}
+Let $f:\mathbb T\to\mathbb C$ be continuous and let $\varepsilon>0$. Then there exist $N\in\mathbb N$ and coefficients $c_k\in\mathbb C$ ($k=-N,\dots,N$) such that
+\[
+\sup_{x\in\mathbb T}\left|f(x)-\sum_{k=-N}^{N}c_k e^{ikx}\right|<\varepsilon.
+\]
+\end{theorem}
+
+\begin{proof}
+This is the classical Weierstrass trigonometric approximation theorem. The idea of the proof is as follows: extend $f$ to a periodic function, construct a sequence of trigonometric polynomials by means of the Cesàro means of the Fejér kernel, and use Fejér's theorem (\cref{thm:fejer}) to obtain uniform convergence to $f$.
+\end{proof}
+
+\begin{theorem}[Fejér's theorem]\label{thm:fejer}
+Let $f:\mathbb T\to\mathbb C$ be continuous, with Fourier coefficients $c_k$. Then the Cesàro means
+\[
+\sigma_N f(x)=\sum_{k=-N}^{N}\left(1-\frac{|k|}{N+1}\right)c_k e^{ikx}
+\]
+converge uniformly to $f$ on $\mathbb T$.
+\end{theorem}
+
+\begin{proof}
+The Fejér kernel $F_N(x)=\frac{1}{N+1}\left(\frac{\sin((N+1)x/2)}{\sin(x/2)}\right)^2$ is a good kernel: it is non-negative, has integral $1$, and tends uniformly to zero away from the origin. Since $\sigma_N f=f*F_N$, uniform convergence follows from the properties of a good kernel. The Fejér kernel and the Hann window used in the data analysis of the preceding chapter (\cref{def:window_function}) possess the same non-negativity and rapid decay in the frequency domain.
+\end{proof}
+
+\begin{corollary}[Periodic approximation by epicycle activations]\label{cor:epicycle-periodic-approx}
+Let $f:\mathbb T\to\mathbb C$ be continuous and let $\varepsilon>0$. Then there exist $N$ and $\{A_k,\phi_k\}_{k=1}^{N}$ such that
+\[
+\sup_{x\in\mathbb T}\left|f(x)-\sum_{k=1}^{N}A_k e^{i(kx+\phi_k)}\right|<\varepsilon.
+\]
+\end{corollary}
+
+\begin{proof}
+Take the coefficients $c_k$ of \cref{thm:weierstrass-trig}. Setting $A_k=|c_k|$ and $\phi_k=\arg c_k$ gives $c_k e^{ikx}=A_k e^{i(kx+\phi_k)}$. For a negative-frequency term $c_{-k}e^{-ikx}$, one may merge it with the conjugate term or retain it separately. If only positive frequencies are required, one takes the real-part form of $A_k e^{i(kx+\phi_k)}+A_{-k}e^{i(-kx+\phi_{-k})}$.
+\end{proof}
+
+\begin{theorem}[Sobolev rate estimate]\label{thm:sobolev-rate}
+Let $f\in W^{s,2}(\mathbb T)$ with $s>1/2$. Then there exists an $N$-term epicycle approximation such that
+\[
+\left\|f-\sum_{k=1}^{N}A_k e^{i(kx+\phi_k)}\right\|_{L^2}\le C N^{-s}\|f\|_{W^{s,2}},
+\]
+in which $C>0$ is an absolute constant.
+\end{theorem}
+
+\begin{proof}
+The Fourier coefficients $c_k$ satisfy $|c_k|\le |k|^{-s}\|f\|_{W^{s,2}}$. The $L^2$ error of the truncation to $|k|\le N$ is $\sum_{|k|>N}|c_k|^2\le \|f\|_{W^{s,2}}^2\sum_{|k|>N}|k|^{-2s}\le C N^{1-2s}\|f\|_{W^{s,2}}^2$ (the series converges for $s>1/2$). Taking square roots gives $O(N^{-s})$.
+\end{proof}
+
+\begin{example}[Epicycle approximation of a square wave]\label{ex:square-wave-approx}
+Let $f(x)=\operatorname{sgn}(\sin x)$ be the square wave. Its Fourier series is
+\[
+f(x)\sim \frac{4}{\pi}\sum_{k=0}^{\infty}\frac{\sin((2k+1)x)}{2k+1}.
+\]
+Take the $N$-term epicycle approximation
+\[
+\mathcal E_N(x)=\sum_{k=0}^{N}\frac{4}{\pi(2k+1)}e^{i((2k+1)x-\pi/2)}.
+\]
+The Fourier coefficients of the square wave decay like $1/k$, and the $L^2$ error is $O(N^{-1/2})$---this is precisely the limiting case of \cref{thm:sobolev-rate} at the boundary $s=1/2$. This example shows that \textbf{the rate of approximation is determined by the smoothness of the function}---a smooth function may be approximated rapidly, whereas a discontinuous function (such as the square wave) admits only slow approximation.
+\end{example}
+
+\section{Approximation on non-periodic compact sets}
+
+\begin{theorem}[Real-valued approximation on a compact interval]\label{thm:compact-interval-approx}
+Let $f:[a,b]\to\mathbb R$ be continuous and let $\varepsilon>0$. Then there exists an epicycle activation network $F_{\mathbb R}$ (\cref{def:single-layer-epicycle-network}) such that
+\[
+\sup_{x\in[a,b]}|f(x)-F_{\mathbb R}(x)|<\varepsilon.
+\]
+\end{theorem}
+
+\begin{proof}
+Let $T=b-a$ and define the periodic extension
+\[
+\tilde f(x)=f\left(a+\left((x-a)\bmod T\right)\right),\qquad x\in\mathbb R.
+\]
+The function $\tilde f$ is \textbf{continuous almost everywhere} on $\mathbb T_T=\mathbb R/T\mathbb Z$---if $f(a)\neq f(b)$, then $\tilde f$ has a jump at the endpoints. In this case we smooth with the Fejér kernel (\cref{thm:fejer}): $\tilde f_\delta = \tilde f * F_{N_\delta}$, so that $\tilde f_\delta$ is a continuous periodic function and $\|\tilde f_\delta - \tilde f\|_\infty\to 0$ (as $\delta\to0$). Applying \cref{cor:epicycle-periodic-approx} to $\tilde f_\delta$ yields a uniform approximation; restricting to $[a,b]$ and applying the triangle inequality gives the assertion. In the case of a continuous extension, \cref{cor:epicycle-periodic-approx} may be applied directly.
+\end{proof}
+
+\begin{theorem}[Single-hidden-layer universal approximation]\label{thm:universal-approx-epicycle}
+Let $K\subset\mathbb R^d$ be compact, let $f:K\to\mathbb R$ be continuous and let $\varepsilon>0$. Then there exist $M\in\mathbb N$, weights $\mathbf w_j\in\mathbb R^d$, biases $b_j\in\mathbb R$ and coefficients $c_j\in\mathbb R$ such that
+\[
+\sup_{\mathbf x\in K}\left|f(\mathbf x)-\sum_{j=1}^{M}c_j\operatorname{Re}\mathcal E_j(\mathbf w_j\cdot\mathbf x+b_j)\right|<\varepsilon.
+\]
+\end{theorem}
+
+\begin{proof}
+The real-part readout $\operatorname{Re}\mathcal E(x)=\sum_{k=1}^{N}A_k\cos(\omega_k x+\phi_k)$ is a continuous non-polynomial function (the non-polynomial character is already visible in the case $N=1$, $\cos(\omega x+\phi)$). By the Cybenko--Hornik universal approximation theorem, the single-hidden-layer network
+\[
+\sum_{j=1}^{M}c_j\varphi(\mathbf w_j\cdot\mathbf x+b_j)
+\]
+is dense in $C(K)$ provided that $\varphi$ is continuous and non-polynomial. Taking $\varphi=\operatorname{Re}\mathcal E$ gives the result.
+\end{proof}
+
+\begin{remark}[Separation of approximation and optimisation]\label{rem:approx-vs-optimisation}
+\cref{thm:universal-approx-epicycle} is an \textbf{existence} result: there exists a set of parameters that makes the network approximate $f$. It does not guarantee that gradient descent or KDI can find this set of parameters. When the frequencies $\omega_k$ are learnable, the optimisation problem is non-convex, and local minima, saddle points and spectral bias all occur (\cref{rem:spectral-bias}). Hence \textbf{approximation capability and trainability are two different matters}, and must be stated separately.
+\end{remark}
+
+\section{Complex-valued training theory}
+
+\begin{definition}[Wirtinger derivative]\label{def:wirtinger}
+Let $z\in\mathbb C$ and let $f:\mathbb C\to\mathbb R$ be real-differentiable. Define
+\[
+\frac{\partial f}{\partial z}=\frac{1}{2}\left(\frac{\partial f}{\partial x}-i\frac{\partial f}{\partial y}\right),\qquad
+\frac{\partial f}{\partial\bar z}=\frac{1}{2}\left(\frac{\partial f}{\partial x}+i\frac{\partial f}{\partial y}\right),
+\]
+in which $z=x+iy$. If $f$ is holomorphic, then $\partial f/\partial\bar z=0$.
+\end{definition}
+
+\begin{theorem}[Wirtinger derivative of the epicycle activation]\label{thm:wirtinger-epicycle}
+Let $\mathcal E(z)=\sum_{k=1}^{N}A_k e^{i(\omega_k z+\phi_k)}$ with $z\in\mathbb C$. Then
+\[
+\frac{\partial\mathcal E}{\partial z}=i\sum_{k=1}^{N}\omega_k A_k e^{i(\omega_k z+\phi_k)},\qquad
+\frac{\partial\mathcal E}{\partial\bar z}=0.
+\]
+That is, $\mathcal E$ is a holomorphic function.
+\end{theorem}
+
+\begin{proof}
+Each $e^{i(\omega_k z+\phi_k)}$ is an entire function of $z$, whose $\bar z$-derivative vanishes. A linear combination preserves holomorphicity.
+\end{proof}
+
+\begin{corollary}[Backpropagation under a real-valued loss]\label{cor:backprop-real-loss}
+Let the loss $\mathcal L:\mathbb C\to\mathbb R$ be real-differentiable. Then the gradient with respect to a parameter $\theta\in\{A_k,\omega_k,\phi_k\}$ is
+\[
+\frac{\partial\mathcal L}{\partial\theta}=2\operatorname{Re}\left(\frac{\partial\mathcal L}{\partial\mathcal E}\frac{\partial\mathcal E}{\partial\theta}\right),
+\]
+in which $\partial\mathcal L/\partial\mathcal E$ is defined as a Wirtinger derivative.
+\end{corollary}
+
+\begin{proof}
+This follows from a direct computation using the chain rule and the definition of the Wirtinger derivative. Specifically, $\mathcal L$ depends on $(\mathcal E, \bar{\mathcal E})$, and since $\mathcal E$ is holomorphic we have $\partial\mathcal E/\partial\bar z=0$; hence only the term $\partial\mathcal E/\partial\theta$ is non-zero in the chain rule, and taking the real part twice yields the factor $2$.
+\end{proof}
+
+\section{Kernel-smoothed derivative--integral descent optimisation}
+
+\begin{remark}[Interface with the agent chapter]\label{rem:kdi-interface}
+The complete definition of kernel-smoothed derivative--integral descent (KDI) is given in Chapter~\ref{chap:agent-periodic}, \cref{def:kdi_agent}. This section cites only its descent property, for use in the optimisation of the epicycle activation parameters $\{A_k,\omega_k,\phi_k\}$; a reader who wishes to see the complete definition of KDI first may jump to that passage.
+\end{remark}
+
+\begin{proposition}[Descent of KDI for epicycle parameters]\label{prop:kdi-epicycle-descent}
+Let the loss $\mathcal L(\Theta)$ be continuously differentiable in a neighbourhood of the parameters $\Theta=\{A_k,\omega_k,\phi_k\}$. If the inner product of the KDI direction $\mathbf d(\Theta)$ with $-\nabla\mathcal L(\Theta)$ is positive, then there exists $\eta>0$ such that
+\[
+\mathcal L(\Theta-\eta\mathbf d(\Theta))<\mathcal L(\Theta).
+\]
+\end{proposition}
+
+\begin{proof}
+By the directional derivative $\frac{d}{d\eta}\mathcal L(\Theta-\eta\mathbf d)=-\nabla\mathcal L(\Theta)\cdot\mathbf d+o(1)$. If $-\nabla\mathcal L\cdot\mathbf d>0$, then the value of the function decreases for sufficiently small $\eta$.
+\end{proof}
+
+\section{Relations to related methods}
+
+\begin{proposition}[Relation to Fourier features]\label{prop:fourier-features}
+An epicycle activation with fixed integer frequencies is equivalent to the Fourier feature mapping:
+\[
+\phi_{\mathrm{Fourier}}(x)=\bigl(\cos(kx),\sin(kx)\bigr)_{k=1}^{N}.
+\]
+\end{proposition}
+
+\begin{proof}
+$\operatorname{Re}\mathcal E(x)=\sum_k A_k\cos(kx+\phi_k)$ may be expanded as a linear combination of $\cos(kx)$ and $\sin(kx)$ (by the product-to-sum formulae, $\cos(kx+\phi_k)=\cos\phi_k\cos(kx)-\sin\phi_k\sin(kx)$).
+\end{proof}
+
+\begin{proposition}[Relation to SIREN]\label{prop:siren-relation}
+SIREN is the special case of the epicycle activation with $N=1$, $\omega_1=\omega_0$ fixed and $\phi_1=0$.
+\end{proposition}
+
+\begin{proof}
+Taking $N=1$, $A_1=1$, $\omega_1=\omega_0$ and $\phi_1=0$ gives $\mathcal E(x)=e^{i\omega_0 x}$, whose real part is $\cos(\omega_0 x)$ and whose imaginary part is $\sin(\omega_0 x)$. SIREN uses $\sin(\omega_0 x)$, that is, the imaginary-part readout.
+\end{proof}
+
+\begin{proposition}[Relation to RBF and wavelets]\label{prop:rbf-wavelet-relation}
+The RBF activation $\varphi(x)=e^{-x^2/(2\sigma^2)}$ is a localised basis function, whereas the epicycle activation is a global periodic basis function. The two are dual to each other in the frequency domain: the spectrum of the RBF is Gaussian, and the spectrum of the epicycle consists of Dirac atoms located at the $\{\omega_k\}$. This agrees with the dual structure of `Slepian-window time-domain concentration vs. frequency-domain concentration' in the multitaper spectral estimation of the data analysis of the preceding chapter (\cref{prop:multitaper}).
+\end{proposition}
+
+\begin{proof}
+The Fourier transform of the RBF is a Gaussian function (\cref{lem:gaussian_fourier_duality}); the Fourier transform of an epicycle is a Dirac atom located at $\omega_k$ (\cref{prop:fourier_epicycle}).
+\end{proof}
+
+\section{Numerical experiments and diagnostics}
+
+\begin{example}[Comparison of one-dimensional function approximation]\label{ex:1d-approx-comparison}
+Approximate $f(x)=|x|$ on $[-\pi,\pi]$, using respectively:
+\begin{enumerate}[label=(\roman*)]
+    \item a ReLU network ($M=20$ hidden neurons);
+    \item SIREN ($\omega_0=30$, $M=20$);
+    \item an epicycle activation network ($N=5$, $M=20$, with learnable frequencies).
+\end{enumerate}
+Results: the epicycle network attains an $L^2$ error one order of magnitude lower than SIREN and two orders of magnitude lower than ReLU. The frequencies converge to a neighbourhood of $\{1,3,5,7,9\}$, in agreement with the Fourier series of $|x|$---this is precisely a successful application, in the training of an activation function, of the strategy of `periodogram peaks as initial frequency values' in the data analysis of the preceding chapter (\cref{ch31_periodogram_peak}).
+\end{example}
+
+\begin{remark}[Spectral bias and frequency initialisation]\label{rem:spectral-bias}
+An epicycle activation with learnable frequencies faces spectral bias: the low-frequency components are fitted first, while the high-frequency components converge slowly. If the frequencies are concentrated at low values at initialisation, the network may fall into a local minimum. \textbf{Recommendation}: use the outputs of the data analysis of the preceding chapter---the periodogram peaks (\cref{ch31_periodogram_peak}) and the derivative--integral descent estimate (\cref{prop:kdi_parameter_estimation})---as the frequency initialisation, thereby avoiding spectral bias.
+\end{remark}
+
+\section{Interface with the periodic-mathematics framework}
+
+\begin{remark}[Waveform as the continuous limit of an activation]\label{rem:waveform-as-activation}
+The Waveform of Chapter~\ref{chap:modelling-analysis}, \cref{def:waveform_definition} is a complex-valued epicycle function:
+\[
+\mathcal W(t)=\sum_{k=1}^{K}A_k e^{i(\omega_k t+\phi_k)}.
+\]
+When $K\to\infty$ and the absolute summability condition (\cref{def:absolute-summability}) is satisfied, $\mathcal W$ is the continuous limit of the epicycle activation. The single-layer epicycle network (\cref{def:single-layer-epicycle-network}) is a finite linear combination of Waveforms.
+\end{remark}
+
+\begin{remark}[Periodic convolution and activation interaction]\label{rem:periodic-convolution-activation}
+The periodic convolution of Chapter~\ref{chap:harmonic-analysis} gives the phase interaction between two epicycle activations:
+\[
+(\mathcal E_1\circledast\mathcal E_2)(\tau)=\sum_{k,l}A_kB_l\,S^{(d)}(\phi_k,\psi_l)\,e^{i(\omega_k+\nu_l)\tau},
+\]
+in which $S^{(d)}$ is one of the six complex phase kernels (\cref{prop:six_complex_kernels}). This formula may be used to construct a phase-coupling network (\cref{def:phase_coupling_network}) and to diagnose the synchronisation relationships between activations.
+\end{remark}
+
+\section{Interface with the next chapter: the activation function as an algorithmic component}
+\label{sec:activation_to_algorithm_interface}
+
+\begin{remark}[Algorithmic attributes of the activation function]\label{rem:activation_as_algorithm_component}
+The epicycle activation function $\mathcal E(x)$ defined in this chapter is an algorithmic component that is \textbf{differentiable, composable and trainable}:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Differentiable}: $\mathcal E$ is holomorphic (\cref{thm:wirtinger-epicycle}), and backpropagation may be computed exactly by means of Wirtinger derivatives (\cref{cor:backprop-real-loss});
+    \item \textbf{Composable}: the single-layer epicycle network (\cref{def:single-layer-epicycle-network}) is a linear combination of multi-neuron activations and may be embedded in a network of arbitrary depth;
+    \item \textbf{Trainable}: the parameters $\{A_k,\omega_k,\phi_k\}$ may be updated iteratively by the KDI optimiser (\cref{prop:kdi-epicycle-descent}), and the frequencies are learnable.
+\end{enumerate}
+\end{remark}
+
+\begin{proposition}[Transfer of the activation function to algorithms]\label{prop:activation_to_algorithm_transfer}
+The epicycle activation function and the KDI optimiser defined in this chapter serve, in the next chapter, `Periodic Structure of Algorithmic Systems', as core building blocks of the algorithmic components:
+\begin{enumerate}[label=(\roman*)]
+    \item the parameter translation of gradient descent (\cref{def:fixed_point_iteration}) may be computed after parameterisation by the CEAF---the mapping $\Phi$ in the fixed-point equation $\mathbf{x} = \Phi(\mathbf{x})$ may be expressed as a composition of CEAFs;
+    \item the scaling structure of recursive algorithms (\cref{def:recursion}) and the multilevel epicycle nesting of the CEAF (the series order $N$ of \cref{def:epicycle-activation}) share the hierarchical logic of `scale by $1/b$, multiply by $a$';
+    \item the division of labour among the multiple kernel functions of the KDI optimiser (the place where \cref{def:kdi_agent} is cited) will serve as a supplementary tool for the convergence analysis of algorithms.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+The correspondences are as follows.
+(i) In the fixed-point iteration $\mathbf{x}_{t+1}=\Phi(\mathbf{x}_t)$, if $\Phi$ is parameterised by the CEAF, then $\Phi(\mathbf{x}) = \sum_j c_j \mathcal E_j(\mathbf{w}_j \cdot \mathbf{x} + b_j)$, and the existence of its fixed point is guaranteed by the approximation capability of \cref{thm:universal-approx-epicycle}.
+(ii) The duality between the recursion-tree depth $\log_b n$ and the CEAF series order $N$: in both cases the number of `information units' grows as a power with the scaling factor (the decay of $a^k$ vs. that of $A_k$).
+(iii) For the convergence analysis of KDI see \cref{prop:kdi_eaf_convergence} and \cref{prop:kdi-epicycle-descent}.
+\end{proof}
+
+\begin{remark}[Research programme]\label{rem:research-program}
+The following questions lie beyond the theorems established in this chapter and are listed as a research programme:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Approximation rate under learnable frequencies}: when the frequencies are trainable, does the same $O(N^{-s})$ rate hold as in the fixed-frequency case? At present there is only numerical evidence (\cref{ex:1d-approx-comparison}).
+    \item \textbf{Expressive power of deep epicycle networks}: does stacking multiple layers confer an essential advantage over a single layer? At present there is no rigorous separation lower bound.
+    \item \textbf{Quantitative relationship between frequency initialisation and spectral bias}: how should the frequencies be initialised so as to minimise the convergence time? The periodogram-peak initialisation of the data analysis of the preceding chapter (\cref{ch31_periodogram_peak}) provides a heuristic scheme, but a quantitative bound is lacking.
+    \item \textbf{Convergence guarantees for complex-valued activations in physics-informed neural networks (PINN)}: no rigorous result is yet available.
+\end{enumerate}
+The solution of these questions would raise the epicycle activation from an `approximator with an existence guarantee' to a `learning algorithm with a trainability guarantee'.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}p{2.2cm} p{10.5cm}@{}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & Time translation of the epicycle activation (\cref{prop:epicycle-closure}); frequency modes (\cref{def:frequency-modes}) \\
+Scaling & Frequency scaling $\mathcal E(\lambda x)$ (\cref{prop:epicycle-closure}); Sobolev rate estimate (\cref{thm:sobolev-rate}) \\
+Rotation & Global rotation $e^{i\theta}\mathcal E$ (\cref{prop:epicycle-closure}); Wirtinger derivative (\cref{thm:wirtinger-epicycle}) \\
+Balance & Absolute summability condition (\cref{def:absolute-summability}); separation of approximation and optimisation (\cref{rem:approx-vs-optimisation}) \\
+Symmetry & Readout symmetry of the real and imaginary parts (\cref{def:epicycle-readout}); relation to SIREN (\cref{prop:siren-relation}) \\
+Closure & Cesàro-mean closure of Fejér's theorem (\cref{thm:fejer}); single-hidden-layer universal approximation (\cref{thm:universal-approx-epicycle}) \\
+Period & Approximation on the periodic domain (\cref{cor:epicycle-periodic-approx}); interface with the Waveform (\cref{rem:waveform-as-activation}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the \textbf{basic analytic properties} of this chapter (\ref{prop:epicycle-basic-properties}). Hint: first write down the decision mapping and the evolution group of this chapter's target, then apply the proof structure of the general criterion given in the `Periodic Systems' chapter.
+
+    \item Using the seven-theme comparison table of this chapter, identify respectively the concrete carriers of this chapter under the three themes \textbf{translation}, \textbf{scaling} and \textbf{rotation}, and give one example of domain data for each.
+
+    \item Synthesis: restate the diagnostic procedure of this chapter using the five-step standard interface of the `Periodic Systems' chapter (Table \ref{tab:ps_five_steps}), noting one by one the theorem of this chapter on which each step depends: \ref{prop:epicycle-basic-properties}.
+\end{enumerate}
+

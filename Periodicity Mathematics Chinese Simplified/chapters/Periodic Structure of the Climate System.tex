@@ -1,0 +1,728 @@
+\chapter{气候系统之周期结构}
+\markboth{气候系统之周期结构}{气候系统之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:climate_ps_hook}
+本章判定研究目标是否具有周期性、确定其周期类型、以及查找最小正周期时，一律引用「周期系统」章：
+周期性判据见 \cref{thm:ps_periodicity_decision}，
+周期类型判别见 \cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}，
+最小正周期查找见 \cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}，
+由数据构建周期级数与周转圆组见 \cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}。
+\end{remark}
+
+\begin{remark}[本章定位：按「周期系统」章五步接口展开]\label{rem:climate_five_steps_positioning}
+气候系统之周期结构研究地球气候系统中周期性、准周期性和长程相关的数学表征。本章不另立周期性判据，而是把气候系统接入「周期系统」章规定的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把季节循环、ENSO、NAO、PDO、IOD、米兰科维奇旋回等目标化为离散或连续动力系统，引用 \cref{thm:ps_periodicity_decision} 判定是否具有周期性，并确定周期类型；
+    \item \textbf{构建}：由温度、降水、气压、海面温度、辐射强迫、风应力构建振幅级数、频率级数、相位级数，组装为气候周转圆组；
+    \item \textbf{调节}：用残差能量下降、能量守恒、动量守恒与水汽守恒约束动态调节气候周转圆组；
+    \item \textbf{卷积}：在气候周转圆组上引入振幅卷积、相位卷积、频率卷积，并与自相关、互相关、遥相关、海盆间耦合衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成气候周期诊断流程。
+\end{enumerate}
+本章使用的数学工具包括：太阳辐射几何、延迟负反馈振荡、充-放电视模型、慢–快变量分离、红噪声谱、Hurst 指数、$1/f$ 噪声、多尺度叠加、周期卷积、周转圆组、相位算子、时延。
+\end{remark}
+
+\begin{remark}[本章七主题导引]\label{rem:climate_seven_themes}
+\textbf{平移}——季节循环的年际推进与大气变率的时间平移；\textbf{缩放}——$1/f$ 噪声的标度不变性与长程持续性（Hurst 指数 $H$）；\textbf{旋转}——ENSO 暖相/冷相的相位振荡与米兰科维奇轨道旋回；\textbf{守恒}——全球能量平衡、地-气角动量守恒与水汽（水文循环）守恒（定理 \ref{thm:climate_conservation}）；\textbf{对称}——南北半球季节的相位对称（相位差 $\pi$）；\textbf{闭合}——冰-反照率反馈等气候反馈回路的闭合；\textbf{周期}——季节（$1$ 年）、ENSO（$2$—$7$ 年）、PDO（$20$—$30$ 年）、米兰科维奇（$2.3$ 万—$10$ 万年）的多尺度周期。
+\end{remark}
+
+\section{接入「周期系统」章的五步接口}
+\label{sec:climate_five_steps}
+
+\subsection{第一步：气候目标的周期性判定}
+
+\begin{definition}[气候目标与判定输入]\label{def:climate_target}
+一个\textbf{气候目标}是指下列对象之一：
+\begin{enumerate}[label=(\roman*)]
+    \item 一个季节循环系统，其状态空间为太阳赤纬 $\delta(t)$ 与纬度 $\varphi$ 的联合空间；
+    \item 一个 ENSO 系统，其状态空间为 $(T_E,\langle h\rangle_W)$ 相空间；
+    \item 一个 NAO 系统，其状态空间为南北气压差的时间序列空间；
+    \item 一个 PDO/IOD 系统，其状态空间为海面温度异常空间；
+    \item 一个米兰科维奇旋回系统，其状态空间为轨道三要素 $(e,\varepsilon,e\sin\varpi)$ 的联合空间；
+    \item 一个长程相关气候序列，其状态空间为具有长程持续性的时间序列空间。
+\end{enumerate}
+气候目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal D_{\mathrm{Cl}}=(\mathcal S,\Phi),
+\]
+其中 $\mathcal S$ 是状态空间，$\Phi:\mathcal S\to\mathcal S$ 是时间平移、相位旋转或反馈演化所诱导的映射。若 $\mathcal S$ 为有限集，称目标为\textbf{有限气候目标}；若 $\mathcal S$ 为无限集，称目标为\textbf{无限气候目标}。
+\end{definition}
+
+\begin{definition}[气候判定映射]\label{def:climate_periodization}
+设气候目标由判定输入 $\mathcal D_{\mathrm{Cl}}=(\mathcal S,\Phi)$ 给出。若目标的状态由 $\Phi$ 生成，即存在 $x_0\in\mathcal S$ 使
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+当 $t\in\mathbb Z$ 时 $x_t$ 由 $\Phi$ 迭代生成；当 $t\in\mathbb R$ 时，以单参数演化族 $\{\Phi_t\}_{t\in\mathbb R}$（其中每个 $\Phi_t:\mathcal S\to\mathcal S$，且 $\Phi_0=\operatorname{id}$、$\Phi_{s+t}=\Phi_s\circ\Phi_t$ 对一切 $s,t\in\mathbb R$ 成立、$(t,x)\mapsto\Phi_t(x)$ 连续）记之。
+则称 $\Phi$ 为目标的\textbf{气候判定映射}。此时当 $t\in\mathbb Z$ 时气候目标化为离散动力系统 $(\mathcal S,\Phi)$，当 $t\in\mathbb R$ 时化为连续动力系统 $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$，两种情形均可直接套用「周期基础」章与「周期系统」章的判据。
+\end{definition}
+
+\begin{theorem}[气候周期性判定定理]\label{thm:climate_periodicity_decision}
+设气候目标的判定映射为 $\Phi$，且 $(\mathcal S,\Phi)$ 为离散动力系统。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 $m\in\mathbb N^+$ 使 $\Phi^m=\mathrm{id}$，则目标为一致周期气候系统；每条轨道闭合，且轨道长度整除 $m$。
+    \item \textbf{判定等价}：目标为一致周期气候系统当且仅当 $\operatorname{ord}(\Phi)<\infty$。
+    \item \textbf{逐点判据}：目标在状态 $x_0$ 处的轨道闭合当且仅当 $x_0$ 为周期点；此时轨道长度即该点处的周期。
+    \item \textbf{不可省略性}：守恒量与对称群的合取不能替代 $\operatorname{ord}(\Phi)<\infty$；准周期气候目标不属于周期气候系统。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:climate_periodicity_decision} 是「周期系统」章 \cref{thm:ps_periodicity_decision} 的领域实例化：
+只需把判定映射 $f$ 与演化群替换为本章的 $\Phi$，(A) 充分判定、(B) 判定等价、(C) 逐点判据、
+(D) 不可省略性四条即逐条成立。依 \cref{rem:ps_applications_hook} 的约定，此处不再重复展开。
+\end{proof}
+
+\begin{corollary}[气候周期类型]\label{cor:climate_period_type}
+经 \cref{thm:climate_periodicity_decision} 判定后，气候目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 $m_0=1$，状态为不动点；
+    \item \textbf{严格周期型}：$1<m_0<\infty$，状态严格周期；
+    \item \textbf{一致周期型}：$\operatorname{ord}(\Phi)=m<\infty$，所有轨道长度整除 $m$；
+    \item \textbf{准周期型}：$\operatorname{ord}(\Phi)=\infty$，轨道不闭合但在紧致承载结构上稠密；
+    \item \textbf{最终周期型}：存在 $N$，使 $t\ge N$ 后目标为周期；
+    \item \textbf{离散周期型}：承载结构为 $\mathbb Z$，且归一化周期比 $\rho=T_x/\Delta x\in\mathbb Q$。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，残差按 $e^{-\kappa t}$ 衰减（见 \cref{def:ps_period_type}(vii)）。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于周期气候系统；(iv) 不属于周期气候系统，但可用有界逼近工具处理（米兰科维奇旋回、ENSO、PDO、IOD 均属此类）；(v) 只在稳定阶段是周期气候系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期气候系统，只在稳定阶段可用有界逼近工具处理。
+\end{corollary}
+
+\begin{proof}
+逐条由 \cref{thm:climate_periodicity_decision} 与「周期系统」章 \cref{def:ps_period_type} 代入气候目标即得。
+\end{proof}
+
+\begin{lemma}[季节循环的周期判定]\label{lem:seasonal_periodic}
+设太阳赤纬 $\delta(t) = 23.44^\circ \sin(2\pi t/365.24)$，纬度 $\varphi$ 固定。则到达大气顶的日平均太阳辐射 $S(\varphi,t)$ 为一致周期系统，其最小正周期为回归年：
+\[
+T_{\text{season}}=365.24\ \text{天}.
+\]
+\end{lemma}
+
+\begin{proof}
+由定义 \ref{def:solar_insolation}，$S(\varphi,t)$ 通过 $\cos\Theta(\varphi,t)$ 依赖于 $\delta(t)$。由 $\delta(t+T_{\text{season}})=\delta(t)$（$\sin$ 函数的周期性）得 $S(\varphi,t+T_{\text{season}})=S(\varphi,t)$。故判定映射 $\Phi$ 满足 $\Phi^{T_{\text{season}}}=\mathrm{id}$，为一致周期系统。
+\end{proof}
+
+\begin{lemma}[ENSO 的准周期判定]\label{lem:enso_quasiperiodic}
+设 ENSO 由充-放电视模型描述，参数满足 $4\beta\gamma > (\alpha-\delta)^2$。则 ENSO 为阻尼振荡，其固有周期为
+\[
+T_{\text{ENSO}} = \frac{4\pi}{\sqrt{4\beta\gamma - (\alpha-\delta)^2}}.
+\]
+其数值随耦合系数而定；在例 \ref{ex:enso_period_calc} 的典型参数下约为 $6.3$ 年。
+在随机大气扰动下，ENSO 表现为准周期系统（$\operatorname{ord}(\Phi)=\infty$），主周期在 $2$—$7$ 年之间。
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:enso_oscillator}，特征值为 $\lambda_{1,2}=-\frac{\alpha+\delta}{2}\pm \frac{i}{2}\sqrt{4\beta\gamma-(\alpha-\delta)^2}$，阻尼率 $(\alpha+\delta)/2>0$。故无强迫时系统为渐近周期（阻尼）型（趋于平衡点）；在随机强迫 $\sigma\xi(t)$ 下，系统在固有频率附近持续振荡，为准周期型。观测的主周期 $2$—$7$ 年由固有周期加上随机调制决定。
+\end{proof}
+
+\begin{lemma}[NAO 的红噪声判定]\label{lem:nao_red_noise}
+设 NAO 指数 $N(t)$ 的自相关函数为 $\rho(\tau)=e^{-|\tau|/\tau_0}$（$\tau_0\approx7$—$10$ 天）。则 NAO 为准周期型（$\operatorname{ord}(\Phi)=\infty$），其功率谱为红噪声
+\[
+S(\omega)=\frac{2\tau_0}{1+\omega^2\tau_0^2}\propto\omega^{-2}\quad(\omega\to\infty).
+\]
+\end{lemma}
+
+\begin{proof}
+由引理 \ref{ch28_red_noise_duality}，$\rho(\tau)=e^{-|\tau|/\tau_0}$ 的功率谱为 $S(\omega)=2\tau_0/(1+\omega^2\tau_0^2)$。红噪声谱在任何频率上均无原子，故不构成一致周期系统。由「周期基础」章 \cref{rem:quasi_period}，NAO 属于准周期型（或更准确地说，属于长程相关型）。
+\end{proof}
+
+\begin{lemma}[米兰科维奇旋回的准周期判定]\label{lem:milankovitch_quasiperiodic}
+设轨道三要素 $(e,\varepsilon,e\sin\varpi)$ 由行星摄动驱动，其主周期分别为 $100$ ka（偏心率）、$41$ ka（倾角）、$23$ ka 与 $19$ ka（岁差）。则米兰科维奇旋回为准周期系统（$\operatorname{ord}(\Phi)=\infty$）。
+\end{lemma}
+
+\begin{proof}
+由「天文系统之周期结构」章 \cref{prop:milankovitch_structure}，三个轨道要素的主频率在 $\mathbb{Q}$ 上线性无关，故周期不可公度、整体运动在三维环面上为准周期流，轨道不闭合。由 \cref{thm:climate_periodicity_decision}(D)，米兰科维奇旋回为准周期型。
+\end{proof}
+
+\begin{lemma}[PDO 与 ENSO 的时间尺度分离判定]\label{lem:pdo_enso_separation_decision}
+设 PDO 主周期 $T_{\text{PDO}}\approx20$—$30$ 年、ENSO 主周期 $T_{\text{ENSO}}\approx2$—$7$ 年。则慢–快变量分离成立，PDO 为准周期型慢背景，ENSO 为准周期型快振荡，两者通过慢–快耦合相互作用。
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:pdo_enso_separation}，$T_{\text{PDO}}/T_{\text{ENSO}}\approx4$—$10$，故存在慢变量 $\bar T_{\text{PDO}}$ 与快变量 $T'$。由 \cref{thm:climate_periodicity_decision}(D)，两者的自然动力学均为准周期型（不同时含有限阶演化）。
+\end{proof}
+
+\begin{definition}[气候最小正周期算法]\label{def:climate_minimal_period_algorithm}
+本定义与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{def:ps_minimal_period_algorithm} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处的差别仅为术语（气候目标 / 气候样本），算法步骤与结论完全相同。
+\end{definition}
+
+\begin{theorem}[气候最小正周期算法的正确性]\label{thm:climate_minimal_period_correctness}
+本定理与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{thm:ps_minimal_period_correctness} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。本处的差别仅为术语（气候目标 / 气候样本），算法步骤与结论完全相同。
+\end{theorem}
+
+\begin{example}[气候周期判定实例]\label{ex:climate_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item 季节循环：$T=365.24$ 天，一致周期型；
+    \item ENSO：$T\approx6.3$ 年（固有周期，见例 \ref{ex:enso_period_calc}），准周期型（随机强迫下）；
+    \item NAO：$\tau_0\approx7$—$10$ 天，准周期型（红噪声）；
+    \item PDO：$T_{\text{PDO}}\approx20$—$30$ 年，准周期型；
+    \item IOD：$T_{\text{IOD}}\approx3$—$7$ 年，准周期型；
+    \item 米兰科维奇旋回：$100/41/23/19$ ka，准周期型。
+\end{enumerate}
+\end{example}
+
+\begin{remark}[守恒量不保证周期]\label{rem:climate_invariant_not_period}
+气候系统中的能量守恒、动量守恒与水汽守恒是周期结构的辅助条件，但不构成充分条件。例如一个具有能量守恒但缺乏海-气耦合的稳定气候不会自发产生 ENSO 振荡。气候周期结构必须由 \cref{thm:climate_periodicity_decision} 或上述引理判定。
+\end{remark}
+
+\subsection{第二步：气候周期级数与周转圆组的构建}
+
+\begin{definition}[气候振幅级数、频率级数、相位级数]\label{def:climate_series}
+设气候目标的状态或输出序列为 $\{z_t\}$。若其可写为
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+则称
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+分别为气候目标的\textbf{振幅级数}、\textbf{频率级数}与\textbf{相位级数}。三者与「级数与卷积」章 \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} 一致。
+\end{definition}
+
+\begin{definition}[气候周转圆组]\label{def:climate_epicycle_group}
+设气候目标的周期级数由振幅级数 $\{A_k\}$、频率级数 $\{\omega_k\}$ 与相位级数 $\{\phi_k\}$ 给出。对每个 $k$ 定义周转圆
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+其集合
+\[
+\mathfrak E_{\mathrm{Cl}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+称为气候目标的\textbf{周转圆组}。其叠加即气候周期级数
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[由气候数据构建周期级数]\label{thm:climate_series_reconstruction}
+设气候目标的输出为有限周期序列，周期为 $N$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 输出可展开为离散傅里叶级数
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item 振幅级数由 $|c_k|$ 给出，相位级数由 $\arg c_k$ 给出，频率级数由 $2\pi k/N$ 给出；
+    \item 若输出为季节温度序列，则基频对应年周期，谐波对应半年、季节与月周期；若输出为 ENSO 序列，则基频对应约 $6$ 年固有周期，谐波对应更强事件（如 $1982$、$1997$、$2015$）的分布。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 有限周期序列的离散傅里叶级数是标准结论：基函数 $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ 构成 $\mathbb C^N$ 的正交基。
+(ii) 由 $c_k=A_k e^{i\phi_k}$ 直接读出。
+(iii) 对季节温度序列 $N=365$（日采样），基频对应年周期，$k=2$ 对应半年周期，$k=4$ 对应季节周期；对 ENSO 序列 $N\sim70$（年采样），基频对应约 $1/6$ yr$^{-1}$，谐波编码准周期事件的统计结构。
+\end{proof}
+
+\begin{proposition}[三参数对应：半径、相位与转速]\label{prop:climate_epicycle_correspondence}
+气候周转圆组 $\mathfrak E_{\mathrm{Cl}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ 的三个参数与三个几何—物理量一一对应：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{半径对应振幅}：$E_k$ 的半径 $|E_k|=A_k$ 即该气候振荡分量的振幅；
+    \item \textbf{相位对应旋转时延}：初相 $\phi_k$ 对应时间平移 $\tau_k=\phi_k/\omega_k$；$\phi_k>0$ 时该分量相对基准\textbf{超前} $\tau_k$（等价于把基准延后 $\tau_k$ 后二者重合）；
+    \item \textbf{频率对应旋转速度}：$\omega_k$ 即该气候振荡分量的角频率。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:climate_epicycle_correspondence} 与「周期系统」章 \cref{prop:ps_epicycle_correspondence} 完全对应，
+三条对应——半径对应振幅、相位对应旋转时延、频率对应旋转速度——逐条平移至本章的周转圆组即得。
+证明见该处：(i) 由 $|E_k|=A_k$ 与能量分解，(ii) 由相位平移定理，(iii) 由频率级数定义。
+\end{proof}
+
+\begin{example}[气候现象的周期谱级数]\label{ex:climate_period_spectrum_series}
+将主要气候现象按时间尺度排列并展为气候周期级数，可得以下分层结构：
+\begin{enumerate}[label=(\roman*)]
+    \item $10^{-2}$—$10^{-1}$ 年：天气系统、Madden–Julian 振荡（MJO，$30$—$90$ 天）；
+    \item $10^{-1}$—$10^0$ 年：季节循环、NAO；
+    \item $10^0$ 年：ENSO、IOD；
+    \item $10^1$ 年：PDO、AMO；
+    \item $10^2$—$10^3$ 年：小冰期、中世纪暖期；
+    \item $10^4$—$10^5$ 年：米兰科维奇旋回（$2.3$ 万年岁差、$4.1$ 万年倾角、$10$ 万年偏心率）。
+\end{enumerate}
+这些现象对应气候周转圆组中从内层高频小周转圆到外层低频大周转圆的分层结构。
+\end{example}
+
+\begin{remark}[周期级数即复变函数]\label{rem:climate_series_complex}
+设 $z=e^{i\omega_0t}$，则气候周期级数
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+当所有分量与 $\omega_0$ 可公度（即 $\omega_k=k\omega_0$，$k\in\mathbb Z$）时可写为洛朗级数 $\sum_k c_k z^k$，其中 $c_k=A_k e^{i\phi_k}$：此时气候周期级数即单位圆上的复变函数，否则为环面上的函数。
+\end{remark}
+
+\subsection{第三步：气候周转圆组的动态调节}
+
+\begin{definition}[气候周转圆组的动态调节]\label{def:climate_adaptive_adjustment}
+设当前气候周转圆组为 $\mathfrak E^{(j)}$，部分和
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+残差 $r^{(j)}=z-z^{(j)}$。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 $\|r^{(j)}\|^2>\delta$，则依残差周期图峰值新增一个周转圆；
+    \item \textbf{参数调节}：对已有周转圆参数按正则化最小二乘或守恒约束更新。
+\end{enumerate}
+在气候系统中，数量调节对应增加气候模态分量（如新识别一个 ENSO 谐波、IOD 独立分量）；参数调节对应调整振幅、相位与频率，使能量、动量与水汽约束满足。
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:climate_adaptive_growth}
+按 \cref{def:climate_adaptive_adjustment}(i) 加入残差主频分量后，残差能量单调不增：
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+等号成立当且仅当残差在被选频率上无能量。
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:climate_adaptive_growth} 与「周期系统」章 \cref{def:ps_adaptive_adjustment} 的动态调节机制一致：
+新增周转圆即把 $r^{(j)}$ 沿 $\hat\omega$ 的分量从残差中移出，由正交分解
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{被移出的分量}\|^2$ 即得不等式，
+等号当且仅当被移出分量的范数为零。完整论证见该处。
+\end{proof}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:climate_adaptive_convergence}
+设气候目标为周期 $T_0$ 的有限周期序列且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得气候周转圆组即目标的精确傅里叶数据。
+\end{theorem}
+
+\begin{proof}
+周期 $T_0$ 的序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波上完备。每步按 \cref{prop:climate_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。
+\end{proof}
+
+\begin{definition}[结构指标调节]\label{def:climate_structure_metric_adjustment}
+设气候目标的结构指标为
+\[
+\mathcal I=(\mathcal I_{\text{能量}},\mathcal I_{\text{动量}},\mathcal I_{\text{水汽}})
+=(\text{能量守恒度},\ \text{动量守恒度},\ \text{水汽守恒度}).
+\]
+\textbf{结构指标调节}为：在参数空间 $\Theta$ 中选取 $\theta$，每步取使 $\mathcal I(\theta)$ 按字典序\textbf{严格递减}（极小化）的邻近参数；若不存在则停止，此时为局部最优。
+\end{definition}
+
+\begin{proposition}[结构指标调节的有限收敛]\label{prop:climate_structure_metric_convergence}
+设参数空间 $\Theta$ 有限，且每次调节使 $\mathcal I$ 按字典序严格递减。则调节在有限步内终止于局部最优参数。
+\end{proposition}
+
+\begin{proof}
+$\Theta$ 有限，故 $\mathcal I$ 只取有限多个值，而字典序是有限集上的全序；按字典序严格递减的序列不能无限延续，故调节在有限步终止。终止时不存在使 $\mathcal I$ 按字典序严格递减的邻近参数，即局部最优。
+\end{proof}
+
+\begin{remark}[动态调节的边界]\label{rem:climate_adaptive_boundary}
+\cref{thm:climate_adaptive_convergence} 依赖有限周期序列。对连续谱或准周期气候目标（如米兰科维奇旋回、ENSO、NAO），不存在有限周转圆组精确表示，只能作有界逼近。结构指标调节不保证全局最优。
+\end{remark}
+
+\subsection{第四步：气候卷积}
+
+\begin{definition}[气候振幅卷积、相位卷积与频率卷积]\label{def:climate_convolution_types}
+设两个气候周转圆组为
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+定义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅卷积}：$\mathbb A_{mn}=A_nB_m$；
+    \item \textbf{相位卷积}：$\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$；
+    \item \textbf{频率卷积}：$\mathbb F_{mn}=\omega_n\nu_m$；
+    \item \textbf{趋势卷积}：$\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$。
+\end{enumerate}
+这与「级数与卷积」章 \cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution}、\cref{def:tendency_convolution} 一致。
+\end{definition}
+
+\begin{theorem}[三类卷积在气候周转圆组上的作用]\label{thm:climate_convolution_action}
+设两个气候目标的周转圆组分别为 $\mathfrak E$ 与 $\mathfrak E'$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 振幅卷积只作用于半径；
+    \item 相位卷积只作用于相位；
+    \item 频率卷积只作用于转速；
+    \item 趋势卷积同时保留振幅与相位。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:climate_convolution_types} 直接读出。
+\end{proof}
+
+\begin{proposition}[自相关与趋势卷积]\label{prop:climate_autocorr_phase_convolution}
+设 $\{z_t\}$ 为气候周期序列，其自相关函数为
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+在气候周转圆组语言中，自相关函数是趋势卷积在对角线上的投影：
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:climate_autocorr_phase_convolution} 是「周期系统」章 \cref{thm:ps_convolution_action} 的卷积作用结论在本领域的实现：
+将 $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ 代入自相关定义，由正交性消去全部非对角交叉项，只保留趋势卷积的对角线项
+（三类卷积的因式分解，\cref{prop:ps_convolution_factorization}），即得 $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$。
+完整展开见该处。
+\end{proof}
+
+\begin{remark}[气候卷积与周期卷积的关系]\label{rem:climate_convolution_relation}
+气候卷积不是新的卷积运算，而是「级数与卷积」章周期卷积在气候周转圆组上的实例。自相关是趋势卷积在对角线上的投影，遥相关、海盆间耦合（如 ENSO–PDO、ENSO–IOD）分别是振幅卷积和频率卷积在地球气候科学中的具体表现。
+\end{remark}
+
+\subsection{第五步：与离散采样、调和分析、时序分析的整合}
+
+\begin{definition}[气候周期诊断流程]\label{def:climate_periodic_diagnosis}
+对于给定气候系统，使用周期数学框架进行诊断：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{周期判定}：验证气候目标的周期类型（\cref{thm:climate_periodicity_decision}）；
+    \item \textbf{级数构建}：由温度、降水、气压、SST 数据构建振幅、频率、相位级数与周转圆组（\cref{thm:climate_series_reconstruction}）；
+    \item \textbf{守恒诊断}：验证能量、动量与水汽守恒（\cref{thm:climate_conservation}）；
+    \item \textbf{卷积诊断}：计算自相关（趋势卷积的对角线投影，\cref{prop:climate_autocorr_phase_convolution}）与相位卷积；
+    \item \textbf{整合诊断}：接入离散采样、调和分析、时序分析工具链。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[气候周期诊断流程与三章接口]\label{thm:climate_diagnosis_integration}
+\cref{def:climate_periodic_diagnosis} 的五个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}、\cref{thm:intercalation_leakage_suppression}；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}、\cref{prop:twelve_to_six}；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}、\cref{def:ts_window_validation}。
+\end{enumerate}
+因此气候周期诊断不是独立方法，而是周期数学统一工具链在气候系统上的应用。
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:climate_diagnosis_integration} 是「周期系统」章五步接口（\cref{tab:ps_five_steps}）在本领域的落地：
+周期判定用采样与谱估计，频率分解与相位核用「调和分析」章，周期图峰值、Fisher 检验与
+窗函数验证用「时序分析」章。故诊断流程由三章工具链合成，证明见该处。
+\end{proof}
+
+\begin{remark}[整合后的操作顺序]\label{rem:climate_integration_order}
+实际诊断建议顺序为：先判定气候目标是否周期（\cref{thm:climate_periodicity_decision}）；再构建气候数据的傅里叶数据与周转圆组（\cref{thm:climate_series_reconstruction}）；再用守恒约束与动态调节优化参数（\cref{thm:climate_adaptive_convergence}、\cref{prop:climate_structure_metric_convergence}）；再作气候卷积与自相关分析（\cref{prop:climate_autocorr_phase_convolution}）；最后按 \cref{def:climate_periodic_diagnosis} 输出诊断。
+\end{remark}
+
+\section{季节循环：太阳辐射的年周期}
+
+\begin{definition}[到达大气顶的太阳辐射]\label{def:solar_insolation}
+纬度为 $\varphi$ 的地点，在一年中第 $t$ 天（以春分为 $t=0$）到达大气顶的日平均太阳辐射由轨道几何决定：
+\[
+S(\varphi, t) = S_0\left(\frac{a}{r(t)}\right)^2 \cos\Theta(\varphi, t),
+\]
+其中 $S_0 = 1361$ W/m$^2$ 为太阳常数，$a/r(t)$ 为日地距离比（偏心率 $e$ 引起），$\Theta$ 为太阳天顶角，满足
+\[
+\cos\Theta = \sin\varphi \sin\delta(t) + \cos\varphi \cos\delta(t) \cos h_0,
+\]
+$\delta(t) \approx 23.44^\circ \sin(2\pi t/365.24)$ 为太阳赤纬（地轴倾角 $23.44^\circ$ 的投影），$h_0$ 为时角。
+\end{definition}
+
+\begin{proposition}[南北半球季节的相位对称]\label{prop:seasonal_phase_symmetry}
+南北半球同纬度地点的太阳辐射年循环相位差为 $\pi$：
+\[
+S(-\varphi, t) = S_0\left(\frac{a}{r(t)}\right)^2 \big(-\sin\varphi \sin\delta(t) + \cos\varphi \cos\delta(t) \cos h_0 \big),
+\]
+即北半球夏至（$\delta = +23.44^\circ$）恰为南半球冬至。季节循环在半球反射 $\varphi \mapsto -\varphi$ 下等价于相位平移 $\pi$：$S$ 关于赤道平面反对称的赤纬项 $\sin\varphi\sin\delta$ 在半球反射下改变符号。
+\end{proposition}
+
+\begin{proof}
+由定义 \ref{def:solar_insolation}，$\varphi \mapsto -\varphi$ 时 $\sin\varphi \mapsto -\sin\varphi$、$\cos\varphi$ 不变，故 $\cos\Theta(-\varphi,t) = -\sin\varphi\sin\delta + \cos\varphi\cos\delta\cos h_0$。另一方面 $\delta(t + T/2) = 23.44^\circ\sin(2\pi(t+T/2)/T) = -\delta(t)$，故 $\cos\Theta(-\varphi, t) = \cos\Theta(\varphi, t + T/2)$——半球反射等价于半年相位平移，即相位差 $\pi$。
+\end{proof}
+
+\begin{example}[北纬 $66.5^\circ$ 的极昼与极夜]\label{ex:polar_day_night}
+取 $\varphi = 66.5^\circ$（北极圈）。夏至日 $\delta = 23.44^\circ$：正午太阳高度角 $= 90^\circ - |66.5^\circ - 23.44^\circ| \approx 46.9^\circ$，午夜太阳高度角 $= \varphi + \delta - 90^\circ = -0.06^\circ \approx 0$——太阳不落，为极昼。冬至日 $\delta = -23.44^\circ$：正午太阳高度角 $= 90^\circ - |66.5^\circ + 23.44^\circ| \approx 0.06^\circ$——太阳不升，为极夜。北极圈内极昼/极夜交替是年周期 $T = 365.24$ 天的最直观表现。
+\end{example}
+
+\begin{lemma}[红噪声谱与指数自相关的对偶]\label{ch28_red_noise_duality}
+设平稳过程的自相关函数为 $\rho(\tau) = e^{-|\tau|/\tau_0}$（红噪声）。则其功率谱密度为
+\[
+S(\omega) = \frac{2\tau_0}{1 + \omega^2 \tau_0^2}.
+\]
+低频极限（$\omega \ll \tau_0^{-1}$）下 $S(\omega) \approx 2\tau_0$ 为平坦白谱，高频极限（$\omega \gg \tau_0^{-1}$）下 $S(\omega) \approx \frac{2}{\tau_0 \omega^2} \propto \omega^{-2}$——能量向低频集中，即“红”谱。
+\end{lemma}
+
+\begin{proof}
+由维纳–辛钦定理，谱密度为自相关函数的傅里叶变换：
+\[
+S(\omega) = \int_{-\infty}^{\infty} e^{-|\tau|/\tau_0} e^{-i\omega\tau}\, d\tau
+= \frac{1}{\frac{1}{\tau_0} - i\omega} + \frac{1}{\frac{1}{\tau_0} + i\omega} = \frac{2\tau_0}{1+\omega^2\tau_0^2}.
+\]
+$\omega \ll \tau_0^{-1}$ 时 $S(\omega) \approx 2\tau_0 \propto \omega^{0}$，$\omega \gg \tau_0^{-1}$ 时 $S(\omega) \approx 2/(\tau_0 \omega^2) \propto \omega^{-2}$。
+\end{proof}
+
+\section{气候系统的数学基础}
+
+\begin{definition}[气候系统的基本量]\label{def:climate_quantities}
+气候系统由以下基本物理量描述：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{温度} $T(\mathbf{r}, t)$（单位：K 或 $^\circ$C）：大气、海洋或地表在位置 $\mathbf{r}$ 和时刻 $t$ 的温度。全球平均地表温度（GMST）是气候变化的核心指标。
+    \item \textbf{降水量} $P(\mathbf{r}, t)$（单位：mm/day）：大气中水汽凝结降落到地表的量。降水量在空间和时间上呈现高度不均匀的分布。
+    \item \textbf{气压} $p(\mathbf{r}, t)$（单位：hPa）：大气柱在单位面积上的重量。海平面气压（SLP）是大气环流的基本变量。
+    \item \textbf{海面温度} SST$(\mathbf{r}, t)$（单位：$^\circ$C）：海洋表层的温度。SST 是海-气相互作用的关键变量——ENSO、印度洋偶极子等气候模态主要通过 SST 异常定义。
+    \item \textbf{辐射强迫} $\Delta F$（单位：W/m$^2$）：地球系统能量收支的扰动（温室气体、太阳活动、火山气溶胶等引起）。$\Delta F > 0$ 表示地球吸收更多能量（变暖），$\Delta F < 0$ 表示地球损失更多能量（变冷）。
+    \item \textbf{风应力} $\boldsymbol{\tau}$（单位：Pa）：大气对海洋表面的切向应力，驱动海洋上层的风生环流。
+\end{enumerate}
+气候系统是一个\textbf{多尺度耦合的复杂系统}——大气（快速响应，日–年尺度）、海洋（慢速响应，年–千年尺度）、冰冻圈（极慢速响应，百年–万年尺度）、生物圈和岩石圈在不同的时间尺度上相互作用。
+\end{definition}
+
+\section{厄尔尼诺-南方涛动（ENSO）}
+
+\begin{definition}[厄尔尼诺-南方涛动（ENSO）]\label{def:enso}
+\textbf{厄尔尼诺-南方涛动}（El Niño-Southern Oscillation, ENSO）是热带太平洋海-气耦合系统在年际尺度上（$2$—$7$ 年）的准周期振荡。ENSO 具有两个极端相位：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{厄尔尼诺（El Niño，暖相）}：赤道东太平洋海面温度异常增暖（SST 正异常超过 $+0.5^\circ$C 持续数月），热带中-东太平洋降水增多，西太平洋降水减少。沃克环流减弱或逆转。赤道温跃层在东部加深、西部抬升。
+    \item \textbf{拉尼娜（La Niña，冷相）}：赤道东太平洋海面温度异常偏冷（SST 负异常超过 $-0.5^\circ$C 持续数月），热带降水分布与厄尔尼诺大致相反。沃克环流增强。赤道温跃层在东部抬升、西部加深。
+\end{enumerate}
+ENSO 是热带太平洋气候系统中最强的年际变率信号，其全球遥相关（teleconnection）影响亚洲季风、北美冬季温度、澳洲干旱和南美降水。ENSO 振幅的季节锁相特征表现为：峰值多出现在北半球冬季（11 月—次年 1 月），衰减多在次年春季。
+\end{definition}
+
+\begin{definition}[南方涛动指数（SOI）]\label{def:soi}
+\textbf{南方涛动指数}（Southern Oscillation Index, SOI）定义为塔希提（Tahiti）与达尔文（Darwin）之间海平面气压差的标准化值：
+\[
+\text{SOI} = \frac{p_{\text{Tahiti}} - p_{\text{Darwin}}}{\sigma_{\Delta p}},
+\]
+其中 $\sigma_{\Delta p}$ 是长期标准差。SOI 与赤道东太平洋 SST 异常呈负相关：厄尔尼诺期间 SOI 取负值（塔希提气压偏低、达尔文气压偏高），拉尼娜期间 SOI 取正值。ENSO 事件的强度通常以 Niño 3.4 区（$5^\circ$S—$5^\circ$N，$120^\circ$W—$170^\circ$W）SST 异常（Oceanic Niño Index, ONI）的三个月滑动平均值衡量。
+\end{definition}
+
+\begin{proposition}[ENSO 的 Bjerknes 正反馈]\label{prop:bjerknes_feedback}
+ENSO 的准周期振荡由 Bjerknes 正反馈和延迟负反馈共同维持。Bjerknes 反馈描述了海-气之间的自放大循环：
+\begin{enumerate}[label=(\roman*)]
+    \item 赤道东太平洋 SST 初始正异常 $\to$ 大气对流增强 $\to$ 低层风场辐合 $\to$ 西风异常。
+    \item 西风异常 $\to$ 激发东传的下沉赤道 Kelvin 波 $\to$ 温跃层加深 $\to$ 东太平洋上升流减弱 $\to$ SST 进一步增暖 $\to$ 正反馈完成。
+\end{enumerate}
+Bjerknes 正反馈是海-气耦合系统中的自放大机制——暖异常通过海-气耦合被放大。正反馈不能无限持续，因为延迟负反馈（西传的赤道 Rossby 波反射为东传 Kelvin 波）在大约 $6$—$12$ 个月后将温跃层异常从暖相逆转为冷相。正反馈和延迟负反馈的交替维持了 ENSO 的准周期振荡。
+\end{proposition}
+
+\begin{proof}
+将反馈循环线性化：令 $T$ 为东太平洋 SST 异常，$\langle h\rangle_W$ 为温跃层深度异常。循环的四个环节——(i) $T$ 驱动对流（增益 $a_1>0$）；(ii) 对流驱动西风异常（增益 $a_2>0$）；(iii) 西风激发 Kelvin 波加深温跃层（增益 $a_3>0$）；(iv) 温跃层加深减弱上升流、使 $T$ 进一步增暖（增益 $a_4>0$）——合成为 $\dot T \supset a_1 a_2 a_3 a_4 \, T$，环路增益 $G = a_1a_2a_3a_4 > 0$：扰动沿环路一周后回到自身且被放大，即线性化的正反馈。这正是命题 \ref{prop:enso_oscillator} 充-放电模型中 $\beta\gamma > 0$ 项的来源：正反馈（$\beta\gamma$）与阻尼（$\alpha\delta$）竞争，$4\beta\gamma > (\alpha-\delta)^2$ 时出现振荡。
+\end{proof}
+
+\begin{proposition}[ENSO 的周期系统模型——充-放电视]\label{prop:enso_oscillator}
+ENSO 的简化动力学可通过热带太平洋海-气耦合的线性化方程组描述。在赤道 $\beta$ 平面上，海洋线性浅水方程在大气风应力强迫下的解为赤道波动的叠加。ENSO 的充-放电视（Recharge-Discharge Oscillator）模型将赤道太平洋温跃层深度的东西平均 $\langle h \rangle_W$ 视为充电状态变量，东太平洋 SST 异常 $T_E$ 为响应变量：
+\[
+\frac{d\langle h \rangle_W}{dt} = -\alpha \langle h \rangle_W + \beta T_E, \quad \frac{dT_E}{dt} = -\gamma \langle h \rangle_W - \delta T_E,
+\]
+其中 $\alpha, \beta, \gamma, \delta > 0$。这一方程组等价于阻尼谐振子——$T_E$ 和 $\langle h \rangle_W$ 在相空间中绕平衡点做衰减旋转。随机大气扰动（如西风爆发事件）为系统注入能量，维持持续振荡。
+
+固有周期 $T_{\text{ENSO}} = \frac{4\pi}{\sqrt{4\beta\gamma - (\alpha-\delta)^2}}$；在例 \ref{ex:enso_period_calc} 的典型参数下约为 $6.3$ 年。随机扰动为系统提供持续的相位扰动，防止振荡衰减。
+\end{proposition}
+
+\begin{proof}
+充-放电视模型的平衡点为 $\langle h \rangle_W^* = 0, T_E^* = 0$。雅可比矩阵为
+\[
+J = \begin{pmatrix} -\alpha & \beta \\ -\gamma & -\delta \end{pmatrix},
+\]
+特征值为 $\lambda_{1,2} = -\frac{\alpha+\delta}{2} \pm \frac{i}{2}\sqrt{4\beta\gamma - (\alpha-\delta)^2}$。此时 $\det J = \alpha\delta + \beta\gamma > 0$，平衡点为稳定焦点；当 $4\beta\gamma > (\alpha-\delta)^2$ 时，特征值为共轭复数——系统呈现阻尼振荡。实际 ENSO 的持续振荡由随机大气扰动维持——这等价于在充-放电视模型右侧添加随机强迫项 $\sigma \xi(t)$，线性系统在随机强迫下输出红噪声谱，峰值在固有频率附近。
+\end{proof}
+
+\begin{example}[ENSO 振荡周期的具体计算]\label{ex:enso_period_calc}
+取耦合系数 $\alpha = \delta = 1/3$（年$^{-1}$，表层热衰减时间尺度约 $3$ 年）、$\beta = \gamma = 1$（年$^{-1}$，东西边界波反射耦合时间尺度约 $1$ 年）。由命题 \ref{prop:enso_oscillator}，衰减率 $\rho = (\alpha+\delta)/2 = 1/3$ 年$^{-1}$，旋转频率
+\[
+\omega = \frac{1}{2}\sqrt{4\beta\gamma - (\alpha-\delta)^2} = \frac{1}{2}\sqrt{4 \times 1 \times 1 - 0} = 1\ \text{年}^{-1},
+\]
+故振荡周期 $T = 2\pi/\omega = 2\pi \approx 6.3$ 年，落在观测到的 ENSO 周期带 $2$—$7$ 年之内。若改取 $\alpha = \delta = 1/4$、$\beta = \gamma = 3/4$，则 $\omega = \tfrac12\sqrt{4 \times \tfrac34 \times \tfrac34} = \tfrac34$ 年$^{-1}$，$T = 2\pi/\omega \approx 8.4$ 年，略超观测上界——说明耦合与耗散的相对强弱决定 ENSO 的主周期。
+\end{example}
+
+\begin{example}[典型 ENSO 事件]\label{ex:enso_events}
+自 1950 年以来，若干强 ENSO 事件被详细记录：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{1982—1983 年厄尔尼诺}：Niño 3.4 区 SST 异常峰值超过 $+2.5^\circ$C，是 20 世纪最强事件之一；全球作物减产、澳洲干旱、秘鲁洪水。
+    \item \textbf{1997—1998 年厄尔尼诺}：与 1982—1983 事件强度相当，Niño 3.4 区 SST 异常峰值达 $+2.4^\circ$C；西太平洋暖池东移导致印尼森林大火。
+    \item \textbf{2010—2011 年拉尼娜}：Niño 3.4 区 SST 异常低至 $-1.6^\circ$C；澳洲东北部发生历史性洪水，巴基斯坦发生大洪水。
+    \item \textbf{2015—2016 年厄尔尼诺}：Niño 3.4 区 SST 异常峰值达 $+2.6^\circ$C，与 1997—1998 相当；全球平均温度在 2016 年创历史新高。
+    \item \textbf{2020—2023 年“三重”拉尼娜}：罕见地连续三年（2020、2021、2022）达到拉尼娜阈值，是全球平均温度短暂下降与澳洲洪水持续的重要原因。
+\end{enumerate}
+ENSO 事件的强度、频率、相位与持续时间呈现明显的不规则性——不是严格周期，而是\textbf{准周期}振荡：主周期在 $2$—$7$ 年之间，峰值季节锁相于北半球冬季。
+\end{example}
+
+\begin{remark}[ENSO 对全球的遥相关]
+ENSO 通过大气环流对全球产生遥相关（teleconnection），典型影响包括：
+\begin{itemize}
+    \item 厄尔尼诺期间：亚洲季风减弱、印度与东南亚干旱、澳洲干旱、秘鲁与厄瓜多尔洪水、北美南部冬季多雨、北大西洋飓风活动减少。
+    \item 拉尼娜期间：影响大致相反，亚洲季风增强、澳洲湿润、北美西南部干旱、北大西洋飓风活动增加。
+\end{itemize}
+这种远距离影响通过大气波列（如太平洋–北美型，PNA）传播，是全球气候可预报性的主要来源之一。
+\end{remark}
+
+\section{北大西洋涛动（NAO）}
+
+\begin{definition}[北大西洋涛动（NAO）]\label{def:nao}
+\textbf{北大西洋涛动}（North Atlantic Oscillation, NAO）是北大西洋地区海平面气压场的南北偶极子型振荡。NAO 指数定义为冰岛低压和亚速尔高压之间标准化气压差的差值。NAO 有两个相位：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{正相位（NAO$^+$）}：冰岛低压异常加深，亚速尔高压异常增强——南北气压梯度增大。中纬度西风带增强，北欧温暖多雨，南欧干燥少雨。
+    \item \textbf{负相位（NAO$^-$）}：冰岛低压减弱，亚速尔高压减弱——南北气压梯度减小。中纬度西风带减弱且向南偏移，北欧寒冷干燥，南欧湿润多雨。
+\end{enumerate}
+NAO 在数天至数十年时间尺度上均有变率——天气尺度（$3$—$10$ 天）、季节尺度（冬季最强）、年际尺度（无固定周期，以约 $7$—$8$ 年为特征时间尺度）和年代际尺度。
+\end{definition}
+
+\begin{proposition}[NAO 的相位转换与红噪声特征]\label{prop:nao_divergence}
+NAO 正负相位的交替表现为大气经向气压梯度的增强与减弱。NAO$^+$ 对应气压梯度的增强（冰岛低压更深，亚速尔高压更强，经向气压梯度增大），NAO$^-$ 对应气压梯度的减弱（两极气压差减小）。
+
+NAO 的时间序列 $N(t)$ 在统计上近似为\textbf{红噪声}过程——自相关函数 $\rho(\tau) \approx e^{-\tau/\tau_0}$，其中 $\tau_0 \approx 7$—$10$ 天（大气内部动力学的时间尺度）。红噪声谱在低频段具有更多能量（$S(\omega) \propto \omega^{-2}$），解释了 NAO 在季节至年际尺度的变率。
+\end{proposition}
+
+\begin{proof}
+关于谱结构：由引理 \ref{ch28_red_noise_duality}，$\rho(\tau) = e^{-|\tau|/\tau_0}$ 给出 $S(\omega) = \frac{2\tau_0}{1+\omega^2\tau_0^2}$——$\omega \gg \tau_0^{-1}$ 频段 $S(\omega) \approx \frac{2}{\tau_0\omega^2} \propto \omega^{-2}$，即低频能量主导，与观测的 NAO 红谱一致。
+\end{proof}
+
+\section{太平洋年代际振荡（PDO）}
+
+\begin{definition}[太平洋年代际振荡（PDO）]\label{def:pdo}
+\textbf{太平洋年代际振荡}（Pacific Decadal Oscillation, PDO）是北太平洋海面温度异常的主导年代际模态，其空间结构类似于 ENSO 但更偏向中纬度北太平洋。PDO 的定义通常取北太平洋 SST 异常经验正交函数（EOF）分析的第一模态，主周期约 $20$—$30$ 年。
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{暖相位（PDO$^+$）}：北太平洋中部（约 $40^\circ$N）海温偏暖，北美西海岸近海海温偏冷，阿留申低压减弱。北美西岸冬季降水偏少、内陆温度偏高。
+    \item \textbf{冷相位（PDO$^-$）}：北太平洋中部偏冷，北美西海岸偏暖，阿留申低压增强。北美西岸降水偏多、内陆温度偏低。
+\end{enumerate}
+PDO 与 ENSO 存在显著的海盆间耦合——PDO 的相位影响 ENSO 事件的形成与强度，ENSO 的遥相关又反过来调制北太平洋 SST 异常。两者的相互作用是太平洋海盆尺度气候变率的典型实例。
+\end{definition}
+
+\begin{proposition}[PDO 与 ENSO 的时间尺度分离]\label{prop:pdo_enso_separation}
+PDO 与 ENSO 在时间尺度上分离：ENSO 主周期约 $2$—$7$ 年，PDO 主周期约 $20$—$30$ 年。频率比约为 $1:4$—$1:10$。在 PDO 的每个完整周期内，ENSO 完成 $4$—$10$ 次准周期振荡。故 PDO 对 ENSO 的调制作用可通过慢–快变量分离来描述：将 PDO 视为缓变背景场 $\bar{T}_{\text{PDO}}(t)$，ENSO 视为在此背景上的快速振荡 $T'(t)$，两者满足
+\[
+\frac{dT'}{dt} = F(T', \bar{T}_{\text{PDO}}), \qquad \frac{d\bar{T}_{\text{PDO}}}{dt} = \varepsilon G(T'),
+\]
+其中 $\varepsilon \ll 1$ 表示 PDO 的慢变特性。ENSO 的振幅与频率被 PDO 的相位调制——PDO$^+$ 期间更强的温跃层异常使 ENSO 振幅增大、周期略缩短。
+\end{proposition}
+
+\begin{proof}
+由时间尺度分离假设 $\varepsilon \ll 1$，ENSO 状态 $\bar{T}'$ 在固定 $\bar{T}_{\text{PDO}}$ 下弛豫到快子系统的不动点或极限环；在 PDO 时间尺度上，ENSO 的统计量（振幅、频率）由 $\bar{T}_{\text{PDO}}$ 决定。多次 ENSO 事件的统计平均反映了 PDO 相位的慢变调制。观测数据（如 $1950$—$2020$ 年 Niño 3.4 指数与 PDO 指数的关系）表明 PDO$^+$ 期间 ENSO 振幅偏高，与慢–快变量分离的预测一致。
+\end{proof}
+
+\section{印度洋偶极子（IOD）}
+
+\begin{definition}[印度洋偶极子（IOD）]\label{def:iod}
+\textbf{印度洋偶极子}（Indian Ocean Dipole, IOD）是热带印度洋海面温度异常的东西偶极子型模态。IOD 指数定义为热带西印度洋（$50^\circ$E—$70^\circ$E，$10^\circ$S—$10^\circ$N）与热带东印度洋（$90^\circ$E—$110^\circ$E，$10^\circ$S—$0^\circ$）SST 异常之差。IOD 有三个相位：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{正相位（IOD$^+$）}：西印度洋偏暖、东印度洋偏冷，对流中心西移，东非降水增多、印尼与澳洲降水减少。
+    \item \textbf{负相位（IOD$^-$）}：西印度洋偏冷、东印度洋偏暖，对流中心东移，影响大致相反。
+    \item \textbf{中性相位}：偶极子指数接近零。
+\end{enumerate}
+IOD 的准周期约为 $3$—$7$ 年，与 ENSO 部分耦合——ENSO 事件通过大气遥相关影响 IOD 的形成，但 IOD 也可以独立于 ENSO 发生。
+\end{definition}
+
+\begin{proposition}[IOD 的独立周期成分]\label{prop:iod_independence}
+IOD 虽然与 ENSO 部分耦合，但具有独立于 ENSO 的周期成分。定义 IOD 对 ENSO 的线性回归残差 $\text{IOD}_{\perp}(t) = \text{IOD}(t) - \beta_{\text{ENSO}} \cdot \text{ONI}(t)$，则 $\text{IOD}_{\perp}$ 的功率谱在 $3$—$7$ 年频段仍有显著峰值——表明 IOD 存在独立于 ENSO 的海盆内动力机制（如赤道印度洋 Wyrtki 急流季节–年际变率的耦合）。
+\end{proposition}
+
+\begin{proof}
+对 IOD 与 ONI 的回归分析表明，ENSO 解释了 IOD 方差的一部分（约 $30\%$—$50\%$，取决于时段），剩余方差集中在 $3$—$7$ 年频段。用谱分析方法，对 $\text{IOD}_{\perp}$ 作功率谱估计，峰值仍出现在 $3$—$7$ 年——说明独立成分存在。这一独立成分源自印度洋自身的季节–年际耦合（如季风–海洋相互作用），与太平洋 ENSO 独立。
+\end{proof}
+
+\section{气候系统中的长程相关与 $1/f$ 噪声}
+
+\begin{definition}[气候时间序列的长程持续性]\label{def:climate_long_memory}
+许多气候时间序列（温度、降水、干旱指数、树木年轮宽度、冰芯氧同位素）呈现\textbf{长程持续性}（long-range persistence）——自相关函数以幂律衰减而非指数衰减：$\rho(\tau) \propto \tau^{-\beta}$（$0 < \beta < 1$）。Hurst 指数 $H = 1 - \beta/2$ 度量了持续性强度：$H > 0.5$ 表示正持续性（过去的增长倾向于持续），$H < 0.5$ 表示反持续性（过去的增长倾向于反转），$H = 0.5$ 表示白噪声（无记忆）。
+
+$H \neq 0.5$ 意味着气候系统在缩放变换下不具有统计不变性——$\{X_{\lambda t}\} \stackrel{d}{\neq} \{\lambda^H X_t\}$（除非原始序列已经是自相似的）。Hurst 指数 $H$ 度量了气候系统在不同时间尺度上的波动强度比——$H$ 越大，低频波动越强，长程记忆越持久。
+\end{definition}
+
+\begin{proposition}[气候系统 $1/f$ 噪声的来源]\label{prop:one_over_f_noise}
+气候时间序列的功率谱密度在低频段近似为 $S(\omega) \propto \omega^{-\alpha}$（$\alpha \approx 0.5$—$1.5$）。$\alpha \approx 1$ 对应经典的 $1/f$ 噪声，它是多种时间尺度过程叠加的自然结果。气候系统中 $1/f$ 噪声的来源包括：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{多尺度过程的线性叠加}：气候系统包含从天气尺度（数天）到米兰科维奇尺度（数万年）的多种过程，不同时间尺度的波动按振幅叠加产生 $1/f$ 谱。
+    \item \textbf{随机漫步的天积分}：白噪声的累积和（随机漫步）的谱为 $S(\omega) \propto \omega^{-2}$。气候系统的“记忆”（海洋热容量、冰盖热惯性）将随机大气扰动积分为红噪声。
+    \item \textbf{自组织临界性}：气候系统可能处于自组织临界态——微小的随机扰动可能触发任何规模的响应（从局部暴风雨到全球冰期），响应大小的分布为幂律。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+（多尺度叠加产生 $1/f$ 谱）设气候系统由一族时间尺度 $\tau$ 的过程叠加而成，各过程为红噪声（引理 \ref{ch28_red_noise_duality}），且时间尺度按幂律分布 $p(\tau)d\tau \propto \tau^{-\gamma}d\tau$（$\tau \in [\tau_1, \tau_2]$，$\tau_1 \ll \tau_2$）。总谱为
+\[
+S(\omega) = \int_{\tau_1}^{\tau_2} \frac{2\tau}{1+\omega^2\tau^2}\,\tau^{-\gamma}\,d\tau
+= \omega^{\gamma-2} \cdot 2\int_{\omega\tau_1}^{\omega\tau_2} \frac{u^{1-\gamma}}{1+u^2}\,du.
+\]
+当 $0 < \gamma < 2$ 时内层积分在 $\omega\tau_1 \to 0$、$\omega\tau_2 \to \infty$ 下收敛于常数，故 $S(\omega) \propto \omega^{\gamma-2}$，即谱指数 $\alpha = 2-\gamma$。$\alpha = 1$（经典 $1/f$）恰对应 $\gamma = 1$——时间尺度在\textbf{对数轴上均匀分布}（天气到冰期的各尺度等权出现）。这一论证同时覆盖随机漫步天积分（$\gamma = 0$ 时 $\alpha = 2$，即红噪声）与自组织临界性（$\gamma \approx 1$）两种来源。
+\end{proof}
+
+\section{气候变化的多尺度嵌套周期}
+
+\begin{theorem}[气候系统的三层嵌套周期结构]\label{thm:climate_nested_periods}
+气候系统构成了一个三层嵌套的周期结构，与天文、海洋和大气三个驱动层一一对应：
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{3.2cm}>{\centering\arraybackslash}p{2.2cm}}
+\toprule
+气候周期层 & 时间尺度 & 主导机制 & 典型实例 \\
+\midrule
+天文驱动层 & $10^4$—$10^5$ 年 & 轨道三要素的准周期变化 & 米兰科维奇旋回 \\
+海洋响应层 & $10^0$—$10^3$ 年 & 海-气耦合与热容量缓冲 & ENSO、PDO、AMO、IOD \\
+大气变率层 & $10^{-2}$—$10^1$ 年 & 大气内部动力学与水汽反馈 & NAO、SAM、季风 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+三层之间的关系由“周期系统”章的组合周期框架统一描述：天文驱动层提供最顶层的准周期驱动力（米兰科维奇旋回），海洋响应层在中层将天文周期转化为热量的储存和释放（热容量是能量的缓冲器），大气变率层在底层响应海洋的热量再分配并通过水汽-云-辐射反馈放大或抑制气候信号。
+\end{theorem}
+
+\begin{proof}
+三层嵌套结构的数学基础是时间尺度的分离和方差的分层。天文周期（$10^4$—$10^5$ 年）远长于海洋热力调整时间（$10^1$—$10^3$ 年），海洋热力调整时间又远长于大气动力调整时间（$10^{-2}$—$10^1$ 年）。在海洋响应层的时间尺度上，天文驱动力可视为缓变参数。在大气变率层的时间尺度上，海洋表面温度可视为固定边界条件。
+
+从功率谱的角度，气候方差按频率的分层结构为：总方差 $\sigma^2_{\text{total}} = \sigma^2_{\text{天文}} + \sigma^2_{\text{海洋}} + \sigma^2_{\text{大气}}$，其中 $\sigma^2_{\text{天文}}$ 集中在 $10^{-5}$—$10^{-4}$ yr$^{-1}$，$\sigma^2_{\text{海洋}}$ 集中在 $10^{-3}$—$10^0$ yr$^{-1}$，$\sigma^2_{\text{大气}}$ 集中在 $10^{-1}$—$10^2$ yr$^{-1}$。这类似于“周期系统”章中嵌套周转系统的各级振幅——天文层对应外层大周转圆（周期最长、振幅最大），大气层对应内层小周转圆（周期最短、振幅最小）。
+\end{proof}
+
+\begin{remark}[气候现象的周期谱]
+将主要气候现象按时间尺度排列：
+\begin{itemize}
+    \item $10^{-2}$—$10^{-1}$ 年：天气系统、Madden–Julian 振荡（MJO，$30$—$90$ 天）。
+    \item $10^{-1}$—$10^0$ 年：季节循环、NAO（$7$—$8$ 年特征时间尺度）。
+    \item $10^0$ 年：ENSO（$2$—$7$ 年）、IOD（$3$—$7$ 年）。
+    \item $10^1$ 年：PDO（$20$—$30$ 年）、AMO（大西洋多年代际振荡，$60$—$80$ 年）。
+    \item $10^2$—$10^3$ 年：小冰期、中世纪暖期等百年–千年尺度波动。
+    \item $10^4$—$10^5$ 年：米兰科维奇旋回（$2.3$ 万年岁差、$4.1$ 万年倾角、$10$ 万年偏心率）。
+    \item $10^5$—$10^6$ 年：冰期-间冰期旋回、长期气候演变。
+\end{itemize}
+这些现象构成从数天到百万年的连续周期谱。
+\end{remark}
+
+\section{气候系统的守恒律}
+
+\begin{theorem}[气候系统的三种守恒律]\label{thm:climate_conservation}
+气候系统的动力学由三种守恒律支配：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{能量守恒}：地球气候系统的总能量平衡为 $\Delta F = \lambda \Delta T$，其中 $\Delta F$ 是辐射强迫（W/m$^2$），$\Delta T$ 是全球平均地表温度响应（K），$\lambda$ 是气候反馈参数。大气顶部的净辐射通量在年平均值上接近为零——地球吸收的太阳辐射等于地球发射的红外辐射。能量守恒约束了全球平均温度在长期时间尺度上的变化范围。
+    \item \textbf{动量守恒}：大气和海洋环流的总角动量在地-气-海系统中守恒。大气环流的角动量输送（Hadley 环流、中纬度涡旋）和海洋环流的角动量输送（风生环流、热盐环流）将角动量从热带向极地输送，维持地球自转速率和自转轴方向的长期稳定。角动量守恒是大气和海洋环流的基本物理约束。
+    \item \textbf{水汽守恒}：全球水文循环中，蒸发量 $E$ 和降水量 $P$ 在年平均值上相等——$E_{\text{global}} = P_{\text{global}}$。水汽在大气中的存留时间约 $9$ 天——水汽的快速周转是高频率标度变换的物理基础。水汽是地球最重要的温室气体，其在大气中的浓度通过 Clausius–Clapeyron 关系与温度耦合——温度每升高 $1^\circ$C，大气持水能力增加约 $7\%$。
+\end{enumerate}
+三种守恒律的层级关系为：能量守恒是气候系统存在的物理基础（太阳辐射输入与地球辐射输出的平衡），动量守恒是大气和海洋环流的动力约束（角动量在圈层之间的重新分配），水汽守恒是水文循环的封闭性保证（蒸发与降水的全球平衡）。三者共同构成了气候系统周期结构的物理保证。
+\end{theorem}
+
+\begin{proof}
+(i) 能量守恒：地球大气顶部接收的净太阳短波辐射为 $S_0(1-A)/4 \approx 240$ W/m$^2$（$S_0 = 1361$ W/m$^2$ 是太阳常数，$A \approx 0.3$ 是行星反照率）。地球红外辐射输出为 $\sigma T_e^4$，其中 $T_e \approx 255$ K 是有效辐射温度。在平衡态，$S_0(1-A)/4 = \sigma T_e^4$。温室效应（大气中的水汽、CO$_2$、云等吸收红外辐射并向下重新辐射）使地表温度 $T_s \approx 288$ K 比 $T_e$ 高约 $33$ K。
+
+(ii) 动量守恒：地-气系统的总角动量变化率等于外部力矩（日月引力力矩）。在气候时间尺度上，外部力矩近似为零，总角动量守恒。大气角动量 $M_{\text{atm}}$ 和固体地球角动量 $M_{\text{earth}}$ 的交换驱动了地球自转速率（日长 LOD）的季节性变化——大气角动量在冬季最大（地球自转稍慢），在夏季最小（地球自转稍快）。
+
+(iii) 水汽守恒：全球平均蒸发 $E \approx 1000$ mm/yr，全球平均降水 $P \approx 1000$ mm/yr（海洋蒸发 $1200$ mm/yr，海洋降水 $1100$ mm/yr，海洋净蒸发 $100$ mm/yr 向陆地输送；陆地蒸发 $500$ mm/yr，陆地降水 $745$ mm/yr，陆地净降水 $245$ mm/yr 来自海洋水汽输送）。水汽在大气中的存留时间 $\tau = \text{大气水汽总量}/\text{全球降水率} \approx 12.7 \times 10^{12} \text{ m}^3 / (1 \text{ m/yr} \times 5.1 \times 10^{14} \text{ m}^2) \approx 9$ 天。
+\end{proof}
+
+\begin{remark}[与全书的衔接]
+本章建立的气候系统周期结构理论是周期数学在地球气候科学中的应用。米兰科维奇旋回是天文周期向气候系统的准周期传递——轨道三要素的准周期变化驱动了冰期-间冰期的交替。ENSO 是赤道太平洋海-气耦合系统的准周期振荡——Bjerknes 正反馈和赤道波导的延迟负反馈共同维持了 $2$—$7$ 年的振荡周期；厄尔尼诺（暖相）与拉尼娜（冷相）是其两个极端相位；与 PDO（年代际）、IOD（印度洋）等模态构成海盆间耦合网络。NAO 表现为大气经向气压梯度的增强与减弱。气候时间序列中的长程持续性（$H > 0.5$）和 $1/f$ 噪声反映了气候系统在不同时间尺度上的能量分配。气候系统的三层嵌套周期结构——天文驱动、海洋响应、大气变率——是“周期系统”章中嵌套周转系统在地球气候中的复杂实现。三种守恒律——能量守恒、动量守恒、水汽守恒——共同构成了气候系统周期结构的物理保证。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 季节循环的年际推进（太阳赤纬 $\delta(t) = 23.44^\circ \sin(2\pi t/365.24)$，定义 \ref{def:solar_insolation}）；大气变率的时间平移 \\
+缩放 & $1/f$ 噪声的标度不变性（命题 \ref{prop:one_over_f_noise} 的多尺度叠加证明）；长程持续性 Hurst 指数 $H$（定义 \ref{def:climate_long_memory}） \\
+旋转 & ENSO 暖相/冷相（厄尔尼诺/拉尼娜）的相位振荡（定义 \ref{def:enso}、命题 \ref{prop:enso_oscillator}）；IOD 的东西偶极子振荡（定义 \ref{def:iod}）；米兰科维奇轨道旋回 \\
+守恒 & 全球能量平衡、地-气角动量守恒、水文循环水汽守恒（定理 \ref{thm:climate_conservation}） \\
+对称 & 南北半球季节的相位对称：半球反射 $\Leftrightarrow$ 相位差 $\pi$（命题 \ref{prop:seasonal_phase_symmetry}） \\
+闭合 & Bjerknes 正反馈回路的闭合（命题 \ref{prop:bjerknes_feedback} 的环路增益 $G>0$）；冰-反照率反馈回路；PDO–ENSO 慢–快耦合回路（命题 \ref{prop:pdo_enso_separation}） \\
+周期 & 季节 $T=365.24$ 天（例 \ref{ex:polar_day_night}）；ENSO $2$—$7$ 年（例 \ref{ex:enso_period_calc}、\ref{ex:enso_events}）；PDO $20$—$30$ 年；IOD $3$—$7$ 年；三层嵌套周期（定理 \ref{thm:climate_nested_periods}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{气候周期性判定定理}（\ref{thm:climate_periodicity_decision}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 验证\textbf{PDO 与 ENSO 的时间尺度分离判定}（\ref{lem:pdo_enso_separation_decision}）的前提在本章领域对象上成立，并给出一个不满足前提的反例。
+
+    \item 考察\textbf{数量调节的单调性}（\ref{prop:climate_adaptive_growth}）在参数退化时的行为，说明结论如何随之退化。
+
+    \item 说明\textbf{三参数对应：半径、相位与转速}（\ref{prop:climate_epicycle_correspondence}）与「周期系统」章相应通用结论的关系（是一致、特例还是需要附加条件）。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{thm:climate_periodicity_decision}、\ref{lem:pdo_enso_separation_decision}、\ref{prop:climate_adaptive_growth}、\ref{prop:climate_epicycle_correspondence}。
+\end{enumerate}
+
+

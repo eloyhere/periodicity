@@ -1,0 +1,790 @@
+\chapter{生物系统之周期结构}
+\markboth{生物系统之周期结构}{生物系统之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:bio_ps_hook}
+本章判定研究目标是否具有周期性、确定其周期类型、以及查找最小正周期时，一律引用「周期系统」章：
+周期性判据见 \cref{thm:ps_periodicity_decision}，
+周期类型判别见 \cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}，
+最小正周期查找见 \cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}，
+由数据构建周期级数与周转圆组见 \cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}。
+\end{remark}
+
+\begin{remark}[本章定位：按「周期系统」章五步接口展开]\label{rem:bio_five_steps_positioning}
+生物系统之周期结构研究生命体中内源性节律、周期性行为和生物钟的数学表征。本章不另立周期性判据，而是把生物系统接入「周期系统」章规定的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把昼夜节律、心率周期、细胞周期、种群周期、神经振荡、多尺度演化等目标化为离散或连续动力系统，引用 \cref{thm:ps_periodicity_decision} 判定是否具有周期性，并确定周期类型；
+    \item \textbf{构建}：由浓度变量、膜电位、种群数量、相位变量构建振幅级数、频率级数、相位级数，组装为生物周转圆组；
+    \item \textbf{调节}：用残差能量下降、能量守恒、物质守恒与信息守恒约束动态调节生物周转圆组；
+    \item \textbf{卷积}：在生物周转圆组上引入振幅卷积、相位卷积、频率卷积，并与自相关、互相关、相位锁定衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成生物周期诊断流程。
+\end{enumerate}
+本章使用的数学工具包括：极限环理论、延迟负反馈、弛豫振荡、Lotka-Volterra 方程、相位振子模型、复制-变异方程、周期卷积、周转圆组、相位算子、时延。
+\end{remark}
+
+\begin{remark}[本章七主题导引]\label{rem:bio_seven_themes}
+\textbf{平移}——昼夜节律约 24 小时主周期（地球自转的内化，定义 \ref{def:circadian_rhythm}）；\textbf{缩放}——细胞周期的标度变换（DNA 含量 $2n \to 4n \to 2n$，定义 \ref{def:cell_cycle}）与种群规模标度；\textbf{旋转}——心率极限环（定义 \ref{def:cardiac_pacemaker}）与神经振荡的相位（定义 \ref{def:neural_oscillation}）；\textbf{守恒}——能量守恒、物质守恒、信息守恒（定理 \ref{thm:biological_conservation}）；\textbf{对称}——DNA 双链的互补对称与世代传递的信息对称；\textbf{闭合}——Lotka-Volterra 首次积分保证的闭合轨道（定理 \ref{thm:lotka_volterra_periodic}）；\textbf{周期}——昼夜（24 h）、心率（$0.6$—$1.0$ s）、细胞（数小时—数天）、种群（$9$—$11$ 年猞猁周期）的多尺度周期。
+\end{remark}
+
+\section{接入「周期系统」章的五步接口}
+\label{sec:bio_five_steps}
+
+\subsection{第一步：生物目标的周期性判定}
+
+\begin{definition}[生物目标与判定输入]\label{def:bio_target}
+一个\textbf{生物目标}是指下列对象之一：
+\begin{enumerate}[label=(\roman*)]
+    \item 一个昼夜节律系统，其状态空间为蛋白质浓度相空间 $(M,P,Z)$；
+    \item 一个心率周期系统，其状态空间为膜电位与离子通道变量的联合空间 $(V_m,n)$；
+    \item 一个细胞周期系统，其状态空间为周期蛋白浓度空间；
+    \item 一个种群周期系统，其状态空间为猎物-捕食者相空间 $(H,P)$；
+    \item 一个神经振荡系统，其状态空间为神经元发放相位空间；
+    \item 一个多尺度演化系统，其状态空间为各层级状态变量的联合空间。
+\end{enumerate}
+生物目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal D_{\mathrm{B}}=(\mathcal S,\Phi),
+\]
+其中 $\mathcal S$ 是状态空间，$\Phi:\mathcal S\to\mathcal S$ 是时间平移、相位旋转或反馈演化所诱导的映射。若 $\mathcal S$ 为有限集，称目标为\textbf{有限生物目标}；若 $\mathcal S$ 为无限集，称目标为\textbf{无限生物目标}。
+\end{definition}
+
+\begin{definition}[生物判定映射]\label{def:bio_periodization}
+设生物目标由判定输入 $\mathcal D_{\mathrm{B}}=(\mathcal S,\Phi)$ 给出。若目标的状态由 $\Phi$ 生成，即存在 $x_0\in\mathcal S$ 使
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+当 $t\in\mathbb Z$ 时 $x_t$ 由 $\Phi$ 迭代生成；当 $t\in\mathbb R$ 时，以单参数演化族 $\{\Phi_t\}_{t\in\mathbb R}$（其中每个 $\Phi_t:\mathcal S\to\mathcal S$，且 $\Phi_0=\operatorname{id}$、$\Phi_{s+t}=\Phi_s\circ\Phi_t$ 对一切 $s,t\in\mathbb R$ 成立、$(t,x)\mapsto\Phi_t(x)$ 连续）记之。
+则称 $\Phi$ 为目标的\textbf{生物判定映射}。此时当 $t\in\mathbb Z$ 时生物目标化为离散动力系统 $(\mathcal S,\Phi)$，当 $t\in\mathbb R$ 时化为连续动力系统 $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$，两种情形均可直接套用「周期基础」章与「周期系统」章的判据。
+\end{definition}
+
+\begin{theorem}[生物周期性判定定理]\label{thm:bio_periodicity_decision}
+设生物目标的判定映射为 $\Phi$，且 $(\mathcal S,\Phi)$ 为离散动力系统。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 $m\in\mathbb N^+$ 使 $\Phi^m=\mathrm{id}$，则目标为一致周期生物系统；每条轨道闭合，且轨道长度整除 $m$。
+    \item \textbf{判定等价}：目标为一致周期生物系统当且仅当 $\operatorname{ord}(\Phi)<\infty$。
+    \item \textbf{逐点判据}：目标在状态 $x_0$ 处的轨道闭合当且仅当 $x_0$ 为周期点；此时轨道长度即该点处的周期。
+    \item \textbf{不可省略性}：守恒量与对称群的合取不能替代 $\operatorname{ord}(\Phi)<\infty$；准周期生物目标不属于周期生物系统。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:bio_periodicity_decision} 是「周期系统」章 \cref{thm:ps_periodicity_decision} 的领域实例化：
+只需把判定映射 $f$ 与演化群替换为本章的 $\Phi$，(A) 充分判定、(B) 判定等价、(C) 逐点判据、
+(D) 不可省略性四条即逐条成立。依 \cref{rem:ps_applications_hook} 的约定，此处不再重复展开。
+\end{proof}
+
+\begin{corollary}[生物周期类型]\label{cor:bio_period_type}
+经 \cref{thm:bio_periodicity_decision} 判定后，生物目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 $m_0=1$，状态为不动点；
+    \item \textbf{严格周期型}：$1<m_0<\infty$，状态严格周期；
+    \item \textbf{一致周期型}：$\operatorname{ord}(\Phi)=m<\infty$，所有轨道长度整除 $m$；
+    \item \textbf{准周期型}：$\operatorname{ord}(\Phi)=\infty$，轨道不闭合但在紧致承载结构上稠密；
+    \item \textbf{最终周期型}：存在 $N$，使 $t\ge N$ 后目标为周期；
+    \item \textbf{离散周期型}：承载结构为 $\mathbb Z$，且归一化周期比 $\rho=T_x/\Delta x\in\mathbb Q$。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，残差按 $e^{-\kappa t}$ 衰减（见 \cref{def:ps_period_type}(vii)）。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于周期生物系统；(iv) 不属于周期生物系统，但可用有界逼近工具处理；(v) 只在稳定阶段是周期生物系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期生物系统，只在稳定阶段可用有界逼近工具处理。
+\end{corollary}
+
+\begin{proof}
+逐条由 \cref{thm:bio_periodicity_decision} 与「周期系统」章 \cref{def:ps_period_type} 代入生物目标即得。
+\end{proof}
+
+\begin{remark}[昼夜节律的周期判定（经验观察／研究纲领）]\label{lem:circadian_periodic}
+经验观察：哺乳动物的昼夜节律在观测尺度上周期稳定，其最小正周期约为
+\[
+T_{\text{circadian}} \approx 24\ \text{小时}.
+\]
+经验依据：以上为经验观察，不是已证定理。这一数值不是模型参数的推论——三变量 Goodwin 振子（\cref{prop:circadian_model}）只给出 Hill 系数 $n > 8$ 时稳定极限环的存在性，其周期随参数连续变化；$24$ 小时来自 TTFL 的延迟时间尺度（PER/CRY 蛋白的积累、修饰、核定位与降解）与生理参数的匹配，属经验观察与研究纲领。
+\end{remark}
+
+\begin{lemma}[心率周期的判定]\label{lem:cardiac_periodic}
+设窦房结起搏细胞的膜电位 $V_m$ 与离子通道变量在相空间中构成极限环。则心率周期为一致周期系统，其最小正周期为
+\[
+T_{\text{cardiac}} \approx 0.6\text{—}1.0\ \text{秒},
+\]
+对应心率 $60$—$100$ 次/分钟。
+\end{lemma}
+
+\begin{proof}
+由定义 \ref{def:cardiac_pacemaker}，起搏细胞通过 $I_f$、$I_{Ca\text{-}T}$、$I_{Ca\text{-}L}$、$I_K$ 等电流的周期性激活产生自律性动作电位。膜电位与离子通道变量的联合动力学在相空间中构成极限环，每次完整的去极化-复极化循环对应极限环的一周。故心率周期为一致周期系统，周期约 $0.6$—$1.0$ 秒。
+\end{proof}
+
+\begin{lemma}[细胞周期的判定]\label{lem:cell_cycle_periodic}
+设 Cyclin B 浓度按锯齿形弛豫振荡演化，积累率为 $\rho$，阈值为 $C_{\text{th}}$，残余浓度为 $C_0$。则细胞周期为一致周期系统，其最小正周期为
+\[
+T_{\text{cell}} = \frac{C_{\text{th}} - C_0}{\rho}.
+\]
+\end{lemma}
+
+\begin{proof}
+由引理 \ref{ch25_sawtooth_period}，锯齿形弛豫振荡的周期为 $T=(C_{\text{th}}-C_0)/\rho$。Cyclin B 浓度达到阈值时触发 M 期，M 期末快速降解至 $C_0$，下一周期重新积累。故判定映射 $\Phi$ 满足 $\Phi^{T_{\text{cell}}}=\mathrm{id}$，为一致周期系统。
+\end{proof}
+
+\begin{lemma}[种群周期的判定]\label{lem:population_periodic}
+设 Lotka-Volterra 系统的首次积分为 $I(H,P)$，平衡点为 $(H^*,P^*)=(\gamma/\delta,\alpha/\beta)$。则对任意正初始条件，系统为一致周期系统，其小振幅周期近似为
+\[
+T_{\text{pop}} \approx \frac{2\pi}{\sqrt{\alpha\gamma}}.
+\]
+\end{lemma}
+
+\begin{proof}
+由定理 \ref{thm:lotka_volterra_periodic}，平衡点是中心型不动点，首次积分 $I(H,P)$ 在 $(H^*,P^*)$ 处取极小值，等值线是围绕平衡点的闭曲线。对充分靠近平衡点的初始条件，周期由线性化特征值 $\lambda=\pm i\sqrt{\alpha\gamma}$ 给出，$T\approx 2\pi/\sqrt{\alpha\gamma}$。故系统为一致周期系统。
+\end{proof}
+
+\begin{lemma}[神经振荡的判定]\label{lem:neural_periodic}
+设两个中间神经元通过抑制性突触耦合，固有频率为 $\omega_1,\omega_2$，耦合强度为 $c_{12},c_{21}$。则当 $|\Delta\omega| < c_{12}+c_{21}$ 时，神经元网络进入相位锁定，为一致周期系统，锁相周期为
+\[
+T_{\text{sync}} = \frac{2\pi}{\bar\omega},
+\]
+其中 $\bar\omega$ 为锁相后的公共频率。
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:gamma_oscillation} 的证明，相位差动力学 $d(\Delta\theta)/dt = \Delta\omega - (c_{12}+c_{21})\sin(\Delta\theta)$ 在 $|\Delta\omega| < c_{12}+c_{21}$ 时存在稳定不动点 $\Delta\theta^*$。此时两神经元的相位差为常数，公共频率锁定为 $\bar\omega$。故网络为一致周期系统，周期为 $T_{\text{sync}}=2\pi/\bar\omega$。
+\end{proof}
+
+\begin{definition}[生物最小正周期算法]\label{def:bio_minimal_period_algorithm}
+本定义与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{def:ps_minimal_period_algorithm} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处的差别仅为术语（生物目标 / 生物样本），算法步骤与结论完全相同。
+\end{definition}
+
+\begin{theorem}[生物最小正周期算法的正确性]\label{thm:bio_minimal_period_correctness}
+本定理与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{thm:ps_minimal_period_correctness} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。本处的差别仅为术语（生物目标 / 生物样本），算法步骤与结论完全相同。
+\end{theorem}
+
+\begin{example}[生物周期判定实例]\label{ex:bio_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item 昼夜节律：$T_{\text{circadian}}\approx 24$ h（经验观察，见注 \ref{lem:circadian_periodic}）；
+    \item 心率周期：$T_{\text{cardiac}}\approx 0.6$—$1.0$ s，一致周期型；
+    \item 细胞周期：$T_{\text{cell}}=(C_{\text{th}}-C_0)/\rho$，一致周期型；
+    \item 种群周期：$T_{\text{pop}}\approx 2\pi/\sqrt{\alpha\gamma}$（小振幅极限），一致周期型；
+    \item 神经振荡：锁相周期 $T_{\text{sync}}=2\pi/\bar\omega$，一致周期型。
+\end{enumerate}
+\end{example}
+
+\begin{remark}[守恒量不保证周期]\label{rem:bio_invariant_not_period}
+生物系统中的能量守恒、物质守恒与信息守恒是周期结构的辅助条件，但不构成充分条件。例如一个具有能量守恒但处于不稳定平衡的生化系统不会自发产生周期振荡。生物周期结构必须由 \cref{thm:bio_periodicity_decision} 或上述引理判定。
+\end{remark}
+
+\subsection{第二步：生物周期级数与周转圆组的构建}
+
+\begin{definition}[生物振幅级数、频率级数、相位级数]\label{def:bio_series}
+设生物目标的状态或输出序列为 $\{z_t\}$。若其可写为
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+则称
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+分别为生物目标的\textbf{振幅级数}、\textbf{频率级数}与\textbf{相位级数}。三者与「级数与卷积」章 \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} 一致。
+\end{definition}
+
+\begin{definition}[生物周转圆组]\label{def:bio_epicycle_group}
+设生物目标的周期级数由振幅级数 $\{A_k\}$、频率级数 $\{\omega_k\}$ 与相位级数 $\{\phi_k\}$ 给出。对每个 $k$ 定义周转圆
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+其集合
+\[
+\mathfrak E_{\mathrm{B}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+称为生物目标的\textbf{周转圆组}。其叠加即生物周期级数
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[由生物数据构建周期级数]\label{thm:bio_series_reconstruction}
+设生物目标的输出为有限周期序列，周期为 $N$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 输出可展开为离散傅里叶级数
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item 振幅级数由 $|c_k|$ 给出，相位级数由 $\arg c_k$ 给出，频率级数由 $2\pi k/N$ 给出；
+    \item 若输出为昼夜节律的蛋白质浓度，则傅里叶分解给出约 24 小时主分量及其谐波；若输出为心电图的 P-QRS-T 波形，则各级谐波对应不同心脏结构的电活动。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 有限周期序列的离散傅里叶级数是标准结论：基函数 $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ 构成 $\mathbb C^N$ 的正交基。
+(ii) 由 $c_k=A_k e^{i\phi_k}$ 直接读出。
+(iii) 对昼夜节律序列 $N=24$（小时采样），基频对应 24 小时主周期，谐波对应次昼夜节律；对心电序列，按命题 \ref{prop:ecg_periodic} 的谐波归属给出波形成分。
+\end{proof}
+
+\begin{proposition}[三参数对应：半径、相位与转速]\label{prop:bio_epicycle_correspondence}
+生物周转圆组 $\mathfrak E_{\mathrm{B}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ 的三个参数与三个几何—生物量一一对应：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{半径对应振幅}：$E_k$ 的半径 $|E_k|=A_k$ 即该浓度分量或电位分量的振幅；
+    \item \textbf{相位对应旋转时延}：初相 $\phi_k$ 对应时间平移 $\tau_k=\phi_k/\omega_k$；$\phi_k>0$ 时该分量相对基准\textbf{超前} $\tau_k$（等价于把基准延后 $\tau_k$ 后二者重合）；
+    \item \textbf{频率对应旋转速度}：$\omega_k$ 即该生物振荡分量的角频率。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:bio_epicycle_correspondence} 与「周期系统」章 \cref{prop:ps_epicycle_correspondence} 完全对应，
+三条对应——半径对应振幅、相位对应旋转时延、频率对应旋转速度——逐条平移至本章的周转圆组即得。
+证明见该处：(i) 由 $|E_k|=A_k$ 与能量分解，(ii) 由相位平移定理，(iii) 由频率级数定义。
+\end{proof}
+
+\begin{example}[心电图的周期级数]\label{ex:bio_ecg_series}
+心电图的 P-QRS-T 波形在周期 $T=1/\text{心率}$ 上为周期序列，其傅里叶分解中：P 波与 T 波对应低次谐波（$n\le 2$），QRS 波群对应高次谐波（$n\approx 3$—$10$）。这些谐波在生物周转圆组中表现为不同半径和相位的周转圆分量。
+\end{example}
+
+\begin{remark}[周期级数即复变函数]\label{rem:bio_series_complex}
+设 $z=e^{i\omega_0t}$，则生物周期级数
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+当所有分量与 $\omega_0$ 可公度（即 $\omega_k=k\omega_0$，$k\in\mathbb Z$）时可写为洛朗级数 $\sum_k c_k z^k$，其中 $c_k=A_k e^{i\phi_k}$：此时生物周期级数即单位圆上的复变函数，否则为环面上的函数。
+\end{remark}
+
+\subsection{第三步：生物周转圆组的动态调节}
+
+\begin{definition}[生物周转圆组的动态调节]\label{def:bio_adaptive_adjustment}
+设当前生物周转圆组为 $\mathfrak E^{(j)}$，部分和
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+残差 $r^{(j)}=z-z^{(j)}$。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 $\|r^{(j)}\|^2>\delta$，则依残差周期图峰值新增一个周转圆；
+    \item \textbf{参数调节}：对已有周转圆参数按正则化最小二乘或守恒约束更新。
+\end{enumerate}
+在生物系统中，数量调节对应增加谐波阶数或生物振荡模态；参数调节对应调整振幅、相位与频率，使能量、物质与信息约束满足。
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:bio_adaptive_growth}
+按 \cref{def:bio_adaptive_adjustment}(i) 加入残差主频分量后，残差能量单调不增：
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+等号成立当且仅当残差在被选频率上无能量。
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:bio_adaptive_growth} 与「周期系统」章 \cref{def:ps_adaptive_adjustment} 的动态调节机制一致：
+新增周转圆即把 $r^{(j)}$ 沿 $\hat\omega$ 的分量从残差中移出，由正交分解
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{被移出的分量}\|^2$ 即得不等式，
+等号当且仅当被移出分量的范数为零。完整论证见该处。
+\end{proof}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:bio_adaptive_convergence}
+设生物目标为周期 $T_0$ 的有限周期序列且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得生物周转圆组即目标的精确傅里叶数据。
+\end{theorem}
+
+\begin{proof}
+周期 $T_0$ 的序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波上完备。每步按 \cref{prop:bio_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。
+\end{proof}
+
+\begin{definition}[结构指标调节]\label{def:bio_structure_metric_adjustment}
+设生物目标的结构指标为
+\[
+\mathcal I=(\mathcal I_{\text{能量}},\mathcal I_{\text{物质}},\mathcal I_{\text{信息}})
+=(\text{能量守恒度},\ \text{物质守恒度},\ \text{信息守恒度}).
+\]
+\textbf{结构指标调节}为：在参数空间 $\Theta$ 中选取 $\theta$，每步取使 $\mathcal I(\theta)$ 按字典序\textbf{严格递减}（极小化）的邻近参数；若不存在则停止，此时为局部最优。
+\end{definition}
+
+\begin{proposition}[结构指标调节的有限收敛]\label{prop:bio_structure_metric_convergence}
+设参数空间 $\Theta$ 有限，且每次调节使 $\mathcal I$ 按字典序严格递减。则调节在有限步内终止于局部最优参数。
+\end{proposition}
+
+\begin{proof}
+$\Theta$ 有限，故 $\mathcal I$ 只取有限多个值，而字典序是有限集上的全序；按字典序严格递减的序列不能无限延续，故调节在有限步终止。终止时不存在使 $\mathcal I$ 按字典序严格递减的邻近参数，即局部最优。
+\end{proof}
+
+\begin{remark}[动态调节的边界]\label{rem:bio_adaptive_boundary}
+\cref{thm:bio_adaptive_convergence} 依赖有限周期序列。对连续谱或准周期生物目标，不存在有限周转圆组精确表示，只能作有界逼近。结构指标调节不保证全局最优。
+\end{remark}
+
+\subsection{第四步：生物卷积}
+
+\begin{definition}[生物振幅卷积、相位卷积与频率卷积]\label{def:bio_convolution_types}
+设两个生物周转圆组为
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+定义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅卷积}：$\mathbb A_{mn}=A_nB_m$；
+    \item \textbf{相位卷积}：$\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$；
+    \item \textbf{频率卷积}：$\mathbb F_{mn}=\omega_n\nu_m$；
+    \item \textbf{趋势卷积}：$\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$。
+\end{enumerate}
+这与「级数与卷积」章 \cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution}、\cref{def:tendency_convolution} 一致。
+\end{definition}
+
+\begin{theorem}[三类卷积在生物周转圆组上的作用]\label{thm:bio_convolution_action}
+设两个生物目标的周转圆组分别为 $\mathfrak E$ 与 $\mathfrak E'$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 振幅卷积只作用于半径；
+    \item 相位卷积只作用于相位；
+    \item 频率卷积只作用于转速；
+    \item 趋势卷积同时保留振幅与相位。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:bio_convolution_types} 直接读出。
+\end{proof}
+
+\begin{proposition}[自相关与趋势卷积]\label{prop:bio_autocorr_phase_convolution}
+设 $\{z_t\}$ 为生物周期序列，其自相关函数为
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+在生物周转圆组语言中，自相关函数是趋势卷积在对角线上的投影：
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:bio_autocorr_phase_convolution} 是「周期系统」章 \cref{thm:ps_convolution_action} 的卷积作用结论在本领域的实现：
+将 $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ 代入自相关定义，由正交性消去全部非对角交叉项，只保留趋势卷积的对角线项
+（三类卷积的因式分解，\cref{prop:ps_convolution_factorization}），即得 $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$。
+完整展开见该处。
+\end{proof}
+
+\begin{remark}[生物卷积与周期卷积的关系]\label{rem:bio_convolution_relation}
+生物卷积不是新的卷积运算，而是「级数与卷积」章周期卷积在生物周转圆组上的实例。自相关是趋势卷积在对角线上的投影，互相关、相位锁定分别是振幅卷积和频率卷积在生命科学中的具体表现。
+\end{remark}
+
+\subsection{第五步：与离散采样、调和分析、时序分析的整合}
+
+\begin{definition}[生物周期诊断流程]\label{def:bio_periodic_diagnosis}
+对于给定生物系统，使用周期数学框架进行诊断：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{周期判定}：验证生物目标的周期类型（\cref{thm:bio_periodicity_decision}）；
+    \item \textbf{级数构建}：由浓度、膜电位、种群数据构建振幅、频率、相位级数与周转圆组（\cref{thm:bio_series_reconstruction}）；
+    \item \textbf{守恒诊断}：验证能量、物质与信息守恒（\cref{thm:biological_conservation}）；
+    \item \textbf{卷积诊断}：计算自相关（趋势卷积的对角线投影，\cref{prop:bio_autocorr_phase_convolution}）与相位卷积；
+    \item \textbf{整合诊断}：接入离散采样、调和分析、时序分析工具链。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[生物周期诊断流程与三章接口]\label{thm:bio_diagnosis_integration}
+\cref{def:bio_periodic_diagnosis} 的五个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}、\cref{thm:intercalation_leakage_suppression}；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}、\cref{prop:twelve_to_six}；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}、\cref{def:ts_window_validation}。
+\end{enumerate}
+因此生物周期诊断不是独立方法，而是周期数学统一工具链在生物系统上的应用。
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:bio_diagnosis_integration} 是「周期系统」章五步接口（\cref{tab:ps_five_steps}）在本领域的落地：
+周期判定用采样与谱估计，频率分解与相位核用「调和分析」章，周期图峰值、Fisher 检验与
+窗函数验证用「时序分析」章。故诊断流程由三章工具链合成，证明见该处。
+\end{proof}
+
+\begin{remark}[整合后的操作顺序]\label{rem:bio_integration_order}
+实际诊断建议顺序为：先判定生物目标是否周期（\cref{thm:bio_periodicity_decision}）；再构建生物数据的傅里叶数据与周转圆组（\cref{thm:bio_series_reconstruction}）；再用守恒约束与动态调节优化参数（\cref{thm:bio_adaptive_convergence}、\cref{prop:bio_structure_metric_convergence}）；再作生物卷积与自相关分析（\cref{prop:bio_autocorr_phase_convolution}）；最后按 \cref{def:bio_periodic_diagnosis} 输出诊断。
+\end{remark}
+
+\section{生物系统的数学基础}
+
+\begin{definition}[生物周期系统的基本量]\label{def:biological_quantities}
+生物周期系统由以下基本变量描述：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{浓度变量} $[X](t)$：特定生物分子（蛋白质、mRNA、离子等）在细胞内或细胞外的浓度。浓度的时间变化率由生成率和降解率决定。
+    \item \textbf{膜电位} $V_m(t)$（单位：mV）：细胞膜内外的电势差。膜电位的变化由离子通道的开放和关闭控制。
+    \item \textbf{种群数量} $N(t)$：特定物种在给定区域内的个体数量。种群数量的变化由出生率、死亡率和迁移率决定。
+    \item \textbf{相位变量} $\phi(t)$：生物振荡器在周期中的位置（$0$ 到 $2\pi$）。相位是生物时间的内在度量——不同组织的昼夜节律通过相位同步实现全身协调。
+\end{enumerate}
+生物周期系统的一个核心特征是\textbf{极限环}——在相空间中存在孤立的闭合轨道，系统从任意初始状态出发最终收敛到该轨道上。极限环出现在耗散系统中：能量或物质的持续输入与耗散维持了振荡的稳定。
+\end{definition}
+
+\section{昼夜节律}
+
+\begin{definition}[昼夜节律的分子机制]\label{def:circadian_rhythm}
+哺乳动物的昼夜节律由\textbf{转录-翻译负反馈环}（TTFL）驱动。核心反馈环由以下基因和蛋白质构成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{激活子}：CLOCK 和 BMAL1 蛋白形成异二聚体，结合到 DNA 的 E-box 序列上，激活 Per 和 Cry 基因的转录。
+    \item \textbf{抑制子}：PER 和 CRY 蛋白在细胞质中积累，形成复合体后进入细胞核，抑制 CLOCK-BMAL1 的转录激活活性。
+    \item \textbf{延迟}：PER 和 CRY 蛋白的积累、修饰、核定位和降解需要约 24 小时——这一延迟决定了昼夜节律的周期。
+\end{enumerate}
+TTFL 是一个延迟负反馈系统：激活子（CLOCK-BMAL1）促进抑制子（PER-CRY）的生成，抑制子反过来抑制激活子的活性，延迟环节使系统产生自持振荡。mRNA 和蛋白质浓度的时间变化构成约 24 小时的周期——每 24 小时完成一个完整的转录-翻译-抑制-降解循环。
+\end{definition}
+
+\begin{proposition}[昼夜节律的数学模型]\label{prop:circadian_model}
+考虑一个简化的 TTFL 模型——三变量 Goodwin 振子（mRNA $\to$ 蛋白 $\to$ 终产物负反馈）：
+\[
+\frac{dM}{dt} = \frac{v_1}{1 + (Z/K)^n} - k_1 M, \quad \frac{dP}{dt} = v_2 M - k_2 P, \quad \frac{dZ}{dt} = v_3 P - k_3 Z,
+\]
+其中 $M$ 是 mRNA 浓度，$P$ 是蛋白质浓度，$Z$ 是终产物（阻遏复合体）浓度，$v_1, v_2, v_3$ 是最大生成速率，$k_1, k_2, k_3$ 是降解速率常数，$K$ 是抑制常数，$n$ 是 Hill 系数（协同性）。
+
+终产物 $Z$ 通过 Hill 函数 $1/(1+(Z/K)^n)$ 非线性地抑制其自身 mRNA 的转录，负反馈回路因此包含三个变量、三步转化。当 $n > 8$ 且参数适当（见证明）时，不动点经 Hopf 分岔失稳并出现稳定极限环。
+\end{proposition}
+
+\begin{proof}
+不动点满足 $v_1/(1+(Z^*/K)^n) = k_1 M^*$、$v_2 M^* = k_2 P^*$、$v_3 P^* = k_3 Z^*$。记 $u = Z^*/K > 0$，稳态通量 $R = k_1 M^* = v_1/(1+u^n)$，则 $Z^* = v_2v_3R/(k_1k_2k_3) = uK$。在不动点处线性化，雅可比矩阵为
+\[
+J = \begin{pmatrix}
+-k_1 & 0 & -g\\
+v_2 & -k_2 & 0\\
+0 & v_3 & -k_3
+\end{pmatrix},
+\qquad
+g = \frac{n v_1}{K}\frac{u^{n-1}}{(1+u^n)^2},
+\]
+特征方程为 $(\lambda+k_1)(\lambda+k_2)(\lambda+k_3) + v_2v_3g = 0$。二变量模型（去掉 $Z$ 与第三式）的散度恒为 $-(k_1+k_2) < 0$，由 Bendixson 判据在单连通区域无闭轨，故不论 $n$ 多大都不会出现极限环——第三个变量正是振荡的必要条件。取三个降解常数相等（$k_1 = k_2 = k_3 = k$），特征方程化为
+\[
+(\lambda+k)^3 + k^3\hat\eta = 0,\qquad \hat\eta = \frac{n u^n}{1+u^n},
+\]
+故一对共轭复根的实部为 $k(\hat\eta^{1/3}/2 - 1)$，当且仅当 $\hat\eta > 8$ 时为正。因 $u^n/(1+u^n) < 1$，$\hat\eta > 8$ 必须 $n > 8$；反之当 $n > 8$ 时取 $K$ 充分小可使 $u$ 充分大，从而 $\hat\eta > 8$，不动点失稳。在 $\hat\eta = 8$ 处特征值以非零速度穿过虚轴（Hopf 分岔），故 $n > 8$ 时出现稳定极限环——这正是 TTFL 的延迟负反馈产生自持振荡的数学机制。
+\end{proof}
+
+\section{心率周期}
+
+\begin{definition}[心脏起搏细胞的电生理]\label{def:cardiac_pacemaker}
+心脏的窦房结（SA node）起搏细胞具有\textbf{自律性}——在没有外部刺激的情况下自发产生节律性动作电位。起搏细胞的动作电位分为四个阶段：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{阶段 4（舒张期去极化）}：起搏电流 $I_f$（Na$^+$ 内流）和 T 型钙电流 $I_{Ca\text{-}T}$ 使膜电位缓慢去极化，从约 $-60$ mV 上升到约 $-40$ mV。
+    \item \textbf{阶段 0（上升支）}：膜电位达到阈值后，L 型钙电流 $I_{Ca\text{-}L}$ 爆发，膜电位迅速上升到约 $+10$ mV。
+    \item \textbf{阶段 3（复极化）}：延迟整流钾电流 $I_K$ 激活，钾离子外流使膜电位回到约 $-60$ mV。
+    \item \textbf{阶段 4 重新开始}：周期约 $0.6$—$1.0$ 秒，对应心率 $60$—$100$ 次/分钟。
+\end{enumerate}
+膜电位 $V_m$ 和离子电流在相空间中构成极限环。每一次动作电位对应相空间中的一个完整旋转——去极化（上升支）和复极化（下降支）构成往复运动。窦房结细胞的固有频率约 $0.8$ Hz 由各离子通道的最大电导和动力学时间常数决定。
+\end{definition}
+
+\begin{proposition}[心电图的周期结构]\label{prop:ecg_periodic}
+心电图是心脏电活动在体表的投影，每个心动周期的典型波形包含 P 波、QRS 波群和 T 波。这些波形是嵌套周转系统的生物实例：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{P 波}：心房去极化——对应心房肌细胞的同步动作电位。频率最低，振幅最小（外层大周转圆）。
+    \item \textbf{QRS 波群}：心室去极化——对应心室肌细胞的快速同步去极化。频率最高，振幅最大（内层快速小周转圆）。
+    \item \textbf{T 波}：心室复极化——对应心室肌细胞的复极化。频率中等，振幅中等。
+\end{enumerate}
+心电图的 P-QRS-T 波形可展开为傅里叶级数：$V(t) = \sum_{n} A_n \cos(n\omega_0 t + \phi_n)$（$\omega_0 = 2\pi \times \text{心率}$）。各级谐波对应不同心脏结构的电活动——P 波对应基频（$n=1$），QRS 波群对应高次谐波（$n \approx 3$—$10$），T 波对应低次谐波（$n \approx 1$—$2$）。心电图的谐波结构是心脏各部位协调工作的数学指纹。
+\end{proposition}
+
+\begin{proof}
+每个心动周期的体表电位 $V(t)$ 是以 $T = 1/\text{心率}$ 为周期的函数（忽略逐搏变异性），故可按“函数与分析基础”章傅里叶级数展开 $V(t) = \sum_n c_n e^{in\omega_0 t}$。波形特征的谐波归属由陡峭度决定：QRS 波群上升支陡峭（$<0.1$ s），其能量集中于高次谐波 $n \approx 3$—$10$（对应 $10$—$40$ Hz 频带）；P 波与 T 波平缓（$>0.1$ s），能量集中于 $n \le 2$。临床上正是按这一谐波结构定义心电图频带（如 QRS 监测的 $5$—$25$ Hz 滤波）——傅里叶级数是心电图波形“嵌套周转结构”的数学实现。
+\end{proof}
+
+\section{细胞周期}
+
+\begin{definition}[细胞周期]\label{def:cell_cycle}
+细胞周期是真核细胞从一次分裂结束到下一次分裂结束所经历的连续过程，分为四个阶段：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{G1 期}（DNA 合成前期）：细胞生长，合成 RNA 和蛋白质。持续时间可变（数小时至数天）。
+    \item \textbf{S 期}（DNA 合成期）：DNA 复制，每条染色体形成两条姐妹染色单体。持续时间约 $6$—$8$ 小时。
+    \item \textbf{G2 期}（DNA 合成后期）：细胞继续生长，准备进入有丝分裂。持续时间约 $2$—$4$ 小时。
+    \item \textbf{M 期}（有丝分裂期）：染色体分离，细胞一分为二。持续时间约 $1$ 小时。
+\end{enumerate}
+G1 期对应细胞体积的增大，S 期对应 DNA 的精确复制（标度因子 $2$），M 期对应细胞一分为二（标度因子 $1/2$）。整个细胞周期是一个完整的标度变换——从单个细胞生长到分裂为两个子细胞，DNA 含量从 $2n$ 增长到 $4n$ 再回归 $2n$（二倍体细胞）。
+\end{definition}
+
+\begin{proposition}[周期蛋白--CDK 的浓度振荡]
+\label{prop:cyclin_cdk_oscillation}
+细胞周期的进程由周期蛋白（cyclin）和
+周期蛋白依赖性激酶（CDK）的复合物调控。
+不同阶段由特定的 cyclin--CDK 复合物依次驱动：
+\[
+\begin{aligned}
+&\text{G1 期：Cyclin D--CDK4/6} \\
+\longrightarrow\;&\text{G1/S 转换：Cyclin E--CDK2} \\
+\longrightarrow\;&\text{S 期：Cyclin A--CDK2} \\
+\longrightarrow\;&\text{M 期：Cyclin B--CDK1}.
+\end{aligned}
+\]
+
+Cyclin B 的浓度在细胞周期中呈锯齿形振荡：
+在间期（G1--S--G2）线性积累，在 M 期末突然降解。
+当其浓度达到阈值时触发有丝分裂，
+分裂完成后浓度骤降，下一周期重新开始。
+这一振荡是线性积累（间期）与快速降解（M 期末）
+交替作用形成的弛豫振荡。
+\end{proposition}
+
+\begin{proof}
+Cyclin B 的锯齿振荡即引理 \ref{ch25_sawtooth_period} 的弛豫振荡：积累率 $\rho$ 为间期的合成速率，阈值 $C_{\text{th}}$ 为触发 APC/C 介导降解的浓度，$C_0$ 为有丝分裂结束后的残余浓度。故细胞周期时长 $T = (C_{\text{th}} - C_0)/\rho$——生长速率越慢（$\rho$ 小），周期越长；这与“G1 期持续时间决定细胞周期长度”的实验事实一致。
+\end{proof}
+
+\begin{lemma}[锯齿形弛豫振荡的周期]\label{ch25_sawtooth_period}
+设弛豫振荡在积累期以速率 $\rho > 0$ 线性增长，达到阈值 $C_{\text{th}}$ 时触发复位（降解），复位到 $C_0 < C_{\text{th}}$ 且复位时长相对积累期可忽略。则该振荡为严格周期振荡，周期为
+\[
+T = \frac{C_{\text{th}} - C_0}{\rho}.
+\]
+\end{lemma}
+
+\begin{proof}
+积累期满足 $dC/dt = \rho$，故 $C(t) = C_0 + \rho t$。到达阈值的时间由 $C_0 + \rho T = C_{\text{th}}$ 解出 $T = (C_{\text{th}} - C_0)/\rho$；复位后回到同一初始条件 $C_0$，由初值问题解的唯一性，此后周期逐段重复。
+\end{proof}
+
+\section{种群周期}
+
+\begin{definition}[Lotka-Volterra 捕食者-猎物模型]\label{def:lotka_volterra}
+设 $H(t)$ 为猎物数量（如野兔），$P(t)$ 为捕食者数量（如猞猁）。经典的 Lotka-Volterra 方程为
+\[
+\frac{dH}{dt} = \alpha H - \beta H P, \quad \frac{dP}{dt} = \delta H P - \gamma P,
+\]
+其中 $\alpha$ 是猎物的内禀增长率，$\beta$ 是捕食率，$\delta$ 是捕食者将猎物转化为后代的比例，$\gamma$ 是捕食者的死亡率。
+
+在相空间 $(H, P)$ 中，系统的轨迹是一族围绕平衡点的闭合曲线——每个初始条件对应一条周期轨道。系统具有首次积分
+\[
+I(H, P) = \delta H - \gamma \ln H + \beta P - \alpha \ln P = \text{常数}.
+\]
+猎物和捕食者的数量此消彼长，相位差约 $90^\circ$——猎物先增长，捕食者随后增长；捕食者先减少，猎物随后减少。
+\end{definition}
+
+\begin{theorem}[Lotka-Volterra 模型的周期解]\label{thm:lotka_volterra_periodic}
+Lotka-Volterra 模型的所有正初始条件（$H_0 > 0, P_0 > 0$）都产生周期解。平衡点 $(H^*, P^*) = (\gamma/\delta, \alpha/\beta)$ 是中心型不动点——线性化系统的特征值为纯虚数 $\lambda = \pm i\sqrt{\alpha\gamma}$。小振幅振荡的周期近似为 $T \approx 2\pi/\sqrt{\alpha\gamma}$。大振幅振荡的周期通过首次积分和椭圆积分计算，周期随振幅增大而增长。
+\end{theorem}
+
+\begin{proof}
+线性化分析：雅可比矩阵在平衡点 $(H^*, P^*)$ 处的特征值为 $\lambda_{1,2} = \pm i\sqrt{\alpha\gamma}$——纯虚数，平衡点是中心。首次积分 $I(H, P)$ 由 $\frac{dH}{dP} = \frac{H(\alpha - \beta P)}{P(\delta H - \gamma)}$ 分离变量积分得到：
+\[
+\int \frac{\delta H - \gamma}{H} dH = \int \frac{\alpha - \beta P}{P} dP,
+\]
+得 $\delta H - \gamma \ln H + \beta P - \alpha \ln P = \text{常数}$。该首次积分在 $(H^*, P^*)$ 处取极小值，等值线是围绕平衡点的闭曲线——每条闭曲线对应一个周期解。
+\end{proof}
+
+\begin{example}[加拿大猞猁与雪鞋兔的十年周期]
+加拿大哈德逊湾公司（Hudson's Bay Company）从 18 世纪到 20 世纪初的毛皮贸易记录显示了猞猁和雪鞋兔数量的显著周期振荡——周期约 $9$—$11$ 年。这是自然界中最著名的种群周期实例。小振幅近似下，$10$ 年周期由猎物的内禀增长率（$\alpha$）和捕食者的死亡率（$\gamma$）共同决定：$T \approx 2\pi/\sqrt{\alpha\gamma} \approx 10$ 年。太阳活动周期（约 $11$ 年）和气候周期可能通过影响猎物食物供应来调制这一生物周期。
+\end{example}
+
+\section{神经振荡与相位锁定}
+
+\begin{definition}[神经元动作电位的周期发放]\label{def:neural_oscillation}
+神经元通过离子通道的电压依赖性产生动作电位。在恒定输入电流下，许多神经元表现为\textbf{周期性发放}——动作电位以固定频率重复产生。发放频率 $f$ 与输入电流 $I$ 的关系为
+\[
+f(I) = \frac{1}{T(I)} \approx \frac{I - I_{\text{th}}}{C_m (V_{\text{th}} - V_{\text{reset}})} \quad (I > I_{\text{th}}),
+\]
+其中 $I_{\text{th}}$ 是阈值电流，$C_m$ 是膜电容，$V_{\text{th}}$ 和 $V_{\text{reset}}$ 是阈值和复位电位。
+
+膜电位 $V_m$ 和恢复变量（如钾离子通道激活变量 $n$）在相空间中构成极限环。每一次动作电位对应相空间中的一个完整旋转——快速上升支（Na$^+$ 内流）和复极化（K$^+$ 外流）构成往复运动。输入电流 $I$ 控制极限环的旋转速度——$I$ 越大，频率越高。
+\end{definition}
+
+\begin{proposition}[神经网络中的 gamma 同步振荡]\label{prop:gamma_oscillation}
+大脑皮层中，抑制性中间神经元网络产生 gamma 频段（$30$—$80$ Hz）的同步振荡。单个中间神经元在恒定兴奋性驱动下以 gamma 频率周期性发放。通过抑制性突触连接（GABA 受体），神经元网络实现相位同步——各神经元的发放时刻在 gamma 周期内锁定到共同的相位。
+
+gamma 同步振荡是“周期系统”章中相位锁定（命题 \ref{prop:phase-locking}）的神经实现：每个中间神经元是一个独立的周期子系统（固有频率约 $40$ Hz），抑制性突触是子结构之间的耦合系数 $c_{ij}$。当耦合足够强时，所有神经元的相位差趋于常数——网络进入同步振荡状态。gamma 同步振荡在注意力、感知和意识中具有重要功能——它为不同脑区的信息整合提供了共同的时间框架。
+\end{proposition}
+
+\begin{proof}
+考虑两个通过抑制性突触连接的神经元，各自在恒定兴奋性输入下周期性发放。简化模型为相位振子：
+\[
+\frac{d\theta_1}{dt} = \omega_1 + c_{12} \sin(\theta_2 - \theta_1), \qquad \frac{d\theta_2}{dt} = \omega_2 + c_{21} \sin(\theta_1 - \theta_2).
+\]
+相位差 $\Delta\theta = \theta_1 - \theta_2$ 的动力学为
+\[
+\frac{d(\Delta\theta)}{dt} = \Delta\omega - (c_{12} + c_{21})\sin(\Delta\theta).
+\]
+当 $|\Delta\omega| < c_{12} + c_{21}$ 时，存在稳定的相位锁定解 $\Delta\theta^* = \arcsin(\Delta\omega/(c_{12} + c_{21}))$——两个神经元的发放相位锁定。推广到 $N$ 个神经元网络，周期卷积的差角正弦分量 $\operatorname{Im}\mathcal{K}^{(1)}\{f_i, f_j\}$ 驱动网络进入全局同步。
+\end{proof}
+
+\section{优胜劣汰与多尺度演化}
+
+本节将达尔文优胜劣汰机制推广为\textbf{多尺度选择-变异-遗传循环}：在每个生物层级上都存在“变异-选择-遗传”的三步循环，各层级之间通过跨尺度耦合实现协同演化。生物学上的演化并不是单一尺度现象，而是嵌套的多尺度过程——基因、蛋白质、细胞、组织、器官、形态、种群、生态位分别有其自身的时间尺度、周期结构与演化速率。
+
+\subsection{多尺度演化的层级结构}
+
+\begin{definition}[生物演化的层级结构]\label{def:evolution_hierarchy}
+生物演化可按空间尺度分为以下层级，每一层级都有其特征时间尺度、周期结构与选择压力：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{基因演化}：时间尺度 $10^{-1}$—$10^1$ 代；周期来源为碱基突变、重组、水平基因转移；选择压力为表型适应度差异。基因频率的变化是 Hardy-Weinberg 平衡偏离的动力学过程。
+    \item \textbf{蛋白质演化}：时间尺度 $10^0$—$10^3$ 代；周期来源为氨基酸替换、结构域重组、构象切换；选择压力为催化活性与结构稳定性。
+    \item \textbf{细胞演化}：时间尺度 $10^0$—$10^5$ 代（体细胞世代数）；周期来源为细胞周期调控突变、表观遗传修饰；选择压力为增殖速率、抗凋亡能力、代谢效率。
+    \item \textbf{组织演化}：时间尺度 $10^2$—$10^6$ 代；周期来源为细胞类型分化、组织再生策略；选择压力为组织功能完整性与修复能力。
+    \item \textbf{器官演化}：时间尺度 $10^3$—$10^7$ 代；周期来源为器官形塑（morphogenesis）调控网络变异；选择压力为器官功能对环境的适配性。
+    \item \textbf{形态演化}：时间尺度 $10^4$—$10^8$ 代；周期来源为发育调控网络变异（Hox 基因、增强子）；选择压力为形态对生态位的适配性。
+    \item \textbf{种群演化}：时间尺度 $10^2$—$10^6$ 代；周期来源为种群遗传漂变、自然选择、种群结构变化；选择压力为种群增长率与环境承载力的匹配。
+    \item \textbf{生态位演化}：时间尺度 $10^4$—$10^9$ 代；周期来源为生态位构建、物种互作网络重组；选择压力为能量与物质流的稳定性。
+\end{enumerate}
+层级之间的时间尺度比约为 $10^2$—$10^3$（相邻层级），构成\textbf{层级分离}——高层级过程在低层级时间尺度上可视为准静态参数（adiabatic parameter），反之低层级过程在高层级时间尺度上表现为平均效应。
+\end{definition}
+
+\begin{theorem}[优胜劣汰的通用数学形式]\label{thm:natural_selection_general}
+设某层级上的状态变量为 $x_i(t)$（如基因频率、蛋白质浓度、细胞类型比例），其演化遵循\textbf{复制-变异方程}（replicator-mutator equation）：
+\[
+\frac{dx_i}{dt} = x_i \left( f_i(\mathbf{x}) - \bar f(\mathbf{x}) \right) + \sum_j \mu_{ji} x_j - \mu_{ij} x_i,
+\]
+其中 $f_i(\mathbf{x})$ 是第 $i$ 种状态的适应度，$\bar f(\mathbf{x}) = \sum_i x_i f_i(\mathbf{x})$ 是平均适应度，$\mu_{ij}$ 是状态 $i$ 向状态 $j$ 的变异率。当 $\mu_{ij} \equiv 0$（无变异）时，方程退化为标准复制方程，适应度高于平均的状态 $i$（$f_i > \bar f$）频率增长，适应度低于平均的状态频率衰减。
+\end{theorem}
+
+\begin{proof}
+无变异情形：$\frac{dx_i}{dt} = x_i(f_i - \bar f)$。求导得 $\sum_i dx_i/dt = \sum_i x_i f_i - \bar f \sum_i x_i = \bar f - \bar f = 0$，故总概率守恒。平衡点满足 $x_i(f_i - \bar f) = 0$——即 $x_i = 0$ 或 $f_i = \bar f$。对 $f_i > \bar f$ 的状态，$dx_i/dt > 0$，频率增长；对 $f_i < \bar f$ 的状态，$dx_i/dt < 0$，频率衰减。$\mu_{ij} \neq 0$ 时，变异项在平衡点附近提供“探索”项——即使某状态当前劣势，其变异来源仍可维持其在种群中少量存在，使系统可以在环境变化时快速响应。
+\end{proof}
+
+\begin{corollary}[基因演化的复制方程]\label{cor:gene_replicator}
+在基因层级，$x_i$ 为等位基因 $i$ 的频率，$f_i$ 为该等位基因的表型适应度。若仅考虑单基因座双等位基因（$i \in \{A, a\}$），复制方程化为逻辑斯蒂形式：
+\[
+\frac{dx_A}{dt} = x_A(1-x_A)(w_A - w_a),
+\]
+其中 $w_A, w_a$ 为两等位基因的绝对适应度。若 $w_A > w_a$，$x_A \to 1$（A 固定）；若 $w_A < w_a$，$x_A \to 0$（a 固定）。这是经典 Fisher 自然选择基本定理的离散化版本。
+\end{corollary}
+
+\subsection{蛋白质演化的中性理论与适应辐射}
+
+\begin{definition}[分子钟]\label{def:molecular_clock}
+\textbf{分子钟}是蛋白质或核酸序列随演化时间线性累积替换的假设。设两条同源序列的替换速率为 $\lambda$（单位：替换/位点/年），分化时间为 $t$（年），则序列差异度 $d$ 近似为
+\[
+d \approx 2\lambda t.
+\]
+分子钟为系统发生树的时间标定提供了独立的度量——它把蛋白质演化转换为可测量的时间周期。
+\end{definition}
+
+\begin{proposition}[中性替换与选择替换]\label{prop:neutral_selection}
+蛋白质演化由两类替换构成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{中性替换}（Kimura 中性理论）：$|s| \ll 1/(2N_e)$（$s$ 为选择系数，$N_e$ 为有效种群大小），替换速率等于突变率 $\mu$，与种群大小无关。
+    \item \textbf{适应性替换}：$|s| \gg 1/(2N_e)$，替换速率由选择系数与种群大小共同决定，正选择替换速率高于中性替换。
+\end{enumerate}
+同义替换（不改变氨基酸）通常接近中性，非同义替换受更强选择约束。因此，同义替换速率 $d_S$ 与非同义替换速率 $d_N$ 之比 $d_N/d_S$ 是识别适应性演化的常用指标：$d_N/d_S > 1$ 提示正选择。
+\end{proposition}
+
+\begin{proof}
+中性理论下，替换速率 $k = \mu \cdot P_{\text{fix}}$，其中 $P_{\text{fix}}$ 为突变基因在种群中最终固定的概率。对中性突变，$P_{\text{fix}} = 1/(2N_e)$，故 $k = \mu/(2N_e) \cdot 2N_e = \mu$——与 $N_e$ 无关。对正选择突变，$P_{\text{fix}} \approx 2s$（$s > 0$ 小），故 $k \approx 2N_e \mu s$，随 $N_e$ 与 $s$ 增大而增大。
+\end{proof}
+
+\subsection{跨尺度耦合与协同演化}
+
+\begin{definition}[跨尺度耦合]\label{def:cross_scale_coupling}
+设第 $k$ 层级的状态变量为 $\mathbf{x}^{(k)}$，其演化方程为
+\[
+\frac{d\mathbf{x}^{(k)}}{dt} = \mathbf{F}_k(\mathbf{x}^{(k)}, \mathbf{x}^{(k-1)}, \mathbf{x}^{(k+1)}),
+\]
+即第 $k$ 层级的动力学同时依赖于上一层级的“环境参数”（$k+1$ 作为缓变量）和下一层级的“构成要素”（$k-1$ 作为快变量）。这一依赖关系称为\textbf{跨尺度耦合}。
+\end{definition}
+
+\begin{proposition}[时间尺度分离下的平均化]\label{prop:adiabatic_averaging}
+若第 $k-1$ 层级的特征时间 $\tau_{k-1} \ll \tau_k$（第 $k$ 层级的特征时间），则在一个 $\tau_k$ 周期内，第 $k-1$ 层级的状态已充分弛豫到其条件平衡态 $\mathbf{x}^{(k-1)}_*(\mathbf{x}^{(k)})$。第 $k$ 层级的有效动力学为
+\[
+\frac{d\mathbf{x}^{(k)}}{dt} \approx \mathbf{F}_k(\mathbf{x}^{(k)}, \mathbf{x}^{(k-1)}_*(\mathbf{x}^{(k)}), \mathbf{x}^{(k+1)}).
+\]
+这一平均化使高层级动力学仅通过低层级平衡态对其参数产生依赖。
+\end{proposition}
+
+\begin{proof}
+设 $\mathbf{x}^{(k-1)} = \mathbf{x}^{(k-1)}_* + \delta \mathbf{x}^{(k-1)}$，其中 $\delta \mathbf{x}^{(k-1)}$ 为对平衡态的偏离。其弛豫方程 $\frac{d\delta}{dt} = -\frac{1}{\tau_{k-1}}\delta$ 给出 $\delta(t) \approx \delta(0) e^{-t/\tau_{k-1}}$。在一个 $\tau_k$ 周期内（$\tau_k \gg \tau_{k-1}$），$\delta \to 0$，故 $\mathbf{x}^{(k-1)} \to \mathbf{x}^{(k-1)}_*$。将其代入第 $k$ 层级的方程即得平均化动力学。
+\end{proof}
+
+\begin{theorem}[多尺度选择的周期结构]\label{thm:multi_scale_selection_periodicity}
+在多尺度演化系统中，若某层级的选择压力呈现周期性变化（如季节性气候变化、捕食者-猎物周期、昼夜节律），则该层级上的等位基因频率、蛋白质浓度或细胞比例将呈现\textbf{周期响应}。其周期响应特征由以下因素决定：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{选择周期} $T_{\text{sel}}$：外部选择压力变化的周期。
+    \item \textbf{响应时间} $\tau_{\text{resp}}$：该层级状态向新平衡态弛豫的时间尺度。
+    \item \textbf{匹配条件}：当 $T_{\text{sel}} \gg \tau_{\text{resp}}$ 时，系统准静态跟随选择压力；当 $T_{\text{sel}} \approx \tau_{\text{resp}}$ 时，系统出现共振放大或相位滞后；当 $T_{\text{sel}} \ll \tau_{\text{resp}}$ 时，系统仅响应选择压力的平均值。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+考虑单基因座双等位基因模型，其等位基因频率动态为 $dx/dt = x(1-x) s(t)$，其中 $s(t) = s_0 \cos(2\pi t/T_{\text{sel}})$ 为周期选择系数。这是 Logistic 型方程，其内在时间尺度 $\tau_{\text{resp}} = 1/(s_0)$。由受迫振荡的经典理论：
+\begin{itemize}
+\item $T_{\text{sel}} \gg \tau_{\text{resp}}$：解近似为 $x(t) \approx x_{\text{eq}}(s(t))$，准静态跟随。
+\item $T_{\text{sel}} \approx \tau_{\text{resp}}$：解出现相位滞后与振幅放大——经典受迫振子共振。
+\item $T_{\text{sel}} \ll \tau_{\text{resp}}$：解近似为 $x(t) \approx x_0 + O(T_{\text{sel}}/\tau_{\text{resp}})$，仅响应时间平均。
+\end{itemize}
+\end{proof}
+
+\begin{corollary}[红皇后假说的周期结构]\label{cor:red_queen}
+\emph{红皇后假说}（Red Queen hypothesis）指出：物种间的协同演化（如宿主-寄生、捕食者-猎物）导致持续的相互选择压力，使双方必须不断演化才能维持相对适应度。在多尺度周期框架下，这表现为\textbf{协同周期}：宿主基因频率的周期响应与寄生基因频率的周期响应之间形成相位锁定，周期由两物种的世代时间几何平均决定。
+\end{corollary}
+
+\begin{proof}
+设宿主基因频率的周期为 $T_H$，寄生的周期为 $T_P$，两者的协同选择强度为 $c$。二者间的相位差动力学为 $d(\Delta\phi)/dt = \Delta\omega - c \sin(\Delta\phi)$，其中 $\Delta\omega = 2\pi(1/T_H - 1/T_P)$。当 $c > |\Delta\omega|$ 时存在稳定相位锁定。周期锁定值 $T_{\text{lock}} = \sqrt{T_H T_P}$——两物种的世代时间几何平均。
+\end{proof}
+
+\begin{example}[多尺度演化在生物周期结构中的具体表现]
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{基因-蛋白质耦合}：细菌的抗生素抗性基因突变（基因层级）改变靶蛋白结构（蛋白质层级），使原有药物失效。基因频率的周期响应（抗性上升）与蛋白质结构变化（靶点变异）在多个抗生素治疗周期中形成协同演化。
+    \item \textbf{细胞-组织耦合}：肿瘤细胞（细胞层级）的克隆演化受组织微环境（组织层级）的选择压力。治疗周期中，敏感细胞死亡、抗性细胞增殖，肿瘤细胞组成呈周期变化；组织层级通过血管生成调控细胞层级的演化速率。
+    \item \textbf{器官-形态耦合}：器官演化（如脊椎动物鳍$\to$肢体）和整体形态演化（如从水生到陆生）在 $10^7$ 年时间尺度上耦合——Hox 基因调控网络的变异同时改变器官和形态。
+    \item \textbf{种群-生态位耦合}：捕食者-猎物周期（种群层级）改变生态位资源分布（生态位层级），进而选择出不同的捕食策略或猎物防御策略。红皇后式的协同周期（推论 \ref{cor:red_queen}）是这一耦合的长期后果。
+\end{enumerate}
+\end{example}
+
+\begin{theorem}[多尺度演化的周期时间树]
+\label{thm:multi_scale_period_tree}
+将各层级演化的特征时间尺度按数量级排列，
+得到\textbf{周期时间树}：
+\[
+\begin{aligned}
+&\text{基因} \ (\sim 10^0 \text{ 代}) \\
+\ll\;&\text{蛋白质} \ (\sim 10^1) \\
+\ll\;&\text{细胞} \ (\sim 10^2) \\
+\ll\;&\text{组织} \ (\sim 10^4) \\
+\ll\;&\text{器官} \ (\sim 10^6) \\
+\ll\;&\text{形态} \ (\sim 10^7) \\[4pt]
+&\text{种群} \ (\sim 10^4) \ll \text{生态位} \ (\sim 10^8).
+\end{aligned}
+\]
+
+每个层级的时间尺度比相邻层级大 $10^1$—$10^4$ 倍。
+这一时间尺度分离使得各层级在其自身时间尺度上
+表现为独立的周期结构，
+而在相邻层级的时间尺度上则表现为
+准静态或平均化的背景。
+\end{theorem}
+
+\begin{proof}
+时间尺度的数量级由各层级主要过程的内禀速率决定：基因替换速率约 $10^{-8}$—$10^{-9}$/位点/代，蛋白质替换速率约 $10^{-9}$/位点/年，细胞周期约 $10^0$—$10^2$ 代，组织再生约 $10^2$—$10^4$ 代，器官形塑约 $10^4$—$10^6$ 代，形态演化约 $10^6$—$10^7$ 代，种群动态约 $10^2$—$10^4$ 代，生态位构建约 $10^6$—$10^8$ 代。相邻层级的时间尺度比约 $10^1$—$10^3$，即每个层级比下一层级慢约 $1$—$3$ 个数量级。
+\end{proof}
+
+\section{生物系统的守恒律}
+
+\begin{theorem}[生物系统的三种守恒律]\label{thm:biological_conservation}
+生物系统的动力学由三种守恒律支配：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{能量守恒}：生物体是开放系统，通过摄取食物（化学能）和呼吸（氧化磷酸化）维持能量平衡。在稳定状态下，能量摄入 $=$ 能量消耗 $+$ 能量储存。能量在生物分子（ATP、葡萄糖、脂肪）之间的转换满足热力学第一定律。昼夜节律中，代谢率以 $24$ 小时为周期波动——这是能量在时间平移下的周期再分配。
+    \item \textbf{物质守恒}：生物体内的物质（碳、氮、水）在摄入、利用和排泄之间满足质量守恒。细胞周期中，DNA 含量在 S 期精确复制（加倍），在 M 期均等分配（减半）——DNA 含量在细胞周期中保持守恒。种群周期中，总个体数的变化 $=$ 出生 $-$ 死亡 $+$ 迁入 $-$ 迁出——这是生态系统层面的物质守恒。
+    \item \textbf{信息守恒}：生物体的遗传信息在 DNA 复制和细胞分裂中保持守恒。DNA 双螺旋结构的两条链互补——每一条链包含重建完整双螺旋所需的全部信息。中心法则（DNA $\to$ RNA $\to$ 蛋白质）描述了遗传信息的流动方向，但不改变信息的总量。DNA 序列的碱基顺序在世代传递中守恒。
+\end{enumerate}
+三种守恒律的层级关系为：能量守恒是维持生命活动的基础，物质守恒保证生物体结构的稳定，信息守恒保证遗传性状的代代相传。三者共同构成了生物系统周期结构的物理基础。
+\end{theorem}
+
+\begin{proof}
+(i) 能量守恒：生物体摄入的化学能 $E_{\text{in}}$（食物）等于消耗的能量 $E_{\text{out}}$（基础代谢、活动产热、生长）加上储存的能量 $\Delta E_{\text{store}}$：$E_{\text{in}} = E_{\text{out}} + \Delta E_{\text{store}}$。在稳态（$\Delta E_{\text{store}} = 0$），能量摄入等于消耗。能量在 ATP（三磷酸腺苷）中的储存和释放是生物能量代谢的核心——ATP $\leftrightarrow$ ADP $+$ P$_i$ 的水解释放约 $30.5$ kJ/mol 的自由能。
+
+(ii) 物质守恒：碳元素的摄入（食物）等于排放（CO$_2$）加上储存（生物量增长）：$C_{\text{in}} = C_{\text{out}} + \Delta C_{\text{store}}$。细胞周期中，DNA 含量在 G1 期为 $2n$，S 期复制后为 $4n$，M 期分裂后恢复为 $2n$——标度在周期中守恒。
+
+(iii) 信息守恒：DNA 复制是半保留的——每一条母链作为模板合成一条新的互补链。子代 DNA 双螺旋中一条链来自亲代，一条链是新合成的。遗传信息（碱基序列）在复制中精确保持——突变率仅为 $10^{-9}$—$10^{-8}$/碱基/代。
+\end{proof}
+
+\begin{remark}[与全书的衔接]
+本章建立的生物系统周期结构理论是周期数学在生命科学中的应用。昼夜节律是 TTFL 的延迟负反馈产生的约 24 小时自持振荡。心率周期是起搏细胞的离子通道动力学在相空间中构成的极限环。细胞周期是 DNA 含量在 S 期复制、在 M 期分裂的完整标度变换。种群周期（Lotka-Volterra 模型）是首次积分保证的相空间闭合轨道。神经振荡是“周期系统”章中相位锁定的生物实现——抑制性突触耦合使神经元网络进入 gamma 同步。优胜劣汰机制在基因、蛋白质、细胞、组织、器官、形态、种群、生态位多个层级上表现为复制-变异方程，各层级之间通过时间尺度分离与跨尺度耦合实现协同演化。生物系统的三种守恒律——能量守恒、物质守恒、信息守恒——共同构成了生命系统周期结构的物理保证。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 昼夜节律约 24 小时主周期：转录-翻译负反馈环（定义 \ref{def:circadian_rhythm}）；Goodwin 振子的极限环分析（命题 \ref{prop:circadian_model}），$24$ 小时为经验观察（注 \ref{lem:circadian_periodic}） \\
+缩放 & 细胞周期的标度变换：DNA 含量 $2n \to 4n \to 2n$（定义 \ref{def:cell_cycle}）；Cyclin B 锯齿振荡的积累-降解（引理 \ref{ch25_sawtooth_period}） \\
+旋转 & 心率极限环（定义 \ref{def:cardiac_pacemaker}）；神经振荡的相位与 gamma 同步（命题 \ref{prop:gamma_oscillation}） \\
+守恒 & 能量守恒、物质守恒、信息守恒（定理 \ref{thm:biological_conservation}） \\
+对称 & DNA 双链互补对称：半保留复制中每条母链重建完整信息（定理 \ref{thm:biological_conservation} 证明 (iii)） \\
+闭合 & Lotka-Volterra 首次积分 $I(H,P)$ 保证的相空间闭合轨道（定理 \ref{thm:lotka_volterra_periodic}） \\
+周期 & 昼夜（24 h）、心率（$0.6$—$1.0$ s）、细胞（$T=(C_{\text{th}}-C_0)/\rho$，引理 \ref{ch25_sawtooth_period}）、猞猁-雪鞋兔种群（$9$—$11$ 年）；多尺度周期时间树（定理 \ref{thm:multi_scale_period_tree}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{生物周期性判定定理}（\ref{thm:bio_periodicity_decision}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 验证\textbf{数量调节的单调性}（\ref{prop:bio_adaptive_growth}）的前提在本章领域对象上成立，并给出一个不满足前提的反例。
+
+    \item 考察\textbf{三参数对应：半径、相位与转速}（\ref{prop:bio_epicycle_correspondence}）在参数退化时的行为，说明结论如何随之退化。
+
+    \item 说明\textbf{生物周期诊断流程与三章接口}（\ref{thm:bio_diagnosis_integration}）与「周期系统」章相应通用结论的关系（是一致、特例还是需要附加条件）。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{thm:bio_periodicity_decision}、\ref{prop:bio_adaptive_growth}、\ref{prop:bio_epicycle_correspondence}、\ref{thm:bio_diagnosis_integration}。
+\end{enumerate}
+
+

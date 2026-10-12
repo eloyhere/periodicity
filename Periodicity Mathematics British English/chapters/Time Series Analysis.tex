@@ -1,0 +1,1030 @@
+\chapter{Time Series Analysis}
+\label{chap:ts_analysis}
+\markboth{Time Series Analysis}{Time Series Analysis}
+
+\begin{remark}[Positioning of This Chapter]\label{rem:ts_chapter_positioning}
+Time series analysis studies the extraction, modelling and forecasting of trend, periodic and random components in discrete time series. This chapter follows the order `definition---proposition---lemma---theorem---proof---corollary---property---example---remark' to systematise the classical time series models (AR, MA, ARMA, ARIMA, SARIMA, ARCH, GARCH, etc.) together with spectral analysis, turning-point detection, tests of period significance, Bayesian updating and window-function selection. Standard concepts are all given their current names: `periodogram/power-spectrum estimation' replaces the non-standard `periodic trend spectrum', `weighted cross-correlation/circular convolution' replaces the non-standard `periodic convolution', `finite harmonic regression/complex exponential model' replaces the non-standard `tunable-parameter epicycle', and `multi-scale kernel-smoothed regularised least squares' replaces the non-standard `KDI optimisation'. The canonical definitions of the concepts of \textbf{sampling point}, \textbf{sampling rate}, \textbf{sampling interval} and \textbf{sampling sequence} used in this chapter are given in the `Discrete Sampling and Intercalation of Periodic Signals' chapter, \cref{def:uniform_sampling_parallel}, \cref{def:nyquist_sampling_parallel}; they are not repeated in this chapter.
+\end{remark}
+
+\begin{remark}[Overview of Themes in This Chapter]\label{rem:ts_theme_overview}
+This chapter is organised around the following themes: translation---the lag operator and differencing; scaling---window width and multi-scale smoothing; rotation---phase and similarity kernels; conservation---spectral energy and Fisher-test normalisation; symmetry---the even and odd symmetry of cosine/sine similarity; closure---the closed loop of the algorithmic pipeline and white-noise residual diagnosis; period---the dominant period and the spectral peaks.
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.0cm and 0.4cm,
+  stage/.style={draw, rounded corners, align=center, minimum width=2.3cm, minimum height=0.75cm, font=\small, fill=blue!8},
+  arr/.style={-{Stealth[length=2.2mm]}, very thick}]
+\node[stage, fill=blue!12]  (s0) {Original series\\$\{X_t\}$};
+\node[stage, fill=cyan!12, right=of s0] (s1) {Window-function\\smoothing};
+\node[stage, fill=green!12, right=of s1] (s2) {Instantaneous\\limit angle};
+\node[stage, fill=teal!12, right=of s2] (s3) {Turning-point\\detection};
+\node[stage, fill=orange!12, right=of s3] (s4) {Refraction rate};
+\node[stage, fill=yellow!16, below=of s0] (s5) {Period determination\\(periodogram)};
+\node[stage, fill=orange!8, right=of s5] (s6) {Finite harmonic\\regression};
+\node[stage, fill=purple!12, right=of s6] (s7) {Bayesian\\updating};
+\node[stage, fill=red!12, right=of s7] (s8) {Window-function\\validation};
+\node[stage, fill=magenta!12, right=of s8] (s9) {Residual\\diagnosis};
+\draw[arr] (s0) -- (s1);
+\draw[arr] (s1) -- (s2);
+\draw[arr] (s2) -- (s3);
+\draw[arr] (s3) -- (s4);
+\draw[arr] (s4.south) |- (s5.east);
+\draw[arr] (s5) -- (s6);
+\draw[arr] (s6) -- (s7);
+\draw[arr] (s7) -- (s8);
+\draw[arr] (s8) -- (s9);
+\draw[arr, dashed, red] (s8.north) to[out=90, in=90] (s1.north);
+\node[align=center, font=\small] at (5,-3.0) {Closed-loop feedback: the result of window-function validation is fed back to the window-function selection of the first step};
+\end{tikzpicture}
+\caption{The complete pipeline of time series analysis: starting from the original series, through smoothing, instantaneous limit angle, turning-point detection, refraction rate, period determination, finite harmonic regression, Bayesian updating and window-function validation to residual diagnosis, where window-function validation feeds back to the first step.}
+\label{fig:ts_workflow}
+\end{figure}
+
+\section{Classical Time Series Models}
+
+\subsection{Stationarity and the Lag Operator}
+
+\begin{definition}[Discrete Time Series and Stationarity]\label{def:ts_stationarity}
+A \textbf{discrete time series} is a set of observations $\{X_t\}_{t=1}^n$. The series is called \textbf{weakly stationary} if $\mathbb{E}[X_t] = \mu$ (a constant), $\operatorname{Var}(X_t) = \sigma^2 < \infty$, and $\operatorname{Cov}(X_t, X_{t+h})$ depends only on the lag $h$. Weak stationarity is the realisation, in the probabilistic sense, of the invariance of statistical properties under a translation in time.
+\end{definition}
+
+\begin{definition}[Autocovariance function and autocorrelation function]\label{def:ts_acf}
+Let $\{X_t\}$ be weakly stationary. Its \textbf{autocovariance function} (ACVF) is defined by
+\[
+\gamma(h)=\operatorname{Cov}(X_t,X_{t+h}),\qquad h\in\mathbb{Z},
+\]
+and its \textbf{autocorrelation function} (ACF) is
+\[
+\rho(h)=\frac{\gamma(h)}{\gamma(0)}\in[-1,1].
+\]
+$\rho(0)=1$, and $\rho(-h)=\rho(h)$ is an even function.
+\end{definition}
+
+\begin{definition}[Partial autocorrelation function]\label{def:ts_pacf}
+The \textbf{partial autocorrelation function} (PACF) $\alpha(h)$ is defined as the conditional correlation coefficient of $X_t$ and $X_{t+h}$ given the intermediate variables $X_{t+1},\dots,X_{t+h-1}$:
+\[
+\alpha(h)=\operatorname{Corr}\bigl(X_t,X_{t+h}\mid X_{t+1},\dots,X_{t+h-1}\bigr).
+\]
+Equivalently, $\alpha(h)$ is the coefficient of $X_t$ when $X_{t+h}$ is predicted optimally and linearly from $X_{t+h-1},\dots,X_t$.
+\end{definition}
+
+\begin{definition}[White noise]\label{def:ts_white_noise}
+The series $\{\varepsilon_t\}$ is called \textbf{white noise} if $\mathbb{E}[\varepsilon_t]=0$, $\operatorname{Var}(\varepsilon_t)=\sigma^2$, and $\operatorname{Cov}(\varepsilon_t,\varepsilon_s)=0$ ($t\neq s$). If in addition all moments are finite and the variables are independent, it is called \textbf{independent white noise}; if $\varepsilon_t\sim\mathcal{N}(0,\sigma^2)$ are independent and identically distributed, it is called \textbf{Gaussian white noise}.
+\end{definition}
+
+\begin{definition}[Lag Operator]\label{def:ts_lag_operator}
+The \textbf{lag operator} $B$ is defined by $BX_t = X_{t-1}$. $B$ is the generator of the discrete translation group $\mathbb{Z}$. The lag-operator polynomial
+\[
+\phi(B) = 1 - \phi_1 B - \cdots - \phi_p B^p
+\]
+defines a linear operator on the space of series.
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+% original series
+\draw[->] (-0.3,0.9) -- (7.5,0.9) node[right] {$t$};
+\foreach \t in {0,...,11} {
+  \pgfmathsetmacro{\x}{\t*0.6}
+  \pgfmathsetmacro{\y}{0.9+0.5*sin(50*\t)}
+  \fill[blue] (\x,\y) circle (2pt);
+}
+\node[blue] at (3.5,1.9) {Original series $X_t$};
+% one-step lag
+\draw[->] (-0.3,-0.3) -- (7.5,-0.3) node[right] {$t$};
+\foreach \t in {0,...,11} {
+  \pgfmathsetmacro{\x}{\t*0.6}
+  \pgfmathsetmacro{\y}{-0.3+0.5*sin(50*(\t-1))}
+  \fill[red] (\x,\y) circle (2pt);
+}
+\node[red] at (3.5,-1.0) {Lagged series $BX_t=X_{t-1}$};
+% arrow indicates the lag
+\draw[->, green!60!black, very thick] (2.4,0.9) to[bend left=20] (3.0,-0.3);
+\node[green!60!black, right, font=\footnotesize] at (3.1,0.2) {Lag $B$};
+\end{tikzpicture}
+\caption{The lag operator $B$: it shifts the series one step to the right along the time axis. $B$ generates the discrete translation group $\mathbb{Z}$ and is the central tool of ARIMA modelling.}
+\label{fig:lag_operator}
+\end{figure}
+
+\begin{property}[Algebraic Properties of the Lag Operator]\label{prop:ts_lag_algebra}
+The lag operator $B$ satisfies, on the space of series:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{linearity}: $B(\alpha X_t + \beta Y_t) = \alpha B X_t + \beta B Y_t$;
+    \item \textbf{commutativity}: $B^a B^b = B^{a+b} = B^b B^a$;
+    \item \textbf{invertibility}: when all roots of the characteristic polynomial $\phi(z)$ lie outside the unit circle, $\phi(B)$ is invertible.
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i) $B(\alpha X_t + \beta Y_t) = \alpha X_{t-1} + \beta Y_{t-1} = \alpha BX_t + \beta BY_t$.
+
+(ii) $(B^a B^b)X_t = B^a X_{t-b} = X_{t-a-b} = B^{a+b}X_t$.
+
+(iii) If all roots of $\phi(z)$ lie outside the unit circle, then $1/\phi(z)$ is analytic in the unit disc, and the coefficients of its power-series expansion $\sum_k \psi_k z^k$ are absolutely summable. Define $\psi(B) = \sum_k \psi_k B^k$; then $\psi(B)\phi(B) = I$ (on the space of stationary series), so $\phi(B)$ is invertible.
+\end{proof}
+
+\begin{definition}[Differencing operator]\label{def:ts_diff_operator}
+The \textbf{first-order differencing operator} is defined by $\nabla = 1-B$, that is, $\nabla X_t=X_t-X_{t-1}$. The $d$-th order difference is $\nabla^d=(1-B)^d$. The differencing operator removes polynomial trends: if $X_t=P_d(t)$ is a polynomial of degree $d$, then $\nabla^d X_t$ is a constant.
+\end{definition}
+
+\begin{lemma}[Null space of the differencing operator]\label{lem:ts_diff_kernel}
+$\ker\nabla^d$ is spanned by $\{1,t,t^2,\dots,t^{d-1}\}$, that is, by all polynomial sequences of degree less than $d$.
+\end{lemma}
+
+\begin{proof}
+Induction on $d$. $d=1$: $\nabla X_t=X_t-X_{t-1}=0\Rightarrow X_t$ is a constant. $d\ge2$: since $\nabla^d=\nabla\nabla^{d-1}$, $\ker\nabla^d=\{X:\nabla X\in\ker\nabla^{d-1}\}$, that is, $\nabla X$ is a polynomial of degree less than $d-1$. Integrating successively shows that $X$ is a polynomial of degree less than $d$.
+\end{proof}
+
+\begin{definition}[Spectral density]\label{def:ts_spectral_density}
+Let $\{X_t\}$ be weakly stationary with $\sum_h|\gamma(h)|<\infty$. Its \textbf{spectral density} is
+\[
+S(\omega)=\frac{1}{2\pi}\sum_{h=-\infty}^{\infty}\gamma(h)e^{-i\omega h},\qquad \omega\in(-\pi,\pi].
+\]
+$S(\omega)\ge0$ and it is an even function. The inverse formula is $\gamma(h)=\int_{-\pi}^{\pi}S(\omega)e^{i\omega h}d\omega$.
+\end{definition}
+
+\begin{theorem}[Wold decomposition theorem]\label{thm:ts_wold}
+Let $\{X_t\}$ be a zero-mean weakly stationary series. Then $X_t$ admits the unique decomposition
+\[
+X_t=\sum_{j=0}^{\infty}\psi_j\varepsilon_{t-j}+V_t,\qquad \psi_0=1,\quad\sum_j\psi_j^2<\infty,
+\]
+where $\{\varepsilon_t\}$ is white noise, $V_t$ is a deterministic component (one that can be predicted entirely linearly from the past), and $\{\varepsilon_t\}$ and $\{V_t\}$ are orthogonal.
+\end{theorem}
+
+\begin{proof}
+Decompose the closed linear span of $\{X_t\}$ in time into the increasing chain of subspaces $\overline{\operatorname{span}}\{X_s:s\le t\}$. Take $\varepsilon_t$ to be the residual of the projection of $X_t$ onto the past space; then $\{\varepsilon_t\}$ is white noise and $X_t=\sum_j\psi_j\varepsilon_{t-j}+V_t$. Uniqueness follows from the uniqueness of the projection.
+\end{proof}
+
+\begin{corollary}[ARMA as a rational form of the Wold decomposition]\label{cor:ts_arma_wold}
+The transfer function $H(z)=\theta(z)/\phi(z)$ of ARMA($p,q$) is a finite-dimensional parametrisation of the Wold decomposition: its coefficients $\psi_j$ are uniquely determined by the coefficients of $\phi,\theta$ through long division.
+\end{corollary}
+
+\begin{proof}
+From $\phi(z)H(z)=\theta(z)$, comparing coefficients of $z^j$ gives $\psi_j-\phi_1\psi_{j-1}-\cdots-\phi_p\psi_{j-p}=\theta_j$, which is a linear recursion for $\psi_j$ and determines $\{\psi_j\}$ uniquely.
+\end{proof}
+
+\subsection{Overview of Classical Time Series Models}
+
+\begin{definition}[AR Model]\label{def:ts_ar}
+The autoregressive model of order $p$, AR($p$):
+\[
+\phi(B) X_t = \varepsilon_t,
+\]
+where $\phi(B) = 1 - \phi_1 B - \cdots - \phi_p B^p$. The stationarity condition is that all roots of $\phi(z)$ lie outside the unit circle.
+\end{definition}
+
+\begin{definition}[MA Model]\label{def:ts_ma}
+The moving-average model of order $q$, MA($q$):
+\[
+X_t = \theta(B)\varepsilon_t,
+\]
+where $\theta(B) = 1 + \theta_1 B + \cdots + \theta_q B^q$.
+\end{definition}
+
+\begin{definition}[ARMA Model]\label{def:ts_arma}
+ARMA($p,q$):
+\[
+\phi(B) X_t = \theta(B)\varepsilon_t.
+\]
+The power spectral density is
+\[
+S(\omega) = \frac{\sigma^2}{2\pi}\frac{|\theta(e^{-i\omega})|^2}{|\phi(e^{-i\omega})|^2}.
+\]
+\end{definition}
+
+\begin{definition}[ARIMA and SARIMA]\label{def:ts_arima_sarima}
+ARIMA($p,d,q$):
+\[
+\phi(B)\nabla^d X_t = \theta(B)\varepsilon_t,
+\]
+where $\nabla = 1-B$. SARIMA($p,d,q$)$\times$($P,D,Q$)$_s$:
+\[
+\phi(B)\Phi(B^s)\nabla^d\nabla_s^D X_t = \theta(B)\Theta(B^s)\varepsilon_t.
+\]
+\end{definition}
+
+\begin{definition}[ARCH and GARCH]\label{def:ts_arch_garch}
+ARCH($q$):
+\[
+\sigma_t^2 = \alpha_0 + \sum_{i=1}^q \alpha_i X_{t-i}^2.
+\]
+GARCH($p,q$):
+\[
+\sigma_t^2 = \alpha_0 + \sum_{i=1}^q \alpha_i X_{t-i}^2 + \sum_{j=1}^p \beta_j \sigma_{t-j}^2.
+\]
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.85]
+% AR(1) ACF
+\begin{scope}[xshift=-6cm]
+\draw[->] (-0.3,0) -- (4.5,0) node[right] {$h$};
+\draw[->] (0,-0.3) -- (0,1.6) node[above] {ACF};
+\foreach \h in {0,1,...,7} {
+  \pgfmathsetmacro{\x}{\h*0.5}
+  \pgfmathsetmacro{\y}{0.7^(\h)}
+  \draw[blue, very thick] (\x,0) -- (\x,\y);
+  \fill[blue] (\x,\y) circle (1.5pt);
+}
+\node[font=\footnotesize] at (2,-0.9) {AR(1) ACF: tails off};
+\end{scope}
+% AR(1) PACF
+\begin{scope}[xshift=-2cm]
+\draw[->] (-0.3,0) -- (4.5,0) node[right] {$h$};
+\draw[->] (0,-0.3) -- (0,1.6) node[above] {PACF};
+\foreach \h in {0,1,...,7} {
+  \pgfmathsetmacro{\x}{\h*0.5}
+  \pgfmathsetmacro{\y}{\h==1 ? 0.7 : 0}
+  \draw[red, very thick] (\x,0) -- (\x,\y);
+  \fill[red] (\x,\y) circle (1.5pt);
+}
+\node[font=\footnotesize] at (2,-0.9) {AR(1) PACF: cuts off};
+\end{scope}
+% MA(1) ACF
+\begin{scope}[xshift=2cm]
+\draw[->] (-0.3,0) -- (4.5,0) node[right] {$h$};
+\draw[->] (0,-0.3) -- (0,1.6) node[above] {ACF};
+\foreach \h in {0,1,...,7} {
+  \pgfmathsetmacro{\x}{\h*0.5}
+  \pgfmathsetmacro{\y}{\h==1 ? 0.6 : 0}
+  \draw[blue, very thick] (\x,0) -- (\x,\y);
+  \fill[blue] (\x,\y) circle (1.5pt);
+}
+\node[font=\footnotesize] at (2,-0.9) {MA(1) ACF: cuts off};
+\end{scope}
+% MA(1) PACF
+\begin{scope}[xshift=6cm]
+\draw[->] (-0.3,0) -- (4.5,0) node[right] {$h$};
+\draw[->] (0,-0.3) -- (0,1.6) node[above] {PACF};
+\foreach \h in {0,1,...,7} {
+  \pgfmathsetmacro{\x}{\h*0.5}
+  \pgfmathsetmacro{\y}{0.6^(\h) * cos(deg(\h)*1.2)}
+  \draw[red, very thick] (\x,0) -- (\x,\y);
+  \fill[red] (\x,\y) circle (1.5pt);
+}
+\node[font=\footnotesize] at (2,-0.9) {MA(1) PACF: tails off};
+\end{scope}
+\end{tikzpicture}
+\caption{Comparison of the ACF/PACF characteristics of AR and MA: for an AR model the PACF cuts off and the ACF tails off; for an MA model the ACF cuts off and the PACF tails off. These are the criteria for model identification (the Box--Jenkins method).}
+\label{fig:ar_ma_acf_pacf}
+\end{figure}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Standard characteristics of the classical time series models}
+    \label{tab:ts_classical_correspondence}
+    \begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}}
+        \toprule
+        Model & ACF/PACF characteristics & Frequency-domain characteristics & Operator correspondence & Transfer function \\
+        \midrule
+        AR($p$) & PACF cuts off & Yule--Walker recursion & Gradient (self-feedback) & $H(\omega) = 1/\phi(e^{-i\omega})$ \\
+        MA($q$) & ACF cuts off & Impulse response & Divergence (shock) & $H(\omega) = \theta(e^{-i\omega})$ \\
+        ARMA & ACF/PACF tails off & Rational spectrum & Gradient + divergence & $H(\omega) = \theta(e^{-i\omega})/\phi(e^{-i\omega})$ \\
+        ARIMA & Same as ARMA after differencing & Differenced trend & Gradient (discrete differentiation) & $H = \theta/(\phi(1-e^{-i\omega})^d)$ \\
+        SARIMA & Seasonal + short period & Multi-scale trend & Gradient (multi-scale) & Multi-scale transfer function \\
+        ARCH & Squared ACF tails off & Volatility self-trend & Divergence (volatility scaling) & Volatility transfer function \\
+        GARCH & Squared ACF/PACF tails off & Volatility persistence & Gradient + divergence & $\alpha/(1-\beta)$ volatility kernel \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{theorem}[Yule-Walker equations]\label{thm:ts_yule_walker}
+Let the AR($p$) model $\phi(B)X_t=\varepsilon_t$ be stationary. Then the autocovariance function satisfies
+\[
+\gamma(h)-\phi_1\gamma(h-1)-\cdots-\phi_p\gamma(h-p)=\begin{cases}\sigma^2,&h=0,\\0,&h\ge1.\end{cases}
+\]
+Expressed in terms of $\rho(h)$, for $h\ge1$ this gives the system of linear equations
+\[
+\rho(h)=\phi_1\rho(h-1)+\cdots+\phi_p\rho(h-p),\qquad h=1,\dots,p.
+\]
+\end{theorem}
+
+\begin{proof}
+Multiply both sides of $\phi(B)X_t=\varepsilon_t$ by $X_{t-h}$ and take expectations, obtaining $\sum_j\phi_j\gamma(h-j)=\mathbb{E}[\varepsilon_tX_{t-h}]$. For $h\ge1$, $\varepsilon_t$ is orthogonal to $X_{t-h}$ ($\varepsilon_t$ is uncorrelated with past observations), so the right-hand side is $0$. For $h=0$, $\mathbb{E}[\varepsilon_tX_t]=\sigma^2$.
+\end{proof}
+
+\begin{property}[Geometric intuition for stationarity]\label{prop:ts_stationarity_geometry}
+The AR(1) model $X_t=\phi X_{t-1}+\varepsilon_t$ is stationary if and only if $|\phi|<1$. In that case the autocovariance $\gamma(h)=\sigma^2\phi^{|h|}/(1-\phi^2)$ decays exponentially, with the rate of decay controlled by $\phi$: the closer $|\phi|$ is to $1$, the longer the memory.
+\end{property}
+
+\begin{proof}
+The root of the characteristic polynomial $\phi(z)=1-\phi z$ is $z=1/\phi$, which lies outside the unit circle if and only if $|\phi|<1$. The autocovariance is obtained from the recursion $\gamma(h)=\phi\gamma(h-1)$ ($h\ge1$) as $\gamma(h)=\phi^h\gamma(0)$, where $\gamma(0)=\sigma^2/(1-\phi^2)$.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.95]
+\draw[->] (-3.3,0) -- (3.3,0) node[right] {$\operatorname{Re}$};
+\draw[->] (0,-2.0) -- (0,2.0) node[above] {$\operatorname{Im}$};
+\draw[gray!60] (0,0) circle (1.5);
+% roots inside the unit circle (non-stationary)
+\fill[red] (0.5,0) circle (2.5pt);
+\node[red, right, font=\footnotesize] at (0.55,0.15) {Non-stationary root};
+% roots outside the unit circle (stationary)
+\fill[blue] (2.5,0) circle (2.5pt);
+\node[blue, right, font=\footnotesize] at (2.55,0.15) {Stationary root};
+% unit-circle annotation
+\node[font=\footnotesize] at (1.1,1.05) {$|z|=1$};
+\node[align=center, font=\small] at (0,-2.7) {Stationarity condition: all roots of the characteristic polynomial $\phi(z)$ lie outside the unit circle (blue points), not inside it (red points)};
+\end{tikzpicture}
+\caption{The ARMA stationarity condition: all roots of the characteristic polynomial $\phi(z)$ lie outside the unit circle in the complex plane.}
+\label{fig:stationarity_condition}
+\end{figure}
+
+\section{Fundamental Tools for Time Series Analysis}
+
+\begin{remark}[Consolidation of the Window-Function Definition]\label{rem:ts_window_function_merged}
+The general definition of a window function (from the frequency-domain/sidelobe viewpoint) and its threefold role in time series analysis have been consolidated into the `Discrete Sampling and Intercalation of Periodic Signals' chapter (see \cref{def:window_function} and its subsection on time-series applications). That definition is used directly in the remainder of this chapter and is not repeated here.
+\end{remark}
+
+\subsection{Instantaneous Limit Angle: Directional Information of the Discrete Gradient}
+
+\begin{definition}[Instantaneous Limit Angle of a Time Series]\label{def:ts_limit_angle}
+For the series $\tilde{X}_t$ smoothed by a window function, the \textbf{instantaneous limit angle} is defined by
+\[
+\theta_t = \arctan(\nabla \tilde{X}_t) = \arctan(\tilde{X}_t - \tilde{X}_{t-1}),
+\]
+where $\nabla \tilde{X}_t = \tilde{X}_t - \tilde{X}_{t-1}$ is the discrete gradient. $\theta_t \in (-\pi/2, \pi/2)$.
+\end{definition}
+
+\section{Turning-Point Detection: Direction-Reversal Determination Based on Similarity}
+
+\begin{definition}[Mathematical Definition of a Turning Point]\label{def:ts_turning_point}
+Let $\theta_t \in (-\pi/2, \pi/2)$ be the instantaneous limit angle. The point $t^*$ is called a \textbf{turning point} if
+\[
+|\theta_{t^*} - \theta_{t^*-1}| > \tau,
+\]
+where $\tau \in (0, \pi/2)$ is a preset threshold. Write $\Delta\theta = \theta_{t^*} - \theta_{t^*-1}$.
+
+Following the unified convention of the `Scalars and Vectors' chapter, the \textbf{included angle} between two trend directions is always taken to be $\theta=\lvert\alpha-\beta\rvert\in[0,\pi]$; the signed quantity $\Delta\theta$ is the \textbf{difference angle}, used only for the sign of the sine-family similarity.
+\end{definition}
+
+\begin{lemma}[Equivalence of the Turning-Point Threshold and Cosine Similarity]\label{lem:ts_turning_equivalence}
+Let $|\Delta\theta| \in [0, \pi)$ and $\tau \in (0, \pi)$. Then
+\[
+|\Delta\theta| > \tau \quad \Longleftrightarrow \quad \cos(\Delta\theta) < \cos\tau.
+\]
+\end{lemma}
+
+\begin{proof}
+The cosine function is strictly decreasing on $[0, \pi]$, and $\cos$ is an even function. Hence $|\Delta\theta| > \tau$ if and only if $\cos|\Delta\theta| < \cos\tau$.
+\end{proof}
+
+\begin{proposition}[Similarity Characteristics of Turning Points]\label{prop:ts_turning_similarity}
+At a turning point $t^*$:
+\begin{enumerate}[label=(\roman*)]
+    \item the cosine similarity $\operatorname{Similarity}^{(1)} = \cos(\Delta\theta) < \cos\tau$;
+    \item the sign of the sine similarity $\operatorname{Similarity}^{(2)} = \sin(\Delta\theta)$ gives the direction of the turn;
+    \item the double-angle sine similarity $\operatorname{Similarity}^{(4)} = \sin(2\Delta\theta)$ is strictly increasing in $\Delta\theta$; its absolute value is strictly increasing in $|\Delta\theta|$ whenever $|\Delta\theta| < \pi/4$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) By Lemma \ref{lem:ts_turning_equivalence}. (ii) $\sin$ is an odd function. (iii) $\frac{d}{d\theta}\sin 2\theta = 2\cos 2\theta > 0$ when $|\theta| < \pi/4$. The conclusion for the absolute value follows directly from the oddness and the monotonicity.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+% time axis
+\draw[->] (-0.3,0) -- (9,0) node[right] {$t$};
+% piecewise linear trend
+\draw[blue, very thick] (0,0) -- (4,1.6) -- (5.5,0.4) -- (8.5,-0.6);
+% turning-point annotation
+\fill[red] (4,1.6) circle (3pt);
+\node[red, above, font=\footnotesize] at (4,1.75) {Turning point};
+\fill[red] (5.5,0.4) circle (3pt);
+% instantaneous limit angle
+\draw[->, green!60!black, thick] (2.5,0.8) -- (3.5,0.8);
+\node[green!60!black, below, font=\footnotesize] at (3.0,0.7) {$\theta_{t-1}>0$};
+\draw[->, orange, thick] (5.0,0.4) -- (6.0,0.15);
+\node[orange, below, font=\footnotesize] at (5.5,0.05) {$\theta_t<0$};
+% threshold
+\node[align=center, font=\small] at (4.5,-1.4) {Turning-point criterion: $|\theta_{t^*}-\theta_{t^*-1}|>\tau$, equivalently $\cos(\Delta\theta)<\cos\tau$};
+\end{tikzpicture}
+\caption{Turning-point detection: when the change $|\Delta\theta|$ in the instantaneous limit angle exceeds the threshold $\tau$, the point is judged to be a turning point. The sign of the sine similarity marks the direction of the turn exactly.}
+\label{fig:turning_point_detection}
+\end{figure}
+
+\begin{example}[Example of Turning-Point Detection]\label{ex:ts_turning_example}
+The series changes from rising to falling at $t=50$. $\tilde{X}_{49} = 10.2$, $\tilde{X}_{50} = 10.5$, $\tilde{X}_{51} = 10.1$. Then $\theta_{50} \approx 16.7^\circ$ and $\theta_{51} \approx -21.8^\circ$, so $\Delta\theta \approx -38.5^\circ$. With the threshold $\tau = 30^\circ$ we have $\cos(38.5^\circ) \approx 0.78 < \cos(30^\circ) \approx 0.87$, so $t=51$ is a turning point. $\operatorname{Similarity}^{(4)} = \sin(-77^\circ) \approx -0.97$, and the negative sign indicates a downward turn.
+\end{example}
+
+\section{Refraction Rate: Difference of Sine Trends on the Two Sides of a Turning Point}
+
+\begin{definition}[Refraction Rate]\label{def:ts_refraction}
+At a turning point $t^*$, define the \textbf{angle of incidence} $\theta_1 = \theta_{t^*-1}$ and the \textbf{angle of emergence} $\theta_2 = \theta_{t^*+1}$. The \textbf{refraction rate} is
+\[
+R_{\text{turn}}(t^*) = |\sin\theta_1 - \sin\theta_2|.
+\]
+\end{definition}
+
+\begin{theorem}[Half-Angle Decomposition and Bounds of the Refraction Rate]\label{thm:ts_refraction_relation}
+Let $\theta_1, \theta_2 \in (-\pi/2, \pi/2)$. Then
+\[
+R_{\text{turn}} = 2\left| \cos\frac{\theta_1 + \theta_2}{2} \right| \cdot \left| \sin\frac{\theta_1 - \theta_2}{2} \right|,
+\]
+and $0 \le R_{\text{turn}} \le 2$. In particular: $R = 0 \iff \theta_1 = \theta_2$; $R = 2 \iff \theta_2 = -\theta_1 = \pm\pi/2$; and when the direction is reversed ($\theta_2 = -\theta_1$), $R = 2|\sin\theta_1|$.
+\end{theorem}
+
+\begin{proof}
+The half-angle decomposition follows from the product-to-sum formulae. The bounds follow from $|\cos| \le 1$ and $|\sin| \le 1$. The three special cases are verified one by one.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+% unit circle
+\draw[gray!40] (0,0) circle (1.5);
+\draw[->] (-1.8,0) -- (1.8,0);
+\draw[->] (0,-1.8) -- (0,1.8);
+% angle of incidence
+\draw[->, blue, very thick] (0,0) -- (1.2,0.9);
+\draw[->, blue, thick] (0,0) -- (1.2,0);
+\draw[->, blue, thick] (0.9,0) arc (0:37:0.9);
+\node[blue, font=\footnotesize] at (1.05,0.4) {$\theta_1$};
+% angle of emergence
+\draw[->, red, very thick] (0,0) -- (1.3,-0.6);
+\draw[->, red, thick] (0,0) -- (1.5,0);
+\draw[->, red, thick] (1.2,0) arc (0:-25:1.2);
+\node[red, font=\footnotesize] at (1.35,-0.4) {$\theta_2$};
+% sine projections
+\draw[dashed, green!60!black] (1.2,0.9) -- (1.2,0);
+\draw[dashed, orange] (1.3,-0.6) -- (1.3,0);
+\node[green!60!black, font=\footnotesize] at (1.5,0.5) {$\sin\theta_1$};
+\node[orange, font=\footnotesize] at (1.55,-0.35) {$\sin\theta_2$};
+\node[align=center, font=\small] at (0,-2.4) {$R_{\text{turn}}=|\sin\theta_1-\sin\theta_2|=2|\cos\frac{\theta_1+\theta_2}{2}|\cdot|\sin\frac{\theta_1-\theta_2}{2}|$};
+\end{tikzpicture}
+\caption{Geometric figure for the half-angle decomposition of the refraction rate: $R_{\text{turn}}$ is the difference of the sine projections on the two sides, and the half-angle decomposition splits it into two factors, the `average direction' and the `direction difference'.}
+\label{fig:refraction_decomposition}
+\end{figure}
+
+\begin{example}[Example of Refraction-Rate Computation]\label{ex:ts_refraction_example}
+Continuing Example \ref{ex:ts_turning_example}: $\sin\theta_1 = 0.287$ and $\sin\theta_2 = -0.371$, so $R_{\text{turn}} = 0.658$. The half-angle decomposition is verified to agree.
+\end{example}
+
+\section{Period Determination: Peaks of the Periodogram}
+\label{sec:ts_period_determination}
+
+\begin{definition}[Period Determination Based on the Periodogram]\label{def:ts_period_detection}
+Compute the periodogram
+\[
+I_n(\omega_k) = \frac{1}{n}\left|\sum_{t=1}^n X_t e^{-i\omega_k t}\right|^2.
+\]
+The dominant period is determined by the peak frequency:
+\[
+\omega_{\text{period}} = \arg\max_{\omega \in (0, \pi]} I_n(\omega), \qquad
+T_{\text{period}} = \frac{2\pi}{\omega_{\text{period}}}.
+\]
+\end{definition}
+
+\begin{proposition}[Fisher Test for Period Significance]\label{prop:ts_period_significance}
+Suppose the periodogram takes the values $I_1, \dots, I_m$ at the $m = \lfloor (n-1)/2 \rfloor$ positive frequency points. The Fisher test statistic is
+\[
+g = \frac{\max_k I_k}{\sum_{k=1}^{m} I_k}.
+\]
+The threshold is
+\[
+g_\alpha = 1 - (\alpha/m)^{1/(m-1)}.
+\]
+If $g > g_\alpha$, the period is significant.
+\end{proposition}
+
+\begin{proof}
+Under white noise the periodogram ordinates are independent and identically distributed (exponentially), and the normalised ratio follows a $\operatorname{Beta}(1, m-1)$ distribution. The union bound gives
+\[
+\mathbb{P}(g > g_0) \le m(1-g_0)^{m-1}.
+\]
+Substituting $g_0 = g_\alpha$ yields $\alpha$.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.95]
+\draw[->] (-0.3,0) -- (8.5,0) node[right] {$\omega$};
+\draw[->] (0,-0.3) -- (0,3.0) node[above] {$I_n(\omega)$};
+% periodogram curve
+\draw[blue, very thick, domain=0.05:8.2, samples=200]
+  plot (\x, {1.0+0.8*sin(deg(\x*1.8))^2+0.5*sin(deg(\x*3.7))^2+0.3*sin(deg(\x*7.1))^2});
+% peak annotations
+\draw[dashed, red] (2.1,0) -- (2.1,2.4);
+\node[red, above, font=\footnotesize] at (2.1,2.45) {Dominant peak};
+\draw[dashed, red] (5.3,0) -- (5.3,1.9);
+\node[red, above, font=\footnotesize] at (5.3,1.95) {Secondary peak};
+% Fisher threshold
+\draw[dashed, green!60!black] (0,2.2) -- (8.2,2.2);
+\node[green!60!black, right, font=\footnotesize] at (8.2,2.2) {$g_\alpha$ threshold};
+\node[align=center, font=\small] at (4.2,-1.0) {When a periodogram peak exceeds the Fisher threshold $g_\alpha$, the corresponding period is significant};
+\end{tikzpicture}
+\caption{The periodogram and the Fisher test: frequencies whose spectral peak exceeds the threshold $g_\alpha$ correspond to significant periods, and the dominant peak gives the dominant period $T_{\text{period}}=2\pi/\omega_{\text{period}}$.}
+\label{fig:periodogram_fisher}
+\end{figure}
+
+\begin{property}[Asymptotic distribution of the periodogram]\label{prop:ts_periodogram_distribution}
+Under Gaussian white noise the periodogram $I_n(\omega_k)$ is asymptotically exponentially distributed with mean $\sigma^2$, that is,
+\[
+I_n(\omega_k)\xrightarrow{d}\operatorname{Exp}(\sigma^2),
+\]
+and $I_n(\omega_k),I_n(\omega_{k'})$ at distinct frequencies are asymptotically independent ($k\neq k'$).
+\end{property}
+
+\begin{proof}
+The DFT coefficients $\sum_tX_te^{-i\omega_kt}$ of Gaussian white noise are complex Gaussian random variables whose real and imaginary parts are independent and identically distributed as $\mathcal{N}(0,n\sigma^2/2)$; hence $I_n(\omega_k)$ is $1/n$ times the sum of squares of two independent Gaussians, that is, it is exponentially distributed. The DFT coefficients at distinct frequencies are asymptotically orthogonal, hence asymptotically independent.
+\end{proof}
+
+\section{Finite Harmonic Regression Model}
+
+\begin{definition}[Finite Harmonic Regression Model]\label{def:ts_harmonic_regression}
+\[
+X_t \approx \operatorname{Re}\left[ \sum_{k=1}^{K} A_k e^{i(\omega_k t + \phi_k)} \right] + \varepsilon_t,
+\]
+where $\{A_k, \omega_k, \phi_k\}_{k=1}^{K}$ are tunable parameters.
+\end{definition}
+
+\begin{proposition}[Regularised Least-Squares Estimation of Finite Harmonic Model Parameters]\label{prop:ts_harmonic_estimate}
+The finite harmonic parameters are estimated by regularised least squares. The objective function is
+\[
+\mathcal{L}(\boldsymbol{\Theta}) = \sum_{t=1}^n \left( X_t - \operatorname{Re}\left[\sum_k A_k e^{i(\omega_k t + \phi_k)}\right] \right)^2 + \lambda \sum_k |A_k|.
+\]
+Under suitable regularisation conditions the estimator $\hat{\boldsymbol{\Theta}}_n$ converges in probability to the true parameter $\boldsymbol{\Theta}_0$.
+\end{proposition}
+
+\begin{proof}
+The objective function $\mathcal{L}$ is a continuously differentiable function of $\boldsymbol{\Theta}$ (apart from the points where the $L^1$ regularisation term fails to be differentiable at $A_k = 0$, which can be handled by subgradients). By the strong convexity of the $L^2$ loss term (on the compact parameter space where the $\omega_k$ are separated) and the convexity of the $L^1$ regularisation term, $\mathcal{L}$ has a unique minimum on the compact parameter space. Let $\hat{\boldsymbol{\Theta}}_n = \arg\min \mathcal{L}$. The Wald consistency conditions are: (i) the parameter space is compact; (ii) the true parameter $\boldsymbol{\Theta}_0$ is the unique minimum (model identifiability: $A_k > 0$ together with pairwise distinct $\omega_k$ guarantees that the harmonic components are uniquely determined); (iii) the loss function converges pointwise to the expected loss. When these conditions hold, $\hat{\boldsymbol{\Theta}}_n \xrightarrow{p} \boldsymbol{\Theta}_0$. Multi-scale kernel smoothing can accelerate the numerical optimisation, but it does not change consistency.
+\end{proof}
+
+\begin{theorem}[Asymptotic normality of the finite harmonic estimator]\label{thm:ts_harmonic_asymptotic}
+Under the above regularisation conditions the estimator satisfies
+\[
+\sqrt{n}\bigl(\hat{\boldsymbol{\Theta}}_n-\boldsymbol{\Theta}_0\bigr)\xrightarrow{d}\mathcal{N}(0,\mathcal{I}(\boldsymbol{\Theta}_0)^{-1}),
+\]
+where $\mathcal{I}(\boldsymbol{\Theta}_0)$ is the Fisher information matrix.
+\end{theorem}
+
+\begin{proof}
+By $\sqrt{n}$-consistency, the second-order differentiability of the objective function (except at $A_k=0$) and a Taylor expansion, $\hat{\boldsymbol{\Theta}}_n-\boldsymbol{\Theta}_0\approx-\mathcal{I}(\boldsymbol{\Theta}_0)^{-1}\nabla\mathcal{L}(\boldsymbol{\Theta}_0)$, where $\nabla\mathcal{L}(\boldsymbol{\Theta}_0)$ is asymptotically normal. Slutsky's theorem then gives the result.
+\end{proof}
+
+\section{Bayesian Updating: Online Inference for the Parameters}
+
+\begin{definition}[Bayesian Updating of Finite Harmonic Parameters]\label{def:ts_bayesian_update}
+The posterior distribution is
+\[
+p(\boldsymbol{\Theta} \mid X_{1:t+1}) \propto p(X_{t+1} \mid \boldsymbol{\Theta}) \cdot p(\boldsymbol{\Theta} \mid X_{1:t}).
+\]
+\end{definition}
+
+\begin{proposition}[Posterior Convergence and Period Stability]\label{prop:ts_bayes_convergence}
+Under standard regularity conditions, the Bernstein--von Mises theorem gives, as $n \to \infty$,
+\[
+\sqrt{n}(\boldsymbol{\Theta} - \hat{\boldsymbol{\Theta}}_n) \mid X_{1:n} \xrightarrow{d} \mathcal{N}(0, \mathcal{I}(\boldsymbol{\Theta}_0)^{-1}),
+\]
+where $\mathcal{I}(\boldsymbol{\Theta}_0)$ is the Fisher information matrix. The posterior distribution concentrates at the true parameter, with width $O(n^{-1/2})$. If the posterior remains concentrated at $\omega_k$, that periodic component is stable; if it spreads out, it is unstable.
+\end{proposition}
+
+\begin{proof}
+Under standard regularity conditions, when the prior is continuous and positive at $\boldsymbol{\Theta}_0$, the posterior is asymptotically normal. The non-degeneracy of the Fisher information guarantees that the covariance matrix $\mathcal{I}(\boldsymbol{\Theta}_0)^{-1}$ is well defined. The concentration follows from the asymptotic standard deviation $O(n^{-1/2})$. The criterion for period stability is decided directly by the size of the posterior variance in the $\omega_k$ direction.
+\end{proof}
+
+\begin{proposition}[Adaptivity of the Forgetting Factor]\label{prop:ts_forgetting}
+For a non-stationary time series, the forgetting factor $\gamma \in (0,1]$ is defined by
+\[
+p_\gamma(\boldsymbol{\Theta} \mid X_{1:t}) \propto p(X_t \mid \boldsymbol{\Theta}) \cdot [p_\gamma(\boldsymbol{\Theta} \mid X_{1:t-1})]^\gamma.
+\]
+Equivalently,
+\[
+\log p_\gamma(\boldsymbol{\Theta} \mid X_{1:t}) \propto \sum_{s=1}^t \gamma^{t-s} \log p(X_s \mid \boldsymbol{\Theta}),
+\]
+that is, the likelihood contribution of old observations decays exponentially. An adaptive forgetting factor decreases $\gamma$ near a turning point (enhancing adaptivity) and increases $\gamma$ over a stationary stretch (enhancing stability).
+\end{proposition}
+
+\begin{proof}
+Expand the recursive definition of the forgetting factor:
+\[
+p_\gamma(\boldsymbol{\Theta} \mid X_{1:t}) \propto \prod_{s=1}^t p(X_s \mid \boldsymbol{\Theta})^{\gamma^{t-s}}.
+\]
+Taking logarithms gives the weighted log-likelihood
+\[
+\sum_{s=1}^t \gamma^{t-s} \log p(X_s \mid \boldsymbol{\Theta}).
+\]
+As $\gamma \to 1$ this degenerates to the standard Bayesian update (all observations weighted equally); for $\gamma < 1$ the weights of old observations decay exponentially, and the effective sample size is approximately $1/(1-\gamma)$. When turning-point detection is triggered at $t^*$, $\gamma$ is temporarily lowered to $\gamma_{\text{low}}$ (for instance $0.9$), so that the model adapts quickly to the change of direction; over a stationary stretch $\gamma \to 1$ is restored in order to preserve the accuracy of the estimate.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.9]
+\draw[->] (-0.3,0) -- (9,0) node[right] {$s$};
+\draw[->] (0,-0.3) -- (0,2.8) node[above] {Weight $\gamma^{t-s}$};
+% weight curves for different gamma
+\draw[blue, very thick, domain=0:8.5, samples=200]
+  plot (\x, {2.5*0.9^(\x)});
+\draw[red, very thick, domain=0:8.5, samples=200]
+  plot (\x, {2.5*0.7^(\x)});
+\draw[green!60!black, very thick, domain=0:8.5, samples=200]
+  plot (\x, {2.5*0.5^(\x)});
+\node[blue, right, font=\footnotesize] at (3,1.6) {$\gamma=0.9$: stationary stretch, long memory};
+\node[red, right, font=\footnotesize] at (3,0.8) {$\gamma=0.7$: moderate adaptivity};
+\node[green!60!black, right, font=\footnotesize] at (3,0.3) {$\gamma=0.5$: near a turning point, fast adaptation};
+\node[align=center, font=\small] at (4.5,-1.2) {The forgetting factor $\gamma$ controls the exponentially decaying weights of old observations: the smaller $\gamma$ is, the faster the adaptation but the larger the estimation variance};
+\end{tikzpicture}
+\caption{Exponential decay of the forgetting factor: the smaller $\gamma$ is, the faster the weights of old observations decay and the stronger the model's adaptation to recent data, but the lower the effective sample size.}
+\label{fig:forgetting_factor}
+\end{figure}
+
+\section{Window-Function Validation: Model Diagnosis Based on Spectral Component Determination}
+
+\begin{definition}[Spectral Criterion for Window-Function Validation]\label{def:ts_window_validation}
+The fidelity is defined by
+\[
+\mathcal{V}(K_\Delta) =
+\frac{\int_{-\pi}^{\pi} |\hat{K}_\Delta(\omega)|^2 \cdot S_X(\omega) \, d\omega}
+{\int_{-\pi}^{\pi} S_X(\omega) \, d\omega}.
+\]
+\end{definition}
+
+\begin{proposition}[Turning-Point--Period Trade-off in Window-Function Validation]\label{prop:ts_window_tradeoff}
+A small window gives high fidelity but insufficient noise suppression; a large window suppresses noise adequately but smooths away the high-frequency signal; the optimal window balances the two.
+\end{proposition}
+
+\begin{proof}
+For a small window, $\Delta \to 0$ gives $\hat{K}_\Delta(\omega) \to 1$ (pointwise), hence $\mathcal{V} \to 1$; but the smoothed series satisfies $\tilde{X}_t \to X_t$ (the original series), the noise is retained entirely, and the probability that turning-point detection produces spurious turning points increases. For a large window, $\Delta \to \infty$ gives $\hat{K}_\Delta(\omega) \to \delta(\omega)$ (concentrated at zero frequency), the high-frequency components are suppressed entirely, and the period estimate is accurate (low-frequency periods are retained) but the turning-point information is lost. The optimal window is determined by minimising the mean squared error or by cross-validation, which proves the trade-off relation.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.95]
+\draw[->] (-0.3,0) -- (8.5,0) node[right] {Window width $\Delta$};
+\draw[->] (0,-0.3) -- (0,3.0) node[above] {Performance};
+% fidelity curve (decreasing)
+\draw[blue, very thick, domain=0.5:8, samples=200]
+  plot (\x, {2.8*exp(-\x/4)});
+% noise-suppression curve (increasing)
+\draw[red, very thick, domain=0.5:8, samples=200]
+  plot (\x, {2.8*(1-exp(-\x/2))});
+% optimal window
+\draw[dashed, green!60!black] (2.6,0) -- (2.6,2.8);
+\node[green!60!black, above, font=\footnotesize] at (2.6,2.85) {Optimal $\Delta^*$};
+\node[blue, right, font=\footnotesize] at (5.5,1.5) {Fidelity (optimal for small windows)};
+\node[red, right, font=\footnotesize] at (5.5,2.3) {Noise suppression (optimal for large windows)};
+\node[align=center, font=\small] at (4.2,-1.2) {Turning-point--period trade-off: the optimal window width $\Delta^*$ balances fidelity against noise suppression};
+\end{tikzpicture}
+\caption{The turning-point--period trade-off of window functions: a small window gives high fidelity but insufficient noise suppression, a large window suppresses noise adequately but loses the high frequencies, and the optimal window $\Delta^*$ lies between the two.}
+\label{fig:window_tradeoff}
+\end{figure}
+
+\begin{proposition}[Similarity Diagnosis of Residuals]\label{prop:ts_residual_diagnosis}
+The residual similarity diagnosis function is
+\[
+\mathcal{D}(\hat{\varepsilon}) =
+\max_{h \ge 1,\, d = 1,\dots,6}
+\left|
+\frac{1}{n-h} \sum_{t=h+1}^{n}
+S^{(d)}\big(\theta_t^{\hat{\varepsilon}}, \theta_{t-h}^{\hat{\varepsilon}}\big)
+\right|.
+\]
+\end{proposition}
+
+\begin{proof}
+The phase sequence of ideal white-noise residuals is independent. The terms of the difference-angle family of kernels are $e^{i(\theta_t - \theta_{t-h})}$, and the phase differences are uniformly distributed on $[0,2\pi)$, so
+\[
+\mathbb{E}[e^{i(\theta_t - \theta_{t-h})}] = 0.
+\]
+By the law of large numbers (for $h$-dependent sequences) the mean converges in probability to $0$, that is, $\mathcal{D} \to 0$. If $\mathcal{D}$ is significantly non-zero for some kernel, this shows that the residuals contain an uncaptured periodic structure at the frequency scale corresponding to that kernel.
+\end{proof}
+
+\begin{theorem}[Ljung-Box test for whiteness of the residuals]\label{thm:ts_ljung_box}
+The $m$-th order autocorrelations $\hat\rho(h)$ of the residuals $\{\hat{\varepsilon}_t\}$ give the test statistic
+\[
+Q=n(n+2)\sum_{h=1}^m\frac{\hat\rho(h)^2}{n-h}\xrightarrow{d}\chi^2_{m-p-q},
+\]
+where $p+q$ is the number of model parameters. When $Q>\chi^2_{m-p-q,\alpha}$, the null hypothesis that the residuals are white noise is rejected.
+\end{theorem}
+
+\begin{proof}
+When the model is correctly specified, the residual autocorrelations $\hat\rho(h)$ are asymptotically normal and their correlation matrix is the identity. By the theory of distributions of quadratic forms, $Q$ is asymptotically $\chi^2$ distributed with $m-p-q$ degrees of freedom.
+\end{proof}
+
+\section{Complete Pipeline of Time Series Analysis}
+
+\begin{definition}[Algorithmic Pipeline of Time Series Analysis]\label{def:ts_algorithm}
+The complete algorithmic pipeline is:
+\begin{enumerate}[label=(\roman*)]
+    \item window-function selection and smoothing;
+    \item computation of the instantaneous limit angle;
+    \item turning-point detection;
+    \item computation of the refraction rate;
+    \item period determination;
+    \item finite harmonic regression modelling and parameter estimation;
+    \item Bayesian updating;
+    \item window-function validation.
+\end{enumerate}
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=0.9cm and 0.9cm,
+  tstep/.style={draw, rounded corners, align=center, minimum width=2.2cm, minimum height=0.8cm, font=\small, fill=blue!8}]
+\node[tstep, fill=blue!12]  (a) {1. Window-function\\smoothing};
+\node[tstep, fill=cyan!12, right=of a] (b) {2. Instantaneous\\limit angle};
+\node[tstep, fill=green!12, right=of b] (c) {3. Turning-point\\detection};
+\node[tstep, fill=teal!12, right=of c] (d) {4. Refraction rate};
+\node[tstep, fill=orange!12, below=of a] (e) {5. Period\\determination};
+\node[tstep, fill=yellow!16, right=of e] (f) {6. Finite harmonic\\regression};
+\node[tstep, fill=purple!12, right=of f] (g) {7. Bayesian\\updating};
+\node[tstep, fill=red!12, right=of g] (h) {8. Window-function\\validation};
+\draw[->, very thick] (a) -- (b);
+\draw[->, very thick] (b) -- (c);
+\draw[->, very thick] (c) -- (d);
+\draw[->, very thick] (d.south) |- (e.east);
+\draw[->, very thick] (e) -- (f);
+\draw[->, very thick] (f) -- (g);
+\draw[->, very thick] (g) -- (h);
+\draw[->, very thick, dashed, red] (h.north) to[out=90, in=90] (a.north);
+\node[align=center, font=\small] at (4.5,-2.8) {Closed-loop feedback: the result of the window-function validation in step 8 is fed back to the window-function selection in step 1};
+\end{tikzpicture}
+\caption{The complete closed loop of the time series analysis pipeline: the eight steps form a complete closed loop, and the result of window-function validation is fed back to the window-function selection, achieving iterative optimisation of the model.}
+\label{fig:ts_algorithm_loop}
+\end{figure}
+
+\begin{example}[Application of the Complete Pipeline to Simulated Data]\label{ex:ts_complete_example}
+Simulated data:
+\[
+X_t = 5\sin(2\pi t/20) + 2\sin(2\pi t/7) + \varepsilon_t, \quad t = 1,\dots,200,
+\]
+where $\varepsilon_t \sim \mathcal{N}(0,1)$.
+
+Turning-point detection: with threshold $\tau = 45^\circ$, about $18$ turning points are detected. The refraction rate $R_{\text{turn}}$ ranges from $0.3$ to $1.8$. Period determination: the periodogram peaks at $\omega = 2\pi/20$ and $\omega = 2\pi/7$, with dominant period $T = 20$ (significant by the Fisher test). Finite harmonic regression: regularised least squares gives the estimates $A_1 \approx 5$, $\omega_1 \approx 2\pi/20$, $A_2 \approx 2$ and $\omega_2 \approx 2\pi/7$. After Bayesian updating the posterior concentrates at $(\omega_1, \omega_2)$. Window validation: $\mathcal{V}(K_{\text{Gauss}, \Delta=3}) \approx 0.95$ and $\mathcal{V}(K_{\text{Cauchy}, \Delta=20}) \approx 0.88$, with residual diagnosis $\mathcal{D} \approx 0.1$.
+\end{example}
+
+\begin{theorem}[Model selection criteria]\label{thm:ts_model_selection}
+Let $\hat\sigma^2_k$ be the maximum-likelihood variance estimate of a candidate model and $p_k$ its number of parameters. The AIC and BIC criteria are
+\[
+\operatorname{AIC}(k)=n\log\hat\sigma_k^2+2p_k,\qquad
+\operatorname{BIC}(k)=n\log\hat\sigma_k^2+p_k\log n.
+\]
+Within a set of candidate models, AIC and BIC asymptotically select the model that is optimal for prediction error and for posterior probability, respectively.
+\end{theorem}
+
+\begin{proof}
+AIC is an asymptotically unbiased estimate of the sum of the KL divergence and the model complexity; BIC is the Laplace approximation to the posterior model probability.
+\end{proof}
+
+\begin{remark}[Scope of Application]\label{rem:ts_scope}
+The methods of this chapter apply to discrete time series with stationary or locally stationary structure, including trend extraction, period identification, turning-point detection and short-term forecasting. For non-stationary, long-memory or strongly non-linear series they should be used in combination with differencing, local modelling or non-linear models.
+\end{remark}
+
+\begin{remark}[Interface with Kalman filtering]\label{rem:ts_kalman_interface}
+For the state-space form
+\[
+x_{t+1}=Fx_t+w_t,\qquad y_t=Hx_t+v_t,
+\]
+the Kalman filter gives the optimal linear state estimate
+\[
+\hat x_{t|t}=\hat x_{t|t-1}+K_t(y_t-H\hat x_{t|t-1}),
+\]
+where $K_t$ is the Kalman gain. ARMA models can be brought into the Kalman framework through a state-space realisation, which handles missing values and online updating in a unified way.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & The lag operator $B$ (Definition \ref{def:ts_lag_operator}) generates the discrete translation group; window-function convolution smoothing \\
+Scaling & Choice of the scale of the window width $\Delta$; fidelity $\mathcal{V}(K_\Delta)$ (Definition \ref{def:ts_window_validation}) \\
+Rotation & The instantaneous limit angle $\theta_t$ (Definition \ref{def:ts_limit_angle}); similarity kernels (Proposition \ref{prop:ts_turning_similarity}) \\
+Conservation & Conservation of periodogram energy; normalisation of the Fisher test statistic (Proposition \ref{prop:ts_period_significance}) \\
+Symmetry & Cosine symmetry (Lemma \ref{lem:ts_turning_equivalence}); direction reversal (Theorem \ref{thm:ts_refraction_relation}) \\
+Closure & Closed loop of the algorithmic pipeline (Definition \ref{def:ts_algorithm}); white-noise residuals $\mathcal{D}\to 0$ (Proposition \ref{prop:ts_residual_diagnosis}) \\
+Period & Dominant period (Definition \ref{def:ts_period_detection}); Fisher test (Proposition \ref{prop:ts_period_significance}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the algebraic properties of the lag operator (Property \ref{prop:ts_lag_algebra}):
+    \begin{enumerate}[label=(\roman*)]
+        \item linearity: $B(\alpha X_t+\beta Y_t)=\alpha BX_t+\beta BY_t$;
+        \item commutativity: $B^aB^b=B^{a+b}=B^bB^a$;
+        \item invertibility: when all roots of the characteristic polynomial $\phi(z)$ lie outside the unit circle, $\phi(B)$ is invertible.
+    \end{enumerate}
+    Carry out the proof in the language of linear operators on a space of series,
+    and explain why the lag operator is the generator of the discrete translation group $\mathbb{Z}$.
+
+    \item Prove the characterisation of the null space of the differencing operator (Lemma \ref{lem:ts_diff_kernel}):
+    $\ker\nabla^d$ is spanned by $\{1,t,t^2,\dots,t^{d-1}\}$.
+    Carry out the proof by induction, and explain how the differencing operator removes polynomial trends.
+
+    \item Prove the Wold decomposition theorem (Theorem \ref{thm:ts_wold}):
+    a zero-mean weakly stationary series admits the unique decomposition
+    \[
+    X_t=\sum_{j=0}^\infty\psi_j\varepsilon_{t-j}+V_t,\quad
+    \psi_0=1,\quad\sum_j\psi_j^2<\infty.
+    \]
+    Carry out the proof using the projection theorem,
+    and explain the geometric meaning of $V_t$ being a deterministic component.
+
+    \item Prove the Yule-Walker equations (Theorem \ref{thm:ts_yule_walker}):
+    for an AR($p$) model,
+    \[
+    \rho(h)=\phi_1\rho(h-1)+\cdots+\phi_p\rho(h-p),\quad h=1,\dots,p.
+    \]
+    Carry out the proof using $\mathbb{E}[\varepsilon_tX_{t-h}]=0$ ($h\ge1$),
+    and explain why the Yule-Walker equations give the method of moments for estimating the AR parameters.
+
+    \item Prove the geometric intuition for stationarity (Property \ref{prop:ts_stationarity_geometry}):
+    the AR(1) model $X_t=\phi X_{t-1}+\varepsilon_t$ is stationary if and only if $|\phi|<1$,
+    and in that case $\gamma(h)=\sigma^2\phi^{|h|}/(1-\phi^2)$.
+    Carry out the proof using the condition that the characteristic root lies outside the unit circle and the autocovariance recursion,
+    and explain why memory is longer the closer $|\phi|$ is to $1$.
+
+    \item From Definition \ref{def:ts_ar} to Definition \ref{def:ts_arch_garch},
+    write down the defining equations of the seven models
+    AR($p$), MA($q$), ARMA($p,q$), ARIMA($p,d,q$),
+    SARIMA, ARCH($q$) and GARCH($p,q$),
+    and verify the ACF/PACF characteristics, the frequency-domain characteristics
+    and the operator correspondence given in each row of Table \ref{tab:ts_classical_correspondence}.
+
+    \item Prove the equivalence of the turning-point threshold and cosine similarity (Lemma \ref{lem:ts_turning_equivalence}):
+    let $|\Delta\theta|\in[0,\pi)$ and $\tau\in(0,\pi)$; then
+    \[
+    |\Delta\theta|>\tau\Longleftrightarrow\cos(\Delta\theta)<\cos\tau.
+    \]
+    Carry out the proof using the strict monotone decrease of the cosine function on $[0,\pi]$ and its evenness.
+
+    \item Prove the three similarity characteristics at a turning point in Proposition \ref{prop:ts_turning_similarity}:
+    \begin{enumerate}[label=(\roman*)]
+        \item the cosine similarity $\operatorname{Similarity}^{(1)}=\cos(\Delta\theta)<\cos\tau$;
+        \item the sign of the sine similarity $\operatorname{Similarity}^{(2)}=\sin(\Delta\theta)$ gives the direction of the turn;
+        \item the absolute value of the double-angle sine similarity $\operatorname{Similarity}^{(4)}=\sin(2\Delta\theta)$
+              is strictly increasing in $|\Delta\theta|$ when $|\Delta\theta|<\pi/4$.
+    \end{enumerate}
+    Write out the proofs separately, and explain why a change in the sign of the sine similarity marks a turning point exactly.
+
+    \item Verify Example \ref{ex:ts_turning_example}:
+    the series changes from rising to falling at $t=50$,
+    with $\tilde{X}_{49}=10.2$, $\tilde{X}_{50}=10.5$ and $\tilde{X}_{51}=10.1$.
+    Compute:
+    \begin{enumerate}[label=(\roman*)]
+        \item the instantaneous limit angles $\theta_{50}$ and $\theta_{51}$;
+        \item the difference angle $\Delta\theta$;
+        \item the cosine similarity $\operatorname{Similarity}^{(1)}$ and the sine similarity $\operatorname{Similarity}^{(2)}$;
+        \item decide whether $t=51$ is a turning point under the threshold $\tau=30^\circ$.
+    \end{enumerate}
+
+    \item Prove Theorem \ref{thm:ts_refraction_relation} (half-angle decomposition and bounds of the refraction rate):
+    let $\theta_1,\theta_2\in(-\pi/2,\pi/2)$, and let the refraction rate be
+    \[
+    R_{\text{turn}}(t^*)=|\sin\theta_1-\sin\theta_2|,
+    \]
+    so that
+    \[
+    R_{\text{turn}}=2\Bigl|\cos\frac{\theta_1+\theta_2}{2}\Bigr|
+    \cdot\Bigl|\sin\frac{\theta_1-\theta_2}{2}\Bigr|,
+    \]
+    and $0\le R_{\text{turn}}\le2$.
+    Carry out the proof using the product-to-sum formulae,
+    and verify the three special cases: $R=0\iff\theta_1=\theta_2$;
+    $R=2\iff\theta_2=-\theta_1=\pm\pi/2$;
+    and when the direction is reversed, $R=2|\sin\theta_1|$.
+
+    \item Prove Proposition \ref{prop:ts_period_significance} (the Fisher test):
+    suppose the periodogram takes the values $I_1,\dots,I_m$ at the $m=\lfloor(n-1)/2\rfloor$ positive frequency points,
+    with Fisher test statistic
+    \[
+    g=\frac{\max_kI_k}{\sum_{k=1}^mI_k},
+    \]
+    and significance threshold $g_\alpha=1-(\alpha/m)^{1/(m-1)}$.
+    Explain that under white noise the periodogram ordinates are independent and identically exponentially distributed
+    and that the normalised ratio follows a $\operatorname{Beta}(1,m-1)$ distribution,
+    and complete the proof using the union bound.
+
+    \item Prove Proposition \ref{prop:ts_periodogram_distribution} (asymptotic distribution of the periodogram):
+    under Gaussian white noise the periodogram $I_n(\omega_k)$ is asymptotically exponentially distributed with mean $\sigma^2$,
+    and the values at distinct frequencies are asymptotically independent.
+    Explain why the DFT coefficients are complex Gaussian random variables.
+
+    \item Prove Proposition \ref{prop:ts_harmonic_estimate} (regularised least-squares estimation of finite harmonic model parameters):
+    the objective function
+    \[
+    \mathcal{L}(\boldsymbol{\Theta})=\sum_{t=1}^n
+    \Bigl(X_t-\operatorname{Re}\Bigl[\sum_kA_ke^{i(\omega_kt+\phi_k)}\Bigr]\Bigr)^2
+    +\lambda\sum_k|A_k|,
+    \]
+    and under suitable regularisation conditions the estimator converges in probability to the true parameter.
+    Explain the three points of the Wald consistency conditions:
+    the parameter space is compact, the true parameter is the unique minimum, and the loss function converges pointwise.
+
+    \item Prove Theorem \ref{thm:ts_harmonic_asymptotic} (asymptotic normality of the finite harmonic estimator):
+    \[
+    \sqrt{n}\bigl(\hat{\boldsymbol{\Theta}}_n-\boldsymbol{\Theta}_0\bigr)
+    \xrightarrow{d}\mathcal{N}(0,\mathcal{I}(\boldsymbol{\Theta}_0)^{-1}).
+    \]
+    Carry out the proof using a Taylor expansion and Slutsky's theorem.
+
+    \item Prove Proposition \ref{prop:ts_bayes_convergence} (posterior convergence and period stability):
+    under standard regularity conditions,
+    \[
+    \sqrt{n}(\boldsymbol{\Theta}-\hat{\boldsymbol{\Theta}}_n)\mid X_{1:n}
+    \xrightarrow{d}\mathcal{N}(0,\mathcal{I}(\boldsymbol{\Theta}_0)^{-1}).
+    \]
+    Explain that the posterior distribution concentrates at the true parameter with width $O(n^{-1/2})$,
+    and state how the posterior variance is used to judge whether a periodic component is stable.
+
+    \item Prove Proposition \ref{prop:ts_forgetting} (adaptivity of the forgetting factor):
+    for a non-stationary time series the forgetting factor $\gamma\in(0,1]$ is defined by
+    \[
+    p_\gamma(\boldsymbol{\Theta}\mid X_{1:t})\propto
+    p(X_t\mid\boldsymbol{\Theta})\cdot
+    [p_\gamma(\boldsymbol{\Theta}\mid X_{1:t-1})]^\gamma,
+    \]
+    and equivalently
+    \[
+    \log p_\gamma(\boldsymbol{\Theta}\mid X_{1:t})\propto
+    \sum_{s=1}^t\gamma^{t-s}\log p(X_s\mid\boldsymbol{\Theta}).
+    \]
+    Write out the proof, and explain why the update degenerates to the standard Bayesian update as $\gamma\to1$,
+    whilst for $\gamma<1$ the weights of old observations decay exponentially.
+
+    \item Prove Proposition \ref{prop:ts_window_tradeoff} (the turning-point--period trade-off in window-function validation):
+    a small window gives high fidelity but insufficient noise suppression;
+    a large window suppresses noise adequately but smooths away the high-frequency signal;
+    the optimal window balances the two.
+    Discuss the limiting behaviour as $\Delta\to0$ and as $\Delta\to\infty$ separately,
+    and explain that the optimal window is determined by minimising the mean squared error or by cross-validation.
+
+    \item Prove Proposition \ref{prop:ts_residual_diagnosis} (similarity diagnosis of residuals):
+    the residual similarity diagnosis function is
+    \[
+    \mathcal{D}(\hat{\varepsilon})=\max_{h\ge1,\,d=1,\dots,6}
+    \Bigl|\frac{1}{n-h}\sum_{t=h+1}^n
+    S^{(d)}(\theta_t^{\hat{\varepsilon}},
+    \theta_{t-h}^{\hat{\varepsilon}})\Bigr|.
+    \]
+    Explain that the phase sequence of ideal white-noise residuals is independent
+    and that the expectation of the difference-angle family of kernels is zero, so that $\mathcal{D}\to0$ by the law of large numbers;
+    and explain why $\mathcal{D}$ being significantly non-zero shows that the residuals contain an uncaptured periodic structure.
+
+    \item Prove Theorem \ref{thm:ts_ljung_box} (the Ljung-Box test for whiteness of the residuals):
+    the test statistic based on the residual autocorrelations is
+    \[
+    Q=n(n+2)\sum_{h=1}^m\frac{\hat\rho(h)^2}{n-h}
+    \xrightarrow{d}\chi^2_{m-p-q}.
+    \]
+    Explain why $Q$ is asymptotically chi-squared distributed when the model is correctly specified.
+
+    \item Prove Theorem \ref{thm:ts_model_selection} (model selection criteria):
+    the AIC and BIC criteria are
+    \[
+    \operatorname{AIC}(k)=n\log\hat\sigma_k^2+2p_k,
+    \quad
+    \operatorname{BIC}(k)=n\log\hat\sigma_k^2+p_k\log n.
+    \]
+    Explain that AIC and BIC correspond respectively to asymptotic approximations
+    of the KL divergence and of the posterior model probability.
+
+    \item Verify Example \ref{ex:ts_complete_example}:
+    the simulated data are
+    \[
+    X_t=5\sin(2\pi t/20)+2\sin(2\pi t/7)+\varepsilon_t,
+    \]
+    where $\varepsilon_t\sim\mathcal{N}(0,1)$.
+    Explain:
+    \begin{enumerate}[label=(\roman*)]
+        \item how turning-point detection identifies a change of direction;
+        \item at which frequencies the periodogram peaks;
+        \item how finite harmonic regression estimates the amplitudes and frequencies;
+        \item how window-function validation selects the optimal window.
+    \end{enumerate}
+
+    \item Prove the closed-loop property of the complete algorithmic pipeline in Definition \ref{def:ts_algorithm}:
+    window-function selection and smoothing, computation of the instantaneous limit angle,
+    turning-point detection, computation of the refraction rate,
+    period determination, finite harmonic regression, Bayesian updating and window-function validation,
+    these eight steps form a complete closed loop.
+    Explain why the result of window-function validation can be fed back to the window-function selection of the first step.
+
+    \item Comprehensive exercise: combining the lag operator (Definition \ref{def:ts_lag_operator}),
+    the instantaneous limit angle (Definition \ref{def:ts_limit_angle}),
+    the similarity kernels (Proposition \ref{prop:ts_turning_similarity}),
+    the periodogram (Definition \ref{def:ts_period_detection})
+    and residual diagnosis (Proposition \ref{prop:ts_residual_diagnosis}),
+    explain how this chapter extends the similarity and trend framework
+    of the `Scalars and Vectors' chapter
+    from the level of trigonometric functions to the level of discrete time series.
+    State separately:
+    \begin{enumerate}[label=(\roman*)]
+        \item how the instantaneous limit angle corresponds to the argument at the vector level;
+        \item how turning-point detection corresponds to the determination of a direction reversal;
+        \item how the refraction rate corresponds to a measure of the difference of trends;
+        \item how residual diagnosis uses similarity kernels to detect uncaptured periods.
+    \end{enumerate}
+\end{enumerate}

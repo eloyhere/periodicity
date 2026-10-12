@@ -1,0 +1,728 @@
+\chapter{Periodic Structure of the Climate System}
+\markboth{Periodic Structure of the Climate System}{Periodic Structure of the Climate System}
+
+\begin{remark}[Periodicity decision for the target of this chapter (citation)]\label{rem:climate_ps_hook}
+When this chapter decides whether a research target is periodic, determines its period type, or seeks its minimal positive period, reference is always made to the `Periodic Systems' chapter:
+for the periodicity criterion see \cref{thm:ps_periodicity_decision},
+for the discrimination of period types see \cref{def:ps_period_type}, \cref{prop:ps_type_discrimination},
+for the search for the minimal positive period see \cref{def:ps_minimal_period_algorithm}, \cref{thm:ps_minimal_period_correctness},
+and for the construction of period series and epicycle groups from data see \cref{thm:ps_series_reconstruction}, \cref{def:ps_epicycle_group}.
+\end{remark}
+
+\begin{remark}[Positioning of this chapter: developed along the five-step interface of the `Periodic Systems' chapter]\label{rem:climate_five_steps_positioning}
+The periodic structure of the climate system studies the mathematical characterisation of periodicity, quasi-periodicity and long-range correlation in the Earth's climate system. This chapter does not establish a separate periodicity criterion; instead it connects the climate system to the five-step interface prescribed by the `Periodic Systems' chapter:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{Decision}: reduce such targets as the seasonal cycle, ENSO, the NAO, the PDO, the IOD and the Milankovitch cycles to discrete or continuous dynamical systems, invoke \cref{thm:ps_periodicity_decision} to decide whether they are periodic, and determine the period type;
+    \item \textbf{Construction}: build the amplitude series, the frequency series and the phase series from temperature, precipitation, pressure, sea surface temperature, radiative forcing and wind stress, and assemble them into the climate epicycle group;
+    \item \textbf{Adjustment}: dynamically adjust the climate epicycle group subject to residual-energy descent, energy conservation, momentum conservation and water-vapour conservation;
+    \item \textbf{Convolution}: introduce amplitude convolution, phase convolution and frequency convolution on the climate epicycle group, and connect them with autocorrelation, cross-correlation, teleconnection and inter-basin coupling;
+    \item \textbf{Integration}: connect to the tool chains of the three chapters `Discrete Sampling and Intercalation of Periodic Signals', `Harmonic Analysis' and `Time Series Analysis', forming a climate periodicity diagnostic procedure.
+\end{enumerate}
+The mathematical tools used in this chapter include: the geometry of solar radiation, delayed negative-feedback oscillation, the recharge--discharge oscillator model, slow--fast variable separation, the red-noise spectrum, the Hurst exponent, $1/f$ noise, multiscale superposition, periodic convolution, epicycle groups, phase operators and time delay.
+\end{remark}
+
+\begin{remark}[Guide to the seven themes of this chapter]\label{rem:climate_seven_themes}
+\textbf{Translation}---the interannual advance of the seasonal cycle and the time translation of atmospheric variability; \textbf{Scaling}---the scale invariance and long-range persistence of $1/f$ noise (the Hurst exponent $H$); \textbf{Rotation}---the phase oscillation of the warm and cold phases of ENSO and the Milankovitch orbital cycles; \textbf{Conservation}---the global energy balance, conservation of Earth--atmosphere angular momentum and conservation of water vapour (the hydrological cycle) (Theorem \ref{thm:climate_conservation}); \textbf{Symmetry}---the phase symmetry of the seasons between the two hemispheres (phase difference $\pi$); \textbf{Closure}---the closure of climate feedback loops such as the ice--albedo feedback; \textbf{Period}---the multiscale periods of the seasons ($1$ year), ENSO ($2$--$7$ years), the PDO ($20$--$30$ years) and the Milankovitch cycles ($2.3$--$10$ ten-thousand years).
+\end{remark}
+
+\section{Connection to the five-step interface of the `Periodic Systems' chapter}
+\label{sec:climate_five_steps}
+
+\subsection{Step one: periodicity decision for climate targets}
+
+\begin{definition}[Climate target and decision input]\label{def:climate_target}
+A \textbf{climate target} is one of the following objects:
+\begin{enumerate}[label=(\roman*)]
+    \item a seasonal cycle system, whose state space is the joint space of the solar declination $\delta(t)$ and the latitude $\varphi$;
+    \item an ENSO system, whose state space is the $(T_E,\langle h\rangle_W)$ phase space;
+    \item an NAO system, whose state space is the space of time series of the north--south pressure difference;
+    \item a PDO/IOD system, whose state space is the space of sea surface temperature anomalies;
+    \item a Milankovitch cycle system, whose state space is the joint space of the three orbital elements $(e,\varepsilon,e\sin\varpi)$;
+    \item a long-range correlated climate series, whose state space is the space of time series with long-range persistence.
+\end{enumerate}
+The \textbf{decision input} of a climate target is the pair
+\[
+\mathcal D_{\mathrm{Cl}}=(\mathcal S,\Phi),
+\]
+where $\mathcal S$ is the state space and $\Phi:\mathcal S\to\mathcal S$ is the map induced by time translation, phase rotation or feedback evolution. If $\mathcal S$ is a finite set, the target is called a \textbf{finite climate target}; if $\mathcal S$ is an infinite set, the target is called an \textbf{infinite climate target}.
+\end{definition}
+
+\begin{definition}[Climate decision map]\label{def:climate_periodization}
+Let a climate target be given by the decision input $\mathcal D_{\mathrm{Cl}}=(\mathcal S,\Phi)$. If the states of the target are generated by $\Phi$, that is, if there exists $x_0\in\mathcal S$ such that
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+for $t\in\mathbb Z$ the state $x_t$ is generated by iteration of $\Phi$; for $t\in\mathbb R$ it is described by the one-parameter evolution family $\{\Phi_t\}_{t\in\mathbb R}$, where each $\Phi_t:\mathcal S\to\mathcal S$, $\Phi_0=\operatorname{id}$, $\Phi_{s+t}=\Phi_s\circ\Phi_t$ for all $s,t\in\mathbb R$, and $(t,x)\mapsto\Phi_t(x)$ is continuous.
+then $\Phi$ is called the \textbf{climate decision map} of the target. The climate target is then reduced to the discrete dynamical system $(\mathcal S,\Phi)$ when $t\in\mathbb Z$ and to the continuous dynamical system $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$ when $t\in\mathbb R$; in both cases the criteria of the `Operations and Periodicity' chapter and of the `Periodic Systems' chapter may be applied directly.
+\end{definition}
+
+\begin{theorem}[Climate periodicity decision theorem]\label{thm:climate_periodicity_decision}
+Let the decision map of a climate target be $\Phi$, and let $(\mathcal S,\Phi)$ be a discrete dynamical system. Then:
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{Sufficient decision}: if there exists $m\in\mathbb N^+$ such that $\Phi^m=\mathrm{id}$, then the target is a uniformly periodic climate system; every orbit is closed, and the orbit length divides $m$.
+    \item \textbf{Equivalence of the decision}: the target is a uniformly periodic climate system if and only if $\operatorname{ord}(\Phi)<\infty$.
+    \item \textbf{Pointwise criterion}: the orbit of the target at the state $x_0$ is closed if and only if $x_0$ is a periodic point; the orbit length is then the period at that point.
+    \item \textbf{Non-omissibility}: the conjunction of conserved quantities and symmetry groups cannot replace $\operatorname{ord}(\Phi)<\infty$; a quasi-periodic climate target is not a periodic climate system.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:climate_periodicity_decision} of this chapter is the domain instantiation of \cref{thm:ps_periodicity_decision} in the `Periodic Systems' chapter:
+one need only replace the decision map $f$ and the evolution group by $\Phi$ of this chapter, and the four clauses (A) sufficient decision, (B) equivalence of the decision, (C) pointwise criterion and
+(D) non-omissibility hold one by one. By the convention of \cref{rem:ps_applications_hook}, the argument is not expanded again here.
+\end{proof}
+
+\begin{corollary}[Climate period types]\label{cor:climate_period_type}
+After the decision by \cref{thm:climate_periodicity_decision}, a climate target falls into one of the following types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Trivially periodic type}: the least period is $m_0=1$, and the states are fixed points;
+    \item \textbf{Strictly periodic type}: $1<m_0<\infty$, and the states are strictly periodic;
+    \item \textbf{Uniformly periodic type}: $\operatorname{ord}(\Phi)=m<\infty$, and all orbit lengths divide $m$;
+    \item \textbf{Quasi-periodic type}: $\operatorname{ord}(\Phi)=\infty$, and the orbits are not closed but are dense on a compact carrier structure;
+    \item \textbf{Eventually periodic type}: there exists $N$ such that the target is periodic for $t\ge N$;
+    \item \textbf{Discretely periodic type}: the carrier structure is $\mathbb Z$, and the normalised period ratio is $\rho=T_x/\Delta x\in\mathbb Q$.
+    \item \textbf{Asymptotically periodic (damped) type}: the orbit is not closed, but tends asymptotically to a closed orbit or to a fixed point, the residual decaying as $e^{-\kappa t}$ (see \cref{def:ps_period_type}(vii)).
+\end{enumerate}
+Of these, (i)--(iii) and (vi) are periodic climate systems; (iv) is not a periodic climate system, but can be handled with bounded-approximation tools (the Milankovitch cycles, ENSO, the PDO and the IOD all belong to this class); (v) is a periodic climate system only in its stable stage; (vii), like (iv), is a type in the limiting sense; it is not a periodic climate system and can be handled with bounded-approximation tools only in its stable stage.
+\end{corollary}
+
+\begin{proof}
+Substituting the climate target clause by clause into \cref{thm:climate_periodicity_decision} and \cref{def:ps_period_type} of the `Periodic Systems' chapter yields the result.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for the seasonal cycle]\label{lem:seasonal_periodic}
+Let the solar declination be $\delta(t) = 23.44^\circ \sin(2\pi t/365.24)$ and let the latitude $\varphi$ be fixed. Then the daily mean solar radiation $S(\varphi,t)$ reaching the top of the atmosphere is a uniformly periodic system, whose least positive period is the tropical year:
+\[
+T_{\text{season}}=365.24\ \text{days}.
+\]
+\end{lemma}
+
+\begin{proof}
+By Definition \ref{def:solar_insolation}, $S(\varphi,t)$ depends, through $\cos\Theta(\varphi,t)$, on $\delta(t)$. From $\delta(t+T_{\text{season}})=\delta(t)$ (the periodicity of the $\sin$ function) we obtain $S(\varphi,t+T_{\text{season}})=S(\varphi,t)$. Hence the decision map $\Phi$ satisfies $\Phi^{T_{\text{season}}}=\mathrm{id}$, so the system is uniformly periodic.
+\end{proof}
+
+\begin{lemma}[Quasi-periodicity decision for ENSO]\label{lem:enso_quasiperiodic}
+Let ENSO be described by the recharge--discharge oscillator model, with parameters satisfying $4\beta\gamma > (\alpha-\delta)^2$. Then ENSO is a damped oscillation, with natural period
+\[
+T_{\text{ENSO}} = \frac{4\pi}{\sqrt{4\beta\gamma - (\alpha-\delta)^2}}.
+\]
+Its value depends on the coupling coefficients; with the typical parameters of Example \ref{ex:enso_period_calc} it is about $6.3$ years.
+Under random atmospheric perturbations, ENSO behaves as a quasi-periodic system ($\operatorname{ord}(\Phi)=\infty$), with dominant period between $2$ and $7$ years.
+\end{lemma}
+
+\begin{proof}
+By Proposition \ref{prop:enso_oscillator}, the eigenvalues are $\lambda_{1,2}=-\frac{\alpha+\delta}{2}\pm \frac{i}{2}\sqrt{4\beta\gamma-(\alpha-\delta)^2}$, and the damping rate is $(\alpha+\delta)/2>0$. Hence in the absence of forcing the system is of asymptotically periodic (damped) type (it tends to the equilibrium point); under the random forcing $\sigma\xi(t)$ the system oscillates persistently near the natural frequency and is of quasi-periodic type. The observed dominant period of $2$--$7$ years is determined by the natural period together with the random modulation.
+\end{proof}
+
+\begin{lemma}[Red-noise decision for the NAO]\label{lem:nao_red_noise}
+Let the autocorrelation function of the NAO index $N(t)$ be $\rho(\tau)=e^{-|\tau|/\tau_0}$ ($\tau_0\approx7$--$10$ days). Then the NAO is of quasi-periodic type ($\operatorname{ord}(\Phi)=\infty$), and its power spectrum is red noise:
+\[
+S(\omega)=\frac{2\tau_0}{1+\omega^2\tau_0^2}\propto\omega^{-2}\quad(\omega\to\infty).
+\]
+\end{lemma}
+
+\begin{proof}
+By Lemma \ref{ch28_red_noise_duality}, the power spectrum of $\rho(\tau)=e^{-|\tau|/\tau_0}$ is $S(\omega)=2\tau_0/(1+\omega^2\tau_0^2)$. The red-noise spectrum has no atoms at any frequency, so it does not constitute a uniformly periodic system. By \cref{rem:quasi_period} of the `Operations and Periodicity' chapter, the NAO is of quasi-periodic type (or, more precisely, of long-range correlated type).
+\end{proof}
+
+\begin{lemma}[Quasi-periodicity decision for the Milankovitch cycles]\label{lem:milankovitch_quasiperiodic}
+Let the three orbital elements $(e,\varepsilon,e\sin\varpi)$ be driven by planetary perturbations, with dominant periods $100$ ka (eccentricity), $41$ ka (obliquity), and $23$ ka and $19$ ka (precession). Then the Milankovitch cycles form a quasi-periodic system ($\operatorname{ord}(\Phi)=\infty$).
+\end{lemma}
+
+\begin{proof}
+By \cref{prop:milankovitch_structure} of the `Periodic Structure of Astronomical Systems' chapter, the principal frequencies of the three orbital elements are linearly independent over $\mathbb{Q}$, so the periods are incommensurable and the overall motion is a quasi-periodic flow on a three-dimensional torus, with non-closed orbits. By \cref{thm:climate_periodicity_decision}(D), the Milankovitch cycles are of quasi-periodic type.
+\end{proof}
+
+\begin{lemma}[Timescale-separation decision for the PDO and ENSO]\label{lem:pdo_enso_separation_decision}
+Let the PDO have dominant period $T_{\text{PDO}}\approx20$--$30$ years and ENSO dominant period $T_{\text{ENSO}}\approx2$--$7$ years. Then slow--fast variable separation holds: the PDO is a quasi-periodic slow background and ENSO a quasi-periodic fast oscillation, and the two interact through slow--fast coupling.
+\end{lemma}
+
+\begin{proof}
+By Proposition \ref{prop:pdo_enso_separation}, $T_{\text{PDO}}/T_{\text{ENSO}}\approx4$--$10$, so there exist a slow variable $\bar T_{\text{PDO}}$ and a fast variable $T'$. By \cref{thm:climate_periodicity_decision}(D), the natural dynamics of the two are both of quasi-periodic type (neither contains a finite-order evolution).
+\end{proof}
+
+\begin{definition}[Least positive period algorithm for climate systems]\label{def:climate_minimal_period_algorithm}
+This definition has the same content as that given, in Chapter~\ref{chap:periodic_system} under the section `Periodicity decision: whether the target is periodic' (\cref{sec:ps_periodicity_decision}), by \cref{def:ps_minimal_period_algorithm}; to avoid repetition only the reference anchor is retained here, and the complete statement is given there. The only difference here is the terminology (climate target / climate sample); the steps of the algorithm and the conclusion are exactly the same.
+\end{definition}
+
+\begin{theorem}[Correctness of the least positive period algorithm for climate systems]\label{thm:climate_minimal_period_correctness}
+This theorem has the same content as that given, in Chapter~\ref{chap:periodic_system} under the section `Periodicity decision: whether the target is periodic' (\cref{sec:ps_periodicity_decision}), by \cref{thm:ps_minimal_period_correctness}; to avoid repetition only the reference anchor is retained here, and the complete statement and proof are given there. The only difference here is the terminology (climate target / climate sample); the steps of the algorithm and the conclusion are exactly the same.
+\end{theorem}
+
+\begin{example}[Instances of climate periodicity decisions]\label{ex:climate_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item Seasonal cycle: $T=365.24$ days, uniformly periodic type;
+    \item ENSO: $T\approx6.3$ years (natural period; see Example \ref{ex:enso_period_calc}), quasi-periodic type (under random forcing);
+    \item NAO: $\tau_0\approx7$--$10$ days, quasi-periodic type (red noise);
+    \item PDO: $T_{\text{PDO}}\approx20$--$30$ years, quasi-periodic type;
+    \item IOD: $T_{\text{IOD}}\approx3$--$7$ years, quasi-periodic type;
+    \item Milankovitch cycles: $100/41/23/19$ ka, quasi-periodic type.
+\end{enumerate}
+\end{example}
+
+\begin{remark}[Conserved quantities do not guarantee periodicity]\label{rem:climate_invariant_not_period}
+In the climate system, conservation of energy, conservation of momentum and conservation of water vapour are auxiliary conditions for periodic structure, but they do not constitute a sufficient condition. For example, a stable climate that possesses energy conservation but lacks ocean--atmosphere coupling will not spontaneously produce ENSO oscillations. Periodic structure in the climate system must be decided by \cref{thm:climate_periodicity_decision} or by the lemmas above.
+\end{remark}
+
+\subsection{Step two: construction of the climate period series and the epicycle group}
+
+\begin{definition}[Climate amplitude, frequency and phase series]\label{def:climate_series}
+Let the state or output sequence of a climate target be $\{z_t\}$. If it can be written as
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+then
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+are called respectively the \textbf{amplitude series}, the \textbf{frequency series} and the \textbf{phase series} of the climate target. The three agree with \cref{def:amplitude_series}, \cref{def:frequency_series} and \cref{def:phase_series} in the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{definition}[Climate epicycle group]\label{def:climate_epicycle_group}
+Let the period series of a climate target be given by the amplitude series $\{A_k\}$, the frequency series $\{\omega_k\}$ and the phase series $\{\phi_k\}$. For each $k$ define the epicycle
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+and call the set
+\[
+\mathfrak E_{\mathrm{Cl}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+the \textbf{epicycle group} of the climate target. Its superposition is the climate period series
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[Construction of the period series from climate data]\label{thm:climate_series_reconstruction}
+Let the output of a climate target be a finite periodic sequence of period $N$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the output can be expanded as a discrete Fourier series
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item the amplitude series is given by $|c_k|$, the phase series by $\arg c_k$, and the frequency series by $2\pi k/N$;
+    \item if the output is a seasonal temperature series, the fundamental frequency corresponds to the annual period and the harmonics to the semi-annual, seasonal and monthly periods; if the output is an ENSO series, the fundamental frequency corresponds to a natural period of about $6$ years and the harmonics to the distribution of stronger events (such as those of $1982$, $1997$ and $2015$).
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) The discrete Fourier series of a finite periodic sequence is a standard result: the basis functions $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ form an orthogonal basis of $\mathbb C^N$.
+(ii) This is read off directly from $c_k=A_k e^{i\phi_k}$.
+(iii) For a seasonal temperature series with $N=365$ (daily sampling), the fundamental frequency corresponds to the annual period, $k=2$ to the semi-annual period and $k=4$ to the seasonal period; for an ENSO series with $N\sim70$ (annual sampling), the fundamental frequency corresponds to about $1/6$ yr$^{-1}$, and the harmonics encode the statistical structure of quasi-periodic events.
+\end{proof}
+
+\begin{proposition}[Three-parameter correspondence: radius, phase and speed]\label{prop:climate_epicycle_correspondence}
+The three parameters of the climate epicycle group $\mathfrak E_{\mathrm{Cl}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ correspond one-to-one to three geometric--physical quantities:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Radius corresponds to amplitude}: the radius of $E_k$, namely $|E_k|=A_k$, is the amplitude of that climate oscillation component;
+    \item \textbf{Phase corresponds to rotational delay}: the initial phase $\phi_k$ corresponds to the time translation $\tau_k=\phi_k/\omega_k$; when $\phi_k>0$ this component \textbf{leads} the baseline by $\tau_k$ (equivalently, the component coincides with the baseline once the baseline is postponed by $\tau_k$);
+    \item \textbf{Frequency corresponds to rotational speed}: $\omega_k$ is the angular frequency of that climate oscillation component.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:climate_epicycle_correspondence} of this chapter corresponds exactly to \cref{prop:ps_epicycle_correspondence} of the `Periodic Systems' chapter,
+and the three correspondences---radius to amplitude, phase to rotational delay, frequency to rotational speed---are obtained by translating them one by one to the epicycle group of this chapter.
+The proof is given there: (i) from $|E_k|=A_k$ and the energy decomposition, (ii) from the phase translation theorem, (iii) from the definition of the frequency series.
+\end{proof}
+
+\begin{example}[Period spectrum series of climate phenomena]\label{ex:climate_period_spectrum_series}
+Arranging the principal climate phenomena by timescale and expanding them into a climate period series yields the following layered structure:
+\begin{enumerate}[label=(\roman*)]
+    \item $10^{-2}$--$10^{-1}$ years: weather systems, the Madden--Julian Oscillation (MJO, $30$--$90$ days);
+    \item $10^{-1}$--$10^0$ years: the seasonal cycle, the NAO;
+    \item $10^0$ years: ENSO, the IOD;
+    \item $10^1$ years: the PDO, the AMO;
+    \item $10^2$--$10^3$ years: the Little Ice Age, the Medieval Warm Period;
+    \item $10^4$--$10^5$ years: the Milankovitch cycles (precession of $2.3$ ten-thousand years, obliquity of $4.1$ ten-thousand years, eccentricity of $10$ ten-thousand years).
+\end{enumerate}
+These phenomena correspond to the layered structure of the climate epicycle group, from the inner high-frequency small epicycles to the outer low-frequency large epicycles.
+\end{example}
+
+\begin{remark}[The period series is a complex function]\label{rem:climate_series_complex}
+Let $z=e^{i\omega_0t}$; then the climate period series
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+when all components are commensurable with $\omega_0$ (that is, $\omega_k=k\omega_0$, $k\in\mathbb Z$) it can be written as the Laurent series $\sum_k c_k z^k$, where $c_k=A_k e^{i\phi_k}$: in that case the climate period series is a complex function on the unit circle, and otherwise it is merely a function on the torus.
+\end{remark}
+
+\subsection{Step three: dynamic adjustment of the climate epicycle group}
+
+\begin{definition}[Dynamic adjustment of the climate epicycle group]\label{def:climate_adaptive_adjustment}
+Let the current climate epicycle group be $\mathfrak E^{(j)}$, with partial sum
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+and residual $r^{(j)}=z-z^{(j)}$. \textbf{Dynamic adjustment} consists of two rules:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Quantity adjustment}: if the residual energy satisfies $\|r^{(j)}\|^2>\delta$, add a new epicycle according to the peak of the residual periodogram;
+    \item \textbf{Parameter adjustment}: update the parameters of the existing epicycles by regularised least squares or by the conservation constraints.
+\end{enumerate}
+In the climate system, quantity adjustment corresponds to increasing the number of climate modal components (for example, identifying a new ENSO harmonic or an independent IOD component); parameter adjustment corresponds to adjusting the amplitude, phase and frequency so that the energy, momentum and water-vapour constraints are satisfied.
+\end{definition}
+
+\begin{proposition}[Monotonicity of quantity adjustment]\label{prop:climate_adaptive_growth}
+After the dominant residual frequency component is added as in \cref{def:climate_adaptive_adjustment}(i), the residual energy is monotonically non-increasing:
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+with equality if and only if the residual has no energy at the selected frequency.
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:climate_adaptive_growth} of this chapter agrees with the dynamic adjustment mechanism of \cref{def:ps_adaptive_adjustment} in the `Periodic Systems' chapter:
+adding an epicycle removes the component of $r^{(j)}$ along $\hat\omega$ from the residual, and the orthogonal decomposition
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{the removed component}\|^2$ gives the inequality,
+with equality if and only if the norm of the removed component is zero. The complete argument is given there.
+\end{proof}
+
+\begin{theorem}[Convergence of dynamic adjustment]\label{thm:climate_adaptive_convergence}
+Let the climate target be a finite periodic sequence of period $T_0$ and let $\delta=0$. Then after at most $\lfloor T_0/2\rfloor+1$ steps of dynamic adjustment the residual is zero, and the resulting climate epicycle group is the exact Fourier data of the target.
+\end{theorem}
+
+\begin{proof}
+The discrete Fourier series of a sequence of period $T_0$ is complete on $\lfloor T_0/2\rfloor+1$ harmonics. At each step one dominant frequency component of the residual is extracted as in \cref{prop:climate_adaptive_growth} and the residual energy decreases strictly, so after finitely many steps the residual is zero.
+\end{proof}
+
+\begin{definition}[Structure-metric adjustment]\label{def:climate_structure_metric_adjustment}
+Let the structure metric of a climate target be
+\[
+\mathcal I=(\mathcal I_{\text{energy}},\mathcal I_{\text{momentum}},\mathcal I_{\text{vapour}})
+=(\text{energy conservation degree},\ \text{momentum conservation degree},\ \text{water-vapour conservation degree}).
+\]
+\textbf{Structural-metric adjustment} consists in choosing $\theta$ in the parameter space $\Theta$: at each step take a neighbouring parameter for which $\mathcal I(\theta)$ is \textbf{strictly decreasing} in the lexicographic order (minimisation); if no such parameter exists, the process stops, and the parameter is then locally optimal.
+\end{definition}
+
+\begin{proposition}[Finite convergence of structure-metric adjustment]\label{prop:climate_structure_metric_convergence}
+Let the parameter space $\Theta$ be finite, and let each adjustment make $\mathcal I$ strictly decreasing in the lexicographic order. Then the adjustment terminates after finitely many steps at a locally optimal parameter.
+\end{proposition}
+
+\begin{proof}
+Since $\Theta$ is finite, $\mathcal I$ takes only finitely many values, and the lexicographic order is a total order on a finite set; a strictly decreasing sequence in that order cannot continue indefinitely, so the adjustment terminates after finitely many steps. At termination there is no neighbouring parameter that makes $\mathcal I$ strictly decrease in the lexicographic order, that is, the parameter is locally optimal.
+\end{proof}
+
+\begin{remark}[Boundaries of dynamic adjustment]\label{rem:climate_adaptive_boundary}
+\cref{thm:climate_adaptive_convergence} relies on finite periodic sequences. For continuous-spectrum or quasi-periodic climate targets (such as the Milankovitch cycles, ENSO and the NAO), no finite epicycle group represents them exactly and only bounded approximation is possible. Structure-metric adjustment does not guarantee global optimality.
+\end{remark}
+
+\subsection{Step four: climate convolution}
+
+\begin{definition}[Climate amplitude, phase and frequency convolutions]\label{def:climate_convolution_types}
+Let two climate epicycle groups be
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+Define:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Amplitude convolution}: $\mathbb A_{mn}=A_nB_m$;
+    \item \textbf{Phase convolution}: $\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$;
+    \item \textbf{Frequency convolution}: $\mathbb F_{mn}=\omega_n\nu_m$;
+    \item \textbf{Trend convolution}: $\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$.
+\end{enumerate}
+This agrees with \cref{def:amplitude_convolution}, \cref{def:phase_convolution}, \cref{def:frequency_convolution} and \cref{def:tendency_convolution} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{theorem}[Action of the three convolutions on the climate epicycle group]\label{thm:climate_convolution_action}
+Let the epicycle groups of two climate targets be $\mathfrak E$ and $\mathfrak E'$ respectively. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item amplitude convolution acts only on the radius;
+    \item phase convolution acts only on the phase;
+    \item frequency convolution acts only on the rotational speed;
+    \item trend convolution preserves both amplitude and phase.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+This is read off directly from \cref{def:climate_convolution_types}.
+\end{proof}
+
+\begin{proposition}[Autocorrelation and trend convolution]\label{prop:climate_autocorr_phase_convolution}
+Let $\{z_t\}$ be a climate periodic sequence, with autocorrelation function
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+In the language of the climate epicycle group, the autocorrelation function is the projection of the trend convolution onto the diagonal:
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:climate_autocorr_phase_convolution} of this chapter is the realisation in this domain of the convolution-action conclusion of \cref{thm:ps_convolution_action} in the `Periodic Systems' chapter:
+substituting $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ into the definition of the autocorrelation, cancelling all off-diagonal cross terms by orthogonality and retaining only the diagonal term of the trend convolution
+(the factorisation of the three convolutions, \cref{prop:ps_convolution_factorization}), which yields $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$.
+The full expansion is given there.
+\end{proof}
+
+\begin{remark}[Relation between climate convolution and periodic convolution]\label{rem:climate_convolution_relation}
+Climate convolution is not a new convolution operation but an instance of the periodic convolution of the `Series and Convolution' chapter on the climate epicycle group. Autocorrelation is the projection of the trend convolution onto the diagonal; teleconnection and inter-basin coupling (such as ENSO--PDO and ENSO--IOD) are respectively the concrete manifestations in the Earth's climate sciences of amplitude convolution and frequency convolution.
+\end{remark}
+
+\subsection{Step five: integration with discrete sampling, harmonic analysis and time series analysis}
+
+\begin{definition}[Climate periodicity diagnostic procedure]\label{def:climate_periodic_diagnosis}
+For a given climate system, diagnose it using the framework of periodic mathematics:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Periodicity decision}: verify the period type of the climate target (\cref{thm:climate_periodicity_decision});
+    \item \textbf{Series construction}: build the amplitude, frequency and phase series and the epicycle group from temperature, precipitation, pressure and SST data (\cref{thm:climate_series_reconstruction});
+    \item \textbf{Conservation diagnosis}: verify energy, momentum and water-vapour conservation (\cref{thm:climate_conservation});
+    \item \textbf{Convolution diagnosis}: compute the autocorrelation (the diagonal projection of the trend convolution, \cref{prop:climate_autocorr_phase_convolution}) and the phase convolution;
+    \item \textbf{Integration diagnosis}: connect to the tool chains of discrete sampling, harmonic analysis and time series analysis.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[The climate periodicity diagnostic procedure and its interfaces with three chapters]\label{thm:climate_diagnosis_integration}
+The five steps of \cref{def:climate_periodic_diagnosis} connect respectively to:
+\begin{enumerate}[label=(\roman*)]
+    \item the `Discrete Sampling and Intercalation of Periodic Signals' chapter: \cref{def:uniform_sampling_parallel}, \cref{thm:nyquist_shannon_parallel}, \cref{thm:intercalation_leakage_suppression};
+    \item the `Harmonic Analysis' chapter: \cref{def:fourier_series}, \cref{thm:parseval_fourier}, \cref{prop:twelve_to_six};
+    \item the `Time Series Analysis' chapter: \cref{def:ts_period_detection}, \cref{prop:ts_period_significance}, \cref{def:ts_window_validation}.
+\end{enumerate}
+The climate periodicity diagnostic procedure is therefore not an independent method but an application of the unified tool chain of periodic mathematics to the climate system.
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:climate_diagnosis_integration} of this chapter is the implementation in this domain of the five-step interface of the `Periodic Systems' chapter (\cref{tab:ps_five_steps}):
+the periodicity decision uses sampling and spectral estimation, the frequency decomposition and the phase kernels use the `Harmonic Analysis' chapter, and the periodogram peaks, the Fisher test and
+window-function validation use the `Time Series Analysis' chapter. The diagnostic procedure is therefore a synthesis of the tool chains of the three chapters; the proof is given there.
+\end{proof}
+
+\begin{remark}[Order of operations after integration]\label{rem:climate_integration_order}
+The recommended order for an actual diagnosis is: first decide whether the climate target is periodic (\cref{thm:climate_periodicity_decision}); then construct the Fourier data and the epicycle group of the climate data (\cref{thm:climate_series_reconstruction}); then optimise the parameters by the conservation constraints and dynamic adjustment (\cref{thm:climate_adaptive_convergence}, \cref{prop:climate_structure_metric_convergence}); then perform climate convolution and autocorrelation analysis (\cref{prop:climate_autocorr_phase_convolution}); and finally output the diagnosis as in \cref{def:climate_periodic_diagnosis}.
+\end{remark}
+
+\section{The seasonal cycle: the annual period of solar radiation}
+
+\begin{definition}[Solar radiation reaching the top of the atmosphere]\label{def:solar_insolation}
+At a location of latitude $\varphi$, the daily mean solar radiation reaching the top of the atmosphere on the $t$-th day of the year (with the vernal equinox at $t=0$) is determined by the orbital geometry:
+\[
+S(\varphi, t) = S_0\left(\frac{a}{r(t)}\right)^2 \cos\Theta(\varphi, t),
+\]
+where $S_0 = 1361$ W/m$^2$ is the solar constant, $a/r(t)$ is the Earth--Sun distance ratio (caused by the eccentricity $e$), $\Theta$ is the solar zenith angle, satisfying
+\[
+\cos\Theta = \sin\varphi \sin\delta(t) + \cos\varphi \cos\delta(t) \cos h_0,
+\]
+$\delta(t) \approx 23.44^\circ \sin(2\pi t/365.24)$ is the solar declination (the projection of the $23.44^\circ$ axial tilt), and $h_0$ is the hour angle.
+\end{definition}
+
+\begin{proposition}[Phase symmetry of the seasons between the two hemispheres]\label{prop:seasonal_phase_symmetry}
+At locations of the same latitude in the northern and southern hemispheres, the annual cycle of solar radiation has phase difference $\pi$:
+\[
+S(-\varphi, t) = S_0\left(\frac{a}{r(t)}\right)^2 \big(-\sin\varphi \sin\delta(t) + \cos\varphi \cos\delta(t) \cos h_0 \big),
+\]
+that is, the northern summer solstice ($\delta = +23.44^\circ$) is exactly the southern winter solstice. Under the hemispheric reflection $\varphi \mapsto -\varphi$, the seasonal cycle is equivalent to a phase translation by $\pi$: the declination term of $S$ that is antisymmetric about the equatorial plane, namely $\sin\varphi\sin\delta$, changes sign under hemispheric reflection.
+\end{proposition}
+
+\begin{proof}
+By Definition \ref{def:solar_insolation}, when $\varphi \mapsto -\varphi$ we have $\sin\varphi \mapsto -\sin\varphi$ whilst $\cos\varphi$ is unchanged, so $\cos\Theta(-\varphi,t) = -\sin\varphi\sin\delta + \cos\varphi\cos\delta\cos h_0$. On the other hand $\delta(t + T/2) = 23.44^\circ\sin(2\pi(t+T/2)/T) = -\delta(t)$, so $\cos\Theta(-\varphi, t) = \cos\Theta(\varphi, t + T/2)$---hemispheric reflection is equivalent to a half-year phase translation, that is, to a phase difference of $\pi$.
+\end{proof}
+
+\begin{example}[Polar Day and Polar Night at Latitude $66.5^\circ$ North]\label{ex:polar_day_night}
+Take $\varphi = 66.5^\circ$ (the Arctic Circle). On the summer solstice $\delta = 23.44^\circ$: the noon solar altitude is $= 90^\circ - |66.5^\circ - 23.44^\circ| \approx 46.9^\circ$, and the midnight solar altitude is $= \varphi + \delta - 90^\circ = -0.06^\circ \approx 0$---the Sun does not set, which is the polar day. On the winter solstice $\delta = -23.44^\circ$: the noon solar altitude is $= 90^\circ - |66.5^\circ + 23.44^\circ| \approx 0.06^\circ$---the Sun does not rise, which is the polar night. The alternation of polar day and polar night inside the Arctic Circle is the most intuitive manifestation of the annual period $T = 365.24$ days.
+\end{example}
+
+\begin{lemma}[Duality between the Red-Noise Spectrum and Exponential Autocorrelation]\label{ch28_red_noise_duality}
+Let the autocorrelation function of a stationary process be $\rho(\tau) = e^{-|\tau|/\tau_0}$ (red noise). Then its power spectral density is
+\[
+S(\omega) = \frac{2\tau_0}{1 + \omega^2 \tau_0^2}.
+\]
+In the low-frequency limit ($\omega \ll \tau_0^{-1}$) we have $S(\omega) \approx 2\tau_0$, a flat white spectrum, whilst in the high-frequency limit ($\omega \gg \tau_0^{-1}$) we have $S(\omega) \approx \frac{2}{\tau_0 \omega^2} \propto \omega^{-2}$---the energy is concentrated at low frequencies, that is, the spectrum is `red'.
+\end{lemma}
+
+\begin{proof}
+By the Wiener--Khinchin theorem the spectral density is the Fourier transform of the autocorrelation function:
+\[
+S(\omega) = \int_{-\infty}^{\infty} e^{-|\tau|/\tau_0} e^{-i\omega\tau}\, d\tau
+= \frac{1}{\frac{1}{\tau_0} - i\omega} + \frac{1}{\frac{1}{\tau_0} + i\omega} = \frac{2\tau_0}{1+\omega^2\tau_0^2}.
+\]
+For $\omega \ll \tau_0^{-1}$ we have $S(\omega) \approx 2\tau_0 \propto \omega^{0}$, and for $\omega \gg \tau_0^{-1}$ we have $S(\omega) \approx 2/(\tau_0 \omega^2) \propto \omega^{-2}$.
+\end{proof}
+
+\section{Mathematical foundations of the climate system}
+
+\begin{definition}[Basic Quantities of the Climate System]\label{def:climate_quantities}
+A climate system is described by the following basic physical quantities:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Temperature} $T(\mathbf{r}, t)$ (unit: K or $^\circ$C): the temperature of the atmosphere, ocean or land surface at position $\mathbf{r}$ and time $t$. The global mean surface temperature (GMST) is the core indicator of climate change.
+    \item \textbf{Precipitation} $P(\mathbf{r}, t)$ (unit: mm/day): the amount of water vapour in the atmosphere that condenses and falls to the surface. Precipitation exhibits a highly uneven distribution in space and time.
+    \item \textbf{Pressure} $p(\mathbf{r}, t)$ (unit: hPa): the weight per unit area of a column of the atmosphere. Sea-level pressure (SLP) is a basic variable of the atmospheric circulation.
+    \item \textbf{Sea surface temperature} SST$(\mathbf{r}, t)$ (unit: $^\circ$C): the temperature of the ocean surface layer. SST is a key variable of ocean--atmosphere interaction---climate modes such as ENSO and the Indian Ocean Dipole are defined mainly through SST anomalies.
+    \item \textbf{Radiative forcing} $\Delta F$ (unit: W/m$^2$): a perturbation of the energy budget of the Earth system (caused by greenhouse gases, solar activity, volcanic aerosols and so on). $\Delta F > 0$ means that the Earth absorbs more energy (warming), and $\Delta F < 0$ means that the Earth loses more energy (cooling).
+    \item \textbf{Wind stress} $\boldsymbol{\tau}$ (unit: Pa): the tangential stress exerted by the atmosphere on the ocean surface, which drives the wind-driven circulation of the upper ocean.
+\end{enumerate}
+The climate system is a \textbf{multiscale coupled complex system}---the atmosphere (fast response, daily--annual scales), the ocean (slow response, annual--millennial scales), the cryosphere (very slow response, centennial--ten-thousand-year scales), the biosphere and the lithosphere interact on different timescales.
+\end{definition}
+
+\section{El Niño--Southern Oscillation (ENSO)}
+
+\begin{definition}[El Niño--Southern Oscillation (ENSO)]\label{def:enso}
+The \textbf{El Niño--Southern Oscillation} (ENSO) is the quasi-periodic oscillation of the coupled ocean--atmosphere system of the tropical Pacific on the interannual timescale ($2$--$7$ years). ENSO has two extreme phases:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{El Niño (warm phase)}: anomalous warming of the sea surface temperature in the eastern equatorial Pacific (positive SST anomaly exceeding $+0.5^\circ$C for several months), increased precipitation in the central and eastern tropical Pacific and reduced precipitation in the western Pacific. The Walker circulation weakens or reverses. The equatorial thermocline deepens in the east and shoals in the west.
+    \item \textbf{La Niña (cold phase)}: anomalous cooling of the sea surface temperature in the eastern equatorial Pacific (negative SST anomaly exceeding $-0.5^\circ$C for several months), with a tropical precipitation distribution broadly opposite to that of El Niño. The Walker circulation strengthens. The equatorial thermocline shoals in the east and deepens in the west.
+\end{enumerate}
+ENSO is the strongest interannual variability signal in the tropical Pacific climate system, and its global teleconnections affect the Asian monsoon, North American winter temperatures, Australian droughts and South American precipitation. The seasonal phase-locking of the ENSO amplitude is manifested as follows: peaks occur mostly in the northern winter (November--January of the following year), and decay mostly in the following spring.
+\end{definition}
+
+\begin{definition}[Southern Oscillation Index (SOI)]\label{def:soi}
+The \textbf{Southern Oscillation Index} (SOI) is defined as the standardised value of the sea-level pressure difference between Tahiti and Darwin:
+\[
+\text{SOI} = \frac{p_{\text{Tahiti}} - p_{\text{Darwin}}}{\sigma_{\Delta p}},
+\]
+where $\sigma_{\Delta p}$ is the long-term standard deviation. The SOI is negatively correlated with the SST anomaly in the eastern equatorial Pacific: during El Niño the SOI takes negative values (lower pressure at Tahiti, higher pressure at Darwin), whilst during La Niña the SOI takes positive values. The strength of an ENSO event is usually measured by the three-month running mean of the SST anomaly in the Niño 3.4 region ($5^\circ$S--$5^\circ$N, $120^\circ$W--$170^\circ$W) (the Oceanic Niño Index, ONI).
+\end{definition}
+
+\begin{proposition}[The Bjerknes positive feedback of ENSO]\label{prop:bjerknes_feedback}
+The quasi-periodic oscillation of ENSO is maintained jointly by the Bjerknes positive feedback and a delayed negative feedback. The Bjerknes feedback describes the self-amplifying loop between ocean and atmosphere:
+\begin{enumerate}[label=(\roman*)]
+    \item An initial positive SST anomaly in the eastern equatorial Pacific $\to$ enhanced atmospheric convection $\to$ low-level wind convergence $\to$ a westerly wind anomaly.
+    \item The westerly wind anomaly $\to$ excites an eastward-propagating downwelling equatorial Kelvin wave $\to$ the thermocline deepens $\to$ upwelling in the eastern Pacific weakens $\to$ SST warms further $\to$ the positive feedback is complete.
+\end{enumerate}
+The Bjerknes positive feedback is a self-amplifying mechanism in the coupled ocean--atmosphere system---a warm anomaly is amplified through ocean--atmosphere coupling. The positive feedback cannot continue indefinitely, because the delayed negative feedback (westward-propagating equatorial Rossby waves reflecting as eastward-propagating Kelvin waves) reverses the thermocline anomaly from the warm phase to the cold phase after about $6$--$12$ months. The alternation of the positive feedback and the delayed negative feedback maintains the quasi-periodic oscillation of ENSO.
+\end{proposition}
+
+\begin{proof}
+Linearise the feedback loop: let $T$ be the eastern Pacific SST anomaly and $\langle h\rangle_W$ the thermocline depth anomaly. The four links of the loop---(i) $T$ drives convection (gain $a_1>0$); (ii) convection drives a westerly wind anomaly (gain $a_2>0$); (iii) the westerlies excite a Kelvin wave that deepens the thermocline (gain $a_3>0$); (iv) the deepened thermocline weakens upwelling and makes $T$ warm further (gain $a_4>0$)---combine to give $\dot T \supset a_1 a_2 a_3 a_4 \, T$, with loop gain $G = a_1a_2a_3a_4 > 0$: a perturbation returns to itself after one circuit of the loop and has been amplified, which is the linearised positive feedback. This is precisely the origin of the term $\beta\gamma > 0$ in the recharge--discharge model of Proposition \ref{prop:enso_oscillator}: the positive feedback ($\beta\gamma$) competes with the damping ($\alpha\delta$), and an oscillation arises when $4\beta\gamma > (\alpha-\delta)^2$.
+\end{proof}
+
+\begin{proposition}[The periodic-system model of ENSO---the recharge--discharge oscillator]\label{prop:enso_oscillator}
+The simplified dynamics of ENSO can be described by the linearised system of equations of the coupled ocean--atmosphere system of the tropical Pacific. On the equatorial $\beta$-plane, the solution of the oceanic linear shallow-water equations under atmospheric wind-stress forcing is a superposition of equatorial waves. The recharge--discharge oscillator model of ENSO treats the east--west average $\langle h \rangle_W$ of the equatorial Pacific thermocline depth as the charging state variable and the eastern Pacific SST anomaly $T_E$ as the response variable:
+\[
+\frac{d\langle h \rangle_W}{dt} = -\alpha \langle h \rangle_W + \beta T_E, \quad \frac{dT_E}{dt} = -\gamma \langle h \rangle_W - \delta T_E,
+\]
+where $\alpha, \beta, \gamma, \delta > 0$. This system of equations is equivalent to a damped harmonic oscillator---$T_E$ and $\langle h \rangle_W$ perform a decaying rotation about the equilibrium point in phase space. Random atmospheric perturbations (such as westerly wind burst events) inject energy into the system and maintain a persistent oscillation.
+
+The natural period is $T_{\text{ENSO}} = \frac{4\pi}{\sqrt{4\beta\gamma - (\alpha-\delta)^2}}$; with the typical parameters of Example \ref{ex:enso_period_calc} it is about $6.3$ years. The random perturbations provide a persistent phase perturbation to the system, preventing the oscillation from decaying.
+\end{proposition}
+
+\begin{proof}
+The equilibrium point of the recharge--discharge oscillator model is $\langle h \rangle_W^* = 0, T_E^* = 0$. The Jacobian matrix is
+\[
+J = \begin{pmatrix} -\alpha & \beta \\ -\gamma & -\delta \end{pmatrix},
+\]
+and its eigenvalues are $\lambda_{1,2} = -\frac{\alpha+\delta}{2} \pm \frac{i}{2}\sqrt{4\beta\gamma - (\alpha-\delta)^2}$. Since $\det J = \alpha\delta + \beta\gamma > 0$, the equilibrium is a stable focus; when $4\beta\gamma > (\alpha-\delta)^2$ the eigenvalues are complex conjugates---the system exhibits a damped oscillation. The persistent oscillation of the actual ENSO is maintained by random atmospheric perturbations---this is equivalent to adding a random forcing term $\sigma \xi(t)$ to the right-hand side of the recharge--discharge oscillator model; the linear system then outputs a red-noise spectrum under random forcing, with a peak near the natural frequency.
+\end{proof}
+
+\begin{example}[Concrete calculation of the ENSO oscillation period]\label{ex:enso_period_calc}
+Take the coupling coefficients $\alpha = \delta = 1/3$ (yr$^{-1}$, surface thermal decay timescale about $3$ years) and $\beta = \gamma = 1$ (yr$^{-1}$, east--west boundary wave-reflection coupling timescale about $1$ year). By Proposition \ref{prop:enso_oscillator}, the decay rate is $\rho = (\alpha+\delta)/2 = 1/3$ yr$^{-1}$ and the rotation frequency is
+\[
+\omega = \frac{1}{2}\sqrt{4\beta\gamma - (\alpha-\delta)^2} = \frac{1}{2}\sqrt{4 \times 1 \times 1 - 0} = 1\ \text{yr}^{-1},
+\]
+so the oscillation period is $T = 2\pi/\omega = 2\pi \approx 6.3$ years, which falls within the observed ENSO period band of $2$--$7$ years. If instead $\alpha = \delta = 1/4$ and $\beta = \gamma = 3/4$, then $\omega = \tfrac12\sqrt{4 \times \tfrac34 \times \tfrac34} = \tfrac34$ yr$^{-1}$ and $T = 2\pi/\omega \approx 8.4$ years, slightly exceeding the observed upper bound---which shows that the relative strength of coupling and dissipation determines the dominant period of ENSO.
+\end{example}
+
+\begin{example}[Typical ENSO events]\label{ex:enso_events}
+Since 1950, several strong ENSO events have been recorded in detail:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{The 1982--1983 El Niño}: the peak SST anomaly in the Niño 3.4 region exceeded $+2.5^\circ$C, making it one of the strongest events of the 20th century; global crop failures, Australian drought and Peruvian floods.
+    \item \textbf{The 1997--1998 El Niño}: comparable in strength to the 1982--1983 event, with a peak SST anomaly of $+2.4^\circ$C in the Niño 3.4 region; the eastward displacement of the western Pacific warm pool caused Indonesian forest fires.
+    \item \textbf{The 2010--2011 La Niña}: the SST anomaly in the Niño 3.4 region fell to $-1.6^\circ$C; historic floods occurred in north-eastern Australia and major floods in Pakistan.
+    \item \textbf{The 2015--2016 El Niño}: the peak SST anomaly in the Niño 3.4 region reached $+2.6^\circ$C, comparable to 1997--1998; the global mean temperature reached a record high in 2016.
+    \item \textbf{The 2020--2023 `triple' La Niña}: unusually, the La Niña threshold was reached in three consecutive years (2020, 2021, 2022), an important cause of the temporary fall in the global mean temperature and of the persistent Australian floods.
+\end{enumerate}
+The strength, frequency, phase and duration of ENSO events display pronounced irregularity---not a strict period but a \textbf{quasi-periodic} oscillation: the dominant period lies between $2$ and $7$ years, and the peak is seasonally phase-locked to the northern winter.
+\end{example}
+
+\begin{remark}[Teleconnections of ENSO to the globe]
+ENSO produces teleconnections to the globe through the atmospheric circulation; typical impacts include:
+\begin{itemize}
+    \item During El Niño: a weakened Asian monsoon, droughts in India and South-East Asia, droughts in Australia, floods in Peru and Ecuador, a wetter winter in the southern part of North America, and reduced North Atlantic hurricane activity.
+    \item During La Niña: the impacts are broadly opposite, with a strengthened Asian monsoon, a wetter Australia, droughts in the south-western part of North America and increased North Atlantic hurricane activity.
+\end{itemize}
+Such remote impacts are transmitted through atmospheric wave trains (such as the Pacific--North American pattern, PNA) and are one of the main sources of global climate predictability.
+\end{remark}
+
+\section{North Atlantic Oscillation (NAO)}
+
+\begin{definition}[North Atlantic Oscillation (NAO)]\label{def:nao}
+The \textbf{North Atlantic Oscillation} (NAO) is a north--south dipole oscillation of the sea-level pressure field in the North Atlantic region. The NAO index is defined as the difference of the standardised pressure difference between the Icelandic Low and the Azores High. The NAO has two phases:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Positive phase (NAO$^+$)}: the Icelandic Low deepens anomalously and the Azores High strengthens anomalously---the north--south pressure gradient increases. The mid-latitude westerlies strengthen, northern Europe is warm and wet, and southern Europe is dry with little rain.
+    \item \textbf{Negative phase (NAO$^-$)}: the Icelandic Low weakens and the Azores High weakens---the north--south pressure gradient decreases. The mid-latitude westerlies weaken and shift southward, northern Europe is cold and dry, and southern Europe is wet with more rain.
+\end{enumerate}
+The NAO exhibits variability on timescales from days to decades---synoptic scale ($3$--$10$ days), seasonal scale (strongest in winter), interannual scale (no fixed period, with a characteristic timescale of about $7$--$8$ years) and decadal scale.
+\end{definition}
+
+\begin{proposition}[Phase transitions of the NAO and its red-noise character]\label{prop:nao_divergence}
+The alternation of the positive and negative phases of the NAO is manifested as the strengthening and weakening of the atmospheric meridional pressure gradient. NAO$^+$ corresponds to a strengthening of the pressure gradient (a deeper Icelandic Low, a stronger Azores High, an increased meridional pressure gradient), and NAO$^-$ to a weakening of the pressure gradient (a smaller pressure difference between the two poles of the dipole).
+
+The time series $N(t)$ of the NAO is statistically approximately a \textbf{red-noise} process---its autocorrelation function is $\rho(\tau) \approx e^{-\tau/\tau_0}$, where $\tau_0 \approx 7$--$10$ days (the timescale of the internal dynamics of the atmosphere). The red-noise spectrum has more energy in the low-frequency band ($S(\omega) \propto \omega^{-2}$), which explains the variability of the NAO on seasonal to interannual scales.
+\end{proposition}
+
+\begin{proof}
+Concerning the spectral structure: by Lemma \ref{ch28_red_noise_duality}, $\rho(\tau) = e^{-|\tau|/\tau_0}$ gives $S(\omega) = \frac{2\tau_0}{1+\omega^2\tau_0^2}$---in the band $\omega \gg \tau_0^{-1}$ we have $S(\omega) \approx \frac{2}{\tau_0\omega^2} \propto \omega^{-2}$, that is, low-frequency energy dominates, in agreement with the observed red spectrum of the NAO.
+\end{proof}
+
+\section{Pacific Decadal Oscillation (PDO)}
+
+\begin{definition}[Pacific Decadal Oscillation (PDO)]\label{def:pdo}
+The \textbf{Pacific Decadal Oscillation} (PDO) is the dominant decadal mode of sea surface temperature anomalies in the North Pacific; its spatial structure resembles that of ENSO but is more biased towards the mid-latitude North Pacific. The PDO is usually defined as the first mode of an empirical orthogonal function (EOF) analysis of North Pacific SST anomalies, with a dominant period of about $20$--$30$ years.
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Warm phase (PDO$^+$)}: the central North Pacific (about $40^\circ$N) is anomalously warm, the waters off the west coast of North America are anomalously cold, and the Aleutian Low weakens. Winter precipitation on the west coast of North America is below normal and inland temperatures are above normal.
+    \item \textbf{Cold phase (PDO$^-$)}: the central North Pacific is anomalously cold, the west coast of North America is anomalously warm, and the Aleutian Low strengthens. Precipitation on the west coast of North America is above normal and inland temperatures are below normal.
+\end{enumerate}
+The PDO and ENSO exhibit pronounced inter-basin coupling---the phase of the PDO influences the formation and strength of ENSO events, whilst the teleconnections of ENSO in turn modulate North Pacific SST anomalies. Their interaction is a typical instance of Pacific basin-scale climate variability.
+\end{definition}
+
+\begin{proposition}[Timescale separation between the PDO and ENSO]\label{prop:pdo_enso_separation}
+The PDO and ENSO are separated in timescale: the dominant period of ENSO is about $2$--$7$ years and that of the PDO about $20$--$30$ years. The frequency ratio is about $1:4$--$1:10$. Within each complete cycle of the PDO, ENSO completes $4$--$10$ quasi-periodic oscillations. Hence the modulation of ENSO by the PDO can be described by slow--fast variable separation: regarding the PDO as a slowly varying background field $\bar{T}_{\text{PDO}}(t)$ and ENSO as a fast oscillation $T'(t)$ on this background, the two satisfy
+\[
+\frac{dT'}{dt} = F(T', \bar{T}_{\text{PDO}}), \qquad \frac{d\bar{T}_{\text{PDO}}}{dt} = \varepsilon G(T'),
+\]
+where $\varepsilon \ll 1$ expresses the slow variation of the PDO. The amplitude and frequency of ENSO are modulated by the phase of the PDO---stronger thermocline anomalies during PDO$^+$ increase the ENSO amplitude and slightly shorten its period.
+\end{proposition}
+
+\begin{proof}
+By the timescale-separation assumption $\varepsilon \ll 1$, the ENSO state $\bar{T}'$ relaxes to a fixed point or limit cycle of the fast subsystem at fixed $\bar{T}_{\text{PDO}}$; on the PDO timescale the statistics of ENSO (amplitude, frequency) are determined by $\bar{T}_{\text{PDO}}$. The statistical average over many ENSO events reflects the slow modulation by the PDO phase. Observational data (such as the relation between the Niño 3.4 index and the PDO index over $1950$--$2020$) indicate that the ENSO amplitude is higher during PDO$^+$, in agreement with the prediction of slow--fast variable separation.
+\end{proof}
+
+\section{Indian Ocean Dipole (IOD)}
+
+\begin{definition}[Indian Ocean Dipole (IOD)]\label{def:iod}
+The \textbf{Indian Ocean Dipole} (IOD) is an east--west dipole mode of sea surface temperature anomalies in the tropical Indian Ocean. The IOD index is defined as the difference between the SST anomalies of the tropical western Indian Ocean ($50^\circ$E--$70^\circ$E, $10^\circ$S--$10^\circ$N) and the tropical eastern Indian Ocean ($90^\circ$E--$110^\circ$E, $10^\circ$S--$0^\circ$). The IOD has three phases:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Positive phase (IOD$^+$)}: the western Indian Ocean is anomalously warm and the eastern Indian Ocean anomalously cold, the convection centre shifts westward, precipitation increases in East Africa and decreases in Indonesia and Australia.
+    \item \textbf{Negative phase (IOD$^-$)}: the western Indian Ocean is anomalously cold and the eastern Indian Ocean anomalously warm, the convection centre shifts eastward, and the impacts are broadly opposite.
+    \item \textbf{Neutral phase}: the dipole index is close to zero.
+\end{enumerate}
+The quasi-period of the IOD is about $3$--$7$ years, and it is partly coupled with ENSO---ENSO events influence the formation of the IOD through atmospheric teleconnections, but the IOD can also occur independently of ENSO.
+\end{definition}
+
+\begin{proposition}[The independent periodic component of the IOD]\label{prop:iod_independence}
+Although the IOD is partly coupled with ENSO, it possesses a periodic component independent of ENSO. Define the residual of the linear regression of the IOD on ENSO, $\text{IOD}_{\perp}(t) = \text{IOD}(t) - \beta_{\text{ENSO}} \cdot \text{ONI}(t)$; then the power spectrum of $\text{IOD}_{\perp}$ still has a significant peak in the $3$--$7$ year band---which shows that the IOD has an intra-basin dynamical mechanism independent of ENSO (such as the coupling of the seasonal--interannual variability of the equatorial Indian Ocean Wyrtki jet).
+\end{proposition}
+
+\begin{proof}
+A regression analysis of the IOD on the ONI shows that ENSO explains part of the IOD variance (about $30\%$--$50\%$, depending on the period), and the residual variance is concentrated in the $3$--$7$ year band. Using spectral analysis, a power-spectrum estimate of $\text{IOD}_{\perp}$ still has its peak at $3$--$7$ years---which shows that an independent component exists. This independent component originates in the seasonal--interannual coupling of the Indian Ocean itself (such as monsoon--ocean interaction) and is independent of Pacific ENSO.
+\end{proof}
+
+\section{Long-range correlation and $1/f$ noise in the climate system}
+
+\begin{definition}[Long-range persistence of climate time series]\label{def:climate_long_memory}
+Many climate time series (temperature, precipitation, drought indices, tree-ring widths, ice-core oxygen isotopes) exhibit \textbf{long-range persistence}---the autocorrelation function decays as a power law rather than exponentially: $\rho(\tau) \propto \tau^{-\beta}$ ($0 < \beta < 1$). The Hurst exponent $H = 1 - \beta/2$ measures the strength of persistence: $H > 0.5$ indicates positive persistence (past increases tend to persist), $H < 0.5$ indicates anti-persistence (past increases tend to reverse), and $H = 0.5$ indicates white noise (no memory).
+
+$H \neq 0.5$ means that the climate system is not statistically invariant under scaling transformations---$\{X_{\lambda t}\} \stackrel{d}{\neq} \{\lambda^H X_t\}$ (unless the original series is already self-similar). The Hurst exponent $H$ measures the ratio of the fluctuation strengths of the climate system on different timescales---the larger $H$ is, the stronger the low-frequency fluctuations and the more persistent the long-range memory.
+\end{definition}
+
+\begin{proposition}[The origin of $1/f$ noise in the climate system]\label{prop:one_over_f_noise}
+The power spectral density of climate time series is approximately $S(\omega) \propto \omega^{-\alpha}$ in the low-frequency band ($\alpha \approx 0.5$--$1.5$). The case $\alpha \approx 1$ corresponds to classical $1/f$ noise, which is the natural result of the superposition of processes on many timescales. The origins of $1/f$ noise in the climate system include:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Linear superposition of multiscale processes}: the climate system contains processes ranging from the synoptic scale (a few days) to the Milankovitch scale (tens of thousands of years), and fluctuations on different timescales superpose in amplitude to produce a $1/f$ spectrum.
+    \item \textbf{Time integration of a random walk}: the spectrum of the cumulative sum of white noise (a random walk) is $S(\omega) \propto \omega^{-2}$. The `memory' of the climate system (ocean heat capacity, the thermal inertia of ice sheets) integrates random atmospheric perturbations into red noise.
+    \item \textbf{Self-organised criticality}: the climate system may be in a self-organised critical state---a tiny random perturbation may trigger a response of any size (from a local storm to a global glacial period), and the distribution of response sizes is a power law.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(Multiscale superposition produces a $1/f$ spectrum) Let the climate system be a superposition of a family of processes with timescales $\tau$, each process being red noise (Lemma \ref{ch28_red_noise_duality}), and let the timescales be distributed as a power law $p(\tau)d\tau \propto \tau^{-\gamma}d\tau$ ($\tau \in [\tau_1, \tau_2]$, $\tau_1 \ll \tau_2$). The total spectrum is
+\[
+S(\omega) = \int_{\tau_1}^{\tau_2} \frac{2\tau}{1+\omega^2\tau^2}\,\tau^{-\gamma}\,d\tau
+= \omega^{\gamma-2} \cdot 2\int_{\omega\tau_1}^{\omega\tau_2} \frac{u^{1-\gamma}}{1+u^2}\,du.
+\]
+When $0 < \gamma < 2$ the inner integral converges to a constant as $\omega\tau_1 \to 0$, $\omega\tau_2 \to \infty$, so $S(\omega) \propto \omega^{\gamma-2}$, that is, the spectral exponent is $\alpha = 2-\gamma$. The case $\alpha = 1$ (classical $1/f$) corresponds exactly to $\gamma = 1$---the timescales are \textbf{uniformly distributed on a logarithmic axis} (all scales from weather to glacial periods occur with equal weight). This argument covers both the random-walk time integral ($\gamma = 0$ gives $\alpha = 2$, that is, red noise) and self-organised criticality ($\gamma \approx 1$).
+\end{proof}
+
+\section{Multiscale nested periods of climate change}
+
+\begin{theorem}[The three-layer nested periodic structure of the climate system]\label{thm:climate_nested_periods}
+The climate system constitutes a three-layer nested periodic structure, corresponding one-to-one to the three driving layers of astronomy, ocean and atmosphere:
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{3.2cm}>{\centering\arraybackslash}p{2.2cm}}
+\toprule
+Climate period layer & Timescale & Dominant mechanism & Typical examples \\
+\midrule
+Astronomically driven layer & $10^4$--$10^5$ years & quasi-periodic variation of the three orbital elements & Milankovitch cycles \\
+Oceanic response layer & $10^0$--$10^3$ years & ocean--atmosphere coupling and heat-capacity buffering & ENSO, PDO, AMO, IOD \\
+Atmospheric variability layer & $10^{-2}$--$10^1$ years & internal atmospheric dynamics and water-vapour feedback & NAO, SAM, monsoon \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The relations among the three layers are described uniformly by the composite-period framework of the `Periodic Systems' chapter: the astronomically driven layer provides the topmost quasi-periodic driving force (the Milankovitch cycles), the oceanic response layer converts astronomical periods into the storage and release of heat in the middle layer (heat capacity is a buffer of energy), and the atmospheric variability layer responds at the bottom to the redistribution of heat by the ocean and amplifies or suppresses climate signals through water-vapour--cloud--radiation feedback.
+\end{theorem}
+
+\begin{proof}
+The mathematical basis of the three-layer nested structure is the separation of timescales and the layering of variance. The astronomical periods ($10^4$--$10^5$ years) are far longer than the oceanic thermal adjustment time ($10^1$--$10^3$ years), and the oceanic thermal adjustment time is in turn far longer than the atmospheric dynamical adjustment time ($10^{-2}$--$10^1$ years). On the timescale of the oceanic response layer, the astronomical driving force can be regarded as a slowly varying parameter. On the timescale of the atmospheric variability layer, the sea surface temperature can be regarded as a fixed boundary condition.
+
+From the point of view of the power spectrum, the layered structure of climate variance by frequency is: the total variance $\sigma^2_{\text{total}} = \sigma^2_{\text{astronomical}} + \sigma^2_{\text{oceanic}} + \sigma^2_{\text{atmospheric}}$, where $\sigma^2_{\text{astronomical}}$ is concentrated at $10^{-5}$--$10^{-4}$ yr$^{-1}$, $\sigma^2_{\text{oceanic}}$ at $10^{-3}$--$10^0$ yr$^{-1}$, and $\sigma^2_{\text{atmospheric}}$ at $10^{-1}$--$10^2$ yr$^{-1}$. This resembles the amplitudes of the various levels of the nested epicycle system in the `Periodic Systems' chapter---the astronomical layer corresponds to the outer large epicycles (longest period, largest amplitude) and the atmospheric layer to the inner small epicycles (shortest period, smallest amplitude).
+\end{proof}
+
+\begin{remark}[The period spectrum of climate phenomena]
+Arranging the principal climate phenomena by timescale:
+\begin{itemize}
+    \item $10^{-2}$--$10^{-1}$ years: weather systems, the Madden--Julian Oscillation (MJO, $30$--$90$ days).
+    \item $10^{-1}$--$10^0$ years: the seasonal cycle, the NAO (characteristic timescale $7$--$8$ years).
+    \item $10^0$ years: ENSO ($2$--$7$ years), the IOD ($3$--$7$ years).
+    \item $10^1$ years: the PDO ($20$--$30$ years), the AMO (Atlantic Multidecadal Oscillation, $60$--$80$ years).
+    \item $10^2$--$10^3$ years: centennial to millennial scale fluctuations such as the Little Ice Age and the Medieval Warm Period.
+    \item $10^4$--$10^5$ years: the Milankovitch cycles (precession of $2.3$ ten-thousand years, obliquity of $4.1$ ten-thousand years, eccentricity of $10$ ten-thousand years).
+    \item $10^5$--$10^6$ years: glacial--interglacial cycles and long-term climate evolution.
+\end{itemize}
+These phenomena constitute a continuous period spectrum from a few days to a million years.
+\end{remark}
+
+\section{Conservation laws of the climate system}
+
+\begin{theorem}[The three conservation laws of the climate system]\label{thm:climate_conservation}
+The dynamics of the climate system is governed by three conservation laws:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Conservation of energy}: the total energy balance of the Earth's climate system is $\Delta F = \lambda \Delta T$, where $\Delta F$ is the radiative forcing (W/m$^2$), $\Delta T$ is the global mean surface temperature response (K), and $\lambda$ is the climate feedback parameter. The net radiative flux at the top of the atmosphere is close to zero on annual average---the solar radiation absorbed by the Earth equals the infrared radiation emitted by the Earth. Conservation of energy constrains the range of variation of the global mean temperature on long timescales.
+    \item \textbf{Conservation of momentum}: the total angular momentum of the atmospheric and oceanic circulations is conserved in the Earth--atmosphere--ocean system. The angular momentum transport by the atmospheric circulation (the Hadley circulation, mid-latitude eddies) and by the oceanic circulation (the wind-driven circulation, the thermohaline circulation) transports angular momentum from the tropics towards the poles, maintaining the long-term stability of the Earth's rotation rate and of the direction of its rotation axis. Conservation of angular momentum is a basic physical constraint on the atmospheric and oceanic circulations.
+    \item \textbf{Conservation of water vapour}: in the global hydrological cycle, evaporation $E$ and precipitation $P$ are equal on annual average---$E_{\text{global}} = P_{\text{global}}$. The residence time of water vapour in the atmosphere is about $9$ days---the rapid turnover of water vapour is the physical basis of high-frequency scaling transformations. Water vapour is the most important greenhouse gas of the Earth, and its concentration in the atmosphere is coupled to temperature through the Clausius--Clapeyron relation---for every $1^\circ$C rise in temperature, the water-holding capacity of the atmosphere increases by about $7\%$.
+\end{enumerate}
+The hierarchical relation among the three conservation laws is: conservation of energy is the physical basis for the existence of the climate system (the balance between the input of solar radiation and the output of terrestrial radiation), conservation of momentum is the dynamical constraint on the atmospheric and oceanic circulations (the redistribution of angular momentum among the Earth's component spheres), and conservation of water vapour is the guarantee of the closure of the hydrological cycle (the global balance of evaporation and precipitation). Together they constitute the physical guarantee of the periodic structure of the climate system.
+\end{theorem}
+
+\begin{proof}
+(i) Conservation of energy: the net solar short-wave radiation received at the top of the Earth's atmosphere is $S_0(1-A)/4 \approx 240$ W/m$^2$ ($S_0 = 1361$ W/m$^2$ is the solar constant and $A \approx 0.3$ is the planetary albedo). The infrared radiation output of the Earth is $\sigma T_e^4$, where $T_e \approx 255$ K is the effective radiating temperature. In equilibrium, $S_0(1-A)/4 = \sigma T_e^4$. The greenhouse effect (water vapour, CO$_2$, clouds and so on in the atmosphere absorb infrared radiation and re-radiate it downwards) makes the surface temperature $T_s \approx 288$ K about $33$ K higher than $T_e$.
+
+(ii) Conservation of momentum: the rate of change of the total angular momentum of the Earth--atmosphere system equals the external torque (the gravitational torque of the Sun and the Moon). On climate timescales the external torque is approximately zero, so the total angular momentum is conserved. The exchange between the atmospheric angular momentum $M_{\text{atm}}$ and the angular momentum $M_{\text{earth}}$ of the solid Earth drives the seasonal variation of the Earth's rotation rate (the length of day, LOD)---the atmospheric angular momentum is largest in winter (the Earth rotates slightly more slowly) and smallest in summer (the Earth rotates slightly faster).
+
+(iii) Conservation of water vapour: the global mean evaporation is $E \approx 1000$ mm/yr and the global mean precipitation is $P \approx 1000$ mm/yr (ocean evaporation $1200$ mm/yr, ocean precipitation $1100$ mm/yr, net ocean evaporation $100$ mm/yr transported to land; land evaporation $500$ mm/yr, land precipitation $745$ mm/yr, net land precipitation $245$ mm/yr from ocean water-vapour transport). The residence time of water vapour in the atmosphere is $\tau = \text{total atmospheric water vapour}/\text{global precipitation rate} \approx 12.7 \times 10^{12} \text{ m}^3 / (1 \text{ m/yr} \times 5.1 \times 10^{14} \text{ m}^2) \approx 9$ days.
+\end{proof}
+
+\begin{remark}[Connection with the rest of the book]
+The theory of the periodic structure of the climate system established in this chapter is an application of periodic mathematics in the Earth's climate sciences. The Milankovitch cycles are the quasi-periodic transmission of astronomical periods to the climate system---the quasi-periodic variation of the three orbital elements drives the alternation of glacial and interglacial periods. ENSO is the quasi-periodic oscillation of the coupled ocean--atmosphere system of the equatorial Pacific---the Bjerknes positive feedback and the delayed negative feedback of the equatorial waveguide together maintain the $2$--$7$ year oscillation period; El Niño (warm phase) and La Niña (cold phase) are its two extreme phases; together with such modes as the PDO (decadal) and the IOD (Indian Ocean) it forms an inter-basin coupling network. The NAO is manifested as the strengthening and weakening of the atmospheric meridional pressure gradient. The long-range persistence ($H > 0.5$) and $1/f$ noise in climate time series reflect the distribution of energy of the climate system on different timescales. The three-layer nested periodic structure of the climate system---astronomical driving, oceanic response and atmospheric variability---is a complex realisation in the Earth's climate of the nested epicycle systems of the `Periodic Systems' chapter. The three conservation laws---conservation of energy, conservation of momentum and conservation of water vapour---together constitute the physical guarantee of the periodic structure of the climate system.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & The interannual advance of the seasonal cycle (the solar declination $\delta(t) = 23.44^\circ \sin(2\pi t/365.24)$, Definition \ref{def:solar_insolation}); the time translation of atmospheric variability \\
+Scaling & The scale invariance of $1/f$ noise (the multiscale superposition proof of Proposition \ref{prop:one_over_f_noise}); the Hurst exponent $H$ of long-range persistence (Definition \ref{def:climate_long_memory}) \\
+Rotation & The phase oscillation of the warm and cold phases of ENSO, El Niño and La Niña (Definition \ref{def:enso}, Proposition \ref{prop:enso_oscillator}); the east--west dipole oscillation of the IOD (Definition \ref{def:iod}); the Milankovitch orbital cycles \\
+Conservation & The global energy balance, conservation of Earth--atmosphere angular momentum and conservation of water vapour in the hydrological cycle (Theorem \ref{thm:climate_conservation}) \\
+Symmetry & The phase symmetry of the seasons between the two hemispheres: hemispheric reflection $\Leftrightarrow$ phase difference $\pi$ (Proposition \ref{prop:seasonal_phase_symmetry}) \\
+Closure & The closure of the Bjerknes positive feedback loop (the loop gain $G>0$ of Proposition \ref{prop:bjerknes_feedback}); the ice--albedo feedback loop; the PDO--ENSO slow--fast coupling loop (Proposition \ref{prop:pdo_enso_separation}) \\
+Period & The seasons $T=365.24$ days (Example \ref{ex:polar_day_night}); ENSO $2$--$7$ years (Examples \ref{ex:enso_period_calc}, \ref{ex:enso_events}); the PDO $20$--$30$ years; the IOD $3$--$7$ years; the three-layer nested periods (Theorem \ref{thm:climate_nested_periods}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the \textbf{climate periodicity decision theorem} of this chapter (\ref{thm:climate_periodicity_decision}). Hint: first write down the decision map and the evolution group of this chapter's target, then apply the proof structure of the general criterion of the `Periodic Systems' chapter.
+
+    \item Verify that the hypotheses of the \textbf{timescale-separation decision for the PDO and ENSO} (\ref{lem:pdo_enso_separation_decision}) hold for the domain objects of this chapter, and give a counterexample in which the hypotheses fail.
+
+    \item Examine the behaviour of \textbf{monotonicity of quantity adjustment} (\ref{prop:climate_adaptive_growth}) under degeneracy of the parameters, and explain how the conclusion degenerates accordingly.
+
+    \item Explain the relation between the \textbf{three-parameter correspondence: radius, phase and speed} (\ref{prop:climate_epicycle_correspondence}) and the corresponding general conclusions of the `Periodic Systems' chapter (whether they agree, whether it is a special case, or whether additional conditions are required).
+
+    \item Using the seven-theme comparison table of this chapter, identify the concrete carriers in this chapter of the three themes \textbf{translation}, \textbf{scaling} and \textbf{rotation}, and give one example of domain data for each.
+
+    \item Synthesis: restate the diagnostic procedure of this chapter using the five-step standard interface of the `Periodic Systems' chapter (Table \ref{tab:ps_five_steps}), noting for each step the theorem of this chapter on which it depends: \ref{thm:climate_periodicity_decision}, \ref{lem:pdo_enso_separation_decision}, \ref{prop:climate_adaptive_growth}, \ref{prop:climate_epicycle_correspondence}.
+\end{enumerate}
+
+

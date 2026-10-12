@@ -1,0 +1,595 @@
+\chapter{Periodic Structure of Audio Systems}
+\markboth{Periodic Structure of Audio Systems}{Periodic Structure of Audio Systems}
+
+\begin{remark}[Periodicity decision for the target of this chapter (citation)]\label{rem:audio_ps_hook}
+When this chapter decides whether a research target is periodic, determines its period type, or seeks its minimal positive period, reference is always made to the `Periodic Systems' chapter:
+for the periodicity criterion see \cref{thm:ps_periodicity_decision},
+for the discrimination of period types see \cref{def:ps_period_type}, \cref{prop:ps_type_discrimination},
+for the search for the minimal positive period see \cref{def:ps_minimal_period_algorithm}, \cref{thm:ps_minimal_period_correctness},
+and for the construction of period series and epicycle groups from data see \cref{thm:ps_series_reconstruction}, \cref{def:ps_epicycle_group}.
+\end{remark}
+
+\begin{remark}[Positioning of this chapter: developed along the five-step interface of the `Periodic Systems' chapter]\label{rem:audio_five_steps_positioning}
+The periodic structure of audio systems studies the mathematical characterisation of periodicity, harmonic structure and spectral features in sound waves. This chapter does not establish a separate periodicity criterion; instead it connects audio systems to the five-step interface prescribed by the `Periodic Systems' chapter:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{Decision}: reduce such targets as simple harmonic motion, single-tone sound waves, beats and standing waves to discrete or continuous dynamical systems, invoke \cref{thm:ps_periodicity_decision} to decide whether they are periodic, and determine the period type;
+    \item \textbf{Construction}: build the amplitude series, the frequency series and the phase series from sound-pressure, particle-velocity, spectral and phase data, and assemble them into the audio epicycle group;
+    \item \textbf{Adjustment}: dynamically adjust the audio epicycle group subject to residual-energy descent, mass conservation, energy conservation and scale-charge conservation;
+    \item \textbf{Convolution}: introduce amplitude convolution, phase convolution and frequency convolution on the audio epicycle group, and link them to autocorrelation, cross-correlation and beat-frequency delay;
+    \item \textbf{Integration}: connect to the tool chains of the three chapters `Discrete Sampling and Intercalation of Periodic Signals', `Harmonic Analysis' and `Time Series Analysis', forming a diagnostic procedure for audio periodicity.
+\end{enumerate}
+The mathematical tools used in this chapter include: simple harmonic motion, the acoustic wave equation, Fourier decomposition, periodic convolution, epicycle groups, phase operators, delay and equal temperament.
+\end{remark}
+
+\begin{remark}[Guide to the seven themes of this chapter]\label{rem:audio_seven_themes}
+\textbf{Translation}---the space--time translational correspondence of the acoustic propagation delay $\tau = r/c$ (Definition \ref{def:acoustic_propagation_delay}); \textbf{Scaling}---the geometric scale of equal temperament with common ratio $2^{1/12}$ (Theorem \ref{thm:equal_temperament}); \textbf{Rotation}---the phase-space circulation of simple harmonic motion (Definition \ref{def:simple_harmonic_motion}) and the phase delay $\tau = \phi/\omega$ (Definition \ref{def:harmonic_phase_delay}); \textbf{Conservation}---mass, energy and scale-charge conservation (Theorem \ref{thm:acoustic_conservation}) and energy conservation in simple harmonic motion (Proposition \ref{prop:harmonic_energy}); \textbf{Symmetry}---the spatial reflection symmetry of standing waves and the fixed boundary at both ends of a string; \textbf{Closure}---periodic closure on every increase of the phase by $2\pi$ (Proposition \ref{prop:acoustic_delay_phase_unity}); \textbf{Period}---the fundamental frequency and the harmonic series (Definition \ref{def:harmonic_series}), and the beat period $T_{\text{beat}} = 1/\Delta f$ (Definition \ref{def:beat_delay}).
+\end{remark}
+
+\section{Connection to the five-step interface of the `Periodic Systems' chapter}
+\label{sec:audio_five_steps}
+
+\subsection{Step one: periodicity decision for the audio target}
+
+\begin{definition}[Audio target and decision input]\label{def:audio_target}
+An \textbf{audio target} is one of the following objects:
+\begin{enumerate}[label=(\roman*)]
+    \item a simple harmonic motion system, whose state space is the $(x,p)$ phase space;
+    \item a single-tone sound wave, whose state space is the phase $\theta=\mathbf k\cdot\mathbf r-\omega t$;
+    \item a beat-frequency system, whose state space is the phase difference of two frequency components;
+    \item a standing-wave system, whose state space is the joint space of spatial modes and temporal phase.
+\end{enumerate}
+The \textbf{decision input} of an audio target is the pair
+\[
+\mathcal D_{\mathrm{A}}=(\mathcal S,\Phi),
+\]
+where $\mathcal S$ is the state space and $\Phi:\mathcal S\to\mathcal S$ is the map induced by time translation, phase rotation or vibration evolution. If $\mathcal S$ is a finite set, the target is called a \textbf{finite audio target}; if $\mathcal S$ is an infinite set, the target is called an \textbf{infinite audio target}.
+\end{definition}
+
+\begin{definition}[Audio decision map]\label{def:audio_periodization}
+Let an audio target be given by the decision input $\mathcal D_{\mathrm{A}}=(\mathcal S,\Phi)$. If the states of the target are generated by $\Phi$, that is, if there exists $x_0\in\mathcal S$ such that
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+for $t\in\mathbb Z$ the state $x_t$ is generated by iteration of $\Phi$; for $t\in\mathbb R$ it is described by the one-parameter evolution family $\{\Phi_t\}_{t\in\mathbb R}$, where each $\Phi_t:\mathcal S\to\mathcal S$, $\Phi_0=\operatorname{id}$, $\Phi_{s+t}=\Phi_s\circ\Phi_t$ for all $s,t\in\mathbb R$, and $(t,x)\mapsto\Phi_t(x)$ is continuous.
+then $\Phi$ is called the \textbf{audio decision map} of the target. The audio target is then reduced to the discrete dynamical system $(\mathcal S,\Phi)$ when $t\in\mathbb Z$ and to the continuous dynamical system $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$ when $t\in\mathbb R$; in both cases the criteria of the `Operations and Periodicity' chapter and of the `Periodic Systems' chapter may be applied directly.
+\end{definition}
+
+\begin{theorem}[Audio periodicity decision theorem]\label{thm:audio_periodicity_decision}
+Let the decision map of an audio target be $\Phi$, and let $(\mathcal S,\Phi)$ be a discrete dynamical system. Then:
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{Sufficient decision}: if there exists $m\in\mathbb N^+$ with $\Phi^m=\mathrm{id}$, then the target is a uniformly periodic audio system; every orbit is closed and the orbit length divides $m$.
+    \item \textbf{Equivalence of the decision}: the target is a uniformly periodic audio system if and only if $\operatorname{ord}(\Phi)<\infty$.
+    \item \textbf{Pointwise criterion}: the orbit of the target at a state $x_0$ is closed if and only if $x_0$ is a periodic point; the orbit length is then the period at that point.
+    \item \textbf{Non-omissibility}: the conjunction of conserved quantities and symmetry groups cannot replace $\operatorname{ord}(\Phi)<\infty$; a quasi-periodic audio target is not a periodic audio system.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:audio_periodicity_decision} of this chapter is the domain instantiation of \cref{thm:ps_periodicity_decision} in the `Periodic Systems' chapter:
+it suffices to replace the decision map $f$ and the evolution group by $\Phi$ of this chapter, and the four parts (A) sufficient decision, (B) equivalence of the decision, (C) pointwise criterion and
+(D) non-omissibility then hold one by one. By the convention of \cref{rem:ps_applications_hook}, they are not expanded again here.
+\end{proof}
+
+\begin{corollary}[Audio period types]\label{cor:audio_period_type}
+After the decision of \cref{thm:audio_periodicity_decision}, an audio target falls into one of the following types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Trivial periodic type}: least period $m_0=1$, the state is a fixed point;
+    \item \textbf{Strictly periodic type}: $1<m_0<\infty$, the state is strictly periodic;
+    \item \textbf{Uniformly periodic type}: $\operatorname{ord}(\Phi)=m<\infty$, every orbit length divides $m$;
+    \item \textbf{Quasi-periodic type}: $\operatorname{ord}(\Phi)=\infty$, the orbits are not closed but are dense on a compact carrier structure;
+    \item \textbf{Eventually periodic type}: there exists $N$ such that the target is periodic for $t\ge N$;
+    \item \textbf{Discrete periodic type}: the carrier structure is $\mathbb Z$ and the normalised period ratio is $\rho=T_x/\Delta x\in\mathbb Q$.
+    \item \textbf{Asymptotically periodic (damped) type}: the orbit is not closed, but tends asymptotically to a closed orbit or to a fixed point, the residual decaying as $e^{-\kappa t}$ (see \cref{def:ps_period_type}(vii)).
+\end{enumerate}
+Here (i)--(iii) and (vi) belong to periodic audio systems; (iv) does not belong to periodic audio systems but can be handled with bounded-approximation tools; (v) is a periodic audio system only in its stable stage; (vii), like (iv), is a type in the limiting sense; it is not a periodic audio system and can be handled with bounded-approximation tools only in its stable stage.
+\end{corollary}
+
+\begin{proof}
+Each item follows by substituting the audio target into \cref{thm:audio_periodicity_decision} and \cref{def:ps_period_type} of the `Periodic Systems' chapter.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for simple harmonic motion]\label{lem:shm_periodic}
+Let the equation of simple harmonic motion be
+\[
+\ddot x+\omega_0^2x=0.
+\]
+Then simple harmonic motion is a uniformly periodic system, whose least positive period is
+\[
+T_0=\frac{2\pi}{\omega_0}=2\pi\sqrt{\frac{m}{k}}.
+\]
+\end{lemma}
+
+\begin{proof}
+By Definition \ref{def:simple_harmonic_motion} the general solution is $x(t)=A\cos(\omega_0t+\phi)$. The time translation $T_0=2\pi/\omega_0$ gives $x(t+T_0)=x(t)$, and $T_0$ is the least positive period. Hence the decision map $\Phi$ satisfies $\Phi^{T_0}=\mathrm{id}$, so the system is uniformly periodic.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for a single-tone sound wave]\label{lem:single_tone_periodic}
+Let a single-tone plane sound wave be
+\[
+p(\mathbf r,t)=p_0e^{i(\mathbf k\cdot\mathbf r-\omega t)}.
+\]
+Then its temporal period is
+\[
+T=\frac{2\pi}{\omega},
+\]
+its spatial period is
+\[
+\lambda=\frac{2\pi}{|\mathbf k|},
+\]
+and the two are coupled by the dispersion relation $\omega=c|\mathbf k|$ as $\lambda=cT$.
+\end{lemma}
+
+\begin{proof}
+From $e^{-i\omega(t+T)}=e^{-i\omega t}e^{-i\omega T}=e^{-i\omega t}$ we obtain the temporal period $T=2\pi/\omega$. From $e^{i\mathbf k\cdot(\mathbf r+\lambda\hat{\mathbf k})}=e^{i\mathbf k\cdot\mathbf r}e^{i|\mathbf k|\lambda}=e^{i\mathbf k\cdot\mathbf r}$ we obtain the spatial period $\lambda=2\pi/|\mathbf k|$. The dispersion relation is given by Theorem \ref{thm:acoustic_wave_equation} and Proposition \ref{prop:acoustic_delay_phase_unity}.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for beats]\label{lem:beat_periodic}
+Let two sound waves of close frequency be superposed, with frequency difference $\Delta f=|f_1-f_2|$. Then the amplitude envelope of the resulting sound wave oscillates with the beat period
+\[
+T_{\text{beat}}=\frac{1}{\Delta f}
+\]
+as its period.
+\end{lemma}
+
+\begin{proof}
+By Definition \ref{def:beat_delay} and Proposition \ref{prop:beat_delay_formula} the beat period is $T_{\text{beat}}=2\pi/\Delta\omega=1/\Delta f$. The amplitude envelope $2A\cos(\Delta\omega\,t/2)$ oscillates with angular frequency $\Delta\omega/2$, so the envelope period is $4\pi/\Delta\omega$; the beat period is half the envelope period, that is, $2\pi/\Delta\omega=1/\Delta f$.
+\end{proof}
+
+\begin{definition}[Audio least positive period algorithm]\label{def:audio_minimal_period_algorithm}
+This definition has the same content as Chapter~\ref{chap:periodic_system}, the section `Periodicity decision: is the target periodic?' (\cref{sec:ps_periodicity_decision}), \cref{def:ps_minimal_period_algorithm}; to avoid repeating the statement, only the reference anchor is retained here, and the complete statement is given there. The only difference here is terminology (audio target / audio sample); the algorithm steps and the conclusion are exactly the same.
+\end{definition}
+
+\begin{theorem}[Correctness of the audio least positive period algorithm]\label{thm:audio_minimal_period_correctness}
+This theorem has the same content as Chapter~\ref{chap:periodic_system}, the section `Periodicity decision: is the target periodic?' (\cref{sec:ps_periodicity_decision}), \cref{thm:ps_minimal_period_correctness}; to avoid repeating the statement, only the reference anchor is retained here, and the complete statement and proof are given there. The only difference here is terminology (audio target / audio sample); the algorithm steps and the conclusion are exactly the same.
+\end{theorem}
+
+\begin{example}[Examples of audio periodicity decisions]\label{ex:audio_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item Simple harmonic motion: $T_0=2\pi\sqrt{m/k}$, uniformly periodic type;
+    \item Single-tone sound wave: temporal period $T=2\pi/\omega$, spatial period $\lambda=2\pi/|\mathbf k|$;
+    \item Beats: $T_{\text{beat}}=1/\Delta f$, uniformly periodic type;
+    \item Standing waves: the frequencies of standing waves on a string are $f_n=n f_1$, uniformly periodic type.
+\end{enumerate}
+\end{example}
+
+\begin{remark}[Conserved quantities do not guarantee periodicity]\label{rem:audio_invariant_not_period}
+Mass conservation, energy conservation and scale-charge conservation in audio systems are auxiliary conditions for periodic structure, but they do not constitute a sufficient condition. For example, damped vibration involves energy dissipation, yet its orbit need not be closed. The periodic structure of an audio system must be decided by \cref{thm:audio_periodicity_decision} or by the lemmas above.
+\end{remark}
+
+\subsection{Step two: construction of the audio period series and epicycle group}
+
+\begin{definition}[Audio amplitude, frequency and phase series]\label{def:audio_series}
+Let the state or output sequence of an audio target be $\{z_t\}$. If it can be written as
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+then
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+are called respectively the \textbf{amplitude series}, the \textbf{frequency series} and the \textbf{phase series} of the audio target. The three agree with \cref{def:amplitude_series}, \cref{def:frequency_series} and \cref{def:phase_series} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{definition}[Audio epicycle group]\label{def:audio_epicycle_group}
+Let the period series of an audio target be given by its amplitude series $\{A_k\}$, frequency series $\{\omega_k\}$ and phase series $\{\phi_k\}$. For each $k$ define the epicycle
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+whose collection
+\[
+\mathfrak E_{\mathrm{A}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+is called the \textbf{epicycle group} of the audio target. Its superposition is the audio period series
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[Constructing the period series from audio data]\label{thm:audio_series_reconstruction}
+Let the output of an audio target be a finite periodic sequence of period $N$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the output admits the discrete Fourier expansion
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item the amplitude series is given by $|c_k|$, the phase series by $\arg c_k$ and the frequency series by $2\pi k/N$;
+    \item if the output is a single-tone sound wave, its Fourier decomposition has only a single spectral line; if the output is the timbre of a musical instrument, each order of harmonic corresponds to a different harmonic component.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) The discrete Fourier series of a finite periodic sequence is a standard result: the basis functions $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ form an orthogonal basis of $\mathbb C^N$.
+(ii) This is read off directly from $c_k=A_k e^{i\phi_k}$.
+(iii) The temporal part of a single-tone sound wave is $e^{-i\omega t}$, which on the period $T=2\pi/\omega$ has only the fundamental component; the timbre of a musical instrument expands as a Fourier series into the successive harmonics.
+\end{proof}
+
+\begin{proposition}[Three-parameter correspondence: radius, phase and speed]\label{prop:audio_epicycle_correspondence}
+The three parameters of the audio epicycle group $\mathfrak E_{\mathrm{A}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ correspond one-to-one to three geometric--physical quantities:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Radius corresponds to amplitude}: the radius of $E_k$, namely $|E_k|=A_k$, is the amplitude of the sound-pressure component;
+    \item \textbf{Phase corresponds to rotational delay}: the initial phase $\phi_k$ corresponds to the time translation $\tau_k=\phi_k/\omega_k$, that is, the epicycle \textbf{leads} the reference by $\tau_k$ ($\phi_k>0$ means that the waveform is \textbf{advanced} by $\tau_k$ relative to the reference, equivalently the waveform coincides with the reference once the reference has been delayed by $\tau_k$);
+    \item \textbf{Frequency corresponds to rotational speed}: $\omega_k$ is the angular frequency of that component.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:audio_epicycle_correspondence} of this chapter corresponds exactly to \cref{prop:ps_epicycle_correspondence} of the `Periodic Systems' chapter,
+and the three correspondences---radius to amplitude, phase to rotational delay, frequency to rotational speed---are obtained by translating them one by one to the epicycle group of this chapter.
+The proof is given there: (i) from $|E_k|=A_k$ and the energy decomposition, (ii) from the phase translation theorem, (iii) from the definition of the frequency series.
+\end{proof}
+
+\begin{example}[Period series of instrumental timbre]\label{ex:audio_timbre_series}
+Different instruments playing the same pitch produce different timbres, which arises from differences in harmonic structure. A tuning fork has almost only the fundamental frequency, a violin is rich in harmonics, and a clarinet is dominated by odd-order harmonics. In the period series these differences appear as different distributions of the amplitude series $\{A_k\}$.
+\end{example}
+
+\begin{remark}[The period series is a complex function]\label{rem:audio_series_complex}
+Let $z=e^{i\omega_0t}$; then the audio period series
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+can be written as the Laurent series $\sum_k c_k z^k$, where $c_k=A_k e^{i\phi_k}$, provided that \textbf{every component frequency is commensurable with $\omega_0$} (that is, $\omega_k=k\omega_0$ with $k\in\mathbb Z$). Hence \textbf{when all components are commensurable with $\omega_0$, the period series is a complex-valued function on the unit circle (otherwise it is a function on the torus)}.
+\end{remark}
+
+\subsection{Step three: dynamic adjustment of the audio epicycle group}
+
+\begin{definition}[Dynamic adjustment of the audio epicycle group]\label{def:audio_adaptive_adjustment}
+Let the current audio epicycle group be $\mathfrak E^{(j)}$, with partial sum
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+and residual $r^{(j)}=z-z^{(j)}$. \textbf{Dynamic adjustment} consists of two rules:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Quantity adjustment}: if the residual energy satisfies $\|r^{(j)}\|^2>\delta$, add a new epicycle according to the peak of the residual periodogram;
+    \item \textbf{Parameter adjustment}: update the parameters of the existing epicycles by regularised least squares or by the conservation constraints.
+\end{enumerate}
+In audio systems, quantity adjustment corresponds to increasing the harmonic order or the number of frequency components; parameter adjustment corresponds to adjusting amplitude, phase and frequency so that the mass, energy and scale-charge constraints are satisfied.
+\end{definition}
+
+\begin{proposition}[Monotonicity of quantity adjustment]\label{prop:audio_adaptive_growth}
+After the dominant residual frequency component is added as in \cref{def:audio_adaptive_adjustment}(i), the residual energy is monotonically non-increasing:
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+with equality if and only if the residual has no energy at the selected frequency.
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:audio_adaptive_growth} of this chapter agrees with the dynamic adjustment mechanism of \cref{def:ps_adaptive_adjustment} in the `Periodic Systems' chapter:
+adding an epicycle removes the component of $r^{(j)}$ along $\hat\omega$ from the residual, and the orthogonal decomposition
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{the removed component}\|^2$ gives the inequality,
+with equality if and only if the norm of the removed component is zero. The complete argument is given there.
+\end{proof}
+
+\begin{theorem}[Convergence of dynamic adjustment]\label{thm:audio_adaptive_convergence}
+Let the audio target be a \textbf{real-valued finite periodic sequence} of length $T_0$ ($T_0\in\mathbb N$) and let $\delta=0$. Then after at most $\lfloor T_0/2\rfloor+1$ steps of dynamic adjustment the residual is zero, and the resulting audio epicycle group is the exact Fourier data of the target; for a \textbf{complex-valued} sequence the corresponding number of steps is at most $T_0$.
+\end{theorem}
+
+\begin{proof}
+The discrete Fourier series of a \textbf{real-valued} finite periodic sequence of length $T_0$ ($T_0\in\mathbb N$) is complete on $\lfloor T_0/2\rfloor+1$ harmonics (including the constant term); a \textbf{complex-valued} sequence requires $T_0$ components. At each step one dominant frequency component of the residual is extracted as in \cref{prop:audio_adaptive_growth} and the residual energy decreases strictly, so after finitely many steps the residual is zero.
+\end{proof}
+
+\begin{definition}[Structure-metric adjustment]\label{def:audio_structure_metric_adjustment}
+Let the structure metric of an audio target be
+\[
+\mathcal I=(\mathcal I_{\text{mass}},\mathcal I_{\text{energy}},\mathcal I_{\text{scale}})
+=(\text{mass conservation degree},\ \text{energy conservation degree},\ \text{scale-charge conservation degree}).
+\]
+\textbf{Structure-metric adjustment} is: at each step choose a neighbouring parameter $\theta$ in the parameter space $\Theta$ for which $\mathcal I(\theta)$ is \textbf{strictly decreasing} in the lexicographic order (minimisation); if no such neighbouring parameter exists, the process stops---then $\theta$ is a \textbf{locally optimal} parameter.
+\end{definition}
+
+\begin{proposition}[Finite convergence of structure-metric adjustment]\label{prop:audio_structure_metric_convergence}
+Let the parameter space $\Theta$ be finite and let each adjustment make $\mathcal I$ \textbf{strictly decreasing} in the lexicographic order. Then the adjustment terminates after finitely many steps at a locally optimal parameter.
+\end{proposition}
+
+\begin{proof}
+$\Theta$ is finite, so $\mathcal I$ takes finitely many values. The lexicographic order is well-founded on a finite set of values, so a strictly lexicographically decreasing sequence cannot continue indefinitely and the process terminates after finitely many steps. At termination there is no neighbouring parameter making $\mathcal I$ strictly lexicographically decreasing, that is, the parameter is locally optimal. Monotonicity must be imposed on the \textbf{whole lexicographic order}: if only `some component strictly increases or decreases' is required, cycles such as $(2,1)\to(1,2)\to(2,1)$ cannot be excluded and finite termination fails.
+\end{proof}
+
+\begin{remark}[Boundaries of dynamic adjustment]\label{rem:audio_adaptive_boundary}
+\cref{thm:audio_adaptive_convergence} relies on finite periodic sequences. For continuous-spectrum or quasi-periodic audio targets, no finite epicycle group represents them exactly and only bounded approximation is possible. Structure-metric adjustment does not guarantee global optimality.
+\end{remark}
+
+\subsection{Step four: audio convolution}
+
+\begin{definition}[Audio amplitude, phase and frequency convolutions]\label{def:audio_convolution_types}
+Let two audio epicycle groups be
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+Define:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Amplitude convolution}: $\mathbb A_{mn}=A_nB_m$;
+    \item \textbf{Phase convolution}: $\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$;
+    \item \textbf{Frequency convolution}: $\mathbb F_{mn}=\omega_n\nu_m$;
+    \item \textbf{Trend convolution}: $\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$.
+\end{enumerate}
+This agrees with \cref{def:amplitude_convolution}, \cref{def:phase_convolution}, \cref{def:frequency_convolution} and \cref{def:tendency_convolution} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{theorem}[Action of the three convolutions on the audio epicycle group]\label{thm:audio_convolution_action}
+Let the epicycle groups of two audio targets be $\mathfrak E$ and $\mathfrak E'$ respectively. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item amplitude convolution acts only on the radius;
+    \item phase convolution acts only on the phase;
+    \item frequency convolution acts only on the rotational speed;
+    \item trend convolution preserves both amplitude and phase.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+This is read off directly from \cref{def:audio_convolution_types}.
+\end{proof}
+
+\begin{proposition}[Autocorrelation and trend convolution]\label{prop:audio_autocorr_phase_convolution}
+Let $\{z_t\}$ be an audio periodic sequence, with autocorrelation function
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+In the language of the audio epicycle group, the autocorrelation function is the projection of the trend convolution onto the diagonal:
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:audio_autocorr_phase_convolution} of this chapter is the realisation in this domain of the convolution-action conclusion of \cref{thm:ps_convolution_action} in the `Periodic Systems' chapter:
+substituting $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ into the definition of the autocorrelation, cancelling all off-diagonal cross terms by orthogonality and retaining only the diagonal term of the trend convolution
+(the factorisation of the three convolutions, \cref{prop:ps_convolution_factorization}), which yields $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$.
+The full expansion is given there.
+\end{proof}
+
+\begin{remark}[Relation between audio convolution and periodic convolution]\label{rem:audio_convolution_relation}
+Audio convolution is not a new convolution operation but an instance of the periodic convolution of the `Series and Convolution' chapter on the audio epicycle group. Autocorrelation is the projection of the trend convolution onto the diagonal; cross-correlation and beats are respectively the concrete manifestations in acoustics of amplitude convolution and frequency convolution.
+\end{remark}
+
+\subsection{Step five: integration with discrete sampling, harmonic analysis and time series analysis}
+
+\begin{definition}[Audio periodicity diagnostic procedure]\label{def:audio_periodic_diagnosis}
+For a given audio system, diagnose it using the framework of periodic mathematics:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Periodicity decision}: verify the period type of the audio target (\cref{thm:audio_periodicity_decision});
+    \item \textbf{Series construction}: build the amplitude, frequency and phase series and the epicycle group from sound-pressure and particle-velocity data (\cref{thm:audio_series_reconstruction});
+    \item \textbf{Conservation diagnosis}: verify mass, energy and scale-charge conservation (\cref{thm:acoustic_conservation});
+    \item \textbf{Convolution diagnosis}: compute the autocorrelation (the diagonal projection of the trend convolution, \cref{prop:audio_autocorr_phase_convolution}) and the phase convolution;
+    \item \textbf{Integration diagnosis}: connect to the tool chains of discrete sampling, harmonic analysis and time series analysis.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[The audio periodicity diagnostic procedure and its interfaces with three chapters]\label{thm:audio_diagnosis_integration}
+The five steps of \cref{def:audio_periodic_diagnosis} connect respectively to:
+\begin{enumerate}[label=(\roman*)]
+    \item the `Discrete Sampling and Intercalation of Periodic Signals' chapter: \cref{def:uniform_sampling_parallel}, \cref{thm:nyquist_shannon_parallel}, \cref{thm:intercalation_leakage_suppression};
+    \item the `Harmonic Analysis' chapter: \cref{def:fourier_series}, \cref{thm:parseval_fourier}, \cref{prop:twelve_to_six};
+    \item the `Time Series Analysis' chapter: \cref{def:ts_period_detection}, \cref{prop:ts_period_significance}, \cref{def:ts_window_validation}.
+\end{enumerate}
+The audio periodicity diagnostic procedure is therefore not an independent method but an application of the unified tool chain of periodic mathematics to audio systems.
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:audio_diagnosis_integration} of this chapter is the implementation in this domain of the five-step interface of the `Periodic Systems' chapter (\cref{tab:ps_five_steps}):
+the periodicity decision uses sampling and spectral estimation, the frequency decomposition and the phase kernels use the `Harmonic Analysis' chapter, and the periodogram peaks, the Fisher test and
+window-function validation use the `Time Series Analysis' chapter. The diagnostic procedure is therefore a synthesis of the tool chains of the three chapters; the proof is given there.
+\end{proof}
+
+\begin{remark}[Order of operations after integration]\label{rem:audio_integration_order}
+The recommended order for an actual diagnosis is: first decide whether the audio target is periodic (\cref{thm:audio_periodicity_decision}); then construct the Fourier data and the epicycle group of the audio data (\cref{thm:audio_series_reconstruction}); then optimise the parameters by the conservation constraints and dynamic adjustment (\cref{thm:audio_adaptive_convergence}, \cref{prop:audio_structure_metric_convergence}); then perform audio convolution and autocorrelation analysis (\cref{prop:audio_autocorr_phase_convolution}); and finally output the diagnosis as in \cref{def:audio_periodic_diagnosis}.
+\end{remark}
+
+\section{Mathematical foundations of audio systems}
+
+\begin{definition}[Basic quantities of sound waves]\label{def:acoustic_quantities}
+An audio system is described by the following basic physical quantities:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Sound pressure} $p(\mathbf{r}, t)$ (unit: Pa): the part of the pressure of the medium that deviates from the static pressure under the action of a sound wave.
+    \item \textbf{Particle velocity} $\mathbf{v}(\mathbf{r}, t)$ (unit: m/s): the vibration velocity of the particles of the medium under the action of a sound wave.
+    \item \textbf{Density perturbation} $\rho'(\mathbf{r}, t)$ (unit: kg/m$^3$): the part of the density of the medium that deviates from the static density $\rho_0$.
+    \item \textbf{Speed of sound} $c$ (unit: m/s): in an ideal gas, $c = \sqrt{\gamma p_0/\rho_0}$.
+\end{enumerate}
+\end{definition}
+
+\section{Simple harmonic motion}
+
+\begin{definition}[Simple harmonic motion]\label{def:simple_harmonic_motion}
+\textbf{Simple harmonic motion} is the motion of a particle under a linear restoring force $F = -kx$:
+\[
+\frac{d^2 x}{dt^2} + \omega_0^2 x = 0, \quad \omega_0 = \sqrt{\frac{k}{m}}.
+\]
+The general solution is $x(t) = A\cos(\omega_0 t + \phi)$. In the phase space $(x, p)$ the trajectory of simple harmonic motion is an ellipse. Introducing the complex variable $z = x + i p/(m\omega_0)$ reduces the equation of motion to $\dot{z} = -i\omega_0 z$---the one-dimensional degenerate form of the epicycle model.
+\end{definition}
+
+\begin{proposition}[Energy conservation of simple harmonic motion]\label{prop:harmonic_energy}
+The total mechanical energy is $E = \frac{1}{2}kA^2 = \text{constant}$. Kinetic energy and potential energy are interconverted at the angular frequency $2\omega_0$.
+\end{proposition}
+
+\begin{proof}
+Substituting $x = A\cos(\omega_0 t + \phi)$: the kinetic energy is $K = \frac{1}{2}m\dot x^2 = \frac{1}{2}mA^2\omega_0^2\sin^2(\omega_0 t + \phi)$ and the potential energy is $U = \frac{1}{2}kx^2 = \frac{1}{2}kA^2\cos^2(\omega_0 t + \phi)$. From $\omega_0^2 = k/m$ we obtain $mA^2\omega_0^2 = kA^2$, hence
+\[
+E = K + U = \frac{1}{2}kA^2\big(\sin^2(\omega_0 t + \phi) + \cos^2(\omega_0 t + \phi)\big) = \frac{1}{2}kA^2,
+\]
+independently of time. $K$ and $U$ each oscillate with angular frequency $2\omega_0$ ($\sin^2\theta = \frac{1-\cos 2\theta}{2}$) and differ in phase by $\pi$---energy is converted periodically between the two forms whilst the total is conserved.
+\end{proof}
+
+\begin{definition}[Phase delay of simple harmonic motion]\label{def:harmonic_phase_delay}
+In simple harmonic motion $x(t) = A\cos(\omega_0 t + \phi)$, the \textbf{phase delay} corresponding to the phase $\phi$ is
+\[
+\tau = \frac{\phi}{\omega_0}.
+\]
+The phase delay converts a phase angle into a time offset: an initial phase $\phi$ is equivalent to the vibration \textbf{leading} the reference by $\tau = \phi/\omega_0$ ($\phi>0$ means that the waveform is \textbf{advanced} by $\tau$ relative to the reference, equivalently the waveform coincides with the reference once the reference has been delayed by $\tau$). When $\phi = 2\pi$ (one complete period), $\tau = T = 2\pi/\omega_0$---the phase delay degenerates to a complete period. This is the acoustic realisation of the delay $\tau = \phi/\omega$ in the parameter table of the `Periodic Functions and Groups with Periodic Orbits' chapter.
+\end{definition}
+
+\section{The acoustic wave equation and propagation delay}
+
+\begin{theorem}[Acoustic wave equation]\label{thm:acoustic_wave_equation}
+In an inviscid ideal fluid without heat conduction, the sound pressure $p(\mathbf{r}, t)$ satisfies the three-dimensional wave equation:
+\[
+\boxed{\nabla^2 p - \frac{1}{c^2} \frac{\partial^2 p}{\partial t^2} = 0}.
+\]
+\end{theorem}
+
+\begin{proof}
+The three linearised equations of an ideal fluid: (i) the continuity equation $\frac{\partial \rho'}{\partial t} + \rho_0 \nabla\cdot\mathbf{v} = 0$; (ii) Euler's equation $\rho_0 \frac{\partial \mathbf{v}}{\partial t} = -\nabla p$; (iii) the adiabatic equation of state $p = c^2 \rho'$ ($c^2 = (\partial p/\partial\rho)_S$). Differentiating (i) with respect to $\partial/\partial t$ and taking the divergence of (ii):
+\[
+\frac{\partial^2 \rho'}{\partial t^2} + \rho_0 \nabla\cdot\frac{\partial \mathbf{v}}{\partial t} = 0, \qquad
+\rho_0 \nabla\cdot\frac{\partial \mathbf{v}}{\partial t} = -\nabla^2 p.
+\]
+Subtracting the two equations eliminates the velocity field: $\frac{\partial^2 \rho'}{\partial t^2} = \nabla^2 p$. Substituting into (iii) to eliminate $\rho'$ gives $\frac{1}{c^2}\frac{\partial^2 p}{\partial t^2} = \nabla^2 p$, that is, the wave equation.
+\end{proof}
+
+\begin{definition}[Propagation delay of acoustic waves]\label{def:acoustic_propagation_delay}
+The \textbf{propagation delay} of a sound wave from a source $\mathbf{r}'$ to an observation point $\mathbf{r}$ is
+\[
+\tau_{\text{prop}} = \frac{|\mathbf{r} - \mathbf{r}'|}{c}.
+\]
+The propagation delay converts a spatial distance into a time offset---the greater the distance, the greater the delay, the two being linearly related, $\tau \propto r$. In air at room temperature ($c \approx 343$ m/s), a distance of $1$ metre corresponds to a delay of about $2.9$ ms---this is the minimum delay threshold for an audible echo in acoustics.
+\end{definition}
+
+\begin{definition}[Phase delay of acoustic waves]\label{def:acoustic_phase_delay}
+For a monochromatic plane sound wave $p(\mathbf{r}, t) = p_0 e^{i(\mathbf{k}\cdot\mathbf{r} - \omega t)}$, the \textbf{phase delay} corresponding to the spatial phase $\mathbf{k}\cdot\mathbf{r}$ is
+\[
+\tau_{\text{phase}} = \frac{\mathbf{k}\cdot\mathbf{r}}{\omega} = \frac{|\mathbf{r}|\cos\theta}{c},
+\]
+and along the direction of propagation ($\theta=0$) we have $\tau_{\text{phase}} = r/c = \tau_{\text{prop}}$.
+\end{definition}
+
+\begin{proposition}[Unification of acoustic delay and phase]\label{prop:acoustic_delay_phase_unity}
+Along the direction of propagation, every increase of the spatial phase by $2\pi$ (one wavelength $\lambda$) corresponds to an increase of the time offset by one period $T$:
+\[
+\tau = \frac{\lambda}{c} = \frac{2\pi}{\omega} = T.
+\]
+The spatial period (wavelength) and the temporal period (frequency) of a sound wave are coupled exactly through the delay.
+\end{proposition}
+
+\begin{proof}
+The wavelength is $\lambda = 2\pi/|\mathbf{k}| = cT$. Along the direction of propagation, an increase of the phase by $2\pi$ corresponds to an increase of the distance by $\lambda$, so the delay is $\tau = \lambda/c = T$.
+\end{proof}
+
+\section{Harmonic structure and Fourier decomposition}
+
+\begin{definition}[Harmonic series]\label{def:harmonic_series}
+Any sound wave of period $T$, $p(t)$, admits the \textbf{Fourier series} expansion
+\[
+p(t) = \sum_{n=1}^{\infty} A_n \cos(n\omega_0 t + \phi_n),
+\]
+where $\omega_0 = 2\pi/T$ is the fundamental frequency and $n\omega_0$ is the frequency of the $n$-th harmonic. The successive harmonics form a nested epicycle system---the fundamental frequency corresponds to the outer, large epicycle and the higher harmonics to the inner, small epicycles.
+\end{definition}
+
+\begin{example}[Harmonic characteristics of instrumental timbre]\label{ex:instrument_timbre}
+Different instruments playing the same pitch produce different timbres, which arises from differences in harmonic structure. A tuning fork has almost only the fundamental frequency, a violin is rich in harmonics, and a clarinet is dominated by odd-order harmonics.
+\end{example}
+
+\section{Tuning systems}
+
+\begin{definition}[Interval and frequency ratio]\label{def:musical_interval}
+The \textbf{interval} between two notes is determined by the frequency ratio. The perfect octave is $2:1$, the perfect fifth $3:2$, the perfect fourth $4:3$ and the major third $5:4$.
+\end{definition}
+
+\begin{theorem}[Mathematical structure of equal temperament]\label{thm:equal_temperament}
+The common ratio of equal temperament is $r = 2^{1/12}$. The frequency of the $k$-th semitone is $f_k = f_0 \cdot 2^{k/12}$.
+\end{theorem}
+
+\begin{proof}
+This follows directly by dividing the octave frequency ratio $2:1$ into twelve equal parts: $r^{12} = 2 \Rightarrow r = 2^{1/12}$.
+\end{proof}
+
+\begin{lemma}[Approximation of equal temperament to the perfect fifth]\label{ch22_fifth_approximation}
+The frequency ratio of the `fifth' formed by seven semitones in equal temperament is $2^{7/12} \approx 1.4983$, whose relative error with respect to the perfect fifth $3/2 = 1.5$ is about $0.11\%$; whilst the twelve semitones close the octave exactly ($2^{12/12} = 2$).
+\end{lemma}
+
+\begin{proof}
+Comparing logarithms: $\log_2(2^{7/12}) = 7/12 \approx 0.5833$ and $\log_2(3/2) \approx 0.5850$, a difference of $0.0016$. Hence $2^{7/12} = 2^{0.5833} = 2^{0.5850} \cdot 2^{-0.0016} \approx \frac{3}{2} \cdot 0.9989$, a relative error of $\approx 0.11\%$. Closure of the octave follows directly from $2^{12/12}=2$. This compromise of an `approximate fifth plus an exact octave' is the musical compromise between geometric scaling (equal temperament) and simple integer ratios (just intonation).
+\end{proof}
+
+\section{Periodic propagation of sound waves and beat-frequency delay}
+
+\begin{definition}[Standing wave]\label{def:standing_wave}
+Two travelling waves of the same frequency and equal amplitude propagating in opposite directions superpose to form a \textbf{standing wave}:
+\[
+p(x, t) = 2A\cos(kx)\cos(\omega t).
+\]
+The spatial reflection symmetry of a standing wave is given by the form of the law of reflection in the `Vector Analysis' chapter---after reflection at a boundary a wave superposes with the incident wave, forming a standing pattern in space.
+\end{definition}
+
+\begin{proposition}[Harmonic series of string instruments]\label{prop:string_harmonics}
+The standing-wave modes allowed on a string fixed at both ends have frequencies $f_n = n f_1$ ($n = 1, 2, 3, \dots$).
+\end{proposition}
+
+\begin{proof}
+The standing-wave form $p(x,t) = A\sin(kx)\cos(\omega t)$ satisfies the wave equation (Theorem \ref{thm:acoustic_wave_equation}). The boundary conditions $p(0,t) = p(L,t) = 0$: at $x=0$ they hold automatically; at $x=L$ they require $\sin(kL) = 0$, that is, $k_n L = n\pi$ ($n = 1,2,3,\dots$). From the dispersion relation $\omega_n = c k_n$ we obtain
+\[
+f_n = \frac{\omega_n}{2\pi} = \frac{c n\pi/L}{2\pi} = n\cdot\frac{c}{2L} = n f_1, \qquad f_1 = \frac{c}{2L}.
+\]
+The fundamental frequency $f_1$ is inversely proportional to the length of the string---the shorter the string, the higher the pitch.
+\end{proof}
+
+\begin{definition}[Beat-frequency delay]\label{def:beat_delay}
+Two sound waves of close frequency ($f_1 \approx f_2$, with $\Delta f = |f_1 - f_2|$ very small) superpose to produce the phenomenon of \textbf{beats}---the amplitude of the resulting sound wave varies periodically at the beat frequency $\Delta f$. From the point of view of delay, the beat period is the \textbf{phase delay} required for the phase difference of the two sound waves, $\Delta\phi(t) = 2\pi\Delta f \cdot t$, to change from $0$ to $2\pi$. The beat-frequency delay measures the time offset required for two sound waves of close frequency to pass from complete coincidence in phase to the next complete coincidence---the time required for the phase difference of the two frequency components to rotate through $2\pi$.
+\end{definition}
+
+\begin{proposition}[Beat-frequency delay formula]\label{prop:beat_delay_formula}
+Let the frequencies of two sound waves be $f_1, f_2$, with $\Delta f = |f_1 - f_2|$. Then the beat period is
+\[
+T_{\text{beat}} = \frac{1}{\Delta f}.
+\]
+\end{proposition}
+
+\begin{proof}
+Superposing the two sound waves: $p(t) = A\cos(\omega_1 t) + A\cos(\omega_2 t) = 2A\cos(\Delta\omega \, t/2)\cos(\bar{\omega} t)$, where $\Delta\omega = |\omega_1 - \omega_2|$ and $\bar{\omega} = (\omega_1 + \omega_2)/2$. The amplitude envelope $2A\cos(\Delta\omega \, t/2)$ oscillates with angular frequency $\Delta\omega/2$, so the envelope period is $2\pi/(\Delta\omega/2) = 4\pi/\Delta\omega$. The beat period (the interval between two successive amplitude maxima or minima) is half the envelope period: $T_{\text{beat}} = 2\pi/\Delta\omega = 1/\Delta f$.
+\end{proof}
+
+\section{Conservation laws of audio systems}
+
+\begin{theorem}[Three conservation laws of acoustic-wave systems]\label{thm:acoustic_conservation}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Mass conservation}: $\frac{\partial \rho'}{\partial t} + \rho_0 \nabla \cdot \mathbf{v} = 0$.
+    \item \textbf{Energy conservation}: $\frac{\partial E}{\partial t} + \nabla \cdot \mathbf{I} = 0$ (in the absence of sources).
+    \item \textbf{Scale-charge conservation}: in the absence of damping the amplitudes of the individual frequency components are conserved independently.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) Mass conservation is the linearised continuity equation (part (i) of the proof of Theorem \ref{thm:acoustic_wave_equation}). (ii) The energy density is $E = \frac{1}{2}\rho_0|\mathbf{v}|^2 + \frac{1}{2}\frac{p^2}{\rho_0 c^2}$ and the energy flux density is $\mathbf{I} = p\mathbf{v}$; differentiating directly from the wave equation gives $\frac{\partial E}{\partial t} + \nabla\cdot\mathbf{I} = 0$ (in the absence of sources)---conservation of energy under spatial translation. (iii) The Fourier decomposition of the undamped wave equation (the plane-wave solution of Theorem \ref{thm:acoustic_wave_equation}) makes the individual frequency components $A_n e^{i(\mathbf{k}_n\cdot\mathbf{r} - \omega_n t)}$ evolve independently with unchanged amplitudes $|A_n|$---conservation of the scale charge of each frequency channel.
+\end{proof}
+
+\begin{remark}[Connection with the rest of the book]
+The theory of the periodic structure of audio systems established in this chapter is an application of periodic mathematics in acoustics. The trajectory of simple harmonic motion in phase space is the one-dimensional degenerate form of the epicycle model, the harmonic series is an acoustic instance of a nested epicycle system, and the acoustic wave equation describes wave propagation in continuum mechanics. The concept of delay reveals the deeper structure of sound-wave propagation: the propagation delay $\tau = r/c$ converts a spatial distance into a time offset, the phase delay $\tau = \phi/\omega$ converts a phase angle into a time offset, and the beat-frequency delay $\tau_{\text{beat}} = 1/\Delta f$ converts a frequency difference into a time offset. The three delays correspond respectively to the manifestations in the time domain of the three elementary operations (translation, rotation and scaling).
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & The acoustic propagation delay $\tau_{\text{prop}} = |\mathbf{r}-\mathbf{r}'|/c$ (Definition \ref{def:acoustic_propagation_delay}): the linear translational correspondence from spatial distance to time offset \\
+Scaling & The common ratio $2^{1/12}$ of equal temperament (Theorem \ref{thm:equal_temperament}) and the approximation to the perfect fifth (Lemma \ref{ch22_fifth_approximation}) \\
+Rotation & The phase-space circulation of simple harmonic motion $\dot z = -i\omega_0 z$ (Definition \ref{def:simple_harmonic_motion}); the phase delay $\tau = \phi/\omega$ (Definition \ref{def:harmonic_phase_delay}) \\
+Conservation & Energy conservation in simple harmonic motion $E = \frac{1}{2}kA^2$ (Proposition \ref{prop:harmonic_energy}); mass, energy and scale-charge conservation (Theorem \ref{thm:acoustic_conservation}) \\
+Symmetry & The spatial reflection symmetry of standing waves (Definition \ref{def:standing_wave}); the symmetry constraint of the boundaries fixed at both ends of a string (Proposition \ref{prop:string_harmonics}) \\
+Closure & Periodic closure on every increase of the phase by $2\pi$: $\tau = \lambda/c = T$ (Proposition \ref{prop:acoustic_delay_phase_unity}); closure of the beat phase difference as it returns from $0$ to $2\pi$ (Definition \ref{def:beat_delay}) \\
+Period & The fundamental frequency and the harmonic series $f_n = n f_1$ (Definition \ref{def:harmonic_series}, Proposition \ref{prop:string_harmonics}); the beat period $T_{\text{beat}} = 1/\Delta f$ (Definition \ref{def:beat_delay}, Proposition \ref{prop:beat_delay_formula}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the \textbf{audio periodicity decision theorem} of this chapter (\ref{thm:audio_periodicity_decision}). Hint: first write down the decision map and the evolution group of this chapter's target, then apply the proof structure of the general criterion of the `Periodic Systems' chapter.
+
+    \item Verify that the hypotheses of \textbf{monotonicity of quantity adjustment} (\ref{prop:audio_adaptive_growth}) hold for the domain objects of this chapter, and give a counterexample in which the hypotheses fail.
+
+    \item Examine the behaviour of the \textbf{three-parameter correspondence: radius, phase and speed} (\ref{prop:audio_epicycle_correspondence}) under degeneracy of the parameters, and explain how the conclusion degenerates accordingly.
+
+    \item Explain the relation between the \textbf{audio periodicity diagnostic procedure and its interfaces with three chapters} (\ref{thm:audio_diagnosis_integration}) and the corresponding general conclusions of the `Periodic Systems' chapter (whether they agree, whether it is a special case, or whether additional conditions are required).
+
+    \item Using the seven-theme comparison table of this chapter, identify the concrete carriers in this chapter of the three themes \textbf{translation}, \textbf{scaling} and \textbf{rotation}, and give one example of domain data for each.
+
+    \item Synthesis: restate the diagnostic procedure of this chapter using the five-step standard interface of the `Periodic Systems' chapter (Table \ref{tab:ps_five_steps}), noting for each step the theorem of this chapter on which it depends: \ref{thm:audio_periodicity_decision}, \ref{prop:audio_adaptive_growth}, \ref{prop:audio_epicycle_correspondence}, \ref{thm:audio_diagnosis_integration}.
+\end{enumerate}
+
+

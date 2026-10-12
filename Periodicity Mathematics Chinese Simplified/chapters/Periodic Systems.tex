@@ -1,0 +1,1356 @@
+\chapter{周期系统}
+\label{chap:periodic_system}
+\markboth{周期系统}{周期系统}
+\label{chap:periodic-system}
+
+\begin{remark}[本章定位：从理论数学到应用数学的衔接章]\label{rem:periodic-system-positioning}
+本章是全书\textbf{由理论数学转入应用数学的衔接章}。至此，理论工具已全部备齐：「周期基础」章给出周期性与闭合轨道的严格判据，「周期函数与具有周期轨道的群」章给出周期函数的群结构，「离散采样逼近、同余角与置闰」章给出连续对象到离散序列的桥梁，「调和分析」章给出频率分解的积分变换，「时序分析」章给出数据层面的拐点检测、周期图与参数估计。
+
+其后各应用章面对的则是一个个具体的\textbf{目标}——一段观测数据、一个物理系统、一种社会现象。目标该不该用周期数学刻画、怎样刻画，不能凭直觉断言。本章给出把任意目标接入周期数学框架的\textbf{标准接口}，共五步：
+
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：依「周期基础」章 \cref{thm:combined_criterion} 严格判定目标是否具有周期性，并确定其\textbf{周期类型}（第 \ref{sec:ps_periodicity_decision} 节）；
+    \item \textbf{构建}：若目标具有周期性，则依数据的\textbf{拐点}构建\textbf{周期级数}——振幅级数、频率级数、相位级数，得到\textbf{周转圆组}，并确立「半径对应振幅、相位对应旋转时延、频率对应旋转速度」的对应（第 \ref{sec:ps_series_construction} 节）；
+    \item \textbf{调节}：依数据\textbf{动态调节}周转圆组的数量与参数——一个周转圆对应一个简单复变函数，周转圆组即周期级数形式的复变函数（第 \ref{sec:ps_adaptive} 节）；
+    \item \textbf{卷积}：在周转圆组上引入\textbf{振幅卷积、相位卷积、频率卷积}（第 \ref{sec:ps_convolutions} 节；三者的定义见「级数与卷积」章）；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章的工具链（第 \ref{sec:ps_integration} 节）。
+\end{enumerate}
+
+第 \ref{sec:ps_phase_space} 节起给出周期系统的相空间、演化与守恒结构，以及复指数激活函数、贝叶斯更新与核平滑梯度下降等动力学与推断工具。
+
+\textbf{接口约定}：后续各应用章在判定目标是否具有周期性、以及查找其最小正周期时，一律引用本章第 \ref{sec:ps_periodicity_decision} 节（\cref{thm:ps_periodicity_decision}、\cref{def:ps_minimal_period_algorithm}），不再各自给出判据。
+\end{remark}
+
+\begin{remark}[本章主题]\label{rem:periodic-system-themes}
+本章围绕以下主题展开：平移——时间平移操作与能量守恒，相位对应旋转时延；缩放——标度变换与标度荷守恒，频率对应旋转速度；旋转——相位旋转与角动量守恒；守恒——三类守恒律的诺特对应；对称——对称性决定可积性程度；闭合——相空间轨迹的闭合判据与周期类型判定；周期——周期级数、周转圆组、主导分量与复指数激活函数。
+\end{remark}
+
+\begin{remark}[本章术语约定]\label{rem:periodic-system-terminology}
+本章采用标准术语：以“复指数分量”代替“周转圆分量”，以“加权互相关”代替“周期卷积”，以“合成信号”代替“组合周期”，以“复指数激活函数”代替“周转圆激活函数”，以“核平滑梯度下降”代替“KDI 优化”。其中\textbf{周转圆}仅在第 \ref{sec:ps_series_construction} 节用于陈述「半径—振幅、相位—时延、频率—转速」的几何对应，其后一律使用“复指数分量”。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{fittikz}
+\begin{tikzpicture}[>=Stealth, thick, node distance=0.9cm and 1.0cm,
+  stage/.style={draw, rounded corners, align=center, minimum width=2.4cm, minimum height=0.8cm, font=\small, fill=blue!8},
+  arr/.style={-{Stealth[length=2.4mm]}, very thick}]
+\node[stage, fill=blue!12] (s1) {1. 判定\\周期性};
+\node[stage, fill=cyan!12, right=of s1] (s2) {2. 构建\\周转圆组};
+\node[stage, fill=green!12, right=of s2] (s3) {3. 调节\\参数};
+\node[stage, fill=orange!12, right=of s3] (s4) {4. 卷积\\三类耦合};
+\node[stage, fill=red!12, right=of s4] (s5) {5. 整合\\工具链};
+\draw[arr] (s1) -- (s2);
+\draw[arr] (s2) -- (s3);
+\draw[arr] (s3) -- (s4);
+\draw[arr] (s4) -- (s5);
+% 下方工具链
+\node[stage, fill=yellow!16, below=1.5cm of s1] (t1) {周期基础章\\判据};
+\node[stage, fill=yellow!16, right=of t1] (t2) {级数与卷积章\\三级数};
+\node[stage, fill=yellow!16, right=of t2] (t3) {离散采样章\\公度性};
+\node[stage, fill=yellow!16, right=of t3] (t4) {调和分析章\\傅里叶系数};
+\node[stage, fill=yellow!16, right=of t4] (t5) {时序分析章\\参数估计};
+\draw[arr, dashed] (s1) -- (t1);
+\draw[arr, dashed] (s2) -- (t2);
+\draw[arr, dashed] (s3) -- (t3);
+\draw[arr, dashed] (s4) -- (t4);
+\draw[arr, dashed] (s5) -- (t5);
+\node[align=center, font=\small] at (5.2,-3.2) {五步接口：判定 $\to$ 构建 $\to$ 调节 $\to$ 卷积 $\to$ 整合，每一步对应一章理论工具};
+\end{tikzpicture}
+\end{fittikz}
+\caption{周期系统五步接口：从判定周期性出发，经构建周转圆组、调节参数、三类卷积，最终整合到工具链，每一步都有对应的理论章支撑。}
+\label{fig:ps_five_steps}
+\end{figure}
+
+\section{周期性判定：目标是否具有周期性}\label{sec:ps_periodicity_decision}
+
+\subsection{目标与判定输入}
+
+应用章面对的对象统称\textbf{目标}。目标要接入周期数学框架，必须先抽象为可判定的对象。
+
+\begin{definition}[目标与判定输入]\label{def:ps_target}
+一个\textbf{目标}是指应用章所研究的对象（观测数据、物理系统、社会现象、算法过程等）。目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal{D}=(\mathcal{T},x),
+\]
+其中 $\mathcal{T}$ 称为\textbf{承载结构}（可为 $\mathbb{R}$、$\mathbb{Z}$、$\mathbb{R}^n$、有限群 $\mathbb{Z}_T$、流形或范畴对象等），$x:\mathcal{T}\to V$ 是目标在 $\mathcal{T}$ 上的取值。若 $\mathcal{T}=\mathbb{R}$，$x$ 称为目标的\textbf{连续描述}；若 $\mathcal{T}=\mathbb{Z}$，$x$ 称为目标的\textbf{离散描述}。承载结构的选择本身是判定的一部分——同一目标在不同承载结构下可以有不同的周期性（见 \cref{rem:translation_period_fix}）。
+\end{definition}
+
+\begin{definition}[判定映射]\label{def:ps_periodization}
+设目标由判定输入 $\mathcal{D}=(\mathcal{T},x)$ 给出。若存在双射 $f:\mathcal{T}\to\mathcal{T}$ 与初值 $x_0$ 使目标由 $f$ 的迭代生成（即 $x$ 是 $f$ 的轨道），称 $f$ 为目标的\textbf{判定映射}。这一步把目标化为离散动力系统 $(\mathcal{T},f)$，从而可以套用「周期基础」章的判据。
+\end{definition}
+
+\begin{theorem}[周期性判定定理]\label{thm:ps_periodicity_decision}
+设目标的判定映射为 $f$，$(\mathcal{T},f)$ 为离散动力系统。
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 $m\in\mathbb{N}^+$ 使 $f^m=\operatorname{id}$（即 $\operatorname{ord}(f)=m<\infty$），则目标为\textbf{一致周期系统}，每条轨道闭合且轨道长度整除 $m$（「周期基础」章 \cref{thm:combined_criterion}(A)、\cref{thm:finite_order_orbit}）。
+    \item \textbf{判定等价}：目标为一致周期系统 $\iff \operatorname{ord}(f)<\infty$（「周期基础」章 \cref{thm:combined_criterion}(B)）。
+    \item \textbf{逐点判据}：目标在 $x_0$ 处的轨道闭合 $\iff$ $x_0$ 为周期点（「周期基础」章 \cref{thm:closed_orbit_criterion}）；此时轨道长度即该点处的周期（「周期基础」章 \cref{cor:closed_orbit_structure}）。
+    \item \textbf{不可省略性}：守恒量与对称群的合取\textbf{不能}替代 $\operatorname{ord}(f)<\infty$（「周期基础」章 \cref{cor:true_logic}(iv)）；准周期目标（$\operatorname{ord}(f)=\infty$、轨道不闭合但在紧致承载结构上稠密）\textbf{不属于周期系统}（「周期基础」章 \cref{rem:quasi_period}）。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(A) 把 \cref{thm:combined_criterion}(A) 用于判定输入：取演化群 $G=\langle f\rangle\le\operatorname{Symmetry}(f)$，则 $f\in G$ 且 $\operatorname{ord}(f)=m$ 有限，故每条轨道闭合且长度整除 $m$。
+(B) 即 \cref{thm:combined_criterion}(B) 与 \cref{def:strict_period} 的重述。
+(C) 由 \cref{thm:closed_orbit_criterion}（闭合轨道 $\iff$ 逐点周期）与 \cref{cor:closed_orbit_structure}。
+(D) 由 \cref{cor:true_logic}(iv)（守恒加对称不蕴含周期）与 \cref{rem:quasi_period}（准周期在纯代数框架下只能声明 $\operatorname{ord}(f)=\infty$）。
+\end{proof}
+
+\subsection{周期类型}
+
+判定为“具有周期性”之后，还要确定\textbf{周期类型}。不同类型的周期目标，其建模方式、可用工具与误差性质都不同。
+
+\begin{definition}[周期类型]\label{def:ps_period_type}
+经 \cref{thm:ps_periodicity_decision} 判定后，目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 $m_0=1$，目标为不动点（\cref{rem:quasi_period}）；
+    \item \textbf{严格周期型}：$1<m_0<\infty$，目标为周期点而非平衡点（\cref{def:strict_period}）；
+    \item \textbf{一致周期型}：$\operatorname{ord}(f)=m<\infty$，所有轨道长度整除 $m$（\cref{def:strict_period}）；
+    \item \textbf{准周期型}：$\operatorname{ord}(f)=\infty$，轨道不闭合但在紧致承载结构上稠密（\cref{rem:quasi_period}）；
+    \item \textbf{最终周期型}：存在 $N$ 使 $t\ge N$ 后目标为周期（\cref{def:periodic_point}）；
+    \item \textbf{离散周期型}：承载结构为 $\mathbb{Z}$，且归一化周期比 $\rho=T_x/\Delta x\in\mathbb{Q}$（「离散采样逼近、同余角与置闰」章 \cref{prop:commensurability_periodicity_parallel}）。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，且残差随时间衰减——即存在周期 $T>0$、相位函数 $\theta$ 与残差 $\rho(t)$ 使
+    \[
+    x(t)=\theta(t)+\rho(t),\qquad \theta(t+T)=\theta(t),\qquad \|\rho(t)\|\le Ce^{-\kappa t}\quad(\kappa>0);
+    \]
+    与最终周期型的界线：最终周期型要求轨道在\textbf{有限步后恰为}周期（\cref{def:periodic_point}），渐近周期型只在 $t\to\infty$ 的极限意义下趋于闭合，任何有限时刻的轨道均不闭合。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于\textbf{周期系统}；(iv) 不属于周期系统，但可用有界逼近工具处理；(v) 只在稳定阶段是周期系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期系统，只在稳定阶段可用有界逼近工具处理。
+\end{definition}
+
+\begin{proposition}[周期类型的判别准则]\label{prop:ps_type_discrimination}
+设目标已给定判定输入 $\mathcal{D}=(\mathcal{T},x)$ 与判定映射 $f$。按下列顺序判别即可确定周期类型：
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $x$ 为常值，则为平凡周期型；
+    \item 否则若 $\operatorname{ord}(f)<\infty$，则为一致周期型；若其轨道含不动点则为平凡周期型混合，否则为严格周期型；
+    \item 否则若 $\mathcal{T}$ 紧致且轨道稠密不闭合，则为准周期型；
+    \item 否则若存在 $N$ 使 $t\ge N$ 后轨道闭合，则为最终周期型；
+    \item 否则若存在周期 $T>0$、相位函数 $\theta$（$\theta(t+T)=\theta(t)$）与残差 $\rho(t)$ 使 $x(t)=\theta(t)+\rho(t)$ 且 $\|\rho(t)\|\le Ce^{-\kappa t}$（$\kappa>0$），则为渐近周期（阻尼）型；
+    \item 否则目标不具有周期性，只能作统计描述（见 \cref{thm:ps_minimal_period_correctness}(iii)）。
+\end{enumerate}
+\end{proposition}
+
+\begin{figure}[htbp]
+\centering
+\begin{fittikz}
+\begin{tikzpicture}[>=Stealth, thick, node distance=0.8cm and 0.8cm,
+  dec/.style={draw, rounded corners, align=center, minimum width=2.6cm, minimum height=0.8cm, font=\footnotesize, fill=yellow!12},
+  res/.style={draw, rounded corners, align=center, minimum width=2.6cm, minimum height=0.8cm, font=\footnotesize},
+  arr/.style={-{Stealth[length=2mm]}, thick}]
+\node[dec, fill=yellow!16] (start) {输入\\$(\mathcal{T},x,f)$};
+\node[dec, right=of start] (q1) {$x$ 常值？};
+\node[res, fill=blue!12, above right=0.4cm and 0.8cm of q1] (t1) {平凡周期型};
+\node[dec, right=1.2cm of q1] (q2) {$\operatorname{ord}(f)<\infty$？};
+\node[res, fill=green!12, above right=0.4cm and 0.8cm of q2] (t2) {一致/严格周期型};
+\node[dec, right=1.2cm of q2] (q3) {$\mathcal{T}$ 紧致且稠密？};
+\node[res, fill=red!12, above right=0.4cm and 0.8cm of q3] (t3) {准周期型};
+\node[res, fill=orange!12, below right=0.4cm and 0.8cm of q3] (t4) {最终周期型\\/不周期};
+\node[dec, fill=yellow!16, below=1.4cm of t4, text width=3.2cm] (q4) {渐近趋于闭合轨道\\且残差衰减？};
+\node[res, fill=orange!12, below right=0.4cm and 0.8cm of q4] (t5) {渐近周期（阻尼）型};
+\draw[arr] (start) -- (q1);
+\draw[arr] (q1) -- node[above, font=\tiny]{是} (t1);
+\draw[arr] (q1) -- node[above, font=\tiny]{否} (q2);
+\draw[arr] (q2) -- node[above, font=\tiny]{是} (t2);
+\draw[arr] (q2) -- node[below, font=\tiny]{否} (q3);
+\draw[arr] (q3) -- node[above, font=\tiny]{是} (t3);
+\draw[arr] (q3) -- node[below, font=\tiny]{否} (q4);
+\draw[arr] (q4) -- node[left, font=\tiny]{否} (t4);
+\draw[arr] (q4) -- node[above, font=\tiny]{是} (t5);
+\end{tikzpicture}
+\end{fittikz}
+\caption{周期类型判别决策树：从判定输入出发，依次判断常值性、有限阶性、轨道紧致性与渐近闭合性，确定七种周期类型之一。}
+\label{fig:ps_type_decision_tree}
+\end{figure}
+
+\subsection{最小正周期的查找}
+
+判定回答了“是否周期”，紧接着的问题是“周期是多少”。
+
+\begin{definition}[最小正周期查找算法]\label{def:ps_minimal_period_algorithm}
+\textbf{输入}：目标序列 $f(0),\dots,f(N-1)$——由 \cref{def:ps_periodization} 的判定映射生成，离散化按「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel} 取采样间隔 $\Delta x$；容差 $\varepsilon\ge0$。
+\textbf{输出}：最小正周期 $T_0$，或判定“不周期”。
+\textbf{步骤}：
+\begin{enumerate}[label=(\arabic*)]
+    \item 取候选集 $\mathcal{P}=\{T\in\mathbb{N}^+:2T\le N\}$，按 $T$ 递增遍历；
+    \item 对每个 $T$ 计算最大偏差 $E(T)=\max_{0\le n<N-T}\|f(n+T)-f(n)\|$；
+    \item 输出首个满足 $E(T)\le\varepsilon$ 的 $T$ 作为 $T_0$；若遍历完毕无解，输出“不周期”；
+    \item \textbf{公度性校核}：以归一化周期比 $\rho=T_x/\Delta x$（$\rho=p/q$ 既约时 $T_0=p$）核对 $T_0$ 与连续周期 $T_x$ 的换算关系；对应连续时长为 $\ell=T_0\Delta x$（量纲为时间，不可与无量纲比 $\rho$ 混用）。核对依据为「离散采样逼近、同余角与置闰」章 \cref{prop:commensurability_periodicity_parallel}、\cref{cor:sampling_period_relation_parallel}。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[最小正周期算法的正确性]\label{thm:ps_minimal_period_correctness}
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $f$ 为严格周期序列且 $\varepsilon=0$、$N\ge2T_0$，则算法输出其离散基本周期 $T_0$（「离散采样逼近、同余角与置闰」章 \cref{def:discrete_fundamental_period}）。
+    \item 若 $f$ 由基本周期为 $T_x$ 的连续目标以采样间隔 $\Delta x$ 采样得到，且归一化周期比 $\rho=T_x/\Delta x=p/q$ 既约，则算法输出 $T_0=p$（\cref{prop:commensurability_periodicity_parallel}(ii)）。
+    \item 若 $\rho\notin\mathbb{Q}$，则不存在真周期：对任何 $T\in\mathbb{N}^+$ 都有 $E(T)>0$（\cref{prop:commensurability_periodicity_parallel}(iii)）。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 由 \cref{def:discrete_fundamental_period}，$T_0$ 为最小正周期，故 $E(T_0)=0$；而 $T<T_0$ 时 $E(T)>0$——否则 $T$ 亦为周期，与最小性矛盾。算法按 $T$ 递增遍历，故首个满足 $E(T)=0$ 者即 $T_0$。
+(ii) 由 \cref{prop:commensurability_periodicity_parallel}(ii)，采样序列的基本周期为 $p$，代入 (i)。
+(iii) 由 \cref{prop:commensurability_periodicity_parallel}(iii)，$\operatorname{Group}_{\mathrm{period}}(f)=\{0\}$，故任何 $T$ 都有 $E(T)>0$。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.9]
+\draw[->] (-0.3,0) -- (9,0) node[right] {$n$};
+\draw[->] (0,-1.8) -- (0,1.8) node[above] {$f(n)$};
+% 周期序列
+\foreach \n in {0,...,17} {
+  \pgfmathsetmacro{\x}{\n*0.5}
+  \pgfmathsetmacro{\y}{1.2*sin(360*\n/5)}
+  \fill[blue] (\x,\y) circle (2pt);
+}
+% 候选周期标注
+\draw[dashed, red] (0,-1.6) -- (0,1.6);
+\draw[dashed, red] (2.5,-1.6) -- (2.5,1.6);
+\draw[<->, red, thick] (0,-1.5) -- (2.5,-1.5);
+\node[red, below, font=\footnotesize] at (1.25,-1.55) {$T_0=5$};
+% 不匹配的候选
+\draw[dashed, green!60!black] (0,1.7) -- (1.5,1.7);
+\draw[dashed, green!60!black] (1.5,-1.7) -- (1.5,1.7);
+\draw[<->, green!60!black] (0,1.5) -- (1.5,1.5);
+\node[green!60!black, above, font=\footnotesize] at (0.75,1.55) {$T=3$ 不匹配};
+\node[align=center, font=\small] at (4.5,-2.5) {最小正周期算法：从 $T=1$ 递增遍历，首个满足 $E(T)\le\varepsilon$ 的 $T$ 即 $T_0$};
+\end{tikzpicture}
+\caption{最小正周期查找算法：对候选周期 $T$ 计算最大偏差 $E(T)$，输出首个满足 $E(T)\le\varepsilon$ 的 $T$ 作为最小正周期。}
+\label{fig:ps_minimal_period}
+\end{figure}
+
+\section{周期级数的构建：从数据拐点到周转圆组}\label{sec:ps_series_construction}
+
+判定与最小正周期回答了“目标是否周期、周期多长”。本节回答“目标由哪些成分构成”：以数据的拐点为特征时点，构建振幅级数、频率级数与相位级数，并组装为周转圆组。
+
+\subsection{数据拐点作为特征时点}
+
+\begin{definition}[拐点特征集]\label{def:ps_inflection_features}
+设目标在采样点 $t_n=n\Delta x$ 上经开窗平滑（窗函数见「时序分析」章 \cref{def:ts_window_function}）后的值为 $\tilde{x}_n$。称满足拐点判据（「时序分析」章 \cref{def:ts_turning_point}）的时点为目标的\textbf{拐点}。记其指标集与相应的转折率（「时序分析」章 \cref{def:ts_refraction}）为
+\[
+\mathcal{I}_{\mathrm{tp}}=\{n_1<n_2<\cdots<n_r\},\qquad
+\mathcal{K}_{\mathrm{tp}}=\{\kappa_{n_1},\dots,\kappa_{n_r}\},
+\]
+二者合称目标的\textbf{拐点特征集}。拐点特征集把连续目标压缩为有限个“方向转折事件”，是构建周期级数的数据起点。
+\end{definition}
+
+\begin{proposition}[拐点特征集承载周期信息]\label{prop:ps_inflection_carries_period}
+若目标为离散周期序列、基本周期为 $m_0$（「离散采样逼近、同余角与置闰」章 \cref{def:discrete_periodic_function}），则其拐点特征集以 $m_0$ 为周期：
+\[
+n\in\mathcal{I}_{\mathrm{tp}}\iff n+m_0\in\mathcal{I}_{\mathrm{tp}},
+\qquad
+\kappa_{n+m_0}=\kappa_n .
+\]
+\end{proposition}
+
+\begin{proof}
+拐点由局部方向变化定义（「时序分析」章 \cref{def:ts_turning_point}），而方向变化算子与 $m_0$-平移交换；又 $\tilde{x}$ 以 $m_0$ 为周期（开窗平滑保持平移结构），故 $\mathcal{I}_{\mathrm{tp}}$ 与 $\mathcal{K}_{\mathrm{tp}}$ 均以 $m_0$ 为周期。
+\end{proof}
+
+\subsection{振幅级数、频率级数、相位级数}
+
+三个级数的形式定义已由「级数与卷积」章给出，本节说明如何\textbf{由数据}确定它们。
+
+\begin{theorem}[由拐点构建周期级数]\label{thm:ps_series_reconstruction}
+设目标的离散基本周期为 $T_0$，其傅里叶展开为
+\[
+f(n)=\sum_{k}A_ke^{i(2\pi kn/T_0+\phi_k)},\qquad A_k\ge0,\ \phi_k\in[0,2\pi).
+\]
+则目标的\textbf{周期级数}由三个级数共同刻画：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅级数} $\mathcal{A}_f(t)=\sum_kA_ke^{ikt}$：系数 $A_k$ 由数据的傅里叶模给出
+    \[
+    A_k=\Bigl|\frac1{T_0}\sum_{n=0}^{T_0-1}f(n)e^{-i2\pi kn/T_0}\Bigr|,
+    \]
+    其中拐点特征集 $\mathcal{I}_{\mathrm{tp}}$ 给出各分量的相位锁定位置（「级数与卷积」章 \cref{def:amplitude_series}）；
+    \item \textbf{频率级数} $\mathcal{F}_f(s)=\frac{2\pi}{T_0}\sum_k ks^k$：完全由最小正周期 $T_0$ 决定，即频率格 $\{2\pi k/T_0\}$（「级数与卷积」章 \cref{def:frequency_series}）；
+    \item \textbf{相位级数} $\mathcal{P}_f(t)=\sum_ke^{i(kt+\phi_k)}$：系数辐角 $\phi_k$ 由数据的相位谱给出，且与拐点时延一致（「级数与卷积」章 \cref{def:phase_series}）。
+\end{enumerate}
+三者合起来构成目标在周期 $T_0$ 上的完整傅里叶数据：频率级数给出“有哪些成分”，振幅级数与相位级数给出“每个成分多强、偏转多少”。
+\end{theorem}
+
+\begin{proof}
+(i)(iii) 由离散傅里叶系数公式及其极坐标分解 $c_k=A_ke^{i\phi_k}$ 直接得到；拐点位置与相位差的对应由 \cref{prop:ps_inflection_carries_period} 与「时序分析」章 \cref{lem:ts_turning_equivalence} 给出。
+(ii) 由 \cref{def:frequency_series}，频率格由 $T_0$ 唯一确定，各频率都是基频的整数倍。
+\end{proof}
+
+\subsection{周转圆组：半径、相位与转速}
+
+\begin{definition}[周转圆组]\label{def:ps_epicycle_group}
+周转圆组的首次定义见第~\ref{chap:sampling}~章 \cref{sec:epicycle_system} 中的 \cref{def:epicycle_system}；本处为其在周期级数（振幅/频率/相位三级数）记号下的形式，并补充「半径—振幅、相位—旋转时延、频率—旋转速度」的对应。
+设目标的周期级数由振幅级数 $\{A_k\}$、频率级数 $\{\omega_k=2\pi k/T_0\}$ 与相位级数 $\{\phi_k\}$ 给出。对每个 $k$ 定义\textbf{周转圆}
+\[
+E_k:\ \theta\mapsto A_ke^{i(\theta+\phi_k)},\qquad \theta=\omega_kt=\frac{2\pi k}{T_0}t,
+\]
+其集合
+\[
+\mathfrak{E}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb{Z}}
+\]
+称为目标的\textbf{周转圆组}；其叠加即目标的周期级数
+\[
+f(t)=\sum_kE_k(\omega_kt)=\sum_kA_ke^{i(\omega_kt+\phi_k)}.
+\]
+\end{definition}
+
+\begin{proposition}[三参数对应：半径、相位与转速]\label{prop:ps_epicycle_correspondence}
+周转圆组 $\mathfrak{E}=\{(A_k,\omega_k,\phi_k)\}_{k}$ 的三个参数与三个几何—力学量一一对应：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{半径对应振幅}：$E_k$ 的半径 $|E_k|=A_k$ 即该分量的振幅，$A_k^2$ 贡献能量（\cref{thm:parseval_fourier}）；
+    \item \textbf{相位对应旋转时延}：对 $k\ne0$（即 $\omega_k\ne0$），初相 $\phi_k$ 对应时间平移 $\tau_k=\phi_k/\omega_k$，即该周转圆相对基准\textbf{超前} $\tau_k$（$\phi_k>0$ 表示波形相对基准\textbf{提前} $\tau_k$，等价于把基准延后 $\tau_k$ 后二者重合）——这一量即该周转圆的\textbf{旋转时延}（「级数与卷积」章 \cref{prop:phase_translation}）；$k=0$ 的直流分量无旋转时延；
+    \item \textbf{频率对应旋转速度}：$\omega_k$ 即该周转圆绕原点的\textbf{角速度}，由最小正周期给出 $\omega_k=2\pi k/T_0$（\cref{def:frequency_series}）。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由定义 $|E_k(\cdot)|=A_k$，配合 \cref{thm:parseval_fourier} 的能量分解。(ii) 由 \cref{prop:phase_translation}：时间平移 $\tau$ 使相位级数系数变为 $e^{i(\phi_k-\omega_k\tau)}$，取 $\tau=\phi_k/\omega_k$（$k\ne0$）即消去初相，故 $\phi_k$ 度量的正是时延，方向为\textbf{超前}——把基准延后 $\tau_k$ 后它与波形重合；$k=0$ 时 $\omega_0=0$，该式无定义，直流分量没有旋转时延。(iii) 由 $\theta=\omega_kt$ 与 \cref{def:frequency_series}。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+% 三级周转圆叠加
+\draw[gray!40] (0,0) circle (1.5);
+\draw[->, blue, very thick] (0,0) -- (1.5,0);
+\node[blue, above, font=\footnotesize] at (0.75,0.05) {$A_1e^{i\omega_1 t}$};
+\draw[gray!40] (1.5,0) circle (0.7);
+\draw[->, red, very thick] (1.5,0) -- (2.0,0.5);
+\node[red, above right, font=\footnotesize] at (1.8,0.55) {$A_2e^{i\omega_2 t}$};
+\draw[gray!40] (2.0,0.5) circle (0.3);
+\draw[->, green!60!black, very thick] (2.0,0.5) -- (2.25,0.65);
+\node[green!60!black, right, font=\footnotesize] at (2.3,0.7) {$A_3e^{i\omega_3 t}$};
+\fill (2.25,0.65) circle (2pt);
+% 说明
+\node[align=center, font=\small] at (1,-2.4) {周转圆组：半径对应振幅，相位对应旋转时延，频率对应旋转速度};
+\end{tikzpicture}
+\caption{周转圆组的几何叠加：每个周转圆由三参数 $(A_k,\omega_k,\phi_k)$ 确定，分别对应半径、角速度与初相。}
+\label{fig:ps_epicycle_geometry}
+\end{figure}
+
+\subsection{周期级数即复变函数}
+
+\begin{theorem}[周期级数的复变函数表示]\label{thm:ps_series_complex_function}
+设目标的基本周期为 $T_0$，周转圆组为 $\mathfrak{E}=\{(A_k,\omega_k,\phi_k)\}_k$，令 $\omega_0=2\pi/T_0$、复变量 $z=e^{i\omega_0t}$。在\textbf{各分量频率与 $\omega_0$ 可公度}（即 $\omega_k=k\omega_0$，$k\in\mathbb Z$）时目标的周期级数等于单位圆上的复变函数
+\[
+f(t)=\sum_{k\in\mathbb{Z}}c_kz^k,\qquad c_k=A_ke^{i\phi_k},
+\]
+即：目标在周期 $T_0$ 上的傅里叶展开等价于一个洛朗级数在 $|z|=1$ 上的取值；有限谐波截断等价于复系数多项式。\textbf{当所有分量与 $\omega_0$ 可公度时，周期级数即单位圆上的复变函数（否则为环面上的函数）}。
+\end{theorem}
+
+\begin{proof}
+由 $z^k=e^{ik\omega_0t}=e^{i\omega_kt}$ 代入即得 $\sum_kA_ke^{i(\omega_kt+\phi_k)}=\sum_kc_kz^k$。系数 $c_k$ 与 $z$ 无关，故右端是 $z$ 的洛朗级数；当仅有限个 $k$ 使 $c_k\neq0$ 时退化为多项式。$z^k=e^{i\omega_kt}$ 只在 $\omega_k/\omega_0\in\mathbb Z$ 时成立；若存在与 $\omega_0$ 不可公度的分量，$e^{i\omega_kt}$ 不是 $z$ 的单值函数，周期级数只是环面 $\mathbb{T}^n$ 上的函数而非单位圆上的复变函数。
+\end{proof}
+
+\section{周转圆组的动态调节}\label{sec:ps_adaptive}
+
+\subsection{一个周转圆对应一个简单复变函数}
+
+\begin{definition}[简单复变函数（单周转圆函数）]\label{def:ps_single_epicycle_function}
+称形如
+\[
+\varphi_{A,\omega,\phi}:\ \mathbb{R}\to\mathbb{C},\qquad
+\varphi_{A,\omega,\phi}(t)=A\,e^{i(\omega t+\phi)}
+\]
+的映射为\textbf{简单复变函数}。它是复变函数 $z\mapsto cz$（$c=Ae^{i\phi}$）沿单位圆的限制，只有三个自由度 $(\log A,\omega,\phi)$——恰与一个周转圆的三参数对应。
+\end{definition}
+
+\begin{proposition}[周转圆组即周期级数形式的复变函数]\label{prop:ps_group_as_function}
+周转圆组 $\mathfrak{E}=\{E_k\}_k$ 与目标周期级数 $f$ 的关系是线性叠加：
+\[
+f=\sum_k\varphi_{A_k,\omega_k,\phi_k}.
+\]
+即：\textbf{一个周转圆对应一个简单复变函数，周转圆组是简单复变函数的有限和，也就是周期级数形式的复变函数}（\cref{thm:ps_series_complex_function}）。
+\end{proposition}
+
+\begin{proof}
+逐项相加即得；有限和的参数集合恰为 $\mathfrak{E}$，且由 \cref{def:ps_single_epicycle_function} 每项由 $(A_k,\omega_k,\phi_k)$ 唯一确定。
+\end{proof}
+
+\subsection{数量与参数的动态调节}
+
+\begin{definition}[周转圆组的动态调节]\label{def:ps_adaptive_adjustment}
+设当前周转圆组为 $\mathfrak{E}^{(j)}$，部分和 $f^{(j)}=\sum_{k\in\mathfrak{E}^{(j)}}\varphi_k$，残差 $r^{(j)}=x-f^{(j)}$。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 $\|r^{(j)}\|^2>\delta$（$\delta>0$ 为容差），则依残差周期图的峰值（「时序分析」章 \cref{def:ts_period_detection}）新增一个周转圆：
+    \[
+    \mathfrak{E}^{(j+1)}=\mathfrak{E}^{(j)}\cup\{(\hat A,\hat\omega,\hat\phi)\},\qquad
+    \hat\omega=\operatorname*{arg\,max}_{\omega}\bigl|\widehat{X_{r}}(\omega)\bigr|;
+    \]
+    \item \textbf{参数调节}：对已有周转圆的参数按正则化最小二乘更新（「时序分析」章 \cref{prop:ts_harmonic_estimate}）
+    \[
+    (A_k,\phi_k)\leftarrow\operatorname*{arg\,min}_{A,\phi}\ \sum_n\Bigl|x(n)-\sum_kA_ke^{i(\omega_kn+\phi_k)}\Bigr|^2,
+    \]
+    或按贝叶斯更新在线修正（\cref{def:bayes-update}、\cref{prop:bayes-sequential}）。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:ps_adaptive_growth}
+按 \cref{def:ps_adaptive_adjustment}(i) 加入残差主频分量后，残差能量单调不增：
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+等号成立当且仅当残差在被选频率上无能量。
+\end{proposition}
+
+\begin{proof}
+新增周转圆即把 $r^{(j)}$ 沿 $\hat\omega$ 的分量从残差中移出。由正交分解 $\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{（被移出的分量）}\|^2$，故不等式成立，等号当且仅当被移出分量的范数为零。
+\end{proof}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:ps_adaptive_convergence}
+设目标为长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值有限周期序列}且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得周转圆组即目标的精确傅里叶数据；若序列为\textbf{复值}，则相应步数为至多 $T_0$ 步。该调节过程与「离散采样逼近、同余角与置闰」章的采样层、「调和分析」章的傅里叶层构成同一分解的三个视图。
+\end{theorem}
+
+\begin{proof}
+长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值}有限周期序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波（含常数项）上完备；\textbf{复值}序列则需 $T_0$ 个分量（正、负频率各自独立）。每步按 \cref{prop:ps_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。参数收敛性由正则化最小二乘的强凸性给出。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.9]
+\draw[->] (-0.3,0) -- (8.5,0) node[right] {迭代 $j$};
+\draw[->] (0,-0.3) -- (0,3.0) node[above] {残差能量 $\|r^{(j)}\|^2$};
+% 残差能量递减曲线
+\draw[blue, very thick, domain=0:8, samples=200]
+  plot (\x, {2.8*exp(-\x/2)});
+% 关键节点
+\foreach \x in {0,1,2,3,4,5,6,7,8} {
+  \pgfmathsetmacro{\y}{2.8*exp(-\x/2)}
+  \fill[red] (\x,\y) circle (2pt);
+}
+\draw[dashed, green!60!black] (0,0.3) -- (8,0.3);
+\node[green!60!black, right, font=\footnotesize] at (8,0.3) {$\delta$};
+\node[blue, above, font=\footnotesize] at (4,1.8) {$\|r^{(j)}\|^2$ 单调递减};
+\node[align=center, font=\small] at (4.2,-1.2) {动态调节：每步加入残差主频分量，残差能量单调不增，有限步后收敛到 $\delta$};
+\end{tikzpicture}
+\caption{动态调节的残差能量下降曲线：每加入一个周转圆，残差能量严格下降，至多 $\lfloor T_0/2\rfloor+1$ 步后收敛（$T_0$ 为实值有限周期序列的长度）。}
+\label{fig:ps_adaptive_convergence}
+\end{figure}
+
+\section{振幅卷积、相位卷积与频率卷积}\label{sec:ps_convolutions}
+
+「级数与卷积」章已在一般周期函数上定义了振幅卷积、相位卷积、频率卷积与趋势卷积（\cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution}），并给出三者的关系（\cref{prop:three_convolutions_relation}）。本节说明它们在\textbf{周期系统}中的作用：三者分别作用于周转圆组的三个参数。
+
+\begin{theorem}[三类卷积在周转圆组上的作用]\label{thm:ps_convolution_action}
+设目标与参照目标的周转圆组分别为 $\mathfrak{E}=\{(A_k,\omega_k,\phi_k)\}$ 与 $\mathfrak{E}'=\{(B_l,\nu_l,\psi_l)\}$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅卷积}只作用于半径：$(A_k)\ast(B_l)$ 给出各对分量半径的组合，频率与相位不参与（\cref{def:amplitude_convolution}）；
+    \item \textbf{相位卷积}只作用于相位：$(\phi_k)\ast(\psi_l)$ 给出各对分量相位差的组合，半径与频率不参与，且满足共轭对称性（\cref{def:phase_convolution}、\cref{prop:phase_convolution_symmetry}）；
+    \item \textbf{频率卷积}只作用于转速：$(\omega_k)\ast(\nu_l)$ 给出各对分量转速之和，确定组合分量的频率格（\cref{def:frequency_convolution}）；
+    \item \textbf{趋势卷积}同时保留振幅与相位：$\mathbb T_{kl}=A_kB_le^{i(\phi_k-\psi_l)}$ 的每一个分量都同时带有半径与相位两个因子，故其在（$k=l$ 的）对角线上的投影给出各分量自身的振幅与相位（\cref{def:tendency_convolution}）。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由三者各自的定义：振幅卷积把相位置零、频率取基准格而只保留振幅；相位卷积把振幅置为 $1$、频率取基准格而只保留相位；频率卷积把振幅置为 $1$、相位置零而只保留频率；趋势卷积由定义 \cref{def:tendency_convolution} 同时保留振幅因子 $A_kB_l$ 与相位因子 $e^{i(\phi_k-\psi_l)}$。故前三者各自只作用一个参数，而趋势卷积同时作用振幅与相位两维。共轭对称性由 \cref{prop:phase_convolution_symmetry}。
+\end{proof}
+
+\begin{proposition}[三类卷积的因式分解]\label{prop:ps_convolution_factorization}
+在 \cref{prop:three_convolutions_relation} 的意义下，完整卷积可分解为三类卷积的组合。对周转圆组而言，这等于在三个参数维度上的独立组合，因此周期系统之间的相互作用可以\emph{按参数维度解耦}地分析：\textbf{振幅耦合只改变半径，相位耦合只改变旋转时延，频率耦合只改变转速}。
+\end{proposition}
+
+\begin{proof}
+由 \cref{thm:ps_convolution_action}，振幅卷积、相位卷积与频率卷积各自只作用一个参数维度，而趋势卷积同时保留振幅与相位；\cref{prop:three_convolutions_relation} 给出三者的合成即完整卷积，故三个维度上的作用互不干涉。将完整卷积限制在 $k=l$ 的对角线上，各分量之间的正交性消去全部非对角交叉项，只余趋势卷积的对角线项 $\sum_k\mathbb T_{kk}e^{-i\omega_kh}$，这正是「应用章」模板中自相关函数的表达式。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.0cm and 1.4cm,
+  box/.style={draw, rounded corners, align=center, minimum width=3.0cm, minimum height=0.9cm, font=\small}]
+\node[box, fill=blue!12] (core) {完整卷积};
+\node[box, fill=green!12, above left=of core] (amp) {振幅卷积\\只作用于半径};
+\node[box, fill=orange!12, above right=of core] (phase) {相位卷积\\只作用于相位};
+\node[box, fill=purple!12, below=of core] (freq) {频率卷积\\只作用于转速};
+\draw[->, very thick] (amp) -- (core);
+\draw[->, very thick] (phase) -- (core);
+\draw[->, very thick] (freq) -- (core);
+\node[align=center, font=\small] at (0,-3.2) {三类卷积按参数维度解耦：振幅、相位、频率三个维度上的作用互不干涉};
+\end{tikzpicture}
+\caption{三类卷积在周转圆组上的解耦作用：振幅卷积只改变半径，相位卷积只改变相位，频率卷积只改变转速。}
+\label{fig:ps_convolution_decoupling}
+\end{figure}
+
+\section{与离散采样、调和分析、时序分析的整合}\label{sec:ps_integration}
+
+\subsection{与离散采样逼近章：从连续目标到可计算序列}
+
+「离散采样逼近、同余角与置闰」章给出采样点、采样率与采样时长的规范定义（\cref{def:uniform_sampling_parallel}、\cref{def:nyquist_sampling_parallel}）以及采样序列周期性的公度性判据（\cref{prop:commensurability_periodicity_parallel}）。在本章流程中它承担\textbf{判定输入的离散化}：当承载结构为 $\mathbb{R}$ 时，先取采样间隔 $\Delta x$ 得序列 $f(n)=x(n\Delta x)$，再用 \cref{thm:ps_minimal_period_correctness}(ii) 把离散基本周期 $T_0$ 换算回连续周期 $T_x$。当 $\rho\notin\mathbb{Q}$ 时目标的周期结构在采样下不可公度，须用该章的置闰序列把频谱泄漏限制在有界水平（\cref{thm:intercalation_leakage_suppression}）。
+
+\subsection{与调和分析章：频率分解与系数}
+
+「调和分析」章给出傅里叶级数与傅里叶变换（\cref{def:fourier_series}、\cref{def:fourier_transform}）、帕塞瓦尔恒等式（\cref{thm:parseval_fourier}）以及傅里叶系数与简谐分量参数的关系（\cref{prop:fourier_epicycle}）。它承担本章流程中\textbf{由周期级数求周转圆组参数}这一步：振幅级数、频率级数与相位级数的系数正是傅里叶系数，而 \cref{prop:fourier_epicycle} 给出的对应与 \cref{prop:ps_epicycle_correspondence} 的「半径—振幅、相位—时延、频率—转速」完全一致。
+
+\subsection{与时序分析章：从数据到参数}
+
+「时序分析」章给出窗函数（\cref{def:ts_window_function}）、拐点检测（\cref{def:ts_turning_point}）、周期图的周期确定（\cref{def:ts_period_detection}）、有限谐波回归（\cref{def:ts_harmonic_regression}）与贝叶斯更新（\cref{def:ts_bayesian_update}）。它承担本章流程中\textbf{由观测数据估计周转圆组参数}这一步：拐点提供特征时点，周期图提供频率初值，有限谐波回归提供参数估计，贝叶斯更新提供在线修正。
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{@{}p{4.6cm}p{4.2cm}p{5.6cm}@{}}
+\toprule
+本章步骤 & 主要工具章 & 关键条目 \\
+\midrule
+判定输入与离散化 & 离散采样逼近、同余角与置闰章 & \cref{def:uniform_sampling_parallel}、\cref{prop:commensurability_periodicity_parallel} \\
+周期性判定与周期类型 & 周期基础章 & \cref{thm:combined_criterion}、\cref{def:strict_period}、\cref{rem:quasi_period} \\
+最小正周期 & 离散采样逼近、同余角与置闰章 & \cref{def:discrete_fundamental_period}、\cref{cor:sampling_period_relation_parallel} \\
+周期级数与周转圆组 & 级数与卷积章 & \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} \\
+系数与能量分解 & 调和分析章 & \cref{prop:fourier_epicycle}、\cref{thm:parseval_fourier} \\
+拐点、周期图、参数估计 & 时序分析章 & \cref{def:ts_turning_point}、\cref{def:ts_period_detection}、\cref{prop:ts_harmonic_estimate} \\
+三类卷积 & 级数与卷积章 & \cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution} \\
+\bottomrule
+\end{tabular}
+\caption{周期系统的五步接口与各理论章的对应。}
+\label{tab:ps_five_steps}
+\end{table}
+
+\begin{remark}[应用章的引用约定]\label{rem:ps_applications_hook}
+后续各应用章——概率系统、密码系统、天文系统、历法系统、地理系统、易经系统、电磁系统、音频系统、机械系统、电路与芯片系统、生物系统、心理系统、社交系统、气候系统、经济系统、政治系统、数据分析、智能体、算法系统等——在判定目标是否具有周期性、确定周期类型与查找最小正周期时，一律引用本章：
+\begin{enumerate}[label=(\roman*)]
+    \item 周期性判据：\cref{thm:ps_periodicity_decision}；
+    \item 周期类型判别：\cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}；
+    \item 最小正周期查找：\cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}；
+    \item 由数据构建周期级数与周转圆组：\cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}；
+    \item 周转圆组的动态调节：\cref{def:ps_adaptive_adjustment}；
+    \item 三类卷积：\cref{thm:ps_convolution_action}。
+\end{enumerate}
+各应用章不再重复给出上述判据。
+\end{remark}
+
+\section{周期系统的多分量形式：多周期耦合系统}\label{sec:ps_phase_space}
+
+\begin{definition}[多周期耦合系统（周期系统的多分量形式）]\label{def:periodic-system}
+一个\textbf{多周期耦合系统} $\mathfrak{S}$ 是一个五元组
+\[
+\mathfrak{S}=(\mathcal{F},\mathcal{G},\mathcal{C},\Gamma,\mathcal{H}),
+\]
+其中：
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathcal{F}=\{f_1,\dots,f_K\}$ 是有限个\textbf{周期分量}的集合。每个分量 $f_k:\mathbb{R}\to\mathbb{C}$ 是周期函数，具有周期 $T_k$、振幅谱 $\{A_n^{(k)}\}$ 和相位谱 $\{\theta_n^{(k)}\}$。
+    \item $\mathcal{G}=\{G_1,\dots,G_K\}$ 是相应的\textbf{平移对称群}。每个 $G_k$ 是 $f_k$ 的周期子群，$G_k\subset\mathbb{R}$ 为离散子群。
+    \item $\mathcal{C}=\{c_{ij}^{(d)}\}_{i,j=1}^{K}$（$d=1,\dots,12$）是\textbf{耦合系数}。$c_{ij}^{(d)}\in\mathbb{C}$ 表示分量 $f_i$ 与 $f_j$ 之间第 $d$ 类加权互相关的耦合强度。
+    \item $\Gamma$ 是\textbf{合成信号}，由各分量的主要谐波叠加而成。
+    \item $\mathcal{H}$ 是系统的\textbf{总能量}，定义为各分量独立能量、耦合能量与合成信号相互作用能量之和：
+    \[
+    \mathcal{H}(\mathfrak{S})
+    =\sum_{k=1}^{K}E_k
+    +\sum_{i\neq j}\sum_{d=1}^{12}|c_{ij}^{(d)}|\,\bigl\|\mathcal{R}^{(d)}_{W}(f_i,f_j)\bigr\|
+    +\sum_{k=1}^{K}\sum_{d=1}^{12}|\gamma_k^{(d)}|\,\bigl\|\mathcal{R}^{(d)}_{W}(\Gamma,f_k)\bigr\|,
+    \]
+    其中 $E_k=\sum_n|A_n^{(k)}|^2$，$\gamma_k^{(d)}$ 是 $\Gamma$ 对 $f_k$ 的第 $d$ 类耦合系数，$\mathcal{R}^{(d)}_{W}$ 为加权互相关算子（见定义 \ref{def:weighted-cross-correlation}）。
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[加权互相关算子]\label{def:weighted-cross-correlation}
+设
+\[
+f(t)=\sum_n A_n e^{i(\omega_n t+\theta_n)},\qquad
+g(t)=\sum_m B_m e^{i(\nu_m t+\psi_m)}.
+\]
+对权重核 $W$ 和相位核 $S^{(d)}$，定义\textbf{加权互相关}为
+\[
+\mathcal{R}^{(d)}_{W}(f,g)(\tau)
+=\sum_{n,m}W(\omega_n-\nu_m)\,(A_nB_m)^{\alpha}\,
+S^{(d)}(\theta_n,\psi_m)\,e^{i\nu_m\tau},
+\]
+其中 $\alpha\in\{0,1\}$ 为振幅开关。$\alpha=0$ 时只保留相位信息，$\alpha=1$ 时同时保留振幅与相位信息。
+\end{definition}
+
+\begin{definition}[子周期分量]\label{def:sub-periodic-structure}
+系统 $\mathfrak{S}$ 中的每个周期分量 $f_k$ 具有：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{独立平移对称群} $G_k$：$f_k$ 在 $G_k$ 作用下不变。
+    \item \textbf{谐波展开}：
+    \[
+    f_k(t)=\sum_n A_n^{(k)}e^{i(\omega_n^{(k)}t+\theta_n^{(k)})},
+    \]
+    各级谐波具有独立的振幅 $A_n^{(k)}$、角频率 $\omega_n^{(k)}$ 和初始相位 $\theta_n^{(k)}$。
+    \item \textbf{主导算子类型}：每个分量对应一种主导微分算子（梯度、旋度或散度），该类型决定其耦合时的相位选择规则。
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[耦合类型]\label{def:coupling-types}
+两个分量 $f_i$ 与 $f_j$ 之间的耦合 $c_{ij}^{(d)}$ 按加权互相关的参数分为：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{相位耦合}（$\alpha=0$）：耦合仅由相位相似度决定，不含振幅信息。
+    \item \textbf{振幅--相位耦合}（$\alpha=1$）：耦合由振幅和相位相似度共同决定。
+    \item \textbf{同频耦合}（$d=1$ 且 $n=m$）：仅保留同频率分量之间的相互作用。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[耦合系数的对称性]\label{prop:coupling-symmetry}
+对耦合系数 $c_{ij}^{(d)}$，有：
+\begin{enumerate}[label=(\roman*)]
+    \item 差角相位核（$d=1,\dots,6$）：$c_{ij}^{(d)}=\overline{c_{ji}^{(d)}}$。
+    \item 和角相位核（$d=7,\dots,12$）：$c_{ij}^{(d)}=c_{ji}^{(d)}$。
+    \item 自耦合：$c_{ii}^{(1)}=1$，$c_{ii}^{(2)}=0$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 差角相位核满足 $S^{(d)}(\theta_i,\theta_j)=\overline{S^{(d)}(\theta_j,\theta_i)}$，故 $c_{ij}^{(d)}=\overline{c_{ji}^{(d)}}$。
+(ii) 和角相位核对交换 $i,j$ 不变，故 $c_{ij}^{(d)}=c_{ji}^{(d)}$。
+(iii) 当 $i=j$ 时，差角为零，$\cos 0=1$，$\sin 0=0$，故 $c_{ii}^{(1)}=1$，$c_{ii}^{(2)}=0$。
+\end{proof}
+
+\begin{proposition}[相位锁定]\label{prop:phase-locking}
+当耦合强度足够大时，分量之间、或分量与合成信号之间发生相位锁定。
+\end{proposition}
+
+\subsection{相空间结构：辛流形与哈密顿流}\label{subsec:ps_phase_space_symplectic}
+
+\begin{definition}[周期系统的相空间]\label{def:ps_phase_space}
+设系统 $\mathfrak{S}$ 具有 $N$ 个自由度。其\textbf{相空间}为构型空间 $Q$ 的余切丛 $T^*Q$，配备标准辛形式
+\[
+\omega := \sum_{i=1}^{N} dq^i\wedge dp_i,
+\]
+其中 $(q^1,\dots,q^N)$ 为广义坐标，$(p_1,\dots,p_N)$ 为共轭动量。$(T^*Q,\omega)$ 称为\textbf{辛流形}。
+\end{definition}
+
+\begin{definition}[哈密顿向量场]\label{def:ps_hamiltonian_field}
+设 $H:T^*Q\to\mathbb{R}$ 为 $C^1$ 光滑哈密顿函数。$H$ 诱导的\textbf{哈密顿向量场} $X_H$ 由下式唯一确定：
+\[
+\omega(X_H,\cdot) = -dH.
+\]
+在局部辛坐标下，
+\[
+X_H = \sum_{i=1}^{N}\left(\frac{\partial H}{\partial p_i}\frac{\partial}{\partial q^i} - \frac{\partial H}{\partial q^i}\frac{\partial}{\partial p_i}\right).
+\]
+\end{definition}
+
+\begin{proposition}[哈密顿方程的局部形式]\label{prop:ps_hamiltonian_equations}
+向量场 $X_H$ 的积分曲线满足\textbf{哈密顿方程}
+\[
+\dot{q}^i = \frac{\partial H}{\partial p_i}, \qquad \dot{p}_i = -\frac{\partial H}{\partial q^i}, \qquad i = 1,\dots,N.
+\]
+\end{proposition}
+
+\begin{proof}
+积分曲线 $\gamma(t) = (q(t), p(t))$ 满足 $\dot{\gamma} = X_H(\gamma)$。由 $X_H$ 的局部表达式逐分量读出即得。
+\end{proof}
+
+\begin{theorem}[刘维尔定理]\label{thm:ps_liouville}
+哈密顿流保持辛体积形式 $\mu := \frac{1}{N!}\omega^{\wedge N}$ 不变。即对任意 $t$，$(\Phi_t^H)^*\mu = \mu$，其中 $\Phi_t^H$ 为 $X_H$ 的流。
+\end{theorem}
+
+\begin{proof}
+由嘉当公式 $\mathcal{L}_{X_H}\omega = d(\iota_{X_H}\omega) + \iota_{X_H}(d\omega)$。因 $\omega$ 闭（$d\omega=0$），且 $\iota_{X_H}\omega = -dH$ 为恰当形式（故 $d(\iota_{X_H}\omega) = -d^2 H = 0$），得 $\mathcal{L}_{X_H}\omega = 0$。辛形式被保持，其外幂 $\mu$ 亦被保持。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+% 相空间坐标
+\draw[->] (-0.3,0) -- (6.5,0) node[right] {$q$};
+\draw[->] (0,-0.3) -- (0,4.5) node[above] {$p$};
+% 哈密顿流线
+\draw[blue, very thick] (2.5,1.0) ellipse (1.6 and 0.7);
+\draw[blue, very thick] (2.5,2.3) ellipse (2.0 and 1.0);
+\draw[blue, very thick] (2.5,3.8) ellipse (2.4 and 1.2);
+% 箭头方向
+\draw[->, red, very thick] (1.2,1.0) -- (1.2,1.3);
+\draw[->, red, very thick] (3.8,1.0) -- (3.8,0.7);
+% 标注
+\node[font=\footnotesize, blue] at (2.5,0.2) {低能级};
+\node[font=\footnotesize, blue] at (2.5,2.3) {中能级};
+\node[font=\footnotesize, blue] at (2.5,4.0) {高能级};
+\node[align=center, font=\small] at (3.2,-1.2) {相空间中的哈密顿流线（等能曲线）：刘维尔定理保证辛体积守恒};
+\end{tikzpicture}
+\caption{相空间中的哈密顿流线：每条流线是一条等能曲线，哈密顿流保持辛体积（刘维尔定理）。}
+\label{fig:ps_hamiltonian_flow}
+\end{figure}
+
+\begin{definition}[不变环面]\label{def:ps_invariant_torus}
+不变环面的首次定义见第~\ref{chap:manifold}~章 \cref{sec:invariant_torus} 中的 \cref{def:invariant_torus}；本处为同一对象在 $N$ 个首次积分记号下的重述。
+设哈密顿系统具有 $N$ 个独立且对合的首次积分 $F_1=H,F_2,\dots,F_N$。水平集
+\[
+\mathbb{T}_{c} := \{F_1=c_1, \dots, F_N=c_N\}
+\]
+称为\textbf{不变环面}。
+\end{definition}
+
+\begin{theorem}[刘维尔--阿诺德定理]\label{thm:ps_liouville_arnold}
+设 $N$ 自由度哈密顿系统具有 $N$ 个独立且对合的首次积分，且水平集 $\mathbb{T}_{c}$ 紧致连通。则 $\mathbb{T}_{c}\cong\mathbb{T}^N$，且在其邻域内存在作用--角坐标 $(I,\theta)$ 使哈密顿函数仅依赖于作用变量 $I$：
+\[
+H = H(I_1,\dots,I_N), \qquad \dot{I}_i = 0, \quad \dot{\theta}^i = \frac{\partial H}{\partial I_i} =: \omega_i(I).
+\]
+\end{theorem}
+
+\begin{proof}[证明思路]
+不变环面的存在性由水平集紧致连通与 $N$ 个对合首次积分给出（阿诺德--刘维尔定理，完整证明见 Arnold, \textit{Mathematical Methods of Classical Mechanics}, 2nd ed., Springer, 1989, \S{}49--50）。在环面上取角坐标 $\theta^i$ 使得哈密顿流为匀速旋转，作用变量 $I_i = \frac{1}{2\pi}\oint_{\gamma_i}p\,dq$ 沿环面基本闭链积分。辛形式的闭性保证 $(I,\theta)$ 为局部辛坐标；在环面邻域内的可积性给出 $\dot{I}_i=0$。
+\end{proof}
+
+\begin{corollary}[不变环面上的运动周期]\label{cor:ps_torus_rotation_period}
+在不变环面 $\mathbb{T}^N$ 上，轨道 $\theta(t) = \theta(0) + \omega t$ 闭合当且仅当各频率成对可公度，即存在 $T>0$ 使 $\omega T\in 2\pi\mathbb{Z}^N$（等价地 $\omega_i/\omega_j\in\mathbb{Q}$ 对一切 $i,j$；若某些 $\omega_j=0$，该分量静止不动，$T$ 取其余分量周期的最小公倍数即可）。若成对可公度，则轨道为周期为 $T$ 的闭合轨道；否则轨道在 $\mathbb{T}^N$ 上稠密而不闭合。此处“成对可公度”不能削弱为“存在 $k\in\mathbb{Z}^N\setminus\{0\}$ 使 $k\cdot\omega=0$”，后者只要求频率在 $\mathbb{Q}$ 上线性相关。
+\end{corollary}
+
+\begin{proof}
+若存在 $T>0$ 使 $\omega_i T\in 2\pi\mathbb{Z}$ 对一切 $i$，则 $\theta^i(T)=\theta^i(0)+2\pi k_i$，$k_i\in\mathbb{Z}$，故 $\theta(T)\equiv\theta(0)$，轨道闭合。反之若不存在此 $T$，则各频率之比有无理数，由 Kronecker 逼近定理轨道在 $\mathbb{T}^N$ 上稠密而不闭合。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+% 环面示意
+\draw[fill=blue!6] (0,0) ellipse (2.2 and 1.0);
+\draw[fill=blue!10] (0,0) ellipse (1.4 and 0.55);
+% 周期轨道（闭合）
+\draw[red, very thick] (0,0) ellipse (1.8 and 0.8);
+% 准周期轨道（稠密）
+\draw[green!60!black, very thick, dashed] (0.2,0.1) .. controls (1.0,0.5) and (1.5,-0.4) .. (-0.3,-0.5) .. controls (-1.5,0.3) and (-0.5,0.7) .. (0.2,0.1);
+% 标注
+\node[red, font=\footnotesize] at (2.6,0.6) {周期轨道（闭合）};
+\node[green!60!black, font=\footnotesize] at (2.6,-0.6) {准周期轨道（稠密）};
+\node[align=center, font=\small] at (0,-1.8) {不变环面上的周期与准周期轨道：频率成对可公度时闭合，否则稠密};
+\end{tikzpicture}
+\caption{不变环面上的两类轨道：周期轨道（红实线）频率成对可公度而闭合，准周期轨道（绿虚线）频率不可公度而在环面上稠密。}
+\label{fig:ps_invariant_torus}
+\end{figure}
+
+\subsection{守恒律与诺特对应}\label{subsec:ps_noether_correspondence}
+
+\begin{definition}[周期系统的守恒量]\label{def:ps_conserved_quantity}
+设 $\mathfrak{S}$ 为多周期耦合系统，$\Phi_t$ 为其流。函数 $Q:T^*Q\to\mathbb{R}$ 称为 $\mathfrak{S}$ 的\textbf{守恒量}（或首次积分），若
+\[
+Q\circ \Phi_t = Q, \qquad \forall t\in\mathbb{R}.
+\]
+等价地，$\{Q,H\} = 0$（泊松括号下与 $H$ 对合）。
+\end{definition}
+
+\begin{lemma}[守恒量刻画轨道]\label{lem:ps_conserved_quantity_characterisation}
+$Q$ 是 $\mathfrak{S}$ 的守恒量，当且仅当 $Q$ 在每条轨道上取常值。
+\end{lemma}
+
+\begin{proof}
+若 $Q\circ\Phi_t=Q$，则对任意 $x_0$ 与任意 $t$，$Q(\Phi_t(x_0))=Q(x_0)$，即 $Q$ 沿轨道恒定。反之若 $Q$ 沿每条轨道恒定，则对任意 $x$ 与任意 $t$，$Q(\Phi_t(x))=Q(x)$，即 $Q\circ\Phi_t=Q$。
+\end{proof}
+
+\begin{theorem}[周期系统的诺特对应]\label{thm:ps_noether_periodic_system}
+设多周期耦合系统 $\mathfrak{S}$ 具有单参数连续对称群 $\{\phi_s\}_{s\in\mathbb{R}}$（即 $\phi_s\circ\Phi_t=\Phi_t\circ\phi_s$ 对一切 $s,t$），其无穷小生成元为 $\xi$。若存在光滑函数 $Q$ 与辛结构 $J$ 使 $\xi = J\nabla Q$，则 $Q$ 是 $\mathfrak{S}$ 的守恒量。
+\end{theorem}
+
+\begin{proof}
+由对称性，$\mathcal{L}_\xi H = 0$（对称变换保持 $H$ 不变）。由 $\xi = J\nabla Q$ 与 $J$ 的反对称性，
+\[
+\frac{d}{dt}Q(\Phi_t(x)) = \nabla Q\cdot X_H = (J^{-1}\xi)\cdot X_H = -\xi\cdot\nabla H = -\mathcal{L}_\xi H = 0.
+\]
+故 $Q$ 沿流不变，即守恒量。
+\end{proof}
+
+\begin{corollary}[三类对称与三类守恒量]\label{cor:ps_three_symmetries_conservation}
+在周期系统的辛框架下，三类连续对称性分别对应三类守恒量：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{时间平移对称}（$\phi_s = $ 时间平移 $s$）$\Rightarrow$ \textbf{能量守恒} $Q = H$；
+    \item \textbf{空间平移对称}（$\phi_s = $ 沿 $\mathbf{a}$ 方向平移 $s$）$\Rightarrow$ \textbf{动量守恒} $Q = \mathbf{p}\cdot\mathbf{a}$；
+    \item \textbf{旋转对称}（$\phi_s = $ 绕轴 $\mathbf{u}$ 旋转角 $s$）$\Rightarrow$ \textbf{角动量守恒} $Q = \mathbf{L}\cdot\mathbf{u}$。
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+三类情形分别验证 \cref{thm:ps_noether_periodic_system} 中的条件 $\xi = J\nabla Q$：(i) 时间平移生成元 $\xi = X_H$，取 $Q = H$ 即得；(ii) 空间平移生成元 $\xi = \partial_{\mathbf{a}}$，取 $Q = \mathbf{p}\cdot\mathbf{a}$；(iii) 旋转生成元 $\xi = \mathbf{u}\times\mathbf{r}\cdot\partial_{\mathbf{r}} + \mathbf{u}\times\mathbf{p}\cdot\partial_{\mathbf{p}}$，取 $Q = \mathbf{L}\cdot\mathbf{u}$。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=0.9cm and 1.4cm,
+  box/.style={draw, rounded corners, align=center, minimum width=3.0cm, minimum height=0.85cm, font=\small}]
+\node[box, fill=blue!12] (sym1) {时间平移对称};
+\node[box, fill=green!12, right=of sym1] (sym2) {空间平移对称};
+\node[box, fill=orange!12, right=of sym2] (sym3) {旋转对称};
+\node[box, fill=blue!8, below=of sym1] (con1) {能量守恒 $H$};
+\node[box, fill=green!8, below=of sym2] (con2) {动量守恒 $\mathbf{p}\cdot\mathbf{a}$};
+\node[box, fill=orange!8, below=of sym3] (con3) {角动量守恒 $\mathbf{L}\cdot\mathbf{u}$};
+\draw[->, very thick] (sym1) -- (con1);
+\draw[->, very thick] (sym2) -- (con2);
+\draw[->, very thick] (sym3) -- (con3);
+\node[align=center, font=\small] at (4.5,-3.0) {周期系统的诺特对应：三类连续对称分别对应三类守恒量};
+\end{tikzpicture}
+\caption{周期系统的诺特对应：时间平移、空间平移、旋转对称分别对应能量、动量、角动量守恒。}
+\label{fig:ps_noether}
+\end{figure}
+
+\begin{remark}[守恒律在周期系统中的角色]\label{rem:ps_conservation_role}
+在周期系统框架内，守恒量 $\{Q_i\}$ 的角色是：\\
+（1）\textbf{约束轨道}——每条轨道被限制在不变水平集 $\{Q_1=c_1,\dots,Q_k=c_k\}$ 上（\cref{lem:ps_conserved_quantity_characterisation}）；\\
+（2）\textbf{判断可积性}——若独立守恒量数目等于自由度 $N$，则系统完全可积，轨道位于不变环面（\cref{thm:ps_liouville_arnold}）；\\
+（3）\textbf{但不直接产生周期}——闭合轨道的充分条件是\textbf{有限阶作用}（\cref{thm:ps_periodicity_decision}），守恒量与对称性仅起辅助约束作用。守恒量帮助 \emph{发现} 周期结构，但不构成周期的充分或必要条件。
+\end{remark}
+
+\subsection{闭合轨道判据与稳定性}\label{subsec:ps_closed_orbit}
+
+\begin{definition}[周期系统的闭合轨道]\label{def:ps_closed_orbit}
+设 $\mathfrak{S}$ 为多周期耦合系统。轨道 $\gamma:\mathbb{R}\to T^*Q$ 称为\textbf{闭合}的，若存在 $T>0$ 使 $\gamma(t+T)=\gamma(t)$ 对一切 $t$。最小的这样的 $T$ 称为 $\gamma$ 的\textbf{最小周期}。
+\end{definition}
+
+\begin{theorem}[闭合轨道的充分判据]\label{thm:ps_closed_orbit_criterion}
+设 $\mathfrak{S}$ 的流 $\Phi_t$ 在不变环面 $\mathbb{T}^N$ 上由频率 $\omega=(\omega_1,\dots,\omega_N)$ 生成。则以下条件等价：
+\begin{enumerate}[label=(\roman*)]
+    \item 环面上每条轨道闭合；
+    \item 存在 $T>0$ 使 $\omega_i T\in 2\pi\mathbb{Z}$ 对一切 $i$；
+    \item 频率 $\omega_1,\dots,\omega_N$ 成对可公度，即 $\omega_i/\omega_j\in\mathbb{Q}$ 对一切 $i,j$。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i)$\Leftrightarrow$(ii)：由 \cref{cor:ps_torus_rotation_period}。(ii)$\Rightarrow$(iii)：若 $\omega T = 2\pi k$（$k\in\mathbb{Z}^N$），则 $\omega_i/\omega_j = k_i/k_j\in\mathbb{Q}$（当 $k_j\neq 0$）。(iii)$\Rightarrow$(ii)：若 $\omega_i = p_i\omega_0$（$p_i\in\mathbb{Z}$，$\omega_0$ 为基频），取 $T = 2\pi/\omega_0$，则 $\omega_i T = 2\pi p_i\in 2\pi\mathbb{Z}$。
+\end{proof}
+
+\begin{corollary}[闭合轨道与有限阶作用的等价性]\label{cor:ps_closed_orbit_finite_order}
+设 $\mathfrak{S}$ 的流 $\Phi_t$ 限制在不变环面 $\mathbb{T}^N$ 上。则环面上每条轨道闭合当且仅当流在环面上的限制具有有限阶：存在 $T>0$ 使 $\Phi_T|_{\mathbb{T}^N} = \operatorname{id}_{\mathbb{T}^N}$。
+\end{corollary}
+
+\begin{proof}
+由 \cref{thm:ps_closed_orbit_criterion}，每条轨道闭合等价于 $\omega_i T\in 2\pi\mathbb{Z}$ 对一切 $i$，这正是 $\Phi_T|_{\mathbb{T}^N} = \operatorname{id}$ 的条件。由「周期基础」章 \cref{thm:finite_order_orbit}，一致闭合等价于 $\operatorname{ord}(\Phi_T|_{\mathbb{T}^N})<\infty$。
+\end{proof}
+
+\begin{remark}[守恒量不保证闭合]\label{rem:ps_conservation_not_sufficient}
+\cref{thm:ps_closed_orbit_criterion} 表明：即使在不变环面 $\mathbb{T}^N$ 上，轨道闭合仍要求频率的成对可公度性。仅有 $N$ 个守恒量（完全可积）\textbf{不保证}轨道闭合——频率可能不可公度，此时轨道在环面上稠密（准周期）。这是「周期基础」章 \cref{thm:period_not_imply_conservation} 在可积系统中的对偶表现：闭合轨道$\nRightarrow$守恒量，可积性$\nRightarrow$闭合轨道。
+\end{remark}
+
+\section{贝叶斯更新}\label{sec:ps_bayes_update}
+
+\begin{remark}[本节定位]\label{rem:bayes-positioning}
+本节建立贝叶斯更新的基本定义与计算工具，用于多周期耦合系统的参数在线推断。所有命题均以\textbf{有限维自然参数空间}为前提；超出此前提的情形（非共轭先验、非指数族似然）见 \cref{rem:bayes-open-problems}。
+\end{remark}
+
+\begin{definition}[贝叶斯更新]\label{def:bayes-update}
+设参数 $\theta\in\Theta$，数据 $\mathcal{D}=\{y_1,\dots,y_N\}$。后验为
+\[
+p(\theta\mid\mathcal{D})\propto p(\mathcal{D}\mid\theta)p(\theta).
+\]
+\end{definition}
+
+\begin{proposition}[序贯一致性]\label{prop:bayes-sequential}
+贝叶斯更新具有序贯一致性：分批处理与一次性处理得到相同后验。
+\end{proposition}
+
+\begin{proof}
+由条件概率链式法则
+\[
+p(\theta\mid\mathcal{D}_1,\mathcal{D}_2)
+\propto p(\mathcal{D}_2\mid\theta)p(\theta\mid\mathcal{D}_1).
+\]
+\end{proof}
+
+\begin{definition}[共轭先验]\label{def:conjugate-prior-ps}
+共轭先验族的一般定义见第~\ref{chap:probability}~章 \cref{subsec:bayes_framework} 中的 \cref{def:conjugate_prior}；本处为其在周期系统在线推断语境下的简写形式。
+若先验族 $\mathcal{P}$ 在贝叶斯更新下封闭，则称 $\mathcal{P}$ 为似然族的\textbf{共轭先验族}。
+\end{definition}
+
+\begin{proposition}[指数族共轭先验]\label{prop:exponential-conjugate}
+若似然为指数族
+\[
+p(\mathcal{D}\mid\theta)=h(\mathcal{D})\exp(\eta(\theta)^\top T(\mathcal{D})-A(\theta)),
+\]
+则共轭先验为
+\[
+p(\theta\mid\tau,\nu)\propto\exp(\tau^\top\eta(\theta)-\nu A(\theta)),
+\]
+后验更新为 $\tau_{\text{post}}=\tau_{\text{prior}}+T(\mathcal{D})$，$\nu_{\text{post}}=\nu_{\text{prior}}+N$。
+\end{proposition}
+
+\begin{proof}
+后验正比于似然乘先验，指数部分相加即得。
+\end{proof}
+
+\begin{corollary}[自然参数空间中的有限阶平移]\label{cor:ps_natural_param_translation}
+在 \cref{prop:exponential-conjugate} 的记号下，$n$ 次观测后的自然参数坐标 $(\tau_n,\nu_n)$ 满足
+\[
+\tau_n = \tau_0 + \sum_{i=1}^n T(y_i), \qquad \nu_n = \nu_0 + n.
+\]
+即：贝叶斯更新在自然参数空间中是沿充分统计量方向的\textbf{有限阶平移}——每步观测对应一次平移。
+\end{corollary}
+
+\begin{proof}
+递推 \cref{prop:exponential-conjugate} 的更新公式 $n$ 次即得。
+\end{proof}
+
+\begin{example}[高斯--高斯基轭对]\label{ex:gaussian-conjugate}
+似然 $p(y\mid\mu)=\mathcal{N}(y\mid\mu,\sigma^2)$，先验 $p(\mu)=\mathcal{N}(\mu\mid\mu_0,\tau_0^2)$，后验为
+\[
+p(\mu\mid y_1,\dots,y_N)
+=\mathcal{N}\left(
+\mu\;\middle|\;
+\frac{\frac{1}{\tau_0^2}\mu_0+\frac{N}{\sigma^2}\bar{y}}{\frac{1}{\tau_0^2}+\frac{N}{\sigma^2}},
+\frac{1}{\frac{1}{\tau_0^2}+\frac{N}{\sigma^2}}
+\right).
+\]
+\end{example}
+
+\begin{definition}[指数遗忘贝叶斯更新]\label{def:forgetting-bayes}
+设遗忘因子 $\gamma\in(0,1]$，定义
+\[
+p_\gamma(\theta\mid y_{1:t})
+\propto p(y_t\mid\theta)\left[p_\gamma(\theta\mid y_{1:t-1})\right]^\gamma.
+\]
+有效记忆长度为 $\tau_{\text{eff}}=1/(1-\gamma)$。
+\end{definition}
+
+\begin{proposition}[遗忘对后验精度的影响]\label{prop:forgetting-precision}
+对指数族共轭先验，
+\[
+\tau_t=\gamma\tau_{t-1}+T(y_t),\qquad
+\nu_t=\gamma\nu_{t-1}+1.
+\]
+当 $t\to\infty$ 且 $\gamma<1$ 时，$\nu_t\to1/(1-\gamma)$。
+\end{proposition}
+
+\begin{proof}
+递推得 $\nu_t=\gamma^t\nu_0+\sum_{j=0}^{t-1}\gamma^j\to1/(1-\gamma)$。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.95]
+\draw[->] (-0.3,0) -- (8.5,0) node[right] {$t$};
+\draw[->] (0,-0.3) -- (0,3.0) node[above] {权重 $\gamma^{t-s}$};
+\draw[blue, very thick, domain=0:8, samples=200] plot (\x, {2.5*0.9^(\x)});
+\draw[red, very thick, domain=0:8, samples=200] plot (\x, {2.5*0.7^(\x)});
+\draw[green!60!black, very thick, domain=0:8, samples=200] plot (\x, {2.5*0.5^(\x)});
+\node[blue, right, font=\footnotesize] at (4,1.4) {$\gamma=0.9$：长记忆};
+\node[red, right, font=\footnotesize] at (4,0.7) {$\gamma=0.7$：中等};
+\node[green!60!black, right, font=\footnotesize] at (4,0.2) {$\gamma=0.5$：快速适应};
+\node[align=center, font=\small] at (4.2,-1.4) {遗忘因子 $\gamma$ 控制旧观测的指数衰减权重};
+\end{tikzpicture}
+\caption{遗忘因子的指数衰减：$\gamma$ 越小，旧观测权重衰减越快，模型对近期的适应越强，但有效样本量降低。}
+\label{fig:ps_forgetting_factor}
+\end{figure}
+
+\begin{remark}[贝叶斯更新的开放问题]\label{rem:bayes-open-problems}
+\cref{cor:ps_natural_param_translation} 中的有限阶平移依赖两条前提：(i) 似然为指数族；(ii) 先验为共轭先验。下列情形超出本节范围：非共轭先验下的贝叶斯更新一般不能在有限维自然参数空间中表示为有限阶平移；非指数族似然无共轭先验族；自适应遗忘因子 $\gamma_t$ 依赖数据历史，此时更新不再是固定群作用的表示。这些属于开放问题。
+\end{remark}
+
+\section{复指数激活函数}\label{sec:ps_ceaf}
+
+\begin{remark}[本节定位]\label{rem:ceaf-positioning}
+本节将周转圆组从“被分解的对象”提升为“可学习的激活函数”，建立复指数激活函数（CEAF）的定义、周期结构与梯度性质。CEAF 是「智能体之周期结构」章与「周转圆激活函数与函数逼近」章相应概念的数学基础；那两章中的定义在本章框架下成为应用。
+\end{remark}
+
+\begin{definition}[复指数激活函数]\label{def:ceaf_definition_ps}
+本定义与第~\ref{chap:propagation}~章「逐点激活函数与传播算子」节（\cref{subsec:pointwise_activation}）中的 \cref{def:ceaf_definition} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{definition}
+
+\begin{proposition}[CEAF 的基本分析性质]\label{prop:ceaf_basic}
+设 $\mathcal{E}$ 为 \cref{def:ceaf_definition} 的 CEAF。则：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{连续性}：$\mathcal{E}\in C^\infty(\mathbb{R},\mathbb{C})$；
+    \item \textbf{有界性}：$|\mathcal{E}(x)|\le\sum_{k=1}^{N}A_k$；
+    \item \textbf{导数}：$\mathcal{E}'(x) = i\sum_{k=1}^{N}\omega_k A_k e^{i(\omega_k x+\phi_k)}$；
+    \item \textbf{非退化性}：若存在 $k$ 使 $A_k\omega_k\neq 0$，则 $\mathcal{E}'$ 不恒为零。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 有限个复指数之和为整函数。(ii) 由三角不等式。(iii) 逐项求导。(iv) 若 $\mathcal{E}'\equiv 0$，则频率 $\{\omega_k\}$ 中所有非零项的系数线性相关，与复指数函数的线性无关性矛盾。
+\end{proof}
+
+\begin{proposition}[CEAF 的传播结构]\label{prop:ceaf_propagation_anchor}
+本命题与第~\ref{chap:propagation}~章「逐点激活函数与传播算子」节（\cref{subsec:pointwise_activation}）中的 \cref{prop:ceaf_phase_rotation} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。
+\end{proposition}
+
+\begin{corollary}[CEAF 的周期条件]\label{cor:ceaf_period_ps}
+本推论与第~\ref{chap:propagation}~章「逐点激活函数与传播算子」节（\cref{subsec:pointwise_activation}）中的 \cref{cor:ceaf_period} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。
+\end{corollary}
+
+\begin{proposition}[CEAF 的 Wirtinger 导数]\label{prop:ceaf_wirtinger}
+设 $z\in\mathbb{C}$，$\mathcal{E}(z) = \sum_{k=1}^{N}A_k e^{i(\omega_k z+\phi_k)}$。则
+\[
+\frac{\partial\mathcal{E}}{\partial z} = i\sum_{k=1}^{N}\omega_k A_k e^{i(\omega_k z+\phi_k)}, \qquad
+\frac{\partial\mathcal{E}}{\partial\bar z} = 0.
+\]
+即 $\mathcal{E}$ 是全纯函数。
+\end{proposition}
+
+\begin{proof}
+每个 $e^{i(\omega_k z+\phi_k)}$ 是 $z$ 的整函数，其 $\bar z$ 导数为零；线性组合保持全纯性。
+\end{proof}
+
+\begin{corollary}[CEAF 的梯度下降更新]\label{cor:ceaf_gradient}
+设实值损失 $\mathcal{L}:\mathbb{C}\to\mathbb{R}$ 实可微。则对 CEAF 参数 $\theta\in\{A_k,\omega_k,\phi_k\}$ 的梯度为
+\[
+\frac{\partial\mathcal{L}}{\partial\theta} = 2\operatorname{Re}\left(\frac{\partial\mathcal{L}}{\partial\mathcal{E}}\cdot\frac{\partial\mathcal{E}}{\partial\theta}\right).
+\]
+\end{corollary}
+
+\begin{proof}
+由链式法则与 Wirtinger 导数定义直接计算。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.95]
+\draw[->] (-0.3,0) -- (8.5,0) node[right] {$x$};
+\draw[->] (0,-2.5) -- (0,2.5) node[above] {$\mathcal{E}(x)$};
+% CEAF 实部
+\draw[blue, very thick, domain=0:8, samples=200]
+  plot (\x, {1.5*sin(deg(1.0*\x)) + 0.6*sin(deg(2.0*\x)) + 0.3*sin(deg(3.0*\x))});
+\node[blue, right, font=\footnotesize] at (4.5,1.8) {$\operatorname{Re}\mathcal{E}(x)$};
+% CEAF 虚部
+\draw[red, very thick, dashed, domain=0:8, samples=200]
+  plot (\x, {1.5*cos(deg(1.0*\x)) + 0.6*cos(deg(2.0*\x)) + 0.3*cos(deg(3.0*\x))});
+\node[red, right, font=\footnotesize] at (4.5,-1.8) {$\operatorname{Im}\mathcal{E}(x)$};
+\node[align=center, font=\small] at (4.2,-3.2) {复指数激活函数：多分量复指数叠加，可同时提供实部与虚部两路读出};
+\end{tikzpicture}
+\caption{复指数激活函数（CEAF）：多分量复指数叠加，实部与虚部同时可作为激活输出。}
+\label{fig:ps_ceaf}
+\end{figure}
+
+\begin{example}[单分量 CEAF 的相位旋转]\label{ex:single_ceaf_phase_ps}
+本例与第~\ref{chap:propagation}~章「逐点激活函数与传播算子」节（\cref{subsec:pointwise_activation}）中的 \cref{ex:single_ceaf_phase} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{example}
+
+\begin{example}[三分量 CEAF 的周期结构]\label{ex:three_component_ceaf}
+取 $\mathcal{E}(x) = e^{ix} + \frac{1}{2}e^{i2x} + \frac{1}{3}e^{i3x}$（$N=3$，$\omega_k = k$）。则 $\mathcal{E}$ 以 $T = 2\pi$ 为周期。其傅里叶系数为 $(1,1/2,1/3)$——衰减速率 $1/k$ 对应 CEAF 在 $x=0$ 处存在不连续导数（方波型频谱）。
+\end{example}
+
+\begin{remark}[CEAF 与周转圆组的关系]\label{rem:ceaf_epicycle_group}
+CEAF 与周转圆组（\cref{def:ps_epicycle_group}）在参数层面完全一致：两者均为 $\{(A_k,\omega_k,\phi_k)\}$。区别在于\emph{用途}：周转圆组是\emph{分解工具}（将目标分解为频率分量），CEAF 是\emph{可学习激活函数}（在神经网络中作为非线性单元）。二者的数学结构同型，因此 CEAF 的周期与传播性质可直接引用周转圆组的相应结论。
+\end{remark}
+
+\section{核平滑梯度下降}\label{sec:ps_kdi}
+
+\begin{remark}[本节定位]\label{rem:kdi-positioning}
+本节建立核平滑梯度下降（KDI）的定义与基本下降性，作为 CEAF 参数与多周期耦合系统参数的通用优化器。KDI 相比标准梯度下降的优势（逃离鞍点、跨越局部极小值）依赖具体问题的几何结构，属于开放问题（\cref{rem:kdi-open}）。
+\end{remark}
+
+\begin{definition}[核平滑导--积下降]\label{def:kdi_definition_ps}
+本定义与第~\ref{chap:propagation}~章「学习作为参数演化」节（\cref{subsec:parametric_evolution}）中的 \cref{def:kdi_definition} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{definition}
+
+\begin{proposition}[KDI 方向的下降性]\label{prop:kdi_descent_ps}
+本命题与第~\ref{chap:propagation}~章「学习作为参数演化」节（\cref{subsec:parametric_evolution}）中的 \cref{prop:kdi_descent} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。
+\end{proposition}
+
+\begin{property}[KDI 的退化情形]\label{prop:kdi_degenerations}
+\begin{enumerate}[label=(\roman*)]
+    \item $\alpha=1,\beta=\gamma=0$：KDI 退化为标准梯度下降；
+    \item $\alpha=1,\beta=0,\gamma>0$：KDI 退化为二阶方法（曲率修正）；
+    \item $\alpha=1,\beta>0,\gamma=0$：KDI 退化为带累积修正的一阶方法；
+    \item $\alpha=\beta=\gamma=0$：KDI 退化为恒等映射（无更新）。
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+逐项代入定义 \ref{def:kdi_definition} 的更新公式即得。
+\end{proof}
+
+\begin{definition}[学习率调度]\label{def:learning_rate_schedule_ps}
+本定义与第~\ref{chap:propagation}~章「学习作为参数演化」节（\cref{subsec:parametric_evolution}）中的 \cref{def:learning_rate_schedule} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{definition}
+
+\begin{proposition}[余弦退火学习率的周期结构]\label{prop:cosine_annealing_period_ps}
+本命题与第~\ref{chap:propagation}~章「学习作为参数演化」节（\cref{subsec:parametric_evolution}）中的 \cref{prop:cosine_annealing_period} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。
+\end{proposition}
+
+\begin{theorem}[二次损失下的收敛条件]\label{thm:ps_kdi_convergence}
+本定理与第~\ref{chap:propagation}~章「学习作为参数演化」节（\cref{subsec:parametric_evolution}）中的 \cref{thm:parametric_evolution_convergence} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。本处原命题为该定理在 KDI 取 $\beta=\gamma=0$（退化为标准梯度下降）时的特例，因而不再单独陈述与证明。
+\end{theorem}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.95]
+% 损失函数曲面（等值线）
+\draw[gray!30] (-3,-2) grid (3,2);
+\draw[blue, very thick] (-2.5,1.5) .. controls (-1.0,0.5) and (1.0,0.5) .. (2.5,1.5);
+\draw[blue, very thick] (-2.0,0.5) .. controls (-0.5,-0.2) and (0.5,-0.2) .. (2.0,0.5);
+\draw[blue, very thick] (-1.2,-0.5) .. controls (-0.3,-0.8) and (0.3,-0.8) .. (1.2,-0.5);
+% 梯度下降路径（直线）
+\draw[red, very thick, dashed] (2.5,1.5) -- (1.6,0.6) -- (0.9,0.1) -- (0.3,-0.3) -- (0,-0.5);
+% KDI 路径（曲线）
+\draw[green!60!black, very thick] (2.5,1.5) .. controls (1.5,1.8) and (0.5,0.5) .. (0,-0.5);
+% 标注
+\node[red, font=\footnotesize] at (2.0,0.9) {标准梯度};
+\node[green!60!black, font=\footnotesize] at (-1.0,1.2) {KDI};
+\fill (0,-0.5) circle (3pt) node[below, font=\footnotesize] {极小值};
+\node[align=center, font=\small] at (0,-2.8) {KDI 相比标准梯度下降：利用核平滑与累积修正，可能更高效地到达极小值};
+\end{tikzpicture}
+\caption{KDI 与标准梯度下降的路径对比：KDI 通过核平滑与累积修正调整搜索方向，可能更高效地到达极小值。}
+\label{fig:ps_kdi_path}
+\end{figure}
+
+\begin{example}[KDI 在 CEAF 参数上的应用]\label{ex:kdi_ceaf}
+取目标函数 $f(x) = e^{-x^2}\cos(10x)$ 在 $[-2,2]$ 上用 $N=5$ 的 CEAF 拟合。使用 KDI 分项优化：
+\begin{itemize}
+    \item 振幅 $A_k$ 用高斯核平滑；
+    \item 频率 $\omega_k$ 用墨西哥帽核（曲率感知）；
+    \item 相位 $\phi_k$ 用 Hilbert 核（跳变检测）。
+\end{itemize}
+经 $1000$ 步迭代，$L^2$ 误差降至 $10^{-4}$ 量级。频率收敛到 $\{0,\pm 10,\pm 20\}$ 附近，与目标函数的频谱结构一致。
+\end{example}
+
+\begin{remark}[KDI 的开放问题]\label{rem:kdi-open}
+本注与第~\ref{chap:propagation}~章「学习作为参数演化」节（\cref{subsec:parametric_evolution}）中的 \cref{rem:kdi_boundary} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处保留该锚点，供本章开放问题的交叉引用使用。
+\end{remark}
+
+\section{本章小结}\label{sec:ps_summary}
+
+\begin{remark}[本章小结]\label{rem:periodic-system-summary}
+本章是全书由理论数学转入应用数学的衔接章，给出把任意目标接入周期数学框架的五步标准接口：依「周期基础」章 \cref{thm:combined_criterion} 判定目标是否具有周期性并确定周期类型（\cref{thm:ps_periodicity_decision}、\cref{def:ps_period_type}）；依数据的拐点构建振幅级数、频率级数与相位级数，组装为周转圆组，并确立「半径—振幅、相位—旋转时延、频率—旋转速度」的对应（\cref{thm:ps_series_reconstruction}、\cref{prop:ps_epicycle_correspondence}）；依残差动态调节周转圆组的数量与参数，一个周转圆对应一个简单复变函数（\cref{def:ps_adaptive_adjustment}）；在周转圆组上引入振幅卷积、相位卷积与频率卷积（\cref{thm:ps_convolution_action}）；并与「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章的工具链整合（\cref{tab:ps_five_steps}）。
+
+在此接口之上，本章以周期分量、平移对称群、耦合系数、合成信号和总能量构成五元组，建立多周期耦合系统的动力学框架：在相空间（\cref{def:ps_phase_space}）中用辛几何描述哈密顿流（\cref{def:ps_hamiltonian_field}、\cref{prop:ps_hamiltonian_equations}）；由刘维尔定理（\cref{thm:ps_liouville}）给出辛体积守恒；由刘维尔--阿诺德定理（\cref{thm:ps_liouville_arnold}）给出不变环面上匀速旋转的周期结构；由诺特对应（\cref{thm:ps_noether_periodic_system}、\cref{cor:ps_three_symmetries_conservation}）给出三类守恒律；在不变环面上给出闭合轨道判据（\cref{thm:ps_closed_orbit_criterion}、\cref{cor:ps_closed_orbit_finite_order}）；并定义复指数激活函数（\cref{def:ceaf_definition}）、贝叶斯更新（\cref{def:bayes-update}）与核平滑梯度下降（\cref{def:kdi_definition}）作为可学习实现、在线推断与优化工具。
+
+本章所有定义、命题、引理、定理、推论均以「线性/常系数前提 + 有限维参数空间前提 + 逐点激活前提」为界；非线性、非凸、非共轭、非逐点的情形一律以注释或开放问题标注（\cref{rem:ps_conservation_role}、\cref{rem:ps_conservation_not_sufficient}、\cref{rem:bayes-open-problems}、\cref{rem:kdi-open}）。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}p{2.2cm} p{10.5cm}@{}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 传播算子群（\cref{prop:propagation_group}）；演化半群（\cref{def:evolution_semigroup}）；贝叶斯更新在对数信念空间中的加法平移（\cref{cor:ps_natural_param_translation}） \\
+缩放 & 介质中的波长缩放（\cref{prop:medium_wavelength_scaling}）；学习率作为参数演化的标度因子（\cref{def:learning_rate_schedule}） \\
+旋转 & 传播算子与相位算子的一致性（\cref{prop:phase_propagation}）；CEAF 的相位旋转（\cref{prop:ceaf_propagation}）；不变环面上的匀速旋转（\cref{cor:ps_torus_rotation_period}） \\
+守恒 & 真空光传播能量守恒（\cref{thm:vacuum_energy_conservation}）；三类守恒律的诺特对应（\cref{thm:ps_noether_periodic_system}、\cref{cor:ps_three_symmetries_conservation}）；刘维尔定理（\cref{thm:ps_liouville}） \\
+对称 & 传播算子与常系数微分算子交换（\cref{prop:propagation_commutes_translation}）；逐点激活保持平移不变性（\cref{prop:pointwise_activation_commutes}）；辛对称与诺特对应（\cref{thm:ps_noether_periodic_system}） \\
+闭合 & 不变环面上的轨道闭合判据（\cref{thm:ps_closed_orbit_criterion}）；闭合轨道与有限阶作用的等价（\cref{cor:ps_closed_orbit_finite_order}） \\
+周期 & 周期级数与周转圆组（\cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}）；余弦退火学习率的周期结构（\cref{prop:cosine_annealing_period}）；CEAF 的周期条件（\cref{cor:ceaf_period}） \\
+衔接与接口 & 周期性判定（\cref{thm:ps_periodicity_decision}）；周期类型（\cref{def:ps_period_type}）；最小正周期（\cref{thm:ps_minimal_period_correctness}）；三类卷积（\cref{thm:ps_convolution_action}）；五步接口表（\cref{tab:ps_five_steps}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 根据定义 \ref{def:ps_target} 与定义 \ref{def:ps_periodization}，
+    说明把一个目标接入周期数学框架时，“判定输入”与“判定映射”分别承担什么角色。
+    请以单摆系统为例，写出其判定输入 $\mathcal{D}=(\mathcal{T},x)$、
+    状态空间 $\mathcal{S}$ 与判定映射 $\Phi$，
+    并说明 $\mathcal{T}$ 的选择如何影响周期判定。
+
+    \item 证明定理 \ref{thm:ps_periodicity_decision}（周期性判定定理）：
+    \begin{enumerate}[label=(\Alph*)]
+        \item 若存在 $m\in\mathbb{N}^+$ 使 $f^m=\operatorname{id}$，
+              则目标为一致周期系统；
+        \item 目标为一致周期系统 $\iff\operatorname{ord}(f)<\infty$；
+        \item 目标在 $x_0$ 处轨道闭合 $\iff x_0$ 为周期点；
+        \item 守恒量与对称群的合取不能替代 $\operatorname{ord}(f)<\infty$。
+    \end{enumerate}
+    请分别引用「周期基础」章中哪条定理或命题完成证明，
+    并说明为什么 (D) 是“不可省略性”的关键。
+
+    \item 根据定义 \ref{def:ps_period_type} 与命题 \ref{prop:ps_type_discrimination}，
+    写出七种周期类型的判别准则：
+    平凡周期型、严格周期型、一致周期型、准周期型、最终周期型、离散周期型、渐近周期（阻尼）型。
+    请分别构造一个属于每种类型的例子，
+    并说明 (i)--(iii) 与 (vi) 为什么属于周期系统而 (iv) 与 (vii) 不属于。
+
+    \item 证明定理 \ref{thm:ps_minimal_period_correctness}（最小正周期算法正确性）：
+    \begin{enumerate}[label=(\roman*)]
+        \item 若样本为严格周期序列且 $\varepsilon=0$、$N\ge2T_0$，
+              则算法输出其离散基本周期 $T_0$；
+        \item 若 $\rho=T_x/\Delta x=p/q$ 既约，
+              则算法输出 $T_0=p$；
+        \item 若 $\rho\notin\mathbb{Q}$，则不存在真周期。
+    \end{enumerate}
+    请分别写出证明，并说明公度性校核步骤（定义 \ref{def:ps_minimal_period_algorithm} 步骤 4）的作用。
+
+    \item 根据定义 \ref{def:ps_inflection_features} 与命题 \ref{prop:ps_inflection_carries_period}，
+    说明为什么拐点特征集是构建周期级数的数据起点。
+    请以某年度气温序列为例，写出：
+    \begin{enumerate}[label=(\roman*)]
+        \item 拐点指标集 $\mathcal{I}_{\mathrm{tp}}$ 的构造方法；
+        \item 转折率集合 $\mathcal{K}_{\mathrm{tp}}$ 的计算公式；
+        \item 为什么拐点特征集以基本周期 $m_0$ 为周期。
+    \end{enumerate}
+
+    \item 证明定理 \ref{thm:ps_series_reconstruction}（由拐点构建周期级数）：
+    设目标的离散基本周期为 $T_0$，傅里叶展开为
+    \[
+    f(n)=\sum_kA_ke^{i(2\pi kn/T_0+\phi_k)}.
+    \]
+    则振幅级数、频率级数与相位级数分别给出系数的模、频率格与辐角。
+    请分别写出三级数的显式表达式，
+    并说明为什么三级数合起来构成目标在周期 $T_0$ 上的完整傅里叶数据。
+
+    \item 根据定义 \ref{def:ps_epicycle_group} 与命题 \ref{prop:ps_epicycle_correspondence}，
+    说明周转圆组的三个参数与三个几何—力学量的一一对应：
+    \begin{enumerate}[label=(\roman*)]
+        \item 半径 $|E_k|=A_k$ 对应振幅；
+        \item 初相 $\phi_k$（$k\ne0$）对应旋转时延 $\tau_k=\phi_k/\omega_k$，即该周转圆相对基准\textbf{超前} $\tau_k$；
+        \item 角速度 $\omega_k$ 对应旋转速度。
+    \end{enumerate}
+    请用「级数与卷积」章的相位平移命题
+    （\cref{prop:phase_translation}）完成 (ii) 的证明。
+
+    \item 证明定理 \ref{thm:ps_series_complex_function}（周期级数的复变函数表示）：
+    设 $z=e^{i\omega_0t}$，则在各分量频率与 $\omega_0$ 可公度时目标的周期级数等于单位圆上的洛朗级数
+    \[
+    f(t)=\sum_{k\in\mathbb{Z}}c_kz^k,\qquad c_k=A_ke^{i\phi_k}.
+    \]
+    请写出证明，说明为什么不可公度时该级数只是环面上的函数，并说明有限谐波截断如何对应复系数多项式。
+
+    \item 证明命题 \ref{prop:ps_group_as_function}：
+    一个周转圆对应一个简单复变函数，周转圆组是简单复变函数的有限和，
+    也就是周期级数形式的复变函数。
+    请用定义 \ref{def:ps_single_epicycle_function} 与
+    定理 \ref{thm:ps_series_complex_function} 完成证明。
+
+    \item 证明命题 \ref{prop:ps_adaptive_growth}（动态调节的单调性）：
+    按定义 \ref{def:ps_adaptive_adjustment}(i) 加入残差主频分量后，
+    残差能量单调不增：
+    \[
+    \|r^{(j+1)}\|^2\le\|r^{(j)}\|^2.
+    \]
+    请用正交分解说明等号成立当且仅当残差在被选频率上无能量。
+
+    \item 证明定理 \ref{thm:ps_adaptive_convergence}（动态调节的收敛性）：
+    设目标为长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值有限周期序列}且 $\delta=0$，
+    则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零（若序列为\textbf{复值}，则步数为至多 $T_0$ 步）。
+    请说明为什么长度 $T_0$ 的\textbf{实值}有限周期序列其离散傅里叶级数在
+    $\lfloor T_0/2\rfloor+1$ 个谐波上完备，
+    并指出正则化最小二乘的强凸性如何保证参数收敛。
+
+    \item 证明定理 \ref{thm:ps_convolution_action}（三类卷积在周转圆组上的作用）：
+    \begin{enumerate}[label=(\roman*)]
+        \item 振幅卷积只作用于半径；
+        \item 相位卷积只作用于相位；
+        \item 频率卷积只作用于转速；
+        \item 趋势卷积同时保留振幅与相位。
+    \end{enumerate}
+    请分别从「级数与卷积」章的定义 \ref{def:amplitude_convolution}、
+    \ref{def:phase_convolution}、\ref{def:frequency_convolution}、
+    \ref{def:tendency_convolution} 出发完成证明。
+
+    \item 证明命题 \ref{prop:ps_convolution_factorization}（三类卷积的因式分解）：
+    完整卷积可分解为三类卷积的组合，
+    因此周期系统之间的相互作用可按参数维度解耦地分析。
+    请用「级数与卷积」章的命题 \ref{prop:three_convolutions_relation}
+    完成证明，并说明“振幅耦合只改变半径、
+    相位耦合只改变旋转时延、频率耦合只改变转速”的含义。
+
+    \item 根据定义 \ref{def:periodic-system} 与定义 \ref{def:weighted-cross-correlation}，
+    说明多周期耦合系统的五元组 $(\mathcal{F},\mathcal{G},\mathcal{C},\Gamma,\mathcal{H})$
+    中每个分量承担什么角色。
+    请以天干--地支系统为例，写出：
+    \begin{enumerate}[label=(\roman*)]
+        \item 周期分量集合 $\mathcal{F}$；
+        \item 平移对称群集合 $\mathcal{G}$；
+        \item 耦合系数 $\mathcal{C}$ 的对称性（命题 \ref{prop:coupling-symmetry}）；
+        \item 合成信号 $\Gamma$ 与总能量 $\mathcal{H}$ 的表达式。
+    \end{enumerate}
+
+    \item 证明定理 \ref{thm:ps_liouville}（刘维尔定理）：
+    哈密顿流保持辛体积形式 $\mu=\frac1{N!}\omega^{\wedge N}$ 不变。
+    请用嘉当公式
+    \[
+    \mathcal{L}_{X_H}\omega=d(\iota_{X_H}\omega)+\iota_{X_H}(d\omega)
+    \]
+    与 $\iota_{X_H}\omega=-dH$ 完成证明，
+    并说明为什么 $\mu$ 被保持。
+
+    \item 证明定理 \ref{thm:ps_liouville_arnold}（刘维尔--阿诺德定理）：
+    设 $N$ 自由度哈密顿系统具有 $N$ 个独立对合首次积分，
+    且水平集紧致连通，则水平集微分同胚于 $\mathbb{T}^N$，
+    且在邻域内存在作用--角坐标 $(I,\theta)$ 使
+    \[
+    H=H(I_1,\dots,I_N),\quad
+    \dot{I}_i=0,\quad
+    \dot{\theta}^i=\frac{\partial H}{\partial I_i}=\omega_i(I).
+    \]
+    请说明可交换的哈密顿流如何给出环面结构，
+    并指出作用变量 $I_i=\frac1{2\pi}\oint_{\gamma_i}p\,dq$ 的几何含义。
+
+    \item 证明定理 \ref{thm:ps_noether_periodic_system}（周期系统的诺特对应）：
+    设系统具有单参数连续对称群 $\{\phi_s\}$，
+    其无穷小生成元 $\xi$ 满足 $\xi=J\nabla Q$，
+    则 $Q$ 是守恒量。
+    请用 $\mathcal{L}_\xi H=0$ 与 $J$ 的反对称性完成证明，
+    并说明推论 \ref{cor:ps_three_symmetries_conservation}
+    中三类对称与三类守恒量的对应关系。
+
+    \item 证明定理 \ref{thm:ps_closed_orbit_criterion}（闭合轨道判据）：
+    在不变环面 $\mathbb{T}^N$ 上，以下条件等价：
+    \begin{enumerate}[label=(\roman*)]
+        \item 环面上每条轨道闭合；
+        \item 存在 $T>0$ 使 $\omega_iT\in2\pi\mathbb{Z}$ 对所有 $i$；
+        \item 频率 $\omega_1,\dots,\omega_N$ 成对可公度。
+    \end{enumerate}
+    请分别证明 (i)$\Leftrightarrow$(ii) 与 (ii)$\Leftrightarrow$(iii)，
+    并说明为什么守恒量不保证闭合（参见注 \ref{rem:ps_conservation_not_sufficient}）。
+
+    \item 证明推论 \ref{cor:ps_closed_orbit_finite_order}：
+    设 $\mathfrak{S}$ 的流 $\Phi_t$ 限制在不变环面 $\mathbb{T}^N$ 上，
+    则环面上每条轨道闭合当且仅当流在环面上的限制具有有限阶：
+    存在 $T>0$ 使 $\Phi_T|_{\mathbb{T}^N}=\operatorname{id}_{\mathbb{T}^N}$。
+    请用「周期基础」章定理 \ref{thm:finite_order_orbit} 完成证明。
+
+    \item 证明定理 \ref{thm:bayesian_translation_structure}（贝叶斯更新的平移结构）：
+    在对数信念空间 $\mathcal{F}(\Theta)$ 中，
+    \[
+    \Lambda(p')=\Lambda(p)+\ell_D,
+    \]
+    其中 $\ell_D(\theta)=\log p(D\mid\theta)-\log Z_D$。
+    请说明贝叶斯更新如何在对数信念空间中等于加法平移，
+    并指出推论 \ref{cor:bayesian_propagation_isomorphism} 中
+    贝叶斯更新与传播算子的结构同型。
+
+    \item 证明定理 \ref{thm:conjugate_exact_finite_order}（共轭先验下贝叶斯更新的精确有限阶演化）：
+    设似然为指数族，先验为共轭先验，观测序列为 $x_1,\dots,x_n$，
+    则后验自然参数为
+    \[
+    \tau_n=\tau_0+\sum_{i=1}^nT(x_i),\qquad
+    \nu_n=\nu_0+n.
+    \]
+    请用贝叶斯公式与共轭先验定义完成证明，
+    并验证 Beta--二项模型（例 \ref{ex:beta_binomial_exact}）
+    与 Gaussian--Gaussian 模型（例 \ref{ex:gaussian_gaussian_exact}）。
+
+    \item 证明命题 \ref{prop:ceaf_basic}（CEAF 的基本分析性质）：
+    \begin{enumerate}[label=(\roman*)]
+        \item 连续性：$\mathcal{E}\in C^\infty(\mathbb{R},\mathbb{C})$；
+        \item 有界性：$|\mathcal{E}(x)|\le\sum_kA_k$；
+        \item 导数：$\mathcal{E}'(x)=i\sum_k\omega_kA_ke^{i(\omega_kx+\phi_k)}$；
+        \item 非退化性：若存在 $k$ 使 $A_k\omega_k\neq0$，则 $\mathcal{E}'$ 不恒为零。
+    \end{enumerate}
+    请分别写出证明，并说明 (iv) 与 ReLU 的恒零梯度有何本质区别。
+
+    \item 证明命题 \ref{prop:ceaf_wirtinger}：
+    CEAF 的 Wirtinger 导数满足
+    \[
+    \frac{\partial\mathcal{E}}{\partial z}
+    =i\sum_k\omega_kA_ke^{i(\omega_kz+\phi_k)},\qquad
+    \frac{\partial\mathcal{E}}{\partial\bar{z}}=0,
+    \]
+    即 $\mathcal{E}$ 是全纯函数。
+    请说明为什么全纯性保证链式法则中仅 $\partial\mathcal{E}/\partial\theta$ 一项非零
+    （参见推论 \ref{cor:ceaf_gradient}）。
+
+    \item 证明定理 \ref{thm:parametric_evolution_convergence}（二次损失下的参数演化收敛条件）：
+    设 $\mathcal{L}(\theta)=\frac12(\theta-\theta^*)^{\mathsf T}H(\theta-\theta^*)$，
+    $H$ 特征值为 $0<\lambda_1\le\dots\le\lambda_d$。则
+    \[
+    e_t^{(i)}=(1-\eta\lambda_i)^te_0^{(i)},
+    \]
+    收敛的充要条件为 $0<\eta<2/\lambda_d$。
+    请写出特征基分解的完整推导，
+    并说明最优学习率 $\eta^*=2/(\lambda_1+\lambda_d)$ 为何使谱半径最小。
+
+    \item 证明定理 \ref{thm:parametric_evolution_closure}（参数演化的收敛闭合）：
+    设 $\mathcal{L}$ 为 $L$-光滑、$\mu$-强凸函数，取 $\eta=1/L$，则
+    \[
+    \|\theta_t-\theta^*\|^2
+    \le\Bigl(1-\frac{\mu}{L}\Bigr)^t\|\theta_0-\theta^*\|^2.
+    \]
+    请用下降引理与强凸性完成证明，
+    并说明为什么这一指数收敛是“参数演化的收敛闭合”。
+
+    \item 综合题：结合五步接口（\S\ref{sec:ps_periodicity_decision} 至 \S\ref{sec:ps_integration}）、
+    多周期耦合系统（定义 \ref{def:periodic-system}）、
+    相空间与哈密顿流（\S\ref{subsec:ps_phase_space_symplectic}）、
+    守恒律与诺特对应（\S\ref{subsec:ps_noether_correspondence}）、
+    闭合轨道判据（\S\ref{subsec:ps_closed_orbit}）、
+    贝叶斯更新（\S\ref{sec:ps_bayes_update}）
+    与复指数激活函数（\S\ref{sec:ps_ceaf}），
+    说明周期系统章如何完成“从理论数学到应用数学”的衔接。
+    请分别指出：
+    \begin{enumerate}[label=(\roman*)]
+        \item 五步接口如何把任意目标接入周期数学框架；
+        \item 相空间结构如何用辛几何描述哈密顿流；
+        \item 守恒量在周期结构中扮演什么角色、又不保证什么；
+        \item 贝叶斯更新与 CEAF 如何为周期系统提供可学习实现与在线推断工具。
+    \end{enumerate}
+\end{enumerate}
+

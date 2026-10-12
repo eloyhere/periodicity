@@ -1,0 +1,655 @@
+\chapter{Periodic Structure of Political Systems}
+\markboth{Periodic Structure of Political Systems}{Periodic Structure of Political Systems}
+
+\begin{remark}[Periodicity decision for the target of this chapter (citation)]\label{rem:politics_ps_hook}
+When this chapter decides whether a research target is periodic, determines its period type, or seeks its minimal positive period, reference is always made to the `Periodic Systems' chapter:
+for the periodicity criterion see \cref{thm:ps_periodicity_decision},
+for the discrimination of period types see \cref{def:ps_period_type}, \cref{prop:ps_type_discrimination},
+for the search for the minimal positive period see \cref{def:ps_minimal_period_algorithm}, \cref{thm:ps_minimal_period_correctness},
+and for the construction of period series and epicycle groups from data see \cref{thm:ps_series_reconstruction}, \cref{def:ps_epicycle_group}.
+\end{remark}
+
+\begin{remark}[Positioning of this chapter: developing via the five-step interface of the `Periodic Systems' chapter]\label{rem:politics_five_steps_positioning}
+The periodic structure of political systems studies the mathematical characterisation of periodic phenomena in regime succession, institutional change and governance performance. This chapter does not establish a separate periodicity criterion; instead it connects political systems to the five-step interface prescribed in the `Periodic Systems' chapter:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{Decision}: reduce such targets as dynastic rise and fall, regime succession, imperial hegemonic succession and the fiscal cycle to discrete or continuous dynamical systems, invoke \cref{thm:ps_periodicity_decision} to decide whether they are periodic, and determine the period type;
+    \item \textbf{Construction}: build the amplitude series, frequency series and phase series from data such as regime stability, fiscal health, elite cohesion, popular support and external threat, and assemble them into a political epicycle group;
+    \item \textbf{Adjustment}: dynamically adjust the political epicycle group by residual-energy descent, information criteria and structural constraints;
+    \item \textbf{Convolution}: introduce amplitude convolution, phase convolution and frequency convolution on the political epicycle group, and connect them with autocorrelation, cross-correlation and phase coupling;
+    \item \textbf{Integration}: connect to the tool chains of the three chapters `Discrete Sampling and Intercalation of Periodic Signals', `Harmonic Analysis' and `Time Series Analysis', forming a political periodicity diagnosis pipeline.
+\end{enumerate}
+The mathematical tools used in this chapter include: gradient flows, delayed negative feedback, positive-feedback systems, the logistic equation, exponential decay, Fourier analysis, periodic convolution, epicycle groups and phase operators.
+\end{remark}
+
+\begin{remark}[Seven-theme guide for this chapter]\label{rem:politics_seven_themes}
+\textbf{Translation}---the passage of time in the dynastic lifecycle and the one-way accumulation of land concentration (Definition \ref{def:land_concentration}); \textbf{scaling}---the expansion--contraction scaling of imperial hegemony (Proposition \ref{prop:hegemony_dynamics}) and the exponential decay of fiscal crisis (Proposition \ref{prop:fiscal_crisis_feedback}); \textbf{rotation}---the phase-space rotation of regime change (the Polybius cycle, Definition \ref{def:regime_change}); \textbf{balance}---the zero-sum constraint on power, fiscal balance and the conversion of legitimacy types (Theorem \ref{thm:political_conservation}); \textbf{symmetry}---the alternating symmetry of unification and division (Theorem \ref{thm:chinese_dynasty_cycle}); \textbf{closure}---the closed causal loop of multiple positive feedbacks (Definition \ref{def:political_quantities}); \textbf{period}---the nested structure of the dynastic cycle ($200$--$300$ years), the hegemony cycle ($100$--$150$ years) and the unification--division cycle ($300$--$500$ years) (Theorem \ref{thm:politics_nested_periods}).
+\end{remark}
+
+\section{Periodicity decision for political targets: the first step of the `Periodic Systems' chapter}
+\label{sec:politics_periodicity_decision}
+
+\subsection{Political targets, decision inputs and decision maps}
+
+\begin{definition}[Political targets and decision inputs]\label{def:politics_target}
+A \textbf{political target} is one of the following objects:
+\begin{enumerate}[label=(\roman*)]
+    \item a regime lifecycle system, whose state space is the set of values of regime stability, $[0,1]$;
+    \item a regime-change system, whose state space is the two-dimensional phase space (degree of democracy $D$, degree of centralisation $A$);
+    \item an imperial hegemony system, whose state space is the relative power of the hegemonic state, $H(t)\in[0,1]$;
+    \item a fiscal--political coupled system, whose state space is the joint space of (fiscal health $F$, regime stability $S$);
+    \item a unification--division alternation system, whose state space is the set of values of territorial integration.
+\end{enumerate}
+The \textbf{decision input} of a political target is the pair
+\[
+\mathcal D_{\mathrm{P}}=(\mathcal T,x),
+\]
+where $\mathcal T$ is the time index set (which may be $\mathbb Z$ or $\mathbb R$) and $x:\mathcal T\to V$ is the value of the political variable over time. If $\mathcal T=\mathbb Z$, the target is called a \textbf{discrete political target}; if $\mathcal T=\mathbb R$, it is called a \textbf{continuous political target}.
+\end{definition}
+
+\begin{definition}[Political decision map]\label{def:politics_periodization}
+Let a political target be given by the decision input $\mathcal D_{\mathrm{P}}=(\mathcal T,x)$. If there exist a map $\Phi:\mathcal S\to\mathcal S$ and an initial value $x_0\in\mathcal S$ such that the states of the target are generated by $\Phi$, that is,
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+for $t\in\mathbb Z$ the state $x_t$ is generated by iteration of $\Phi$; for $t\in\mathbb R$ it is described by the one-parameter evolution family $\{\Phi_t\}_{t\in\mathbb R}$, where each $\Phi_t:\mathcal S\to\mathcal S$, $\Phi_0=\operatorname{id}$, $\Phi_{s+t}=\Phi_s\circ\Phi_t$ for all $s,t\in\mathbb R$, and $(t,x)\mapsto\Phi_t(x)$ is continuous.
+then $\Phi$ is called the \textbf{political decision map} of the target. The political target is thereby reduced to the discrete dynamical system $(\mathcal S,\Phi)$ when $t\in\mathbb Z$ and to the continuous dynamical system $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$ when $t\in\mathbb R$; in both cases the criteria of the `Operations and Periodicity' chapter and of the `Periodic Systems' chapter may be applied directly.
+\end{definition}
+
+\begin{theorem}[Political periodicity decision theorem]\label{thm:politics_periodicity_decision}
+Let the decision map of a political target be $\Phi$, and let $(\mathcal S,\Phi)$ be a discrete dynamical system. Then:
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{Sufficient criterion}: if there exists $m\in\mathbb N^+$ such that $\Phi^m=\mathrm{id}$, then the target is a uniformly periodic political system; every orbit is closed, and the orbit length divides $m$.
+    \item \textbf{Equivalence of the decision}: the target is a uniformly periodic political system if and only if $\operatorname{ord}(\Phi)<\infty$.
+    \item \textbf{Pointwise criterion}: the orbit of the target at the state $x_0$ is closed if and only if $x_0$ is a periodic point; the orbit length is then the period at that point.
+    \item \textbf{Non-eliminability}: the conjunction of conserved quantities and the symmetry group cannot replace $\operatorname{ord}(\Phi)<\infty$; a quasi-periodic political target is not a periodic political system.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:politics_periodicity_decision} of this chapter is the domain instantiation of \cref{thm:ps_periodicity_decision} in the `Periodic Systems' chapter:
+it suffices to replace the decision map $f$ and the evolution group by $\Phi$ of this chapter, and then (A) sufficient criterion, (B) equivalence of the decision, (C) pointwise criterion and
+(D) non-eliminability hold one by one. By the convention of \cref{rem:ps_applications_hook}, they are not expanded again here.
+\end{proof}
+
+\begin{corollary}[Political period types]\label{cor:politics_period_type}
+After the decision by \cref{thm:politics_periodicity_decision}, a political target falls into one of the following types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Trivial period type}: the minimal period is $m_0=1$, and the state is a fixed point (for example a long-stable equilibrium regime);
+    \item \textbf{Strictly periodic type}: $1<m_0<\infty$, and the state is strictly periodic (for example the periodic succession of dynastic rise and fall);
+    \item \textbf{Uniformly periodic type}: $\operatorname{ord}(\Phi)=m<\infty$, and every orbit length divides $m$;
+    \item \textbf{Quasi-periodic type}: $\operatorname{ord}(\Phi)=\infty$; the orbits are not closed but are dense in a compact carrier structure (for example the superposition of imperial hegemonic successions);
+    \item \textbf{Eventually periodic type}: there exists $N$ such that the target is periodic for $t\ge N$;
+    \item \textbf{Discrete periodic type}: the carrier structure is $\mathbb Z$ and the normalised period ratio is $\rho=T_x/\Delta x\in\mathbb Q$.
+    \item \textbf{Asymptotically periodic (damped) type}: the orbit is not closed, but tends asymptotically to a closed orbit or to a fixed point, the residual decaying as $e^{-\kappa t}$ (see \cref{def:ps_period_type}(vii)).
+\end{enumerate}
+Among these, (i)--(iii) and (vi) belong to periodic political systems; (iv) does not belong to periodic political systems, but can be handled by bounded-approximation tools; (v) is a periodic political system only in its stable stage; (vii), like (iv), is a type in the limiting sense; it is not a periodic political system and can be handled with bounded-approximation tools only in its stable stage.
+\end{corollary}
+
+\begin{proof}
+Each item follows by substituting a political target into \cref{thm:politics_periodicity_decision} and \cref{def:ps_period_type} of the `Periodic Systems' chapter.
+\end{proof}
+
+\begin{remark}[Periodicity decision for the dynastic lifecycle (empirical observation / research programme)]\label{lem:dynasty_periodic}
+Empirical observation: let the dynastic lifecycle be described by the four-stage model, with regime stability $S(t)$ rising from $0$ to $1$ and then falling back to $0$, the whole cycle lasting about $200$--$300$ years. If the modelling hypothesis that dynastic succession repeats itself strictly (a new dynasty replacing the old) is adopted in addition, then under that hypothesis the dynastic lifecycle may be regarded as of uniformly periodic type with a period of about $207$ years; the conclusion depends on the modelling hypothesis rather than on historical fact, and belongs to empirical observation and a research programme.
+
+Empirical basis:
+By Definition \ref{def:dynasty_lifecycle}, $S(t)$ completes one full rise--zenith--decline--collapse cycle on the time scale of $200$--$300$ years, and \cref{prop:dynasty_lifespan} gives a characteristic lifespan of about $207$ years for the major unificatory dynasties. If the modelling hypothesis that dynastic succession repeats itself strictly is adopted in addition, the decision map may be taken to be a discrete map satisfying $\Phi^{T_{\text{dynasty}}}=\mathrm{id}$ ($T_{\text{dynasty}}\approx207$ years), so that under that hypothesis the type is uniformly periodic. Both $\Phi$ and $T_{\text{dynasty}}$ are modelling choices here, not conclusions derived from historical fact.
+\end{remark}
+
+\begin{lemma}[Periodicity decision for regime change]\label{lem:regime_periodic}
+Let regime change be described by the Polybius cycle: monarchy $\to$ tyranny $\to$ aristocracy $\to$ oligarchy $\to$ democracy $\to$ ochlocracy $\to$ monarchy. Then regime change is of uniformly periodic type.
+\end{lemma}
+
+\begin{proof}
+By Definition \ref{def:regime_change}, the Polybius cycle rotates periodically among the six regime types, and each complete cycle contains six stages. The decision map $\Phi$ satisfies $\Phi^6=\mathrm{id}$ (a six-stage cycle), so the type is uniformly periodic.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for imperial hegemonic succession]\label{lem:hegemony_periodic}
+Let global hegemony be described by the logistic equation $\dot H=\alpha H(1-H)-\beta H$, with the cost of maintaining hegemony growing over time as $\beta(t)=\beta_0 e^{\gamma t}$. Then hegemonic succession is of quasi-periodic type ($\operatorname{ord}(\Phi)=\infty$), with a period of about $100$--$150$ years.
+\end{lemma}
+
+\begin{proof}
+By Proposition \ref{prop:hegemony_dynamics}, once $\beta(t)$ exceeds $\alpha$ the hegemony declines irreversibly; the whole process by which a new hegemony rises and replaces the old one constitutes one complete cycle. Since the lengths of the individual hegemony cycles are not all equal (about $86$--$150$ years), the overall motion is of quasi-periodic type.
+\end{proof}
+
+\begin{definition}[Algorithm for the minimal positive period of political systems]\label{def:politics_minimal_period_algorithm}
+This definition has the same content as \cref{def:ps_minimal_period_algorithm} in the section `Periodicity Decision: Is the Target Periodic?' of Chapter~\ref{chap:periodic_system} (\cref{sec:ps_periodicity_decision}); to avoid repetition, only the reference anchor is retained here, and the full statement is given there. The only difference here is terminology (political target / political sample); the steps of the algorithm and the conclusions are exactly the same.
+\end{definition}
+
+\begin{theorem}[Correctness of the algorithm for the minimal positive period of political systems]\label{thm:politics_minimal_period_correctness}
+This theorem has the same content as \cref{thm:ps_minimal_period_correctness} in the section `Periodicity Decision: Is the Target Periodic?' of Chapter~\ref{chap:periodic_system} (\cref{sec:ps_periodicity_decision}); to avoid repetition, only the reference anchor is retained here, and the full statement and proof are given there. The only difference here is terminology (political target / political sample); the steps of the algorithm and the conclusions are exactly the same.
+\end{theorem}
+
+\begin{example}[Examples of political periodicity decisions]\label{ex:politics_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item The dynastic lifecycle: $T\approx207$ years, uniformly periodic type (locally; an empirical observation and a research programme, see Remark \ref{lem:dynasty_periodic});
+    \item regime change: a six-stage cycle, uniformly periodic type;
+    \item imperial hegemonic succession: $T\approx100$--$150$ years, quasi-periodic type;
+    \item fiscal crisis: exponential decay, asymptotically periodic (damped) type (tending to collapse);
+    \item unification--division alternation: $T\approx300$--$500$ years, quasi-periodic type.
+\end{enumerate}
+\end{example}
+
+\begin{remark}[Conserved quantities do not guarantee periodicity]\label{rem:politics_invariant_not_period}
+In political systems, the zero-sum constraint on power, fiscal balance and the conversion of legitimacy types are auxiliary conditions for periodic structure, but they do not constitute sufficient conditions. For example, a stable regime that satisfies fiscal balance will not spontaneously generate periodic succession. Whether a periodic structure is present in a political target must be decided by \cref{thm:politics_periodicity_decision} or by the lemmas above.
+\end{remark}
+
+\subsection{The second step: construction of the political period series and the epicycle group}
+
+\begin{definition}[Political amplitude series, frequency series and phase series]\label{def:politics_series}
+Let the state or output sequence of a political target be $\{z_t\}$. If it can be written as
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+then
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+are called respectively the \textbf{amplitude series}, the \textbf{frequency series} and the \textbf{phase series} of the political target. The three agree with \cref{def:amplitude_series}, \cref{def:frequency_series} and \cref{def:phase_series} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{definition}[Political epicycle group]\label{def:politics_epicycle_group}
+Let the period series of a political target be given by the amplitude series $\{A_k\}$, the frequency series $\{\omega_k\}$ and the phase series $\{\phi_k\}$. For each $k$ define the epicycle
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+whose collection
+\[
+\mathfrak E_{\mathrm{P}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+is called the \textbf{epicycle group} of the political target. Its superposition is the political period series
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[Construction of the period series from political data]\label{thm:politics_series_reconstruction}
+Let the output of a political target be a finite periodic sequence of period $N$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the output can be expanded as a discrete Fourier series
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item the amplitude series is given by $|c_k|$, the phase series by $\arg c_k$ and the frequency series by $2\pi k/N$;
+    \item if the output is a sequence of dynastic lifespans, then the fundamental frequency corresponds to the average period of dynastic succession, and the harmonics correspond to the unification--division cycle and the cycle of institutional evolution.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) The discrete Fourier series of a finite periodic sequence is a standard result: the basis functions $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ form an orthogonal basis of $\mathbb C^N$.
+(ii) This is read off directly from $c_k=A_k e^{i\phi_k}$.
+(iii) For a sequence of dynastic lifespans, the fundamental frequency corresponds to the average succession period of the $N$ dynasties, and the low-order harmonics correspond to the unification--division cycle on a larger scale.
+\end{proof}
+
+\begin{proposition}[Three-parameter correspondence: radius, phase and angular speed]\label{prop:politics_epicycle_correspondence}
+The three parameters of the political epicycle group $\mathfrak E_{\mathrm{P}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ are in one-to-one correspondence with three geometric--political quantities:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Radius corresponds to amplitude}: the radius of $E_k$ is $|E_k|=A_k$, namely the amplitude of that political oscillation component (for example the fluctuation amplitude of dynastic stability);
+    \item \textbf{Phase corresponds to rotational delay}: the initial phase $\phi_k$ corresponds to the time translation $\tau_k=\phi_k/\omega_k$ (for example the delay of a dynasty's rise relative to a baseline); when $\phi_k>0$ this component \textbf{leads} the baseline by $\tau_k$ (equivalently, the component coincides with the baseline once the baseline is postponed by $\tau_k$);
+    \item \textbf{Frequency corresponds to rotational speed}: $\omega_k$ is the angular frequency of that political oscillation component (for example how fast dynastic succession proceeds).
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:politics_epicycle_correspondence} of this chapter corresponds exactly to \cref{prop:ps_epicycle_correspondence} of the `Periodic Systems' chapter,
+and the three correspondences---radius to amplitude, phase to rotational delay, frequency to rotational speed---are obtained one by one by translating them to the epicycle group of this chapter.
+The proof is given there: (i) from $|E_k|=A_k$ and the energy decomposition, (ii) from the phase-translation theorem, (iii) from the definition of the frequency series.
+\end{proof}
+
+\begin{example}[Period series of a political time series]\label{ex:politics_series_example}
+The sequence of Chinese dynastic lifespans can be decomposed into a fundamental frequency (about $207$ years), a second harmonic (about $104$ years, corresponding to the secondary unification--division cycle) and long-period harmonics (about $500$--$1000$ years, corresponding to institutional evolution). In the political epicycle group, the long periods correspond to the outer, large epicycles (low frequency, high amplitude), whilst dynastic succession corresponds to the inner, small epicycles (high frequency, low amplitude).
+\end{example}
+
+\begin{remark}[The period series is a complex function]\label{rem:politics_series_complex}
+Let $z=e^{i\omega_0t}$. Then the political period series
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+when all components are commensurable with $\omega_0$ (that is, $\omega_k=k\omega_0$, $k\in\mathbb Z$) it can be written as the Laurent series $\sum_k c_k z^k$, where $c_k=A_k e^{i\phi_k}$: in that case the political period series is a complex function on the unit circle, and otherwise it is merely a function on the torus.
+\end{remark}
+
+\subsection{The third step: dynamic adjustment of the political epicycle group}
+
+\begin{definition}[Dynamic adjustment of the political epicycle group]\label{def:politics_adaptive_adjustment}
+Let the current political epicycle group be $\mathfrak E^{(j)}$, with partial sum
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+and residual $r^{(j)}=z-z^{(j)}$. \textbf{Dynamic adjustment} consists of two rules:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Cardinality adjustment}: if the residual energy satisfies $\|r^{(j)}\|^2>\delta$, add one new epicycle according to the peaks of the residual periodogram;
+    \item \textbf{Parameter adjustment}: update the parameters of the existing epicycles by regularised least squares or an information criterion.
+\end{enumerate}
+In political systems, cardinality adjustment corresponds to adding a political cycle component (for example adding a newly identified dynastic cycle or hegemony cycle); parameter adjustment corresponds to tuning the amplitude, phase and frequency so as to balance goodness of fit against model parsimony.
+\end{definition}
+
+\begin{proposition}[Monotonicity of cardinality adjustment]\label{prop:politics_adaptive_growth}
+After the dominant-frequency component of the residual is added as in \cref{def:politics_adaptive_adjustment}(i), the residual energy is monotonically non-increasing:
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+with equality if and only if the residual has no energy at the selected frequency.
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:politics_adaptive_growth} of this chapter is consistent with the dynamic adjustment mechanism of \cref{def:ps_adaptive_adjustment} in the `Periodic Systems' chapter:
+adding an epicycle removes the component of $r^{(j)}$ along $\hat\omega$ from the residual, and the orthogonal decomposition
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{the removed component}\|^2$ gives the inequality,
+with equality if and only if the norm of the removed component is zero. The complete argument is given there.
+\end{proof}
+
+\begin{theorem}[Convergence of dynamic adjustment]\label{thm:politics_adaptive_convergence}
+Let the political target be a finite periodic sequence of period $T_0$ and let $\delta=0$. Then after at most $\lfloor T_0/2\rfloor+1$ steps of dynamic adjustment the residual is zero, and the resulting political epicycle group is the exact Fourier data of the target.
+\end{theorem}
+
+\begin{proof}
+The discrete Fourier series of a sequence of period $T_0$ is complete on $\lfloor T_0/2\rfloor+1$ harmonics. At each step one dominant-frequency component of the residual is extracted as in \cref{prop:politics_adaptive_growth}, and the residual energy decreases strictly; hence after finitely many steps the residual is zero.
+\end{proof}
+
+\begin{definition}[Structural metric adjustment]\label{def:politics_structure_metric_adjustment}
+Let the structural metric of a political target be
+\[
+\mathcal I=(\mathcal I_{\text{fit}},\mathcal I_{\text{parsimony}},\mathcal I_{\text{prediction}})
+=(\text{residual sum of squares},\ \text{number of parameters},\ \text{cross-validation error}).
+\]
+\textbf{Structural-metric adjustment} consists in choosing $\theta$ in the parameter space $\Theta$: at each step take a neighbouring parameter for which $\mathcal I(\theta)$ is \textbf{strictly decreasing} in the lexicographic order (minimisation); if no such parameter exists, the process stops, and the parameter is then locally optimal.
+\end{definition}
+
+\begin{proposition}[Finite convergence of structural metric adjustment]\label{prop:politics_structure_metric_convergence}
+Let the parameter space $\Theta$ be finite, and let each adjustment make $\mathcal I$ strictly decreasing in the lexicographic order. Then the adjustment terminates after finitely many steps at a locally optimal parameter.
+\end{proposition}
+
+\begin{proof}
+Since $\Theta$ is finite, $\mathcal I$ takes only finitely many values, and the lexicographic order is a total order on a finite set; a strictly decreasing sequence in that order cannot continue indefinitely, so the adjustment terminates after finitely many steps. At termination there is no neighbouring parameter that makes $\mathcal I$ strictly decrease in the lexicographic order, that is, the parameter is locally optimal.
+\end{proof}
+
+\begin{example}[Selecting a political period series by BIC]\label{ex:politics_bic}
+Fit $K$ epicycles to a sequence of dynastic lifespans and compute $\operatorname{BIC}(K)=n\ln(\operatorname{RSS}/n)+K\ln n$. Choose the $K$ that minimises the BIC. Usually $K=2$--$4$ suffices to capture the main cycles.
+\end{example}
+
+\begin{remark}[Boundaries of dynamic adjustment]\label{rem:politics_adaptive_boundary}
+\cref{thm:politics_adaptive_convergence} relies on a finite periodic sequence. For a continuous spectrum or a quasi-periodic political target (such as hegemonic succession or unification--division alternation), no finite epicycle group represents it exactly, and only a bounded approximation is possible. Structural metric adjustment does not guarantee a global optimum.
+\end{remark}
+
+\subsection{The fourth step: political convolution}
+
+\begin{definition}[Political amplitude, phase and frequency convolutions]\label{def:politics_convolution_types}
+Let two political epicycle groups be
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+Define:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Amplitude convolution}: $\mathbb A_{mn}=A_nB_m$;
+    \item \textbf{Phase convolution}: $\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$;
+    \item \textbf{Frequency convolution}: $\mathbb F_{mn}=\omega_n\nu_m$;
+    \item \textbf{Trend convolution}: $\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$.
+\end{enumerate}
+This agrees with \cref{def:amplitude_convolution}, \cref{def:phase_convolution}, \cref{def:frequency_convolution} and \cref{def:tendency_convolution} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{theorem}[Action of the three convolutions on the political epicycle group]\label{thm:politics_convolution_action}
+Let the epicycle groups of two political targets be $\mathfrak E$ and $\mathfrak E'$ respectively. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item amplitude convolution acts only on the radius;
+    \item phase convolution acts only on the phase;
+    \item frequency convolution acts only on the rotational speed;
+    \item trend convolution preserves both amplitude and phase.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+This is read off directly from \cref{def:politics_convolution_types}.
+\end{proof}
+
+\begin{proposition}[Autocorrelation and trend convolution]\label{prop:politics_autocorr_phase_convolution}
+Let $\{z_t\}$ be a political period sequence with autocorrelation function
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+In the language of the political epicycle group, the autocorrelation function is the projection of trend convolution onto the diagonal:
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:politics_autocorr_phase_convolution} of this chapter is the realisation in this domain of the convolution-action conclusion of \cref{thm:ps_convolution_action} in the `Periodic Systems' chapter:
+substituting $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ into the definition of the autocorrelation, cancelling all off-diagonal cross terms by orthogonality and retaining only the diagonal term of the trend convolution
+(the factorisation of the three convolutions, \cref{prop:ps_convolution_factorization}), which yields $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$.
+The full expansion is given there.
+\end{proof}
+
+\begin{remark}[Relation between political convolution and periodic convolution]\label{rem:politics_convolution_relation}
+Political convolution is not a new convolution operation, but an instance of the periodic convolution of the `Series and Convolution' chapter on political epicycle groups. Autocorrelation is the projection of the trend convolution onto the diagonal; cross-correlation and phase coupling are respectively the concrete manifestations in political science of amplitude convolution and frequency convolution.
+\end{remark}
+
+\subsection{The fifth step: integration with discrete sampling, harmonic analysis and time series analysis}
+
+\begin{definition}[Political periodicity diagnosis pipeline]\label{def:politics_periodic_diagnosis}
+For a given political system, diagnosis is carried out using the framework of periodic mathematics:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Periodicity decision}: verify the period type of the political target (\cref{thm:politics_periodicity_decision});
+    \item \textbf{Series construction}: build the amplitude, frequency and phase series and the epicycle group from data such as dynastic lifespans, regime durations and hegemony cycles (\cref{thm:politics_series_reconstruction});
+    \item \textbf{Conservation diagnosis}: verify the zero-sum constraint on power, fiscal balance and the conversion of legitimacy types (\cref{thm:political_conservation});
+    \item \textbf{Convolution diagnosis}: compute the autocorrelation (the diagonal projection of the trend convolution, \cref{prop:politics_autocorr_phase_convolution}) and the phase convolution;
+    \item \textbf{Integration diagnosis}: connect to the tool chains of discrete sampling, harmonic analysis and time series analysis.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[The political periodicity diagnosis pipeline and its interface with three chapters]\label{thm:politics_diagnosis_integration}
+The five steps of \cref{def:politics_periodic_diagnosis} are connected respectively to:
+\begin{enumerate}[label=(\roman*)]
+    \item the `Discrete Sampling and Intercalation of Periodic Signals' chapter \cref{def:uniform_sampling_parallel}, \cref{thm:nyquist_shannon_parallel}, \cref{thm:intercalation_leakage_suppression};
+    \item the `Harmonic Analysis' chapter \cref{def:fourier_series}, \cref{thm:parseval_fourier}, \cref{prop:twelve_to_six};
+    \item the `Time Series Analysis' chapter \cref{def:ts_period_detection}, \cref{prop:ts_period_significance}, \cref{def:ts_window_validation}.
+\end{enumerate}
+Hence the political periodicity diagnosis is not an independent method, but an application of the unified tool chain of periodic mathematics to political systems.
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:politics_diagnosis_integration} of this chapter is the implementation in this domain of the five-step interface of the `Periodic Systems' chapter (\cref{tab:ps_five_steps}):
+periodicity is decided by sampling and spectral estimation, the frequency decomposition and the phase kernel use the `Harmonic Analysis' chapter, and the periodogram peaks, Fisher test and
+window-function validation use the `Time Series Analysis' chapter. The diagnostic pipeline is therefore synthesised from the tool chains of the three chapters; the proof is given there.
+\end{proof}
+
+\begin{remark}[The order of operations after integration]\label{rem:politics_integration_order}
+The recommended order for an actual diagnosis is: first decide whether the political target is periodic (\cref{thm:politics_periodicity_decision}); then construct the Fourier data and the epicycle group of the political data (\cref{thm:politics_series_reconstruction}); then optimise the parameters using the balance constraints and dynamic adjustment (\cref{thm:politics_adaptive_convergence}, \cref{prop:politics_structure_metric_convergence}); then carry out the political convolution and autocorrelation analysis (\cref{prop:politics_autocorr_phase_convolution}); and finally output the diagnosis as in \cref{def:politics_periodic_diagnosis}.
+\end{remark}
+
+\section{Mathematical foundations of political systems}
+
+\begin{definition}[Basic quantities of political systems]\label{def:political_quantities}
+A political system is described by the following basic variables:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Regime stability} $S(t) \in [0,1]$: the degree of stability of the regime at time $t$. $S \to 1$ indicates high stability (no internal disorder, no external threat), and $S \to 0$ indicates collapse (the disintegration of the regime).
+    \item \textbf{Fiscal health} $F(t) \in [0,1]$: the health of the state finances at time $t$. $F \to 1$ indicates ample finances (a well-filled treasury), and $F \to 0$ indicates exhaustion of the finances (expenditure exceeding revenue).
+    \item \textbf{Elite cohesion} $E(t) \in [0,1]$: the degree of unity of the ruling elite at time $t$. $E \to 1$ indicates that the elite unanimously support the regime, and $E \to 0$ indicates that the elite are divided or have defected.
+    \item \textbf{Popular support} $P(t) \in [0,1]$: the degree of support of the ordinary population for the regime at time $t$. $P \to 1$ indicates that the people are attached to the regime, and $P \to 0$ indicates seething popular resentment.
+    \item \textbf{External threat} $W(t) \in [0,1]$: the degree of threat posed to the regime by hostile external forces at time $t$. $W \to 1$ indicates a powerful enemy at the borders, and $W \to 0$ indicates peace throughout the realm.
+\end{enumerate}
+The core feature of a political system is \textbf{multiple coupled positive feedbacks}---fiscal deterioration leads to elite defection, elite defection weakens military defence, military defeat aggravates the fiscal crisis, the fiscal crisis provokes popular revolt, and popular revolt further undermines regime stability. These positive feedbacks form a closed causal loop that drives the political system from stability towards collapse.
+\end{definition}
+
+\section{A periodic model of dynastic rise and fall}
+
+\begin{definition}[Four-stage model of the dynastic lifecycle]\label{def:dynasty_lifecycle}
+The lifecycles of the unificatory dynasties of China display a marked four-stage pattern:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Rise} (about $50$--$80$ years): the founding monarch establishes a new dynasty through military conquest or political consolidation. Land is redistributed (equal-field and land-granting measures), the tax system is reformed (light corvée and low taxes), and a bureaucracy is established. Regime stability $S(t)$ rises rapidly. Representative dynasties: the Rule of Wen and Jing in the Western Han (about $180$--$140$ BCE), the Zhenguan Prosperity of the Tang ($627$--$649$), and the Hongwu Prosperity of the Ming ($1368$--$1398$).
+    \item \textbf{Zenith} (about $80$--$120$ years): national power reaches its peak, territory expands to its greatest extent, culture flourishes and institutions mature. Regime stability $S(t)$ remains high but begins to show slight fluctuations---land concentration appears, bureaucratic corruption takes root and fiscal expenditure swells. Representative dynasties: the Prosperity of Emperor Wu of the Han (about $140$--$87$ BCE), the Kaiyuan Prosperity of the Tang ($713$--$741$), and the Yongle--Xuande Prosperity of the Ming ($1402$--$1435$).
+    \item \textbf{Decline} (about $100$--$150$ years): land concentration intensifies, owner-farmers go bankrupt and the tax base shrinks; the bureaucracy swells and administrative efficiency falls; expenditure exceeds revenue and the currency depreciates. Regime stability $S(t)$ declines steadily. Representative dynasties: the middle and late Western Han (about $50$--$8$ BCE), the Tang after the An Lushan Rebellion ($755$--$907$), and the Ming after the Wanli period ($1582$--$1644$).
+    \item \textbf{Collapse} (about $20$--$50$ years): fiscal exhaustion leads to arrears in military pay, and troops mutiny or defect; peasant risings follow one another without pause; regional separatist forces grow in strength; and external enemies exploit the weakness. Regime stability $S(t)$ plunges to $0$. Representative dynasties: the risings of the Green Woodsmen and the Red Eyebrows at the end of the Western Han, the Huang Chao rebellion at the end of the Tang, and the Li Zicheng rebellion at the end of the Ming.
+\end{enumerate}
+The dynastic lifecycle is the realisation of an accumulative process in political time: the whole process in which $S(t)$ rises from $0$ to $1$ and then falls back to $0$ takes about $200$--$300$ years. The rise phase corresponds to the establishment and consolidation of institutions, and the decline phase to their disintegration and failure. The dynastic lifespan $T_{\text{dynasty}}$ is determined by the combined effect of the rate of land concentration, the rate of accumulation of the fiscal deficit and the rate of internal attrition among the elite.
+\end{definition}
+
+\begin{proposition}[Statistical distribution of dynastic lifespans]\label{prop:dynasty_lifespan}
+The lifespans of the major unificatory dynasties in Chinese history from the Qin unification ($221$ BCE) to the fall of the Qing ($1912$) are tabulated as follows:
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{3cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}}
+\toprule
+Dynasty & Years & Lifespan (years) & Main cause of fall \\
+\midrule
+Qin & $221$--$206$ BCE & $15$ & Tyranny, peasant risings \\
+Western Han & $206$ BCE--$8$ & $214$ & Usurpation by consort clans \\
+Eastern Han & $25$--$220$ & $195$ & Eunuch domination, Yellow Turban rebellion \\
+Tang & $618$--$907$ & $289$ & Regional military governors, Huang Chao rebellion \\
+Northern Song & $960$--$1127$ & $167$ & Foreign invasion \\
+Southern Song & $1127$--$1279$ & $152$ & Foreign invasion \\
+Yuan & $1271$--$1368$ & $97$ & Ethnic conflict, peasant risings \\
+Ming & $1368$--$1644$ & $276$ & Fiscal collapse, Li Zicheng rebellion \\
+Qing & $1644$--$1912$ & $268$ & Foreign invasion, the 1911 Revolution \\
+\bottomrule
+\end{tabular}
+\end{center}
+The mean lifespan of the eight major unificatory dynasties other than the Qin is about $207$ years, with a standard deviation of about $60$ years. The characteristic lifespan of $207$ years is determined by the following time constants: the transition of land from equal distribution to a high degree of concentration takes about $100$--$150$ years, that of the bureaucracy from lean to bloated about $100$--$150$ years, and that of the population from recovery growth to the carrying limit of the land about $100$--$150$ years. The intersection of the three time constants at about $200$--$300$ years determines the characteristic scale of dynastic lifespans.
+\end{proposition}
+
+\begin{proof}
+By the four-stage model of \cref{def:dynasty_lifecycle}, the dynastic lifespan is determined by the intersection of three independent time constants. Taking the arithmetic mean of the data for the individual dynasties other than the Qin: $(214+195+289+167+152+97+276+268)/8=1658/8\approx207$ years. The standard deviation, computed from $\sqrt{\frac{1}{n}\sum(x_i-\bar x)^2}$, is about $60$ years.
+\end{proof}
+
+\begin{remark}[Comparison of the lifespans of Chinese dynasties and world empires]\label{rem:dynasty_vs_empires}
+Comparing the lifespans of the major unificatory dynasties of China with those of the other major empires of the world reveals a striking statistical regularity: the lifespans of Chinese dynasties are concentrated in the interval $200$--$300$ years, whereas the lifespans of the major world empires display a much greater dispersion.
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{3.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2cm}}
+\toprule
+Empire/dynasty & Years & Lifespan (years) \\
+\midrule
+Roman Empire (Principate) & $27$ BCE--$476$ & $503$ \\
+Byzantine Empire & $395$--$1453$ & $1058$ \\
+Ottoman Empire & $1299$--$1922$ & $623$ \\
+Mughal Empire & $1526$--$1857$ & $331$ \\
+Arab Empire (Abbasid dynasty) & $750$--$1258$ & $508$ \\
+Sasanian Empire of Persia & $224$--$651$ & $427$ \\
+Zhou dynasty of China & $1046$--$256$ BCE & $790$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The mean lifespan of the major world empires is about $606$ years ($503+1058+623+331+508+427+790=4240$, $4240/7\approx606$), far higher than the mean lifespan of $207$ years for the unificatory dynasties of China. The reasons for this difference are various: first, Chinese dynasties faced continuous pressure from the nomadic peoples of the north, so that the frequency of external threats was higher than in other civilisations; second, the Chinese imperial examination system and bureaucracy tended to ossify in the later part of a dynasty, whereas the military-aristocratic institutions of other empires (such as the Ottoman and the Mughal) afforded greater institutional flexibility; third, the population--land contradiction in China was especially acute in the middle and late periods of a dynasty, and land concentration proceeded faster. Empirical research in cliodynamics also confirms that the lifespans of empires follow an exponential distribution, with a typical time scale of about $300$ years.
+\end{remark}
+
+\section{Land concentration and the fiscal cycle}
+
+\begin{definition}[Mathematical description of land concentration]\label{def:land_concentration}
+\textbf{Land concentration} is the most fundamental economic cause of the decline of Chinese dynasties. Let $L(t)$ be the proportion of land owned by owner-farmers, with $L(0) = L_0 \approx 1$ (land being relatively equally distributed in the early period of a dynasty). Under the pressure of famine, taxation and usury, owner-farmers are forced to sell their land, and land becomes concentrated in the hands of the landlord class. The process of land concentration can be modelled as
+\[
+\frac{dL}{dt} = -\alpha L + \beta(1-L) - \gamma L \cdot \mathbf{1}_{\text{famine}}(t),
+\]
+where $\alpha > 0$ is the normal rate of concentration, $\beta > 0$ is the rate of land redistribution (land reform at the founding of a new dynasty), and $\gamma > 0$ is the coefficient by which famine accelerates concentration. Land concentration leads to the bankruptcy of owner-farmers $\to$ shrinkage of the tax base $\to$ fiscal crisis $\to$ arrears in military pay $\to$ defection of the army $\to$ collapse of the regime.
+
+Land concentration is the realisation of a one-way accumulative process in political economy: the one-way transfer of land from owner-farmers to landlords ($dL/dt < 0$) is accumulative translation---analogous to the irreversible flow of heat from a higher to a lower temperature in thermodynamics. Land reform in the early period of a dynasty (the $\beta$ term) attempts to reverse this process, but as time goes on the concentration rate $\alpha$ exceeds the reform rate $\beta$, and land concentration becomes irreversible.
+\end{definition}
+
+\begin{proposition}[Positive-feedback amplification of fiscal crisis]\label{prop:fiscal_crisis_feedback}
+The fiscal crisis of a dynasty in its late period exhibits \textbf{positive feedback} (a vicious circle): expenditure exceeds revenue $\to$ taxes are raised $\to$ owner-farmers go bankrupt faster $\to$ the tax base shrinks further $\to$ the fiscal deficit grows larger $\to$ taxes are raised again. This positive-feedback process can be modelled as
+\[
+\frac{dF}{dt} = -rF - \lambda F = -(r+\lambda)F,
+\]
+where $F(t)$ is fiscal health, $r > 0$ is the rate of fiscal deficit and $\lambda > 0$ is the additional impact on the finances of the shrinking tax base (both are proportional to the current fiscal health: the deficit consumes the treasury in proportion to its current size, and the shrinking tax base reduces revenue in proportion to its current size). When $r + \lambda > 0$, $F(t)$ decays exponentially: $F(t) = F_0 e^{-(r+\lambda)t}$.
+
+The positive feedback of a fiscal crisis is the accumulation of forward scaling---a small fiscal deficit is amplified round by round through the loop of owner-farmer bankruptcy and shrinkage of the tax base, and ultimately brings about the collapse of the regime. The `half-life' of a fiscal crisis, $T_{1/2} = \ln 2/(r+\lambda)$, measures the time required for the finances to pass from health to collapse. In the late period of a dynasty, $r+\lambda$ is usually large, and $T_{1/2} \approx 20$--$50$ years.
+\end{proposition}
+
+\begin{proof}
+The solution of the fiscal decay equation $\frac{dF}{dt} = -(r+\lambda)F$ is $F(t) = F_0 e^{-(r+\lambda)t}$, and its half-life is given by $T_{1/2} = \ln 2/(r+\lambda)$ (Lemma \ref{ch30_fiscal_half_life}). The meaning of `positive feedback' lies in the fact that $r+\lambda$ itself increases as the tax base shrinks (raising taxes accelerates bankruptcy, and bankruptcy erodes the tax base further), so that the decay rate rises with time---the actual fiscal collapse is faster than exponential decay, in agreement with what is observed in the collapse phase of a dynasty ($20$--$50$ years).
+\end{proof}
+
+\begin{lemma}[Half-life of fiscal decay]\label{ch30_fiscal_half_life}
+For the fiscal decay equation $\frac{dF}{dt} = -(r+\lambda)F$ (with $r+\lambda > 0$ constant), the solution is $F(t) = F_0 e^{-(r+\lambda)t}$, and its half-life is
+\[
+T_{1/2} = \frac{\ln 2}{r+\lambda},
+\]
+and after $k$ half-lives of decay $F = F_0 / 2^k$---fiscal health collapses as a geometric progression.
+\end{lemma}
+
+\begin{proof}
+Separating the variables: $\frac{dF}{F} = -(r+\lambda)dt$; integrating gives $\ln F = -(r+\lambda)t + C$, and $F(0) = F_0$ determines $F(t) = F_0 e^{-(r+\lambda)t}$. Setting $F(T_{1/2}) = F_0/2$ gives $e^{-(r+\lambda)T_{1/2}} = 1/2$, that is, $T_{1/2} = \ln 2/(r+\lambda)$; repeated application gives $F(kT_{1/2}) = F_0/2^k$.
+\end{proof}
+
+\begin{example}[Numerical analysis of the Ming fiscal collapse]\label{ex:ming_fiscal_collapse}
+Taking the Ming as an example, during the Wanli period ($1573$--$1620$) fiscal revenue was about $4$ million taels of silver and expenditure about $6$ million taels, giving an annual deficit of about $2$ million taels. Taking $r=0.5$ per year (the deficit rate) and $\lambda=0.3$ per year (the rate of shrinkage of the tax base) gives $r+\lambda=0.8$ per year and a half-life $T_{1/2}=\ln2/0.8\approx0.87$ years. In fact, however, the Ming finances took about $24$ years ($1620$--$1644$) to pass from the apparent balance of the Wanli period to complete collapse under the Chongzhen emperor, which shows that $r+\lambda$ grows at an accelerating rate over time (positive-feedback amplification), and that the actual rate of fiscal collapse in the later period was far higher than in the early period.
+\end{example}
+
+\section{The periodic structure of regime change}
+
+\begin{definition}[Phase space of regime change]\label{def:regime_change}
+Political institutions rotate periodically in the two-dimensional phase space (degree of democracy $D$, degree of centralisation $A$). Different regime types correspond to different regions of the phase space:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Absolute monarchy} (low $D$, high $A$): power is highly concentrated in the person of the monarch. Examples: France under Louis XIV (`I am the state') and the Qin under the First Emperor.
+    \item \textbf{Aristocratic republic} (medium $D$, medium $A$): power is shared among a small number of elite families. Examples: the Roman Republic (rule by the Senate) and the Republic of Venice (the Great Council).
+    \item \textbf{Democracy} (high $D$, low $A$): power is distributed among the citizenry at large through elections. Examples: Athenian democracy in ancient Greece and modern representative democracy.
+    \item \textbf{Oligarchy} (low $D$, medium $A$): power is controlled by a small number of wealthy men or soldiers. Examples: the period of the Roman triumvirates and modern military governments.
+\end{enumerate}
+Regime change is the rotational motion of a periodic cycle in institutional space. The theory of the cycle of constitutions (anacyclosis) put forward by Polybius in the $2$nd century BCE---monarchy $\to$ tyranny $\to$ aristocracy $\to$ oligarchy $\to$ democracy $\to$ ochlocracy $\to$ monarchy---is the earliest theory of cycles in political science. The rotation of regimes in phase space resembles a limit cycle---the degenerate forms of institution (tyranny, oligarchy, ochlocracy) are the unstable segments of the cyclic trajectory, whilst the good forms of institution (monarchy, aristocracy, democracy) are its stable segments.
+\end{definition}
+
+\begin{proposition}[Period length of regime change]\label{prop:regime_cycle_length}
+The period length of the Polybian cycle of constitutions has no fixed value; it depends on the duration of each regime. Taking ancient Rome as an example: the regal period lasted about $244$ years ($753$--$509$ BCE), the republican period about $482$ years ($509$--$27$ BCE), and the imperial period about $503$ years ($27$ BCE--$476$ CE, the fall of the Western Roman Empire). The evolution of Rome from monarchy through republic to empire took about $1200$ years.
+
+The period length of regime change is a superposition of several time scales: short cycles ($10$--$30$ years) correspond to changes of regime (coups d'état, electoral turnover), medium cycles ($100$--$300$ years) to institutional transformation (dynastic rise and fall), and long cycles ($500$--$1000$ years) to civilisational evolution (classical civilisation $\to$ the Middle Ages $\to$ modernity). This nested structure corresponds to the structure of multi-level periodic systems.
+\end{proposition}
+
+\begin{proof}
+Calculation of the durations of Roman constitutional evolution: the regal period $244$ years ($753$--$509$ BCE), the republican period $482$ years ($509$--$27$ BCE), and the imperial period $503$ years ($27$ BCE--$476$ CE). The total is $244+482+503=1229$ years. The mean duration of the three periods is about $410$ years. The nested structure is guaranteed by the difference in order of magnitude between the time scales: the ratio of the short cycle to the medium cycle is about $1$--$10$, and that of the medium cycle to the long cycle about $2$--$5$.
+\end{proof}
+
+\section{The periodic structure of imperial hegemonic succession}
+
+\begin{definition}[Periodic succession of global hegemony]\label{def:hegemony_cycle}
+Since the onset of globalisation in the $16$th century, global hegemony has passed from one power to another with a period of about $100$--$150$ years. Each round of the hegemony cycle comprises a rise (challenging the old hegemony), a hegemonic phase (dominating the international order) and a decline (being replaced by a new hegemony):
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}}
+\toprule
+Hegemonic power & Hegemonic period & Cycle length & Main challengers \\
+\midrule
+Portugal & $1494$--$1580$ & $\approx 86$ years & Spain \\
+The Netherlands & $1580$--$1688$ & $\approx 108$ years & Britain, France \\
+Britain (first round) & $1688$--$1792$ & $\approx 104$ years & France \\
+Britain (second round) & $1792$--$1914$ & $\approx 122$ years & Germany, the United States \\
+The United States & $1945$--present & --- & The Soviet Union, China \\
+\bottomrule
+\end{tabular}
+\end{center}
+Hegemonic succession is a periodic process of expansion and contraction: the rise of a hegemonic power is forward scaling (the expansion of military and economic strength), and hegemonic decline is reverse scaling (the dissipation of resources caused by overextension). Paul Kennedy points out in \textit{The Rise and Fall of the Great Powers} that the main cause of hegemonic decline is `imperial overreach'---the military and administrative costs of maintaining global hegemony exceed the economic benefits that hegemony brings. When the marginal benefit of expansion falls below the marginal cost, the direction of scaling reverses---from expansion to contraction.
+\end{definition}
+
+\begin{proposition}[Dynamic model of the hegemony cycle]\label{prop:hegemony_dynamics}
+Let the relative power of the hegemonic state be $H(t)$ ($H = 1$ denotes absolute hegemony and $H = 0$ the loss of hegemony). The rise and fall of hegemony can be modelled as
+\[
+\frac{dH}{dt} = \alpha H(1-H) - \beta H,
+\]
+where $\alpha > 0$ is the rate of self-reinforcement of hegemony (the `winner takes all' effect) and $\beta > 0$ is the dissipation rate of the cost of maintaining hegemony (the `overextension' effect). When $\alpha > \beta$, $H(t)$ converges to $H^* = 1 - \beta/\alpha$---hegemony is stable. When the cost of maintaining hegemony grows with time ($\beta = \beta_0 e^{\gamma t}$), there must come a moment at which $\beta(t) > \alpha$---hegemony begins an irreversible decline.
+
+The dynamics of the hegemony cycle is a competition between self-reinforcement (hegemonic expansion) and maintenance cost (hegemonic upkeep). In the rising phase of a hegemony the term $\alpha H(1-H)$ dominates---forward scaling; in the declining phase the term $-\beta H$ dominates---reverse scaling. The length of the hegemony cycle, $T_{\text{hegemony}}$, is determined by the critical time at which $\beta(t)$ exceeds $\alpha$, about $100$--$150$ years.
+\end{proposition}
+
+\begin{proof}
+Equilibrium points: $\frac{dH}{dt} = \alpha H(1-H) - \beta H = H(\alpha - \beta - \alpha H) = 0$ gives $H = 0$ and $H^* = 1 - \beta/\alpha$ (requiring $\beta < \alpha$). When $\alpha > \beta$, $H^* > 0$ is a stable equilibrium ($\dot H > 0$ for $H < H^*$ and $\dot H < 0$ for $H > H^*$)---hegemony is stable at $H^*$. If the maintenance cost grows exponentially with time, $\beta(t) = \beta_0 e^{\gamma t}$, then at the critical time $t_c = \frac{1}{\gamma}\ln\frac{\alpha}{\beta_0}$ we have $\beta(t_c) = \alpha$; thereafter $H^* < 0$, and the only equilibrium is $H = 0$---hegemony declines irreversibly. Taking $\alpha/\beta_0 \sim 3$--$10$ and $\gamma \sim 0.01$--$0.02$ per year gives $t_c \sim 60$--$230$ years, which covers the observed $100$--$150$-year hegemony cycle.
+\end{proof}
+
+\begin{example}[Empirical data on global hegemony cycles]\label{ex:hegemony_data}
+According to the long-cycle theory of international politics of Modelski, the data on global hegemonic succession since 1494 are as follows:
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2cm}}
+\toprule
+Hegemony cycle & Years & Cycle length (years) \\
+\midrule
+Portuguese cycle & $1494$--$1580$ & $86$ \\
+Dutch cycle & $1580$--$1688$ & $108$ \\
+British cycle I & $1688$--$1792$ & $104$ \\
+British cycle II & $1792$--$1914$ & $122$ \\
+American cycle & $1914$--present & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+The mean length of the five cycles is about $109$ years ($86+108+104+122=420$, $420/4=105$ years; if the cycles are delimited by the onset of absolute naval supremacy, the mean is about $109$ years).
+\end{example}
+
+\section{A periodic analysis of dynastic succession in Chinese history}
+
+\begin{theorem}[Periodic laws of Chinese dynastic succession]\label{thm:chinese_dynasty_cycle}
+In the $2133$ years from the Qin unification to the fall of the Qing ($221$ BCE--$1912$), China experienced about $10$ major dynasties. The lifespans, modes of succession and institutional legacies of these dynasties reveal deep regularities of the political cycle:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{The alternating cycle of unification and division}: Chinese history exhibits the macro-cycle described by the classical maxim that after long division there must be union, and after long union there must be division (the traditional formulation of the alternation of unification and division). Periods of great unification (the Han, Tang, Yuan, Ming and Qing) are interspersed with periods of division (the Three Kingdoms, the Two Jins and the Northern and Southern Dynasties; the Five Dynasties and Ten Kingdoms). Periods of unification last on average about $250$--$300$ years, periods of division vary in length from about $53$ to $369$ years, with a mean of about $247$ years.
+    \item \textbf{The long cycle of institutional innovation}: the founding of every great unificatory dynasty was accompanied by institutional innovation---the commandery-and-county system of the Qin, the recommendation system of the Han, the imperial examination system of the Tang, the civil-service system of the Song, the Grand Secretariat of the Ming and the Grand Council of the Qing. The cycle from the innovation to the maturity of an institution is about $200$--$300$ years.
+    \item \textbf{Coupled fiscal--military collapse}: the common path of dynastic collapse is fiscal crisis $\to$ military weakening $\to$ internal rebellion $\to$ foreign invasion. The fall of almost every major dynasty was accompanied both by internal troubles (peasant risings) and by external threats (invasions by the nomadic peoples of the north).
+\end{enumerate}
+Chinese dynastic succession is the grandest realisation of a nested periodic structure in political history---the dynastic cycle ($200$--$300$ years) is nested within the unification--division cycle ($300$--$500$ years), and the unification--division cycle is in turn nested within the cycle of institutional evolution ($1000$--$2000$ years).
+\end{theorem}
+
+\begin{proof}
+(i) Alternation of unification and division: Qin--Han unification ($221$ BCE--$220$ CE, about $441$ years) $\to$ division under the Three Kingdoms, the Two Jins and the Northern and Southern Dynasties ($220$--$589$, about $369$ years) $\to$ Sui--Tang unification ($589$--$907$, about $318$ years) $\to$ division under the Five Dynasties and Ten Kingdoms ($907$--$960$, about $53$ years) $\to$ division under the Song, Liao and Jin ($960$--$1279$, about $319$ years) $\to$ Yuan unification ($1271$--$1368$, about $97$ years) $\to$ Ming unification ($1368$--$1644$, about $276$ years) $\to$ Qing unification ($1644$--$1912$, about $268$ years). The mean length of the periods of unification is about $280$ years ($(441+318+97+276+268)/5=280$). The mean length of the periods of division is about $247$ years ($(369+53+319)/3=247$).
+
+(ii) Institutional innovation: the Qin created the commandery-and-county system (centralised authority); the Han created the recommendation system (selection of officials); the Sui and Tang created the imperial examination system (selection of officials by examination) and perfected the system of the Three Departments and Six Ministries; the Song strengthened the civil-service system (checking the military by the civil power); the Ming created the Grand Secretariat and abolished the office of chancellor; and the Qing created the Grand Council. Every institutional innovation was completed in the early period of a dynasty and was subsequently ossified in the middle and late periods---the cycle from the flexibility to the ossification of an institution ran roughly in step with the lifespan of the dynasty.
+
+(iii) Coupled fiscal--military collapse: the Qin fell to the revolt of the conscript soldiers that took the Hangu Pass (the rising of Chen Sheng and Wu Guang); the Western Han to the Green Woodsmen and the Red Eyebrows; the Eastern Han to the Yellow Turbans; the Tang to Huang Chao; the Yuan to the Red Turbans; the Ming to Li Zicheng; and the Qing to the 1911 Revolution. In the final period of every dynasty there appeared the vicious circle `fiscal exhaustion $\to$ arrears in military pay $\to$ mutiny of the soldiers or decline in fighting capacity $\to$ expansion of the rising $\to$ still greater fiscal exhaustion'. The critical point of fiscal collapse usually occurred when the rate of land concentration reached $70\%$--$80\%$---at which point the owner-farmers could no longer bear the taxes of the state.
+\end{proof}
+
+\begin{theorem}[Nested periodic structure of political systems]\label{thm:politics_nested_periods}
+The periodic structure of political systems displays a four-level nested pattern:
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{3cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{4cm}}
+\toprule
+Periodic level & Time scale & Typical examples \\
+\midrule
+Micro cycle & $10$--$30$ years & Change of regime (coups d'état, electoral turnover) \\
+Meso cycle & $100$--$300$ years & The dynastic lifecycle, hegemonic succession \\
+Macro cycle & $300$--$500$ years & Alternation of unification and division \\
+Ultra-long cycle & $1000$--$2000$ years & Institutional evolution (commandery-and-county system $\to$ imperial examination system $\to$ Grand Secretariat) \\
+\bottomrule
+\end{tabular}
+\end{center}
+The period ratio between successive levels is about $1.9$--$10.4$ (that is, a frequency ratio of about $0.10$--$0.53$)---the inner cycle completes about $1.9$--$10.4$ whole cycles in each phase of the outer cycle. This nested structure is the realisation in political history of the nested epicycle system of the `Periodic Systems' chapter.
+\end{theorem}
+
+\begin{proof}
+Calculation of the frequency ratios: micro/meso = $207/20\approx10.4$ (taking the micro mean as $20$ years), meso/macro = $400/207\approx1.9$, macro/ultra-long = $1500/400=3.75$. The nested structure is guaranteed by the difference in order of magnitude between the time scales: the time scale of each level is $1.9$--$10.4$ times that of the level above, so that the inner cycle completes several whole cycles in each phase of the outer cycle.
+\end{proof}
+
+\section{Balance relations in political systems}
+
+\begin{theorem}[Three balance relations of political systems]\label{thm:political_conservation}
+The dynamics of a political system is governed by three balance relations:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{The zero-sum constraint on power}: in a closed political system the total quantity of power remains constant---power gained by one person or group necessarily means power lost by another. Changes in the distribution of power among monarch, aristocracy, bureaucracy and populace are the dynamic manifestation of the zero-sum constraint on power. The zero-sum constraint on power is the political-science expression of the zero-sum game.
+    \item \textbf{Fiscal balance}: in a closed fiscal system without external financing, the total revenue of the government (taxation) $=$ total expenditure (administration $+$ military $+$ the imperial household). When expenditure persistently exceeds revenue, the government covers the deficit by seigniorage (inflation), debt default or the sale of privileges---but all these means have their limits. Fiscal collapse is the consequence of the breakdown of fiscal balance---the government can no longer balance revenue and expenditure by any means.
+    \item \textbf{Conversion of legitimacy types}: there are three sources of legitimacy of a regime (Weber's classification): the traditional (`it has always been so'), the charismatic (`following a great leader') and the legal-rational (`in accordance with legal procedure'). The total legitimacy of a regime is converted among the three types---when traditional legitimacy declines, a charismatic leader rises; after the death of a charismatic leader the regime must establish legal-rational legitimacy in order to maintain stability. The conversion of legitimacy among the three types is the political realisation of phase rotation.
+\end{enumerate}
+The hierarchical relation among the three balance relations is as follows: the zero-sum constraint on power is the zero-sum constraint of political games, fiscal balance is the material basis for the survival of a regime, and the conversion of legitimacy types is the psychological basis for regime stability. Together the three constitute the guarantee of self-consistency of the periodic structure of political systems.
+\end{theorem}
+
+\begin{proof}
+(i) The zero-sum constraint on power: under an absolute monarchy the concentration of power in the monarch, $A(t)$, and the dispersion of power among the aristocracy, $D(t)$, satisfy $A + D = 1$ (other holders of power being neglected). When the monarch centralises power ($A \to 1$), the power of the aristocracy is compressed ($D \to 0$); when the aristocracy grows strong ($D \to 1$), the monarch is reduced to a figurehead ($A \to 0$). The struggles in Chinese history between the power of the chancellor and the power of the emperor, and between the localities and the centre, are both instances of the zero-sum constraint on power.
+
+(ii) Fiscal balance: taking the Ming as an example, during the Wanli period ($1573$--$1620$) fiscal revenue was about $4$ million taels of silver and expenditure about $6$ million taels (including the military costs of the Three Great Campaigns and the expenditure of the imperial household), giving an annual deficit of about $2$ million taels. By the Chongzhen period ($1628$--$1644$) the military expenditure for Liaodong had risen sharply to about $5$ million taels a year, whilst in the interior the tax base shrank because of the fighting, so that fiscal revenue fell to about $2$ million taels---the annual deficit widening to more than $3$ million taels. The persistent deficit ultimately brought about the fiscal collapse of the Ming.
+
+(iii) Conversion of legitimacy types: taking the Qing as an example, in the early Qing legitimacy derived mainly from military conquest (the charismatic type---the personal leadership of Nurhaci and Hong Taiji). Under the Kangxi and Qianlong emperors the Qing shifted the basis of legitimacy from the charismatic to the traditional and legal-rational types by compiling the \textit{Complete Library of the Four Treasuries}, holding imperial examinations and honouring Confucius and Confucian learning. In the late Qing, traditional legitimacy disintegrated under the impact of the West, and the charismatic leadership of the revolutionaries (Sun Yat-sen) rose---legitimacy rotated once again from the traditional to the charismatic type.
+\end{proof}
+
+\begin{remark}[Unity with the rest of the book]
+The theory of the periodic structure of political systems established in this chapter is a systematic application of periodic mathematics in political science and history. The dynastic lifecycle (rise--zenith--decline--collapse) is the realisation of an accumulative process in political time---the cumulative effects of land concentration and fiscal crisis drive regime stability from high to low. Regime change (monarchy--aristocracy--democracy--ochlocracy) is the rotational motion of a periodic cycle in institutional space. Imperial hegemonic succession (Portugal--the Netherlands--Britain--the United States) is the scaling realisation of expansion and contraction in geopolitics---the alternation of hegemonic expansion and excessive contraction has a period of about $100$--$150$ years. The two-thousand-year history of Chinese dynastic succession is the political evidence for a nested periodic structure---the dynastic cycle ($200$--$300$ years) is nested within the unification--division cycle ($300$--$500$ years), and the unification--division cycle is in turn nested within the cycle of institutional evolution ($1000$--$2000$ years). The three balance relations of political systems---the zero-sum constraint on power, fiscal balance and the conversion of legitimacy types---together constitute the guarantee of self-consistency of the periodic structure of political systems.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & The passage of time in the dynastic lifecycle and the one-way accumulation of land concentration, $dL/dt = -\alpha L$ (Definition \ref{def:land_concentration}) \\
+Scaling & The expansion--contraction scaling of imperial hegemony (Proposition \ref{prop:hegemony_dynamics}); the exponential decay and half-life of fiscal crisis (Lemma \ref{ch30_fiscal_half_life}) \\
+Rotation & The phase-space rotation of regime change: the Polybius cycle (Definition \ref{def:regime_change}); the rotation of legitimacy among the traditional, charismatic and legal-rational types (Theorem \ref{thm:political_conservation}) \\
+Balance & The zero-sum constraint on power, fiscal balance and the conversion of legitimacy types (Theorem \ref{thm:political_conservation}) \\
+Symmetry & The alternating symmetry of unification and division (`after long division, union; after long union, division', Theorem \ref{thm:chinese_dynasty_cycle}) \\
+Closure & The closed causal loop of multiple positive feedbacks: fiscal deterioration $\to$ elite defection $\to$ military weakening $\to$ still worse fiscal deterioration (Definition \ref{def:political_quantities}) \\
+Period & The three-level nesting of the dynastic cycle ($200$--$300$ years, Proposition \ref{prop:dynasty_lifespan}), the hegemony cycle ($100$--$150$ years, Definition \ref{def:hegemony_cycle}) and the unification--division cycle ($300$--$500$ years, Theorem \ref{thm:chinese_dynasty_cycle}) (Theorem \ref{thm:politics_nested_periods}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the \textbf{political periodicity decision theorem} of this chapter (\ref{thm:politics_periodicity_decision}). Hint: first write down the decision map and the evolution group of this chapter's target, then apply the proof structure of the general criterion given in the `Periodic Systems' chapter.
+
+    \item Verify that the hypotheses of the \textbf{monotonicity of cardinality adjustment} (\ref{prop:politics_adaptive_growth}) hold for the domain objects of this chapter, and give a counterexample in which the hypotheses fail.
+
+    \item Examine the behaviour of the \textbf{three-parameter correspondence: radius, phase and angular speed} (\ref{prop:politics_epicycle_correspondence}) under parameter degeneration, and explain how the conclusion degenerates accordingly.
+
+    \item Explain the relation between the \textbf{political periodicity diagnosis pipeline and its interface with three chapters} (\ref{thm:politics_diagnosis_integration}) and the corresponding general conclusions of the `Periodic Systems' chapter (whether they agree, whether this is a special case, or whether additional conditions are required).
+
+    \item Using the seven-theme comparison table of this chapter, identify the concrete carriers of the themes \textbf{translation}, \textbf{scaling} and \textbf{rotation} in this chapter, and give one example of domain data for each.
+
+    \item Synthesis: restate the diagnostic procedure of this chapter using the five-step standard interface of the `Periodic Systems' chapter (Table \ref{tab:ps_five_steps}), noting for each step the theorem of this chapter on which it depends: \ref{thm:politics_periodicity_decision}, \ref{prop:politics_adaptive_growth}, \ref{prop:politics_epicycle_correspondence}, \ref{thm:politics_diagnosis_integration}.
+\end{enumerate}
+
+

@@ -1,0 +1,782 @@
+\chapter{Periodic Structure of Geographic Systems}
+\label{chap:geo-periodic}
+\markboth{Periodic Structure of Geographic Systems}{Periodic Structure of Geographic Systems}
+
+\begin{remark}[Periodicity decision for the target of this chapter (citation)]\label{rem:geo_ps_hook}
+When this chapter decides whether a research target is periodic, determines its period type, or seeks its minimal positive period, reference is always made to the `Periodic Systems' chapter:
+for the periodicity criterion see \cref{thm:ps_periodicity_decision},
+for the discrimination of period types see \cref{def:ps_period_type}, \cref{prop:ps_type_discrimination},
+for the search for the minimal positive period see \cref{def:ps_minimal_period_algorithm}, \cref{thm:ps_minimal_period_correctness},
+and for the construction of period series and epicycle groups from data see \cref{thm:ps_series_reconstruction}, \cref{def:ps_epicycle_group}.
+\end{remark}
+
+\begin{remark}[Positioning of this chapter: developed along the five-step interface of the `Periodic Systems' chapter]\label{rem:geo_chapter_positioning}
+The periodic structure of geographic systems studies the mathematical characterisation of periodicity, quasi-periodicity and scale invariance in the Earth-surface system. Geographic systems lie at the intersection of astronomical, geological and climatic systems---astronomical cycles (the long-term variation of the three elements of the Earth's orbit) drive glacial--interglacial cycles on scales of ten thousand to a hundred thousand years, geological cycles (plate motion, orogeny, volcanic activity and seismic activity) shape landforms on scales of a million to a hundred million years, climatic cycles (atmospheric circulation, ocean currents and monsoons) control environmental change on scales from the seasonal to the interdecadal, whilst the surface terrain and the latitude--longitude system form the geometric framework of these processes. This chapter does not establish a separate periodicity criterion; instead it connects geographic systems to the five-step interface prescribed by the `Periodic Systems' chapter:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{Decision}: reduce Milankovitch cycles, the seasonal cycle, geological cycles and the latitude--longitude grid to discrete dynamical systems, invoke \cref{thm:ps_periodicity_decision} to decide whether they are periodic, and determine the period type;
+    \item \textbf{Construction}: build the amplitude series, the frequency series and the phase series from astronomical orbital elements, the distribution of solar radiation, geological time series and latitude--longitude coordinates, and assemble them into the geographic epicycle group;
+    \item \textbf{Adjustment}: dynamically adjust the geographic epicycle group subject to the cross-scale resonance window, the isostasy constraint and residual-energy descent;
+    \item \textbf{Convolution}: introduce amplitude convolution, phase convolution and frequency convolution on the geographic epicycle group, and link them to Milankovitch cycles, the monsoon phase and latitude--longitude rotation;
+    \item \textbf{Integration}: connect to the tool chains of the three chapters `Discrete Sampling and Intercalation of Periodic Signals', `Harmonic Analysis' and `Time Series Analysis', forming a diagnostic procedure for geographic periodicity.
+\end{enumerate}
+The mathematical tools used in this chapter include: group actions, closed orbits, period series, periodic convolution, discrete subgroups of continuous groups and rotation flows on compact topological spaces; the physical tools used include: conservation of angular momentum, conservation of energy, conservation of mass, isostasy, plate tectonics, the meridional distribution of solar radiation, Milankovitch cycles, the ENSO coupled oscillator, the earthquake recurrence period and the Gutenberg--Richter law.
+\end{remark}
+
+\begin{remark}[Guide to the seven themes of this chapter]\label{rem:geo_seven_themes}
+\textbf{Translation}---the passage of geological time and the seasonal cycle (the translational period of the tropical year, \cref{def:monsoon_system});
+\textbf{Scaling}---the scaling distribution of climate zones with latitude (\cref{ch19_insolation_gradient_example}) and the power-law distribution of volcanic eruption frequency (\cref{prop:volcanic_frequency});
+\textbf{Rotation}---Milankovitch cycles (the quasi-periodic rotation of the three elements, precession, obliquity and eccentricity, \cref{def:milankovitch_cycles}) and the Earth's rotation and the latitude--longitude coordinate system (\cref{def:geographic_coordinate});
+\textbf{Conservation}---conservation of angular momentum, conservation of energy and conservation of mass (\cref{thm:geographic_conservation_laws});
+\textbf{Symmetry}---the phase symmetry of the seasons in the northern and southern hemispheres (\cref{def:solar_insolation_gradient});
+\textbf{Closure}---the closure of the Wilson cycle, the earthquake cycle and the transgression--regression cycle (\cref{def:wilson_cycle}, \cref{def:seismic_cycle}, \cref{def:transgression_regression});
+\textbf{Period}---the multi-scale nesting of the diurnal cycle, the seasons, precession, Milankovitch cycles and volcanic and geological cycles (\cref{thm:geographic_four_layer}).
+\end{remark}
+
+\section{Periodicity decision for geographic targets: the first step of the `Periodic Systems' chapter}
+\label{sec:geo_periodicity_decision}
+
+\subsection{Geographic targets, decision inputs and decision maps}
+
+\begin{definition}[Geographic targets and decision inputs]\label{def:geo_target}
+A \textbf{geographic target} is one of the following objects:
+\begin{enumerate}[label=(\roman*)]
+    \item an astronomically driven geographic periodic system, whose state space is the orbital-element space $\mathcal S\subset\mathbb R^3$ (eccentricity $e$, obliquity $\varepsilon$, precession index $e\sin\varpi$);
+    \item a climate-response time series, whose state space is a set of climatic variables (temperature, precipitation, sea-surface temperature and so on);
+    \item a time record of a geological process, whose state space is a sequence of geological events;
+    \item a latitude--longitude coordinate grid, whose state space is the set of points $S^2$ on the Earth's surface.
+\end{enumerate}
+The \textbf{decision input} of a geographic target is the ordered pair
+\[
+\mathcal D_{\mathrm{G}}=(\mathcal S,\Phi),
+\]
+where $\mathcal S$ is the state space and $\Phi:\mathcal S\to\mathcal S$ is the evolution map. If $\mathcal S$ is a compact manifold or a subset of a compact manifold, the target is called a \textbf{compact geographic target}; if $\mathcal S$ is a finite set, the target is called a \textbf{finite geographic target}.
+\end{definition}
+
+\begin{definition}[Geographic decision map]\label{def:geo_periodization}
+Let a geographic target be given by the decision input $\mathcal D_{\mathrm{G}}=(\mathcal S,\Phi)$. If the states of the target are generated by $\Phi$, that is, if there exists $x_0\in\mathcal S$ such that
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+for $t\in\mathbb Z$ the state $x_t$ is generated by iteration of $\Phi$; for $t\in\mathbb R$ it is described by the one-parameter evolution family $\{\Phi_t\}_{t\in\mathbb R}$, where each $\Phi_t:\mathcal S\to\mathcal S$, $\Phi_0=\operatorname{id}$, $\Phi_{s+t}=\Phi_s\circ\Phi_t$ for all $s,t\in\mathbb R$, and $(t,x)\mapsto\Phi_t(x)$ is continuous.
+then $\Phi$ is called the \textbf{geographic decision map} of the target. The geographic target is then reduced to the discrete dynamical system $(\mathcal S,\Phi)$ when $t\in\mathbb Z$ and to the continuous dynamical system $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$ when $t\in\mathbb R$; in both cases the criteria of the `Operations and Periodicity' chapter and of the `Periodic Systems' chapter may be applied directly.
+\end{definition}
+
+\begin{theorem}[Geographic periodicity decision theorem]\label{thm:geo_periodicity_decision}
+Let the decision map of a geographic target be $\Phi$, and let $(\mathcal S,\Phi)$ be a discrete dynamical system. Then:
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{Sufficient decision}: if there exists $m\in\mathbb N^+$ with $\Phi^m=\mathrm{id}$, then the target is a uniformly periodic geographic system; every orbit is closed and the orbit length divides $m$.
+    \item \textbf{Equivalence of the decision}: the target is a uniformly periodic geographic system if and only if $\operatorname{ord}(\Phi)<\infty$.
+    \item \textbf{Pointwise criterion}: the orbit of the target at a state $x_0$ is closed if and only if $x_0$ is a periodic point; the orbit length is then the period at that point.
+    \item \textbf{Non-omissibility}: the conjunction of conserved quantities and symmetry groups cannot replace $\operatorname{ord}(\Phi)<\infty$; a quasi-periodic geographic target is not a periodic geographic system.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:geo_periodicity_decision} of this chapter is the domain instantiation of \cref{thm:ps_periodicity_decision} in the `Periodic Systems' chapter:
+it suffices to replace the decision map $f$ and the evolution group by $\Phi$ of this chapter, and the four parts (A) sufficient decision, (B) equivalence of the decision, (C) pointwise criterion and
+(D) non-omissibility then hold one by one. By the convention of \cref{rem:ps_applications_hook}, they are not expanded again here.
+\end{proof}
+
+\begin{corollary}[Geographic period types]\label{cor:geo_period_type}
+After the decision of \cref{thm:geo_periodicity_decision}, a geographic target falls into one of the following types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Trivial periodic type}: least period $m_0=1$, the state is a fixed point;
+    \item \textbf{Strictly periodic type}: $1<m_0<\infty$, the state is strictly periodic (for example the seasonal cycle with $m_0=1$ year, and the tides with $m_0\approx 12.42$ hours);
+    \item \textbf{Uniformly periodic type}: $\operatorname{ord}(\Phi)=m<\infty$, every orbit length divides $m$;
+    \item \textbf{Quasi-periodic type}: $\operatorname{ord}(\Phi)=\infty$, the orbits are not closed but are dense on a compact carrier structure (for example the overall motion of the Milankovitch cycles and the quasi-periodic oscillation of ENSO);
+    \item \textbf{Eventually periodic type}: there exists $N$ such that the target is periodic for $t\ge N$;
+    \item \textbf{Discrete periodic type}: the carrier structure is $\mathbb Z$ and the normalised period ratio is $\rho=T_x/\Delta x\in\mathbb Q$.
+    \item \textbf{Asymptotically periodic (damped) type}: the orbit is not closed, but tends asymptotically to a closed orbit or to a fixed point, the residual decaying as $e^{-\kappa t}$ (see \cref{def:ps_period_type}(vii)).
+\end{enumerate}
+Here (i)--(iii) and (vi) belong to periodic geographic systems; (iv) does not belong to periodic geographic systems but can be handled with cross-scale resonance or bounded-approximation tools; (v) is a periodic geographic system only in its stable stage; (vii), like (iv), is a type in the limiting sense; it is not a periodic geographic system and can be handled with bounded-approximation tools only in its stable stage.
+\end{corollary}
+
+\begin{proof}
+Each item follows by substituting the geographic target into \cref{thm:geo_periodicity_decision} and \cref{def:ps_period_type} of the `Periodic Systems' chapter.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for the seasonal cycle]\label{lem:geo_seasonal_period}
+Let the decision map of the seasonal cycle be $\Phi$, with state space the latitude of the subsolar point $\delta\in[-23.44^\circ,+23.44^\circ]$. Then the period of $\Phi$ is $1$ tropical year:
+\[
+\operatorname{ord}(\Phi)=1\ \text{year}=365.2422\ \text{days}.
+\]
+The seasonal cycle is of strictly periodic type, and its least period is the tropical year.
+\end{lemma}
+
+\begin{proof}
+The latitude of the subsolar point $\delta(t)$ satisfies $\delta(t+T)=\delta(t)$, where $T$ is the tropical year. Within one year the subsolar point travels from the Tropic of Capricorn to the Tropic of Cancer and back to the Tropic of Capricorn, completing exactly one full oscillation, so the period of $\Phi$ is $1$ tropical year. By \cref{thm:kepler_third} (calendar-systems chapter), the length of the tropical year is $T_{\text{trop}}=365.2422$ days.
+\end{proof}
+
+\begin{lemma}[Long-period decision for the obliquity of the Earth's axis]\label{lem:geo_obliquity_period}
+Let the evolution map of the obliquity of the Earth's axis be $\Phi$, with state space $\varepsilon\in[22.1^\circ,24.5^\circ]$. Then $\Phi$ is a quasi-periodic map with principal period about $41,000$ years.
+\end{lemma}
+
+\begin{proof}
+The evolution of the obliquity of the Earth's axis is driven by planetary perturbations; its Fourier expansion is a multi-frequency quasi-periodic function whose principal frequency corresponds to the $41$ ka period. By \cref{prop:milankovitch_structure} the periods of the three orbital elements are incommensurable, so the whole is of quasi-periodic type.
+\end{proof}
+
+\begin{lemma}[Multi-frequency decision for the precession index]\label{lem:geo_precession_period}
+Let the evolution map of the precession index be $\Phi$, with state space $e\sin\varpi$. Then $\Phi$ is a quasi-periodic map with principal periods about $19$ ka and $23$ ka.
+\end{lemma}
+
+\begin{proof}
+Precession is jointly modulated by the precession of the Earth's rotation axis (period about $26$ ka) and the precession of the orbital major axis (period about $112$ ka), and the principal components of the combined frequency correspond to $19$ ka and $23$ ka. By \cref{def:milankovitch_cycles}.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for the tidal cycle]\label{lem:geo_tidal_period}
+Let the decision map of the tidal cycle be $\Phi$, with state space the sea level. Then the period of $\Phi$ is the $M_2$ tidal period:
+\[
+T_{M_2}\approx 12.42\ \text{hours},
+\]
+which is the period of the principal lunar semidiurnal tide.
+\end{lemma}
+
+\begin{proof}
+The $M_2$ tide is driven by the tide-generating force of the Moon. The interval between two successive passages of the Moon across the same meridian is $1$ lunar day $=24.84$ hours; since $M_2$ is a semidiurnal tide, its period is $12.42$ hours. By \cref{lem:kepler_period} (astronomical-systems chapter), the orbital period of the Moon is $27.32$ days.
+\end{proof}
+
+\begin{definition}[Geographic least positive period algorithm]\label{def:geo_minimal_period_algorithm}
+\textbf{Input}: geographic target samples $x_0,\dots,x_{N-1}$, tolerance $\varepsilon\ge0$.
+\textbf{Output}: the least positive period $T_0$, or the decision `not periodic'.
+\textbf{Steps}:
+\begin{enumerate}[label=(\arabic*)]
+    \item take the candidate set $\mathcal P=\{T\in\mathbb N^+:2T\le N\}$ and traverse it in increasing order of $T$;
+    \item for each $T$ compute the maximum deviation
+    \[
+    E(T)=\max_{0\le n<N-T}\|x_{n+T}-x_n\|;
+    \]
+    \item output the first $T$ satisfying $E(T)\le\varepsilon$ as $T_0$; if the traversal is completed with no solution, output `not periodic';
+    \item commensurability check: use the normalised period ratio $\rho=T_x/\Delta x$ and the corresponding continuous duration $\ell=T_0\Delta x$, together with \cref{prop:commensurability_periodicity_parallel} and \cref{cor:sampling_period_relation_parallel} of the `Discrete Sampling and Intercalation of Periodic Signals' chapter, to check the conversion relation between $T_0$ and the continuous period $T_x$.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[Correctness of the geographic least positive period algorithm]\label{thm:geo_minimal_period_correctness}
+\begin{enumerate}[label=(\roman*)]
+    \item If the samples form a strictly periodic sequence with $\varepsilon=0$ and $N\ge2T_0$, the algorithm outputs its discrete fundamental period $T_0$.
+    \item If the samples are obtained by sampling a continuous geographic target of fundamental period $T_x$ at sampling interval $\Delta x$, and the normalised period ratio $\rho=T_x/\Delta x=p/q$ is in lowest terms, the algorithm outputs $T_0=p$.
+    \item If $\rho\notin\mathbb Q$, no true period exists: $E(T)>0$ for every $T\in\mathbb N^+$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) By \cref{def:discrete_fundamental_period} of the `Discrete Sampling and Intercalation of Periodic Signals' chapter, $T_0$ is the least positive period, so $E(T_0)=0$, whilst $E(T)>0$ for $T<T_0$. The algorithm traverses in increasing order of $T$, so the first index satisfying $E(T)=0$ is $T_0$.
+(ii) By \cref{prop:commensurability_periodicity_parallel}(ii) the fundamental period of the sampling sequence is $p$; substitute into (i).
+(iii) By \cref{prop:commensurability_periodicity_parallel}(iii), $\operatorname{Group}_{\mathrm{period}}(f)=\{0\}$, so $E(T)>0$ for every $T$.
+\end{proof}
+
+\begin{example}[Example of a periodicity decision for the seasonal cycle]\label{ex:geo_seasonal_period}
+Take a surface air-temperature record $T(t)$ (with the day as the sampling unit). By \cref{lem:geo_seasonal_period} the least period is $T_0=365$ days (approximately). A periodicity test with a window of 365 days gives $E(365)<\varepsilon$, whilst a smaller window (for example 300 days) gives $E(300)>\varepsilon$.
+\end{example}
+
+\begin{example}[Quasi-periodicity decision for Milankovitch cycles]\label{ex:geo_milankovitch_quasi}
+Take an obliquity record $\varepsilon(t)$ (with the millennium as the sampling unit). By \cref{lem:geo_obliquity_period}, $\varepsilon(t)$ is quasi-periodic and no strict least period exists. Testing any candidate $T$ gives $E(T)>0$; spectral analysis gives a principal peak at $41$ ka.
+\end{example}
+
+\begin{remark}[Conserved quantities do not guarantee periodicity]\label{rem:geo_invariant_not_period}
+The conserved quantities of a geographic system (angular momentum, energy and mass) are auxiliary conditions for periodic structure, but they do not constitute a sufficient condition. For example, a hyperbolic orbit has conservation of energy and conservation of angular momentum, yet its orbit is open and not closed. The periodic structure of a geographic system must be decided by \cref{thm:geo_periodicity_decision} or by criteria such as \cref{lem:geo_seasonal_period}.
+\end{remark}
+
+\section{Construction of the geographic period series and epicycle group: the second step of the `Periodic Systems' chapter}
+\label{sec:geo_series_construction}
+
+\begin{definition}[Geographic amplitude, frequency and phase series]\label{def:geo_series}
+Let the state or output sequence of a geographic target be $\{z_t\}$. If it can be written as
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+then
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+are called respectively the \textbf{amplitude series}, the \textbf{frequency series} and the \textbf{phase series} of the geographic target. The three agree with \cref{def:amplitude_series}, \cref{def:frequency_series} and \cref{def:phase_series} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{definition}[Geographic epicycle group]\label{def:geo_epicycle_group}
+Let the period series of a geographic target be given by its amplitude series $\{A_k\}$, frequency series $\{\omega_k\}$ and phase series $\{\phi_k\}$. For each $k$ define the epicycle
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+whose collection
+\[
+\mathfrak E_{\mathrm{G}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+is called the \textbf{epicycle group} of the geographic target. Its superposition is the geographic period series
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[Constructing the period series from geographic data]\label{thm:geo_series_reconstruction}
+Let the output of a geographic target be a finite periodic sequence of period $N$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the output admits the discrete Fourier expansion
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item the amplitude series is given by $|c_k|$, the phase series by $\arg c_k$ and the frequency series by $2\pi k/N$;
+    \item if the output is a Milankovitch-cycle sequence, its harmonic decomposition gives four principal components at $100$ ka, $41$ ka, $23$ ka and $19$ ka;
+    \item if the output is an earthquake sequence, its harmonic decomposition gives a principal frequency corresponding to the fault recurrence interval $\Delta t$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) The discrete Fourier series of a finite periodic sequence is a standard result: the basis functions $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ form an orthogonal basis of $\mathbb C^N$.
+(ii) This is read off directly from $c_k=A_k e^{i\phi_k}$.
+(iii) By \cref{def:milankovitch_cycles} the principal frequencies of the three orbital elements are $1/100$ ka$^{-1}$, $1/41$ ka$^{-1}$, $1/23$ ka$^{-1}$ and $1/19$ ka$^{-1}$ respectively. The discrete Fourier transform separates these principal frequencies into different harmonic channels.
+(iv) By \cref{def:seismic_cycle} the earthquake recurrence interval $T_{\text{rec}}=d_s/v_s$ gives the principal frequency $1/T_{\text{rec}}$.
+\end{proof}
+
+\begin{definition}[Geographic periodic system and periodic structure]\label{def:geographic_periodic_system}
+A \textbf{geographic periodic system} is a dynamical system of the Earth-surface layer acted on jointly by astronomical driving forces, geological tectonic forces, climatic feedback forces and terrain constraints. The state variables of the system include:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Astronomical driving forces}: the spatio-temporal distribution of solar radiation over the Earth's surface, determined by the three elements of the Earth's orbit (eccentricity $e$, obliquity $\varepsilon$, precession index $e\sin\varpi$).
+    \item \textbf{Geological tectonic forces}: the plate-motion velocity field $\mathbf{v}_{\text{plate}}(\mathbf{x}, t)$, isostatic compensation, fault slip rates, the spatio-temporal distribution of volcanic activity, and the earthquake magnitude--frequency distribution.
+    \item \textbf{Climatic feedback forces}: the atmospheric temperature field $T(\mathbf{x}, t)$, the precipitation field $P(\mathbf{x}, t)$, the ocean-current velocity field $\mathbf{u}_{\text{ocean}}(\mathbf{x}, t)$ and the ice-sheet volume $V_{\text{ice}}(t)$.
+    \item \textbf{Terrain constraints}: the elevation field $h(\mathbf{x})$, the surface slope $\nabla h(\mathbf{x})$, latitude--longitude coordinates $(\lambda, \phi)$ and the time-zone system.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[The periodic structure of a geographic system]\label{def:geographic_periodic_structure}
+The \textbf{periodic structure} of a geographic system falls into four basic types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Astronomical-geographic period}: on scales of $10^4$--$10^5$ years, driven by Milankovitch cycles, with the total angular momentum of the Earth--Sun--planet system as its conserved quantity;
+    \item \textbf{Climatic-geographic period}: on scales from the seasonal to the interdecadal, driven by the meridional gradient of solar radiation, with the total energy of the Earth--atmosphere system as its conserved quantity;
+    \item \textbf{Geological-geographic period}: on scales of $10^6$--$10^9$ years, driven by the Earth's internal heat energy and plate motion, with the total mass of crustal material as its conserved quantity;
+    \item \textbf{Terrain--coordinate period}: the latitude--longitude coordinate system and the altitudinal layering of terrain determined by the Earth's rotation, with the angular momentum of rotation and revolution as its conserved quantity.
+\end{enumerate}
+\end{definition}
+
+\section{Dynamic adjustment of the geographic epicycle group: the third step of the `Periodic Systems' chapter}
+\label{sec:geo_adaptive}
+
+\begin{definition}[Dynamic adjustment of the geographic epicycle group]\label{def:geo_adaptive_adjustment}
+Let the current geographic epicycle group be $\mathfrak E^{(j)}$, with partial sum
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+and residual $r^{(j)}=z-z^{(j)}$. \textbf{Dynamic adjustment} consists of two rules:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Quantity adjustment}: if the residual energy satisfies $\|r^{(j)}\|^2>\delta$, add a new epicycle according to the peak of the residual periodogram;
+    \item \textbf{Parameter adjustment}: update the parameters of the existing epicycles by regularised least squares or by the cross-scale resonance constraint.
+\end{enumerate}
+In geographic systems, quantity adjustment corresponds to increasing the orbital harmonic order, adding a climatic mode or adding a geological event layer; parameter adjustment corresponds to adjusting orbital elements, resonance widths or geological time-scale parameters.
+\end{definition}
+
+\begin{proposition}[Monotonicity of quantity adjustment]\label{prop:geo_adaptive_growth}
+After the dominant residual frequency component is added as in \cref{def:geo_adaptive_adjustment}(i), the residual energy is monotonically non-increasing:
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+with equality if and only if the residual has no energy at the selected frequency.
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:geo_adaptive_growth} of this chapter agrees with the dynamic adjustment mechanism of \cref{def:ps_adaptive_adjustment} in the `Periodic Systems' chapter:
+adding an epicycle removes the component of $r^{(j)}$ along $\hat\omega$ from the residual, and the orthogonal decomposition
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{the removed component}\|^2$ gives the inequality,
+with equality if and only if the norm of the removed component is zero. The complete argument is given there.
+\end{proof}
+
+\begin{theorem}[Convergence of dynamic adjustment]\label{thm:geo_adaptive_convergence}
+Let the geographic target be a finite periodic sequence of period $T_0$ and let $\delta=0$. Then after at most $\lfloor T_0/2\rfloor+1$ steps of dynamic adjustment the residual is zero, and the resulting geographic epicycle group is the exact Fourier data of the target.
+\end{theorem}
+
+\begin{proof}
+The discrete Fourier series of a sequence of period $T_0$ is complete on $\lfloor T_0/2\rfloor+1$ harmonics. At each step one dominant frequency component of the residual is extracted as in \cref{prop:geo_adaptive_growth} and the residual energy decreases strictly, so after finitely many steps the residual is zero.
+\end{proof}
+
+\begin{definition}[Cross-scale resonance index]\label{def:geo_cross_scale_resonance}
+Let a geographic target have substructures on $L$ time scales, with periods $T_1<\dots<T_L$. Define the \textbf{cross-scale resonance index}
+\[
+\mathcal R=\max_{i<j}\left|\frac{T_j}{T_i}-\operatorname{round}\left(\frac{T_j}{T_i}\right)\right|.
+\]
+The smaller $\mathcal R$ is, the closer the periods at the various scales are to an integer ratio, and the stronger the cross-scale resonance.
+\end{definition}
+
+\begin{proposition}[Bounds for the cross-scale resonance index]\label{prop:geo_cross_scale_bound}
+The cross-scale resonance index satisfies $0\le\mathcal R\le 1/2$. If all $T_j/T_i\in\mathbb Q$, the periods at the various scales are commensurable, that is, a common period exists; $\mathcal R$ measures how close the period ratios are to integers, and $\mathcal R\to0$ requires every $T_j/T_i$ to be close to an integer.
+\end{proposition}
+
+\begin{proof}
+For any real number $x$, $|x-\operatorname{round}(x)|\le 1/2$. The upper bound follows directly from the definition.
+\end{proof}
+
+\begin{remark}[Boundaries of dynamic adjustment]\label{rem:geo_adaptive_boundary}
+\cref{thm:geo_adaptive_convergence} relies on finite periodic sequences. For quasi-periodic geographic targets such as Milankovitch cycles, no finite epicycle group represents them exactly, and only cross-scale resonance analysis or bounded approximation is possible. The cross-scale resonance index $\mathcal R$ measures only the closeness to an integer ratio and does not guarantee that resonance actually occurs.
+\end{remark}
+
+\section{Geographic convolution: the fourth step of the `Periodic Systems' chapter}
+\label{sec:geo_convolution}
+
+\begin{definition}[Geographic amplitude, phase and frequency convolutions]\label{def:geo_convolution_types}
+Let two geographic epicycle groups be
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+Define:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Amplitude convolution}: $\mathbb A_{mn}=A_nB_m$;
+    \item \textbf{Phase convolution}: $\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$;
+    \item \textbf{Frequency convolution}: $\mathbb F_{mn}=\omega_n\nu_m$;
+    \item \textbf{Trend convolution}: $\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$.
+\end{enumerate}
+This agrees with \cref{def:amplitude_convolution}, \cref{def:phase_convolution}, \cref{def:frequency_convolution} and \cref{def:tendency_convolution} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{theorem}[Action of the three convolutions on the geographic epicycle group]\label{thm:geo_convolution_action}
+Let the epicycle groups of two geographic targets be $\mathfrak E$ and $\mathfrak E'$ respectively. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item amplitude convolution acts only on the radius;
+    \item phase convolution acts only on the phase;
+    \item frequency convolution acts only on the rotational speed;
+    \item trend convolution preserves both amplitude and phase.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+This is read off directly from \cref{def:geo_convolution_types}.
+\end{proof}
+
+\begin{proposition}[Phase convolution of Milankovitch cycles and the climate response]\label{prop:geo_milankovitch_climate_convolution}
+Let the epicycle group of Milankovitch cycles be $\mathfrak E_{\mathrm{M}}$ and the epicycle group of the climate-response sequence be $\mathfrak E_{\mathrm{C}}$. Their phase convolution
+\[
+\mathbb P_{mn}=e^{i(\phi_m^{\mathrm{M}}-\phi_n^{\mathrm{C}})}
+\]
+measures the phase difference between the astronomical forcing and the climate response. Glacial terminations correspond to particular zeros of the phase difference---at these the maximum of the astronomical forcing aligns with the maximum of the climate response, producing the melting of ice sheets.
+\end{proposition}
+
+\begin{proof}
+By \cref{prop:glacial_phase_locking} there is a phase relation between glacial cycles and Milankovitch cycles. A glacial termination corresponds to a period in which precession and obliquity are simultaneously in a high-insolation configuration; at such a time the phase of the astronomical forcing coincides with the phase of the climate response, and the argument of $\mathbb P_{mn}$ is zero. The phase convolution records all the information about this alignment.
+\end{proof}
+
+\begin{proposition}[Autocorrelation and trend convolution]\label{prop:geo_autocorr_phase_convolution}
+Let $\{z_t\}$ be a geographic periodic sequence, with autocorrelation function
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+In the language of the geographic epicycle group, the autocorrelation function is the projection of the trend convolution onto the diagonal:
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:geo_autocorr_phase_convolution} of this chapter is the realisation in this domain of the convolution-action conclusion of \cref{thm:ps_convolution_action} in the `Periodic Systems' chapter:
+substituting $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ into the definition of the autocorrelation, cancelling all off-diagonal cross terms by orthogonality and retaining only the diagonal term of the trend convolution
+(the factorisation of the three convolutions, \cref{prop:ps_convolution_factorization}), which yields $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$.
+The full expansion is given there.
+\end{proof}
+
+\begin{remark}[Relation between geographic convolution and periodic convolution]\label{rem:geo_convolution_relation}
+Geographic convolution is not a new convolution operation but an instance of the periodic convolution of the `Series and Convolution' chapter on the geographic epicycle group. Autocorrelation is the projection of the trend convolution onto the diagonal; the Milankovitch--climate phase difference and cross-scale resonance are respectively the concrete manifestations in geography of phase convolution and frequency convolution.
+\end{remark}
+
+\section{Integration with discrete sampling, harmonic analysis and time series analysis: the fifth step of the `Periodic Systems' chapter}
+\label{sec:geo_integration}
+
+\begin{definition}[Geographic periodicity diagnostic procedure]\label{def:geo_periodic_diagnosis}
+For a given geographic system, diagnose it using the framework of periodic mathematics:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Periodicity decision}: verify the period type of the geographic target (\cref{thm:geo_periodicity_decision});
+    \item \textbf{Series construction}: build the amplitude, frequency and phase series and the epicycle group from geographic data (\cref{thm:geo_series_reconstruction});
+    \item \textbf{Cross-scale diagnosis}: compute the cross-scale resonance index $\mathcal R$ (\cref{def:geo_cross_scale_resonance});
+    \item \textbf{Convolution diagnosis}: compute the autocorrelation (the diagonal projection of the trend convolution, \cref{prop:geo_autocorr_phase_convolution}) and the Milankovitch--climate phase convolution (\cref{prop:geo_milankovitch_climate_convolution});
+    \item \textbf{Conservation diagnosis}: verify conservation of angular momentum, energy and mass (\cref{thm:geographic_conservation_laws}).
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[The geographic periodicity diagnostic procedure and its interfaces with three chapters]\label{thm:geo_diagnosis_integration}
+The five steps of \cref{def:geo_periodic_diagnosis} connect respectively to:
+\begin{enumerate}[label=(\roman*)]
+    \item the `Discrete Sampling and Intercalation of Periodic Signals' chapter: \cref{def:uniform_sampling_parallel}, \cref{thm:nyquist_shannon_parallel}, \cref{thm:intercalation_leakage_suppression} (sampling and spectral estimation of geographic time series);
+    \item the `Harmonic Analysis' chapter: \cref{def:fourier_series}, \cref{thm:parseval_fourier}, \cref{prop:twelve_to_six} (frequency decomposition of geographic data);
+    \item the `Time Series Analysis' chapter: \cref{def:ts_period_detection}, \cref{prop:ts_period_significance}, \cref{def:ts_window_validation} (periodicity significance tests for geographic time series).
+\end{enumerate}
+The geographic periodicity diagnostic procedure is therefore not an independent method but an application of the unified tool chain of periodic mathematics to geographic systems.
+\end{theorem}
+
+\begin{proof}
+The correspondences are item by item:
+(i) geographic periodicity diagnosis requires sampling and spectral estimation;
+(ii) the frequency decomposition and the phase kernels are found in the `Harmonic Analysis' chapter;
+(iii) the periodogram peaks, the Fisher test and window-function validation are found in the `Time Series Analysis' chapter.
+Hence the diagnostic procedure is a synthesis of the tool chains of the three chapters.
+\end{proof}
+
+\begin{remark}[Order of operations after integration]\label{rem:geo_integration_order}
+The recommended order for an actual diagnosis is: first decide whether the geographic target is periodic (\cref{thm:geo_periodicity_decision}); then construct the Fourier data and the epicycle group of the geographic data (\cref{thm:geo_series_reconstruction}); then optimise the parameters by cross-scale resonance and dynamic adjustment (\cref{thm:geo_adaptive_convergence}, \cref{def:geo_cross_scale_resonance}); then perform geographic convolution and phase-relation analysis (\cref{prop:geo_milankovitch_climate_convolution}, \cref{prop:geo_autocorr_phase_convolution}); and finally output the diagnosis as in \cref{def:geo_periodic_diagnosis}.
+\end{remark}
+
+\section{Astronomical-geographic cycles}
+\label{sec:astro_geographic_cycles}
+
+\subsection{Milankovitch cycles}
+
+\begin{definition}[Milankovitch cycles]\label{def:milankovitch_cycles}
+\textbf{Milankovitch cycles} are the quasi-periodic variations of the three elements of the Earth's orbit, caused by the gravitational perturbations of the other planets of the Solar System on the Earth. The three elements and their principal periods are:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Eccentricity} $e$: principal periods of about $100,000$ years ($100$ ka) and $413,000$ years ($413$ ka).
+    \item \textbf{Obliquity} $\varepsilon$: ranging from about $22.1^\circ$ to $24.5^\circ$, with a principal period of about $41,000$ years ($41$ ka).
+    \item \textbf{Precession index} $e\sin\varpi$: principal periods of about $19,000$ years and $23,000$ years ($19$--$23$ ka).
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Structural properties of Milankovitch cycles]\label{prop:milankovitch_structure}
+Milankovitch cycles have the following structural properties:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Phase-space rotation}: the quasi-periodic variation of the three elements of the Earth's orbit corresponds to a rotation of the Earth--Sun system in phase space.
+    \item \textbf{Conservation of angular momentum}: the total angular momentum of the Earth--Sun--planet system is conserved; the orbital and rotational angular momenta of the Earth evolve slowly under planetary perturbations and lunisolar tidal torques---this is precisely the dynamical origin of the Milankovitch cycles.
+    \item \textbf{Quasi-periodicity}: the periods of the three orbital elements are incommensurable, and the overall motion is quasi-periodic.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) The variations of the three elements of the Earth's orbit are described by Lagrange's planetary equations. In phase space the eccentricity $e$ and the longitude of perihelion $\varpi$ form a pair of conjugate variables whose long-term evolution is equivalent to a rotation in phase space.
+(ii) Planetary perturbations are conservative forces, and the total angular momentum of the Earth--Sun--planet system is strictly conserved.
+(iii) The principal frequencies of the three elements obtained from planetary perturbation theory are linearly independent over $\mathbb{Q}$, so the overall motion is a quasi-periodic flow on a three-dimensional torus; $100:41:23$ is only an order-of-magnitude approximation and cannot be used to decide incommensurability.
+\end{proof}
+
+\subsection{Glacial--interglacial cycles}
+
+\begin{definition}[Glacial--interglacial cycles]\label{def:glacial_interglacial_cycles}
+\textbf{Glacial--interglacial cycles} are the periodic alternation of the Earth's climate between cold glacial periods and warm interglacial periods during the Quaternary (the last $2.58$ Ma). During glacial periods the continental ice sheets of the northern hemisphere expand greatly and sea level falls by $100$--$130$ metres. During interglacial periods the ice sheets retreat and sea level rises again.
+
+Glacial--interglacial cycles are the \textbf{non-linear response} of the Milankovitch astronomical cycles in the geographic system.
+\end{definition}
+
+\begin{proposition}[Phase relations of glacial cycles]\label{prop:glacial_phase_locking}
+There is a phase relation between glacial--interglacial cycles and the Milankovitch astronomical cycles:
+\begin{enumerate}[label=(\roman*)]
+    \item in the Early Pleistocene ($2.58$--$1.0$ Ma) the glacial cycles were dominated by the $41$ ka period;
+    \item after the Mid-Pleistocene Transition ($1.0$--$0.8$ Ma) the glacial cycles shifted to being dominated by the $100$ ka period;
+    \item glacial terminations correspond to periods in which precession and obliquity are simultaneously in a high-insolation configuration.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+The phase relation between glacial cycles and astronomical cycles is established by oxygen-isotope stratigraphy. Spectral analysis of $\delta^{18}O$ time series identifies four principal frequencies at $100$ ka, $41$ ka, $23$ ka and $19$ ka. Around the Mid-Pleistocene Transition the dominant frequency shifts from $41$ ka to $100$ ka, in step with the eccentricity period. Glacial terminations correspond to periods in which the phases of several astronomical cycles coincide.
+\end{proof}
+
+\section{Climatic-geographic cycles}
+\label{sec:climate_geographic_cycles}
+
+\subsection{The seasonal cycle of the solar-radiation gradient and atmospheric circulation}
+
+\begin{definition}[Meridional gradient of solar radiation]\label{def:solar_insolation_gradient}
+The fundamental energy driver of the Earth's climate system is the \textbf{meridional gradient of solar radiation}. The zonal-mean distribution of solar radiation at the top of the atmosphere can be approximated by
+\[
+Q(\phi)=\frac{S_0}{4}\cdot\bar{s}(\phi),
+\]
+where $S_0\approx 1361$ W/m$^2$ is the solar constant and $\bar{s}(\phi)$ is the annual-mean insolation distribution function at latitude $\phi$.
+\end{definition}
+
+\begin{example}[Concrete calculation of the meridional gradient of solar radiation]\label{ch19_insolation_gradient_example}
+Using the Legendre approximation to the annual-mean insolation distribution, $\bar{s}(\phi)\approx 1-0.482\,P_2(\sin\phi)$, we obtain
+\[
+Q(0)\approx 422\ \text{W/m}^2,\qquad Q(90^\circ)\approx 176\ \text{W/m}^2.
+\]
+The equator-to-pole difference in annual-mean insolation is about $246$ W/m$^2$, which supplies the order of magnitude of the solar-radiation gradient that drives the meridional atmospheric circulation.
+\end{example}
+
+\begin{definition}[Monsoon system]\label{def:monsoon_system}
+A \textbf{monsoon} is a large-scale reversal of the atmospheric circulation on the seasonal scale. In summer the continents warm faster than the oceans, producing continental lows and oceanic highs that drive moist oceanic air towards the continents; in winter the reverse occurs.
+\end{definition}
+
+\begin{proposition}[Periodic properties of the monsoon system]\label{prop:monsoon_periodicity}
+The monsoon system has the following periodic properties:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Translational period}: the fundamental period is the tropical year.
+    \item \textbf{Conservation of energy}: the total energy is approximately conserved over the seasonal cycle.
+    \item \textbf{Gradient constraint}: the annual-mean meridional temperature gradient remains approximately unchanged in the long-term climatic balance.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) The subsolar point moves back and forth between the Tropic of Cancer and the Tropic of Capricorn, the position of the maximum of the solar-radiation gradient travels with the seasons, and the land--sea thermal contrast and the monsoon wind direction it drives therefore reverse once every year.
+(ii) During the summer monsoon the oceans release energy in the form of latent heat, whilst during the winter monsoon radiative cooling over the continents drives subsidence; latent heat, sensible heat and kinetic energy circulate between land and sea with the tropical year as period.
+(iii) The annual-mean meridional temperature gradient is determined by the energy balance: the net radiative surplus at low latitudes and the net radiative deficit at high latitudes are compensated by meridional transport by the atmosphere and the oceans.
+\end{proof}
+
+\subsection{Periodic structure of ocean circulation}
+
+\begin{definition}[Thermohaline circulation]\label{def:thermohaline_circulation}
+\textbf{Thermohaline circulation} is the global deep-ocean circulation system driven by differences in the temperature and salinity of sea water, with a complete circulation period of about $1000$--$2000$ years.
+\end{definition}
+
+\begin{definition}[El Ni\~no--Southern Oscillation]\label{def:enso_geo}
+\textbf{El Ni\~no--Southern Oscillation} (ENSO) is the quasi-periodic oscillation of the coupled ocean--atmosphere system of the tropical Pacific on the interannual scale ($2$--$7$ years), with two extreme phases, El Ni\~no (the warm phase) and La Ni\~na (the cold phase).
+\end{definition}
+
+\begin{lemma}[Rotation--decay decomposition of the damped harmonic oscillator]\label{ch19_enso_oscillator_lemma}
+Let $(T_E(t),H_W(t))$ satisfy the linear system
+\[
+\frac{d}{dt}\begin{pmatrix}T_E\\H_W\end{pmatrix}
+= M\begin{pmatrix}T_E\\H_W\end{pmatrix},\qquad
+M=\begin{pmatrix}-\alpha & \beta\\ -\gamma & -\delta\end{pmatrix},
+\]
+where $\alpha,\beta,\gamma,\delta>0$. If $4\beta\gamma>(\alpha-\delta)^2$, then $M$ has a pair of conjugate complex eigenvalues
+\[
+\lambda_{\pm}=-\rho\pm i\omega,\qquad
+\rho=\frac{\alpha+\delta}{2}>0,\qquad
+\omega=\frac{1}{2}\sqrt{4\beta\gamma-(\alpha-\delta)^2}>0.
+\]
+\end{lemma}
+
+\begin{proof}
+The characteristic polynomial of the matrix $M$ is $\lambda^2+(\alpha+\delta)\lambda+(\alpha\delta+\beta\gamma)$, with discriminant $\Delta=(\alpha-\delta)^2-4\beta\gamma$. When $4\beta\gamma>(\alpha-\delta)^2$ we have $\Delta<0$, giving conjugate complex roots. The real part $-\rho<0$ makes the solution decay exponentially, whilst the imaginary part $\pm i\omega$ makes the solution rotate in phase space.
+\end{proof}
+
+\begin{proposition}[Coupled-oscillator model of ENSO]\label{prop:enso_periodic_system}
+ENSO can be modelled as a periodic system of two coupled subsystems, with evolution equations
+\[
+\frac{dT_E}{dt}=-\alpha T_E+\beta H_W,\qquad
+\frac{dH_W}{dt}=-\gamma T_E-\delta H_W.
+\]
+This system of equations is equivalent to a damped harmonic oscillator; random atmospheric perturbations inject energy into it and maintain a sustained oscillation.
+\end{proposition}
+
+\begin{proof}
+By \cref{ch19_enso_oscillator_lemma}, when $4\beta\gamma>(\alpha-\delta)^2$ the pair $(T_E,H_W)$ undergoes a decaying rotation about the equilibrium point with frequency $\omega$ and period $T=2\pi/\omega$.
+\end{proof}
+
+\section{Periodic structure of geological and volcanic activity}
+\label{sec:geological_cycles}
+
+\subsection{The Wilson cycle}
+
+\begin{definition}[The Wilson cycle]\label{def:wilson_cycle}
+The \textbf{Wilson cycle} is the ultra-long period of the Earth's plate tectonics on the $200$--$500$ Ma time scale, comprising six stages: continental rifting, sea-floor spreading, ocean opening, initiation of subduction, ocean closure and continental collision.
+\end{definition}
+
+\begin{proposition}[Structural properties of the Wilson cycle]\label{prop:wilson_structure}
+The Wilson cycle has the following structural properties:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Scaling structure}: the period is about $200$--$500$ Ma.
+    \item \textbf{Conservation of mass}: the ratio of ocean to land area remains constant over long times (about $71\%$ ocean and $29\%$ land).
+    \item \textbf{Self-similarity}: similar sequences of stages appear on different scales.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) The greatest age of oceanic crust worldwide is about $200$ Ma; the North Atlantic, for example, opened about $200$ Ma ago at an average spreading rate of about $2.5$ cm/year.
+(ii) The production rate and the destruction rate of oceanic crust are both about $3$ km$^2$/year during the Phanerozoic.
+(iii) The opening of the Japan Sea and that of the Atlantic both pass through the same sequence of stages, differing only by about one order of magnitude in time scale.
+\end{proof}
+
+\subsection{The orogenic--denudation cycle and isostasy}
+
+\begin{definition}[The orogenic--denudation cycle]\label{def:orogenic_denudation_cycle}
+The \textbf{orogenic--denudation cycle} is the dynamically balanced process of the crust between tectonic uplift and surface erosion, on time scales of $10^6$--$10^8$ years.
+\end{definition}
+
+\begin{proposition}[A quantitative model of isostasy]\label{prop:isostasy_model}
+Let the crustal density be $\rho_c$, the mantle density $\rho_m>\rho_c$, the reference crustal thickness $H_0$, the surface elevation $h$ and the crustal thickening $\Delta H$. Then Airy isostasy satisfies
+\[
+h\cdot\rho_c=\Delta H\cdot(\rho_m-\rho_c),
+\]
+that is, $h=(\rho_m-\rho_c)/\rho_c\cdot\Delta H$. For typical parameters $\rho_c\approx 2.7$ g/cm$^3$ and $\rho_m\approx 3.3$ g/cm$^3$, the proportionality coefficient is about $0.22$.
+\end{proposition}
+
+\begin{proof}
+Take the pressure-balance condition at the depth of compensation: $\rho_cH_0g+\rho_m\Delta Hg=\rho_c(h+H_0+\Delta H)g$, which on expansion gives $h\rho_c=\Delta H(\rho_m-\rho_c)$.
+\end{proof}
+
+\subsection{The transgression--regression cycle and sedimentary sequences}
+
+\begin{definition}[The transgression--regression cycle]\label{def:transgression_regression}
+The \textbf{transgression--regression cycle} is the periodic rise and fall of sea level relative to continental margins, driven by cycles on several hierarchical levels: first-order cycles ($50$--$100$ Ma), second-order cycles ($5$--$50$ Ma), third-order cycles ($0.5$--$5$ Ma) and fourth-order cycles ($0.1$--$0.5$ Ma).
+\end{definition}
+
+\subsection{Periodic structure of volcanic activity}
+
+\begin{definition}[Multi-scale periodicity of volcanic activity]\label{def:volcanic_periodicity}
+\textbf{Volcanic activity} exhibits periodicity on several hierarchical levels: eruption periods (minutes to hours), active--dormant periods (years to millennia), super-eruption periods ($10^4$--$10^5$ years) and periods of the global volcanic activity rate ($10^7$--$10^8$ years).
+\end{definition}
+
+\begin{proposition}[Power-law distribution of volcanic eruption frequency versus magnitude]\label{prop:volcanic_frequency}
+The frequency $N$ of global volcanic eruption events and the eruption size $M$ satisfy the power-law distribution
+\[
+N(>M)\propto M^{-b},\qquad b\approx 0.7\text{--}1.0.
+\]
+\end{proposition}
+
+\begin{proof}
+In the global volcanic database, fitting over the range $M_0\in[10^{-2},10^3]$ km$^3$ gives $b\approx 0.7$--$1.0$, which has the same structure as the Gutenberg--Richter relation for earthquakes.
+\end{proof}
+
+\subsection{Periodic structure of seismic activity}
+
+\begin{definition}[The earthquake cycle and recurrence interval]\label{def:seismic_cycle}
+An \textbf{earthquake} is a periodic process of accumulation and release of crustal stress. The recurrence interval is $T_{\text{rec}}=d_s/v_s$, where $d_s$ is the coseismic slip and $v_s$ the slip rate.
+\end{definition}
+
+\begin{proposition}[Power-law distribution of seismic frequency versus magnitude]\label{prop:seismic_frequency}
+Earthquakes satisfy the \textbf{Gutenberg--Richter law}
+\[
+\log_{10}N(>M)=a-bM,\qquad b\approx 1.0.
+\]
+\end{proposition}
+
+\begin{proof}
+Substituting the relation $\log_{10}E\approx 1.5M+4.8$ between the magnitude $M$ and the energy $E$ released by an earthquake gives $N(>E)\propto E^{-b/1.5}\approx E^{-0.67}$.
+\end{proof}
+
+\begin{example}[Concrete calculation of the earthquake recurrence interval]\label{ex:geo_seismic_rec}
+For the southern segment of the San Andreas Fault, $v_s=34$ mm/year and $d_s\approx 5.5$ m, giving
+\[
+T_{\text{rec}}=\frac{5.5}{0.034}\approx 160\ \text{years}.
+\]
+\end{example}
+
+\section{Terrain, landforms and the latitude--longitude system}
+\label{sec:terrain_coordinates}
+
+\subsection{The latitude--longitude coordinate system}
+
+\begin{definition}[The geographic coordinate system]\label{def:geographic_coordinate}
+The \textbf{geographic coordinate system} is determined by the Earth's rotation axis and the equatorial plane, and comprises latitude $\phi$, longitude $\lambda$ and elevation $h$. Longitude has period $360^\circ$, latitude has half-period $180^\circ$, and elevation has no period but exhibits scaling layering.
+\end{definition}
+
+\begin{proposition}[The periodicity of the time-zone system]\label{prop:timezone_periodicity}
+The international time-zone system divides the Earth by longitude into $24$ time zones, each spanning $15^\circ$ and corresponding to a time difference of $1$ hour:
+\[
+n=\left\lfloor\frac{\lambda+7.5^\circ}{15^\circ}\right\rfloor,\qquad \lambda_n=15^\circ\times n.
+\]
+\end{proposition}
+
+\begin{proof}
+The angular velocity of the Earth's rotation is $\omega_E=2\pi/24\text{h}$. A longitude difference $\Delta\lambda$ corresponds to the local time difference $\Delta t=\Delta\lambda\cdot(24\text{h}/360^\circ)=\Delta\lambda/15^\circ$ hours. The angular distance between the centres of adjacent time zones is $15^\circ$, which is exactly a local time difference of $1$ hour.
+\end{proof}
+
+\subsection{Latitudinal climate zones}
+
+\begin{definition}[Latitudinal climate zones]\label{def:climate_zones}
+The Earth's surface is divided by latitude into five principal climate zones: tropical, subtropical, temperate, subpolar and polar. The boundary latitudes of the climate zones ($23.44^\circ$ and $66.56^\circ$) are determined by the obliquity of the Earth's axis, $\varepsilon=23.44^\circ$.
+\end{definition}
+
+\begin{proposition}[The temperature scaling of climate zones]\label{prop:climate_temperature_scaling}
+The annual-mean surface air temperature $T(\phi)$ satisfies the scaling relation
+\[
+T(\phi)\approx T_0-\Delta T\cdot\left(\frac{\sin\phi}{\sin 90^\circ}\right)^2,
+\]
+where $T_0\approx 27^\circ$C is the annual-mean temperature at the equator and $\Delta T\approx 40^\circ$C is the equator-to-pole temperature difference.
+\end{proposition}
+
+\begin{proof}
+The annual-mean solar radiation at latitude $\phi$ is proportional to $\cos\phi$. Taking the radiative input together with meridional heat transport, the latitudinal distribution of air temperature is found to be approximately proportional to $\cos^2\phi$. Empirical fitting shows that $T(\phi)\approx T_0-\Delta T\sin^2\phi$ agrees well with observations for $|\phi|\le 60^\circ$.
+\end{proof}
+
+\subsection{Elevation, terrain and altitudinal layering}
+
+\begin{definition}[Terrain height layering]\label{def:terrain_elevation}
+The land surface of the Earth is divided by elevation into three layers: lowlands ($0$--$500$ m, about $57\%$), middle elevations ($500$--$2000$ m, about $28\%$) and high elevations ($>2000$ m, about $15\%$).
+\end{definition}
+
+\begin{proposition}[Power-law characteristic of the land elevation distribution]\label{prop:hypsometric_curve}
+The cumulative distribution of land elevation approximately satisfies the power law
+\[
+P(h>h_0)\propto h_0^{-\alpha},\qquad \alpha\approx 1.5\text{--}2.0.
+\]
+\end{proposition}
+
+\begin{proof}
+Statistical analysis of the global terrain database shows that the cumulative distribution of land area with elevation is approximately a straight line in log--log coordinates, with slope $\alpha\approx 1.5$--$2.0$. This feature is consistent with the fractal structure of the `tectonic uplift--erosional denudation' process.
+\end{proof}
+
+\section{The multi-layer nested structure of geographic periodic systems}
+\label{sec:geo_nested}
+
+\begin{theorem}[The four-level nesting of the geographic periodic system]\label{thm:geographic_four_layer}
+The geographic periodic system forms a four-level nested structure:
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}>{\centering\arraybackslash}p{2.5cm}}
+\toprule
+Geographic periodicity layer & Time scale & Dominant mechanism & Conserved quantity/reference scale \\
+\midrule
+Astronomical driving layer & $10^4$--$10^5$ years & Rotation of the Earth--Sun--planet system & Angular momentum \\
+Climatic response layer & $10^0$--$10^3$ years & Meridional gradient of solar radiation & Energy \\
+Geological tectonic layer & $10^6$--$10^9$ years & Plate motion and mantle convection & Mass \\
+Terrain--coordinate layer & $10^{-1}$--$10^1$ years & Geometry of the Earth's rotation and revolution & Rotation/revolution quantity \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{theorem}
+
+\begin{proof}
+The mathematical basis of the four-level nested structure is the separation of time scales. Astronomical periods are far longer than climatic periods, and climatic periods are in turn far longer than the time scales of weather systems. In the evolution equations of the climate system the astronomical driving forces may be regarded as slowly varying parameters, approximately constant on the time scale of the climatic response layer. Geological tectonic forces are regarded as fixed boundary conditions on the time scale of the climatic response layer. The terrain--coordinate layer serves as the coordinate framework on all time scales.
+\end{proof}
+
+\begin{corollary}[Cross-scale resonance of the geographic system]\label{cor:geographic_cross_scale_resonance}
+In the four-level nested structure, when the periods of different levels resonate, a pronounced cross-scale amplification effect can arise.
+\end{corollary}
+
+\begin{proof}
+Any response substructure may be regarded as a forced oscillator whose steady-state amplitude is proportional to $1/|\omega_0^2-\omega^2|$; hence when the driving frequency $\omega$ approaches the natural frequency $\omega_0$ of the response substructure, the response amplitude increases markedly.
+\end{proof}
+
+\begin{remark}[Empirical observations and formal analogies of cross-scale resonance]\label{rem:geo_cross_scale_empirical}
+The following three examples are empirical observations and formal analogies, not theorems: (i) the Mid-Pleistocene Transition may be a consequence of cross-scale resonance among the astronomical driving layer, the climatic response layer and the geological tectonic layer; (ii) the quasi-synchrony of the supercontinent cycle with crossings of the Galactic spiral arms; (iii) the overlap in time scale between super-volcanic eruptions and Milankovitch cycles.
+\end{remark}
+
+\section{Conservation laws of geographic periodic systems}
+\label{sec:geo_conservation}
+
+\begin{theorem}[The three conservation laws of the geographic system]\label{thm:geographic_conservation_laws}
+The dynamics of a geographic periodic system is governed by three conservation laws:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Conservation of angular momentum}: the total angular momentum of the Earth--atmosphere--ocean system evolves slowly under external astronomical torques, and the exchange of angular momentum among the internal spheres satisfies a conservation law.
+    \item \textbf{Conservation of energy}: the total energy input and output of the Earth's climate system are balanced in the annual mean. The meridional gradient of solar radiation drives the global circulation.
+    \item \textbf{Conservation of mass}: the circulation of Earth-surface material among its reservoirs satisfies conservation of mass.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) The rate of change of the total angular momentum of the Earth--atmosphere--ocean system equals the external astronomical torque. The precession of the Earth's rotation axis (period about $25772$ years) and nutation (principal period $18.6$ years) correspond respectively to the long-term and the short-term components of the exchange of angular momentum between the equatorial bulge and the external gravitational torque.
+(ii) The net solar radiation received at the top of the Earth's atmosphere is $S_0(1-A)/4\approx 240$ W/m$^2$, and the Earth's infrared radiative output is $\sigma T_e^4$ with $T_e\approx 255$ K. In the annual mean the input and the output are balanced.
+(iii) Global sea-level change is determined jointly by changes in the volume of sea water and changes in the capacity of the ocean basins. Volcanic eruptions transfer mantle material to the surface and subduction carries surface material back into the mantle, and the two are balanced on the time scale of the Wilson cycle.
+\end{proof}
+
+\begin{remark}[Connection with the rest of the book]\label{rem:geo_book_interface}
+The theory of the periodic structure of geographic systems established in this chapter is an application of periodic mathematics to the Earth-surface system. Astronomical cycles, climatic cycles, geological cycles and terrain--coordinate cycles constitute the most complete periodic spectrum of the Earth-surface system. Geographic systems are a comparatively complex field of application of the periodic-mathematics framework in the natural sciences---they span the whole range of time scales from the seasonal to the hundred-million-year, and couple the periodic processes of the five great spheres: astronomical, atmospheric, oceanic, geological and biological.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & The passage of geological time and the seasonal cycle: the translational period of the tropical year (\cref{def:monsoon_system}, \cref{prop:monsoon_periodicity}) \\
+Scaling & The scaling distribution of climate zones with latitude (\cref{ch19_insolation_gradient_example}, \cref{prop:climate_temperature_scaling}); the power-law distribution of volcanic eruption frequency versus magnitude (\cref{prop:volcanic_frequency}); the power law of the land elevation distribution (\cref{prop:hypsometric_curve}) \\
+Rotation & Milankovitch cycles (\cref{def:milankovitch_cycles}, \cref{prop:milankovitch_structure}); the Earth's rotation and the latitude--longitude coordinate system (\cref{def:geographic_coordinate}, \cref{prop:timezone_periodicity}) \\
+Conservation & Conservation of angular momentum, conservation of energy and conservation of mass (\cref{thm:geographic_conservation_laws}) \\
+Symmetry & Symmetry of the northern and southern hemispheres and latitudinal symmetry: the symmetric distribution of solar radiation about the equator (\cref{def:solar_insolation_gradient}) \\
+Closure & Closure of the water cycle and the lithospheric cycle: the Wilson cycle (\cref{def:wilson_cycle}), the earthquake cycle (\cref{def:seismic_cycle}), the transgression--regression cycle (\cref{def:transgression_regression}) \\
+Period & Multi-scale periods of the diurnal cycle, the seasons, precession, Milankovitch cycles and volcanic and geological cycles (\cref{thm:geographic_four_layer}); cross-scale resonance (\cref{cor:geographic_cross_scale_resonance}, \cref{def:geo_cross_scale_resonance}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the \textbf{geographic periodicity decision theorem} of this chapter (\ref{thm:geo_periodicity_decision}). Hint: first write down the decision map and the evolution group of this chapter's target, then apply the proof structure of the general criterion of the `Periodic Systems' chapter.
+
+    \item Verify that the hypotheses of \textbf{monotonicity of quantity adjustment} (\ref{prop:geo_adaptive_growth}) hold for the domain objects of this chapter, and give a counterexample in which the hypotheses fail.
+
+    \item Examine the behaviour of the \textbf{geographic periodicity diagnostic procedure and its interfaces with three chapters} (\ref{thm:geo_diagnosis_integration}) under degeneracy of the parameters, and explain how the conclusion degenerates accordingly.
+
+    \item Explain the relation between \textbf{autocorrelation and trend convolution} (\ref{prop:geo_autocorr_phase_convolution}) and the corresponding general conclusion of the `Periodic Systems' chapter (whether they agree, whether it is a special case, or whether additional conditions are required).
+
+    \item Using the seven-theme comparison table of this chapter, identify the concrete carriers in this chapter of the three themes \textbf{translation}, \textbf{scaling} and \textbf{rotation}, and give one example of domain data for each.
+
+    \item Synthesis: restate the diagnostic procedure of this chapter using the five-step standard interface of the `Periodic Systems' chapter (Table \ref{tab:ps_five_steps}), noting for each step the theorem of this chapter on which it depends: \ref{thm:geo_periodicity_decision}, \ref{prop:geo_adaptive_growth}, \ref{thm:geo_diagnosis_integration}, \ref{prop:geo_autocorr_phase_convolution}.
+\end{enumerate}
+
+

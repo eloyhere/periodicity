@@ -1,0 +1,729 @@
+\chapter{数据分析之周期结构}
+\markboth{数据分析之周期结构}{数据分析之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:data_ps_hook}
+本章判定研究目标是否具有周期性、确定其周期类型、以及查找最小正周期时，一律引用「周期系统」章：
+周期性判据见 \cref{thm:ps_periodicity_decision}，
+周期类型判别见 \cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}，
+最小正周期查找见 \cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}，
+由数据构建周期级数与周转圆组见 \cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}。
+\end{remark}
+
+\begin{remark}[本章定位：按「周期系统」章五步接口展开]\label{rem:data_five_steps_positioning}
+数据分析之周期结构研究数据科学中周期性模式的检测、提取、建模和预测的数学方法。本章不另立周期性判据，而是把数据分析接入「周期系统」章规定的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把时间序列、多变量数据、频谱、趋势等目标化为离散或连续动力系统，引用 \cref{thm:ps_periodicity_decision} 判定是否具有周期性，并确定周期类型；
+    \item \textbf{构建}：由观测数据、频谱、相位构建振幅级数、频率级数、相位级数，组装为数据周转圆组；
+    \item \textbf{调节}：用残差能量下降、信息准则（AIC/BIC）与导-积下降优化动态调节数据周转圆组；
+    \item \textbf{卷积}：在数据周转圆组上引入振幅卷积、相位卷积、频率卷积，并与自相关、互相关、相位耦合网络衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成数据周期诊断流程。
+\end{enumerate}
+本章使用的数学工具包括：离散傅里叶变换、周期图、多窗谱估计、周期卷积、窗函数、相似度与趋势、折射率、导-积下降优化、相位耦合网络。
+\end{remark}
+
+\begin{remark}[本章七主题导引]\label{rem:data_seven_themes}
+\textbf{平移}——时间序列的滞后算子、自相关与时延相关（定义 \ref{def:trend_similarity_data} 中的延迟 $\tau$ 步自相似度）；\textbf{缩放}——多窗谱估计的多尺度窗半径与趋势分解的窗半径 $\Delta$、折射率 $\eta$（命题 \ref{prop:multitaper}、定义 \ref{def:data_window_decomposition}、定义 \ref{def:refraction_index_data}）；\textbf{旋转}——相位耦合网络的相位边权与相位差角（定义 \ref{def:phase_coupling_network}）；\textbf{平衡}——信息守恒、能量守恒与相位守恒三种平衡关系（\textbf{经验观察／研究纲领}，见注 \ref{thm:data_conservation}）；\textbf{对称}——数据分布关于 $0$、$1$、$i$ 三个对称中心的对称性检验；\textbf{闭合}——“检测—建模—验证—预测”的闭环诊断流程（定义 \ref{def:data_diagnosis_pipeline}）；\textbf{周期}——周期图尖峰与主导周期（定义 \ref{def:spectral_analysis}）。
+\end{remark}
+
+\section{数据目标的周期性判定：接入「周期系统」章第一步}
+\label{sec:data_periodicity_decision}
+
+\subsection{数据目标、判定输入与判定映射}
+
+\begin{definition}[数据目标与判定输入]\label{def:data_target}
+一个\textbf{数据目标}是指下列对象之一：
+\begin{enumerate}[label=(\roman*)]
+    \item 一个单变量时间序列 $\{X_t\}_{t=1}^{n}$；
+    \item 一个多变量时间序列 $\{X_t^{(i)}\}_{i=1}^{M}$；
+    \item 一个频谱或周期图序列；
+    \item 一个趋势分量或波动分量序列。
+\end{enumerate}
+数据目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal D_{\mathrm{D}}=(\mathcal T,x),
+\]
+其中 $\mathcal T$ 是时间指标集（可为 $\mathbb Z$ 或 $\mathbb R$），$x:\mathcal T\to V$ 是数据在时间上的取值。若 $\mathcal T=\mathbb Z$，称目标为\textbf{离散数据目标}；若 $\mathcal T=\mathbb R$，称目标为\textbf{连续数据目标}。
+\end{definition}
+
+\begin{definition}[数据判定映射]\label{def:data_periodization}
+设数据目标由判定输入 $\mathcal D_{\mathrm{D}}=(\mathcal T,x)$ 给出。若存在映射 $\Phi:\mathcal S\to\mathcal S$ 及初值 $x_0\in\mathcal S$，使目标状态由 $\Phi$ 生成，即
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+当 $t\in\mathbb Z$ 时 $x_t$ 由 $\Phi$ 迭代生成；当 $t\in\mathbb R$ 时，以单参数演化族 $\{\Phi_t\}_{t\in\mathbb R}$（其中每个 $\Phi_t:\mathcal S\to\mathcal S$，且 $\Phi_0=\operatorname{id}$、$\Phi_{s+t}=\Phi_s\circ\Phi_t$ 对一切 $s,t\in\mathbb R$ 成立、$(t,x)\mapsto\Phi_t(x)$ 连续）记之。
+则称 $\Phi$ 为目标的\textbf{数据判定映射}。此时当 $t\in\mathbb Z$ 时数据目标化为离散动力系统 $(\mathcal S,\Phi)$，当 $t\in\mathbb R$ 时化为连续动力系统 $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$，两种情形均可直接套用「周期基础」章与「周期系统」章的判据。
+\end{definition}
+
+\begin{theorem}[数据周期性判定定理]\label{thm:data_periodicity_decision}
+设数据目标的判定映射为 $\Phi$，且 $(\mathcal S,\Phi)$ 为离散动力系统。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 $m\in\mathbb N^+$ 使 $\Phi^m=\mathrm{id}$，则目标为一致周期数据系统；每条轨道闭合，且轨道长度整除 $m$。
+    \item \textbf{判定等价}：目标为一致周期数据系统当且仅当 $\operatorname{ord}(\Phi)<\infty$。
+    \item \textbf{逐点判据}：目标在状态 $x_0$ 处的轨道闭合当且仅当 $x_0$ 为周期点；此时轨道长度即该点处的周期。
+    \item \textbf{不可省略性}：守恒量与对称群的合取不能替代 $\operatorname{ord}(\Phi)<\infty$；准周期数据目标不属于周期数据系统。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:data_periodicity_decision} 是「周期系统」章 \cref{thm:ps_periodicity_decision} 的领域实例化：
+只需把判定映射 $f$ 与演化群替换为本章的 $\Phi$，(A) 充分判定、(B) 判定等价、(C) 逐点判据、
+(D) 不可省略性四条即逐条成立。依 \cref{rem:ps_applications_hook} 的约定，此处不再重复展开。
+\end{proof}
+
+\begin{corollary}[数据周期类型]\label{cor:data_period_type}
+经 \cref{thm:data_periodicity_decision} 判定后，数据目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 $m_0=1$，状态为不动点；
+    \item \textbf{严格周期型}：$1<m_0<\infty$，状态严格周期（如单频信号）；
+    \item \textbf{一致周期型}：$\operatorname{ord}(\Phi)=m<\infty$，所有轨道长度整除 $m$；
+    \item \textbf{准周期型}：$\operatorname{ord}(\Phi)=\infty$，轨道不闭合但在紧致承载结构上稠密（如多频信号、太阳黑子数据）；
+    \item \textbf{最终周期型}：存在 $N$，使 $t\ge N$ 后目标为周期；
+    \item \textbf{离散周期型}：承载结构为 $\mathbb Z$，且归一化周期比 $\rho=T_x/\Delta x\in\mathbb Q$。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，残差按 $e^{-\kappa t}$ 衰减（见 \cref{def:ps_period_type}(vii)）。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于周期数据系统；(iv) 不属于周期数据系统，但可用有界逼近工具处理；(v) 只在稳定阶段是周期数据系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期数据系统，只在稳定阶段可用有界逼近工具处理。
+\end{corollary}
+
+\begin{proof}
+逐条由 \cref{thm:data_periodicity_decision} 与「周期系统」章 \cref{def:ps_period_type} 代入数据目标即得。
+\end{proof}
+
+\begin{lemma}[周期图峰值检测的一致性]\label{ch31_periodogram_peak}
+设单频观测 $X_t = A e^{i(\omega_0 t + \phi)} + \varepsilon_t$（$t = 1,\dots,n$），其中 $\omega_0 = 2\pi k_0 / n$ 为格点频率，$A > 0$，$\phi \in \mathbb{R}$，噪声 $\{\varepsilon_t\}$ 独立同分布、$\mathbb{E}[\varepsilon_t] = 0$、$\operatorname{Var}(\varepsilon_t) = \sigma^2 < \infty$。则周期图（定义 \ref{def:spectral_analysis}）满足
+\[
+\mathbb{E}[I_{k_0}] = A^2 n + \sigma^2, \qquad \mathbb{E}[I_k] = \sigma^2 \quad (k \neq k_0),
+\]
+且峰值信噪比 $\dfrac{\mathbb{E}[I_{k_0}]}{\max_{k \neq k_0} \mathbb{E}[I_k]} = 1 + \dfrac{A^2 n}{\sigma^2} \to \infty$（$n \to \infty$）。故周期图最大值的位置 $\arg\max_k I_k$ 依概率收敛到真实频率指标 $k_0$。
+\end{lemma}
+
+\begin{proof}
+信号项与噪声项的 DFT 线性叠加：$\hat{X}_k = \hat{X}_k^{\text{sig}} + \hat{X}_k^{\text{noise}}$。信号项
+\[
+\hat{X}_k^{\text{sig}} = \frac{A e^{i\phi}}{\sqrt{n}} \sum_{t=1}^{n} e^{i(\omega_0 - 2\pi k/n)t} = \frac{A e^{i\phi}}{\sqrt{n}} \sum_{t=1}^{n} e^{i\,2\pi(k_0 - k)t/n}.
+\]
+当 $k = k_0$ 时内和为 $n$，故 $|\hat{X}_{k_0}^{\text{sig}}|^2 = A^2 n$；当 $k \neq k_0$ 时由单位根之和为零，信号项为零。噪声项 $\hat{X}_k^{\text{noise}} = \frac{1}{\sqrt{n}}\sum_t \varepsilon_t e^{-i2\pi kt/n}$ 满足 $\mathbb{E}\big[|\hat{X}_k^{\text{noise}}|^2\big] = \frac{1}{n}\sum_{t,s} \mathbb{E}[\varepsilon_t \overline{\varepsilon_s}] e^{-i2\pi k(t-s)/n} = \frac{1}{n}\sum_t \sigma^2 = \sigma^2$（噪声独立同分布，交叉项期望为零）。信号与噪声交叉项 $\mathbb{E}\big[\hat{X}_k^{\text{sig}}\overline{\hat{X}_k^{\text{noise}}}\big] = 0$（$\mathbb{E}[\varepsilon_t] = 0$）。于是 $I_k = |\hat{X}_k|^2$ 的期望如上，峰值信噪比发散，故当 $n$ 充分大时周期图在 $k_0$ 处的期望值严格支配其余频率——由期望的支配性与噪声的有限方差，$\arg\max_k I_k$ 依概率收敛于 $k_0$。
+\end{proof}
+
+\begin{definition}[数据最小正周期算法]\label{def:data_minimal_period_algorithm}
+本定义与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{def:ps_minimal_period_algorithm} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处的差别仅为术语（数据目标 / 数据样本），算法步骤与结论完全相同。
+\end{definition}
+
+\begin{theorem}[数据最小正周期算法的正确性]\label{thm:data_minimal_period_correctness}
+本定理与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{thm:ps_minimal_period_correctness} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。本处的差别仅为术语（数据目标 / 数据样本），算法步骤与结论完全相同。
+\end{theorem}
+
+\begin{example}[数据周期判定实例]\label{ex:data_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item 单频正弦信号：周期图在真实频率处呈现尖峰，一致周期型；
+    \item 太阳黑子月均值：$11$ 年主周期与 $88$ 年长周期叠加，准周期型；
+    \item 多变量脑电信号：多通道相位耦合，准周期型；
+    \item 气温异常序列：$20$ 世纪以来趋势上升，最终周期型（叠加周期）。
+\end{enumerate}
+\end{example}
+
+\begin{remark}[守恒量不保证周期]\label{rem:data_invariant_not_period}
+数据分析中的信息守恒、能量守恒与相位守恒是周期结构的辅助条件，但不构成充分条件。例如白噪声满足能量守恒但无周期分量。数据周期结构必须由 \cref{thm:data_periodicity_decision} 或上述引理判定。
+\end{remark}
+
+\subsection{第二步：数据周期级数与周转圆组的构建}
+
+\begin{definition}[数据振幅级数、频率级数、相位级数]\label{def:data_series}
+设数据目标的状态或输出序列为 $\{z_t\}$。若其可写为
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+则称
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+分别为数据目标的\textbf{振幅级数}、\textbf{频率级数}与\textbf{相位级数}。三者与「级数与卷积」章 \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} 一致。
+\end{definition}
+
+\begin{definition}[数据周转圆组]\label{def:data_epicycle_group}
+设数据目标的周期级数由振幅级数 $\{A_k\}$、频率级数 $\{\omega_k\}$ 与相位级数 $\{\phi_k\}$ 给出。对每个 $k$ 定义周转圆
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+其集合
+\[
+\mathfrak E_{\mathrm{D}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+称为数据目标的\textbf{周转圆组}。其叠加即数据周期级数
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[由数据构建周期级数]\label{thm:data_series_reconstruction}
+设数据目标的输出为有限周期序列，周期为 $N$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 输出可展开为离散傅里叶级数
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item 振幅级数由 $|c_k|$ 给出，相位级数由 $\arg c_k$ 给出，频率级数由 $2\pi k/N$ 给出；
+    \item 若输出为单频信号，则傅里叶分解只有一根谱线；若输出为多频叠加，则各级谐波对应不同频率分量。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 有限周期序列的离散傅里叶级数是标准结论：基函数 $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ 构成 $\mathbb C^N$ 的正交基。
+(ii) 由 $c_k=A_k e^{i\phi_k}$ 直接读出。
+(iii) 单频信号在周期 $T=2\pi/\omega$ 上只有基频分量；多频叠加按傅里叶级数展开。
+\end{proof}
+
+\begin{proposition}[三参数对应：半径、相位与转速]\label{prop:data_epicycle_correspondence}
+数据周转圆组 $\mathfrak E_{\mathrm{D}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ 的三个参数与三个几何—数据量一一对应：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{半径对应振幅}：$E_k$ 的半径 $|E_k|=A_k$ 即该数据振荡分量的振幅；
+    \item \textbf{相位对应旋转时延}：初相 $\phi_k$ 对应时间平移 $\tau_k=\phi_k/\omega_k$，即该周转圆相对基准\textbf{超前} $\tau_k$（$\phi_k>0$ 表示波形相对基准\textbf{提前} $\tau_k$，等价于把基准延后 $\tau_k$ 后二者重合）；
+    \item \textbf{频率对应旋转速度}：$\omega_k$ 即该数据振荡分量的角频率。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:data_epicycle_correspondence} 与「周期系统」章 \cref{prop:ps_epicycle_correspondence} 完全对应，
+三条对应——半径对应振幅、相位对应旋转时延、频率对应旋转速度——逐条平移至本章的周转圆组即得。
+证明见该处：(i) 由 $|E_k|=A_k$ 与能量分解，(ii) 由相位平移定理，(iii) 由频率级数定义。
+\end{proof}
+
+\begin{definition}[时间序列的频谱分析]\label{def:spectral_analysis}
+设$\{X_t\}_{t=1}^{n}$为观测到的时间序列数据。其\textbf{离散傅里叶变换}（DFT）为
+\[
+\hat{X}_k = \frac{1}{\sqrt{n}} \sum_{t=1}^{n} X_t e^{-i 2\pi k t / n}, \quad k = 0, 1, \dots, n-1.
+\]
+\textbf{周期图}（periodogram）是DFT的模方：$I_k = |\hat{X}_k|^2$。周期图在真实周期频率$\omega_0 = 2\pi k_0/n$处呈现尖峰。周期图的统计性质为：$\mathbb{E}[I_k] \to S(\omega_k)$（渐近无偏），但$\operatorname{Var}(I_k) \to S^2(\omega_k)$（不是一致估计）——方差不随$n$增大而减小。
+
+周期图是傅里叶变换在时间序列分析中的直接应用——它保留了同频率分量的能量信息，是功率谱密度的渐近无偏估计。
+\end{definition}
+
+\begin{proposition}[多窗谱估计]\label{prop:multitaper}
+为克服周期图的方差发散问题，\textbf{多窗谱估计}（multitaper spectral estimation）使用一组正交的窗函数对同一时间序列进行多次独立的频谱估计，然后取平均。设$K$个正交窗函数为$\{h_k(t)\}_{k=1}^{K}$（如Slepian序列），每个窗函数给出一个独立的周期图$I_k(\omega)$。多窗谱估计为
+\[
+\hat{S}_{\text{MT}}(\omega) = \frac{1}{K} \sum_{k=1}^{K} I_k(\omega).
+\]
+多窗谱估计的方差减小为周期图的$1/K$——窗函数的使用等价于在频域中做$K$次独立采样。
+
+多窗谱估计是窗函数体系在谱估计中的直接应用。不同窗函数对应不同的频域特性——Slepian窗在给定带宽内能量最集中，高斯窗在时频域均具有最佳光滑性，墨西哥帽窗在检测频谱峰值时具有最高的灵敏度。
+\end{proposition}
+
+\begin{proof}
+对每个窗 $h_k$（$k = 1,\dots,K$），加窗周期图 $I_k(\omega)$ 渐近无偏于 $S(\omega)$ 且方差趋于 $S^2(\omega)$（定义 \ref{def:spectral_analysis} 的统计性质）。取 Slepian 序列时，各窗在时域两两正交且其频域能量集中在互不重叠的频带内，故各 $I_k(\omega)$ 渐近互不相关。由方差的双线性展开，
+\[
+\operatorname{Var}\big[\hat{S}_{\text{MT}}(\omega)\big]
+= \operatorname{Var}\Big( \frac{1}{K}\sum_{k=1}^{K} I_k(\omega) \Big)
+= \frac{1}{K^2}\sum_{k=1}^{K} \operatorname{Var}[I_k(\omega)] + \frac{2}{K^2}\sum_{k<l} \operatorname{Cov}(I_k, I_l).
+\]
+正交窗使 $\operatorname{Cov}(I_k, I_l) \to 0$（$k \neq l$），而 $\operatorname{Var}[I_k(\omega)] \to S^2(\omega)$，故
+\[
+\operatorname{Var}\big[\hat{S}_{\text{MT}}(\omega)\big] \to \frac{1}{K^2}\cdot K S^2(\omega) = \frac{S^2(\omega)}{K},
+\]
+即方差减小为单窗周期图的 $1/K$，且均值 $\mathbb{E}[\hat{S}_{\text{MT}}] = \frac{1}{K}\sum_k \mathbb{E}[I_k] \to S(\omega)$ 保持渐近无偏。
+\end{proof}
+
+\begin{definition}[基于周期卷积的周期检测]\label{def:periodic_transform_detection}
+对于时间序列$\{X_t\}$，使用周期卷积检测其周期结构的步骤为：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{自周期卷积}：取$f = g = X$，计算周期卷积$\mathcal{K}^{(d)}\{X, X\}$（$d=1,\dots,6$；12 种实趋势谱为其实虚部）。当$d=1$（基础差角，$\alpha=1$）时，周期趋势谱的经典极限为功率谱——即周期图。
+    \item \textbf{相位关系检测}：取$\alpha=0$（相似度层），计算$\operatorname{Im}\mathcal{K}^{(1)}\{X, X\}$（差角正弦）。输出在趋势反转点（拐点）呈现尖峰——正弦差角相似度检测相位突变。
+    \item \textbf{振幅关系检测}：取$\alpha=1$（趋势层），计算$\operatorname{Re}\mathcal{K}^{(2)}\{X, X\}$（和角余弦）。输出度量了信号的自耦合强度——不同频率分量之间的能量传递。
+    \item \textbf{多尺度周期识别}：使用不同半径的窗函数$K_\Delta$对$X$进行平滑，计算各尺度下的周期卷积。峰值对应的频率即为该尺度下的主导周期。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[周期卷积与经典方法的比较]\label{prop:periodic_transform_vs_classical}
+周期卷积在周期检测中的优势：
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}>{\centering\arraybackslash}p{3cm}>{\centering\arraybackslash}p{3cm}}
+\toprule
+方法 & 检测内容 & 保留相位信息 & 多周期耦合 \\
+\midrule
+傅里叶变换/周期图 & 单一周期（频率分解） & 部分（仅各频率的相位） & 否 \\
+自相关函数 & 单一周期（时域延迟） & 否（仅振幅） & 否 \\
+小波变换 & 多尺度周期 & 部分（各尺度的相位） & 否 \\
+周期卷积（$\alpha=0$） & 相位关系（方向匹配） & 完全（所有频率对） & 是（所有频率对） \\
+周期卷积（$\alpha=1$） & 振幅关系（方向+尺度） & 完全（所有频率对） & 是（所有频率对） \\
+\bottomrule
+\end{tabular}
+\end{center}
+周期卷积是唯一能够同时检测多个周期、保留全部相位信息并量化周期间耦合强度的方法。
+\end{proposition}
+
+\begin{proof}
+将周期级数展开 $X(t) = \sum_n A_n e^{i(\omega_n t + \phi_n)}$ 代入单周期层的自周期卷积（取 $W \equiv 1$、$\alpha = 1$、差角核 $S^{(1)}(\phi_n, \phi_m) = e^{i(\phi_m - \phi_n)}$）：
+\[
+\mathcal{K}^{(1)}\{X, X\}(\tau) = \sum_{n,m} A_n A_m \, e^{i(\phi_m - \phi_n)} \, e^{i\omega_m \tau}.
+\]
+项 $(n,m)$ 的模为 $A_n A_m$、辐角为 $\phi_m - \phi_n$、频率为 $\omega_m$——即\textbf{全部频率对} $(n,m)$ 的振幅乘积与相位差被同时保留。对比三类经典方法：(i) 周期图/傅里叶变换在经典极限（$W \to \delta$）下只保留对角项 $|c_n|^2 = A_n^2$（定义 \ref{def:spectral_analysis}），辐角 $\phi_n$ 被模方抹去，非对角频率对 $(n \neq m)$ 全部丢失，故无多周期耦合、相位信息不完整；(ii) 自相关函数由维纳—辛钦定理等于周期图的逆变换 $R(\tau) = \sum_n A_n^2 e^{i\omega_n \tau}$，只含 $A_n^2$，相位信息完全丢失，且是时域单变量函数、无频率对耦合（此处取\textbf{延迟型}约定，与本章 \cref{prop:data_autocorr_phase_convolution} 的超前型约定相差 $h\to-h$，见「调和分析」章注 \ref{rem:autocorrelation_two_conventions}）；(iii) 小波变换 $W(a,b) = \langle X, \psi_{a,b}\rangle$ 按尺度 $a$ 分解，各尺度保留其局部相位，但输出是“尺度—时间”平面上的单参数谱，不含两个不同频率（尺度）之间的交叉耦合项。故唯有周期卷积同时满足“多周期 + 全相位 + 全频率对耦合”三项，比较表结论成立。
+\end{proof}
+
+\begin{example}[数据周期级数构建实例]\label{ex:data_series_example}
+对太阳黑子月均值序列，周期图在 $11$ 年处呈现最强峰值，在 $5.5$ 年和 $88$ 年处有次峰。在数据周转圆组中，$11$ 年对应基频，$5.5$ 年对应二倍频，$88$ 年对应长周期分量。
+\end{example}
+
+\begin{remark}[周期级数即复变函数]\label{rem:data_series_complex}
+设 $z=e^{i\omega_0t}$，则数据周期级数
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+在\textbf{各分量频率与 $\omega_0$ 可公度}（即 $\omega_k=k\omega_0$，$k\in\mathbb Z$）时可写为洛朗级数 $\sum_k c_k z^k$，其中 $c_k=A_k e^{i\phi_k}$。故\textbf{当所有分量与 $\omega_0$ 可公度时，周期级数即单位圆上的复变函数（否则为环面上的函数）}。
+\end{remark}
+
+\subsection{第三步：数据周转圆组的动态调节}
+
+\begin{definition}[数据周转圆组的动态调节]\label{def:data_adaptive_adjustment}
+设当前数据周转圆组为 $\mathfrak E^{(j)}$，部分和
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+残差 $r^{(j)}=z-z^{(j)}$。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 $\|r^{(j)}\|^2>\delta$，则依残差周期图峰值新增一个周转圆；
+    \item \textbf{参数调节}：对已有周转圆参数按正则化最小二乘或信息准则更新。
+\end{enumerate}
+在数据分析中，数量调节对应增加频率分量或谐波阶数；参数调节对应调整振幅、相位与频率，使拟合优度与模型简约性平衡。
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:data_adaptive_growth}
+按 \cref{def:data_adaptive_adjustment}(i) 加入残差主频分量后，残差能量单调不增：
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+等号成立当且仅当残差在被选频率上无能量。
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:data_adaptive_growth} 与「周期系统」章 \cref{def:ps_adaptive_adjustment} 的动态调节机制一致：
+新增周转圆即把 $r^{(j)}$ 沿 $\hat\omega$ 的分量从残差中移出，由正交分解
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{被移出的分量}\|^2$ 即得不等式，
+等号当且仅当被移出分量的范数为零。完整论证见该处。
+\end{proof}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:data_adaptive_convergence}
+设数据目标为长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值有限周期序列}且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得数据周转圆组即目标的精确傅里叶数据；若序列为\textbf{复值}，则相应步数为至多 $T_0$ 步。
+\end{theorem}
+
+\begin{proof}
+长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值}有限周期序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波（含常数项）上完备；\textbf{复值}序列则需 $T_0$ 个分量。每步按 \cref{prop:data_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。
+\end{proof}
+
+\begin{definition}[结构指标调节]\label{def:data_structure_metric_adjustment}
+设数据目标的结构指标为
+\[
+\mathcal I=(\mathcal I_{\text{拟合}},\mathcal I_{\text{简约}},\mathcal I_{\text{预测}})
+=(\text{残差平方和},\ \text{参数个数},\ \text{交叉验证误差}).
+\]
+\textbf{结构指标调节}为：在参数空间 $\Theta$ 中每步选取使 $\mathcal I(\theta)$ 按字典序\textbf{严格递减}（极小化）的邻近参数 $\theta$；若不存在这样的邻近参数，则停止——此时 $\theta$ 为\textbf{局部最优}参数。
+\end{definition}
+
+\begin{proposition}[结构指标调节的有限收敛]\label{prop:data_structure_metric_convergence}
+设参数空间 $\Theta$ 有限，且每次调节使 $\mathcal I$ 按字典序\textbf{严格递减}。则调节在有限步内终止于局部最优参数。
+\end{proposition}
+
+\begin{proof}
+$\Theta$ 有限，$\mathcal I$ 取值有限。字典序在有限值集上是良基的，故字典序严格递减的序列不能无限延续，调节在有限步终止。终止时不存在使 $\mathcal I$ 按字典序严格递减的邻近参数，即局部最优。这里必须按\textbf{整条字典序}给出单调性：若只要求「某一分量严格增加／减小」，则 $(2,1)\to(1,2)\to(2,1)$ 这类循环无法排除，有限终止性不成立。
+\end{proof}
+
+\begin{definition}[嵌套周转系统的数据拟合]\label{def:nested_epicycle_fitting}
+给定观测时间序列$\{X_t\}_{t=1}^{n}$，使用嵌套周转系统进行数据驱动的周期建模。设$K$级嵌套周转系统为
+\[
+X(t) = \sum_{k=1}^{K} A_k e^{i(\omega_k t + \phi_k)} + \varepsilon(t),
+\]
+其中$\varepsilon(t)$是残差（噪声）。参数$\Theta = \{A_k, \omega_k, \phi_k\}_{k=1}^{K}$通过最小化残差平方和来估计：
+\[
+\hat{\Theta} = \arg\min_{\Theta} \sum_{t=1}^{n} \left| X_t - \sum_{k=1}^{K} A_k e^{i(\omega_k t + \phi_k)} \right|^2.
+\]
+由于$\omega_k$出现在指数中，目标函数关于$\omega_k$是非线性的——传统的线性最小二乘不适用。使用核函数导-积下降优化算法，通过窗函数导-积下降法同时估计所有参数。
+\end{definition}
+
+\begin{proposition}[导-积下降优化的参数估计]\label{prop:kdi_parameter_estimation}
+嵌套周转系统的参数估计使用导-积下降优化算法分三步进行：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{频率初步估计}：对数据做傅里叶变换，取周期图中最大的$K$个峰值对应的频率作为$\omega_k$的初始估计$\omega_k^{(0)}$。这一步相当于用传统方法进行粗定位。
+    \item \textbf{导-积精细优化}：使用高斯核$K_{\text{Gauss}}$对振幅$A_k$进行窗口导-积优化，使用墨西哥帽核$K_{\text{MexHat}}$对频率$\omega_k$进行二阶导数优化，使用Hilbert核$K_{\text{Hilbert}}$对相位$\phi_k$进行正交相位优化。导-积融合函数$\Phi(\theta, r, \dot{\theta}, \dot{r})$同时利用一阶导数和积分信息，在非凸目标函数中逃离局部极小值。
+    \item \textbf{模型选择}：使用信息准则（AIC或BIC）确定最优的周转圆级数$K$——$K$过小则欠拟合（遗漏重要周期），$K$过大则过拟合（拟合噪声）。BIC准则为$\text{BIC}(K) = n\ln(\text{RSS}/n) + K\ln n$，选择使BIC最小的$K$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+分三步论证。(i) \textbf{频率初始化的渐近一致性}：单分量情形由引理 \ref{ch31_periodogram_peak} 直接给出——周期图峰值位置依概率收敛到真实格点频率；多分量情形在频域分离条件（各主峰互不重叠）下，按峰值从大到小取前 $K$ 个峰即依次对应 $K$ 个分量，故 $\omega_k^{(0)} \to \omega_k$（$k = 1,\dots,K$）。(ii) \textbf{导-积精细优化的下降性}：目标函数 $L(\Theta) = \sum_{t=1}^{n} |X_t - \sum_k A_k e^{i(\omega_k t + \phi_k)}|^2$ 在真值 $\Theta^*$ 的邻域内是 $\Theta$ 的光滑函数。由导-积下降的非局部下降性质，只要存在某窗—核对使核平滑累积量为负，更新即给出严格下降方向 $L(\Theta_{t+1}) < L(\Theta_t)$；故从一致初始点 $\Theta^{(0)}$ 出发的迭代停留在真值邻域并逼近 $\Theta^*$。(iii) \textbf{BIC 的一致性}：残差平方和 $\text{RSS}(K)$ 随 $K$ 递增而单调不增；BIC 惩罚项 $K\ln n$ 随 $n$ 增大对过拟合施加渐近正惩罚，$\text{BIC}(K) = n\ln(\text{RSS}(K)/n) + K\ln n$ 的最小值点 $\hat{K}$ 依概率收敛到真实级数 $K^*$——$K < K^*$ 时欠拟合使 $\text{RSS}$ 显著偏大，$K > K^*$ 时 $\text{RSS}$ 的下降不足以抵消惩罚项 $K\ln n$ 的增长。
+\end{proof}
+
+\begin{example}[BIC 选择数据周期级数]\label{ex:data_bic}
+对太阳黑子序列拟合 $K$ 级周转圆，计算 $\operatorname{BIC}(K)=n\ln(\operatorname{RSS}/n)+K\ln n$。选择使 BIC 最小的 $K$。通常 $K=3$ 即可捕捉 $11$ 年基频、$5.5$ 年二倍频和 $88$ 年长周期。
+\end{example}
+
+\begin{remark}[动态调节的边界]\label{rem:data_adaptive_boundary}
+\cref{thm:data_adaptive_convergence} 依赖有限周期序列。对连续谱或准周期数据目标（如多频信号、太阳黑子），不存在有限周转圆组精确表示，只能作有界逼近。结构指标调节不保证全局最优。
+\end{remark}
+
+\subsection{第四步：数据卷积与相位耦合网络}
+
+\begin{definition}[数据振幅卷积、相位卷积与频率卷积]\label{def:data_convolution_types}
+设两个数据周转圆组为
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+定义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅卷积}：$\mathbb A_{mn}=A_nB_m$；
+    \item \textbf{相位卷积}：$\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$；
+    \item \textbf{频率卷积}：$\mathbb F_{mn}=\omega_n\nu_m$；
+    \item \textbf{趋势卷积}：$\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$。
+\end{enumerate}
+这与「级数与卷积」章 \cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution}、\cref{def:tendency_convolution} 一致。
+\end{definition}
+
+\begin{theorem}[三类卷积在数据周转圆组上的作用]\label{thm:data_convolution_action}
+设两个数据目标的周转圆组分别为 $\mathfrak E$ 与 $\mathfrak E'$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 振幅卷积只作用于半径；
+    \item 相位卷积只作用于相位；
+    \item 频率卷积只作用于转速；
+    \item 趋势卷积同时保留振幅与相位。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:data_convolution_types} 直接读出。
+\end{proof}
+
+\begin{proposition}[自相关与趋势卷积]\label{prop:data_autocorr_phase_convolution}
+设 $\{z_t\}$ 为数据周期序列，其自相关函数为
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+在数据周转圆组语言中，自相关函数是趋势卷积在对角线上的投影：
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+此为本节的\textbf{超前型}约定；同一章前文比较三类经典方法时引用的维纳—辛钦形式 $R(\tau)=\sum_n A_n^2 e^{i\omega_n\tau}$ 取\textbf{延迟型}约定，两者由 $R_{\text{超前}}(h)=R_{\text{延迟}}(-h)$ 互换，详见「调和分析」章注 \ref{rem:autocorrelation_two_conventions}。
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:data_autocorr_phase_convolution} 是「周期系统」章 \cref{thm:ps_convolution_action} 的卷积作用结论在本领域的实现：
+将 $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ 代入自相关定义，由正交性消去全部非对角交叉项，只保留趋势卷积的对角线项
+（三类卷积的因式分解，\cref{prop:ps_convolution_factorization}），即得 $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$。
+完整展开见该处。
+\end{proof}
+
+\begin{definition}[相位耦合网络的构建]\label{def:phase_coupling_network}
+对于包含$M$个变量（如多个传感器、多个股票、多个脑电图电极）的多变量时间序列$\{X_t^{(i)}\}_{i=1}^{M}$，可构建\textbf{相位耦合网络}以揭示变量之间的周期相互作用。网络的节点为各变量，边权为两变量之间的周期卷积相似度：
+\[
+W_{ij}^{(d)} = \left\| \mathcal{K}^{(d)}\{X^{(i)}, X^{(j)}\} \right\|, \quad d = 1,\dots,12.
+\]
+$W_{ij}^{(1)}$度量了两变量在频率上的同向耦合强度，$W_{ij}^{(2)}$度量了相位正交耦合强度，$W_{ij}^{(7)}$度量了和角耦合强度。相位耦合网络的拓扑结构——连通性、社团结构、中心节点——揭示了系统的功能组织方式。
+\end{definition}
+
+\begin{lemma}[相位耦合网络的边权对称性]\label{ch31_phase_network_symmetry}
+设权重核 $W$ 为偶函数（$W(-\Omega) = W(\Omega)$，如高斯核、Sinc核、墨西哥帽核），相位核 $S^{(d)}$ 为单位模（$|S^{(d)}| \equiv 1$，$d = 1,\dots,6$），边权取能量范数
+\[
+\big\|\mathcal{K}^{(d)}\{f,g\}\big\| := \Big( \sum_{n,m} \big| W(\omega_n - \nu_m) (A_n B_m)^{\alpha} S^{(d)}(\phi_n, \psi_m) \big|^2 \Big)^{1/2}.
+\]
+则边权满足对称性与非负性：
+\[
+W_{ij}^{(d)} = W_{ji}^{(d)} \ge 0,
+\]
+故矩阵 $\{W_{ij}^{(d)}\}$ 是 $M$ 个节点上\textbf{有权无向图}的邻接矩阵，标准网络分析方法（社团检测、中心性）因此适用。
+\end{lemma}
+
+\begin{proof}
+展开能量范数的平方，对复相位核 $S^{(d)}$ 及其实虚部（12 种实相似度）逐项求模：对 $d=1,\dots,6$ 的复核，$|S^{(d)}| \equiv 1$；对其实部 $|\cos(\phi_n \mp \psi_m)|$ 与虚部 $|\sin(\phi_n \mp \psi_m)|$，因余弦为偶函数、正弦为奇函数，模长在 $n \leftrightarrow m$ 交换下不变。故平方和只依赖于 $|W(\omega_n - \nu_m)|$、$|A_n B_m|^{\alpha}$ 与上述对称模长。交换 $f \leftrightarrow g$ 即交换 $n \leftrightarrow m$、$\omega_n \leftrightarrow \nu_m$、$A_n \leftrightarrow B_m$、$\phi_n \leftrightarrow \psi_m$：由 $W$ 偶对称，$|W(\nu_m - \omega_n)| = |W(\omega_n - \nu_m)|$，又 $|B_m A_n| = |A_n B_m|$，相位模长如上不变，故求和逐项相等，得 $\|\mathcal{K}^{(d)}\{f,g\}\| = \|\mathcal{K}^{(d)}\{g,f\}\|$。非负性由范数定义直接给出。以 $f = X^{(i)}$、$g = X^{(j)}$ 代入即得 $W_{ij}^{(d)} = W_{ji}^{(d)} \ge 0$。
+\end{proof}
+
+\begin{proposition}[相位耦合网络的分析方法]\label{prop:phase_network_analysis}
+相位耦合网络可使用标准网络分析方法进行解读：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{社团检测}：使用模块度最大化（modularity maximisation）将节点划分为社团——同一社团内的节点具有相似的周期结构（同相同步），不同社团的节点具有正交的周期结构（反相同步或相位差固定）。
+    \item \textbf{中心性分析}：节点的度中心性（与多少个其他节点有强耦合）度量了该变量在系统中的周期“影响力”。高中心性节点是系统周期结构的关键驱动者。
+    \item \textbf{动态演化}：在不同时间窗口上构建相位耦合网络，观察网络拓扑随时间的变化。网络拓扑的突变（如社团结构的重组、中心节点的迁移）可能是系统发生相变或进入新状态的信号。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+由引理 \ref{ch31_phase_network_symmetry}，边权矩阵 $\{W_{ij}^{(d)}\}$ 对称非负，故 (i) 模块度最大化、谱聚类等社团检测算法在数学上良定义（它们只依赖对称非负邻接矩阵）；同相耦合强（差角余弦接近 $1$）的节点对边权大，故被分入同一社团，相位正交（差角正弦占优）的节点对边权小，倾向分属不同社团。(ii) 度中心性 $D_i^{(d)} = \sum_{j \neq i} W_{ij}^{(d)}$ 是节点 $i$ 与其他节点的总耦合强度；若某节点的能量超过总耦合能的一半，则该节点是网络的\textbf{主周期驱动者}。(iii) 动态演化：时间窗 $[t, t+\Delta]$ 上的网络矩阵 $W(t)$ 是 $t$ 的矩阵值函数，其社团结构由 $W(t)$ 的谱（主特征值及其特征向量）连续刻画；当特征向量的主导分量发生符号翻转或主特征值次序交换时，社团归属突变，对应网络拓扑相变。
+\end{proof}
+
+\begin{example}[相位耦合网络实例]\label{ex:phase_network}
+对多通道脑电信号构建相位耦合网络，同相耦合强的通道被分入同一社团，对应大脑功能网络的模块化组织。高中心性通道对应功能网络的关键枢纽。
+\end{example}
+
+\begin{remark}[数据卷积与周期卷积的关系]\label{rem:data_convolution_relation}
+数据卷积不是新的卷积运算，而是「级数与卷积」章周期卷积在数据周转圆组上的实例。自相关是趋势卷积在对角线上的投影，互相关、相位耦合分别是振幅卷积和频率卷积在数据科学中的具体表现。
+\end{remark}
+
+\subsection{第五步：与离散采样、调和分析、时序分析的整合}
+
+\begin{definition}[数据周期诊断流程]\label{def:data_diagnosis_pipeline}
+对于给定的时间序列数据，周期数学提供以下标准化诊断流程：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数据预处理}：去除趋势（差分或窗函数平滑），处理缺失值（插值或模型预测），标准化（零均值单位方差）。
+    \item \textbf{经典频谱分析}：计算周期图和多窗谱估计，识别显著谱峰。这一步给出周期结构的初步概览。
+    \item \textbf{周期卷积周期检测}：计算$\mathcal{K}^{(1)}\{X, X\}$至$\mathcal{K}^{(6)}\{X, X\}$（$\alpha=0,1$；12 种实趋势谱为 6 个复核的实部与虚部），提取各维度的频谱、振幅和相位分量。识别主导周期、检测相位突变、量化周期耦合。
+    \item \textbf{多尺度窗函数分解}：使用$\{\Delta_1, \dots, \Delta_K\}$组窗函数对数据进行多尺度平滑，在每个尺度上重复步骤$2$—$3$。对比不同尺度的周期结构——识别哪些周期是跨尺度稳定的，哪些周期是尺度依赖的。
+    \item \textbf{嵌套周转系统拟合}：使用导-积下降优化拟合嵌套周转系统，获得各周期分量的精确参数$\{A_k, \omega_k, \phi_k\}$。分析各级周转圆的振幅比和频率比——评估系统的嵌套层次结构。
+    \item \textbf{相位耦合网络构建}（多变量数据）：构建各变量之间的周期卷积耦合矩阵，进行社团检测和中心性分析。
+    \item \textbf{周期预测}：基于拟合的嵌套周转系统进行外推预测。预测的不确定性由各级周转圆的振幅衰减因子和相位漂移率决定。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[数据周期诊断流程与三章接口]\label{thm:data_diagnosis_integration}
+\cref{def:data_diagnosis_pipeline} 的七个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}、\cref{thm:intercalation_leakage_suppression}；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}、\cref{prop:twelve_to_six}；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}、\cref{def:ts_window_validation}。
+\end{enumerate}
+因此数据周期诊断不是独立方法，而是周期数学统一工具链在数据科学中的应用。
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:data_diagnosis_integration} 是「周期系统」章五步接口（\cref{tab:ps_five_steps}）在本领域的落地：
+周期判定用采样与谱估计，频率分解与相位核用「调和分析」章，周期图峰值、Fisher 检验与
+窗函数验证用「时序分析」章。故诊断流程由三章工具链合成，证明见该处。
+\end{proof}
+
+\begin{remark}[整合后的操作顺序]\label{rem:data_integration_order}
+实际诊断建议顺序为：先判定数据目标是否周期（\cref{thm:data_periodicity_decision}）；再构建数据傅里叶数据与周转圆组（\cref{thm:data_series_reconstruction}）；再用导-积下降与动态调节优化参数（\cref{thm:data_adaptive_convergence}、\cref{prop:kdi_parameter_estimation}）；再作数据卷积与相位耦合分析（\cref{prop:data_autocorr_phase_convolution}、\cref{def:phase_coupling_network}）；最后按 \cref{def:data_diagnosis_pipeline} 输出诊断。
+\end{remark}
+
+\begin{remark}[数据分析的三种守恒律（经验观察／研究纲领）]\label{thm:data_conservation}
+数据周期分析由三种守恒律支配：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{信息守恒}：在无噪声的数据压缩和重建过程中，信息的总量保持守恒。周期卷积是信息无损失的积分变换——压缩和解压使用相同的核函数，微分和积分通过微积分基本定理精确互逆。
+    \item \textbf{能量守恒}：信号的总能量（方差）在傅里叶域中等于各频率分量能量之和——帕塞瓦尔恒等式。在嵌套周转系统拟合中，各级周转圆的能量之和等于原始信号的总能量（减去噪声）。能量在各个周期分量之间的分配比例是系统的标度结构。
+    \item \textbf{相位守恒}：在无相位失真（phase distortion）的信号处理中，各频率分量的相对相位关系保持守恒。周期卷积保留了所有频率对之间的相位信息，确保了相位在变换和重建过程中不丢失。相位耦合网络的稳定性是相位守恒的数据表现。
+\end{enumerate}
+三种守恒律共同保证了数据周期诊断的可靠性——信息守恒保证诊断不丢失信息，能量守恒保证周期分解的能量自洽性，相位守恒保证周期结构的时间一致性。
+
+这条「三律共同保证诊断可靠性」的说法是\textbf{经验观察／研究纲领}，不是已证定理：三条守恒律对周期结构既非充分条件（见 \cref{rem:data_invariant_not_period}），也不构成诊断可靠性的证明。其中可严格证明的只有下面证明中的两条恒等式——(ii) 的帕塞瓦尔恒等式与 (i) 的 DFT 可逆性；(iii) 的「相位守恒」是零相位（实非负增益）滤波下的定义性事实。
+\end{remark}
+
+\begin{proof}
+分三部分。
+(i) \textbf{能量守恒（帕塞瓦尔）}：由 DFT 的正交性 $\frac{1}{n}\sum_{k=0}^{n-1} e^{-i 2\pi k(t-s)/n} = \delta_{ts}$，
+\[
+\sum_{k=0}^{n-1} |\hat{X}_k|^2 = \frac{1}{n}\sum_{k=0}^{n-1}\sum_{t,s} X_t \overline{X_s}\, e^{-i 2\pi k(t-s)/n} = \sum_{t=1}^{n} |X_t|^2,
+\]
+即信号总能量等于各频率分量能量之和。嵌套周转系统 $\sum_k A_k e^{i(\omega_k t + \phi_k)}$ 中正交分量能量为 $A_k^2$，故各级周转圆能量之和 $\sum_k A_k^2$ 等于去噪后信号能量，残差 $\varepsilon$ 承载其余能量。(ii) \textbf{信息守恒（可逆性）}：DFT 是 $\mathbb{C}^n \to \mathbb{C}^n$ 的双射，其逆为 $X_t = \frac{1}{\sqrt{n}}\sum_k \hat{X}_k e^{i 2\pi kt/n}$，系数与信号一一对应、无信息丢失；周期卷积在 $W \equiv 1$、$\alpha = 1$、$d = 1$ 时保存全部振幅 $A_n$ 与相位 $\phi_n$（命题 \ref{prop:periodic_transform_vs_classical} 的展开式），故压缩—重建精确互逆。(iii) \textbf{相位守恒}：对零相位（实非负增益）线性滤波，各分量 $c_k e^{i(\omega_k t + \phi_k)} \mapsto g_k c_k e^{i(\omega_k t + \phi_k)}$（$g_k \ge 0$），相位 $\phi_k$ 逐点不变，故相对相位 $\phi_k - \phi_l$ 守恒；周期卷积的项 $(n,m)$ 携带辐角 $\phi_m - \phi_n$（见命题 \ref{prop:periodic_transform_vs_classical} 的证明），全部频率对相位差被显式保留，相位耦合网络的边权稳定（引理 \ref{ch31_phase_network_symmetry}）即相位守恒的网络表现。
+\end{proof}
+
+\begin{definition}[数据趋势的窗函数分解]\label{def:data_window_decomposition}
+对于任意时间序列数据 $\{X_t\}_{t=1}^{n}$，使用窗函数体系进行多尺度趋势分解。设窗函数为 $K$（高斯核、墨西哥帽核、指数核等），窗半径为 $\Delta > 0$。数据的\textbf{窗函数平滑趋势} $T_\Delta(t)$ 和\textbf{窗函数局部波动} $F_\Delta(t)$ 分别为：
+\[
+T_\Delta(t) = \int_{-\infty}^{\infty} X(t+\tau) K\left(\frac{\tau}{\Delta}\right) \frac{d\tau}{\Delta}, \quad F_\Delta(t) = X(t) - T_\Delta(t).
+\]
+窗半径 $\Delta$ 控制了时间尺度——$\Delta$ 越小，趋势 $T_\Delta(t)$ 越灵敏（捕捉短期波动），$F_\Delta(t)$ 的振幅越小（高频噪声被保留在趋势中）；$\Delta$ 越大，趋势越平滑（揭示长期方向），$F_\Delta(t)$ 的振幅越大（更多中频波动被分离到波动分量中）。
+
+趋势 $T_\Delta(t)$ 对应数据的长期方向，波动 $F_\Delta(t)$ 对应数据围绕趋势的往复运动。窗函数 $K$ 是周期卷积权重核在单变量时间序列上的退化实现。
+\end{definition}
+
+\begin{definition}[多窗叠加的周期分解]\label{def:multi_window_decomposition}
+使用一组递增的窗半径 $\{\Delta_1, \Delta_2, \dots, \Delta_K\}$（$\Delta_1 < \Delta_2 < \dots < \Delta_K$）对数据 $X(t)$ 进行多尺度分解。定义第 $k$ 级\textbf{周期分量}为相邻尺度趋势的差：
+\[
+C_k(t) = T_{\Delta_k}(t) - T_{\Delta_{k-1}}(t), \quad k = 2, \dots, K,
+\]
+其中 $T_{\Delta_0}(t) \equiv 0$，$C_1(t) = T_{\Delta_1}(t)$。各级周期分量满足重构公式：
+\[
+X(t) = \sum_{k=1}^{K} C_k(t) + R_K(t),
+\]
+其中 $R_K(t) = X(t) - T_{\Delta_K}(t)$ 是最小尺度下的残差（高频噪声）。这一分解将原始数据拆分为 $K$ 个不同时间尺度的周期分量——类似于傅里叶级数的多窗版本。各级周期分量 $C_k(t)$ 是嵌套周转系统中不同半径和频率的周转圆在时间域中的实现。
+\end{definition}
+
+\begin{proposition}[多窗分解的重构完备性]\label{ch31_multiscale_reconstruction}
+多窗周期分解对任意时间序列 $X(t)$ 逐点精确重构：$X(t) = \sum_{k=1}^{K} C_k(t) + R_K(t)$，且各级分量之和是“趋势金字塔” $T_{\Delta_0} \equiv 0, T_{\Delta_1}, \dots, T_{\Delta_K}$ 的\textbf{望远镜和}。
+\end{proposition}
+
+\begin{proof}
+将 $C_k(t) = T_{\Delta_k}(t) - T_{\Delta_{k-1}}(t)$ 代入并逐项求和：
+\[
+\sum_{k=1}^{K} C_k(t) + R_K(t)
+= \sum_{k=1}^{K} \big( T_{\Delta_k}(t) - T_{\Delta_{k-1}}(t) \big) + \big( X(t) - T_{\Delta_K}(t) \big).
+\]
+前 $K$ 项是望远镜和，中间项 $T_{\Delta_0}, T_{\Delta_1}, \dots, T_{\Delta_{K-1}}$ 两两相消：
+\[
+\sum_{k=1}^{K} \big( T_{\Delta_k}(t) - T_{\Delta_{k-1}}(t) \big) = T_{\Delta_K}(t) - T_{\Delta_0}(t) = T_{\Delta_K}(t),
+\]
+（因 $T_{\Delta_0} \equiv 0$）。故 $\sum_k C_k(t) + R_K(t) = T_{\Delta_K}(t) + X(t) - T_{\Delta_K}(t) = X(t)$，对任意 $t$ 成立。
+\end{proof}
+
+\begin{definition}[趋势相似度的计算]\label{def:trend_similarity_data}
+对于两个不同窗半径下的趋势分量 $T_{\Delta_i}(t)$ 和 $T_{\Delta_j}(t)$，定义其\textbf{趋势相似度}。首先计算趋势的对数收益率：
+\[
+r_{\Delta}(t) = \ln\frac{T_{\Delta}(t)}{T_{\Delta}(t-1)} \approx \frac{T_{\Delta}(t) - T_{\Delta}(t-1)}{T_{\Delta}(t-1)},
+\]
+然后提取极限角 $\theta_{\Delta}(t) = \arctan(r_{\Delta}(t))$。按「标量与矢量」章的统一口径，两趋势方向之间的\textbf{夹角}一律取 $\theta=\lvert\alpha-\beta\rvert\in[0,\pi]$；有符号的 $\alpha-\beta$ 称为\textbf{差角}，仅用于正弦族相似度的符号判定。两个趋势的\textbf{差角余弦相似度}（趋势一致性）和\textbf{差角正弦相似度}（趋势反转度）分别为：
+\[
+\operatorname{Similarity}^{(1)}_{\Delta_i, \Delta_j}(t) = \cos(\theta_{\Delta_i}(t) - \theta_{\Delta_j}(t)), \quad \operatorname{Similarity}^{(2)}_{\Delta_i, \Delta_j}(t) = \sin(\theta_{\Delta_i}(t) - \theta_{\Delta_j}(t)).
+\]
+$\operatorname{Similarity}^{(1)} \approx 1$ 表示两个时间尺度的趋势方向一致（同涨同跌），$\operatorname{Similarity}^{(1)} \approx -1$ 表示方向相反（一个上涨一个下跌）。$\operatorname{Similarity}^{(2)} > 0$ 表示短期趋势领先于长期趋势（短期变化快于长期），$\operatorname{Similarity}^{(2)} < 0$ 表示短期趋势滞后于长期趋势（短期正在反转）。
+
+趋势相似度是周期卷积在趋势分量对 $(\Delta_i, \Delta_j)$ 上的退化形式——它度量了不同时间尺度趋势之间的相位对齐程度。
+\end{definition}
+
+\begin{proposition}[趋势强度与趋势稳定性]\label{prop:trend_strength_stability}
+对于单一窗半径 $\Delta$ 下的趋势 $T_\Delta(t)$，定义其\textbf{趋势强度} $S_\Delta(t)$ 和\textbf{趋势稳定性} $Q_\Delta(t)$：
+\[
+\begin{aligned}
+S_\Delta(t) &= |r_\Delta(t)| = \left|\frac{T_\Delta(t) - T_\Delta(t-1)}{T_\Delta(t-1)}\right|, \\
+Q_\Delta(t) &= \operatorname{Similarity}^{(1)}_{\Delta, \Delta}(t, t-\tau) = \cos(\theta_\Delta(t) - \theta_\Delta(t-\tau)),
+\end{aligned}
+\]
+其中 $\tau$ 是延迟步数。$S_\Delta(t)$ 度量了趋势的变化速率，$Q_\Delta(t)$ 度量了趋势在时间延迟 $\tau$ 内的一致性。$Q_\Delta(t) \approx 1$ 表示趋势方向稳定延续，$Q_\Delta(t)$ 下降表示趋势可能即将反转——$Q_\Delta(t)$ 的下降是拐点的早期预警信号。
+\end{proposition}
+
+\begin{proof}
+记相位增量 $\delta(t) := \theta_\Delta(t) - \theta_\Delta(t-\tau)$。由余弦的泰勒展开 $\cos u = 1 - \frac{u^2}{2} + O(u^4)$，
+\[
+Q_\Delta(t) = \cos \delta(t) = 1 - \frac{\delta(t)^2}{2} + O(\delta(t)^4).
+\]
+故 $Q_\Delta(t)$ 是相位增量平方 $\delta(t)^2$ 的严格递减函数：$\delta \to 0$ 时 $Q_\Delta \to 1$（趋势方向稳定延续），$|\delta|$ 增大时 $Q_\Delta$ 从 $1$ 单调下降。又 $\delta(t) \approx \tau\, \dot{\theta}_\Delta(t)$（离散导数，$\tau$ 为延迟步数），故 $Q_\Delta$ 的下降等价于相位变化率 $|\dot{\theta}_\Delta|$ 的上升——即趋势方向开始加速偏转，这是拐点（趋势反转）前的必要早期信号。$S_\Delta(t) = |r_\Delta(t)| = |\tan \theta_\Delta(t)|$（因 $\theta_\Delta = \arctan r_\Delta$）度量相位角本身的正切模（趋势变化速率），与 $Q_\Delta$ 一者量“当前速率”、一者量“速率的变化”，互补刻画趋势。
+\end{proof}
+
+\begin{definition}[数据折射率的定义]\label{def:refraction_index_data}
+借鉴光学中折射定律（正弦趋势的缩放）和股价拐点的折射率概念，在一般数据分析中定义\textbf{折射率} $\eta(t; \Delta)$ 用于度量数据趋势在拐点处的\textbf{动量变化强度}。设拐点 $t^*$ 前后两个时间窗口 $[t^*-\Delta, t^*]$ 和 $[t^*, t^*+\Delta]$ 内的趋势方向向量分别为：
+\[
+\mathbf{v}_{\text{in}} = T_\Delta(t^*) - T_\Delta(t^*-\Delta), \quad \mathbf{v}_{\text{out}} = T_\Delta(t^*+\Delta) - T_\Delta(t^*).
+\]
+\textbf{趋势折射率}定义为出射动量与入射动量的比值：
+\[
+\eta(t^*; \Delta) = \frac{\|\mathbf{v}_{\text{out}}\|}{\|\mathbf{v}_{\text{in}}\|} = \frac{|T_\Delta(t^*+\Delta) - T_\Delta(t^*)|}{|T_\Delta(t^*) - T_\Delta(t^*-\Delta)|}.
+\]
+折射率的物理含义：
+\begin{enumerate}[label=(\roman*)]
+    \item $\eta > 1$：拐点后动量增强（趋势加速）——出射趋势比入射趋势更陡。
+    \item $\eta = 1$：动量不变（趋势匀速）——拐点前后的趋势强度相同。
+    \item $\eta < 1$：拐点后动量减弱（趋势减速）——出射趋势比入射趋势平缓。
+    \item $\eta \approx 0$：拐点后动量消失（趋势走平）——出射趋势接近于零，数据进入横盘整理。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[折射率的相位解释]\label{prop:refraction_phase}
+折射率 $\eta$ 与正弦差角相似度 $\operatorname{Similarity}^{(2)}$ 之间存在内在联系。设入射角为 $\theta_{\text{in}} = \arctan(\mathbf{v}_{\text{in}}/\Delta)$，折射角为 $\theta_{\text{out}} = \arctan(\mathbf{v}_{\text{out}}/\Delta)$。由斯涅尔定律的正弦趋势缩放关系：
+\[
+\frac{\sin\theta_{\text{out}}}{\sin\theta_{\text{in}}} = \frac{\|\mathbf{v}_{\text{out}}\|}{\|\mathbf{v}_{\text{in}}\|} \cdot \frac{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{in}}\|^2}}{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{out}}\|^2}} = \eta \cdot \frac{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{in}}\|^2}}{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{out}}\|^2}}.
+\]
+当 $\Delta$ 远大于趋势动量（$\Delta \gg \|\mathbf{v}_{\text{in}}\|, \|\mathbf{v}_{\text{out}}\|$）时，$\sin\theta_{\text{out}}/\sin\theta_{\text{in}} \approx \eta$——折射率近似等于正弦趋势的缩放比。当 $\eta > 1$ 且 $\operatorname{Similarity}^{(2)} < 0$（正弦差角为负）时，拐点确认——趋势方向反转且动量放大，这是强拐点信号。
+\end{proposition}
+
+\begin{proof}
+由 $\tan\theta = \|\mathbf{v}\|/\Delta$ 得直角三角形关系 $\sin\theta = \frac{\|\mathbf{v}\|}{\sqrt{\Delta^2 + \|\mathbf{v}\|^2}}$。于是
+\[
+\frac{\sin\theta_{\text{out}}}{\sin\theta_{\text{in}}}
+= \frac{\|\mathbf{v}_{\text{out}}\|}{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{out}}\|^2}} \cdot \frac{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{in}}\|^2}}{\|\mathbf{v}_{\text{in}}\|}
+= \eta \cdot \frac{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{in}}\|^2}}{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{out}}\|^2}},
+\]
+与命题陈述一致。在极限 $\Delta^2 \gg \max(\|\mathbf{v}_{\text{in}}\|^2, \|\mathbf{v}_{\text{out}}\|^2)$ 下，第二个因子
+\[
+\frac{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{in}}\|^2}}{\sqrt{\Delta^2 + \|\mathbf{v}_{\text{out}}\|^2}} \to 1,
+\]
+故 $\sin\theta_{\text{out}}/\sin\theta_{\text{in}} \to \eta$。又 $\operatorname{Similarity}^{(2)} = \sin(\theta_{\text{out}} - \theta_{\text{in}})$，方向反转（$\theta_{\text{out}}$ 与 $\theta_{\text{in}}$ 异号）时其值为负；配合 $\eta > 1$（动量放大）即得“方向反转且动量增强”的强拐点判据。
+\end{proof}
+
+\begin{definition}[趋势的反射与折射]\label{def:reflection_refraction_trend}
+数据趋势在遇到“阻力位”或“支撑位”时发生\textbf{反射}（趋势反转，原路返回）或\textbf{折射}（趋势改变方向但不反转，继续前进但改变斜率）。这两种行为的数学判据为：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{反射判据}：$\operatorname{Similarity}^{(2)}_{\Delta}(t) < 0$（正弦差角为负）且 $\operatorname{Similarity}^{(1)}_{\Delta}(t, t-\tau) < 0$（余弦差角为负——趋势方向完全反转）。此时 $\mathbf{v}_{\text{out}} \approx -\gamma \mathbf{v}_{\text{in}}$（$\gamma > 0$），折射率 $\eta = \gamma$。若 $\gamma \approx 1$，为\textbf{全反射}（镜像反转）——拐点前后趋势强度相同，方向相反。全反射对应倍角余弦相似度守恒：$\cos 2\theta_{\text{in}} = \cos 2\theta_{\text{out}}$。
+    \item \textbf{折射判据}：$\operatorname{Similarity}^{(2)}_{\Delta}(t) < 0$（正弦差角为负——方向改变）但 $\operatorname{Similarity}^{(1)}_{\Delta}(t, t-\tau)$ 保持正值（余弦差角为正——趋势仍有部分延续）。此时 $\mathbf{v}_{\text{out}}$ 与 $\mathbf{v}_{\text{in}}$ 的夹角在 $(0^\circ, 90^\circ)$ 内——趋势方向有偏转但未反转。折射率 $\eta$ 可大于或小于 $1$，取决于新趋势的强度。
+    \item \textbf{全透射判据}：$\operatorname{Similarity}^{(2)}_{\Delta}(t) \approx 0$（正弦差角接近零）且 $\operatorname{Similarity}^{(1)}_{\Delta}(t, t-\tau) \approx 1$（余弦差角接近一）。此时趋势方向不变，强度可能变化——$\eta \neq 1$ 表示趋势加速或减速，但方向延续。
+\end{enumerate}
+反射和折射是反射定律和折射定律在数据趋势分析中的直接推广——反射对应倍角余弦相似度守恒（$\cos 2\theta_{\text{in}} = \cos 2\theta_{\text{out}}$），折射对应正弦趋势的缩放（$n_1 \sin\theta_{\text{in}} = n_2 \sin\theta_{\text{out}}$，其中 $n_1, n_2$ 是趋势“介质”的折射率——即数据在不同时间段的波动率）。
+\end{definition}
+
+\begin{proposition}[拐点处的周期卷积诊断]\label{prop:inflection_periodic_transform}
+在数据拐点 $t^*$ 处，周期卷积的四个关键相似度指标联合诊断拐点的类型和强度：
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.7cm}>{\centering\arraybackslash}p{3.2cm}>{\centering\arraybackslash}p{3.0cm}>{\centering\arraybackslash}p{4.6cm}}
+\toprule
+相似度指标 & 公式 & 拐点处的取值 & 诊断含义 \\
+\midrule
+$\operatorname{Similarity}^{(1)}$ & $\cos(\theta_t - \theta_{t-\tau})$ & $< 0$ 或下降 & 趋势一致性减弱 \\
+$\operatorname{Similarity}^{(2)}$ & $\sin(\theta_t - \theta_{t-\tau})$ & $< 0$ & 方向反转（拐点必要条件） \\
+$\operatorname{Similarity}^{(3)}$ & $\cos 2(\theta_t - \theta_{t-\tau})$ & $\to -1$ & \textbf{正交度指标}：两趋势正交（$\delta\to\pm\pi/2\iff\operatorname{Similarity}^{(1)}=\cos\delta\to0$） \\
+$\operatorname{Similarity}^{(4)}$ & $\sin 2(\theta_t - \theta_{t-\tau})$ & $|\cdot|$ 增大 & 反转强度放大 \\
+\bottomrule
+\end{tabular}
+\end{center}
+综合判据：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{弱拐点}：$\operatorname{Similarity}^{(2)} < 0$，$\operatorname{Similarity}^{(1)} > 0$，$\eta < 1$——方向微调，动量减弱。
+    \item \textbf{强拐点}：$\operatorname{Similarity}^{(2)} < 0$，$\operatorname{Similarity}^{(1)} < 0$，$\eta > 1$，$\operatorname{Similarity}^{(3)} \to +1$——方向反转，动量增强，接近全反射。
+    \item \textbf{假拐点}：$\operatorname{Similarity}^{(2)} < 0$ 但 $\eta \approx 0$ 且 $|\operatorname{Similarity}^{(4)}|$ 很小——方向短暂波动后迅速回归，动量几乎消失。这是横盘整理中的噪声波动，非真实拐点。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+记相位增量 $\delta(t) = \theta_t - \theta_{t-\tau}$，则表中四个指标为 $\operatorname{Similarity}^{(1)} = \cos\delta$、$\operatorname{Similarity}^{(2)} = \sin\delta$、$\operatorname{Similarity}^{(3)} = \cos 2\delta$、$\operatorname{Similarity}^{(4)} = \sin 2\delta$。由二倍角公式
+\[
+\begin{aligned}
+\operatorname{Similarity}^{(3)} &= \cos 2\delta = 2\cos^2\delta - 1 = 2(\operatorname{Similarity}^{(1)})^2 - 1, \\
+\operatorname{Similarity}^{(4)} &= \sin 2\delta = 2\sin\delta\cos\delta = 2\,\operatorname{Similarity}^{(1)}\operatorname{Similarity}^{(2)}.
+\end{aligned}
+\]
+故四指标实际只由两个独立量 $(\operatorname{Similarity}^{(1)}, \operatorname{Similarity}^{(2)})$（即单位圆上的相位差 $e^{i\delta}$）决定——倍角指标（\textbf{正交度指标}）$\operatorname{Similarity}^{(3)} \to -1$ 当且仅当 $\delta \to \pm\pi/2$，即 $\operatorname{Similarity}^{(1)} \to 0$（两趋势正交）；而镜像反转（$\delta \to \pm\pi$）给出 $\operatorname{Similarity}^{(1)} \to -1$ 与 $\operatorname{Similarity}^{(3)} \to +1$，对应“方向反转到完全反转”的镜像情形。综合判据随后结合折射率 $\eta$ 区分强度：$\operatorname{Similarity}^{(2)} < 0$（$\delta < 0$，方向反转）是拐点的必要条件；$\eta < 1$ 且 $\operatorname{Similarity}^{(1)} > 0$ 为弱拐点，$\eta > 1$ 且 $\operatorname{Similarity}^{(1)} < 0$、$\operatorname{Similarity}^{(3)} \to +1$ 为强拐点；若 $\operatorname{Similarity}^{(2)} < 0$ 但 $\eta \approx 0$ 且 $|\operatorname{Similarity}^{(4)}| = 2|\operatorname{Similarity}^{(1)}\operatorname{Similarity}^{(2)}|$ 很小，则方向波动瞬时且无动量，判为假拐点（噪声）。
+\end{proof}
+
+\begin{example}[太阳黑子数据的周期分析]\label{ex:sunspot_analysis}
+太阳黑子数的月均值时间序列（$1749$年至今）是数据分析中经典的周期检测案例。太阳黑子活动以约$11$年为周期（Schwabe周期），同时嵌套在更长的周期中（如约$88$年的Gleissberg周期）。使用周期卷积对该数据进行分析：
+\begin{enumerate}[label=(\roman*)]
+    \item 周期图在$11$年处呈现最强峰值，在$5.5$年（半周期）和$88$年处也有次峰。
+    \item 周期卷积$\mathcal{K}^{(1)}\{X, X\}$（趋势变换）在$11$年处出现最大振幅输出，验证了Schwabe周期的主导性。
+    \item 周期卷积的差角正弦分量 $\operatorname{Im}\mathcal{K}^{(1)}\{X, X\}$（相位关系）在太阳黑子活动的上升期和下降期呈现不同的相位耦合模式——上升期相位聚集，下降期相位发散。
+    \item 嵌套周转系统拟合表明，$K=3$（$11$年基频、$5.5$年二倍频、$88$年长周期）即可解释约$80\%$的总方差。
+\end{enumerate}
+\end{example}
+
+\begin{example}[时间序列的窗函数-折射率诊断]\label{ex:window_refraction_diagnosis}
+对某年度气温异常数据（$1850$—$2023$年）进行窗函数周期诊断。取高斯核 $K_{\text{Gauss}}$，窗半径 $\Delta = 20$ 年（去除年代际以下的高频波动），计算：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{窗函数趋势} $T_{20}(t)$：揭示全球变暖的长期趋势——$20$世纪以来持续上升。
+    \item \textbf{正弦差角相似度} $\operatorname{Similarity}^{(2)}(t) = \sin(\theta_t - \theta_{t-10})$（$10$年延迟）：在$1940$—$1970$年的“降温期”出现负值——标志着从早期变暖到中期变冷的拐点。在$1970$年代后期再次出现正值恢复——标志着从降温到加速变暖的拐点。
+    \item \textbf{折射率} $\eta(t)$：在$1970$年代的拐点处 $\eta \approx 2.3 > 1$——拐点后变暖趋势的动量是拐点前降温趋势的$2.3$倍，证实了“全球加速变暖”的趋势强度变化。
+    \item \textbf{反射/折射分析}：$1940$年代的拐点处 $\operatorname{Similarity}^{(1)} \to -1$（等价地 $\operatorname{Similarity}^{(3)} \to +1$，即反射判据 $\cos 2\theta_{\text{in}} = \cos 2\theta_{\text{out}}$ 成立）——接近全反射，变暖趋势完全反转为降温趋势。$1970$年代的拐点处 $\operatorname{Similarity}^{(1)} < 0$ 且 $\eta \gg 1$——强折射，降温趋势反转为更强的变暖趋势。
+\end{enumerate}
+气候数据的窗函数-折射率诊断是周期卷积在环境数据中的具体应用——窗函数提供了多尺度的趋势提取能力，相似度指标量化了趋势的相位变化，折射率度量了趋势动量在拐点处的缩放比。三者的联合使用构成了数据拐点诊断的完整工具链。
+\end{example}
+
+\begin{remark}[与全书的统一]
+本章建立的数据分析周期结构理论是周期数学在数据科学中的完整应用。周期卷积为时间序列周期检测提供了统一的数学框架——它同时检测多个周期、保留全部相位信息、量化周期间耦合强度。窗函数体系提供了多尺度的频谱估计能力，导-积下降优化提供了数据驱动的参数估计方法。相位耦合网络将多变量数据的周期相互作用可视化为网络拓扑。数据周期诊断的综合流程将全书的数学工具——从傅里叶变换到周期卷积，从单周期检测到多周期耦合分析——整合为一套标准化的数据分析方法。
+\end{remark}
+
+\section*{本章七主题对照表}
+本章七主题在数据分析之周期结构中的对应对象回溯如下：
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{9.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 时间序列的滞后算子与时延相关：延迟 $\tau$ 步的趋势自相似度 $\operatorname{Similarity}^{(1)}$ 与趋势稳定性 $Q_\Delta(t)$（定义 \ref{def:trend_similarity_data}、命题 \ref{prop:trend_strength_stability}） \\
+缩放 & 多窗谱估计的多尺度窗半径与趋势分解的窗半径 $\Delta$、折射率 $\eta$（命题 \ref{prop:multitaper}、定义 \ref{def:data_window_decomposition}、定义 \ref{def:refraction_index_data}） \\
+旋转 & 相位耦合网络的相位边权 $W_{ij}^{(d)}$ 与相位差角 $\phi_m-\phi_n$（定义 \ref{def:phase_coupling_network}、引理 \ref{ch31_phase_network_symmetry}） \\
+平衡 & 信息守恒、能量守恒（帕塞瓦尔）与相位守恒三律（\textbf{经验观察／研究纲领}，注 \ref{thm:data_conservation}） \\
+对称 & 数据分布关于 $0$、$1$、$i$ 三个对称中心的对称性检验与趋势反射/折射判据（定义 \ref{def:reflection_refraction_trend}） \\
+闭合 & “检测—建模—验证—预测”的闭环诊断流程（定义 \ref{def:data_diagnosis_pipeline}） \\
+周期 & 周期图尖峰、多窗周期分解分量 $C_k(t)$ 与嵌套周转系统的主导周期（定义 \ref{def:spectral_analysis}、命题 \ref{ch31_multiscale_reconstruction}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{数据周期性判定定理}（\ref{thm:data_periodicity_decision}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 验证\textbf{数量调节的单调性}（\ref{prop:data_adaptive_growth}）的前提在本章领域对象上成立，并给出一个不满足前提的反例。
+
+    \item 考察\textbf{三参数对应：半径、相位与转速}（\ref{prop:data_epicycle_correspondence}）在参数退化时的行为，说明结论如何随之退化。
+
+    \item 说明\textbf{数据周期诊断流程与三章接口}（\ref{thm:data_diagnosis_integration}）与「周期系统」章相应通用结论的关系（是一致、特例还是需要附加条件）。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{thm:data_periodicity_decision}、\ref{prop:data_adaptive_growth}、\ref{prop:data_epicycle_correspondence}、\ref{thm:data_diagnosis_integration}。
+\end{enumerate}
+
+

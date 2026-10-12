@@ -1,0 +1,1823 @@
+\chapter{数系}
+\markboth{数系}{数系}
+
+\begin{remark}[本章定位]\label{rem:chapter_positioning_ch2}
+数系是周期判定所需代数封闭性的逐级实现。本章不从“数学结构百科”的角度罗列数系，而是从\textbf{周期判定需求}出发，回答一个核心问题：\textbf{每一类周期轨道要成为数学上可判定的对象，需要什么样的数系作为其代数基础？}
+
+主线逻辑为：
+\[
+\text{周期判定需求} \;\Longrightarrow\; \text{所需代数封闭性} \;\Longrightarrow\; \text{数系扩张}.
+\]
+
+每一步扩张，都由上一级数系中\textbf{不可判定的周期问题}所驱动。每一节回答三个问题：判定什么周期？原来数系缺什么？扩张后获得了什么判据？
+
+\textbf{核心洞察：变换的层级递进}。重复的加法（平移）产生乘法（缩放）；重复的乘法（缩放）产生幂（旋转）。这一层级递进是数系扩张的内在驱动力。
+
+\textbf{函数方程主线}。本章不仅从“周期判定需求”出发，还从“函数方程的可解性”出发。上一章给出的三种函数方程——
+\[
+\text{平移：} f(x+a)=f(x),\qquad
+\text{缩放：} f(qx)=f(x),\qquad
+\text{旋转：} f(e^{i\theta}z)=f(z)
+\]
+以及反周期方程 $f(x+a)+f(x)=0$（等价于 $f(x+a)=-f(x)$）——
+在每一级数系中的可解性与具有周期轨道的群结构，构成数系扩张的另一条主线。每一级数系扩张，恰好使某一类函数方程从“不可解”或“不封闭”变为“可解”且其具有周期轨道的群成为群。这条主线与“周期判定需求”主线并行，共同驱动数系从 $\mathbb N$ 到 $\mathbb H$ 的扩张。
+
+\textbf{本章七主题导引}：平移——整数 $\mathbb{Z}$ 的平移群 $(\mathbb{Z},+)$ 及其加法对称（对称中心 $0$）；缩放——有理数 $\mathbb{Q}$ 的比例方向与乘法对称 $\sigma_1$（对称中心 $1$）；旋转——复数 $\mathbb{C}$ 的单位圆 $U(1)$ 与四元数 $\mathbb{H}$ 的 $SU(2)$ 三维旋转；守恒——各数系逐级扩张所封闭的运算（加法、乘法、完备性、代数闭性、非交换乘法）各自对应的守恒量（动量、相体积、角动量、三维角动量）；对称——对称中心 $0$、$1$、$i$ 随逆运算的引入逐级涌现；闭合——各数系运算的封闭性与有限旋转轨道的闭合判据；周期——各数系对应的周期类型（离散平移周期、有限旋转周期、准周期、双周期、三维旋转周期）。
+\end{remark}
+
+\section{\texorpdfstring{自然数 $\mathbb{N}$：计数与重复，但不构成周期}{自然数 N：计数与重复，但不构成周期}}
+
+\subsection{\texorpdfstring{判定需求}{判定需求}}
+
+周期序列中“第 $k$ 个元素”的编号，以及“重复 $n$ 次”的计数。
+
+\subsection{\texorpdfstring{自然数的公理化}{自然数的公理化}}
+
+\begin{axiom}[皮亚诺算术]\label{ax:peano}
+自然数系 $\mathbb{N}$ 由以下五条公理刻画：
+\begin{enumerate}[label=(\arabic*)]
+    \item $0 \in \mathbb{N}$。
+    \item 每个自然数 $n$ 有唯一后继 $S(n) \in \mathbb{N}$。
+    \item $0$ 不是任何自然数的后继。
+    \item 后继函数是单射：若 $S(n) = S(m)$，则 $n = m$。
+    \item \textbf{归纳公理}：若子集 $A \subseteq \mathbb{N}$ 满足 $0 \in A$ 且对任意 $n \in A$ 有 $S(n) \in A$，则 $A = \mathbb{N}$。
+\end{enumerate}
+\end{axiom}
+
+\begin{definition}[自然数上的运算]\label{def:nat_operations}
+自然数上的三种基本运算的递归定义：
+\begin{itemize}
+    \item \textbf{加法}（平移）：$n + 0 := n$，$n + S(m) := S(n + m)$。封闭。
+    \item \textbf{乘法}（缩放的重复）：$n \times 0 := 0$，$n \times S(m) := (n \times m) + n$。封闭。
+    \item \textbf{幂}（旋转的重复）：$b^0 := 1$（$b \neq 0$），$b^{S(n)} := b^n \times b$。封闭。
+\end{itemize}
+\end{definition}
+
+\begin{remark}[变换层级在自然数中的体现]\label{rem:nat_hierarchy}
+自然数中已经蕴含了变换的层级递进：
+\begin{itemize}
+    \item \textbf{第一层：加法}（平移）。$n + m$ 是 $m$ 次平移的复合。
+    \item \textbf{第二层：乘法}（缩放）。$n \times m$ 是 $m$ 次加法（平移）的重复——重复的平移产生缩放。
+    \item \textbf{第三层：幂}（旋转）。$b^n$ 是 $n$ 次乘法（缩放）的重复——重复的缩放产生旋转。
+\end{itemize}
+然而，自然数中这三种运算都只有正向，没有逆向，因此不构成群结构，不直接提供周期判定的代数工具。
+\end{remark}
+
+\subsection{\texorpdfstring{判据缺失}{判据缺失}}
+
+\begin{proposition}[自然数中逆运算的缺失]\label{prop:natural_no_inverse}
+在 $\mathbb{N}$ 中：
+\begin{enumerate}[label=(\roman*)]
+    \item 减法 $a - b$ 有解当且仅当 $b \le a$。
+    \item 除法 $a \div b$ 有解当且仅当 $b \mid a$ 且 $b \neq 0$。
+    \item 根 $\sqrt[e]{b}$ 有解当且仅当 $b$ 是某自然数的 $e$ 次幂。
+\end{enumerate}
+因此，自然数中不存在完整的运算对偶，无法形成方向结构，也不具备群结构。
+\end{proposition}
+
+\begin{proof}
+(i) 若 $b \le a$，则存在 $c \in \mathbb{N}$ 使 $a = b + c$，故 $x = c$ 是解。若 $b > a$，由自然数的序性质，不存在 $x \in \mathbb{N}$ 使 $b + x = a$。
+(ii) 若 $b \mid a$，则存在 $c \in \mathbb{N}$ 使 $a = b \times c$，故 $x = c$ 是解。否则不存在整数商。
+(iii) 若 $b = c^e$ 对某 $c \in \mathbb{N}$ 成立，则 $x = c$ 是解。否则无自然数解。
+\end{proof}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.0,>=stealth]
+        \draw[->, thick, blue] (0,0) -- (6.2,0) node[right, font=\small] {$\mathbb{N}$};
+        \foreach \x in {0,1,2,...,5} {
+            \filldraw[blue] (\x,0) circle (2.5pt);
+            \node[below=3pt, font=\footnotesize] at (\x,0) {$\x$};
+        }
+        \draw[->, red, thick] (0.35,0.45) -- (1.65,0.45)
+            node[midway, above, font=\footnotesize] {后继 $S$};
+        \draw[<-, gray, dashed, thick] (-1.2,0) -- (0,0);
+        \node[gray, font=\footnotesize, above] at (-0.6,0.1) {无逆};
+        \draw[gray, dotted] (-1.2,-0.6) -- (-1.2,0.6);
+        \node[font=\small\bfseries, text width=7.5cm, align=center, below=1.4cm] at (3,0)
+            {$\mathbb{N}$ 只有正向推进，无加法逆元；\\ 平移轨道不能双向延展，因此无法判定闭合性。};
+    \end{tikzpicture}
+    \caption{自然数 $\mathbb{N}$ 的射线结构。后继映射 $S$ 只提供单向推进，没有逆映射。平移轨道无法回溯，闭合性判定在 $\mathbb{N}$ 中不封闭（命题 \ref{prop:natural_no_inverse}）。}
+    \label{fig:natural_ray}
+\end{figure}
+\begin{corollary}[自然数与周期判定的关系]\label{cor:natural_period}
+自然数没有对称中心，没有方向对偶，本身不构成群，因此不直接提供周期判定的代数工具。在周期数学的谱系中，$\mathbb{N}$ 仅提供计数的功能——周期序列中“第 $k$ 个元素”的编号。离散平移周期的判定至少需要 $\mathbb{Z}$ 的群结构（由命题 \ref{prop:natural_no_inverse} 推出）。
+\end{corollary}
+
+\begin{proof}
+由命题 \ref{prop:natural_no_inverse}，$\mathbb{N}$ 中减法、除法、开方均不封闭，故不存在加法逆元与乘法逆元。没有逆元就没有“反向”操作，因而既无对称中心（对称要求 $x \mapsto -x$ 或 $x \mapsto x^{-1}$ 有定义），也无方向对偶（方向要求正逆成对出现）。离散平移周期的判定要求轨道可双向延展并检验闭合性，这至少需要加法逆元，即 $\mathbb{Z}$ 的群结构。
+\end{proof}
+
+\subsection{\texorpdfstring{函数特征：平移方程的有解性与具有周期轨道的群的缺失}{函数特征：平移方程的有解性与具有周期轨道的群的缺失}}
+
+\begin{proposition}[自然数中平移方程的解]\label{prop:translation_equation_N}
+设 $f:\mathbb{N}\to Y$，$a\in\mathbb{N}$，$a\ne0$。若
+\[
+f(x+a)=f(x),\qquad \forall x\in\mathbb{N},
+\]
+则 $f$ 在模 $a$ 的每个剩余类上取常值；但周期集合
+\[
+\operatorname{Group}_{\mathrm{period},\mathbb{N}}(f)=\{a\in\mathbb{N}: f(x+a)=f(x),\ \forall x\in\mathbb{N}\}
+\]
+一般\textbf{不是子群}，因为 $\mathbb{N}$ 中不存在加法逆元：$a\in\operatorname{Group}_{\mathrm{period},\mathbb{N}}(f)$ 不蕴含 $-a$ 存在。
+\end{proposition}
+
+\begin{proof}
+由 $f(x+a)=f(x)$ 反复迭代得 $f(x+na)=f(x)$ 对任意 $n\in\mathbb{N}$ 成立，故 $f$ 在模 $a$ 的剩余类上常值。但周期集合的封闭性要求逆元：若 $a,b\in\operatorname{Group}_{\mathrm{period},\mathbb{N}}(f)$，则 $a+b\in\operatorname{Group}_{\mathrm{period},\mathbb{N}}(f)$（由 $f(x+a+b)=f(x+a)=f(x)$），但 $a-b$ 未必在 $\mathbb{N}$ 中，故不满足子群判据。
+\end{proof}
+
+\begin{proposition}[自然数中反周期方程的失效]\label{prop:antiperiod_N}
+设 $f:\mathbb{N}\to Y$，$a\in\mathbb{N}$，$a\ne0$。若
+\[
+f(x+a)=-f(x),\qquad \forall x\in\mathbb{N},
+\]
+则迭代给出 $f(x+2a)=f(x)$，故 $2a\in\operatorname{Group}_{\mathrm{period},\mathbb{N}}(f)$。但方程本身不能反向延拓：$f(x-a)$ 在 $x<a$ 时无定义。
+\end{proposition}
+
+\begin{proof}
+由 $f(x+a)=-f(x)$ 得 $f(x+2a)=f(x)$。反向延拓需要 $x-a\in\mathbb{N}$，即 $x\ge a$，故在 $x<a$ 处失效。
+\end{proof}
+
+\begin{remark}[自然数中缩放方程与旋转方程的地位]\label{rem:scaling_rotation_N}
+缩放方程 $f(qx)=f(x)$ 在 $\mathbb{N}$ 上仅当 $q$ 为整数且 $q$ 整除所有相关 $x$ 时才有意义，且 $q^{-1}$ 不存在，无法双向迭代。旋转方程 $f(e^{i\theta}z)=f(z)$ 在 $\mathbb{N}$ 中根本没有代数载体，因为 $e^{i\theta}$ 不属于 $\mathbb{N}$。故自然数只承载平移方程的最原始形式，且具有周期轨道的群不封闭。
+\end{remark}
+
+\section{\texorpdfstring{整数 $\mathbb{Z}$：离散平移周期的判定基础}{整数 Z：离散平移周期的判定基础}}
+
+\subsection{\texorpdfstring{判定需求}{判定需求}}
+
+给定平移轨道
+\[
+\mathcal{O}(x_0; T) = \{x_0 + nT \mid n \in \mathbb{Z}\},
+\]
+要判定它是否规则、是否可能闭合，前提是轨道必须能双向延展。如果只有正向推进，永远无法“回到起点”，闭合性判定在逻辑上不可能。
+
+\subsection{\texorpdfstring{代数需求}{代数需求}}
+
+加法逆元，即减法。这是使平移成为群作用的最小代数封闭性。
+
+\subsection{\texorpdfstring{整数的构造}{整数的构造}}
+
+\begin{definition}[整数的构造]\label{def:integer_construction}
+在 $\mathbb{N} \times \mathbb{N}$ 上定义等价关系
+\[
+(a,b) \sim (c,d) \iff a + d = b + c.
+\]
+整数集 $\mathbb{Z} := (\mathbb{N} \times \mathbb{N}) / \sim$。等价类 $[(a,b)]$ 对应直观上的“$a - b$”。
+
+运算定义：
+\begin{itemize}
+    \item 加法：$[(a,b)] + [(c,d)] := [(a+c, b+d)]$。
+    \item 零元：$0_{\mathbb{Z}} := [(0,0)]$。
+    \item 加法逆元：$-[(a,b)] := [(b,a)]$。
+    \item 乘法：$[(a,b)] \times [(c,d)] := [(ac+bd, ad+bc)]$。
+\end{itemize}
+\end{definition}
+
+\begin{proposition}[整数运算是良定义的]\label{prop:integer_well_defined}
+上述加法和乘法定义不依赖于代表元的选择，且 $(\mathbb{Z},+,\times)$ 构成一个交换环。
+\end{proposition}
+
+\begin{proof}
+设 $(a,b) \sim (a',b')$ 和 $(c,d) \sim (c',d')$，即
+\[
+a+b' = b+a', \qquad c+d' = d+c'. \tag{*}
+\]
+加法良定义：需证 $(a+c, b+d) \sim (a'+c', b'+d')$，即
+\[
+(a+c)+(b'+d') = (b+d)+(a'+c').
+\]
+由结合律、交换律及 $(*)$ 两式相加即得：
+\[
+(a+c)+(b'+d') = (a+b')+(c+d') = (b+a')+(d+c') = (b+d)+(a'+c').
+\]
+乘法良定义：需证 $(ac+bd, ad+bc) \sim (a'c'+b'd', a'd'+b'c')$，即
+\[
+ac + bd + a'd' + b'c' = ad + bc + a'c' + b'd'. \tag{**}
+\]
+由 $(*)$ 得 $a + b' = b + a'$，两边分别乘以 $c$ 与 $d$，得
+\[
+ac + b'c = bc + a'c, \qquad bd + a'd = ad + b'd.
+\]
+于是
+\[
+ac + bd + a'd + b'c = (ac + b'c) + (bd + a'd) = (bc + a'c) + (ad + b'd) = ad + bc + a'c + b'd,
+\]
+即 $(ac+bd, ad+bc) \sim (a'c+b'd, a'd+b'c)$，乘法对第一因子良定义。同理由 $(c,d) \sim (c',d')$ 得乘法对第二因子良定义。两次替换复合即得 $(ac+bd, ad+bc) \sim (a'c'+b'd', a'd'+b'c')$，乘法良定义。
+
+环公理：加法结合律、交换律、零元 $[(0,0)]$、逆元 $-[(a,b)] = [(b,a)]$ 由自然数对应性质经代表元直接继承；乘法结合律与分配律同理，经代表元逐项展开验证，均归结为自然数的运算律。
+\end{proof}
+
+\subsection{\texorpdfstring{整数中的运算对偶与方向结构}{整数中的运算对偶与方向结构}}
+
+\begin{proposition}[整数中的运算对偶]\label{prop:integer_operation_duality}
+在 $\mathbb{Z}$ 中：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{加法与减法}构成完整对偶：$a + x = b \iff x = b - a$。正方向：$x \mapsto x + k$（向右平移）；逆方向：$x \mapsto x - k$（向左平移）。
+    \item \textbf{乘法}封闭，但\textbf{除法}仍不完全：当 $a \neq 0$ 时，$a \times x = b$ 有整数解当且仅当 $a \mid b$；当 $a = 0$ 时，有解当且仅当 $b = 0$（此时任意 $x$ 均为解）。
+    \item \textbf{幂}封闭（底数为整数、指数为自然数），但\textbf{根}仍不完全。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 若 $x = b - a = b + (-a)$，则 $a + x = a + b + (-a) = b$；反之，若 $a + x = b$，两边同加 $-a$ 得 $x = b + (-a) = b - a$。故 $a + x = b \iff x = b - a$，加法与减法构成完整对偶。方向对偶由 $x \mapsto x + k$ 与其逆映射 $x \mapsto x - k$ 给出：$(x+k)-k = x = (x-k)+k$。
+(ii) 设 $a \neq 0$。若 $a \mid b$，则存在 $c \in \mathbb{Z}$ 使 $b = ac$，$x = c$ 是解；反之若 $ax = b$ 有整数解，则 $a \mid b$。设 $a = 0$，方程化为 $0 = b$：$b = 0$ 时任意 $x$ 均为解，$b \neq 0$ 时无解。综上，除法仅对整除情形封闭，一般情形不封闭。
+(iii) 对整数 $b$ 与非负整数 $n$，$b^n$ 由 $b$ 反复自乘得到，仍是整数，故幂封闭。根运算：方程 $x^e = b$ 有整数解当且仅当 $b$ 是某整数的 $e$ 次幂（且 $e$ 为偶数时需 $b \geq 0$），一般情形不封闭，例如 $x^2 = 2$ 无整数解。
+\end{proof}
+
+\begin{proposition}[整数的对称性、方向性与周期性]\label{prop:integer_symmetry_direction_period}
+整数上的运算结构产生以下对称性与周期性：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{对称中心}：$0$（加法单位元）。
+    \item \textbf{对称类型}：加法反射对称。$\sigma_{0,+}(x) = -x$ 是对合自同构，不动点为 $0$，生成 $C_2$ 群。
+    \item \textbf{方向结构}：平移方向。方向群 $\langle 1 \rangle = \mathbb{Z}$。正向：$x \mapsto x + 1$；逆向：$x \mapsto x - 1$。
+    \item \textbf{周期类型}：平移准周期。轨道 $\{a_0 + k \mid k \in \mathbb{Z}\}$ 在 $\mathbb{Z}$ 上等距延展。该轨道上的平移不变函数为常值函数。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $0 + x = x$ 对所有 $x \in \mathbb{Z}$ 成立，且对任意 $x$ 存在唯一 $-x$ 使 $x + (-x) = 0$。
+(ii) $\sigma_{0,+}(\sigma_{0,+}(x)) = -(-x) = x$，故为对合。不动点条件 $-x = x \iff 2x = 0 \iff x = 0$（在无挠加法群中）。
+(iii) 每个整数可唯一表示为 $n \cdot 1$（$n \in \mathbb{Z}$），正向对应 $n>0$，逆向对应 $n<0$。
+(iv) 对任意 $k \in \mathbb{Z}$，$T_k(x) = x + k$ 满足 $T_k \circ T_{-k} = \text{id}$。轨道的等距性由 $|(x+k) - x| = |k|$ 保证。平移群在 $\mathbb{Z}$ 上作用传递，其不变量必为常值函数 $P(x) = \text{const}$。
+\end{proof}
+
+\subsection{\texorpdfstring{函数特征：平移方程的可逆化与具有周期轨道的群}{函数特征：平移方程的可逆化与具有周期轨道的群}}
+
+\begin{theorem}[整数平移方程的具有周期轨道的群]\label{thm:translation_equation_Z}
+设 $f:\mathbb{Z}\to Y$，$a\in\mathbb{Z}$，$a\ne0$。若
+\[
+f(x+a)=f(x),\qquad \forall x\in\mathbb{Z},
+\]
+则具有周期轨道的群
+\[
+\operatorname{Group}_{\mathrm{period},\mathbb{Z}}(f)=\{T\in\mathbb{Z}: f(x+T)=f(x),\ \forall x\in\mathbb{Z}\}
+\]
+是 $\mathbb{Z}$ 的子群，且 $a\mathbb{Z}\le\operatorname{Group}_{\mathrm{period},\mathbb{Z}}(f)$。
+\end{theorem}
+
+\begin{proof}
+由 $f(x+a)=f(x)$ 双向迭代得 $f(x+na)=f(x)$ 对任意 $n\in\mathbb{Z}$ 成立，故 $a\mathbb{Z}\le\operatorname{Group}_{\mathrm{period},\mathbb{Z}}(f)$。周期集合对加法与取逆封闭（$T\in\operatorname{Group}_{\mathrm{period},\mathbb{Z}}(f)\Rightarrow -T\in\operatorname{Group}_{\mathrm{period},\mathbb{Z}}(f)$ 由双向延拓保证），故为子群。
+\end{proof}
+
+\begin{corollary}[反周期方程的周期加倍]\label{cor:antiperiod_Z}
+若 $f(x+a)=-f(x)$ 对一切 $x\in\mathbb{Z}$ 成立，则 $f(x+2a)=f(x)$，即 $2a\in\operatorname{Group}_{\mathrm{period},\mathbb{Z}}(f)$，且 $2a\mathbb{Z}\le\operatorname{Group}_{\mathrm{period},\mathbb{Z}}(f)$。
+\end{corollary}
+
+\begin{proof}
+由 $f(x+a)=-f(x)$ 得 $f(x+2a)=f(x)$。此时 $f(x-a)$ 对所有 $x\in\mathbb{Z}$ 有定义，具有周期轨道的群完整。
+\end{proof}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=0.95,>=stealth]
+        \draw[->] (-0.4,0) -- (7.2,0) node[right, font=\footnotesize] {$x$};
+        \draw[->] (0,-1.4) -- (0,1.6) node[above, font=\footnotesize] {$f$};
+        \draw[thick, blue, domain=0:6.8, samples=120]
+            plot (\x, {cos(180*\x)});
+        \draw[<->, red, thick] (0.5,-1.1) -- (1.5,-1.1)
+            node[midway, below, font=\footnotesize] {$a$};
+        \draw[<->, red, thick] (0.5,-1.5) -- (2.5,-1.5)
+            node[midway, below, font=\footnotesize] {$2a$};
+        \filldraw[red] (0.5,1) circle (2.2pt);
+        \filldraw[red] (1.5,-1) circle (2.2pt);
+        \filldraw[red] (2.5,1) circle (2.2pt);
+        \node[red, font=\footnotesize, above right=1pt] at (0.5,1) {$f(x)$};
+        \node[red, font=\footnotesize, below right=1pt] at (1.5,-1) {$-f(x)$};
+        \node[red, font=\footnotesize, above right=1pt] at (2.5,1) {$f(x)$};
+        \node[font=\small\bfseries, text width=7.5cm, align=center, below=1.8cm] at (3.5,0)
+            {反周期 $f(x+a)=-f(x)$ 蕴含周期加倍 $f(x+2a)=f(x)$；\\ 正负交替，两步闭合。};
+    \end{tikzpicture}
+    \caption{反周期方程 $f(x+a)=-f(x)$ 的几何图像。函数在相邻两个 $a$-区间内符号相反，两步之后回到初值——周期加倍为 $2a$（推论 \ref{cor:antiperiod_Z}）。这是最简单的非平凡倍周期结构。}
+    \label{fig:antiperiod_doubling}
+\end{figure}
+
+\begin{remark}[整数让平移方程“可逆化”]\label{rem:integer_makes_translation_invertible}
+自然数中平移方程只能单向迭代，周期集合不封闭；整数中加法逆元存在，平移方程可双向迭代，周期集合成为子群。这是数系扩张使函数方程从“不可逆”变为“可逆”的第一个实例。
+\end{remark}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[>=stealth,
+        nsbox/.style={draw, circle, minimum size=1.35cm, inner sep=0pt,
+                      font=\large\bfseries},
+        arrow/.style={->, thick, >=stealth},
+        lbl/.style={font=\footnotesize, midway, above=2pt, align=center},
+        sublbl/.style={font=\footnotesize, align=center}]
+
+        \node[nsbox, fill=blue!10]   (N) at (0,0)    {$\mathbb{N}$};
+        \node[nsbox, fill=green!12]  (Z) at (3.5,0)  {$\mathbb{Z}$};
+        \node[nsbox, fill=yellow!12] (Q) at (7.0,0)  {$\mathbb{Q}$};
+
+        \draw[arrow] (N) -- (Z) node[lbl] {加法逆元\\ $c=0$};
+        \draw[arrow] (Z) -- (Q) node[lbl] {乘法逆元\\ $c=1$};
+
+        \node[sublbl, blue!60!black]   at (0,   -1.05) {计数};
+        \node[sublbl, green!60!black]  at (3.5, -1.05) {$\sigma_0$};
+        \node[sublbl, yellow!60!black] at (7.0, -1.05) {$\sigma_1$};
+
+    \end{tikzpicture}
+    \caption{对称中心 $0$、$1$ 在数系扩张中的逐级涌现（第 \ref{prop:integer_symmetry_direction_period} 节局部图）。$\mathbb{N}\to\mathbb{Z}$ 引入加法逆元（对称中心 $0$）；$\mathbb{Z}\to\mathbb{Q}$ 引入乘法逆元（对称中心 $1$）。$\mathbb{R}$、$\mathbb{C}$、$\mathbb{H}$ 的后续扩张（分别引入完备性、虚数单位 $i$、非交换乘法）见全章总结图 \ref{fig:number_extension}。}
+    \label{fig:symmetry_centre_emergence}
+\end{figure}
+\subsection{\texorpdfstring{判据定理}{判据定理}}
+
+\begin{lemma}[有限循环群中元素的阶]\label{lem:order_cyclic_subgroup_ch2}
+设 $m \ge 1$，$T \in \mathbb{Z}$。在商群 $\mathbb{Z}/m\mathbb{Z}$ 中，元素 $[T]$ 生成的循环子群 $\langle [T] \rangle$ 的阶为 $m/\gcd(T,m)$。特别地，$\gcd(T,m) = 1$ 当且仅当 $[T]$ 生成整个 $\mathbb{Z}/m\mathbb{Z}$。
+\end{lemma}
+
+\begin{proof}
+设 $d = \gcd(T,m)$。$[T]$ 的阶是使 $nT \equiv 0 \pmod{m}$ 成立的最小正整数 $n$。条件 $m \mid nT$ 等价于 $\frac{m}{d} \mid n \cdot \frac{T}{d}$。因 $\gcd\!\left(\frac{m}{d}, \frac{T}{d}\right) = 1$，由互素性质得 $\frac{m}{d} \mid n$，最小正整数解为 $n = \frac{m}{d} = \frac{m}{\gcd(T,m)}$。当 $\gcd(T,m) = 1$ 时，$d = 1$，$[T]$ 的阶为 $m = |\mathbb{Z}/m\mathbb{Z}|$，故 $[T]$ 生成整个群；反之，若 $[T]$ 生成整个群，则其阶为 $m$，即 $m = m/d$，得 $d = 1$。
+\end{proof}
+
+\begin{theorem}[整数平移周期判据]\label{thm:integer_translation_criterion}
+设 $x_0 \in \mathbb{Z}$，平移步长为 $T \in \mathbb{Z}$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $T = 0$，轨道 $\mathcal{O}(x_0; T)$ 退化为单点 $\{x_0\}$，周期为 $1$（平凡周期）。
+    \item 若 $T \neq 0$，轨道 $\mathcal{O}(x_0; T)$ 是双向无限等距点列，不闭合但规则。在任何有限商 $\mathbb{Z}/m\mathbb{Z}$（即 $C_m$）中，轨道必闭合，其周期恰为 $m/\gcd(T,m)$；特别地，轨道退化为单点当且仅当 $T \equiv 0 \pmod{m}$。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) $x_0 + n\cdot 0 = x_0$ 对所有 $n$ 成立，轨道仅含一点。
+(ii) 若 $T \neq 0$，则 $|(x_0+nT) - x_0| = |nT|$ 随 $|n|$ 增大而无限增大，轨道在 $\mathbb{Z}$ 中不闭合。在商群 $\mathbb{Z}/m\mathbb{Z}$ 中，轨道为陪集 $[x_0] + \langle [T] \rangle$；由引理 \ref{lem:order_cyclic_subgroup_ch2}，$\mathrm{ord}([T]) = m/\gcd(T,m)$ 有限，故轨道闭合且周期为 $m/\gcd(T,m)$。特别地，轨道退化为单点当且仅当 $[T] = [0]$，即 $T \equiv 0 \pmod{m}$。
+\end{proof}
+
+\begin{corollary}[整数与离散平移周期]\label{cor:integer_discrete_translation}
+$\mathbb{Z}$ 是离散平移周期可判定的最小群结构（由定理 \ref{thm:integer_translation_criterion} 推出）。判定能力体现在：
+\begin{enumerate}[label=(\roman*)]
+    \item 轨道可以双向延展，回溯性使闭合性判定成为可能；
+    \item 有限循环群 $C_m \cong \mathbb{Z}/m\mathbb{Z}$ 的商结构使有限平移周期获得精确的代数刻画。
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+(i) 定理 \ref{thm:integer_translation_criterion} 中 $T \neq 0$ 情形的论证依赖 $\mathbb{Z}$ 的加法逆元：负向平移 $x \mapsto x - T$ 的存在使轨道可回溯，从而闭合性判定成为可能。
+(ii) 由引理 \ref{lem:order_cyclic_subgroup_ch2}，$C_m \cong \mathbb{Z}/m\mathbb{Z}$ 中元素的阶（周期）可精确计算为 $m/\gcd(T,m)$，故有限平移周期获得代数刻画。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+    \draw[->] (-4.5,0) -- (4.5,0) node[right] {$\mathbb{Z}$};
+    \foreach \i in {-4,...,4} {
+        \draw (\i, 0.15) -- (\i, -0.15);
+        \node[below=2pt, font=\footnotesize] at (\i,0) {$\i$};
+        \filldraw[blue] (\i, 0) circle (2pt);
+    }
+    \draw[<->, blue, thick, >=stealth] (0, 0.6) to[bend left=40] (1, 0.6);
+    \node[blue, font=\footnotesize] at (1.5, 1.6) {$+1$ 正向平移};
+    \draw[<->, red, thick, >=stealth] (0, 0.6) to[bend right=40] (-1, 0.6);
+    \node[red, font=\footnotesize] at (-1.5, 1.6) {$-1$ 逆向平移};
+    \draw[gray, thin] (0, -1.2) -- (0, 1.8);
+    \node[font=\small\bfseries] at (0, -1.8) {对称中心 $c=0$};
+    \filldraw[black] (0,0) circle (3pt);
+\end{tikzpicture}
+\caption{整数 $\mathbb{Z}$ 的平移方向结构：以 $0$ 为对称中心，$+1$ 和 $-1$ 构成正逆方向对偶。轨道在整数轴上等距延展。}
+\label{fig:integer_direction}
+\end{figure}
+\section{\texorpdfstring{有理数 $\mathbb{Q}$：有限旋转周期的判定基础}{有理数 Q：有限旋转周期的判定基础}}
+
+\subsection{\texorpdfstring{判定需求}{判定需求}}
+
+旋转轨道
+\[
+\mathcal{O}(z_0; \theta) = \{z_0 e^{in\theta} \mid n\in\mathbb{Z}\}
+\]
+何时闭合？判据是
+\[
+\frac{\theta}{2\pi} \in \mathbb{Q}.
+\]
+但“可公度”这一概念本身需要有理数。没有 $\mathbb{Q}$，我们甚至无法表达“旋转角与圆周的三分之一可公度”。
+
+\subsection{\texorpdfstring{代数需求}{代数需求}}
+
+乘法逆元，即除法。这是使比例关系可精确表达的最小代数封闭性。
+
+\subsection{\texorpdfstring{有理数的构造}{有理数的构造}}
+
+\begin{definition}[有理数的构造]\label{def:rational_construction}
+在 $\mathbb{Z} \times \mathbb{Z}^{\times}$（其中 $\mathbb{Z}^{\times} = \mathbb{Z} \setminus \{0\}$）上定义等价关系
+\[
+(a,b) \approx (c,d) \iff a \times d = b \times c.
+\]
+有理数集 $\mathbb{Q} := (\mathbb{Z} \times \mathbb{Z}^{\times}) / \approx$。等价类记为 $\frac{a}{b}$ 或 $a/b$。
+
+运算定义：
+\begin{itemize}
+    \item 加法：$\frac{a}{b} + \frac{c}{d} := \frac{ad+bc}{bd}$。
+    \item 乘法：$\frac{a}{b} \times \frac{c}{d} := \frac{ac}{bd}$。
+    \item 加法零元：$\frac{0}{1}$。
+    \item 乘法单位元：$\frac{1}{1}$。
+    \item 加法逆元：$-\frac{a}{b} := \frac{-a}{b}$。
+    \item 乘法逆元：$(\frac{a}{b})^{-1} := \frac{b}{a}$（$a \neq 0$）。
+\end{itemize}
+\end{definition}
+
+\begin{proposition}[有理数是域]\label{prop:rational_field}
+$(\mathbb{Q},+,\times)$ 构成一个域，即同时是加法阿贝尔群和乘法阿贝尔群（除零元外），且乘法对加法满足分配律。
+\end{proposition}
+
+\begin{proof}
+加法群结构继承自 $\mathbb{Z}$ 的分数构造。乘法结合律和交换律由整数乘法直接验证。乘法逆元的存在性：对任意 $\frac{a}{b} \neq 0$（即 $a \neq 0$），其逆元为 $\frac{b}{a} \in \mathbb{Q}$。分配律通过通分计算验证。
+\end{proof}
+
+\subsection{\texorpdfstring{对称中心 $1$ 与比例方向}{对称中心 1 与比例方向}}
+
+\begin{definition}[乘法取逆对合 $\sigma_1$]\label{def:rational_involution}
+在乘法群 $\mathbb{Q}^{\times} = \mathbb{Q} \setminus \{0\}$ 上，定义映射
+\[
+\sigma_1: \mathbb{Q}^{\times} \to \mathbb{Q}^{\times}, \quad \sigma_1(x) = x^{-1} = \frac{1}{x}.
+\]
+称 $\sigma_1$ 为关于对称中心 $1$ 的对合。
+\end{definition}
+
+\begin{proposition}[对合 $\sigma_1$ 的基本性质]\label{prop:rational_involution_properties}
+\begin{enumerate}[label=(\roman*)]
+    \item $\sigma_1$ 是一个对合：$\sigma_1 \circ \sigma_1 = \text{id}_{\mathbb{Q}^{\times}}$。
+    \item $\sigma_1$ 的不动点集为 $\{1, -1\}$。
+    \item $\sigma_1$ 是乘法群 $(\mathbb{Q}^{\times}, \times)$ 的自同构：$\sigma_1(x \times y) = \sigma_1(x) \times \sigma_1(y)$。
+    \item $\sigma_1$ 将“放大”操作（乘以 $q>1$）与“缩小”操作（除以 $q$）互换。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\sigma_1(\sigma_1(x)) = 1/(1/x) = x$。
+(ii) $\sigma_1(x) = x \iff 1/x = x \iff x^2 = 1 \iff x = 1$ 或 $x = -1$。
+(iii) $\sigma_1(xy) = 1/(xy) = (1/x)(1/y) = \sigma_1(x) \sigma_1(y)$。
+(iv) 设 $T_q(x) = qx$（$q>1$，放大），则 $\sigma_1 \circ T_q \circ \sigma_1(x) = \sigma_1(q \cdot x^{-1}) = x/q$，即缩小操作。
+\end{proof}
+
+\begin{proposition}[有理数的方向结构与周期类型]\label{prop:rational_direction_period}
+有理数在整数对称性的基础上，新增了以下结构：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{新增对称中心}：$1$（乘法单位元）。
+    \item \textbf{新增对称类型}：乘法取逆对称。$\sigma_1(x) = x^{-1}$ 是乘法群 $\mathbb{Q}^{\times}$ 上的对合自同构，不动点为 $\pm 1$。
+    \item \textbf{新增方向结构}：比例方向。方向群 $\langle q \rangle = \{q^k \mid k \in \mathbb{Z}\} \cong \mathbb{Z}$（$q > 0, q \neq 1$）。正向：$x \mapsto q \times x$；逆向：$x \mapsto x / q$。
+    \item \textbf{新增周期类型}：比例准周期。轨道 $\{a_0 q^k \mid k \in \mathbb{Z}\}$ 通过对数同态等价于对数域中的平移准周期。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i)–(ii) 对称中心 $1$ 与乘法取逆对称 $\sigma_1$ 的性质已由定义 \ref{def:rational_involution} 与命题 \ref{prop:rational_involution_properties} 建立。
+(iii) 对 $q > 0, q \neq 1$，映射 $k \mapsto q^k$ 给出群同构 $\mathbb{Z} \to \langle q \rangle$：$q^{k_1 + k_2} = q^{k_1} q^{k_2}$ 且 $q^0 = 1$，又 $q^{k_1} = q^{k_2}$ 当且仅当 $k_1 = k_2$（$q \neq 1$ 时 $q^k$ 严格单调），故 $\langle q \rangle \cong \mathbb{Z}$。正向 $x \mapsto qx$ 对应 $k \mapsto k+1$，逆向 $x \mapsto x/q$ 对应 $k \mapsto k-1$。
+(iv) 轨道 $\{a_0 q^k \mid k \in \mathbb{Z}\}$ 经对数映射 $\ln$ 化为 $\{\ln a_0 + k \ln q \mid k \in \mathbb{Z}\}$，是 $\mathbb{R}$ 上步长为 $\ln q$ 的等距平移轨道（见命题 \ref{prop:rational_momentum} 与图 \ref{fig:rational_direction}），故为平移准周期在比例方向的对偶——比例准周期。
+\end{proof}
+
+\subsection{\texorpdfstring{函数特征：缩放方程与可公度性}{函数特征：缩放方程与可公度性}}
+
+\begin{theorem}[有理数缩放方程的具有周期轨道的群]\label{thm:scaling_equation_Q}
+设 $f:\mathbb{Q}^+\to Y$，$q\in\mathbb{Q}^+$，$q\ne1$。若
+\[
+f(qx)=f(x),\qquad \forall x\in\mathbb{Q}^+,
+\]
+则具有周期轨道的群
+\[
+\operatorname{Group}_{\mathrm{period},\mathbb{Q}^+}(f)=\{r\in\mathbb{Q}^+: f(rx)=f(x),\ \forall x\in\mathbb{Q}^+\}
+\]
+是 $\mathbb{Q}^+$ 的子群，且 $\langle q\rangle=\{q^n:n\in\mathbb{Z}\}\le\operatorname{Group}_{\mathrm{period},\mathbb{Q}^+}(f)$。
+\end{theorem}
+
+\begin{proof}
+由 $f(qx)=f(x)$ 双向迭代得 $f(q^n x)=f(x)$ 对任意 $n\in\mathbb{Z}$ 成立（$q^{-1}$ 在 $\mathbb{Q}^+$ 中存在），故 $\langle q\rangle\le\operatorname{Group}_{\mathrm{period},\mathbb{Q}^+}(f)$。周期集合对乘法与取逆封闭，故为子群。
+\end{proof}
+
+\begin{theorem}[有理数与旋转方程的可公度判据]\label{thm:rotation_equation_Q}
+设 $\theta\in\mathbb{R}$，$f:\mathbb{C}^\times\to Y$。旋转方程
+\[
+f(e^{i\theta}z)=f(z),\qquad \forall z\in\mathbb{C}^\times
+\]
+有非平凡周期解，只要 $\theta/(2\pi)\in\mathbb{Q}$；与之并列，旋转所生成的具有周期轨道的群 $\langle e^{i\theta}\rangle\le\mathbb{C}^\times$ 有限，当且仅当 $\theta/(2\pi)\in\mathbb{Q}$。这一判据本身依赖有理数 $\mathbb{Q}$ 的分数表示 $p/q$。因此 $\mathbb{Q}$ 是表达“可公度性”的最小代数结构，但旋转方程的\textbf{代数实现}（$e^{i\theta}$ 的构造）仍需 $\mathbb{C}$。
+\end{theorem}
+
+\begin{proof}
+第一个断言（充分方向）：若 $\theta/(2\pi)=p/q\in\mathbb{Q}$ 既约，则 $e^{i\theta}$ 是 $q$ 次单位根，$f(e^{i\theta}z)=f(z)$ 有非平凡解——取 $f(z)=z^{q}$，则 $f(e^{i\theta}z)=(e^{i\theta}z)^{q}=e^{2\pi ip}z^{q}=f(z)$，且 $f$ 非常值。
+
+第二个断言（具有周期轨道的群）：若 $\theta/(2\pi)=p/q\in\mathbb{Q}$ 既约，则 $e^{i\theta}$ 的阶为 $q$，$\langle e^{i\theta}\rangle$ 有限；反之，若 $\theta/(2\pi)\notin\mathbb{Q}$，则 $e^{in\theta}=1$ 要求 $\theta/(2\pi)=k/n\in\mathbb{Q}$，故 $e^{i\theta}$ 的阶为无限，$\langle e^{i\theta}\rangle$ 无限。
+
+判据 $\theta/(2\pi)\in\mathbb{Q}$ 的表达需要 $\mathbb{Q}$，但 $e^{i\theta}$ 本身的代数化需要 $\mathbb{C}$ 中的 $i$。
+\end{proof}
+
+\begin{remark}[定理 \ref{thm:rotation_equation_Q} 的第一条不能反推]\label{rem:rotation_equation_Q_converse}
+定理 \ref{thm:rotation_equation_Q} 的第一条是单向的：$\theta/(2\pi)\in\mathbb{Q}$ 保证非平凡周期解存在，但“解存在”推不出 $\theta/(2\pi)\in\mathbb{Q}$。解的存在性只由 $f$ 的等值集决定，与 $e^{i\theta}$ 的阶无关——使旋转方程逐点成立的函数类正是 $f$ 在 $\langle e^{i\theta}\rangle$-轨道上取常值的函数，这一类随 $\theta$ 变化而变化，却对任何 $\theta$ 都非空。反方向要成立须追加对 $f$ 的限制；例如当 $f$ 连续且在某条圆周 $|z|=r$ 上非常值时，$\theta/(2\pi)\notin\mathbb{Q}$ 反而使解必为平凡解：$e^{i\theta}$ 在该圆周上稠密，连续性迫使 $f$ 在整条圆周上为常数。而周期的第二条（具有周期轨道的群有限）在改写为关于具有周期轨道的群 $\langle e^{i\theta}\rangle$ 的陈述后仍是双向的。
+\end{remark}
+
+\begin{example}[逐点周期解不蕴含有限阶]\label{ex:rotation_equation_module}
+取 $f(z)=|z|$。则对任意 $\theta\in\mathbb{R}$ 与任意 $z\in\mathbb{C}^\times$ 都有
+\[
+f(e^{i\theta}z)=|e^{i\theta}z|=|z|=f(z),
+\]
+故任意 $\theta$ 都允许逐点周期解；特别地，当 $\theta/(2\pi)\notin\mathbb{Q}$（例如 $\theta=1$）时，旋转的具有周期轨道的群 $\langle e^{i\theta}\rangle$ 仍为无限。这说明“允许逐点周期解”严格弱于“旋转具有有限阶”，也说明定理 \ref{thm:rotation_equation_Q} 的第一条不能写成“当且仅当”。
+\end{example}
+
+\begin{remark}[有理数让缩放方程“可逆化”]\label{rem:rational_makes_scaling_invertible}
+整数中缩放方程 $f(qx)=f(x)$ 仅当 $q$ 整除所有相关 $x$ 时才有意义，且 $q^{-1}$ 不存在。有理数中乘法逆元存在，缩放方程可双向迭代，具有周期轨道的群 $\langle q\rangle$ 成为子群。这是数系扩张使函数方程从“不可逆”变为“可逆”的第二个实例。
+\end{remark}
+
+\subsection{\texorpdfstring{判据定理}{判据定理}}
+
+\begin{theorem}[有理数旋转周期判据]\label{thm:rational_rotation_criterion}
+设 $\theta \in \mathbb{R}$，旋转轨道为 $\mathcal{O}(z_0;\theta) = \{z_0 e^{in\theta} \mid n\in\mathbb{Z}\}$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $\theta/(2\pi) = p/q \in \mathbb{Q}$（既约分数），则轨道是 $q$ 阶有限循环轨道，周期为 $q$。
+    \item 若 $\theta/(2\pi) \notin \mathbb{Q}$，则 $e^{i\theta}$ 的阶为无限，轨道不闭合（无限轨道）。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 设 $\theta = 2\pi p/q, \gcd(p,q)=1$。则 $e^{in\theta}=1 \iff n\theta \in 2\pi\mathbb{Z} \iff q \mid np \iff q \mid n$（互素），故 $e^{i\theta}$ 的阶恰为 $q$。轨道为 $\{z_0, z_0 e^{i\theta}, \dots, z_0 e^{i(q-1)\theta}\}$，恰含 $q$ 个等距点。
+(ii) 若 $\theta/(2\pi) \notin \mathbb{Q}$，则 $e^{in\theta}=1$ 要求 $n\theta \in 2\pi\mathbb{Z}$，即 $\theta/(2\pi)=k/n \in \mathbb{Q}$，矛盾。故对一切 $n \geq 1$ 有 $e^{in\theta} \neq 1$，轨道无限、不闭合。
+\end{proof}
+
+\begin{corollary}[有理数与有限旋转周期]\label{cor:rational_finite_rotation}
+$\mathbb{Q}$ 是有限旋转周期可判定的最小数系（由定理 \ref{thm:rational_rotation_criterion} 推出）。判定能力体现在：
+\begin{enumerate}[label=(\roman*)]
+    \item 可公度性判据 $\theta/(2\pi) \in \mathbb{Q}$ 可以被精确表达；
+    \item 有限循环群 $C_q$ 的阶 $q$ 可以被精确指定。
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+(i) 定理 \ref{thm:rational_rotation_criterion} 的判据 $\theta/(2\pi) = p/q \in \mathbb{Q}$ 依赖有理数的分数表示 $p/q$，这一表示在 $\mathbb{Q}$ 中可精确给出。
+(ii) 由该定理，轨道恰含 $q$ 个点且 $e^{i\theta}$ 是 $q$ 阶单位根，故 $C_q$ 的阶 $q$ 由分母精确指定。
+\end{proof}
+
+\begin{proposition}[比例方向与对数同态下的守恒量转换]\label{prop:rational_momentum}
+缩放轨道 $\mathcal{O} = \{a_0 q^k \mid k \in \mathbb{Z}\} \subset \mathbb{Q}^+$ 通过对数映射 $\ln: \mathbb{Q}^+ \to \mathbb{R}$ 转化为平移轨道：
+\[
+\ln(\mathcal{O}) = \{\ln a_0 + k \ln q \mid k \in \mathbb{Z}\}.
+\]
+在比例方向下保持不变的量，经对数转换后，表现为平移方向下的不变量。
+\end{proposition}
+
+\begin{proof}
+设 $Q_{\text{scale}}$ 是 $(\mathbb{Q}^+, \times)$ 上的守恒量，满足 $Q_{\text{scale}}(q x) = Q_{\text{scale}}(x)$。定义 $Q_{\text{trans}}(y) = Q_{\text{scale}}(e^y)$，则
+\[
+Q_{\text{trans}}(y + \ln q) = Q_{\text{scale}}(e^{y + \ln q}) = Q_{\text{scale}}(q \cdot e^y) = Q_{\text{scale}}(e^y) = Q_{\text{trans}}(y).
+\]
+$Q_{\text{trans}}$ 在平移 $y \mapsto y + \ln q$ 下不变，即为平移方向下的不变量。
+\end{proof}
+
+\begin{remark}[可公度性与周期]
+有理数的一个核心特征是\textbf{可公度性}：旋转角 $\theta$ 与 $2\pi$ 之比满足 $\theta/(2\pi) \in \mathbb{Q}$ 当且仅当旋转的具有周期轨道的群 $\langle e^{i\theta}\rangle$ 有限，即旋转生成有限严格周期。这一性质将有理数与旋转周期理论紧密联结——有理逼近论（连分数）为不可公度周期的离散近似提供了算法基础。在历法学中，回归年与朔望月之间的不可公度比正是通过有理逼近（如十九年七闰）来实现离散近似的。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.9]
+    \draw[->] (0,0) -- (7.5,0) node[right] {$\mathbb{Q}^+$（乘法群）};
+    \foreach \i in {0,1,...,5} {
+        \filldraw[blue] ({0.6*pow(1.5,\i)}, 0) circle (2.5pt);
+    }
+    \draw[<->, blue, thick, >=stealth] (0.6, 0.5) to[bend left=40] (0.9, 0.5);
+    \node[blue, font=\footnotesize] at (0.75, 1.4) {$\times q$ 正向（放大）};
+    \draw[<->, red, thick, >=stealth] (0.6, -0.5) to[bend right=40] (0.9, -0.5);
+    \node[red, font=\footnotesize] at (0.75, -1.4) {$\div q$ 逆向（缩小）};
+    \filldraw[black] (0.6,0) circle (2.5pt);
+    \node[font=\footnotesize] at (0.6, -0.8) {$a_0$};
+
+    \draw[->] (0,-2.8) -- (7.5,-2.8) node[right] {$\mathbb{R}$（对数域，加法群）};
+    \foreach \i in {0,1,...,5} {
+        \filldraw[green!60!black] ({1.0 + \i*0.75}, -2.8) circle (2.5pt);
+    }
+    \draw[<->, green!60!black, thick, >=stealth] (1.0, -2.3) -- (1.75, -2.3);
+    \node[green!60!black, font=\footnotesize] at (1.375, -2.0) {$\ln q$};
+    \filldraw[black] (1.0,-2.8) circle (2.5pt);
+    \node[font=\footnotesize] at (1.0, -3.3) {$\ln a_0$};
+
+    \node[font=\small\bfseries, blue] at (4, -4.0) {比例准周期轨道：$\{a_0 q^k \mid k\in\mathbb{Z}\}$};
+    \node[font=\small\bfseries, green!60!black] at (4, -4.7) {对数域中等价于平移准周期};
+\end{tikzpicture}
+\caption{有理数 $\mathbb{Q}^+$ 的比例方向结构（上图）及其对数域中的等价平移方向（下图）。以 $1$ 为乘法对称中心，乘以 $q$ 和除以 $q$ 构成正逆方向对偶。}
+\label{fig:rational_direction}
+\end{figure}
+\section{\texorpdfstring{实数 $\mathbb{R}$：准周期轨道的拓扑基础}{实数 R：准周期轨道的拓扑基础}}
+
+\subsection{\texorpdfstring{判定需求}{判定需求}}
+
+当旋转角不可公度时，$\theta/(2\pi) \notin \mathbb{Q}$，轨道在 $U(1)$ 上稠密但不闭合。这种“稠密性”是拓扑概念，只能在完备空间中严格表述。此外，连续平移轨道 $x(t) = x_0 + vt$ 需要 $\mathbb{R}$ 作为时间参数的取值范围。
+
+\subsection{\texorpdfstring{代数需求}{代数需求}}
+
+完备性。这是使所有柯西序列收敛的最小有序域性质。
+
+\subsection{\texorpdfstring{实数的构造}{实数的构造}}
+
+\begin{definition}[实数的构造]\label{def:real_construction}
+实数集 $\mathbb{R}$ 由所有满足以下条件的戴德金分割 $L \subset \mathbb{Q}$ 构成：
+\begin{enumerate}[label=(\arabic*)]
+    \item $L \neq \emptyset$ 且 $L \neq \mathbb{Q}$。
+    \item 若 $x \in L$ 且 $y < x$，则 $y \in L$（向下封闭）。
+    \item $L$ 无最大元。
+\end{enumerate}
+$\mathbb{R}$ 满足最小上界性质（完备性）：任何有上界的非空子集必有最小上界。
+\end{definition}
+
+\begin{theorem}[实数完备性定理]\label{thm:real_completeness}
+$\mathbb{R}$ 是使得所有柯西序列收敛的最小有序域。具体而言，以下条件等价：
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathbb{R}$ 满足最小上界性质；
+    \item $\mathbb{R}$ 中每个柯西序列收敛；
+    \item $\mathbb{R}$ 是 $\mathbb{Q}$ 的完备化。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i)$\Rightarrow$(iii)：由定义 \ref{def:real_construction}，$\mathbb{R}$ 由 $\mathbb{Q}$ 的全体戴德金分割构成，其最小上界性质由构造直接保证：任意有上界的非空分割族之并仍是一个分割，且是该族的最小上界。每个实数 $x$ 由其分割 $L_x$ 确定，取 $L_x$ 中上升的有理数序列逼近 $x$（例如逐次二分），故每个实数是某有理数柯西序列的极限，即 $\mathbb{R}$ 是 $\mathbb{Q}$ 的完备化。
+(i)$\Rightarrow$(ii)：设 $(x_n)$ 是 $\mathbb{R}$ 中的柯西序列。对每个 $n$，由最小上界性质，$u_n = \sup\{x_k : k \ge n\}$ 与 $l_n = \inf\{x_k : k \ge n\}$ 均存在；$(u_n)$ 单调递减、$(l_n)$ 单调递增，且由柯西性 $\lim_{n\to\infty}(u_n - l_n) = 0$。单调有界序列收敛（同样由最小上界性质保证），设 $x = \lim u_n = \lim l_n$，则由 $l_n \le x_n \le u_n$ 及夹逼性得 $x_n \to x$。
+(ii)$\Rightarrow$(i)：设 $A \subset \mathbb{R}$ 非空且有上界 $B$。取 $a_0 \in A$，$b_0 = B$，递归构造区间套 $[a_n, b_n]$：令 $m_n = (a_n+b_n)/2$，若 $m_n$ 是 $A$ 的上界则取 $[a_{n+1}, b_{n+1}] = [a_n, m_n]$，否则取 $[a_{n+1}, b_{n+1}] = [m_n, b_n]$。端点序列 $(a_n),(b_n)$ 均为柯西序列（区间长 $|b_n - a_n| = 2^{-n}(b_0 - a_0) \to 0$），由 (ii) 收敛到同一极限 $x$。归纳地，每个 $b_n$ 是 $A$ 的上界而每个 $a_n$ 不是 $A$ 的上界，故对任意 $y \in A$ 有 $y \le \lim b_n = x$（$x$ 是上界），而对任意上界 $u$ 存在 $y_n \in A$ 使 $a_n < y_n \le u$，故 $x = \lim a_n \le u$（$x$ 是最小上界）。因此 $x = \sup A$。
+\end{proof}
+
+\subsection{\texorpdfstring{根运算的封闭性}{根运算的封闭性}}
+
+\begin{theorem}[实数完备性使根运算封闭]\label{thm:real_root_closure}
+对任意 $b > 0$ 和 $n \in \mathbb{N}^+$，方程 $x^n = b$ 在 $\mathbb{R}$ 中有唯一正解 $x = \sqrt[n]{b}$。
+\end{theorem}
+
+\begin{proof}
+构造戴德金分割 $L = \{q \in \mathbb{Q} : q \le 0 \text{ 或 } q^n < b\}$。验证 $L$ 满足戴德金分割的三个条件：(1) $0 \in L$ 且 $b+1$ 是上界，故 $L \neq \emptyset, \mathbb{Q}$；(2) 若 $q \in L$ 且 $r < q$，当 $r\le0$ 时由 $L$ 的定义直接有 $r\in L$，当 $r > 0$ 时 $r^n < q^n < b$，故 $r \in L$；(3) 对任意 $q \in L$ 且 $q > 0$，可取充分小的 $\varepsilon > 0$ 使 $(q+\varepsilon)^n < b$，故 $q+\varepsilon \in L$，$L$ 无最大元。$L$ 定义的实数 $x$ 满足 $x^n = b$。唯一性由幂函数的严格单调性保证。
+\end{proof}
+
+\subsection{\texorpdfstring{函数特征：连续平移方程与准周期}{函数特征：连续平移方程与准周期}}
+
+\begin{theorem}[实数连续平移方程的具有周期轨道的群]\label{thm:translation_equation_R}
+设 $f:\mathbb{R}\to Y$ 连续，$T>0$。若
+\[
+f(x+T)=f(x),\qquad \forall x\in\mathbb{R},
+\]
+则具有周期轨道的群
+\[
+\operatorname{Group}_{\mathrm{period},\mathbb{R}}(f)=\{t\in\mathbb{R}: f(x+t)=f(x),\ \forall x\in\mathbb{R}\}
+\]
+是 $\mathbb{R}$ 的闭子群。$\mathbb{R}$ 的闭子群或为 $\mathbb{R}$，或为离散子群 $T_0\mathbb{Z}$（$T_0>0$）。
+\end{theorem}
+
+\begin{proof}
+由连续性与 $f(x+T)=f(x)$ 得 $T\mathbb{Z}\le\operatorname{Group}_{\mathrm{period},\mathbb{R}}(f)$。具有周期轨道的群对加法与取逆封闭，且由 $f$ 的连续性，若 $t_n\in\operatorname{Group}_{\mathrm{period},\mathbb{R}}(f)$ 且 $t_n\to t$，则 $f(x+t)=f(x)$，故为闭子群。$\mathbb{R}$ 的闭子群分类是标准结论：若含任意小正元素则为 $\mathbb{R}$，否则为离散子群 $T_0\mathbb{Z}$。
+\end{proof}
+
+\begin{proposition}[准周期轨道与完备性]\label{prop:quasi_period_R}
+若 $\theta/(2\pi)\notin\mathbb{Q}$，则旋转轨道 $\{e^{in\theta}\}$ 在 $U(1)$ 上稠密。稠密性的严格表述依赖 $\mathbb{R}$ 的完备性（定理 \ref{thm:real_completeness}）：没有完备性，极限与闭包概念无法定义。
+\end{proposition}
+
+\begin{proof}
+由克罗内克逼近定理，$\{n\theta\bmod 2\pi\}$ 在 $[0,2\pi)$ 中稠密。稠密性要求对任意 $\varepsilon>0$ 存在轨道点落入任意给定点的 $\varepsilon$-邻域，这依赖 $\mathbb{R}$ 中极限的存在性，即完备性。
+\end{proof}
+
+\begin{remark}[实数让平移方程“连续化”]\label{rem:real_makes_translation_continuous}
+整数中平移方程的具有周期轨道的群是离散子群 $a\mathbb{Z}$；实数中平移方程的具有周期轨道的群可以是任意闭子群，包括连续群 $\mathbb{R}$ 本身。这是数系扩张使函数方程从“离散”变为“连续”的实例。旋转方程 $f(e^{i\theta}z)=f(z)$ 在实数中仍无法代数化，因为 $e^{i\theta}$ 不属于 $\mathbb{R}$。
+\end{remark}
+
+\subsection{\texorpdfstring{判据定理}{判据定理}}
+
+\begin{theorem}[实数准周期判据]\label{thm:real_quasi_period_criterion}
+设 $\theta/(2\pi) \notin \mathbb{Q}$。则旋转轨道
+\[
+\mathcal{O}(z_0;\theta) = \{z_0 e^{in\theta} \mid n\in\mathbb{Z}\}
+\]
+在 $U(1)$ 上稠密。这一稠密性结论只在 $\mathbb{R}$ 中有严格拓扑意义。
+\end{theorem}
+
+\begin{proof}
+由克罗内克逼近定理，若 $\theta/(2\pi)$ 为无理数，则集合 $\{n\theta \bmod 2\pi \mid n\in\mathbb{Z}\}$ 在 $[0,2\pi)$ 中稠密。因此轨道点在 $U(1)$ 上稠密。稠密性定义要求对任意 $\varepsilon > 0$，存在轨道点落在任意给定点的 $\varepsilon$-邻域内，这需要实数完备性。
+\end{proof}
+
+\begin{corollary}[实数与准周期]\label{cor:real_quasi_period}
+$\mathbb{R}$ 是准周期轨道可描述、但不可有限判定的最小完备数系（由定理 \ref{thm:real_quasi_period_criterion} 与定理 \ref{thm:real_completeness} 推出）。具体而言：
+\begin{enumerate}[label=(\roman*)]
+    \item 稠密性、极限、连续性等拓扑概念在 $\mathbb{R}$ 中严格成立；
+    \item 但实数的有理性不可通过有限步骤判定——因此 $\mathbb{R}$ 无法提升有限旋转周期的判定能力。
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+(i) 定理 \ref{thm:real_completeness} 保证 $\mathbb{R}$ 中每个柯西序列收敛，故稠密性、极限、连续性等拓扑概念有严格意义。
+(ii) 定理 \ref{thm:real_quasi_period_criterion} 只断言无理旋转角对应轨道的稠密性，这是存在性描述而非有限判定；判断一个实数的有理性需对其十进制（或连分数）展开做无穷检验，无法在有限步骤内完成，故 $\mathbb{R}$ 不提升有限旋转周期的判定能力。
+\end{proof}
+
+\begin{proposition}[实数完备化对方向结构的影响]\label{prop:real_completion_direction}
+实数的完备性使得平移方向和比例方向从离散群提升为连续群：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平移方向连续化}：平移群从 $(\mathbb{Z},+)$ 提升为 $(\mathbb{R},+)$。平移轨道从离散等距点列变为连续直线。
+    \item \textbf{比例方向连续化}：缩放群从离散子群 $\{q^k\}$ 提升为 $(\mathbb{R}^+,\times)$。比例轨道在对数域中等价于连续平移。
+    \item \textbf{旋转方向的拓扑完备化}：不可公度旋转角产生的稠密准周期轨道在 $\mathbb{R}$ 上获得严格的极限意义。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $(\mathbb{R},+)$ 是 $(\mathbb{Z},+)$ 在完备化下的最小连续扩张：$(\mathbb{Q},+)$ 稠密嵌入 $(\mathbb{R},+)$，而 $(\mathbb{Z},+)$ 是 $(\mathbb{Q},+)$ 的离散生成集，故平移群由离散生成元 $1$ 的整数倍提升为连续参数 $t \in \mathbb{R}$ 的平移 $x \mapsto x + t$，轨道 $\{x_0 + t \mid t \in \mathbb{R}\}$ 是连续直线。
+(ii) 指数映射 $\exp: (\mathbb{R},+) \to (\mathbb{R}^+,\times)$ 是群同构（见定理 \ref{thm:log_isomorphism_conservation}），故缩放群由离散子群 $\{q^k \mid k \in \mathbb{Z}\}$ 提升为连续群 $(\mathbb{R}^+,\times) = \{\exp(t) \mid t \in \mathbb{R}\}$，比例轨道 $\{a_0 r \mid r \in \mathbb{R}^+\}$ 在对数域中等价于连续平移轨道。
+(iii) 由定理 \ref{thm:real_quasi_period_criterion}，$\{n\theta \bmod 2\pi\}$ 在 $[0,2\pi)$ 中稠密；稠密性、极限与闭包等拓扑概念依赖 $\mathbb{R}$ 的完备性（定理 \ref{thm:real_completeness}），故不可公度旋转的稠密准周期轨道在 $\mathbb{R}$ 上获得严格的极限意义。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.85]
+    \draw[->] (0,0) -- (8.5,0) node[right] {$\mathbb{R}$（加法群）};
+    \draw[blue, thick] (0.5,0.5) -- (7.5,0.5);
+    \node[blue, font=\small] at (4, 2.2) {连续平移方向（群 $\mathbb{R}$）};
+    \foreach \x in {0.8,1.6,...,7.2} {
+        \filldraw[blue] (\x, 0.5) circle (1.2pt);
+    }
+    \draw[<->, blue, thick, >=stealth] (0.8, 1.0) -- (1.6, 1.0);
+    \node[blue, font=\footnotesize] at (1.2, 1.5) {$\Delta t$};
+
+    \draw[red, thick] (0.5,-1.2) -- (7.5,-1.2);
+    \node[red, font=\small] at (4, -1.9) {连续比例方向（群 $\mathbb{R}^+$）};
+    \filldraw[red] (0.8,-1.2) circle (1.5pt);
+    \filldraw[red] (1.2,-1.2) circle (1.5pt);
+    \filldraw[red] (1.8,-1.2) circle (1.5pt);
+    \filldraw[red] (2.7,-1.2) circle (1.5pt);
+    \filldraw[red] (4.05,-1.2) circle (1.5pt);
+    \filldraw[red] (6.075,-1.2) circle (1.5pt);
+    \draw[<->, red, thick, >=stealth] (0.8, -0.7) -- (1.2, -0.7);
+    \node[red, font=\footnotesize] at (1.0, -0.2) {$\times q$};
+\end{tikzpicture}
+\caption{实数完备化带来的连续方向结构。平移方向从离散群 $\mathbb{Z}$ 提升为连续群 $\mathbb{R}$（上图）。比例方向在对数域中等价于连续平移（下图）。}
+\label{fig:real_continuous}
+\end{figure}
+\section{\texorpdfstring{复数 $\mathbb{C}$：旋转周期的代数化与双周期}{复数 C：旋转周期的代数化与双周期}}
+
+\subsection{\texorpdfstring{判定需求}{判定需求}}
+
+旋转操作需要用代数运算表达，而不仅仅是几何直觉。有限旋转周期 $C_n$ 需要代数方程 $z^n = 1$ 的完整解集。此外，双周期结构（椭圆函数）需要复平面上的离散子群。
+
+\subsection{\texorpdfstring{代数需求}{代数需求}}
+
+虚数单位 $i$，代数闭性。这是使所有多项式方程可解的最小域扩张。
+
+\subsection{\texorpdfstring{复数的构造}{复数的构造}}
+
+\begin{definition}[复数的构造]\label{def:complex_construction}
+$\mathbb{C} := \mathbb{R}^2$ 作为实向量空间。加法逐分量定义：
+\[
+(a,b) + (c,d) := (a+c, b+d).
+\]
+乘法定义为
+\[
+(a,b) \times (c,d) := (ac - bd, ad + bc).
+\]
+记 $i := (0,1)$，则 $i^2 = (0,1) \times (0,1) = (-1,0) = -1$。任意复数可写为 $z = a + bi$（$a,b \in \mathbb{R}$）。
+\end{definition}
+
+\begin{proposition}[复数构成域]\label{prop:complex_algebraically_closed}
+$(\mathbb{C},+,\times)$ 构成一个域。即：
+\begin{enumerate}[label=(\roman*)]
+    \item $(\mathbb{C},+)$ 是阿贝尔群，零元为 $(0,0)$；
+    \item $(\mathbb{C}^{\times}, \times)$ 是阿贝尔群，乘法逆元为 $z^{-1} = \bar{z}/|z|^2$（$z \neq 0$）；
+    \item 乘法对加法满足分配律。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 加法逐分量定义，各分量在 $\mathbb{R}$ 中作加法，故结合律、交换律、零元 $(0,0)$、负元 $-(a,b) = (-a,-b)$ 均由 $\mathbb{R}$ 的加法群结构逐分量继承。
+(ii) 乘法交换律与结合律由定义直接展开验证：$(a,b)(c,d) = (ac-bd, ad+bc) = (ca-db, cb+da) = (c,d)(a,b)$；结合律逐分量展开后归结为 $\mathbb{R}$ 的运算律。乘法单位元为 $(1,0)$。对 $z = (a,b) \neq 0$，$|z|^2 = a^2+b^2 > 0$，且
+\[
+(a,b)\left(\frac{a}{a^2+b^2}, \frac{-b}{a^2+b^2}\right) = \left(\frac{a^2+b^2}{a^2+b^2}, \frac{-ab+ba}{a^2+b^2}\right) = (1,0),
+\]
+故 $z^{-1} = \bar{z}/|z|^2$ 是乘法逆元。
+(iii) 分配律由定义逐分量展开验证：
+\[
+(a,b)\bigl[(c,d)+(e,f)\bigr] = (a,b)(c+e, d+f) = \bigl(a(c+e)-b(d+f), a(d+f)+b(c+e)\bigr)
+\]
+\[
+= (ac-bd, ad+bc) + (ae-bf, af+be) = (a,b)(c,d) + (a,b)(e,f).
+\]
+\end{proof}
+
+\begin{proposition}[复数的完备性]\label{prop:complex_completeness}
+$\mathbb{C} \cong \mathbb{R}^2$ 作为度量空间是完备的：$\mathbb{C}$ 中的柯西序列 $\{z_n = a_n + ib_n\}$ 收敛当且仅当实部序列 $\{a_n\}$ 和虚部序列 $\{b_n\}$ 均在 $\mathbb{R}$ 中收敛。
+\end{proposition}
+
+\begin{proof}
+由 $\mathbb{R}$ 的完备性（定理 \ref{thm:real_completeness}），$\{a_n\}$ 和 $\{b_n\}$ 分别收敛于 $a, b \in \mathbb{R}$。则 $z_n \to a + bi \in \mathbb{C}$。反之，若 $z_n \to z = a+bi$，则 $|a_n - a| \le |z_n - z| \to 0$ 且 $|b_n - b| \le |z_n - z| \to 0$。
+\end{proof}
+
+\begin{remark}[代数基本定理（代数闭性）]\label{rem:fta}
+复数域 $\mathbb{C}$ 是\textbf{代数闭域}：任何非零复系数多项式在 $\mathbb{C}$ 中至少有一个根。这是代数基本定理，其标准证明需要复分析（刘维尔定理或辐角原理）或拓扑/代数的方法，超出本章“数系扩张”的推导范围，故此处作为标准结果引用而不展开证明。本章后续仅用到其较弱推论——“$n$ 次多项式至多有 $n$ 个根”，该结论可由因式定理在任意域上直接证明（见定理 \ref{thm:complex_finite_rotation_criterion} 的证明），不依赖代数基本定理的完整强度。
+\end{remark}
+
+\subsection{\texorpdfstring{旋转的代数化}{旋转的代数化}}
+
+\begin{theorem}[复数旋转代数化]\label{thm:complex_rotation_algebraization}
+单位圆
+\[
+S^1 = \{z \in \mathbb{C} \mid |z| = 1\}
+\]
+在复数乘法下构成群，同构于 $U(1)$。旋转 $R_\theta$ 的代数实现为
+\[
+R_\theta(z) = e^{i\theta} z,
+\]
+其中 $e^{i\theta} = \cos\theta + i\sin\theta$（欧拉公式）。
+\end{theorem}
+
+\begin{proof}
+$|e^{i\theta} z| = |e^{i\theta}| \cdot |z| = 1 \cdot |z| = |z|$，故旋转保持模长。$e^{i(\theta_1 + \theta_2)} = e^{i\theta_1} e^{i\theta_2}$，故旋转群与 $U(1)$ 同构。欧拉公式由 $e^{i\theta}$ 的幂级数展开与 $\cos\theta, \sin\theta$ 的幂级数展开比较得出。
+\end{proof}
+
+\subsection{\texorpdfstring{函数特征：旋转方程与单位根}{函数特征：旋转方程与单位根}}
+
+\begin{theorem}[复数旋转方程的具有周期轨道的群]\label{thm:rotation_equation_C}
+设 $f:\mathbb{C}^\times\to Y$，$\theta\in\mathbb{R}$。若
+\[
+f(e^{i\theta}z)=f(z),\qquad \forall z\in\mathbb{C}^\times,
+\]
+则具有周期轨道的群
+\[
+\operatorname{Group}_{\mathrm{period},U(1)}(f)=\{e^{i\theta}\in U(1): f(e^{i\theta}z)=f(z),\ \forall z\in\mathbb{C}^\times\}
+\]
+是 $U(1)$ 的子群。若 $\theta/(2\pi)=p/q$ 既约，则 $e^{i\theta}$ 的阶为 $q$，$\langle e^{i\theta}\rangle\cong C_q\le\operatorname{Group}_{\mathrm{period},U(1)}(f)$。
+\end{theorem}
+
+\begin{proof}
+由 $f(e^{i\theta}z)=f(z)$ 双向迭代得 $f(e^{in\theta}z)=f(z)$ 对任意 $n\in\mathbb{Z}$ 成立，故 $\langle e^{i\theta}\rangle\le\operatorname{Group}_{\mathrm{period},U(1)}(f)$。若 $\theta/(2\pi)=p/q$ 既约，则 $e^{i\theta}$ 是 $q$ 次单位根，阶为 $q$，生成 $C_q$。
+\end{proof}
+
+\begin{corollary}[单位根方程与有限旋转周期]\label{cor:unit_root_C}
+方程 $z^n=1$ 在 $\mathbb{C}$ 中恰有 $n$ 个解，构成循环群 $C_n$。这是旋转方程 $f(e^{i\theta}z)=f(z)$ 在 $\theta=2\pi/n$ 时的代数原型：取 $f(z)=z^n$，则 $f(e^{2\pi i/n}z)=z^n=f(z)$。
+\end{corollary}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.15,>=stealth]
+        \draw[gray!50, thin] (0,0) circle (1.8);
+        \draw[->, gray] (-2.1,0) -- (2.1,0) node[right, font=\footnotesize] {$\operatorname{Re}$};
+        \draw[->, gray] (0,-2.1) -- (0,2.1) node[above, font=\footnotesize] {$\operatorname{Im}$};
+
+        \foreach \k in {0,1,...,7} {
+            \filldraw[red] ({360/8*\k}:1.8) circle (2.4pt);
+        }
+        \draw[->, red, thick] (1.8,0) arc (0:45:1.8);
+        \node[red, font=\footnotesize] at (1.55,1.15) {$\zeta_1$};
+        \node[red, font=\footnotesize] at (-0.35,1.85) {$\zeta_2$};
+        \node[red, font=\footnotesize] at (-1.75,0.55) {$\zeta_3$};
+        \node[red, font=\footnotesize] at (-1.75,-0.55) {$\zeta_4$};
+        \node[red, font=\footnotesize] at (-0.35,-1.85) {$\zeta_5$};
+        \node[red, font=\footnotesize] at (1.55,-1.15) {$\zeta_6$};
+        \node[red, font=\footnotesize] at (1.75,0.25) {$\zeta_0=1$};
+        \node[red, font=\footnotesize] at (0.2,1.7) {$\zeta_7$};
+
+        \node[font=\small\bfseries, text width=6.5cm, align=center, below=0.3cm] at (0,-2.6)
+            {$\zeta_k=e^{i2\pi k/n}$，$k=0,\dots,n-1$：\\ 单位根在单位圆上均匀分布，构成 $C_n$。};
+    \end{tikzpicture}
+    \caption{复数 $n$ 次单位根的几何分布（以 $n=8$ 为例）。$n$ 个解 $\zeta_k=e^{2\pi ik/n}$ 等距分布在单位圆上，构成 $n$ 阶循环群 $C_n$。这是有限旋转周期在复数域中的代数原型（定理 \ref{thm:complex_finite_rotation_criterion}）；图中 $n=4$ 的特例即图 \ref{fig:complex_rotation_i} 中的四阶旋转轨道。}
+    \label{fig:unit_roots_Cn}
+\end{figure}
+
+\begin{proof}
+由定理 \ref{thm:complex_finite_rotation_criterion}，$z^n=1$ 的解集为 $\{e^{2\pi ik/n}:k=0,\dots,n-1\}$，构成 $C_n$。取 $f(z)=z^n$，则 $f(e^{2\pi i/n}z)=(e^{2\pi i/n}z)^n=z^n=f(z)$。
+\end{proof}
+
+\begin{remark}[复数让旋转方程“代数化”]\label{rem:complex_makes_rotation_algebraic}
+实数中旋转方程 $f(e^{i\theta}z)=f(z)$ 没有代数载体，因为 $e^{i\theta}$ 不属于 $\mathbb{R}$。复数中虚数单位 $i$ 使 $e^{i\theta}$ 成为代数对象，旋转方程可代数化，有限旋转周期的具有周期轨道的群 $C_n$ 由单位根方程 $z^n=1$ 精确刻画。这是数系扩张使函数方程从“不可代数化”变为“可代数化”的关键一步。
+\end{remark}
+\subsection{\texorpdfstring{判据定理}{判据定理}}
+
+\begin{theorem}[有限旋转周期的代数判据]\label{thm:complex_finite_rotation_criterion}
+方程
+\[
+z^n = 1
+\]
+在 $\mathbb{C}$ 中恰有 $n$ 个解：
+\[
+\zeta_k = e^{2\pi i k/n},\qquad k = 0, 1, \dots, n-1.
+\]
+这 $n$ 个解构成 $n$ 阶循环群 $C_n$。它们是有限旋转周期的代数原型。
+\end{theorem}
+
+\begin{proof}
+先证解集恰有 $n$ 个元素。因 $\mathbb{C}$ 是域，$z^n - 1$ 是 $n$ 次非零多项式，由因式定理（每个根 $\alpha$ 对应因式 $(z-\alpha)$，每取一次因式次数下降 $1$）知它至多有 $n$ 个根。另一方面，对 $k = 0, 1, \dots, n-1$，令 $\zeta_k = e^{2\pi i k/n}$，则
+\[
+\zeta_k^n = e^{2\pi i k} = \cos(2\pi k) + i\sin(2\pi k) = 1,
+\]
+且当 $k \neq l$ 时 $\zeta_k/\zeta_l = e^{2\pi i(k-l)/n} \neq 1$（因 $0 < |k-l| < n$），故 $\zeta_0, \dots, \zeta_{n-1}$ 两两不同，给出 $n$ 个根。因此解集恰为 $\{\zeta_0, \dots, \zeta_{n-1}\}$。
+再证这 $n$ 个解构成循环群：乘法封闭性 $\zeta_k \cdot \zeta_l = e^{2\pi i(k+l)/n} = \zeta_{k+l \bmod n}$；单位元 $\zeta_0 = 1$；逆元 $\zeta_k^{-1} = e^{-2\pi i k/n} = \zeta_{n-k}$（$k = 0$ 时 $\zeta_0^{-1} = \zeta_0$）。由 $\zeta_1 = e^{2\pi i/n}$ 生成整个集合（$\zeta_k = \zeta_1^k$），故这 $n$ 个解构成 $n$ 阶循环群 $C_n$。
+\end{proof}
+
+\begin{theorem}[双周期结构的周期格判据]\label{thm:complex_double_period}
+$\mathbb{C}$ 上的离散子群
+\[
+\Lambda = \omega_1 \mathbb{Z} + \omega_2 \mathbb{Z},\qquad \omega_1/\omega_2 \notin \mathbb{R},
+\]
+是双周期函数（椭圆函数）的周期格。任何以 $\Lambda$ 为周期格的椭圆函数满足
+\[
+f(z + \omega_1) = f(z), \qquad f(z + \omega_2) = f(z).
+\]
+两个独立周期 $\omega_1, \omega_2$ 分别对应两个平移方向。
+\end{theorem}
+
+\begin{proof}
+$\Lambda$ 是 $\mathbb{C}$ 的离散加法子群，秩为 $2$（因为 $\omega_1/\omega_2 \notin \mathbb{R}$ 保证两个方向线性无关）。商空间 $\mathbb{C}/\Lambda$ 是紧致复流形（椭圆曲线）。魏尔斯特拉斯 $\wp$ 函数是周期格 $\Lambda$ 上的典型椭圆函数。
+\end{proof}
+
+\subsection{\texorpdfstring{对称中心 $i$ 的对合}{对称中心 i 的对合}}
+
+\begin{definition}[对称中心 $i$ 的对合]\label{def:complex_i_involution}
+在 $\mathbb{C}^{\times}$ 上定义映射
+\[
+\sigma_i: \mathbb{C}^{\times} \to \mathbb{C}^{\times}, \quad \sigma_i(z) = i \cdot z^{-1}.
+\]
+将 $z$ 写为极形式 $z = re^{i\varphi}$，由 $z^{-1} = r^{-1}e^{-i\varphi}$ 得该操作为
+\[
+\sigma_i(re^{i\varphi}) = i \cdot r^{-1} e^{-i\varphi} = r^{-1} e^{i(\pi/2 - \varphi)}.
+\]
+此操作同时包含了\textbf{缩放}（模长取倒数，$r \mapsto r^{-1}$）与关于 $\pi/4$ 方向的辐角反射（$\varphi \mapsto \pi/2 - \varphi$）。
+\end{definition}
+
+\begin{proposition}[对合 $\sigma_i$ 的基本性质]\label{prop:complex_i_involution_properties}
+\begin{enumerate}[label=(\roman*)]
+    \item $\sigma_i$ 是一个对合：$\sigma_i \circ \sigma_i = \text{id}_{\mathbb{C}^{\times}}$。
+    \item $\sigma_i$ 的不动点满足 $z^2 = i$，即 $z = \pm \frac{\sqrt{2}}{2}(1+i)$。
+    \item $\sigma_i = R_{\pi/2} \circ \sigma_1$，其中 $R_{\pi/2}(z) = iz$ 是 $90^\circ$ 旋转，$\sigma_1(z) = z^{-1}$ 是乘法取逆对合。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\sigma_i(\sigma_i(z)) = i \cdot (i \cdot z^{-1})^{-1} = i \cdot (-i \cdot z) = z$（注意 $(i \cdot w)^{-1} = -i \cdot w^{-1}$ 因为 $i \cdot (-i) = 1$）。
+(ii) $\sigma_i(z) = z \iff i \cdot z^{-1} = z \iff z^2 = i \iff z = \pm e^{i\pi/4}$。
+(iii) $R_{\pi/2}(\sigma_1(z)) = i \cdot z^{-1} = \sigma_i(z)$。
+\end{proof}
+
+\begin{example}[复幂映射中缩放与旋转的统一]\label{ex:complex_power_scaling_rotation}
+考虑复幂函数 $f_n: \mathbb{C}^{\times} \to \mathbb{C}^{\times}, z \mapsto z^n$（$n \in \mathbb{N}^+$）。令 $z = re^{i\theta}$，则
+\[
+f_n(z) = r^n e^{in\theta}.
+\]
+该映射在缩放维度（模长 $r \mapsto r^n$）和旋转维度（辐角 $\theta \mapsto n\theta$）上同时作用。若 $|z|=1$，则 $f_n$ 是旋转群 $U(1)$ 上的 $n$ 倍自同态。复幂运算将比例方向和旋转方向统一在一个运算中。
+
+具体计算：取 $z = 2 e^{i\pi/4}$，$n = 3$，则
+\[
+f_3(z) = 2^3\, e^{3 \cdot i\pi/4} = 8\, e^{3\pi i/4} = 8\left(-\frac{\sqrt{2}}{2} + i\frac{\sqrt{2}}{2}\right) = -4\sqrt{2} + 4\sqrt{2}\,i.
+\]
+模长 $|z| = 2$ 放大为 $|f_3(z)| = 8$（比例方向，缩放 $r \mapsto r^3$），辐角 $\pi/4$ 旋转为 $3\pi/4$（旋转方向，$\theta \mapsto 3\theta$），二者在同一运算中同步完成，验证了复幂同时实现缩放与旋转两种操作。
+\end{example}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2]
+    \draw[thick] (0,0) circle (2.0);
+    \draw[->, gray] (-2.5,0) -- (2.5,0);
+    \draw[->, gray] (0,-2.5) -- (0,2.5);
+    \filldraw[red] (2,0) circle (2pt) node[right=3pt] {$i^0=1$};
+    \filldraw[blue] (0,2) circle (2pt) node[above=1cm, font=\footnotesize] {$i^1=i$};
+    \filldraw[red] (-2,0) circle (2pt) node[left=1cm, font=\footnotesize] {$i^2=-1$};
+    \filldraw[blue] (0,-2) circle (2pt) node[below=1cm, font=\footnotesize] {$i^3=-i$};
+    \draw[->, thick, >=stealth, orange] (1.9, 0.3) arc (10:80:2.0);
+    \node[orange, font=\footnotesize] at (0.8, 1.2) {$\times i$};
+    \node[font=\small\bfseries] at (0, -3.8) {$i^4=1$：四阶旋转轨道};
+\end{tikzpicture}
+\caption{复数乘法 $z \mapsto iz$ 生成的旋转方向：乘以 $i$ 是 $90^\circ$ 旋转，四次幂回到自身，形成四阶旋转轨道。}
+\label{fig:complex_rotation_i}
+\end{figure}
+
+\begin{definition}[单位圆的四阶离散骨架]\label{def:unit_circle_fourfold_skeleton}
+单位圆 $S^1=\{z\in\mathbb{C}\mid |z|=1\}$ 的四阶离散骨架定义为
+\[
+C_4=\mu_4=\{1,i,-1,-i\}=\{i^k\mid k=0,1,2,3\},
+\]
+其中各元素的相位与代数角色为
+\[
+1=e^{i0}\ (\text{乘法单位元，旋转的不动点}),\qquad
+i=e^{i\pi/2}\ (\text{四分之一转}),
+\]
+\[
+-1=e^{i\pi}=i^2\ (\text{半转，即符号翻转}),\qquad
+-i=e^{i3\pi/2}=i^3\ (\text{四分之三转}).
+\]
+该集合在复数乘法下构成四阶循环群 $C_4$，是以 $i$ 为生成元的有限旋转轨道（图 \ref{fig:complex_rotation_i}），也是单位根方程 $z^4=1$ 在 $\mathbb{C}$ 中的完整解集（定理 \ref{thm:complex_finite_rotation_criterion} 取 $n=4$，亦见推论 \ref{cor:unit_root_C}）。其连续化给出整个单位圆：
+\[
+S^1=\{e^{i\theta}\mid\theta\in\mathbb{R}\}\cong U(1).
+\]
+$C_4$ 是 $S^1$ 中最小的含 $i$ 的离散骨架：$\{1,-1\}$ 是它的二阶子群，而 $i$ 的加入使骨架由二阶升为四阶。
+\end{definition}
+
+\begin{proposition}[符号系统是旋转群在 $180^\circ$ 处的投影，$i$ 将其精化为 $C_4$]\label{prop:sign_as_half_turn_projection}
+在复数的嵌入 $\mathbb{R}\hookrightarrow\mathbb{C}$，$x\mapsto x+0i$ 之下：
+\begin{enumerate}[label=(\roman*)]
+    \item 符号系统 $\{\pm1\}$ 在乘法下构成二阶循环群 $C_2$，且是 $\mathbb{R}$ 的乘法群的子群（命题 \ref{prop:complex_algebraically_closed} 第 (ii) 款）。
+    \item 映射 $\pi_1:\mu_4\to\{\pm1\}$，$\pi_1(e^{i\theta})=e^{i2\theta}$，是满群同态，它把四个相位 $0,\pi/2,\pi,3\pi/2$ 两两配对地压到 $0,\pi$ 两个相位上，故 $\pi_1(\mu_4)=\{\pm1\}$ 正是旋转群在 $180^\circ$（半转）处的投影；其核为 $\ker\pi_1=\{\pm1\}$，由第一同构定理得 $\mu_4/\{\pm1\}\cong\{\pm1\}$。
+    \item 实数符号系统 $\{\pm1\}$ 是旋转群在 $180^\circ$ 处投影的像：$\mu_4/\{\pm1\}\cong\{\pm1\}$ 表明它正是四阶旋转骨架在半转投影下的商群；等价地，$\mathbb{R}\cap\mu_4=\{\pm1\}$，即实数轴上只能看到四阶骨架的两个实元素。
+    \item 添加 $i$ 把 $\{\pm1\}\cong C_2$ 精化为 $\mu_4\cong C_4$，且 $C_2=\langle-1\rangle$ 是 $C_4$ 的唯一的二阶子群；再连续化（把离散相位补全为任意实相位）即得 $S^1\cong U(1)$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\{\pm1\}$ 在乘法下封闭（$1\cdot1=1$，$(-1)\cdot(-1)=1$，$1\cdot(-1)=-1$），含单位元 $1$，且 $(-1)^{-1}=-1$，故为群；$\langle-1\rangle$ 的阶为 $2$，故同构于 $C_2$，且它是 $\mathbb{R}^\times$ 的子群。
+
+(ii) 定义 $\pi_1(e^{i\theta})=e^{i2\theta}$。对 $e^{i\theta_1},e^{i\theta_2}\in\mu_4$ 有 $\pi_1(e^{i\theta_1}e^{i\theta_2})=\pi_1(e^{i(\theta_1+\theta_2)})=e^{i2(\theta_1+\theta_2)}=\pi_1(e^{i\theta_1})\pi_1(e^{i\theta_2})$，故 $\pi_1$ 是群同态；四个相位的像为 $e^{i0}=1$、$e^{i\pi}=-1$、$e^{i2\pi}=1$、$e^{i3\pi}=-1$，故像是 $\{\pm1\}$，核是相位加倍后为 $0$ 的元素，即 $e^{i0}=1$ 与 $e^{i\pi}=-1$，故 $\ker\pi_1=\{\pm1\}$，由第一同构定理得 $\mu_4/\{\pm1\}\cong\{\pm1\}$。
+
+(iii) 由 (ii)，半转投影的核为 $\{\pm1\}$，像为 $\{\pm1\}$；又 $\mu_4$ 中属于 $\mathbb{R}$ 的元素恰为 $\pm1$（因 $i,-i$ 的虚部为 $\pm1\neq0$），故 $\mathbb{R}\cap\mu_4=\{\pm1\}$。
+
+(iv) 因 $i^2=-1$ 而 $i^4=1$，故 $i$ 在 $\mathbb{C}^{\times}$ 中的阶为 $4$，生成 $\mu_4=\langle i\rangle\cong C_4$，其中 $\{\pm1\}=\langle-1\rangle$ 是二阶子群；$C_4$ 的子群阶整除 $4$，故二阶子群唯一。把离散相位 $k\pi/2$ 补全为任意实相位 $\theta$ 即得 $S^1=\{e^{i\theta}\mid\theta\in\mathbb{R}\}$，与 $U(1)$ 的同构见定理 \ref{thm:complex_rotation_algebraization}。
+\end{proof}
+
+\begin{remark}[“符号是旋转 $\pi$”的成立条件]\label{rem:sign_versus_additive_reflection}
+上述命题中的“符号翻转即半转”必须在嵌入 $\mathbb{R}\subset\mathbb{C}$ 之后才成立，这里需要明确区分两种结构，以免与本章已建立的三类对称中心 $0,1,i$ 相冲突：
+\begin{itemize}
+    \item 在 $\mathbb{R}$ 上单独看，$x\mapsto-x$ 是\textbf{以 $0$ 为中心的加法反射}：它是加法群的对合自同构 $\sigma_0$，其不动点为 $0$，生成 $C_2$（命题 \ref{prop:integer_symmetry_direction_period} 第 (ii) 款）；它\textbf{不是}复平面中的旋转，因为 $\mathbb{R}$ 中不含 $e^{i\pi}$ 这一相位载体（见注 \ref{rem:complex_makes_rotation_algebraic}）。
+    \item 在 $\mathbb{C}$ 中并且仅在此之后，$-1=e^{i\pi}$ 才是单位圆上的半转，即乘法上以 $1$ 为中心、相位为 $\pi$ 的翻转。二者的关系由限制映射给出：加法反射 $\sigma_0$ 在 $\{\pm1\}\subset\mathbb{C}$ 上的限制恰为乘 $-1$，即 $e^{i\pi}$ 在实轴上的作用；换言之，加法反射是半转在实轴上的限制，而半转是加法反射在 $\mathbb{C}$ 中的相位实现。
+    \item 由此，三类对称中心的分工是：加法中心 $0$（$\sigma_0$，对称类型加法反射）、乘法中心 $1$（$\sigma_1$，对称类型乘法取逆，定义 \ref{def:rational_involution}）、相位中心 $i$（$\sigma_i$，定义 \ref{def:complex_i_involution}）。符号系统 $\{\pm1\}$ 不属于新增的对称中心，它是 $\sigma_0$ 与半转在实轴上的公共像。
+\end{itemize}
+\end{remark}
+
+\section{\texorpdfstring{四元数 $\mathbb{H}$：三维旋转周期的代数化}{四元数 H：三维旋转周期的代数化}}
+
+\subsection{\texorpdfstring{判定需求}{判定需求}}
+
+二维旋转只需一个角度参数，对应 $U(1)$，是阿贝尔群。三维旋转需要三个参数，对应 $SO(3)$，是非阿贝尔群。复数只能表达平面旋转，无法表达三维旋转的非交换性。
+
+\subsection{\texorpdfstring{代数需求}{代数需求}}
+
+非交换乘法结构。这是使三维旋转可代数化的最小代数扩张。
+
+\subsection{\texorpdfstring{四元数的构造}{四元数的构造}}
+
+\begin{definition}[四元数的构造]\label{def:quaternion_construction}
+$\mathbb{H} := \mathbb{R}^4$ 作为实向量空间，基元记为 $\{1,i,j,k\}$。乘法由以下关系双线性延拓：
+\[
+i^2 = j^2 = k^2 = ijk = -1,
+\]
+以及由此导出的 $ij = k, ji = -k$，$jk = i, kj = -i$，$ki = j, ik = -j$。
+对 $q = a + bi + cj + dk$，定义共轭 $\bar{q} = a - bi - cj - dk$，范数 $|q| = \sqrt{q\bar{q}} = \sqrt{a^2+b^2+c^2+d^2}$，逆 $q^{-1} = \bar{q}/|q|^2$（$q \neq 0$）。
+\end{definition}
+
+\begin{proposition}[四元数的代数性质]\label{prop:quaternion_properties}
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathbb{H}$ 是一个可除代数（除环）：每个非零元有乘法逆元，但乘法不可交换。
+    \item 单位四元数群 $S^3 = \{q \in \mathbb{H} : |q| = 1\}$ 在四元数乘法下构成一个非交换李群，同构于 $SU(2)$。
+    \item $S^3$ 通过共轭作用 $\rho_q(v) = q v q^{-1}$（$v$ 为纯虚四元数）实现三维空间中的旋转。映射 $q \mapsto \rho_q$ 给出二重覆盖 $SU(2) \to SO(3)$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 对 $q = a + bi + cj + dk \neq 0$，由 $q\bar{q} = a^2+b^2+c^2+d^2 = |q|^2 > 0$ 得 $q^{-1} = \bar{q}/|q|^2$ 满足 $q q^{-1} = 1$，故每个非零元有乘法逆元；而 $ij = k \neq -k = ji$，乘法不可交换，故 $\mathbb{H}$ 是可除代数（除环）。
+(ii) 先证范数乘性 $|q_1 q_2| = |q_1|\,|q_2|$：$|q_1 q_2|^2 = q_1 q_2 \overline{q_1 q_2} = q_1 q_2 \bar{q}_2 \bar{q}_1 = q_1 |q_2|^2 \bar{q}_1 = |q_1|^2 |q_2|^2$。于是 $|q_1|=|q_2|=1 \Rightarrow |q_1 q_2|=1$ 且 $|q^{-1}| = |\bar{q}|/|q|^2 = 1$，故 $S^3$ 对乘法封闭且含单位元与逆元，是群；它是 $\mathbb{H}^\times$ 的光滑闭子流形、乘法不可交换，故为非交换李群。同构 $S^3 \cong SU(2)$ 由 $a+bi+cj+dk \mapsto \begin{pmatrix} a+bi & c+di \\ -c+di & a-bi \end{pmatrix}$ 给出，因该矩阵满足 $|q|^2 = \det M$ 且 $M M^\dagger = (a^2+b^2+c^2+d^2)I$，故 $|q|=1$ 当且仅当 $M \in SU(2)$。
+(iii) 由定理 \ref{thm:quaternion_rotation_criterion}，共轭作用 $\rho_q(v) = q v q^{-1}$ 保持模长且保持纯虚空间，故为 $\mathbb{R}^3$ 上的旋转，且 $\rho_q = \rho_{-q}$ 给出二重覆盖 $SU(2) \to SO(3)$。
+\end{proof}
+
+\begin{remark}[四元数与复数的对比]\label{rem:quaternion_vs_complex}
+四元数 $\mathbb{H}$ 是复数 $\mathbb{C}$ 的非交换扩张：
+\begin{itemize}
+    \item $\mathbb{C}$ 的虚数单位只有一个（$i$），$\mathbb{H}$ 有三个（$i,j,k$）；
+    \item $\mathbb{C}$ 的旋转群 $U(1)$ 是阿贝尔群，$\mathbb{H}$ 的旋转群 $SU(2)$ 是非阿贝尔群；
+    \item $\mathbb{C}$ 的单位根 $\zeta_n$ 构成循环群 $C_n$，$\mathbb{H}$ 的有限子群分类更丰富（循环群、二面体群、四面体群、八面体群、二十面体群）。
+\end{itemize}
+\end{remark}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.0,>=stealth]
+        \shade[ball color=blue!12, opacity=0.55] (0,0) circle (2.2);
+        \draw[gray!60, thin] (0,0) circle (2.2);
+        \draw[gray!60, dashed, thin] (0,0) ellipse (2.2 and 0.7);
+        \draw[gray!60, dashed, thin] (0,0) ellipse (0.7 and 2.2);
+
+        \filldraw[red] (1.55,1.55) circle (3pt);
+        \node[red, font=\footnotesize, above right=1pt] at (1.55,1.55) {$q$};
+        \filldraw[red] (-1.55,-1.55) circle (3pt);
+        \node[red, font=\footnotesize, below left=1pt] at (-1.55,-1.55) {$-q$};
+
+        \draw[->, thick, red!70!black] (2.6,1.0) to[bend left=25] (4.5,0);
+        \node[red!70!black, font=\footnotesize, align=center] at (3.6, 1.6)
+            {$\Pi:S^3\to SO(3)$};
+        \node[red!70!black, font=\footnotesize, align=center] at (3.6, -0.4)
+            {$q\mapsto\rho_q$};
+
+        \shade[ball color=green!15, opacity=0.6] (7.0,0) circle (1.5);
+        \draw[gray!60, thin] (7.0,0) circle (1.5);
+        \draw[gray!60, dashed, thin] (7.0,0) ellipse (1.5 and 0.5);
+        \node[green!60!black, font=\footnotesize] at (7.0,0) {$SO(3)$};
+
+        \node[font=\small\bfseries, text width=7.5cm, align=center, below=2.8cm] at (3.5,0)
+            {$S^3\cong SU(2)$：单位四元数群，非交换李群；\\ 每个三维旋转对应两个单位四元数 $q$ 与 $-q$。};
+    \end{tikzpicture}
+    \caption{四元数单位球面 $S^3\cong SU(2)$ 及其对 $SO(3)$ 的二重覆盖。$q$ 与 $-q$ 对应同一三维旋转，$\Pi:S^3\to SO(3)$ 的核为 $\{\pm 1\}$。这是三维旋转周期在四元数域中的代数化实现（定理 \ref{thm:quaternion_rotation_criterion}）。}
+    \label{fig:quaternion_S3_cover}
+\end{figure}
+\subsection{\texorpdfstring{判据定理}{判据定理}}
+
+\begin{theorem}[三维旋转代数化判据]\label{thm:quaternion_rotation_criterion}
+单位四元数群 $S^3$ 通过共轭作用
+\[
+\rho_q(v) = q v q^{-1},\qquad v \in \operatorname{Im}(\mathbb{H}) \cong \mathbb{R}^3,
+\]
+实现三维空间中的旋转。映射
+\[
+\Pi: S^3 \to SO(3),\qquad q \mapsto \rho_q,
+\]
+是二重覆盖，$\ker \Pi = \{\pm 1\}$。
+\end{theorem}
+
+\begin{proof}
+纯虚四元数空间 $\operatorname{Im}(\mathbb{H}) = \{bi + cj + dk : b,c,d \in \mathbb{R}\} \cong \mathbb{R}^3$。对单位四元数 $q$，共轭作用 $\rho_q$ 保持范数：$|qvq^{-1}| = |v|$，且将纯虚四元数映为纯虚四元数。因此 $\rho_q$ 是 $\mathbb{R}^3$ 上的正交变换。连续性给出 $\det(\rho_q) = 1$，故为旋转。$\rho_q = \rho_{-q}$，故覆盖度为 $2$。
+\end{proof}
+
+\begin{theorem}[非交换周期判据]\label{thm:noncommutative_period}
+绕不同轴的旋转不交换：
+\[
+\rho_{q_1} \circ \rho_{q_2} \neq \rho_{q_2} \circ \rho_{q_1}
+\]
+（一般情形）。因此三维旋转周期不能由阿贝尔循环群的单一参数刻画，必须由 $SU(2)$（或 $SO(3)$）的非交换子群结构描述。
+\end{theorem}
+
+\begin{proof}
+取 $q_1 = \cos(\theta_1/2) + i\sin(\theta_1/2)$（绕 $x$ 轴旋转），$q_2 = \cos(\theta_2/2) + j\sin(\theta_2/2)$（绕 $y$ 轴旋转）。则 $q_1 q_2 \neq q_2 q_1$（因 $ij = k$，$ji = -k$）。因此共轭作用不交换。
+\end{proof}
+
+\subsection{\texorpdfstring{函数特征：三维旋转方程}{函数特征：三维旋转方程}}
+
+\begin{theorem}[四元数旋转方程的具有周期轨道的群]\label{thm:rotation_equation_H}
+设 $f:\mathbb{H}\to Y$，$q\in S^3$。若
+\[
+f(qvq^{-1})=f(v),\qquad \forall v\in\operatorname{Im}(\mathbb{H}),
+\]
+则具有周期轨道的群
+\[
+\operatorname{Group}_{\mathrm{period},S^3}(f)=\{q\in S^3: f(qvq^{-1})=f(v),\ \forall v\in\operatorname{Im}(\mathbb{H})\}
+\]
+是 $S^3\cong SU(2)$ 的子群。若 $q$ 是有限阶元素（即旋转角为 $2\pi p/r$），则 $\langle q\rangle\cong C_r$ 或二面体群等有限子群。
+\end{theorem}
+
+\begin{proof}
+由 $f(qvq^{-1})=f(v)$ 得 $f(q^n v q^{-n})=f(v)$ 对任意 $n\in\mathbb{Z}$ 成立，故 $\langle q\rangle\le\operatorname{Group}_{\mathrm{period},S^3}(f)$。$S^3$ 的有限子群分类包括循环群、二面体群、四面体群、八面体群、二十面体群，故具有周期轨道的群可为这些有限群。
+\end{proof}
+
+\begin{remark}[四元数让三维旋转方程“可代数化”]\label{rem:quaternion_makes_rotation_algebraic}
+复数中旋转方程 $f(e^{i\theta}z)=f(z)$ 只刻画平面旋转；三维旋转方程 $f(qvq^{-1})=f(v)$ 需要非交换乘法结构，四元数 $S^3\cong SU(2)$ 提供了这一结构。这是数系扩张使函数方程从“平面旋转”推广到“三维旋转”的最终一步。
+\end{remark}
+
+\begin{proposition}[四元数的方向性与周期性]\label{prop:quaternion_direction_period}
+四元数的非交换性使得方向结构从单一的旋转方向扩展为三维旋转方向的非交换复合：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{旋转对称提升}：从复数的 $U(1)$（一维旋转）提升为 $SU(2)$（三维旋转的双覆盖）。
+    \item \textbf{方向结构的非交换性}：绕不同轴的旋转方向不再交换。
+    \item \textbf{共轭周期}：四元数共轭 $q \mapsto \bar{q}$ 与乘法取逆对称 $\sigma_1$ 和加法反射对称 $\sigma_0$ 构成新的对称类型——共轭对称。
+    \item \textbf{守恒量}：三维角动量。$SU(2)$ 的卡西米尔算子对应于总角动量平方。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由定理 \ref{thm:quaternion_rotation_criterion}，$S^3 \cong SU(2)$ 二重覆盖 $SO(3)$；一维旋转群 $U(1) \cong \{\cos(\theta/2) + i\sin(\theta/2)\} \subset S^3$ 是嵌入子群，故旋转对称由 $U(1)$ 提升为 $SU(2)$。
+(ii) 由定理 \ref{thm:noncommutative_period}，取绕 $x$、$y$ 轴的单位四元数 $q_1 = \cos(\theta_1/2)+i\sin(\theta_1/2)$、$q_2 = \cos(\theta_2/2)+j\sin(\theta_2/2)$，有 $q_1 q_2 \neq q_2 q_1$，故绕不同轴的旋转方向不可交换。
+(iii) 共轭 $c(q) = \bar{q}$ 满足 $c(c(q)) = q$（对合）与 $c(q_1 q_2) = c(q_2)c(q_1)$（反自同构）；在纯虚空间 $\operatorname{Im}(\mathbb{H})$ 上 $c(v) = \bar{v} = -v$ 即加法反射 $\sigma_0$，在 $S^3$ 上 $c(q) = \bar{q} = q^{-1}$ 即乘法取逆 $\sigma_1$，故 $c$ 是 $\sigma_0$ 与 $\sigma_1$ 的合成推广，构成共轭对称。
+(iv) $\mathfrak{su}(2)$ 的卡西米尔算子 $J^2 = J_x^2 + J_y^2 + J_z^2$ 与三个生成元 $J_x,J_y,J_z$ 均对易，故在 $SU(2)$ 作用下不变，对应守恒量总角动量平方（三维角动量）。
+\end{proof}
+
+\section{\texorpdfstring{对数：比例方向与平移方向的结构转换}{对数：比例方向与平移方向的结构转换}}
+
+\subsection{\texorpdfstring{判定需求}{判定需求}}
+
+缩放轨道
+\[
+\mathcal{O}(x_0; q) = \{x_0 q^n \mid n\in\mathbb{Z}\}
+\]
+与平移轨道
+\[
+\mathcal{O}(y_0; T) = \{y_0 + nT \mid n\in\mathbb{Z}\}
+\]
+在结构上完全平行。这种平行需要严格的数学转换，才能将比例周期与平移周期在判定层面统一处理。
+
+\subsection{\texorpdfstring{对数的定义与基本性质}{对数的定义与基本性质}}
+
+\begin{definition}[对数的定义]\label{def:logarithm}
+设 $b > 0, b \neq 1, x > 0$。$y = \log_b x \iff b^y = x$。特别地，自然对数 $\ln x = \log_e x$。
+\end{definition}
+
+\begin{remark}[实指数幂的定义顺序]
+定义 \ref{def:logarithm} 中 $b^y$（$y \in \mathbb{R}$）的严格定义依赖实数完备性，逻辑顺序为：整数幂（定义 \ref{def:nat_operations}）$\to$ 有理指数幂 $b^{p/q} := (\sqrt[q]{b})^p$（正实数的 $q$ 次根由定理 \ref{thm:real_root_closure} 保证存在唯一）$\to$ 实指数幂 $b^y := \lim_{n\to\infty} b^{q_n}$（任取有理数列 $q_n \to y$；极限存在且与逼近列选取无关，由完备性与幂函数单调性保证）。因此 $y = \log_b x$ 作为单调函数 $y \mapsto b^y$ 的反函数良定义，不构成循环定义。
+\end{remark}
+
+\begin{theorem}[对数：比例方向与平移方向的结构转换]\label{thm:logarithm_conversion}
+对数将乘法群上的操作转化为加法群上的操作：
+\[
+\log_b(x \cdot y) = \log_b x + \log_b y, \quad \log_b(x^e) = e \cdot \log_b x.
+\]
+具体而言：
+\begin{enumerate}[label=(\roman*)]
+    \item $\log_b(1) = 0$——乘法的对称中心 $1$ 映射为加法的对称中心 $0$。
+    \item $\log_b(x^{-1}) = -\log_b x$——乘法的逆对称（$1$-对称）转化为加法的逆对称（$0$-对称）。
+    \item $\log_b(x / y) = \log_b x - \log_b y$——乘除转化为加减。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+设 $u = \log_b x, v = \log_b y$，即 $b^u = x, b^v = y$。则
+(i) $x \cdot y = b^u \cdot b^v = b^{u+v}$，故 $\log_b(x \cdot y) = u + v$。
+(ii) $\log_b(1) = 0$ 因为 $b^0 = 1$。
+(iii) $x^{-1} = (b^u)^{-1} = b^{-u}$，故 $\log_b(x^{-1}) = -u$。
+(iv) $x/y = x \cdot y^{-1} = b^{u-v}$，故 $\log_b(x/y) = u - v$。
+\end{proof}
+
+\begin{theorem}[对数群同构与守恒量转换]\label{thm:log_isomorphism_conservation}
+对数映射 $\ln: (\mathbb{R}^+, \times) \to (\mathbb{R}, +)$ 是一个李群同构。它将
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{运算}：乘除法转换为加减法。
+    \item \textbf{对称性}：$1$-对称（乘法逆元 $\sigma_1$）转换为 $0$-对称（加法逆元 $\sigma_0$）。
+    \item \textbf{守恒量}：将比例方向下的守恒量，转换为平移方向下的守恒量。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+同构性已由定理 \ref{thm:logarithm_conversion} 证明。守恒量的转换：设在 $(\mathbb{R}^+, \times)$ 上存在守恒量 $Q_{\text{scale}}$，满足 $Q_{\text{scale}}(r x) = Q_{\text{scale}}(x)$。定义 $Q_{\text{trans}}(y) = Q_{\text{scale}}(e^y)$，则
+\[
+Q_{\text{trans}}(y + \ln r) = Q_{\text{scale}}(e^{y + \ln r}) = Q_{\text{scale}}(r \cdot e^y) = Q_{\text{scale}}(e^y) = Q_{\text{trans}}(y).
+\]
+故 $Q_{\text{trans}}$ 在平移下不变，即为平移方向下的守恒量。
+\end{proof}
+
+\begin{corollary}[对数判定等价]\label{cor:logarithm_judgement_equivalence}
+对数同构使得缩放轨道的闭合判定等价于对数域中平移轨道的闭合判定。比例准周期与平移准周期在数学上同构，但在物理上对应不同的守恒量。
+\end{corollary}
+
+\begin{proof}
+由定理 \ref{thm:log_isomorphism_conservation}，$\ln: (\mathbb{R}^+, \times) \to (\mathbb{R}, +)$ 是群同构，缩放轨道 $\{x_0 q^k \mid k\in\mathbb{Z}\}$ 映为平移轨道 $\{\ln x_0 + k\ln q \mid k\in\mathbb{Z}\}$。因同构是保持运算的双射，$x_0 q^k = x_0 \iff k\ln q = 0 \iff \ln x_0 + k\ln q = \ln x_0$，故缩放轨道闭合当且仅当对数域中平移轨道闭合，两类轨道的闭合判定等价。数学上二者经 $\ln$ 同构；守恒量的差异由定理 \ref{thm:log_isomorphism_conservation} 第 (iii) 款给出。
+\end{proof}
+
+\subsection{\texorpdfstring{对数视角下三种变换的统一}{对数视角下三种变换的统一}}
+
+\begin{theorem}[对数视角下三种变换的统一]\label{thm:log_unification}
+对数把乘法群上的变换统一为加法。设 $\Phi$ 为乘法群上的乘法作用 $\Phi(x) = g \cdot x$，则
+\[
+\log(\Phi(x)) = \log(x) + \log g,
+\]
+即 $\Phi$ 在对数域中表现为平移 $T_{\log g}$。三种变换的情形如下：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平移}：$T_a(x) = x + a$ 本身是加法群 $(\mathbb{R},+)$ 上的作用，是对数域中的基准情形（统一公式在加法群中平凡成立），无需转换；
+    \item \textbf{缩放}：$S_\lambda(x) = \lambda x$（$\lambda > 0$），$\ln(S_\lambda(x)) = \ln x + \ln \lambda$，对数域中表现为 $T_{\ln\lambda}$；
+    \item \textbf{旋转}：$R_\theta(z) = e^{i\theta}z$，复对数（任一分支）给出 $\log(R_\theta(z)) = \log z + i\theta$，复对数域中表现为 $T_{i\theta}$（模 $2\pi i$）。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 平移是加法群上的作用：$T_a(x) = x + a$ 即统一公式中“对数”取恒等映射的退化情形，也是缩放与旋转经对数转换后的共同归宿。
+(ii) $\ln(S_\lambda(x)) = \ln(\lambda x) = \ln x + \ln \lambda = T_{\ln\lambda}(\ln x)$（定理 \ref{thm:logarithm_conversion}）。
+(iii) 取复对数的任一分支：$\log(R_\theta(z)) = \log(e^{i\theta}z) = \log z + \log(e^{i\theta}) = \log z + i\theta + 2\pi i k$（$k \in \mathbb{Z}$ 依分支而定，多值性见命题 \ref{prop:complex_log_i_symmetry}），即复对数域中模 $2\pi i$ 的平移 $T_{i\theta}$。
+\end{proof}
+
+\begin{proposition}[对数视角下对称中心的统一]\label{prop:log_symmetry_centre_unification}
+在对数域中，三种变换的对称中心统一为 $0$：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平移}：对称中心 $0$，因为 $T_0 = \text{id}$。
+    \item \textbf{缩放}：对称中心 $1$，但 $\ln 1 = 0$，对数域中对称中心为 $0$。
+    \item \textbf{旋转}：对称中心 $1$（单位圆上的恒等元素），但 $\log 1 = 0$，对数域中对称中心为 $0$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $T_0(x) = x + 0 = x$，故 $0$ 是平移的对称中心。
+(ii) $S_1(x) = 1 \cdot x = x$，故 $1$ 是缩放的对称中心。$\ln 1 = 0$。
+(iii) $R_0(z) = e^{i\cdot 0}z = z$，故 $1$（即 $e^{i\cdot 0}$）是旋转的对称中心。$\log 1 = 0$。
+\end{proof}
+
+\begin{proposition}[对数视角下守恒量的统一]\label{prop:log_conservation_unification}
+在对数域中，三种变换的守恒量统一为“平移不变量”：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平移}：守恒量为平移不变量 $P$，是平移不变性的表现。
+    \item \textbf{缩放}：守恒量为比例不变量 $D$，在对数域中对应平移不变量（定理 \ref{thm:log_isomorphism_conservation}）。
+    \item \textbf{旋转}：守恒量为旋转不变量 $L$，在复对数域中对应平移不变量。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 平移不变性：$P(x+a) = P(x)$。
+(ii) 由定理 \ref{thm:log_isomorphism_conservation}，缩放守恒量 $Q_{\text{scale}}$ 在对数域中转化为平移守恒量 $Q_{\text{trans}}$。
+(iii) 旋转不变性 $L(e^{i\theta}z) = L(z)$ 在复对数域中表现为平移不变性。
+\end{proof}
+
+\begin{remark}[变换的层级递进与对数]\label{rem:hierarchy_logarithm}
+对数揭示了变换的层级递进：
+\begin{itemize}
+    \item \textbf{第一层：加法（平移）}。$n$ 次平移的复合产生乘法：$n \times a = a + a + \cdots + a$。
+    \item \textbf{第二层：乘法（缩放）}。$n$ 次缩放的复合产生幂：$\lambda^n = \lambda \times \lambda \times \cdots \times \lambda$。对数将缩放转化为平移：$\ln(\lambda^n) = n\ln\lambda$。
+    \item \textbf{第三层：幂（旋转）}。当 $|\lambda| = 1$ 时，$\lambda^n = e^{in\theta}$ 是旋转。复对数将旋转转化为平移：$\log(e^{in\theta}) = in\theta$。
+\end{itemize}
+\textbf{核心结论}：在对数域中，三种变换都统一为加法（平移），对称中心统一为 $0$，守恒量统一为平移不变量。旋转在幂运算下封闭，是变换层级递进的最高层。
+\end{remark}
+
+\begin{proposition}[复对数的 $i$-对称：多值性与周期结构]\label{prop:complex_log_i_symmetry}
+复对数 $\log z = \ln|z| + i(\arg z + 2\pi k)$（$k \in \mathbb{Z}$）是多值函数，不同分支相差 $2\pi i$。这一多值性恰来源于复指数函数的 $2\pi i$-周期性——$i$ 对称在指数域产生的周期振动在对数域表现为分支的周期性重复。对数将指数域的旋转周期转化为加法群上的平移周期（步长为 $2\pi i$）。
+\end{proposition}
+
+\begin{proof}
+设 $\log z = \ln|z| + i\arg z$，取一确定分支的值 $w$，则 $e^w = z$。因 $e^{2\pi i k} = \cos(2\pi k) + i\sin(2\pi k) = 1$（$k\in\mathbb{Z}$），有 $e^{w + 2\pi i k} = e^w e^{2\pi i k} = z$，故 $w + 2\pi i k$ 同为 $\log z$ 的值，不同分支相差 $2\pi i$，多值性由此而来。反过来，这一平移正是复指数 $2\pi i$-周期性的对偶：指数域中乘以 $i$（辐角加 $\pi/2$，$i$-对称）累加四次回到自身，产生 $2\pi$ 旋转周期；对数将其转为加法群上步长 $2\pi i$ 的平移周期。
+\end{proof}
+
+\subsection{\texorpdfstring{旋转由缩放产生的严格表述}{旋转由缩放产生的严格表述}}
+
+\begin{proposition}[旋转由缩放产生的严格表述]\label{prop:rotation_from_scaling}
+在复数域中，任何复数 $z = re^{i\theta}$ 可以分解为缩放 $r$ 和旋转 $e^{i\theta}$ 的复合。旋转是缩放在单位圆上的限制：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{缩放}：$S_r(z) = rz$，改变模长，保持辐角。
+    \item \textbf{旋转}：$R_\theta(z) = e^{i\theta}z$，改变辐角，保持模长。
+    \item \textbf{复合}：$z \mapsto re^{i\theta}z = S_r \circ R_\theta(z)$。
+\end{enumerate}
+当 $r = 1$ 时，缩放退化为恒等变换，旋转成为唯一的操作。
+\end{proposition}
+
+\begin{proof}
+(i) $S_r(z) = rz = re^{i\arg z}$（$z \neq 0$），模长变为 $r|z|$，辐角不变。
+(ii) $R_\theta(z) = e^{i\theta}z = |z|e^{i(\arg z + \theta)}$，模长不变，辐角增加 $\theta$。
+(iii) $S_r \circ R_\theta(z) = S_r(e^{i\theta}z) = re^{i\theta}z$。
+当 $r = 1$ 时，$S_1(z) = z$ 为恒等变换，$re^{i\theta}z = e^{i\theta}z = R_\theta(z)$。
+\end{proof}
+
+\begin{remark}[旋转的独立性]\label{rem:rotation_independence}
+虽然旋转可以视为缩放（乘以正实数）在单位圆上的“边界情形”（乘以单位复数），但旋转是\textbf{独立的变换}：
+\begin{itemize}
+    \item 缩放改变“大小”，旋转改变“方向”；
+    \item 缩放群 $(\mathbb{R}^+,\times)$ 与旋转群 $U(1)$ 是复数乘法群 $\mathbb{C}^{\times}$ 的两个不同的子群；
+    \item $\mathbb{C}^{\times} \cong \mathbb{R}^+ \times U(1)$（极分解），缩放与旋转是独立的自由度。
+\end{itemize}
+对数将缩放转化为实轴上的平移，复对数将旋转转化为虚轴上的平移，两者在对数域中分别对应实部和虚部的加法。
+\end{remark}
+
+\begin{definition}[对数坐标]\label{def:log_linear_coordinates}
+对 $z\in\mathbb{C}^{\times}=\mathbb{C}\setminus\{0\}$ 取定极分解 $z=|z|e^{i\arg z}$，定义\textbf{对数坐标}
+\[
+\Lambda(z)=\bigl(\ln|z|,\ \arg z\bigr)\in\mathbb{R}\times\mathbb{R}/2\pi\mathbb{Z}.
+\]
+其中 $\ln|z|$ 是正实数的实对数，由定义 \ref{def:logarithm} 唯一确定；而 $\arg z$ 只是模 $2\pi$ 的等价类 $\arg z\in\mathbb{R}/2\pi\mathbb{Z}$，取定它的一个代表元称为\textbf{选支}，选支一旦取定，$\Lambda$ 便是单值映射。$\Lambda$ 是双射：其逆为 $(\rho,\theta)\mapsto e^{\rho}e^{i\theta}$，故任何 $z\neq0$ 与其对数坐标一一对应。命题 \ref{prop:complex_log_i_symmetry} 表明，不同选支相差 $2\pi i$，故 $\Lambda$ 的单值性依赖于选支的固定。在对数坐标下，复数乘法表现为加法：
+\[
+\Lambda(zw)=\Lambda(z)+\Lambda(w)=\bigl(\ln|z|+\ln|w|,\ \arg z+\arg w\bigr),
+\]
+这正是定理 \ref{thm:log_unification} 在复情形下的坐标表述：$\Lambda$ 把乘法群 $\mathbb{C}^{\times}$ 上的作用化为 $\mathbb{R}\times\mathbb{R}/2\pi\mathbb{Z}$ 上按坐标相加的平移作用。
+\end{definition}
+
+\begin{theorem}[复数乘法的解耦]\label{thm:complex_multiplication_decoupling}
+在选支固定（即 $\Lambda$ 单值，定义 \ref{def:log_linear_coordinates}）的前提下，模长映射与单位化映射
+\[
+z\mapsto|z|,\qquad z\mapsto\frac{z}{|z|},
+\]
+给出拓扑群同构
+\[
+\mathbb{C}^{\times}\;\cong\;\mathbb{R}_{>0}\times U(1),\qquad
+z\;\longmapsto\;\bigl(|z|,\ e^{i\arg z}\bigr),
+\]
+其逆为 $(r,w)\mapsto rw$。在这个同构下，$\mathbb{C}^{\times}$ 上的乘法分成两个独立的坐标：模长相乘（$\mathbb{R}_{>0}$ 上的乘法）与辐角相加（$U(1)$ 上的乘法）。该同构是整体的（对全部 $\mathbb{C}^{\times}$ 成立），而不是仅在原点邻域内成立的局部同构；它把定理 \ref{thm:log_unification} 中“缩放与旋转经对数同时化为平移”的结论提升为群结构的直积分解。
+\end{theorem}
+
+\begin{proof}
+先验证双射与同态。映射 $\Phi(z)=(|z|,z/|z|)$ 对 $z\in\mathbb{C}^{\times}$ 有定义，且第一分量在 $\mathbb{R}_{>0}$ 中、第二分量在 $U(1)$ 中。若 $\Phi(z)=\Phi(w)=(r,w)$，则 $z=|z|\cdot z/|z|=rw=w$，故 $\Phi$ 是单射；对任意 $(r,w)\in\mathbb{R}_{>0}\times U(1)$，取 $z=rw\neq0$，则 $|z|=r$、$z/|z|=w$，故 $\Phi$ 是满射，逆映射为 $(r,w)\mapsto rw$。
+
+再验证乘法结构：对 $z,w\in\mathbb{C}^{\times}$，
+\[
+|zw|=|z|\,|w|,\qquad \frac{zw}{|zw|}=\frac{z}{|z|}\cdot\frac{w}{|w|},
+\]
+故 $\Phi(zw)=\Phi(z)\Phi(w)$，即 $\Phi$ 是群同态；由双射性，$\Phi$ 是群同构。
+
+最后验证拓扑同构：模长 $z\mapsto|z|$ 与辐角 $z\mapsto\arg z$ 在选定的支上连续，逆映射 $(r,w)\mapsto rw$ 是复乘法的限制，亦连续，故 $\Phi$ 是拓扑群同构。
+\end{proof}
+
+\begin{theorem}[幂在对数坐标下的矩阵形式]\label{thm:power_matrix_log_coordinates}
+设 $b=u+iv\in\mathbb{C}^{\times}$（$u,v\in\mathbb{R}$）为底，$z\in\mathbb{C}^{\times}$。在定义 \ref{def:log_linear_coordinates} 的基 $(\ln|z|,\arg z)$ 与选定的支之下，映射 $z\mapsto bz$（即 $b$ 的乘法作用）由以下实线性映射给出：
+\[
+\begin{pmatrix}\ln|z|\\ \arg z\end{pmatrix}
+\;\longmapsto\;
+\begin{pmatrix}u&-v\\ v&u\end{pmatrix}
+\begin{pmatrix}\ln|z|\\ \arg z\end{pmatrix}
++\begin{pmatrix}\ln|b|\\ \arg b\end{pmatrix}
+=\begin{pmatrix}u\ln|z|-v\arg z+\ln|b|\\ v\ln|z|+u\arg z+\arg b\end{pmatrix},
+\]
+其中修正项 $(\ln|b|,\arg b)$ 是选支固定的平移项。矩阵 $M_b=\begin{pmatrix}u&-v\\ v&u\end{pmatrix}$ 的非对角元 $\pm v$ 正是“幂把缩放耦合进旋转、把旋转耦合进缩放”的代数载体：$v\neq0$ 时两个坐标轴互相串扰，$v=0$ 时矩阵为对角阵（引理 \ref{lem:real_power_no_coupling}）。矩阵的行列式为
+\[
+\det M_b=u^2+v^2=|b|^2\neq0,
+\]
+故 $M_b$ 可逆，这与“$b\neq0$ 时 $z\mapsto bz$ 可逆”一致。
+
+幂的情形（须区分两类收束条件）：设 $z\in\mathbb{C}^{\times}$。
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $b\in\mathbb{Z}$（此时 $v=0$，$M_b=bI_2=uI_2$ 为纯缩放），则 $z^b$ 单值，且下列等式在模 $2\pi$ 意义下成立：
+    \[
+    \Lambda(z^b)=M_b\,\Lambda(z)\pmod{2\pi}.
+    \]
+    \item 若 $b\in\mathbb{C}\setminus\mathbb{Z}$，则必须按命题 \ref{prop:power_preconditions} 第 (ii)、(iii) 款固定对数选支，取 $\log z=\ln|z|+i\arg z$ 的支值后 $z^b:=\exp(b\log z)$，此时有精确等式
+    \[
+    \Lambda(z^b)=M_b\,L(z),\qquad L(z)=(\ln|z|,\arg z),
+    \]
+    其中 $L(z)$ 是所选支下的实向量；换支等价于 $L(z)\mapsto L(z)+2\pi k\,\mathbf{e}_2$。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 $b=u+iv=|b|e^{i\arg b}$ 与复数的极形式 $z=|z|e^{i\arg z}$ 得
+\[
+bz=|b|\,|z|\,e^{i(\arg b+\arg z)},
+\]
+故在对数坐标下
+\[
+\ln|bz|=\ln|b|+\ln|z|,\qquad \arg(bz)=\arg b+\arg z\pmod{2\pi}.
+\]
+把 $b$ 的坐标与 $z$ 的坐标分离开：$(\ln|b|,\arg b)$ 是只依赖 $b$ 的平移向量，它是实线性的“加常数”项；而 $z$ 的坐标前面所乘的矩阵只由 $b$ 的实部与虚部决定。将复数 $u+iv$ 与 $\ln|z|+i\arg z$ 相乘并比较实部与虚部，
+\[
+(u+iv)(\ln|z|+i\arg z)=\bigl(u\ln|z|-v\arg z\bigr)+i\bigl(v\ln|z|+u\arg z\bigr),
+\]
+即得所给的矩阵形式；换言之 $M_b$ 就是复标量乘法 $w\mapsto bw$ 在基 $\{1,i\}$ 下的矩阵表示，其行列式 $|b|^2$ 正是乘 $b$ 所施加的面积缩放因子。
+
+幂的情形：(i) 对 $b=n\in\mathbb{Z}$，$z^n$ 与选支无关（性质 \ref{prop:power_preconditions} 第 (ii) 款），且 $\ln|z^n|=n\ln|z|$、$\arg(z^n)=n\arg z\ (\mathrm{mod}\ 2\pi)$，故 $\Lambda(z^n)=n\Lambda(z)\ (\mathrm{mod}\ 2\pi)=M_n\Lambda(z)$。(ii) 对 $b\in\mathbb{C}\setminus\mathbb{Z}$，按命题 \ref{prop:power_preconditions} 第 (iii) 款取定支与支值 $\log z=\ln|z|+i\arg z$，则
+\[
+\log(z^b)=\log\bigl(\exp(b\log z)\bigr)=b\log z,
+\]
+其坐标形式即 $\Lambda(z^b)=(u\ln|z|-v\arg z,\ v\ln|z|+u\arg z)=M_bL(z)$，为精确等式；换支时 $L(z)\mapsto L(z)+2\pi k\mathbf{e}_2$。
+
+行列式：$\det M_b=u\cdot u-(-v)\cdot v=u^2+v^2=|b|^2$，因 $b\neq0$ 故非零，$M_b$ 可逆。
+\end{proof}
+
+\begin{lemma}[实指数不产生耦合]\label{lem:real_power_no_coupling}
+若 $b\in\mathbb{R}\setminus\{0\}$（即 $b=u$，$v=0$），则在对数坐标下乘 $b$ 的矩阵 $M_b$ 是对角阵
+\[
+M_b=\begin{pmatrix}u&0\\ 0&u\end{pmatrix}=uI_2,
+\]
+其非对角元为零：缩放坐标与旋转坐标互不串扰。特别地，实指数幂 $z\mapsto z^b$ 属纯缩放族——模长按 $|z|\mapsto|z|^b=e^{b\ln|z|}$ 变化，辐角只被常数 $\arg b\in\{0,\pi\}$ 平移而\textbf{不}被缩放坐标 $\ln|z|$ 耦合；当 $b\in\mathbb{Z}$ 时该结论对一切 $z\in\mathbb{C}^{\times}$ 成立，当 $b\notin\mathbb{Z}$ 时须按命题 \ref{prop:power_preconditions} 第 (ii)、(iii) 款取定支或限制 $a>0$。
+\end{lemma}
+
+\begin{proof}
+$b=u+iv$ 为实数等价于 $v=0$，代入定理 \ref{thm:power_matrix_log_coordinates} 的矩阵即得 $M_b=uI_2$，非对角元 $\pm v=0$。此时 $\ln|bz|=\ln|b|+\ln|z|$，$\arg(bz)=\arg z+\arg b$，其中 $\arg b\in\{0,\pi\}$ 为常数，故辐角只被平移项改变，不含 $u\ln|z|$ 的贡献；即缩放方向（实轴）的作用为 $u\ln|z|$，旋转方向（虚轴）的作用为 $u\arg z$，两式各自只含同一坐标，无交叉项。$b>0$ 时 $\arg b=0$，辐角在模 $2\pi$ 意义下不变；$b<0$ 时 $\arg b=\pi$，辐角整体平移 $\pi$。实指数幂的模长与辐角行为由 $L(z^b)=M_bL(z)$ 在 $v=0$ 时逐坐标读出。
+\end{proof}
+
+\begin{corollary}[螺旋判据]\label{cor:spiral_criterion}
+在定理 \ref{thm:power_matrix_log_coordinates} 的选支与基之下，设 $b=u+iv\in\mathbb{C}^{\times}$，$z\in\mathbb{C}^{\times}$，考虑幂序列的轨道 $\{z\,b^n\mid n\in\mathbb{Z}\}$。其对数坐标轨道为直线
+\[
+\Lambda(zb^n)=\Lambda(z)+n\,\Lambda(b)=\Lambda(z)+n\,(\ln|b|,\ \arg b),
+\]
+经逆映射 $\exp$ 映回复平面后：
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $v\neq0$（即 $b\notin\mathbb{R}$），则 $\arg b\not\equiv0\pmod{\pi}$，辐角坐标必非零：当 $|b|\neq1$ 时 $\ln|b|\neq0$，对数坐标下的直线既不水平也不垂直，其像是\textbf{等角螺线}（对数螺线）的离散采样——轨道同时具有径向缩放与角向旋转，二者由非零的 $v$ 耦合，故 $v\neq0$ 称为\textbf{螺旋判据}；当 $|b|=1$ 时直线竖直，退化为第 (iii) 款的临界情形。
+    \item 若 $v\neq0$ 且 $|b|\neq1$，则模长 $|z||b|^n$ 严格单调，轨道不闭合（无最小正周期），且不落在任何以原点为中心的圆上；$|b|<1$ 时轨道趋于 $0$，$|b|>1$ 时趋于 $\infty$。
+    \item 若 $v\neq0$ 且 $|b|=1$，则轨道落在以原点为中心、半径为 $|z|$ 的圆上，此时无径向耦合，是旋转退化为纯相位的临界情形：由定理 \ref{thm:rational_rotation_criterion}，$\arg b/(2\pi)\in\mathbb{Q}$ 时轨道闭合，$\arg b/(2\pi)\notin\mathbb{Q}$ 时轨道在圆上稠密而不闭合。
+    \item 若 $v=0$（$b$ 为实数）：$|b|\neq1$ 时轨道的所有点落在过 $0$ 与 $z$ 的同一条直线上（纯缩放，无旋转分量）；$b=1$ 时轨道退化为单点 $\{z\}$；$b=-1$ 时轨道为两点 $\{z,-z\}$，最小正周期为 $2$。
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+第一式由 $\Lambda(zb^n)=\Lambda(z)+n\Lambda(b)$（定义 \ref{def:log_linear_coordinates} 中 $\Lambda$ 下乘法化为加法）直接得到；再由 $\Lambda$ 的逆映射为 $\exp$ 得像的几何形状。
+
+(i) $v\neq0$ 保证 $\arg b\not\equiv0\pmod{\pi}$，故直线方向的第二分量非零；当 $|b|\neq1$ 时第一分量 $\ln|b|$ 亦非零（$\ln|b|=0$ 恰是第 (iii) 款的临界情形），于是直线方向的两个分量均非零。故其像 $\{e^{n\ln|b|}e^{in\arg b}\}$ 的模长按几何级数 $|b|^n$ 变化而辐角按等差 $n\arg b$ 变化，即等角螺线。
+
+(ii) $|b|\neq1$ 时 $|b|^n$ 严格单调且不为 $1$，故模长沿轨道严格变化：轨道若有最小正周期 $q>0$ 则 $b^q=1$，从而 $|b|^q=1$，与 $|b|\neq1$ 矛盾；模长非常值亦说明轨道不落在任何中心在原点的圆上。$|b|<1$ 与 $|b|>1$ 时 $|b|^n$ 分别趋于 $0$ 与 $\infty$。
+
+(iii) $|b|=1$ 时 $\ln|b|=0$，轨道所有点的模长均为 $|z|$，故落在半径 $|z|$ 的圆上；其后按旋转角度 $\arg b$ 的可公度性，由定理 \ref{thm:rational_rotation_criterion} 的判据分别得闭合与稠密。
+
+(iv) $v=0$ 时 $\arg b\in\{0,\pi\}$，故 $b^n$ 的辐角恒为 $0$（$b>0$）或随 $n$ 的奇偶取 $0,\pi$（$b<0$），即 $b^n$ 是实数，轨道落在过 $0$ 与 $z$ 的直线上；$b=1$ 时 $b^n=1$ 恒成立；$b=-1$ 时 $b^n$ 随 $n$ 的奇偶取值 $\pm1$，故轨道为 $\{z,-z\}$，最小正周期为 $2$。$|b|\neq1$ 且 $b\neq-1$ 时模长 $|z||b|^n$ 严格单调，故无正周期。
+\end{proof}
+
+\begin{property}[幂运算的收束条件（良定性前提）]\label{prop:power_preconditions}
+下列条件保证定义 \ref{def:log_linear_coordinates}、定理 \ref{thm:complex_multiplication_decoupling}、定理 \ref{thm:power_matrix_log_coordinates} 与引理 \ref{lem:real_power_no_coupling} 的陈述有意义且唯一，缺一不可：
+\begin{enumerate}[label=(\roman*)]
+    \item $z\in\mathbb{C}^{\times}$：对数坐标 $\Lambda(z)=(\ln|z|,\arg z)$ 只在 $z\neq0$ 时有定义，$z=0$ 处的辐角无定义，$(\ln|z|,\arg z)$ 不可用。
+    \item $b\in\mathbb{Z}$ 时 $z^b$ 单值：$z^n$（$n\in\mathbb{Z}$）只依赖 $z$，与辐角选支无关，故对一切 $z\in\mathbb{C}^{\times}$ 单值；一旦 $b\notin\mathbb{Z}$，$z^b$ 就依赖 $\log z$ 的选支，不同的支给出不同的值（命题 \ref{prop:complex_log_i_symmetry}），故若要求 $z^b$ 单值，必须或限制 $b\in\mathbb{Z}$，或固定一个选支（如主支 $\operatorname{Log}$，$\arg z\in(-\pi,\pi]$），或把 $z$ 限制在不跨支割线的单连通区域上。
+    \item 复对数的选支：定理 \ref{thm:power_matrix_log_coordinates} 中对数坐标的“矩阵形式”只在固定支之后成立，换支后 $L(z)$ 的第二坐标整体平移 $2\pi k$（$k\in\mathbb{Z}$），矩阵 $M_b$ 不变而平移项改变，故 $L(z^b)=M_bL(z)$ 应理解为“在取定的一个支上成立”，或等价地理解为模 $2\pi$ 意义下的等式（命题 \ref{prop:complex_log_i_symmetry}）。
+    \item $a^b=\exp(b\ln a)$ 要求 $a>0$：若 $a>0$ 且取实数对数 $\ln a$（$a\neq1$ 时由定义 \ref{def:logarithm} 唯一确定，$a=1$ 时 $\ln a=0$），则 $a^b$ 有唯一实值；若允许 $a\le0$ 或 $b\notin\mathbb{Z}$，则 $a^b$ 或取多值，或必须指定分支，且所选分支在支割线上不连续，故实单值性以 $a>0$ 为前提。
+    \item 解耦的局部与整体之分：$\mathbb{C}^{\times}\cong\mathbb{R}_{>0}\times U(1)$ 作为拓扑群同构是整体的（定理 \ref{thm:complex_multiplication_decoupling}），但把解耦写成单值坐标 $\Lambda$ 必须选支；在任一不含 $0$ 的单连通区域上可选取全纯对数支，而在 $\mathbb{C}^{\times}$ 整体上不存在连续的单值对数支，故“坐标形式的解耦”是局部可行的，“同构形式的解耦”是整体成立的。
+    \item 可逆性前提：$b\neq0$。矩阵 $M_b$ 可逆当且仅当 $|b|^2\neq0$；$b=0$ 时 $z\mapsto bz$ 是零映射，对数坐标下的线性形式随之退化。
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i) 辐角 $\arg z$ 由 $z/|z|$ 读出，而 $z=0$ 时 $z/|z|$ 无定义；实对数 $\ln|z|$ 也只在 $|z|>0$ 上有定义（定义 \ref{def:logarithm}）。
+
+(ii) 对 $n\in\mathbb{Z}$ 与 $z=re^{i\varphi}$ 有 $z^n=r^ne^{in\varphi}$，把 $\varphi$ 换成 $\varphi+2\pi k$ 后 $e^{in(\varphi+2\pi k)}=e^{in\varphi}e^{2\pi ink}=e^{in\varphi}$（因 $nk\in\mathbb{Z}$），故与选支无关。反之若 $b\notin\mathbb{Z}$，则 $e^{ib(\varphi+2\pi k)}=e^{ib\varphi}e^{2\pi ibk}$，而 $e^{2\pi ibk}\neq1$ 对某个 $k$ 成立（因 $bk\notin\mathbb{Z}$），故换支改变函数值；不同支相差 $2\pi i$ 的事实见命题 \ref{prop:complex_log_i_symmetry}。
+
+(iii) 由定义 \ref{def:log_linear_coordinates}，换支只改变 $\arg z$ 的代表元，$M_b$ 由 $b$ 的实部与虚部决定而不含 $\arg z$，故不变；平移项 $(\ln|b|,\arg b)$ 随支改变。
+
+(iv) 设 $a>0$。若 $a\neq1$，则 $y\mapsto a^y$ 是严格单调的连续函数，$a^b$ 由极限定义（注 \ref{def:logarithm} 后的顺序说明）唯一；若 $a=1$，则 $a^b=1$ 唯一。若 $a<0$，写 $a=|a|e^{i\pi}$，则 $a^b=e^{b\ln|a|}e^{ib\pi}$ 依赖 $\arg a=\pi+2\pi k$ 的选取，仅在 $b\in\mathbb{Z}$ 时单值。
+
+(v) 整体同构由定理 \ref{thm:complex_multiplication_decoupling} 给出。设 $U\subset\mathbb{C}^{\times}$ 单连通且不含 $0$，则可取 $\arg$ 的连续单值支使 $\Lambda$ 在 $U$ 上单值；若在 $\mathbb{C}^{\times}$ 整体上存在连续单值支 $\arg$，则沿单位圆一周的连续变化给出 $\arg(1)$ 的两个不同值（相差 $2\pi$），矛盾，故整体单值支不存在。
+
+(vi) $\det M_b=|b|^2$，故可逆当且仅当 $b\neq0$；$b=0$ 时 $bz=0$ 不落在 $\mathbb{C}^{\times}$ 中，对数坐标无定义。
+\end{proof}
+
+\begin{example}[幂耦合的具体演算]\label{ex:power_coupling_example}
+取对数坐标中的一点 $z_0=2e^{i\pi/4}$，则 $L(z_0)=(\ln 2,\pi/4)$。
+\begin{enumerate}[label=(\roman*)]
+    \item 实底的纯缩放：取 $b=2$（$u=2,v=0$，实数底，引理 \ref{lem:real_power_no_coupling}），$M_2=2I_2$，故
+    在模 $2\pi$ 意义下 $L(z_0^2)=2L(z_0)=(\ln 4,\ \pi/2)$，而 $z_0^2=4e^{i\pi/2}=4i$，
+    即模长由 $2$ 放大为 $4$，辐角由 $\pi/4$ 变为 $\pi/2$，两个坐标各自独立地乘 $2$，交叉项为零，无耦合。
+    \item 非实底的耦合：取 $b=1+i$（$u=v=1$），$M_b=\begin{pmatrix}1&-1\\ 1&1\end{pmatrix}$，则
+    \[
+    L(z_0^b)=M_bL(z_0)=\bigl(\ln 2-\tfrac{\pi}{4},\ \ln 2+\tfrac{\pi}{4}\bigr)
+    \approx(0.6931-0.7854,\ 0.6931+0.7854)=(-0.0923,\ 1.4785),
+    \]
+    即 $z_0^{1+i}\approx e^{-0.0923}e^{i1.4785}=0.9118\,e^{i1.4785}\approx0.0843+0.9096\,i$。其中第一坐标的 $-\pi/4$ 项正是“旋转耦合进缩放”的贡献（辐角 $\pi/4$ 被 $-v=-1$ 乘进模长坐标），第二坐标的 $+\ln 2$ 项正是“缩放耦合进旋转”的贡献（模长坐标 $\ln 2$ 被 $+v=+1$ 乘进辐角坐标）：非对角元 $\pm v$ 使两个方向互相串扰，轨道不再沿坐标轴分离。
+    \item 选支校准：若改用主支直接计算，则 $\operatorname{Log}z_0=\ln 2+i\pi/4$，$(1+i)\operatorname{Log}z_0=(\ln 2-\pi/4)+i(\ln 2+\pi/4)$，与 (ii) 的坐标一致；而按 $\log(z_0^b)=b\log z_0+2\pi ik$ 的选支修正，$k$ 的不同只把结果在虚方向上平移 $2\pi$，矩阵 $M_b$ 不变（性质 \ref{prop:power_preconditions} 第 (iii) 款）。
+    \item 对照纯旋转：取 $b=i$（$u=0,v=1$），$M_i=\begin{pmatrix}0&-1\\ 1&0\end{pmatrix}$ 是 $90^\circ$ 旋转矩阵，它把 $L(z_0^2)=(\ln 4,\pi/2)$ 映为
+    \[
+    L\bigl((z_0^2)^i\bigr)=M_iL(z_0^2)=\bigl(-\pi/2,\ \ln 4\bigr),\qquad (z_0^2)^i=e^{-\pi/2}(\cos\ln 4+i\sin\ln 4),
+    \]
+    模长坐标 $0$ 被旋转矩阵的 $-1$ 项吸走，只剩辐角 $\ln 4$；这正是 $b=i$ 时 $\ln|b|=0$、$\arg b=\pi/2$ 的表现：纯旋转底的幂把缩放坐标转为相位、把相位转为缩放坐标，与 (i) 的对角情形恰成对照。
+\end{enumerate}
+\end{example}
+
+\begin{remark}[$e^{i\pi}+1=0$：五个基本常数的汇合]\label{rem:euler_identity_closing}
+本节的解耦结构可以用一个等式收束：
+\[
+e^{i\pi}+1=0.
+\]
+它把五个基本常数汇集在一个关系式中：$0$（加法中性元，平移的对称中心）、$1$（乘法中性元，缩放的对称中心）、$e$（指数映射的底，定理 \ref{thm:log_unification} 中把平移转化为缩放的载体）、$i$（旋转的原子，四阶骨架 $C_4$ 的生成元，定义 \ref{def:unit_circle_fourfold_skeleton}）、$\pi$（半转的相位，把 $i$ 的四分之一转累积两次所得的相位）。就结构而言，这个等式说明三件事：
+\begin{itemize}
+    \item \textbf{旋转的原子是 $i$，不是 $-1$}：$-1=e^{i\pi}=i^2$ 是半转，只能给出二阶的符号翻转；要得到四阶骨架 $C_4$（以及随之而来的四分之一转），必须加入 $i$，这正是定义 \ref{def:unit_circle_fourfold_skeleton} 与命题 \ref{prop:sign_as_half_turn_projection} 的结论；“符号即半转”的成立条件见注 \ref{rem:sign_versus_additive_reflection}。
+    \item \textbf{$e^{i\pi}$ 是 $-1$ 的唯一相位实现}：$e^{i\pi}=-1$ 表明加法反射在 $\mathbb{C}$ 中以半转相位实现，故定理 \ref{thm:complex_multiplication_decoupling} 中单位圆 $U(1)$ 的实元素 $\{\pm1\}$ 恰是实轴与 $U(1)$ 的交，即 $\mathbb{R}\cap U(1)=\{\pm1\}$，也即 $180^\circ$ 投影的像。
+    \item \textbf{$0,1,e,i,\pi$ 在解耦下各司其职}：对数坐标把乘法分为模长与辐角两条轴，$1$ 与 $0$ 分别是对数域两条轴上（乘法与加法）的中性元，$e$ 负责两域之间的转换，$i$ 提供旋转方向的四分之一转，$\pi$ 标定半转的相位；幂运算的矩阵形式（定理 \ref{thm:power_matrix_log_coordinates}）则把这五个常数的分工写成两个坐标轴之间的线性耦合。
+\end{itemize}
+由此，$e^{i\pi}+1=0$ 不是孤立的巧合，而是本章“逆运算的引入逐级确立对称中心”这一主线的相位表述：加法中心 $0$、乘法中心 $1$、相位中心 $i$ 在同一等式中同时出现。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+    \draw[->] (-3.5,0) -- (3.5,0) node[right] {$(\mathbb{R},+)$ 平移方向};
+    \draw[->] (0,-0.5) -- (0,3.8) node[above] {$(\mathbb{R}^+,\times)$ 比例方向};
+    \draw[gray, dashed, domain=-3.2:1.3, samples=100] plot (\x, {exp(\x)});
+    \node[font=\footnotesize] at (2.0, 3.5) {$y=e^x$（指数）};
+    \node[font=\footnotesize] at (1.8, 1.0) {$\exp$};
+
+    \filldraw[blue] (-1.0, {exp(-1.0)}) circle (2pt) node[left=4pt, font=\footnotesize] {$(-x,e^{-x})$};
+    \filldraw[red] (1.0, {exp(1.0)}) circle (2pt) node[right=4pt, font=\footnotesize] {$(x,e^x)$};
+
+    \draw[->, thick, >=stealth, orange] (3.0, {exp(1.0)}) to[bend left=40] (4.3, {exp(1.0)+0.8});
+    \node[orange, font=\footnotesize] at (4.6, 3.3) {$\log$（对数）};
+
+    \node[font=\footnotesize] at (-2.0, 2.5) {结构转换};
+    \draw[->, gray, thin] (-2.2, 2.2) -- (-1.5, 1.5);
+
+    \filldraw[black] (0,1) circle (2pt) node[below right=3pt, font=\footnotesize] {$0 \leftrightarrow 1$};
+\end{tikzpicture}
+\caption{对数的结构转换功能：指数映射 $\exp$ 将加法群中的平移转化为乘法群中的比例；对数 $\log$ 是其逆映射，将比例方向转化为平移方向。乘法对称中心 $1$ 对应加法对称中心 $0$。}
+\label{fig:logarithm_converter}
+\end{figure}
+\section{\texorpdfstring{数系扩张的周期判定谱系}{数系扩张的周期判定谱系}}
+
+\begin{theorem}[数系扩张与周期判定能力的对应]\label{thm:number_system_period_criterion}
+设系统的时间演化由一个群作用或哈密顿流给出。则描述该系统所需的数系，与其可能判定或表达的周期类型之间存在如下对应：
+\[
+\mathbb{Z} \Longrightarrow \text{可表达离散平移周期},
+\]
+\[
+\mathbb{Q} \Longrightarrow \text{可表达有限旋转周期},
+\]
+\[
+\mathbb{R} \Longrightarrow \text{可表达连续平移周期与准周期},
+\]
+\[
+\mathbb{C} \Longrightarrow \text{可表达旋转周期与双周期},
+\]
+\[
+\mathbb{H} \Longrightarrow \text{可表达三维旋转周期与非交换周期}.
+\]
+每一步扩张，都为上一级数系中无法表达的周期判定问题提供了新的代数工具。
+\end{theorem}
+
+\begin{proof}
+由各节的判据定理逐级组合：
+\begin{itemize}
+    \item $\mathbb{Z}$：定理 \ref{thm:integer_translation_criterion}——离散平移周期可判定。
+    \item $\mathbb{Q}$：定理 \ref{thm:rational_rotation_criterion}——有限旋转周期可判定。
+    \item $\mathbb{R}$：定理 \ref{thm:real_quasi_period_criterion}——准周期可描述。
+    \item $\mathbb{C}$：定理 \ref{thm:complex_finite_rotation_criterion} 与定理 \ref{thm:complex_double_period}——旋转周期与双周期完全代数化。
+    \item $\mathbb{H}$：定理 \ref{thm:quaternion_rotation_criterion} 与定理 \ref{thm:noncommutative_period}——三维旋转周期与非交换周期可代数化。
+\end{itemize}
+各级扩张不可逆推，因为每级新增的封闭性都恰好解决上一级无法表达的周期判定问题。
+\end{proof}
+
+\begin{theorem}[数系扩张与函数方程可解性的对应]\label{thm:number_system_function_equation}
+每一级数系扩张，恰好使一类函数方程从“不可解”或“不封闭”变为“可解”且其具有周期轨道的群成为群：
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathbb{Z}$ 使平移方程 $f(x+a)=f(x)$ 可双向迭代，具有周期轨道的群成为子群 $a\mathbb{Z}$；反周期方程 $f(x+a)=-f(x)$ 推出周期加倍 $2a$。
+    \item $\mathbb{Q}$ 使缩放方程 $f(qx)=f(x)$ 可双向迭代，具有周期轨道的群成为子群 $\langle q\rangle$；可公度性判据 $\theta/(2\pi)\in\mathbb{Q}$ 可被精确表达。
+    \item $\mathbb{R}$ 使连续平移方程 $f(x+t)=f(x)$（$t\in\mathbb{R}$）有严格拓扑意义，具有周期轨道的群为闭子群；准周期轨道的稠密性可被严格描述。
+    \item $\mathbb{C}$ 使旋转方程 $f(e^{i\theta}z)=f(z)$ 可代数化，具有周期轨道的群为 $U(1)$ 的子群；有限旋转周期由单位根方程 $z^n=1$ 精确刻画。
+    \item $\mathbb{H}$ 使三维旋转方程 $f(qvq^{-1})=f(v)$ 可代数化，具有周期轨道的群为 $S^3\cong SU(2)$ 的有限子群。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+逐条由各节的函数特征定理给出：$\mathbb{Z}$ 由定理 \ref{thm:translation_equation_Z}，$\mathbb{Q}$ 由定理 \ref{thm:scaling_equation_Q} 与 \ref{thm:rotation_equation_Q}，$\mathbb{R}$ 由定理 \ref{thm:translation_equation_R} 与命题 \ref{prop:quasi_period_R}，$\mathbb{C}$ 由定理 \ref{thm:rotation_equation_C} 与推论 \ref{cor:unit_root_C}，$\mathbb{H}$ 由定理 \ref{thm:rotation_equation_H}。
+\end{proof}
+
+\begin{table}[htbp]
+\centering
+\caption{三类函数方程在各数系中的可解性与具有周期轨道的群结构}
+\label{tab:function_equation_solvability}
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.55cm}>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}p{3.5cm}>{\raggedright\arraybackslash}p{5.05cm}@{}}
+\toprule
+\textbf{数系} & \textbf{平移 $f(x+a)=f(x)$} & \textbf{缩放 $f(qx)=f(x)$} & \textbf{旋转 $f(e^{i\theta}z)=f(z)$} \\
+\midrule
+$\mathbb{N}$ & 有解，具有周期轨道的群非群 & 不可逆 & 无载体 \\
+$\mathbb{Z}$ & 具有周期轨道的群 $a\mathbb{Z}$ & 不可逆（$q^{-1}\notin\mathbb{Z}$） & 无载体 \\
+$\mathbb{Q}$ & 具有周期轨道的群 $a\mathbb{Z}$ & 具有周期轨道的群 $\langle q\rangle$ & 可公度性判据可表达 \\
+$\mathbb{R}$ & 具有周期轨道的群为闭子群 & 对数域平移 & 仍无代数载体 \\
+$\mathbb{C}$ & 具有周期轨道的群为闭子群 & 对数域平移 & 具有周期轨道的群为 $U(1)$ 子群，$z^n=1$ 精确 \\
+$\mathbb{H}$ & 具有周期轨道的群为闭子群 & 对数域平移 & 具有周期轨道的群为 $S^3\cong SU(2)$ 的有限子群 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{数系扩张、判定需求与周期类型的统一谱系}
+\label{tab:number_system_period_spectrum}
+\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{1.6cm}
+                  >{\raggedright\arraybackslash}X
+                  >{\raggedright\arraybackslash}X
+                  >{\raggedright\arraybackslash}X
+                  >{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{数系} & \textbf{判定需求} & \textbf{新增封闭性} & \textbf{周期类型} & \textbf{守恒量} \\
+\midrule
+$\mathbb{N}$ & 计数、索引 & 无逆运算 & 无周期 & —— \\
+$\mathbb{Z}$ & 平移轨道双向延展 & 减法（加法逆元） & 离散平移周期 & 动量 \\
+$\mathbb{Q}$ & 可公度性判断 & 除法（乘法逆元） & 有限旋转周期 & 角动量 \\
+$\mathbb{R}$ & 稠密性、连续性 & 完备性 & 准周期、连续周期 & 动量、相体积 \\
+$\mathbb{C}$ & 旋转代数化 & 虚数单位 $i$ & 旋转周期、双周期 & 角动量 \\
+$\mathbb{H}$ & 三维旋转代数化 & 非交换乘法 & 三维旋转周期 & 三维角动量 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{corollary}[数系扩张的周期诊断意义]\label{cor:number_system_diagnosis}
+在周期数学的诊断中，数系扩张的层级提供了一个判定工具：
+\begin{enumerate}[label=(\roman*)]
+    \item 若系统只能在 $\mathbb{Z}$ 上构造群作用，则可判定的周期类型限于离散平移周期。
+    \item 若系统需要 $\mathbb{Q}$ 来表达可公度性，则可判定有限旋转周期。
+    \item 若系统需要 $\mathbb{R}$ 来表达稠密性与连续性，则可描述准周期。
+    \item 若系统需要 $\mathbb{C}$ 来表达旋转代数化与周期格，则可描述旋转周期或双周期。
+    \item 若系统需要 $\mathbb{H}$ 来表达三维旋转，则可描述三维旋转周期。
+\end{enumerate}
+这一诊断原则是数系扩张理论在周期判定中的直接应用。
+\end{corollary}
+
+\begin{proof}
+由定理 \ref{thm:number_system_period_criterion} 与定理 \ref{thm:number_system_function_equation} 逐条代入即得——所需数系决定可表达或可判定的周期类型与函数方程的可解性：
+(i) 若只能用 $\mathbb{Z}$（$\mathbb{N}$ 无逆运算、不直接提供周期判定工具，见命题 \ref{prop:natural_no_inverse}），则 $\mathbb{Z}$ 对应离散平移周期，函数方程 $f(x+a)=f(x)$ 的具有周期轨道的群为 $a\mathbb{Z}$。
+(ii) 若需要 $\mathbb{Q}$，即需要乘法逆元表达可公度性 $\theta/(2\pi)\in\mathbb{Q}$，则 $\mathbb{Q}$ 对应有限旋转周期，函数方程 $f(qx)=f(x)$ 的具有周期轨道的群为 $\langle q\rangle$。
+(iii) 若需要 $\mathbb{R}$，即需要完备性表达稠密性与连续性，则 $\mathbb{R}$ 对应准周期，连续平移方程的具有周期轨道的群为闭子群。
+(iv) 若需要 $\mathbb{C}$，即需要代数闭性给出 $z^n = 1$ 的完整解集与周期格 $\Lambda$，则 $\mathbb{C}$ 对应旋转周期或双周期，旋转方程的具有周期轨道的群为 $U(1)$ 的子群。
+(v) 若需要 $\mathbb{H}$，即需要非交换乘法表达三维旋转，则 $\mathbb{H}$ 对应三维旋转周期，三维旋转方程的具有周期轨道的群为 $SU(2)$ 的有限子群。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=stealth, node distance=2.8cm and 3.2cm,
+    ns/.style={draw, circle, minimum size=1.5cm, inner sep=0pt, font=\large\bfseries},
+    arrow/.style={->, thick, >=stealth, font=\footnotesize}]
+
+    \node[ns, fill=blue!10] (N) at (0,0) {$\mathbb{N}$};
+    \node[ns, fill=green!10] (Z) at (4,0) {$\mathbb{Z}$};
+    \node[ns, fill=yellow!10] (Q) at (8,0) {$\mathbb{Q}$};
+    \node[ns, fill=orange!10] (R) at (8,-3.5) {$\mathbb{R}$};
+    \node[ns, fill=red!10] (C) at (0,-3.5) {$\mathbb{C}$};
+    \node[ns, fill=purple!10] (H) at (0,-7.0) {$\mathbb{H}$};
+
+    \draw[arrow] (N) -- (Z) node[midway, above=1cm] {加减法：$0$平移对称};
+    \draw[arrow] (Z) -- (Q) node[midway, above=1cm] {乘除法：$1$缩放对称};
+    \draw[arrow] (Q) -- (R) node[midway, right] {完备化（连续化）};
+    \draw[arrow] (R) -- (C) node[midway, below, sloped] {$\sqrt{-1}$：$i$对称（旋转）};
+    \draw[arrow] (C) -- (H) node[midway, right] {非交换（三维旋转）};
+
+    \node[font=\footnotesize, text=blue!60!black] at (2, -1.2) {平移方向（动量）};
+    \node[font=\footnotesize, text=green!60!black] at (6, -1.2) {比例方向（相体积）};
+    \node[font=\footnotesize, text=red!60!black] at (-1.5, -5.2) {旋转方向（角动量）};
+    \node[font=\footnotesize, text=purple!60!black] at (-2, -8.2) {三维旋转（三维角动量）};
+\end{tikzpicture}
+\caption{数系扩张路径与变换层级的递进（全章总结图）。每一步扩张通过引入新的逆运算来确立新的对称中心，从而产生新的变换类型：减法（$0$对称）使平移双向化；除法（$1$对称）引入缩放——重复的平移产生缩放；虚数单位（$i$对称）引入旋转——重复的缩放产生旋转；非交换乘法引入三维旋转。对数将缩放转化为平移，复对数将旋转转化为平移，三种变换在对数域中统一为加法。$\mathbb{N}\to\mathbb{Z}\to\mathbb{Q}$ 的局部图见第 \ref{prop:integer_symmetry_direction_period} 节的图 \ref{fig:symmetry_centre_emergence}。}
+\label{fig:number_extension}
+\end{figure}
+\section*{本章七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 整数的平移周期判据（定理 \ref{thm:integer_translation_criterion}）与离散平移周期（推论 \ref{cor:integer_discrete_translation}）；对数将比例方向转换为平移方向（定理 \ref{thm:logarithm_conversion}）；平移方程的具有周期轨道的群（定理 \ref{thm:translation_equation_Z}、\ref{thm:translation_equation_R}） \\
+缩放 & 有理数的比例方向（命题 \ref{prop:rational_direction_period}）、乘法取逆对合 $\sigma_1$（定义 \ref{def:rational_involution}）；对数同构下守恒量转换（定理 \ref{thm:log_isomorphism_conservation}）；缩放方程的具有周期轨道的群（定理 \ref{thm:scaling_equation_Q}） \\
+旋转 & 复数旋转代数化（定理 \ref{thm:complex_rotation_algebraization}）、有限旋转周期判据（定理 \ref{thm:complex_finite_rotation_criterion}）；四元数三维旋转（定理 \ref{thm:quaternion_rotation_criterion}）；旋转方程的具有周期轨道的群（定理 \ref{thm:rotation_equation_C}、\ref{thm:rotation_equation_H}） \\
+守恒 & 各级数系的运算封闭性（整数构造 \ref{def:integer_construction}、复数代数封闭 \ref{prop:complex_algebraically_closed}）；四元数范数乘性与卡西米尔守恒（命题 \ref{prop:quaternion_direction_period}） \\
+对称 & 对称中心 $0,1,i$ 的涌现：加法对合（整数）、乘法对合 $\sigma_1$（有理数）、$i$-对合（复数，定义 \ref{def:complex_i_involution}） \\
+闭合 & 对合的两步闭合（$\sigma^2=\mathrm{id}$）；有限旋转周期 $\Leftrightarrow$ 单位根闭合（定理 \ref{thm:complex_finite_rotation_criterion}） \\
+周期 & 数系扩张与周期判定能力的对应（定理 \ref{thm:number_system_period_criterion}）、数系扩张与函数方程可解性的对应（定理 \ref{thm:number_system_function_equation}）与周期判定谱系（表 \ref{tab:number_system_period_spectrum}）：离散平移/有限旋转/准周期/双周期/非交换周期 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明命题 \ref{prop:natural_no_inverse} 中关于自然数逆运算缺失的三条断言：
+    减法、除法与开方分别在何种条件下有自然数解、在何种条件下无解。
+    进一步说明：为什么自然数不能构成群，并解释推论 \ref{cor:natural_period} 中
+    “离散平移周期判定至少需要 $\mathbb{Z}$ 的群结构”这一结论。
+
+    \item 补全命题 \ref{prop:integer_well_defined} 中乘法良定义性的证明细节，
+    并验证整数构造 \ref{def:integer_construction} 中加法、乘法、零元与逆元确实
+    不依赖于等价类代表元的选取。最后说明：为什么 $\mathbb{Z}$ 的加法群是使
+    平移轨道能够双向延展、从而判定闭合性的最小代数结构
+    （参见注 \ref{rem:integer_makes_translation_invertible}）。
+
+    \item 在 $\mathbb{Z}/12\mathbb{Z}$ 中计算元素 $[3]$、$[4]$、$[5]$、$[7]$ 的阶，
+    并验证引理 \ref{lem:order_cyclic_subgroup_ch2} 的公式
+    \[
+    \operatorname{ord}([T])=\frac{12}{\gcd(T,12)}.
+    \]
+    指出哪些元素是 $\mathbb{Z}/12\mathbb{Z}$ 的生成元。
+    若把 $12$ 理解为地支周期，试说明这些元素的阶如何对应周期 $12$ 内部的子周期结构。
+
+    \item 证明定理 \ref{thm:integer_translation_criterion} 中的断言：
+    平移轨道在 $\mathbb{Z}/m\mathbb{Z}$ 中退化为单点当且仅当 $T\equiv0\pmod m$。
+    并构造一个具体例子：取 $m=12$，$T\neq0$，但轨道在 $\mathbb{Z}/12\mathbb{Z}$
+    中的最小周期严格小于 $12$。计算该轨道长度。
+
+    \item 验证 $\mathbb{Q}$ 构成域（命题 \ref{prop:rational_field}），
+    并证明乘法取逆映射
+    \[
+    \sigma_1:\mathbb{Q}^{\times}\to\mathbb{Q}^{\times},\qquad
+    \sigma_1(x)=x^{-1}
+    \]
+    是乘法群自同构、对合，且不动点集为 $\{1,-1\}$
+    （参见定义 \ref{def:rational_involution} 与命题 \ref{prop:rational_involution_properties}）。
+    说明 $\sigma_1$ 如何把“放大”操作与“缩小”操作互换。
+
+    \item 证明定理 \ref{thm:rational_rotation_criterion}：
+    若 $\theta/(2\pi)=p/q$ 为既约有理数，则旋转轨道
+    \[
+    \mathcal{O}(z_0;\theta)=\{z_0e^{in\theta}\mid n\in\mathbb{Z}\}
+    \]
+    恰含 $q$ 个点，且周期为 $q$；
+    若 $\theta/(2\pi)\notin\mathbb{Q}$，则轨道不闭合。
+    进一步说明：为什么“可公度性”这一判据本身需要 $\mathbb{Q}$
+    才能被精确表达，而 $\mathbb{R}$ 只能描述其极限与稠密性。
+
+    \item 证明实数完备性使根运算封闭（定理 \ref{thm:real_root_closure}），
+    并给出一个在 $\mathbb{Q}$ 中无解、但在 $\mathbb{R}$ 中有解的方程。
+    再说明：为什么准周期轨道的稠密性描述必须依赖 $\mathbb{R}$ 的完备性
+    （参见命题 \ref{prop:quasi_period_R} 与定理 \ref{thm:real_quasi_period_criterion}）。
+
+    \item 验证 $n$ 次单位根集合
+    \[
+    \{\zeta_k=e^{2\pi ik/n}\mid k=0,1,\dots,n-1\}
+    \]
+    在复数乘法下构成循环群 $C_n$（定理 \ref{thm:complex_finite_rotation_criterion}）。
+    具体写出 $n=8$ 时的全部单位根，并说明它们与旋转周期 $C_8$ 的对应关系。
+    最后说明：为什么 $\mathbb{C}$ 是使旋转方程可代数化的最小域扩张
+    （参见注 \ref{rem:complex_makes_rotation_algebraic}）。
+
+    \item 证明映射
+    \[
+    \sigma_i:\mathbb{C}^{\times}\to\mathbb{C}^{\times},\qquad
+    \sigma_i(z)=iz^{-1}
+    \]
+    是对合，并求其不动点。将 $z$ 写成极形式 $z=re^{i\varphi}$，
+    说明 $\sigma_i$ 同时包含模长取倒数与关于 $\pi/4$ 方向的辐角反射
+    （参见定义 \ref{def:complex_i_involution} 与命题 \ref{prop:complex_i_involution_properties}）。
+
+    \item 证明四元数单位球面
+    \[
+    S^3=\{q\in\mathbb{H}\mid |q|=1\}
+    \]
+    通过共轭作用
+    \[
+    \rho_q(v)=qvq^{-1},\qquad v\in\operatorname{Im}(\mathbb{H})\cong\mathbb{R}^3
+    \]
+    实现三维旋转，且映射
+    \[
+    \Pi:S^3\to SO(3),\qquad q\mapsto\rho_q
+    \]
+    是二重覆盖，核为 $\{\pm1\}$（定理 \ref{thm:quaternion_rotation_criterion}）。
+    再举例说明绕不同轴的旋转一般不可交换（定理 \ref{thm:noncommutative_period}）。
+
+    \item 验证对数同构
+    \[
+    \ln:(\mathbb{R}^+,\times)\to(\mathbb{R},+)
+    \]
+    将乘法对称中心 $1$ 映为加法对称中心 $0$，
+    并将比例方向下的守恒量转换为平移方向下的守恒量
+    （参见定理 \ref{thm:logarithm_conversion}、定理 \ref{thm:log_isomorphism_conservation}
+    与命题 \ref{prop:log_symmetry_centre_unification}）。
+    以 $f(x)=\sin(2\pi\log_q x)$ 为例，验证 $f(qx)=f(x)$，
+    并写出其在 $t=\ln x$ 变量下的平移周期形式。
+
+    \item 综合题：根据定理 \ref{thm:number_system_period_criterion}
+    与表 \ref{tab:number_system_period_spectrum}，说明为什么
+    “离散平移周期”“有限旋转周期”“双周期”“三维旋转周期”
+    分别至少需要 $\mathbb{Z}$、$\mathbb{Q}$、$\mathbb{C}$、$\mathbb{H}$。
+    构造一个反例说明：在 $\mathbb{R}$ 上无法代数化平面旋转周期。
+    再讨论：若一个系统仅在 $\mathbb{N}$ 上有定义，能否判定其平移周期？
+    若不能，最小应把数系扩张到哪一级？给出理由。
+
+    \item 在对数坐标 $(\ln|z|,\arg z)$ 下写出乘 $b=u+iv$ 的矩阵
+    \[
+    M_b=\begin{pmatrix}u&-v\\ v&u\end{pmatrix},
+    \]
+    并说明其非对角元 $\pm v$ 的含义（定理 \ref{thm:power_matrix_log_coordinates}）。
+    取 $b=1+i$ 与 $z_0=2e^{i\pi/4}$，算出 $z_0^{b}$ 的对数坐标，
+    并指出哪一项来自“旋转耦合进缩放”、哪一项来自“缩放耦合进旋转”
+    （参见例 \ref{ex:power_coupling_example}）。
+    最后说明：为什么“幂序列 $\{z b^n\}$ 落在一条等角螺线上”必须以 $v\neq0$ 为前提，
+    而当 $|b|=1$ 时该判据退化为圆上的闭合与稠密二分
+    （参见推论 \ref{cor:spiral_criterion} 与定理 \ref{thm:rational_rotation_criterion}）；
+    并说明 $z^b$ 的单值性需要哪些收束条件（性质 \ref{prop:power_preconditions}）。
+\end{enumerate}
+

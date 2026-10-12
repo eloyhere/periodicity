@@ -1,0 +1,705 @@
+\chapter{心理系统之周期结构}
+\markboth{心理系统之周期结构}{心理系统之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:psych_ps_hook}
+本章判定研究目标是否具有周期性、确定其周期类型、以及查找最小正周期时，一律引用「周期系统」章：
+周期性判据见 \cref{thm:ps_periodicity_decision}，
+周期类型判别见 \cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}，
+最小正周期查找见 \cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}，
+由数据构建周期级数与周转圆组见 \cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}。
+\end{remark}
+
+\begin{remark}[本章定位：按「周期系统」章五步接口展开]\label{rem:psych_five_steps_positioning}
+心理系统之周期结构研究人类心理活动中周期性、节律性和振荡现象的数学表征。本章不另立周期性判据，而是把心理系统接入「周期系统」章规定的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把睡眠-觉醒周期、注意波动、情绪周期、记忆衰减、潜意识过程、行为周期、人际同步等目标化为离散或连续动力系统，引用 \cref{thm:ps_periodicity_decision} 判定是否具有周期性，并确定周期类型；
+    \item \textbf{构建}：由唤醒水平、情绪效价、注意资源、记忆强度、潜意识激活度、行为倾向构建振幅级数、频率级数、相位级数，组装为心理周转圆组；
+    \item \textbf{调节}：用残差能量下降、心理能量守恒、信息守恒与注意守恒约束动态调节心理周转圆组；
+    \item \textbf{卷积}：在心理周转圆组上引入振幅卷积、相位卷积、频率卷积，并与自相关、互相关、情感同步衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成心理周期诊断流程。
+\end{enumerate}
+本章使用的数学工具包括：双过程模型、极限环理论、RC 充放电模型、情绪环状模型、艾宾浩斯遗忘曲线、相位振子模型、耦合振荡、周期卷积、周转圆组、相位算子、时延。
+\end{remark}
+
+\begin{remark}[本章七主题导引]\label{rem:psych_seven_themes}
+\textbf{平移}——睡眠-觉醒约 24 小时主周期与生物节律的时段推进；\textbf{缩放}——艾宾浩斯遗忘曲线的指数衰减与间隔重复的标度优化；\textbf{旋转}——情绪效价-唤醒二维相空间的昼夜旋转与双相障碍的极限环；\textbf{守恒}——心理能量守恒、信息守恒、注意守恒（经验观察／研究纲领，注 \ref{thm:psychological_conservation}）；\textbf{对称}——情绪的正负效价对称与睡眠-觉醒的昼夜对称；\textbf{闭合}——注意资源消耗-恢复循环的闭合（引理 \ref{ch26_attention_cycle}）；\textbf{周期}——90 分钟睡眠周期、注意振荡（theta/delta 频段）、情绪昼夜周期、习惯循环。
+\end{remark}
+
+\section{接入「周期系统」章的五步接口}
+\label{sec:psych_five_steps}
+
+\subsection{第一步：心理目标的周期性判定}
+
+\begin{definition}[心理目标与判定输入]\label{def:psych_target}
+一个\textbf{心理目标}是指下列对象之一：
+\begin{enumerate}[label=(\roman*)]
+    \item 一个睡眠-觉醒系统，其状态空间为睡眠压力与昼夜节律相位的联合空间；
+    \item 一个注意资源系统，其状态空间为注意资源量 $R(t)$ 的区间空间；
+    \item 一个情绪周期系统，其状态空间为（效价 $V$，唤醒 $A$）二维相空间；
+    \item 一个记忆保持系统，其状态空间为记忆强度 $M(t)$ 的区间空间；
+    \item 一个行为周期系统，其状态空间为行为倾向 $B(t)$ 与提示强度的联合空间；
+    \item 一个人际情感同步系统，其状态空间为双方情绪相位 $(\theta_1,\theta_2)$ 的联合空间。
+\end{enumerate}
+心理目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal D_{\mathrm{P}}=(\mathcal S,\Phi),
+\]
+其中 $\mathcal S$ 是状态空间，$\Phi:\mathcal S\to\mathcal S$ 是时间平移、相位旋转或反馈演化所诱导的映射。若 $\mathcal S$ 为有限集，称目标为\textbf{有限心理目标}；若 $\mathcal S$ 为无限集，称目标为\textbf{无限心理目标}。
+\end{definition}
+
+\begin{definition}[心理判定映射]\label{def:psych_periodization}
+设心理目标由判定输入 $\mathcal D_{\mathrm{P}}=(\mathcal S,\Phi)$ 给出。若目标的状态由 $\Phi$ 生成，即存在 $x_0\in\mathcal S$ 使
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+当 $t\in\mathbb Z$ 时 $x_t$ 由 $\Phi$ 迭代生成；当 $t\in\mathbb R$ 时，以单参数演化族 $\{\Phi_t\}_{t\in\mathbb R}$（其中每个 $\Phi_t:\mathcal S\to\mathcal S$，且 $\Phi_0=\operatorname{id}$、$\Phi_{s+t}=\Phi_s\circ\Phi_t$ 对一切 $s,t\in\mathbb R$ 成立、$(t,x)\mapsto\Phi_t(x)$ 连续）记之。
+则称 $\Phi$ 为目标的\textbf{心理判定映射}。此时当 $t\in\mathbb Z$ 时心理目标化为离散动力系统 $(\mathcal S,\Phi)$，当 $t\in\mathbb R$ 时化为连续动力系统 $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$，两种情形均可直接套用「周期基础」章与「周期系统」章的判据。
+\end{definition}
+
+\begin{theorem}[心理周期性判定定理]\label{thm:psych_periodicity_decision}
+设心理目标的判定映射为 $\Phi$，且 $(\mathcal S,\Phi)$ 为离散动力系统。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 $m\in\mathbb N^+$ 使 $\Phi^m=\mathrm{id}$，则目标为一致周期心理系统；每条轨道闭合，且轨道长度整除 $m$。
+    \item \textbf{判定等价}：目标为一致周期心理系统当且仅当 $\operatorname{ord}(\Phi)<\infty$。
+    \item \textbf{逐点判据}：目标在状态 $x_0$ 处的轨道闭合当且仅当 $x_0$ 为周期点；此时轨道长度即该点处的周期。
+    \item \textbf{不可省略性}：守恒量与对称群的合取不能替代 $\operatorname{ord}(\Phi)<\infty$；准周期心理目标不属于周期心理系统。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:psych_periodicity_decision} 是「周期系统」章 \cref{thm:ps_periodicity_decision} 的领域实例化：
+只需把判定映射 $f$ 与演化群替换为本章的 $\Phi$，(A) 充分判定、(B) 判定等价、(C) 逐点判据、
+(D) 不可省略性四条即逐条成立。依 \cref{rem:ps_applications_hook} 的约定，此处不再重复展开。
+\end{proof}
+
+\begin{corollary}[心理周期类型]\label{cor:psych_period_type}
+经 \cref{thm:psych_periodicity_decision} 判定后，心理目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 $m_0=1$，状态为不动点；
+    \item \textbf{严格周期型}：$1<m_0<\infty$，状态严格周期；
+    \item \textbf{一致周期型}：$\operatorname{ord}(\Phi)=m<\infty$，所有轨道长度整除 $m$；
+    \item \textbf{准周期型}：$\operatorname{ord}(\Phi)=\infty$，轨道不闭合但在紧致承载结构上稠密；
+    \item \textbf{最终周期型}：存在 $N$，使 $t\ge N$ 后目标为周期；
+    \item \textbf{离散周期型}：承载结构为 $\mathbb Z$，且归一化周期比 $\rho=T_x/\Delta x\in\mathbb Q$。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，残差按 $e^{-\kappa t}$ 衰减（见 \cref{def:ps_period_type}(vii)）。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于周期心理系统；(iv) 不属于周期心理系统，但可用有界逼近工具处理；(v) 只在稳定阶段是周期心理系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期心理系统，只在稳定阶段可用有界逼近工具处理。
+\end{corollary}
+
+\begin{proof}
+逐条由 \cref{thm:psych_periodicity_decision} 与「周期系统」章 \cref{def:ps_period_type} 代入心理目标即得。
+\end{proof}
+
+\begin{lemma}[睡眠-觉醒周期的判定]\label{lem:sleep_periodic}
+设睡眠-觉醒系统由双过程模型描述：过程 S 在觉醒期线性累积，睡眠期指数清除；过程 C 以约 24 小时为周期振荡。则睡眠-觉醒系统为一致周期系统，其主周期为
+\[
+T_{\text{sleep-wake}}\approx 24\ \text{小时},
+\]
+且该主周期内嵌套约 $90$ 分钟的 NREM-REM 次昼夜周期。
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:two_process_sleep}，睡眠倾向 $P(t)=S(t)-C(t)$ 在傍晚-夜间穿越阈值触发睡眠，清晨回落至阈值以下触发觉醒。过程 C 以 24 小时为周期振荡，过程 S 在觉醒-睡眠循环中周期性累积与清除，两者叠加使睡眠-觉醒系统具有约 24 小时的主周期。故判定映射 $\Phi$ 满足 $\Phi^{T_{\text{sleep-wake}}}=\mathrm{id}$，为一致周期系统。
+\end{proof}
+
+\begin{lemma}[注意波动的周期判定]\label{lem:attention_periodic}
+设注意资源 $R(t)$ 在任务期以速率 $\alpha$ 消耗，在休息期以速率 $\beta$ 恢复。则注意资源的消耗-恢复循环为一致周期系统，其周期由引理 \ref{ch26_attention_cycle} 给出。
+\end{lemma}
+
+\begin{proof}
+在任务-休息交替的稳态循环中，注意资源在 $[R_{\min},R_{\max}]$ 内周期性充放。由引理 \ref{ch26_attention_cycle} 的闭合解，$R_{\min}$ 与 $R_{\max}$ 由闭合条件唯一确定，循环以 $T=t_1+t_2$ 为周期重复。故判定映射 $\Phi$ 满足 $\Phi^T=\mathrm{id}$，为一致周期系统。
+\end{proof}
+
+\begin{lemma}[情绪周期的判定]\label{lem:emotion_periodic}
+设情绪状态在（效价 $V$，唤醒 $A$）二维相空间中以角频率 $\omega$ 围绕平衡点旋转，回归速率为 $\mu$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $\mu>0$ 且振荡持久（外部驱动），则情绪系统为一致周期系统；
+    \item 若 $\mu>0$ 且无外部驱动，则情绪轨道为衰减螺旋，属渐近周期（阻尼）型；
+    \item 若 $\mu\approx 0$（双相障碍极限环），则情绪系统为一致周期系统，振幅由病理极限环决定。
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:bipolar_cycle} 的证明，情绪动力学在平衡点附近的线性化为 $\dot X=JX$，特征值为 $\lambda_\pm=-\mu\pm i\omega$。当 $\mu>0$ 时轨道为衰减螺旋，属渐近周期（阻尼）型；当 $\mu\approx 0$ 时轨道近似闭合（一致周期型）；当有持久外部驱动（如昼夜节律驱动）时，稳态响应为一致周期型。
+\end{proof}
+
+\begin{lemma}[遗忘曲线的周期判定]\label{lem:memory_periodic}
+设记忆强度 $M(t)$ 在无复习时以 $M(t)=M_0 e^{-t/\tau}$ 指数衰减，在复习时重置为 $M_0$。则复习-遗忘循环为一致周期系统，其周期为复习间隔之和。
+\end{lemma}
+
+\begin{proof}
+每次复习将 $M$ 重置为 $M_0$；在两次复习之间，$M$ 按指数律衰减至阈值 $M_{\min}$。由命题 \ref{prop:spaced_repetition}，第 $n$ 次复习的最优时间间隔为 $\Delta t_n$。当复习间隔序列为周期性时，复习-遗忘循环构成一致周期系统。
+\end{proof}
+
+\begin{lemma}[习惯形成的周期判定]\label{lem:habit_periodic}
+设行为倾向 $B(t)$ 在重复提示下以速率 $\gamma$ 向渐近值 $B_\infty$ 收敛，则习惯形成过程为渐近周期（阻尼）型——在 $\tau_{\text{habit}}=1/\gamma$ 时间尺度后收敛到稳态。若提示本身具有周期性，则 $B$ 呈现周期响应。
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:habit_formation}，在重复提示下 $B(t)=B_\infty(1-e^{-\gamma t})$，收敛到 $B_\infty$。若提示本身以周期 $T_{\text{cue}}$ 重复，则 $B$ 在稳态时呈现以 $T_{\text{cue}}$ 为周期的周期响应。两种情形分别对应渐近周期（阻尼）型与一致周期型。
+\end{proof}
+
+\begin{definition}[心理最小正周期算法]\label{def:psych_minimal_period_algorithm}
+本定义与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{def:ps_minimal_period_algorithm} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处的差别仅为术语（心理目标 / 心理样本），算法步骤与结论完全相同。
+\end{definition}
+
+\begin{theorem}[心理最小正周期算法的正确性]\label{thm:psych_minimal_period_correctness}
+本定理与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{thm:ps_minimal_period_correctness} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。本处的差别仅为术语（心理目标 / 心理样本），算法步骤与结论完全相同。
+\end{theorem}
+
+\begin{example}[心理周期判定实例]\label{ex:psych_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item 睡眠-觉醒：$T_{\text{sleep-wake}}\approx 24$ h，一致周期型；
+    \item 睡眠内次昼夜：$T_{\text{ultradian}}\approx 90$ min，一致周期型；
+    \item 注意波动：$T_{\text{attention}}=t_1+t_2$，一致周期型；
+    \item 情绪昼夜：$T_{\text{emotion}}=24$ h（有昼夜驱动时），一致周期型；
+    \item 双相障碍：$T_{\text{bipolar}}$ 数周至数月，一致周期型（极限环）；
+    \item 记忆复习：$T_{\text{review}}=\sum_n \Delta t_n$，一致周期型（周期复习时）；
+    \item 习惯形成：渐近周期（阻尼）型（无周期提示）或一致周期型（周期提示）。
+\end{enumerate}
+\end{example}
+
+\begin{remark}[守恒量不保证周期]\label{rem:psych_invariant_not_period}
+心理系统中的能量守恒、信息守恒与注意守恒是周期结构的辅助条件，但不构成充分条件。例如一个具有能量守恒但缺乏反馈回路的精神状态不会自发产生周期振荡。心理周期结构必须由 \cref{thm:psych_periodicity_decision} 或上述引理判定。
+\end{remark}
+
+\subsection{第二步：心理周期级数与周转圆组的构建}
+
+\begin{definition}[心理振幅级数、频率级数、相位级数]\label{def:psych_series}
+设心理目标的状态或输出序列为 $\{z_t\}$。若其可写为
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+则称
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+分别为心理目标的\textbf{振幅级数}、\textbf{频率级数}与\textbf{相位级数}。三者与「级数与卷积」章 \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} 一致。
+\end{definition}
+
+\begin{definition}[心理周转圆组]\label{def:psych_epicycle_group}
+设心理目标的周期级数由振幅级数 $\{A_k\}$、频率级数 $\{\omega_k\}$ 与相位级数 $\{\phi_k\}$ 给出。对每个 $k$ 定义周转圆
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+其集合
+\[
+\mathfrak E_{\mathrm{P}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+称为心理目标的\textbf{周转圆组}。其叠加即心理周期级数
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[由心理数据构建周期级数]\label{thm:psych_series_reconstruction}
+设心理目标的输出为有限周期序列，周期为 $N$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 输出可展开为离散傅里叶级数
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item 振幅级数由 $|c_k|$ 给出，相位级数由 $\arg c_k$ 给出，频率级数由 $2\pi k/N$ 给出；
+    \item 若输出为睡眠-觉醒序列，则基频对应约 24 小时主周期，谐波对应约 90 分钟次昼夜节律与约 12 小时半日节律；若输出为注意资源序列，则基频对应任务-休息循环周期。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 有限周期序列的离散傅里叶级数是标准结论：基函数 $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ 构成 $\mathbb C^N$ 的正交基。
+(ii) 由 $c_k=A_k e^{i\phi_k}$ 直接读出。
+(iii) 对睡眠-觉醒序列 $N=24$（小时采样），基频对应 24 小时主周期，$k=16$ 谐波对应 90 分钟次昼夜周期（$24\times 60/90=16$）；对注意序列，基频对应任务-休息循环周期。
+\end{proof}
+
+\begin{proposition}[三参数对应：半径、相位与转速]\label{prop:psych_epicycle_correspondence}
+心理周转圆组 $\mathfrak E_{\mathrm{P}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ 的三个参数与三个几何—心理量一一对应：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{半径对应振幅}：$E_k$ 的半径 $|E_k|=A_k$ 即该心理振荡分量的振幅；
+    \item \textbf{相位对应旋转时延}：初相 $\phi_k$ 对应时间平移 $\tau_k=\phi_k/\omega_k$；$\phi_k>0$ 时该分量相对基准\textbf{超前} $\tau_k$（等价于把基准延后 $\tau_k$ 后二者重合）；
+    \item \textbf{频率对应旋转速度}：$\omega_k$ 即该心理振荡分量的角频率。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:psych_epicycle_correspondence} 与「周期系统」章 \cref{prop:ps_epicycle_correspondence} 完全对应，
+三条对应——半径对应振幅、相位对应旋转时延、频率对应旋转速度——逐条平移至本章的周转圆组即得。
+证明见该处：(i) 由 $|E_k|=A_k$ 与能量分解，(ii) 由相位平移定理，(iii) 由频率级数定义。
+\end{proof}
+
+\begin{example}[睡眠-觉醒的周期级数]\label{ex:psych_sleep_series}
+睡眠-觉醒序列包含约 24 小时主周期、约 90 分钟次昼夜周期与约 12 小时半日周期。在心理周转圆组中，三者表现为不同半径与不同角频率的周转圆分量——主周期振幅最大，次昼夜与半日分量振幅较小。
+\end{example}
+
+\begin{remark}[周期级数即复变函数]\label{rem:psych_series_complex}
+设 $z=e^{i\omega_0t}$，则心理周期级数
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+当所有分量与 $\omega_0$ 可公度（即 $\omega_k=k\omega_0$，$k\in\mathbb Z$）时可写为洛朗级数 $\sum_k c_k z^k$，其中 $c_k=A_k e^{i\phi_k}$：此时心理周期级数即单位圆上的复变函数，否则为环面上的函数。
+\end{remark}
+
+\subsection{第三步：心理周转圆组的动态调节}
+
+\begin{definition}[心理周转圆组的动态调节]\label{def:psych_adaptive_adjustment}
+设当前心理周转圆组为 $\mathfrak E^{(j)}$，部分和
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+残差 $r^{(j)}=z-z^{(j)}$。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 $\|r^{(j)}\|^2>\delta$，则依残差周期图峰值新增一个周转圆；
+    \item \textbf{参数调节}：对已有周转圆参数按正则化最小二乘或守恒约束更新。
+\end{enumerate}
+在心理系统中，数量调节对应增加生物振荡模态（如新发现的节律频段）；参数调节对应调整振幅、相位与频率，使心理能量、信息与注意约束满足。
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:psych_adaptive_growth}
+按 \cref{def:psych_adaptive_adjustment}(i) 加入残差主频分量后，残差能量单调不增：
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+等号成立当且仅当残差在被选频率上无能量。
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:psych_adaptive_growth} 与「周期系统」章 \cref{def:ps_adaptive_adjustment} 的动态调节机制一致：
+新增周转圆即把 $r^{(j)}$ 沿 $\hat\omega$ 的分量从残差中移出，由正交分解
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{被移出的分量}\|^2$ 即得不等式，
+等号当且仅当被移出分量的范数为零。完整论证见该处。
+\end{proof}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:psych_adaptive_convergence}
+设心理目标为周期 $T_0$ 的有限周期序列且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得心理周转圆组即目标的精确傅里叶数据。
+\end{theorem}
+
+\begin{proof}
+周期 $T_0$ 的序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波上完备。每步按 \cref{prop:psych_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。
+\end{proof}
+
+\begin{definition}[结构指标调节]\label{def:psych_structure_metric_adjustment}
+设心理目标的结构指标为
+\[
+\mathcal I=(\mathcal I_{\text{能量}},\mathcal I_{\text{信息}},\mathcal I_{\text{注意}})
+=(\text{心理能量守恒度},\ \text{信息守恒度},\ \text{注意守恒度}).
+\]
+\textbf{结构指标调节}为：在参数空间 $\Theta$ 中选取 $\theta$，每步取使 $\mathcal I(\theta)$ 按字典序\textbf{严格递减}（极小化）的邻近参数；若不存在则停止，此时为局部最优。
+\end{definition}
+
+\begin{proposition}[结构指标调节的有限收敛]\label{prop:psych_structure_metric_convergence}
+设参数空间 $\Theta$ 有限，且每次调节使 $\mathcal I$ 按字典序严格递减。则调节在有限步内终止于局部最优参数。
+\end{proposition}
+
+\begin{proof}
+$\Theta$ 有限，故 $\mathcal I$ 只取有限多个值，而字典序是有限集上的全序；按字典序严格递减的序列不能无限延续，故调节在有限步终止。终止时不存在使 $\mathcal I$ 按字典序严格递减的邻近参数，即局部最优。
+\end{proof}
+
+\begin{remark}[动态调节的边界]\label{rem:psych_adaptive_boundary}
+\cref{thm:psych_adaptive_convergence} 依赖有限周期序列。对连续谱或准周期心理目标，不存在有限周转圆组精确表示，只能作有界逼近。结构指标调节不保证全局最优。
+\end{remark}
+
+\subsection{第四步：心理卷积}
+
+\begin{definition}[心理振幅卷积、相位卷积与频率卷积]\label{def:psych_convolution_types}
+设两个心理周转圆组为
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+定义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅卷积}：$\mathbb A_{mn}=A_nB_m$；
+    \item \textbf{相位卷积}：$\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$；
+    \item \textbf{频率卷积}：$\mathbb F_{mn}=\omega_n\nu_m$；
+    \item \textbf{趋势卷积}：$\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$。
+\end{enumerate}
+这与「级数与卷积」章 \cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution}、\cref{def:tendency_convolution} 一致。
+\end{definition}
+
+\begin{theorem}[三类卷积在心理周转圆组上的作用]\label{thm:psych_convolution_action}
+设两个心理目标的周转圆组分别为 $\mathfrak E$ 与 $\mathfrak E'$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 振幅卷积只作用于半径；
+    \item 相位卷积只作用于相位；
+    \item 频率卷积只作用于转速；
+    \item 趋势卷积同时保留振幅与相位。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:psych_convolution_types} 直接读出。
+\end{proof}
+
+\begin{proposition}[自相关与趋势卷积]\label{prop:psych_autocorr_phase_convolution}
+设 $\{z_t\}$ 为心理周期序列，其自相关函数为
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+在心理周转圆组语言中，自相关函数是趋势卷积在对角线上的投影：
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:psych_autocorr_phase_convolution} 是「周期系统」章 \cref{thm:ps_convolution_action} 的卷积作用结论在本领域的实现：
+将 $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ 代入自相关定义，由正交性消去全部非对角交叉项，只保留趋势卷积的对角线项
+（三类卷积的因式分解，\cref{prop:ps_convolution_factorization}），即得 $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$。
+完整展开见该处。
+\end{proof}
+
+\begin{remark}[心理卷积与周期卷积的关系]\label{rem:psych_convolution_relation}
+心理卷积不是新的卷积运算，而是「级数与卷积」章周期卷积在心理周转圆组上的实例。自相关是趋势卷积在对角线上的投影，互相关、情感同步分别是振幅卷积和频率卷积在心理科学中的具体表现。
+\end{remark}
+
+\subsection{第五步：与离散采样、调和分析、时序分析的整合}
+
+\begin{definition}[心理周期诊断流程]\label{def:psych_periodic_diagnosis}
+对于给定心理系统，使用周期数学框架进行诊断：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{周期判定}：验证心理目标的周期类型（\cref{thm:psych_periodicity_decision}）；
+    \item \textbf{级数构建}：由唤醒、情绪、注意、记忆数据构建振幅、频率、相位级数与周转圆组（\cref{thm:psych_series_reconstruction}）；
+    \item \textbf{守恒诊断}：核验心理能量、信息与注意守恒这一经验观察与研究纲领（见注 \cref{thm:psychological_conservation}）；
+    \item \textbf{卷积诊断}：计算自相关（趋势卷积的对角线投影，\cref{prop:psych_autocorr_phase_convolution}）与相位卷积；
+    \item \textbf{整合诊断}：接入离散采样、调和分析、时序分析工具链。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[心理周期诊断流程与三章接口]\label{thm:psych_diagnosis_integration}
+\cref{def:psych_periodic_diagnosis} 的五个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}、\cref{thm:intercalation_leakage_suppression}；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}、\cref{prop:twelve_to_six}；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}、\cref{def:ts_window_validation}。
+\end{enumerate}
+因此心理周期诊断不是独立方法，而是周期数学统一工具链在心理系统上的应用。
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:psych_diagnosis_integration} 是「周期系统」章五步接口（\cref{tab:ps_five_steps}）在本领域的落地：
+周期判定用采样与谱估计，频率分解与相位核用「调和分析」章，周期图峰值、Fisher 检验与
+窗函数验证用「时序分析」章。故诊断流程由三章工具链合成，证明见该处。
+\end{proof}
+
+\begin{remark}[整合后的操作顺序]\label{rem:psych_integration_order}
+实际诊断建议顺序为：先判定心理目标是否周期（\cref{thm:psych_periodicity_decision}）；再构建心理数据的傅里叶数据与周转圆组（\cref{thm:psych_series_reconstruction}）；再用守恒约束与动态调节优化参数（\cref{thm:psych_adaptive_convergence}、\cref{prop:psych_structure_metric_convergence}）；再作心理卷积与自相关分析（\cref{prop:psych_autocorr_phase_convolution}）；最后按 \cref{def:psych_periodic_diagnosis} 输出诊断。
+\end{remark}
+
+\section{心理系统的数学基础}
+
+\begin{definition}[心理周期系统的基本量]\label{def:psychological_quantities}
+心理周期系统由以下基本变量描述：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{唤醒水平} $A(t) \in [0,1]$：个体在时刻 $t$ 的警觉程度。$A \to 1$ 表示高度唤醒（紧张、兴奋），$A \to 0$ 表示低唤醒（困倦、放松）。唤醒水平在约 24 小时周期上波动，在约 90 分钟的次昼夜周期上也呈现节律。
+    \item \textbf{情绪效价} $V(t) \in [-1,1]$：个体在时刻 $t$ 的主观愉悦程度。$V > 0$ 表示正性情绪（愉悦），$V < 0$ 表示负性情绪（不愉悦），$V = 0$ 表示中性。情绪效价和唤醒水平构成情绪的二维环状模型（circumplex model）。
+    \item \textbf{注意资源} $R(t) \in [0,1]$：个体在时刻 $t$ 可用的认知资源总量。$R \to 1$ 表示注意充沛，$R \to 0$ 表示注意枯竭。注意资源在任务执行中消耗，在休息中恢复——消耗与恢复的交替构成注意的周期。
+    \item \textbf{记忆强度} $M(t) \in [0,1]$：特定记忆痕迹在时刻 $t$ 的可提取概率。$M \to 1$ 表示记忆鲜明，$M \to 0$ 表示遗忘。记忆强度在没有复习的情况下以近似指数衰减。
+    \item \textbf{潜意识激活度} $U(t) \in [0,1]$：在意识阈限之下运行的心理过程的活跃程度。$U \to 1$ 表示潜意识过程高度活跃（如睡眠中的记忆巩固、习惯化过程中的自动加工），$U \to 0$ 表示潜意识过程处于静息状态。
+    \item \textbf{行为倾向} $B(t) \in [0,1]$：个体在时刻 $t$ 表现特定行为模式的概率。行为倾向由心理状态（意识与潜意识）与环境刺激共同决定。
+\end{enumerate}
+心理系统的核心特征是\textbf{多尺度嵌套周期}——不同时间尺度的节律（毫秒级的神经振荡、秒级的注意波动、小时级的情绪变化、昼夜的睡眠周期、年际的行为周期）在同一心理系统中并存，并跨越意识与潜意识两个层面。
+\end{definition}
+
+\section{睡眠-觉醒周期}
+
+\begin{definition}[睡眠的周期结构]\label{def:sleep_cycle}
+人类的睡眠由多个约 90 分钟的\textbf{睡眠周期}组成。每个睡眠周期包含：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{NREM 睡眠}（非快速眼动睡眠）：分为 N1（入睡期）、N2（浅睡期）、N3（深睡期/慢波睡眠）。脑电波频率逐渐降低，振幅逐渐增大——$\delta$ 波（$0.5$—$4$ Hz）在 N3 期占主导。
+    \item \textbf{REM 睡眠}（快速眼动睡眠）：脑电波呈现高频低幅的去同步化模式（类似清醒状态），眼球快速运动，身体肌肉瘫痪，梦境主要发生在此阶段。
+\end{enumerate}
+整夜睡眠通常包含 $4$—$6$ 个睡眠周期。前半夜以深睡（N3）为主，后半夜以 REM 睡眠为主——REM 睡眠的持续时间从第一个周期的约 $10$ 分钟增长到最后周期的约 $60$ 分钟。
+
+约 24 小时的睡眠-觉醒主周期是地球自转周期的内化。约 90 分钟的睡眠周期是嵌套在主周期内的次昼夜节律——NREM 和 REM 的交替表现为睡眠结构中的嵌套周期。深睡（NREM）对应慢波振荡（低频高幅，外层大周转圆），REM 睡眠对应快波振荡（高频低幅，内层小周转圆）。整夜睡眠中 REM 占比的增加是嵌套周期中的相位漂移——REM 分量在一夜中逐渐增强。
+\end{definition}
+
+\begin{proposition}[睡眠的双过程模型]\label{prop:two_process_sleep}
+睡眠的调控由两个独立过程构成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{过程 S（睡眠压力）}：觉醒期间，腺苷等促眠物质在脑中积累，睡眠压力线性增加。睡眠期间，这些物质被清除，睡眠压力指数衰减。过程 S 表现为睡眠压力在觉醒期的线性累积与在睡眠期的指数清除——类似于电容的充电（觉醒期）和放电（睡眠期）。
+    \item \textbf{过程 C（昼夜节律）}：视交叉上核（SCN）产生的约 24 小时昼夜节律信号，调制睡眠倾向。过程 C 在夜间促进睡眠，在白天促进觉醒。过程 C 是周期驱动——SCN 神经元以约 24 小时为周期振荡。
+\end{enumerate}
+两个过程的叠加决定了睡眠的时机和深度：睡眠在过程 S 最高且过程 C 最促进睡眠的时刻发生（通常是夜间）。睡眠的双过程模型是线性累积（过程 S）与周期振荡（过程 C）耦合产生睡眠-觉醒周期的实例。
+\end{proposition}
+
+\begin{proof}
+记觉醒期为 $t \in [0, T_w)$、睡眠期为 $[T_w, T_w + T_s)$（$T_w + T_s = 24$ h）。过程 S 的线性化模型为：觉醒期 $S(t) = S_{\min} + \rho_w t$（$\rho_w > 0$ 为睡眠压力积累率），睡眠期 $S(t) = S_{\max} e^{-t/\tau_s}$（$\tau_s$ 为清除时间常数）。过程 C 取正弦近似 $C(t) = C_0 \cos\!\big(\tfrac{2\pi t}{24}\big)$（夜间取负值即促眠）。睡眠倾向为 $P(t) = S(t) - C(t)$：觉醒 $\Leftrightarrow$ $P(t) < \theta$，睡眠 $\Leftrightarrow$ $P(t) \ge \theta$（阈值 $\theta$）。因 $S$ 在觉醒期单调增、$C$ 在傍晚单调降，$P$ 在傍晚-夜间必然穿越阈值——睡眠在 $S$ 高且 $C$ 低的时段被“门控”触发；清晨 $C$ 回升、$S$ 已清空，$P$ 回落至阈值以下——觉醒。双过程的叠加由此严格给出约 24 小时的睡眠-觉醒周期。
+\end{proof}
+
+\section{注意的周期性波动}
+
+\begin{definition}[注意的振荡]\label{def:attention_oscillation}
+人类的注意不是连续均匀的，而是以多种频率\textbf{节律性地波动}：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{高频注意振荡}（$4$—$8$ Hz，theta 频段）：注意在约 $125$—$250$ 毫秒的时间尺度上波动。这对应于感知采样率的周期性变化——注意的“位宽”（同时能关注的目标数量）以 theta 频率缩放。
+    \item \textbf{中频注意振荡}（$0.5$—$2$ Hz，delta 频段）：注意在约 $0.5$—$2$ 秒的时间尺度上波动。这对应于注意焦点在多个目标之间的切换——注意的“带宽”（注意切换的时间分辨率）以 delta 频率变化。
+    \item \textbf{低频注意振荡}（$<0.1$ Hz）：注意在分钟级的时间尺度上波动。这对应于总体认知资源的涨落——任务表现呈现约 $10$—$20$ 分钟的周期性波动。
+\end{enumerate}
+注意的周期性波动表现为聚焦与分散的交替：聚焦时认知资源集中在单一目标上，分散时资源在多个目标之间分布。注意的聚焦与发散决定了信息从外部世界流向意识心灵的有效通量。
+\end{definition}
+
+\begin{proposition}[注意资源消耗与恢复模型]\label{prop:attention_resource}
+设注意资源 $R(t)$ 在任务执行中以速率 $\alpha$ 消耗，在休息中以速率 $\beta$ 恢复：
+\[
+\frac{dR}{dt} = -\alpha \cdot \mathbf{1}_{\text{task}}(t) \cdot R(t) + \beta \cdot \mathbf{1}_{\text{rest}}(t) \cdot (1 - R(t)),
+\]
+其中 $\mathbf{1}_{\text{task}}(t)$ 和 $\mathbf{1}_{\text{rest}}(t)$ 是指示函数。消耗和恢复的交替产生注意资源的周期性波动。
+
+注意资源的消耗-恢复循环由线性消耗与指数恢复产生周期行为：类似于 RC 电路的充放电过程，注意资源在任务期指数衰减，在休息期指数恢复。时间常数 $\tau_{\text{消耗}} = 1/\alpha$ 和 $\tau_{\text{恢复}} = 1/\beta$ 决定了注意周期的持续时间。在长期任务中，休息间隔的优化等价于寻找最佳的注意周期——使平均注意资源在任务期间最大化。
+\end{proposition}
+
+\begin{lemma}[注意充放电循环的闭合解]\label{ch26_attention_cycle}
+设任务期时长 $t_1$（消耗率 $\alpha$）、休息期时长 $t_2$（恢复率 $\beta$），循环以周期 $T = t_1 + t_2$ 重复。则稳态循环满足：
+\[
+R_{\min} = \frac{(1 - e^{-\beta t_2})\, e^{-\alpha t_1}}{1 - e^{-\alpha t_1} e^{-\beta t_2}}, \qquad
+R_{\max} = \frac{1 - e^{-\beta t_2}}{1 - e^{-\alpha t_1} e^{-\beta t_2}},
+\]
+且周期平均资源为
+\[
+\bar R = \frac{1}{T}\Big( \frac{R_{\max} - R_{\min}}{\alpha} + t_2 - \frac{(1 - R_{\max})(e^{\beta t_2} - 1)}{\beta} \Big).
+\]
+\end{lemma}
+
+\begin{proof}
+任务期解 $R(t) = R_{\max} e^{-\alpha t}$，休息期解 $R(t) = 1 - (1 - R_{\min}) e^{-\beta t}$。周期闭合条件：
+\[
+\begin{aligned}
+R_{\min} &= R_{\max} e^{-\alpha t_1}, \\
+R_{\max} &= 1 - (1 - R_{\min}) e^{-\beta t_2}.
+\end{aligned}
+\]
+联立解得 $R_{\min}$ 与 $R_{\max}$ 如上。平均资源按 $\bar R = \frac{1}{T}\big(\int_0^{t_1} R_{\max}e^{-\alpha t} dt + \int_0^{t_2} [1-(1-R_{\min})e^{-\beta t}] dt\big)$ 计算：第一项 $= (R_{\max}-R_{\min})/\alpha$；第二项 $= t_2 - (1-R_{\min})(1-e^{-\beta t_2})/\beta$，由闭合条件 $1 - R_{\min} = (1-R_{\max}) e^{\beta t_2}$ 化为 $t_2 - (1-R_{\max})(e^{\beta t_2}-1)/\beta$。
+\end{proof}
+
+\begin{example}[番茄工作法的注意周期]\label{ch26_pomodoro_example}
+取 $\alpha = 0.10$/min（高强度任务）、$\beta = 0.25$/min（短休息恢复）、$t_1 = 25$ min、$t_2 = 5$ min。代入引理 \ref{ch26_attention_cycle}：$e^{-\alpha t_1} = e^{-2.5} \approx 0.082$，$e^{-\beta t_2} = e^{-1.25} \approx 0.287$。得
+\[
+R_{\min} = \frac{(1-0.287)\times 0.082}{1 - 0.082\times 0.287} \approx \frac{0.0584}{0.9765} \approx 0.060, \qquad
+R_{\max} = \frac{0.713}{0.9765} \approx 0.730.
+\]
+即每个番茄周期内注意资源在 $6\%$—$73\%$ 之间充放循环，周期平均 $\bar R \approx 0.30$。若取消休息（$t_2 = 0$）则 $R_{\min} \to 0$ 且 $\bar R$ 显著下降——休息间隔的存在使平均注意资源最大化，这正是“注意周期”的优化意义。
+\end{example}
+
+\section{情绪周期}
+
+\begin{definition}[情绪的环状模型]\label{def:emotion_circumplex}
+情绪状态可在二维平面上表示：横轴为\textbf{情绪效价}（愉悦-不愉悦），纵轴为\textbf{唤醒水平}（高唤醒-低唤醒）。特定情绪对应平面上的一个点：快乐（高愉悦 + 高唤醒），悲伤（低愉悦 + 低唤醒），焦虑（低愉悦 + 高唤醒），平静（高愉悦 + 低唤醒）。
+
+情绪状态在一天中围绕环状模型的中心\textbf{周期性旋转}——从早晨的高唤醒（无论愉悦与否）到午后的低唤醒，再到晚上的情绪低落，最后在睡眠中重置。情绪状态的昼夜变化可视为（效价，唤醒）平面上的准周期轨迹：一天内的情绪变化对应平面上的一段弧线，睡眠将情绪状态重置到接近原点（中性）。
+\end{definition}
+
+\begin{proposition}[双相情感障碍的情绪周期]\label{prop:bipolar_cycle}
+双相情感障碍（Bipolar Disorder）的特征是情绪状态在躁狂（高唤醒 + 高愉悦或高激惹）和抑郁（低唤醒 + 低愉悦）之间周期性交替。一个完整的情绪周期（躁狂-正常-抑郁-正常-躁狂）的时间尺度因人而异——快速循环型约数周至数月，超快速循环型约数天。
+
+在相空间（效价 $V$，唤醒 $A$）中，健康个体的情绪轨迹是小振幅的椭圆（情绪在正常范围内波动），双相障碍患者的情绪轨迹是大振幅的极限环（情绪在躁狂和抑郁两个极端之间大幅振荡）。情绪稳定剂（如锂盐）的作用是增大情绪回归速率——将相空间中的轨道约束在平衡点附近。
+\end{proposition}
+
+\begin{proof}
+将情绪动力学在平衡点附近线性化。设 $X = (V, A)^{\mathsf T}$ 满足 $\dot X = J X$，其中 $J$ 的特征值为 $\lambda_{\pm} = -\mu \pm i\omega$（$\mu > 0$ 为情绪回归速率，$\omega$ 为情绪固有振荡频率）。健康个体 $\mu$ 较大：轨道为快速衰减的螺旋线，振幅 $r(t) = r_0 e^{-\mu t}$ 小。双相障碍患者 $\mu$ 显著减小（情绪回归减弱）：轨道近似闭合，极限环振幅 $r \approx r_0$ 大。情绪稳定剂的作用是增大有效 $\mu$（相当于在 $J$ 中引入更强的阻尼项），使轨道重新衰减回平衡点邻域。
+\end{proof}
+
+\section{学习与遗忘的周期}
+
+\begin{definition}[艾宾浩斯遗忘曲线]\label{def:ebbinghaus}
+艾宾浩斯遗忘曲线描述了记忆保持量在没有复习的情况下随时间的指数衰减：
+\[
+M(t) = M_0 \cdot e^{-t/\tau},
+\]
+其中 $M_0$ 是初始记忆强度，$\tau$ 是遗忘时间常数（取决于记忆材料的难度和个体的记忆能力）。记忆保持量在最初几小时内迅速下降，随后下降速度减缓。
+
+记忆强度的指数衰减类似于“微分方程与积分方程”章中热传导方程的傅里叶分量的指数衰减。时间常数 $\tau$ 度量了记忆痕迹在时间平移下的保持能力。$\tau$ 越大，记忆越持久。
+\end{definition}
+
+\begin{proposition}[间隔重复的最优复习周期]\label{prop:spaced_repetition}
+间隔重复利用遗忘曲线的周期结构优化长期记忆。若每次复习将记忆强度重置为 $M_0$，则第 $n$ 次复习的最优时间间隔为
+\[
+\Delta t_n = \tau \cdot \ln\frac{M_0}{M_{\min}} + \sum_{k=1}^{n-1} \Delta t_k \cdot \frac{\tau}{\tau + \Delta t_k} \approx \tau \cdot \ln\frac{M_0}{M_{\min}} \cdot n,
+\]
+其中 $M_{\min}$ 是最低可接受记忆强度。复习间隔随复习次数线性增长——这是记忆周期中的标度特征。
+
+间隔重复是记忆的衰减与复习的强化在时间轴上的交替——每次复习将记忆强度重置为初始状态（$M = M_0$），两次复习之间的遗忘构成一个完整的衰减-恢复周期。最优化复习间隔等价于寻找使平均记忆强度最大的周期。
+\end{proposition}
+
+\begin{proof}
+设第 $n$ 次复习后记忆强度为 $M_0$，经过 $\Delta t_n$ 后衰减为 $M_{\min}$：$M_{\min} = M_0 e^{-\Delta t_n/\tau}$，解得 $\Delta t_n = \tau \ln(M_0/M_{\min})$。考虑复习效果的累积：若复习不仅重置记忆强度，还略微增大遗忘时间常数（$\tau_n = \tau_{n-1} + \Delta\tau$），则复习间隔逐渐增长。经验上，间隔重复软件（如 Anki）使用类似公式计算最优复习间隔。
+\end{proof}
+
+\section{潜意识过程}
+
+\begin{definition}[潜意识过程]\label{def:subconscious_process}
+\textbf{潜意识过程}是指在意识阈限之下自动运行的心理过程。与意识过程相比，潜意识过程具有以下特征：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{自动性}：无需意识努力即可启动和运行。
+    \item \textbf{不可内省}：无法通过内省直接观察其内容。
+    \item \textbf{并行性}：多个潜意识过程可同时运行，不受意识注意的串行瓶颈限制。
+    \item \textbf{时间尺度多样性}：从毫秒级（内隐启动）到小时级（睡眠中的记忆巩固）到年际（内隐态度形成）均有分布。
+\end{enumerate}
+潜意识过程的时间结构是心理周期结构的重要组成部分——它提供了意识过程的背景节律，并通过与意识过程的耦合影响行为输出。
+\end{definition}
+
+\begin{definition}[内隐记忆的激活-衰减周期]\label{def:implicit_memory}
+\textbf{内隐记忆}（程序性记忆、启动效应）表现为无需意识回忆即可影响行为的记忆痕迹。内隐记忆强度 $I(t)$ 随时间的激活-衰减可建模为
+\[
+\frac{dI}{dt} = -\lambda I + \eta \cdot \mathbf{1}_{\text{刺激}}(t),
+\]
+其中 $\lambda$ 为衰减率、$\eta$ 为激活增益。内隐记忆的衰减率 $\lambda$ 通常小于外显记忆的衰减率——这解释了程序性技能（如骑自行车）比陈述性知识（如背诵诗歌）保持更持久的现象。
+\end{definition}
+
+\begin{proposition}[潜意识周期与意识周期的耦合]\label{prop:subconscious_conscious_coupling}
+设潜意识过程 $U(t)$ 与意识过程 $C(t)$ 通过如下耦合方程相互作用：
+\[
+\frac{dU}{dt} = f_U(U, C), \qquad \frac{dC}{dt} = f_C(U, C).
+\]
+当潜意识过程的时间尺度与意识过程的时间尺度相近时（$|\tau_U - \tau_C| < \epsilon$），两过程之间出现\textbf{相位耦合}——潜意识状态的波动可通过耦合影响意识状态，反之亦然。
+\end{proposition}
+
+\begin{proof}
+在平衡点附近线性化耦合方程：$\delta \dot U = a_{11}\delta U + a_{12}\delta C$，$\delta \dot C = a_{21}\delta U + a_{22}\delta C$。耦合系统的特征值为
+\[
+\lambda_{\pm} = \frac{(a_{11}+a_{22}) \pm \sqrt{(a_{11}-a_{22})^2 + 4 a_{12} a_{21}}}{2}.
+\]
+当判别式为负时，特征值为复共轭——两过程出现耦合振荡。振荡频率由耦合强度 $a_{12}a_{21}$ 与固有频率差 $(a_{11}-a_{22})^2$ 共同决定。强耦合下系统进入耦合周期状态——潜意识与意识过程同步振荡。
+\end{proof}
+
+\begin{example}[睡眠中的记忆巩固]\label{ex:sleep_memory_consolidation}
+睡眠中的记忆巩固是潜意识过程的典型实例。白天学习的信息首先编码在海马体（快速学习系统），睡眠期间海马体与皮层（慢速学习系统）之间的耦合使信息逐渐转移至皮层长时记忆。这一过程发生在慢波睡眠（N3）阶段——此时海马-皮层的耦合达到最强。
+
+从周期数学的视角看，记忆巩固的周期结构与睡眠周期嵌套：每个 N3 阶段对应一轮海马-皮层耦合的“训练周期”。整合多个睡眠周期的累积效应，记忆强度在整夜睡眠中逐渐增强——这是一个由嵌套周期驱动的累积过程。
+\end{example}
+
+\section{行为周期性}
+
+\begin{definition}[行为周期]\label{def:behaviour_periodicity}
+\textbf{行为周期}是指个体在特定时间尺度上呈现的重复性行为模式。行为周期分为以下层级：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{昼夜行为节律}（约 24 小时）：睡眠-觉醒、进食、活动水平、体温、激素分泌等行为与生理指标的昼夜波动。
+    \item \textbf{周行为周期}（约 7 天）：工作日-休息日的活动模式切换。
+    \item \textbf{习惯循环}（分钟至小时）：提示-行为-奖励三步循环，由基底神经节回路驱动。
+    \item \textbf{成瘾周期}（小时至天）：物质或行为的寻求-使用-戒断循环。
+    \item \textbf{年际行为周期}（约 1 年）：季节性情绪变化、节庆行为模式、季节性活动水平变化。
+\end{enumerate}
+各层级的行为周期嵌套于彼此之中——昼夜行为节律包含多次习惯循环，习惯循环在一周内重复并受周行为周期的调制，周行为周期在年际行为周期中重复。
+\end{definition}
+
+\begin{definition}[习惯循环的三阶段模型]\label{def:habit_loop}
+\textbf{习惯循环}由三个阶段构成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{提示}（cue）：环境刺激触发行为的起始信号。
+    \item \textbf{例行行为}（routine）：由提示触发的自动行为序列。
+    \item \textbf{奖励}（reward）：行为完成后获得的愉悦或满足感，强化提示-行为联结。
+\end{enumerate}
+习惯循环周期 $T_{\text{habit}}$ 由提示的频率与奖励的强度决定。习惯的自动化程度越高，$T_{\text{habit}}$ 越短，行为对意识控制的依赖越低。
+\end{definition}
+
+\begin{proposition}[习惯形成的周期特征]\label{prop:habit_formation}
+设行为倾向 $B(t)$ 随时间变化，习惯形成过程可用以下模型描述：
+\[
+\frac{dB}{dt} = \gamma \cdot (B_{\infty} - B) \cdot \mathbf{1}_{\text{提示}}(t),
+\]
+其中 $\gamma$ 为学习率，$B_{\infty}$ 为渐近习惯强度。习惯形成的时间尺度 $\tau_{\text{habit}} = 1/\gamma$ 通常为数十天至数百天——具体取决于行为的复杂度和奖励的频率。
+\end{proposition}
+
+\begin{proof}
+在重复提示下，$B$ 向 $B_\infty$ 指数收敛：$B(t) = B_\infty (1 - e^{-\gamma t})$。实验研究表明，习惯形成的平均时间从简单行为（如喝水）的约 20 天到复杂行为（如每日锻炼）的约 250 天不等。习惯形成的时间尺度 $\tau_{\text{habit}}$ 与行为自动化的神经标记（基底神经节激活的稳定性）的变化速率一致。
+\end{proof}
+
+\begin{example}[成瘾的周期结构]\label{ex:addiction_cycle}
+成瘾行为呈现典型的周期结构：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{使用期}：物质或行为的刺激激活奖赏回路（多巴胺释放），产生短暂愉悦。
+    \item \textbf{耐受期}：重复使用导致奖赏回路的敏感性下降（受体下调），需要更强烈的刺激才能产生相同效应。
+    \item \textbf{戒断期}：停用后奖赏回路处于低活跃状态——产生焦虑、抑郁、渴求等戒断症状。
+    \item \textbf{复吸期}：为缓解戒断症状再次使用，形成新一轮循环。
+\end{enumerate}
+成瘾周期的时间尺度从数小时（急性戒断）到数天（长期戒断）到数年（复吸风险）。成瘾的神经机制涉及奖赏回路的长期可塑性变化——这些变化将成瘾周期“固化”为一种稳定的极限环，即使外部刺激长期缺席，内部的渴求机制仍可能驱动复吸。
+\end{example}
+
+\section{心理周期的相位锁定}
+
+\begin{definition}[人际情感同步]\label{def:emotional_synchrony}
+在面对面交流中，对话双方的情绪状态倾向于\textbf{同步}——一个人的愉悦或悲伤会通过表情、语调和肢体语言传递给对方。这种情感同步是“周期系统”章中相位锁定（命题 \ref{prop:phase-locking}）在人际互动中的实现。
+
+设两个人的情绪效价分别为 $V_1(t)$ 和 $V_2(t)$，各自有固有频率 $\omega_1$ 和 $\omega_2$。通过情感表达和感知，两者产生耦合：
+\[
+\frac{d\theta_1}{dt} = \omega_1 + c_{12} \sin(\theta_2 - \theta_1), \quad \frac{d\theta_2}{dt} = \omega_2 + c_{21} \sin(\theta_1 - \theta_2),
+\]
+其中 $\theta_i$ 是情绪状态的相位，$c_{ij}$ 是情感耦合强度（取决于共情能力和表达强度）。当耦合足够强时，两人的情绪相位趋于一致——情感同步。婴儿-照料者之间的情感同步对健康依恋关系的发展至关重要。
+\end{definition}
+
+\begin{proposition}[群体情绪的传染性扩散]\label{prop:emotional_contagion}
+在群体环境中，情绪状态通过社交网络传播——一个人的情绪变化可以影响其社交邻域内的他人，进而影响更远的个体。这类似于“周期流形”章中离散格点上的周期传播（定义 \ref{def:lattice_periodic_evolution}）。
+
+设群体中个体 $i$ 的情绪效价 $V_i(t)$ 满足
+\[
+\frac{dV_i}{dt} = -\alpha V_i + \sum_{j \in \text{邻域}(i)} w_{ij} (V_j - V_i) + \xi_i(t),
+\]
+其中 $\alpha$ 是情绪回归中性的速率，$w_{ij}$ 是社会影响权重，$\xi_i(t)$ 是个体特异性的情绪扰动。群体情绪的平均值 $\bar{V}(t) = \frac{1}{N}\sum_i V_i(t)$ 在强耦合（$w_{ij}$ 大）时呈现缓慢的集体振荡——群体情绪的“社会节律”。社会情绪周期（如经济乐观-悲观周期）的时间尺度可达数月至数年——这是心理周期在社会层面的宏观表现。
+\end{proposition}
+
+\begin{proof}
+对全部 $i$ 求和并除以 $N$：$\frac{d\bar V}{dt} = -\alpha \bar V + \frac{1}{N}\sum_{i} \sum_{j \in N(i)} w_{ij}(V_j - V_i) + \bar\xi$。当权重对称（$w_{ij} = w_{ji}$）时，内层双重和在无向网络中逐边相消：每条边 $(i,j)$ 贡献 $w_{ij}(V_j - V_i) + w_{ji}(V_i - V_j) = 0$，故 $\frac{d\bar V}{dt} = -\alpha \bar V + \bar\xi$。因此均值服从一阶线性方程——集体振荡并非来自耦合项本身，而是来自噪声 $\bar\xi$ 经低通滤波（时间常数 $1/\alpha$）后的红谱涨落；强耦合的作用在于使各 $V_i$ 与 $\bar V$ 快速对齐（相位锁定），从而把个体涨落聚合力可观测的社会节律。
+\end{proof}
+
+\section{心理系统的守恒律}
+
+\begin{remark}[心理系统的三种守恒律（经验观察／研究纲领）]\label{thm:psychological_conservation}
+心理系统的动力学可由三种守恒律描述。\textbf{以下三条为经验观察与研究纲领，不是已证定理}：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{能量守恒}：心理能量（精神疲劳与恢复）在觉醒期间消耗，在睡眠期间恢复。睡眠剥夺导致认知功能下降，恢复性睡眠使认知功能复原——心理能量在消耗与恢复之间满足守恒。这是能量在时间平移下的平衡：$\Delta E_{\text{消耗}} + \Delta E_{\text{恢复}} = 0$（长期平均）。
+    \item \textbf{信息守恒}：工作记忆的容量有限（$7 \pm 2$ 个组块）——信息在工作记忆中的流入（编码）和流出（遗忘或转入长时记忆）满足守恒。长时记忆的巩固在睡眠中发生——海马体向皮层的记忆转移是信息在不同储库之间的重新分配。记忆的总信息量在转移中守恒。
+    \item \textbf{注意守恒}：总注意资源在特定时刻是有限的——注意在某对象上的集中必然伴随对其他对象的忽略。注意的“零和”性质表现为注意资源的有限性：注意在多个目标之间的分配构成相空间中的相位约束——聚焦于一个目标意味着相位锁定在该目标的方向上。
+\end{enumerate}
+三种守恒律的层级关系为：能量守恒保证心理活动的持续性，信息守恒保证认知结构的稳定性，注意守恒保证意识焦点的选择性。三者共同构成了心理系统周期结构的物理基础。
+
+\textbf{经验依据}：
+(i) 能量守恒：心理能量消耗与恢复的实证证据来自睡眠剥夺研究。持续觉醒导致认知功能（反应时间、工作记忆、决策能力）进行性下降，恢复性睡眠后认知功能恢复到基线水平。脑电图（EEG）中慢波活动（SWA，$0.5$—$4$ Hz）的功率在觉醒期线性累积，在睡眠期指数衰减——这是心理能量的电生理指标。
+
+(ii) 信息守恒：工作记忆的有限容量由 Miller（1956）的经典研究确立——人类能同时保持约 $7 \pm 2$ 个信息组块。信息在工作记忆中的保持时间约 $20$—$30$ 秒，除非通过复述（rehearsal）刷新。记忆巩固的双过程理论认为，海马体的快速学习系统在睡眠中将信息转移到皮层的慢速学习系统——信息量在转移中守恒。
+
+(iii) 注意守恒：注意的有限资源理论认为，总注意资源在特定时刻是固定且有限的。注意在一个任务上的分配必然减少可用于其他任务的资源——双任务干扰实验证实了注意资源的有限性。在周期数学中，注意资源 $R(t)$ 满足 $R_1 + R_2 + \cdots + R_n \le R_{\max}$——总注意不超过最大容量。
+\end{remark}
+
+\begin{remark}[潜意识与行为周期在全书中的位置]
+潜意识过程与行为周期性是心理系统周期结构的两个重要补充层面。潜意识过程提供了意识过程之外的背景节律——这些节律虽然不可直接内省，但通过行为输出、生理指标与情绪波动可以被间接观测。行为周期性则将心理周期结构投影到可观测的行为层面——使心理周期获得了可测量、可验证的实证基础。将潜意识、意识、行为三个层面整合在同一周期结构框架中，是本章对周期数学在心理学中应用的完整表述。
+\end{remark}
+
+\begin{remark}[与全书的衔接]
+本章建立的心理系统周期结构理论是周期数学在心理学中的应用。睡眠-觉醒周期表现为约 24 小时的主周期和约 90 分钟的次昼夜节律构成的嵌套周期结构。注意的周期性波动表现为聚焦与分散的交替。情绪环状模型中的昼夜旋转表现为（效价，唤醒）相空间中的周转运动。艾宾浩斯遗忘曲线表现为记忆强度以指数方式衰减，间隔重复优化了记忆保持的周期。潜意识过程提供了意识过程之外的背景节律——内隐记忆、习惯化、睡眠中的记忆巩固构成潜意识的时间结构。行为周期性将心理周期投影到可观测的行为层面——昼夜行为节律、周行为周期、习惯循环、成瘾周期构成行为的多层级周期。人际情感同步和群体情绪传染是“周期系统”章中相位锁定在社会心理层面的实现。心理系统的三种守恒律——能量守恒、信息守恒、注意守恒——共同构成了心理系统周期结构的自洽性保证。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 睡眠-觉醒约 24 小时主周期：双过程模型的门控触发（命题 \ref{prop:two_process_sleep}）；觉醒期睡眠压力的线性累积 \\
+缩放 & 艾宾浩斯遗忘曲线的指数衰减 $M(t) = M_0 e^{-t/\tau}$（定义 \ref{def:ebbinghaus}）；间隔重复的标度优化（命题 \ref{prop:spaced_repetition}）；行为周期的多层级嵌套（定义 \ref{def:behaviour_periodicity}） \\
+旋转 & 情绪效价-唤醒二维相空间的昼夜旋转（定义 \ref{def:emotion_circumplex}）；双相障碍的大振幅极限环（命题 \ref{prop:bipolar_cycle}）；潜意识与意识过程的耦合振荡（命题 \ref{prop:subconscious_conscious_coupling}） \\
+守恒 & 心理能量守恒、信息守恒（工作记忆 $7\pm2$ 组块）、注意守恒（$R_1+\cdots+R_n \le R_{\max}$）（经验观察／研究纲领，注 \ref{thm:psychological_conservation}） \\
+对称 & 情绪的正负效价对称（$V \in [-1,1]$ 关于 $0$ 对称）；睡眠-觉醒的昼夜对称 \\
+闭合 & 注意资源的消耗-恢复充放电循环（引理 \ref{ch26_attention_cycle}，例 \ref{ch26_pomodoro_example}）；情绪状态的睡眠复位；习惯循环的提示-行为-奖励闭合（定义 \ref{def:habit_loop}）；成瘾周期（例 \ref{ex:addiction_cycle}） \\
+周期 & 90 分钟睡眠周期（NREM-REM 交替，定义 \ref{def:sleep_cycle}）；注意振荡的 theta（$4$—$8$ Hz）/delta（$0.5$—$2$ Hz）节律（定义 \ref{def:attention_oscillation}）；人际情感同步的相位锁定（定义 \ref{def:emotional_synchrony}）；习惯形成的周期特征（命题 \ref{prop:habit_formation}）；潜意识过程的激活-衰减周期（定义 \ref{def:implicit_memory}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{心理周期性判定定理}（\ref{thm:psych_periodicity_decision}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 验证\textbf{数量调节的单调性}（\ref{prop:psych_adaptive_growth}）的前提在本章领域对象上成立，并给出一个不满足前提的反例。
+
+    \item 考察\textbf{三参数对应：半径、相位与转速}（\ref{prop:psych_epicycle_correspondence}）在参数退化时的行为，说明结论如何随之退化。
+
+    \item 说明\textbf{心理周期诊断流程与三章接口}（\ref{thm:psych_diagnosis_integration}）与「周期系统」章相应通用结论的关系（是一致、特例还是需要附加条件）。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{thm:psych_periodicity_decision}、\ref{prop:psych_adaptive_growth}、\ref{prop:psych_epicycle_correspondence}、\ref{thm:psych_diagnosis_integration}。
+\end{enumerate}
+
+

@@ -1,0 +1,1031 @@
+\chapter{Group Objects and Higher-order Mappings}
+\label{chap:higher_group}
+\markboth{Higher-order Groups and Higher-order Functions}{Higher-order Groups and Higher-order Functions}
+
+\begin{remark}[Positioning of this chapter]\label{rem:higher_group_chapter_positioning}
+This chapter systematically develops the automorphism tower structure of the `Groups and Group Functions' chapter. The automorphism tower
+\[
+G_{(0)} = G,\qquad G_{(k+1)} = \operatorname{Aut}(G_{(k)}),\quad k\ge 0
+\]
+is the concrete realisation, in group representation theory, of the idea that `the relation of a relation is again a group'. This chapter establishes the basic theory of the automorphism tower, the three standard constructions on each level of the tower (translation, inner automorphism, outer automorphism), the function spaces on the tower, the symmetries and conserved quantities on the tower, the periodic structures on the tower, and the stability of the tower together with the tower heights of typical groups.
+
+The core content of this chapter is the level-by-level lifting of the first-order group representation theory framework established in the `Groups and Group Functions' chapter to every level of the automorphism tower. Each level $G_{(k)}$ has its own translation (left regular action), inner automorphisms ($\operatorname{Inn}(G_{(k)})$) and outer automorphisms ($\operatorname{Out}(G_{(k)})$), together with the corresponding function spaces and conserved quantities.
+
+\textbf{Seven-theme guide for this chapter}: Translation---the left regular action on each level of the automorphism tower (Proposition \ref{prop:tower_three_operations}); Scaling---the level-by-level recursion of the outer automorphism group (Proposition \ref{prop:tower_three_operations}); Rotation---the level-by-level recursion of the inner automorphism group (Proposition \ref{prop:tower_three_operations}); Conservation---the conserved quantities on the tower (Definition \ref{def:higher_conservation_law}); Symmetry---the symmetry groups on the tower (Definition \ref{def:higher_symmetry_group}); Closure---the stability of the tower (Theorem \ref{thm:higher_wielandt}, Proposition \ref{prop:tower_heights}); Period---the periodic structures on the tower (Definition \ref{def:higher_period}).
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  >=Stealth, thick, node distance=1.5cm,
+  tower/.style={draw, rounded corners, align=center, minimum width=2.6cm, minimum height=0.9cm, fill=blue!8},
+  arr/.style={-{Stealth[length=2.4mm]}, very thick}
+]
+\node[tower, fill=blue!12] (g0) at (0,0)  {$G_{(0)}=G$};
+\node[tower, fill=green!12] (g1) at (3.6,0) {$G_{(1)}=\operatorname{Aut}(G)$};
+\node[tower, fill=orange!12] (g2) at (7.2,0) {$G_{(2)}=\operatorname{Aut}^2(G)$};
+\node[tower, fill=red!12] (g3) at (10.8,0) {$G_{(3)}$};
+\node[align=center] (dots) at (12.6,0) {$\cdots$};
+\draw[arr] (g0) -- (g1);
+\draw[arr] (g1) -- (g2);
+\draw[arr] (g2) -- (g3);
+\draw[arr, dashed] (g3) -- (dots);
+\foreach \name in {g0,g1,g2,g3} {
+  \draw[gray!40, dashed] (\name.south) -- ++(0,-0.6);
+}
+\node[align=center, font=\footnotesize] at (3.6,-1.4) {translation\\inner automorphism\\outer automorphism};
+\node[align=center, font=\footnotesize] at (7.2,-1.4) {translation\\inner automorphism\\outer automorphism};
+\node[align=center, font=\footnotesize] at (10.8,-1.4) {translation\\inner automorphism\\outer automorphism};
+\node[align=center, font=\small] at (5.4,-3.0) {each level $G_{(k)}$ again possesses the three standard constructions (translation / inner automorphism / outer automorphism)};
+\end{tikzpicture}
+\caption{Overview of the automorphism tower: $G_{(k+1)}=\operatorname{Aut}(G_{(k)})$ is constructed level by level, and translation, inner automorphisms and outer automorphisms reappear on every level.}
+\label{fig:automorphism_tower_overview}
+\end{figure}
+
+\section{Automorphisms and the Automorphism Group}
+
+The basic concepts of this section were established in the `Groups and Group Functions' chapter; here we merely review them and fix the notation.
+
+\begin{definition}[Automorphisms of a group]\label{def:higher_automorphism}
+This definition is the same content as \cref{def:automorphism} in the `Automorphism Tower' section (\cref{sec:automorphism_tower}) of Chapter~\ref{chap:group_function}; to avoid repeated exposition, only the reference anchor is retained here, and the complete statement is to be found there.
+\end{definition}
+
+\begin{definition}[The automorphism group]\label{def:higher_automorphism_group}
+This definition is the same content as \cref{def:automorphism_group} in the `Automorphism Tower' section (\cref{sec:automorphism_tower}) of Chapter~\ref{chap:group_function}; to avoid repeated exposition, only the reference anchor is retained here, and the complete statement is to be found there.
+\end{definition}
+
+\begin{proposition}[The inverse of an automorphism preserves the group operation]\label{prop:higher_automorphism_inverse}
+This proposition is the same content as \cref{prop:automorphism_inverse} in the `Automorphism Tower' section (\cref{sec:automorphism_tower}) of Chapter~\ref{chap:group_function}; to avoid repeated exposition, only the reference anchor is retained here, and the complete statement is to be found there.
+\end{proposition}
+
+\begin{proof}
+Since $\varphi$ is surjective, for any $u,v \in G$ there exist unique $x,y \in G$ such that $\varphi(x)=u$, $\varphi(y)=v$. By the homomorphism property of $\varphi$, $\varphi(xy)=uv$. Applying $\varphi^{-1}$ to both sides gives
+\[
+xy = \varphi^{-1}(uv).
+\]
+But $x=\varphi^{-1}(u)$, $y=\varphi^{-1}(v)$, so
+\[
+\varphi^{-1}(uv) = \varphi^{-1}(u)\varphi^{-1}(v).
+\]
+Hence $\varphi^{-1}$ preserves the group operation. Moreover $\varphi^{-1}$ is a bijection ($\varphi$ being a bijection), so $\varphi^{-1}\in\operatorname{Aut}(G)$.
+\end{proof}
+
+\begin{property}[Group-structural invariants preserved by automorphisms]\label{prop:higher_automorphism_invariants}
+Let $\varphi \in \operatorname{Aut}(G)$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Order}: $|G| = |\varphi(G)|$;
+    \item \textbf{Identity element}: $\varphi(e) = e$;
+    \item \textbf{Order of an element}: $\operatorname{ord}(\varphi(g)) = \operatorname{ord}(g)$ for any $g\in G$;
+    \item \textbf{Centre}: $\varphi(Z(G)) = Z(G)$;
+    \item \textbf{Commutator subgroup}: $\varphi([G,G]) = [G,G]$.
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i) $\varphi$ is a bijection, so $|G| = |\varphi(G)|$.
+
+(ii) From $\varphi(e) = \varphi(ee) = \varphi(e)\varphi(e)$, multiplying on the left by $\varphi(e)^{-1}$ gives $\varphi(e)=e$.
+
+(iii) For any $n\ge 1$, $\varphi(g)^n = \varphi(g^n)$. Since $\varphi$ is a bijection, $\varphi(g)^n = e$ if and only if $g^n = e$, so the orders are equal.
+
+(iv) Let $z\in Z(G)$. For any $x\in G$ there exists $y\in G$ with $x=\varphi(y)$. Then
+\[
+x\varphi(z) = \varphi(y)\varphi(z) = \varphi(yz) = \varphi(zy) = \varphi(z)\varphi(y) = \varphi(z)x.
+\]
+Hence $\varphi(z)\in Z(G)$, that is, $\varphi(Z(G))\subseteq Z(G)$. Applying the same conclusion to $\varphi^{-1}$ gives $Z(G)\subseteq\varphi(Z(G))$, so the two are equal.
+
+(v) The image of the commutator $[x,y]=xyx^{-1}y^{-1}$ under an automorphism is
+\[
+\varphi([x,y]) = \varphi(x)\varphi(y)\varphi(x)^{-1}\varphi(y)^{-1} = [\varphi(x),\varphi(y)].
+\]
+Hence $\varphi([G,G]) = [G,G]$.
+\end{proof}
+
+\begin{property}[Automorphisms preserve conjugacy classes]\label{prop:automorphism_preserves_conjugacy}
+Let $\varphi \in \operatorname{Aut}(G)$. Then $\varphi$ maps conjugacy classes to conjugacy classes, that is, for any $g\in G$,
+\[
+\varphi\bigl(\operatorname{Cl}(g)\bigr) = \operatorname{Cl}\bigl(\varphi(g)\bigr).
+\]
+In particular, $\varphi$ preserves the partition into conjugacy classes.
+\end{property}
+
+\begin{proof}
+For any $x = hgh^{-1} \in \operatorname{Cl}(g)$,
+\[
+\varphi(x) = \varphi(h)\varphi(g)\varphi(h)^{-1} \in \operatorname{Cl}(\varphi(g)).
+\]
+Hence $\varphi(\operatorname{Cl}(g))\subseteq \operatorname{Cl}(\varphi(g))$. Applying the same conclusion to $\varphi^{-1}$ gives $\operatorname{Cl}(\varphi(g))\subseteq \varphi(\operatorname{Cl}(g))$, so the two are equal.
+\end{proof}
+
+\begin{lemma}[Automorphisms restrict to characteristic subgroups]\label{lem:automorphism_restricts_characteristic}
+Let $H\le G$ be a \textbf{characteristic subgroup} of $G$ (that is, $\varphi(H)=H$ holds for every $\varphi\in\operatorname{Aut}(G)$). Then there exists a group homomorphism
+\[
+\Phi: \operatorname{Aut}(G) \to \operatorname{Aut}(H),\qquad \varphi \mapsto \varphi|_H.
+\]
+\end{lemma}
+
+\begin{proof}
+For any $\varphi\in\operatorname{Aut}(G)$, by characteristicity $\varphi(H)=H$, so $\varphi|_H: H\to H$ is a bijection; and $\varphi$ preserves the group operation, so $\varphi|_H$ preserves the group operation, that is, $\varphi|_H\in\operatorname{Aut}(H)$. The map $\Phi$ preserves composition: $(\varphi\psi)|_H=\varphi|_H\,\psi|_H$, so $\Phi$ is a homomorphism.
+\end{proof}
+
+\begin{example}[Invariants of the automorphism groups of typical groups]\label{ex:automorphism_invariants_examples}
+\begin{itemize}
+    \item $\operatorname{Aut}(\mathbb{Z}) \cong C_2$: the only non-trivial automorphism is $x\mapsto -x$, which preserves the orders of elements and interchanges $+n$ and $-n$.
+    \item $\operatorname{Aut}(C_n) \cong (\mathbb{Z}/n\mathbb{Z})^\times$: the automorphisms $x\mapsto x^k$ ($\gcd(k,n)=1$) preserve the orders of elements, preserve the identity element, and preserve the centre (the whole of $C_n$).
+    \item $\operatorname{Aut}(S_3) \cong S_3$: all automorphisms are inner, and they preserve the three subgroups of order two (the transpositions) and the normal subgroup $A_3$.
+\end{itemize}
+\end{example}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Automorphism invariants and typical examples}
+    \label{tab:automorphism_invariants}
+    \small
+    \renewcommand{\arraystretch}{1.25}
+    \begin{tabular}{@{}p{3.4cm} p{5.0cm} p{4.6cm}@{}}
+    \toprule
+    Invariant & Meaning & Typical example \\
+    \midrule
+    Group order $|G|$ & $\varphi$ is a bijection & $\operatorname{Aut}(\mathbb{Z}/n\mathbb{Z})$ preserves $n$ \\
+    Identity element $e$ & $\varphi(ee)=\varphi(e)\varphi(e)$ & every automorphism fixes $e$ \\
+    Order of an element & $\operatorname{ord}(\varphi(g))=\operatorname{ord}(g)$ & $\operatorname{Aut}(C_5)$ preserves the number of elements of order 5 \\
+    Centre $Z(G)$ & characteristic subgroup & $\operatorname{Aut}(S_3)$ fixes $Z(S_3)=\{e\}$ \\
+    Commutator subgroup $[G,G]$ & characteristic subgroup & $\operatorname{Aut}(S_3)$ fixes $[S_3,S_3]=A_3$ \\
+    Partition into conjugacy classes & conjugacy classes are mapped to conjugacy classes & the three transposition classes of $S_3$ are preserved under $\operatorname{Aut}$ \\
+    \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{corollary}[Automorphisms preserve simplicity]\label{cor:automorphism_simple}
+If $G$ is a simple group and $\varphi\in\operatorname{Aut}(G)$, then $\varphi$ maps maximal normal subgroups to maximal normal subgroups; in particular, if $G$ is simple, then $\varphi(\{e\})=\{e\}$ and $\varphi(G)=G$.
+\end{corollary}
+
+\begin{proof}
+$G$ being simple means that it has no non-trivial normal subgroups. Let $N\trianglelefteq G$; then $\varphi(N)\trianglelefteq G$. If $N=\{e\}$, then $\varphi(N)=\{e\}$; if $N=G$, then $\varphi(N)=G$. The intermediate case does not occur.
+\end{proof}
+
+\section{Inner and Outer Automorphisms}
+
+\begin{definition}[Inner automorphisms]\label{def:higher_inner_automorphism}
+This definition is the same content as \cref{def:group_rotation_operation} in the `Inner Automorphisms' section (\cref{subsec:inner_automorphism}) of Chapter~\ref{chap:group_function}; to avoid repeated exposition, only the reference anchor is retained here, and the complete statement is to be found there.
+\end{definition}
+
+\begin{proposition}[The structure of the inner automorphism group]\label{prop:inner_automorphism_group}
+$\operatorname{Inn}(G)$ is a normal subgroup of $\operatorname{Aut}(G)$, and
+\[
+\operatorname{Inn}(G) \cong G/Z(G).
+\]
+\end{proposition}
+
+\begin{proof}
+First we verify that $\iota_g$ is an automorphism. For any $x,y\in G$,
+\[
+\iota_g(xy) = g(xy)g^{-1} = (gxg^{-1})(gyg^{-1}) = \iota_g(x)\iota_g(y).
+\]
+Moreover the inverse of $\iota_g$ is $\iota_{g^{-1}}$, so $\iota_g$ is a bijection and hence an automorphism.
+
+The map $\phi: G\to\operatorname{Aut}(G)$, $\phi(g)=\iota_g$ is a group homomorphism, because
+\[
+\phi(gh)(x) = (gh)x(gh)^{-1} = g(hxh^{-1})g^{-1} = \iota_g(\iota_h(x)) = (\phi(g)\circ\phi(h))(x).
+\]
+Its kernel is
+\[
+\ker\phi = \{g\in G : gxg^{-1}=x,\ \forall x\in G\} = Z(G).
+\]
+By the first isomorphism theorem, $\operatorname{Inn}(G) = \phi(G) \cong G/Z(G)$.
+
+Normality: for any $\varphi\in\operatorname{Aut}(G)$ and $g\in G$,
+\[
+\varphi\circ\iota_g\circ\varphi^{-1} = \iota_{\varphi(g)} \in\operatorname{Inn}(G).
+\]
+Hence $\operatorname{Inn}(G)\trianglelefteq\operatorname{Aut}(G)$.
+\end{proof}
+
+\begin{proposition}[Inner automorphisms preserve conjugacy classes]\label{prop:inner_preserves_conjugacy}
+For any $g\in G$, the map $\iota_g$ maps every conjugacy class to itself:
+\[
+\iota_g(\operatorname{Cl}(h)) = \operatorname{Cl}(h),\qquad \forall h\in G.
+\]
+\end{proposition}
+
+\begin{proof}
+Let $x = khk^{-1}$. Then
+\[
+\iota_g(x) = g(khk^{-1})g^{-1} = (gk)h(gk)^{-1} \in \operatorname{Cl}(h).
+\]
+The reverse inclusion is analogous (using $\iota_g^{-1}=\iota_{g^{-1}}$). Hence the conjugacy classes are invariant under $\iota_g$.
+\end{proof}
+
+\begin{definition}[The outer automorphism group]\label{def:higher_outer_automorphism}
+This definition is the same content as \cref{def:group_scaling_operation} in the `Outer Automorphisms' section (\cref{subsec:outer_automorphism}) of Chapter~\ref{chap:group_function}; to avoid repeated exposition, only the reference anchor is retained here, and the complete statement is to be found there.
+\end{definition}
+
+\begin{proposition}[Exact sequence of the automorphism group]\label{prop:automorphism_exact_sequence}
+There is an exact sequence
+\[
+1 \longrightarrow Z(G) \xrightarrow{\ \iota\ } G \xrightarrow{\ \phi\ } \operatorname{Aut}(G) \xrightarrow{\ \pi\ } \operatorname{Out}(G) \longrightarrow 1,
+\]
+where $\iota$ is the inclusion map, $\phi(g)=\iota_g$ is the inner automorphism map, and $\pi$ is the quotient map.
+\end{proposition}
+
+\begin{proof}
+An exact sequence requires that the image of each map equals the kernel of the next.
+
+(i) $\ker\iota = \{e\}$, because $\iota$ is the inclusion map.
+
+(ii) $\operatorname{im}\iota = Z(G)$. By the proof of Proposition \ref{prop:inner_automorphism_group}, $\ker\phi = Z(G)$, so $\operatorname{im}\iota = \ker\phi$.
+
+(iii) $\operatorname{im}\phi = \operatorname{Inn}(G)$. By definition, $\operatorname{Inn}(G) = \phi(G)$. Also $\pi$ is the quotient map, so $\ker\pi = \operatorname{Inn}(G)$, whence $\operatorname{im}\phi = \ker\pi$.
+
+(iv) $\pi$ is surjective, so $\operatorname{im}\pi = \operatorname{Out}(G)$.
+
+Therefore the sequence is exact.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick,
+  obj/.style={draw, rounded corners, align=center, minimum width=2.2cm, minimum height=0.85cm, fill=blue!8, font=\small}]
+
+\node[obj] (triv1) at (0,0) {$\{1\}$};
+\node[obj, fill=green!10] (zg) at (2.6,0) {$Z(G)$};
+\node[obj, fill=orange!10] (g) at (5.2,0) {$G$};
+\node[obj, fill=red!10] (aut) at (7.8,0) {$\operatorname{Aut}(G)$};
+
+\node[obj, fill=purple!10] (out) at (7.8,-1.8) {$\operatorname{Out}(G)$};
+\node[obj] (triv2) at (5.2,-1.8) {$\{1\}$};
+
+
+\draw[->, very thick] (triv1) -- (zg);
+\draw[->, very thick] (zg) -- node[above, font=\footnotesize] {$\iota$} (g);
+\draw[->, very thick] (g) -- node[above, font=\footnotesize] {$\phi$} (aut);
+
+\draw[->, very thick] (aut) -- node[right, font=\footnotesize] {$\pi$} (out);
+
+\draw[->, very thick] (out) -- (triv2);
+
+\node[align=center, font=\small] at (3.9,-3.6) {Exactness: $\ker\iota=\{1\}$, $\operatorname{im}\iota=\ker\phi=Z(G)$,\\$\operatorname{im}\phi=\ker\pi=\operatorname{Inn}(G)$, $\operatorname{im}\pi=\operatorname{Out}(G)$};
+\end{tikzpicture}
+\caption{The exact sequence of the automorphism group (serpentine return layout): the first row is $1\to Z(G)\to G\to\operatorname{Aut}(G)$, and from $\operatorname{Aut}(G)$ the sequence turns downwards to the second row $\operatorname{Out}(G)\to 1$.}
+\label{fig:automorphism_exact_sequence}
+\end{figure}
+
+\begin{property}[The order of the outer automorphism group]\label{prop:outer_automorphism_order}
+If $G$ is a finite group, then
+\[
+|\operatorname{Out}(G)| = \frac{|\operatorname{Aut}(G)|}{|\operatorname{Inn}(G)|} = \frac{|\operatorname{Aut}(G)|}{|G/Z(G)|}.
+\]
+\end{property}
+
+\begin{proof}
+From the exact sequence $1\to\operatorname{Inn}(G)\to\operatorname{Aut}(G)\to\operatorname{Out}(G)\to 1$, $|\operatorname{Out}(G)| = |\operatorname{Aut}(G)|/|\operatorname{Inn}(G)|$. Substituting $\operatorname{Inn}(G)\cong G/Z(G)$ gives the result.
+\end{proof}
+
+\begin{example}[Typical examples of outer automorphism groups]\label{ex:outer_automorphism_examples}
+\begin{itemize}
+    \item $\operatorname{Out}(\mathbb{Z}) \cong C_2$, because $\operatorname{Aut}(\mathbb{Z})\cong C_2$ whilst $\operatorname{Inn}(\mathbb{Z})$ is trivial ($\mathbb{Z}$ being abelian).
+    \item $\operatorname{Out}(C_n) \cong (\mathbb{Z}/n\mathbb{Z})^\times/\{1,-1\}$.
+    \item $\operatorname{Out}(S_6) \cong C_2$ ($S_6$ is the only symmetric group with a non-trivial outer automorphism), whilst $\operatorname{Out}(S_n)=\{e\}$ ($n\neq 2,6$).
+\end{itemize}
+\end{example}
+
+\begin{remark}[The meaning of the exact sequence]\label{rem:exact_sequence_operator}
+The exact sequence
+\[
+1 \to Z(G) \to G \to \operatorname{Aut}(G) \to \operatorname{Out}(G) \to 1
+\]
+shows that: the centre $Z(G)$ of $G$ is the kernel of the inner automorphism map, the inner automorphism group $\operatorname{Inn}(G)$ is the image of $G$ in $\operatorname{Aut}(G)$, and the outer automorphism group is the quotient group. This structure recurs on every level of the automorphism tower.
+\end{remark}
+
+\section{The Automorphism Tower}
+
+\begin{definition}[The automorphism tower]\label{def:higher_automorphism_tower}
+This definition is the same content as \cref{def:automorphism_tower} in the `Automorphism Tower' section (\cref{sec:automorphism_tower}) of Chapter~\ref{chap:group_function}; to avoid repeated exposition, only the reference anchor is retained here, and the complete statement is to be found there.
+\end{definition}
+
+\begin{proposition}[The embedding chain of the automorphism tower]\label{prop:tower_embedding_chain}
+If $Z(G)=\{e\}$, then $Z(G_{(k)})=\{e\}$ for every level $k\ge 0$, and
+\[
+G_{(k)} \cong \operatorname{Inn}(G_{(k)}) \subseteq \operatorname{Aut}(G_{(k)}) = G_{(k+1)}.
+\]
+Hence every level of the tower embeds in the next: $G_{(0)} \subseteq G_{(1)} \subseteq G_{(2)} \subseteq \cdots$.
+\end{proposition}
+
+\begin{proof}
+We proceed by induction on $k$. For $k=0$, $Z(G)=\{e\}$ is the hypothesis.
+
+Suppose $Z(G_{(k)})=\{e\}$. By Proposition \ref{prop:inner_automorphism_group}, the inner automorphism map $\phi_k: G_{(k)} \to \operatorname{Aut}(G_{(k)})$ has kernel $Z(G_{(k)})=\{e\}$, so $\phi_k$ is injective, whence $G_{(k)} \cong \operatorname{Inn}(G_{(k)}) \subseteq \operatorname{Aut}(G_{(k)}) = G_{(k+1)}$.
+
+It remains to prove that $Z(G_{(k+1)})=\{e\}$. By Lemma \ref{ch8_centreless_embedding} (iii) of the `Groups and Group Functions' chapter, $Z(\operatorname{Aut}(G_{(k)}))=\{e\}$, that is, $Z(G_{(k+1)})=\{e\}$. The induction is complete.
+\end{proof}
+
+\begin{lemma}[Level-by-level preservation of triviality of the centre]\label{ch10_centreless_preserved}
+Let $G$ be a group with $Z(G)=\{e\}$. Then $Z(G_{(k)})=\{e\}$ for any $k\ge 0$.
+\end{lemma}
+
+\begin{proof}
+This is the induction step in the proof of Proposition \ref{prop:tower_embedding_chain}.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=0.9cm,
+  lvl/.style={draw, rounded corners, align=center, minimum width=3.0cm, minimum height=0.8cm, fill=blue!8}]
+\node[lvl, fill=blue!12] (g0) at (0,0) {$G_{(0)}=G$};
+\node[lvl, fill=green!12] (g1) at (0,1.6) {$G_{(1)}=\operatorname{Aut}(G)$};
+\node[lvl, fill=orange!12] (g2) at (0,3.2) {$G_{(2)}=\operatorname{Aut}^2(G)$};
+\node[align=center] (gd) at (0,4.6) {$\vdots$};
+\draw[->, very thick] (g0) -- (g1) node[midway, right, font=\footnotesize] {$\cong\operatorname{Inn}$};
+\draw[->, very thick] (g1) -- (g2) node[midway, right, font=\footnotesize] {$\cong\operatorname{Inn}$};
+\draw[->, very thick, dashed] (g2) -- (gd);
+\node[align=center, font=\small] at (5.2,1.6) {$Z(G_{(k)})=\{e\}$ is preserved level by level;\\embedding chain $G_{(0)}\subseteq G_{(1)}\subseteq\cdots$};
+\end{tikzpicture}
+\caption{Triviality of the centre is preserved level by level along the automorphism tower: the centre of every level is still $\{e\}$, and $G_{(k)}$ embeds in $\operatorname{Aut}(G_{(k)})=G_{(k+1)}$.}
+\label{fig:centreless_tower}
+\end{figure}
+
+\begin{theorem}[Stability of the automorphism tower of a finite group---Wielandt's theorem]\label{thm:higher_wielandt}
+This theorem is the same content as \cref{thm:finite_automorphism_tower} in the `Automorphism Tower' section (\cref{sec:automorphism_tower}) of Chapter~\ref{chap:group_function}; to avoid repeated exposition, only the reference anchor is retained here, and the complete statement and proof are to be found there.
+\end{theorem}
+
+\begin{lemma}[Monotonicity of the tower order]\label{lem:tower_order_monotone}
+Let $G$ be a finite group with $Z(G)=\{e\}$. Then the order $|G_{(k)}|$ is non-decreasing in $k$: $|G_{(k+1)}|\ge |G_{(k)}|$.
+\end{lemma}
+
+\begin{proof}
+By Proposition \ref{prop:tower_embedding_chain}, $G_{(k)}\cong\operatorname{Inn}(G_{(k)})\subseteq\operatorname{Aut}(G_{(k)})=G_{(k+1)}$, so $|G_{(k)}|\le |G_{(k+1)}|$.
+\end{proof}
+
+\begin{corollary}[Equal order implies stability]\label{cor:equal_order_stable}
+Let $G$ be a finite group with $Z(G)=\{e\}$. Then $|G_{(k+1)}|=|G_{(k)}|$ if and only if $G_{(k+1)}\cong G_{(k)}$.
+\end{corollary}
+
+\begin{proof}
+Sufficiency: this follows directly from the definition of tower stability (equality at that level yields equality at every subsequent level). Necessity: by Lemma \ref{lem:tower_order_monotone} and Proposition \ref{prop:tower_embedding_chain}, $G_{(k)}\subseteq G_{(k+1)}$ and $|G_{(k)}|=|G_{(k+1)}|$, so $G_{(k)}=G_{(k+1)}$ (as subgroups of $\operatorname{Aut}(G_{(k)})$), that is, $G_{(k+1)}\cong G_{(k)}$.
+\end{proof}
+
+\begin{remark}[The boundary of Wielandt's theorem]\label{rem:higher_wielandt_boundary}
+This remark is the same content as \cref{rem:wielandt_boundary} in the `Automorphism Tower' section (\cref{sec:automorphism_tower}) of Chapter~\ref{chap:group_function}; to avoid repeated exposition, only the reference anchor is retained here, and the complete statement is to be found there.
+\end{remark}
+
+\section{The Three Standard Constructions on the Automorphism Tower}
+\label{sec:tower_three_constructions}
+
+\begin{proposition}[Three constructions on each level of the automorphism tower]\label{prop:tower_three_operations}
+Let $G$ be a group. For each level $G_{(k)}$ of the automorphism tower there exist three standard constructions:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Translation}: the left regular action $L_g: G_{(k)}\to G_{(k)}$, $L_g(x)=gx$, $g\in G_{(k)}$;
+    \item \textbf{Inner automorphisms}: $\operatorname{Inn}(G_{(k)}) \cong G_{(k)}/Z(G_{(k)})$;
+    \item \textbf{Outer automorphisms}: $\operatorname{Out}(G_{(k)}) = \operatorname{Aut}(G_{(k)})/\operatorname{Inn}(G_{(k)})$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+For each level $G_{(k)}$, apply Theorem \ref{thm:three_operations_unity} of the `Groups and Group Functions' chapter directly.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.0cm,
+  lvl/.style={draw, rounded corners, align=center, minimum width=8.0cm, minimum height=0.9cm, fill=blue!6}]
+\node[lvl, fill=blue!12] (l0) at (0,0) {$G_{(0)}$: translation $L_g$ / inner automorphism $\operatorname{Inn}$ / outer automorphism $\operatorname{Out}$};
+\node[lvl, fill=green!12] (l1) at (0,-1.6) {$G_{(1)}$: translation $L_\varphi$ / inner automorphism $\operatorname{Inn}$ / outer automorphism $\operatorname{Out}$};
+\node[lvl, fill=orange!12] (l2) at (0,-3.2) {$G_{(2)}$: translation $L_\psi$ / inner automorphism $\operatorname{Inn}$ / outer automorphism $\operatorname{Out}$};
+\node[align=center] at (0,-4.4) {$\vdots$};
+\draw[->, very thick] (l0) -- (l1);
+\draw[->, very thick] (l1) -- (l2);
+\draw[->, very thick, dashed] (l2) -- (0,-4.2);
+\node[align=center, font=\small] at (6.0,-2.0) {the three constructions have\\exactly the same form on each\\level, only the group being\\replaced by $G_{(k)}$};
+\end{tikzpicture}
+\caption{The three standard constructions on each level of the automorphism tower: translation, inner automorphisms and outer automorphisms recur level by level.}
+\label{fig:tower_three_constructions}
+\end{figure}
+
+\begin{definition}[Conserved quantities on the tower]\label{def:higher_conservation_law}
+Let $G$ be a group and let $G_{(k)}$ be the $k$-th level of its automorphism tower. A \textbf{conserved quantity} on the tower is a functional $Q_k: G_{(k)}\to \mathbb{R}$ satisfying the following conditions:
+\begin{enumerate}[label=(\roman*)]
+    \item invariant under left translation: $Q_k(gx)=Q_k(x)$ for all $g,x\in G_{(k)}$;
+    \item invariant under inner automorphisms: $Q_k(hxh^{-1})=Q_k(x)$ for all $h,x\in G_{(k)}$;
+    \item covariant under outer automorphisms: $Q_k(\varphi(x)) = Q_k(x)$ for all $\varphi\in\operatorname{Aut}(G_{(k)})$.
+\end{enumerate}
+One satisfying (i) is called a translation invariant, one satisfying (ii) a class function, and one satisfying (iii) an automorphism invariant.
+\end{definition}
+
+\begin{remark}[The correspondence between the three constructions on the tower and conserved quantities]\label{cor:higher_conservation}
+On each level $G_{(k)}$ of the automorphism tower:
+\begin{enumerate}[label=(\roman*)]
+    \item invariance under left translation corresponds to translation conserved quantities;
+    \item invariance under inner automorphisms corresponds to class functions (values on central elements);
+    \item invariance under outer automorphisms corresponds to automorphism invariants.
+\end{enumerate}
+This correspondence is the repetition, on every level, of the correspondence between the three constructions and conserved quantities in the `Groups and Group Functions' chapter.
+\end{remark}
+
+\begin{property}[Inclusion relations among the conserved quantities on the tower]\label{prop:tower_conservation_inclusion}
+On each level $G_{(k)}$ of the automorphism tower, let $Q_k$ be a conserved quantity. Then
+\[
+\text{automorphism invariants} \subseteq \text{class functions} \subseteq \text{translation invariants}.
+\]
+\end{property}
+
+\begin{proof}
+Let $Q_k$ be an automorphism invariant. Then for any $h\in G_{(k)}$, taking $\iota_h\in\operatorname{Aut}(G_{(k)})$ gives $Q_k(hxh^{-1})=Q_k(x)$, so $Q_k$ is a class function. Let $Q_k$ be a class function. For any $g\in G_{(k)}$, if $Q_k$ is known on the identity element, in general there is no relation $Q_k(gx)=Q_k(x)$; this inclusion depends on the particular group, but a class function is necessarily constant on central elements (central elements commute with everything), so in the sense of inner automorphisms it is a translation invariant.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+\draw[fill=purple!8, rounded corners] (-3.6,-2.0) rectangle (3.6,2.0);
+\node[purple!60!black] at (2.8,1.6) {translation invariants};
+\draw[fill=orange!12, rounded corners] (-2.6,-1.4) rectangle (2.6,1.4);
+\node[orange!60!black] at (1.8,1.0) {class functions};
+\draw[fill=red!16, rounded corners] (-1.6,-0.8) rectangle (1.6,0.8);
+\node[red!60!black] at (0,0) {automorphism invariants};
+\node[align=center, font=\small] at (0,-3.0) {inclusion chain of the conserved quantities on the tower: automorphism invariants $\subseteq$ class functions $\subseteq$ translation invariants};
+\end{tikzpicture}
+\caption{Inclusion relations among the three kinds of conserved quantity on the tower.}
+\label{fig:tower_conservation_inclusion}
+\end{figure}
+
+\section{Function Spaces on the Tower}
+
+\begin{definition}[Functions on the tower]\label{def:higher_function}
+Let $G$ be a group and let $V$ be a vector space. A \textbf{function} on the tower is a family of maps
+\[
+f_{(k)}: G_{(k)} \to V,\qquad k\ge 0.
+\]
+Here $f_{(0)}: G\to V$ is the function on the bottom level.
+\end{definition}
+
+\begin{definition}[Function spaces on the tower]\label{def:higher_function_space}
+For each level $k\ge 0$, define the \textbf{function space}
+\[
+\mathcal{F}_{(k)} = \{f_{(k)}: G_{(k)} \to V\}.
+\]
+\end{definition}
+
+\begin{proposition}[Preservation of periodicity for functions on the tower]\label{prop:higher_period_preservation}
+Let $f_{(0)}: G\to V$ be right $\Gamma$-periodic, that is, $f_{(0)}(g\gamma)=f_{(0)}(g)$ for all $g\in G$, $\gamma\in\Gamma$. Then for each level $k\ge 0$ there exists a subgroup $\Gamma_{(k)}$ of $G_{(k)}$ such that the corresponding function $f_{(k)}$ is right $\Gamma_{(k)}$-periodic.
+\end{proposition}
+
+\begin{proof}
+We proceed by induction on $k$. For $k=0$ take $\Gamma_{(0)}=\Gamma$.
+
+Suppose $f_{(k)}$ is right $\Gamma_{(k)}$-periodic. Define
+\[
+\Gamma_{(k+1)} = \{\varphi\in G_{(k+1)} : \varphi(\gamma)=\gamma,\ \forall\gamma\in\Gamma_{(k)}\}.
+\]
+This is a subgroup of $G_{(k+1)}$ (a stabiliser). For any $\varphi\in\Gamma_{(k+1)}$ and $x\in G_{(k)}$, since $\varphi$ is an automorphism,
+\[
+f_{(k)}(\varphi(x\gamma)) = f_{(k)}(\varphi(x)\varphi(\gamma)) = f_{(k)}(\varphi(x)\gamma) = f_{(k)}(\varphi(x)),
+\]
+where the last step uses the $\Gamma_{(k)}$-periodicity of $f_{(k)}$. Hence $f_{(k)}\circ\varphi = f_{(k)}$, that is, $f_{(k)}$ is $\Gamma_{(k+1)}$-periodic.
+\end{proof}
+
+\begin{proposition}[The regular representation structure of the function spaces on the tower]\label{prop:higher_function_regular_rep}
+Let $G$ be a locally compact group and let $G_{(k)}$ be the $k$-th level of its automorphism tower. Then the left regular representation
+\[
+\lambda_{(k)}: G_{(k)} \to \mathcal{U}(L^2(G_{(k)})),\qquad (\lambda_{(k)}(g)f)(x) = f(g^{-1}x)
+\]
+is a unitary representation on $L^2(G_{(k)})$.
+\end{proposition}
+
+\begin{proof}
+For any $g,h\in G_{(k)}$,
+\[
+\lambda_{(k)}(g)\lambda_{(k)}(h)f(x) = f(h^{-1}g^{-1}x) = f((gh)^{-1}x) = \lambda_{(k)}(gh)f(x).
+\]
+The identity element acts as the identity. Unitarity follows from the left invariance of the Haar measure (Proposition \ref{prop:regular_unitary} of the `Groups and Group Functions' chapter, applied level by level).
+\end{proof}
+
+\begin{corollary}[The form of the inner product on the function spaces of the tower]\label{cor:higher_function_inner_product}
+The inner product on the function space $\mathcal{F}_{(k)} = L^2(G_{(k)})$ at level $k$ of the tower is
+\[
+\langle f_{(k)}, g_{(k)}\rangle_{(k)} = \int_{G_{(k)}} f_{(k)}(x)\,\overline{g_{(k)}(x)}\,dx.
+\]
+\end{corollary}
+
+\begin{proof}
+A direct computation from Definition \ref{def:higher_function_space} and the existence and uniqueness of the Haar measure.
+\end{proof}
+
+\begin{example}[Function spaces on the tower of $C_3$]\label{ex:c3_tower_functions}
+Let $G=C_3$. Its tower is $C_3\to C_2\to\{e\}$.
+\begin{itemize}
+    \item The bottom level $\mathcal{F}_{(0)} = \{f: C_3\to\mathbb{C}\}$ has dimension $3$.
+    \item Level 1, $\mathcal{F}_{(1)} = \{f: C_2\to\mathbb{C}\}$, has dimension $2$.
+    \item Level 2, $\mathcal{F}_{(2)} = \{f: \{e\}\to\mathbb{C}\}$, has dimension $1$.
+\end{itemize}
+Ascending the tower, the dimension of the function space decreases level by level---this is precisely the algebraic manifestation of the tower `getting shorter' level by level.
+\end{example}
+
+\section{Symmetries and Conserved Quantities on the Tower}
+
+\begin{definition}[Symmetry groups on the tower]\label{def:higher_symmetry_group}
+Let $f_{(k)}: G_{(k)}\to V$. The \textbf{symmetry group} at level $k$ of the tower is defined as
+\[
+\operatorname{Symmetry}_{(k)}(f_{(k)}) = \{\varphi\in\operatorname{Aut}(G_{(k)}) : f_{(k)}\circ\varphi = f_{(k)}\}.
+\]
+\end{definition}
+
+\begin{proposition}[Inclusion relations among the symmetry groups on the tower]
+\label{prop:higher_symmetry_inclusion}
+If $f_{(k+1)}$ is the natural extension of $f_{(k)}$ along the tower, that is,
+\[
+f_{(k+1)}\!\mid_{\operatorname{Inn}(G_{(k)})} = f_{(k)},
+\]
+then
+\[
+\operatorname{Symmetry}_{(k)}(f_{(k)})
+\subseteq
+\operatorname{Symmetry}_{(k+1)}(f_{(k+1)}).
+\]
+\end{proposition}
+
+\begin{proof}
+Let $\varphi\in\operatorname{Symmetry}_{(k)}(f_{(k)})$. By the definition of the extension $f_{(k+1)}$, for any $x\in G_{(k)}$,
+\[
+f_{(k+1)}(\varphi(x)) = f_{(k)}(\varphi(x)) = f_{(k)}(x) = f_{(k+1)}(x).
+\]
+Hence $\varphi\in\operatorname{Symmetry}_{(k+1)}(f_{(k+1)})$.
+\end{proof}
+
+\begin{definition}[Conserved quantities on the tower]\label{def:higher_conservation_law_2}
+This definition is the same content as \cref{def:higher_conservation_law} in the `The Three Standard Constructions on the Automorphism Tower' section (\cref{sec:tower_three_constructions}) of Chapter~\ref{chap:higher_group}; to avoid repeated exposition, only the reference anchor is retained here, and the complete statement is to be found there.
+\end{definition}
+
+\begin{remark}[The Noether correspondence on the tower]\label{thm:higher_noether}
+On each level $G_{(k)}$ of the automorphism tower:
+\begin{enumerate}[label=(\roman*)]
+    \item left-translation symmetry corresponds to translation invariants;
+    \item inner automorphism symmetry corresponds to class functions;
+    \item outer automorphism symmetry corresponds to automorphism invariants.
+\end{enumerate}
+This is the level-by-level repetition on the tower of the Noether correspondence in the `Groups and Group Functions' chapter.
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.0cm and 1.2cm,
+  box/.style={draw, rounded corners, align=center, minimum width=3.0cm, minimum height=0.9cm, fill=blue!6}]
+\node[box, fill=blue!12] (sym1) at (0,0) {left-translation symmetry};
+\node[box, fill=green!12] (sym2) at (5,0) {inner automorphism symmetry};
+\node[box, fill=orange!12] (sym3) at (10,0) {outer automorphism symmetry};
+\node[box, fill=blue!8] (cons1) at (0,-1.8) {translation invariants};
+\node[box, fill=green!8] (cons2) at (5,-1.8) {class functions};
+\node[box, fill=orange!8] (cons3) at (10,-1.8) {automorphism invariants};
+\draw[->, very thick] (sym1) -- (cons1);
+\draw[->, very thick] (sym2) -- (cons2);
+\draw[->, very thick] (sym3) -- (cons3);
+\node[align=center, font=\small] at (5,-3.2) {the Noether correspondence on the tower: three kinds of symmetry correspond to three kinds of conserved quantity, repeated level by level};
+\end{tikzpicture}
+\caption{The Noether correspondence on the tower: left translation, inner automorphisms and outer automorphisms correspond respectively to translation invariants, class functions and automorphism invariants.}
+\label{fig:higher_noether}
+\end{figure}
+
+\section{Periodic Structures on the Tower}
+
+\begin{definition}[Periods on the tower]\label{def:higher_period}
+Let $G$ be a group and let $f_{(k)}: G_{(k)}\to V$. If there exists a subgroup $\Gamma_{(k)}\subseteq G_{(k)}$ such that
+\[
+f_{(k)}(g\gamma) = f_{(k)}(g),\qquad \forall g\in G_{(k)},\ \gamma\in\Gamma_{(k)},
+\]
+then $f_{(k)}$ is said to be right $\Gamma_{(k)}$-periodic, and $\Gamma_{(k)}$ is called a \textbf{group with periodic orbits} of $f_{(k)}$.
+\end{definition}
+
+\begin{proposition}[Transfer of periods along the tower]\label{prop:higher_period_transfer}
+Let $f_{(0)}$ be right $\Gamma_{(0)}$-periodic. Then for each level $k\ge 0$, $f_{(k)}$ is right $\Gamma_{(k)}$-periodic, where $\Gamma_{(k)}$ is defined recursively by Proposition \ref{prop:higher_period_preservation}.
+\end{proposition}
+
+\begin{proof}
+This follows by applying Proposition \ref{prop:higher_period_preservation} level by level.
+\end{proof}
+
+\begin{proposition}[Stabilisation of the periods on the tower]\label{prop:higher_period_stabilization}
+Let $G$ be a finite group with $Z(G)=\{e\}$. Then the groups with periodic orbits $\Gamma_{(k)}$ on the tower cease to change where the tower stabilises: if $G_{(N)}\cong G_{(N+1)}$, then $\Gamma_{(k)}=\Gamma_{(N)}$ for any $k\ge N$.
+\end{proposition}
+
+\begin{proof}
+Stability of the tower at $N$ means that $G_{(k)}\cong G_{(N)}$ holds for all $k\ge N$ (an extension of the `equal order implies stability' lemma \ref{cor:equal_order_stable}). In the recursive definition of Proposition \ref{prop:higher_period_preservation}, $\Gamma_{(k+1)}$ is the stabiliser of $\Gamma_{(k)}$ in $G_{(k+1)}$. When $G_{(k+1)}=G_{(k)}$ (up to isomorphism), the stabiliser is $\Gamma_{(k)}$ itself. Hence $\Gamma_{(k)}$ remains unchanged after the stabilising level.
+\end{proof}
+
+\begin{example}[The automorphism tower of a cyclic group]\label{ex:cyclic_tower_period}
+Consider the cyclic group $C_3 = \langle g \rangle$.
+\begin{itemize}
+    \item The automorphism group of $C_3$ is $\operatorname{Aut}(C_3) \cong C_2$, because $(\mathbb{Z}/3\mathbb{Z})^\times = \{1,2\} \cong C_2$.
+    \item The automorphism group of $C_2$ is $\operatorname{Aut}(C_2) \cong \{e\}$, because $(\mathbb{Z}/2\mathbb{Z})^\times = \{1\}$.
+    \item Hence the tower is $C_3 \to C_2 \to \{e\}$, of height $2$.
+\end{itemize}
+If $f: C_3 \to \mathbb{C}$ is an arbitrary function, then the group with periodic orbits of $f$ is $C_3$ itself (since $C_3$ is simple and has no non-trivial subgroup), and the function on the bottom level is strictly periodic. Ascending the tower, a function on $C_2$ has only the trivial group with periodic orbits, and the automorphism group of $C_2$ is the trivial group.
+\end{example}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=2.0cm,
+  lvl/.style={draw, rounded corners, align=center, minimum width=2.8cm, minimum height=0.9cm, fill=blue!8}]
+\node[lvl, fill=blue!12] (g0) at (0,0) {$C_3$\\$\Gamma_{(0)}=C_3$};
+\node[lvl, fill=green!12] (g1) at (4.4,0) {$C_2$\\$\Gamma_{(1)}=\{e\}$};
+\node[lvl, fill=orange!12] (g2) at (8.8,0) {$\{e\}$\\$\Gamma_{(2)}=\{e\}$};
+\draw[->, very thick] (g0) -- node[above, font=\footnotesize] {$\operatorname{Aut}$} (g1);
+\draw[->, very thick] (g1) -- node[above, font=\footnotesize] {$\operatorname{Aut}$} (g2);
+\draw[->, very thick, dashed] (g2) -- ++(1.6,0) node[right, font=\footnotesize] {stable};
+\node[align=center, text width=12cm, font=\small] at (4.4,-2.4) {the group with periodic orbits decreases along the tower: $C_3\to\{e\}\to\{e\}$, eventually stabilising};
+\end{tikzpicture}
+\caption{The automorphism tower of $C_3$ and the level-by-level decrease of the group with periodic orbits.}
+\label{fig:c3_tower_period}
+\end{figure}
+
+\section{Stability and Height of the Tower}
+
+\begin{definition}[Stability and height of the tower]\label{def:tower_stability}
+If there exists $N\in\mathbb{N}$ such that $G_{(N+1)} \cong G_{(N)}$, then the automorphism tower is said to \textbf{stabilise} at step $N$, and the least such $N$ is called the \textbf{height} of the tower.
+\end{definition}
+
+\begin{proposition}[Heights of the automorphism towers of typical groups]\label{prop:tower_heights}
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{3cm}>{\centering\arraybackslash}p{5cm}>{\centering\arraybackslash}p{3cm}}
+\toprule
+Group $G$ & Automorphism tower & Tower height \\
+\midrule
+$C_2$ & $C_2 \to \{e\}$ & $1$ \\
+$C_3$ & $C_3 \to C_2 \to \{e\}$ & $2$ \\
+$C_4$ & $C_4 \to C_2 \to \{e\}$ & $2$ \\
+$C_5$ & $C_5 \to C_4 \to C_2 \to \{e\}$ & $3$ \\
+$S_3$ & $S_3 \to S_3$ & $0$ \\
+$S_n$ ($n\neq 2,6$) & $S_n \to S_n$ & $0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{proposition}
+
+\begin{proof}
+\textbf{$C_2$}: $\operatorname{Aut}(C_2) \cong (\mathbb{Z}/2\mathbb{Z})^\times = \{1\}$, the trivial group. Tower: $C_2 \to \{e\}$, height $1$.
+
+\textbf{$C_3$}: $\operatorname{Aut}(C_3) \cong (\mathbb{Z}/3\mathbb{Z})^\times \cong C_2$ (the generator $2$ is a primitive root modulo $3$). $\operatorname{Aut}(C_2) \cong \{e\}$. Tower: $C_3 \to C_2 \to \{e\}$, height $2$.
+
+\textbf{$C_4$}: $\operatorname{Aut}(C_4) \cong (\mathbb{Z}/4\mathbb{Z})^\times \cong C_2$ (the invertible elements being $\{1,3\}$). $\operatorname{Aut}(C_2) \cong \{e\}$. Tower: $C_4 \to C_2 \to \{e\}$, height $2$.
+
+\textbf{$C_5$}: $\operatorname{Aut}(C_5) \cong (\mathbb{Z}/5\mathbb{Z})^\times \cong C_4$ ($2$ being a primitive root modulo $5$). $\operatorname{Aut}(C_4) \cong C_2$. $\operatorname{Aut}(C_2) \cong \{e\}$. Tower: $C_5 \to C_4 \to C_2 \to \{e\}$, height $3$.
+
+\textbf{$S_3$}: $Z(S_3) = \{e\}$ and $\operatorname{Aut}(S_3) \cong S_3$ (all six automorphisms of $S_3$ are inner, because the commutator subgroup of $S_3$ is $A_3 \cong C_3$, so the outer automorphism group $\operatorname{Out}(S_3) \cong \{e\}$). The tower stabilises immediately, with height $0$.
+
+\textbf{$S_n$ ($n \neq 2,6$)}: it is known that $\operatorname{Out}(S_n) = \{e\}$ ($n \neq 6$), so $\operatorname{Aut}(S_n) = \operatorname{Inn}(S_n) \cong S_n$. The tower stabilises immediately, with height $0$.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, xscale=0.85, yscale=1.0]
+\def\rowH{0.9}
+% Header
+\node at (0,0.8) {group};
+\node at (2.6,0.8) {tower};
+\node at (6.2,0.8) {height};
+\draw[thick] (-1.0,0.4) -- (7.2,0.4);
+% Rows
+\foreach \y/\name/\tower/\h in {
+  0/{$C_2$}/{$C_2\to\{e\}$}/{$1$},
+  1/{$C_3$}/{$C_3\to C_2\to\{e\}$}/{$2$},
+  2/{$C_4$}/{$C_4\to C_2\to\{e\}$}/{$2$},
+  3/{$C_5$}/{$C_5\to C_4\to C_2\to\{e\}$}/{$3$},
+  4/{$S_3$}/{$S_3\to S_3$}/{$0$},
+  5/{$S_n$}/{$S_n\to S_n$}/{$0$}
+} {
+  \node at (0,-1.0-\y*\rowH) {\name};
+  \node at (2.6,-1.0-\y*\rowH) {\tower};
+  \node at (6.2,-1.0-\y*\rowH) {\h};
+  \draw[gray!20] (-1.0,-1.4-\y*\rowH) -- (7.2,-1.4-\y*\rowH);
+}
+\draw[thick] (-1.0,-1.0-6*\rowH+0.4) -- (7.2,-1.0-6*\rowH+0.4);
+\end{tikzpicture}
+\caption{Comparison table of the heights of the automorphism towers of typical groups.}
+\label{fig:tower_heights}
+\end{figure}
+
+\begin{remark}[The relation between tower height and group structure]\label{rem:tower_height_structure}
+The tower height reflects the complexity of iterating the automorphism group of a group. A group of height $0$ (such as $S_n$, $n\neq 2,6$) has the property $\operatorname{Aut}(G)\cong G$; a group of height $1$ (such as $C_2$) has trivial automorphism group; a group of height $2$ (such as $C_3$, $C_4$) has automorphism group $C_2$; a group of height $3$ (such as $C_5$) has automorphism group $C_4$, which on one further iteration becomes $C_2$ and then the trivial group.
+\end{remark}
+
+\begin{lemma}[Finiteness of the tower height]\label{lem:tower_height_finite}
+Let $G$ be a finite group with $Z(G)=\{e\}$. Then the tower height $h(G)$ is finite.
+\end{lemma}
+
+\begin{proof}
+By Wielandt's theorem (Theorem \ref{thm:higher_wielandt}), the tower stabilises in finitely many steps, so the height is finite.
+\end{proof}
+
+\begin{theorem}[Equivalent conditions for tower stability]\label{thm:tower_stability_periodic}
+Let $G$ be a finite group with $Z(G)=\{e\}$. Then the tower stabilises at step $N$ if and only if
+\[
+\operatorname{Out}(G_{(N)}) = \{e\}.
+\]
+\end{theorem}
+
+\begin{proof}
+If $\operatorname{Out}(G_{(N)}) = \{e\}$, then $\operatorname{Aut}(G_{(N)}) = \operatorname{Inn}(G_{(N)}) \cong G_{(N)}/Z(G_{(N)}) = G_{(N)}$ (because $Z(G_{(N)})=\{e\}$), so $G_{(N+1)} \cong G_{(N)}$, and the tower stabilises.
+
+Conversely, if the tower stabilises at step $N$, that is, $G_{(N+1)} \cong G_{(N)}$, then $|\operatorname{Aut}(G_{(N)})| = |G_{(N)}|$. By Proposition \ref{prop:inner_automorphism_group}, $\operatorname{Inn}(G_{(N)}) \cong G_{(N)}/Z(G_{(N)}) = G_{(N)}$ (because $Z(G_{(N)})=\{e\}$), so $\operatorname{Inn}(G_{(N)})$ and $\operatorname{Aut}(G_{(N)})$ have the same order, whence $\operatorname{Inn}(G_{(N)}) = \operatorname{Aut}(G_{(N)})$, that is, $\operatorname{Out}(G_{(N)}) = \{e\}$.
+\end{proof}
+
+\begin{corollary}[Criterion for the tower height]\label{cor:tower_height_criterion}
+Let $G$ be a finite group with $Z(G)=\{e\}$. Then the tower height $h(G)$ is equal to the least non-negative integer $N$ such that $\operatorname{Out}(G_{(N)})=\{e\}$.
+\end{corollary}
+
+\begin{proof}
+By Theorem \ref{thm:tower_stability_periodic}, the tower stabilises at step $N$ if and only if $\operatorname{Out}(G_{(N)})=\{e\}$. Taking the least such $N$ gives the tower height.
+\end{proof}
+
+\begin{theorem}[The H\"older programme: the tower height can exceed any given integer]\label{thm:holder_program}
+For any $n\in\mathbb{N}$ there exists a finite group $G$ such that the tower height $h(G)\ge n$.
+\end{theorem}
+
+\begin{proof}
+H\"older (1893) constructed a family of finite groups whose automorphism tower heights can be arbitrarily large. For example, one may take semi-direct products with $\mathbb{Z}/p\mathbb{Z}$ ($p$ prime) and thereby construct step by step groups whose automorphism groups increase in complexity. Concretely, if $G_0 = \mathbb{Z}/p\mathbb{Z}$ and $G_{i+1} = G_i \rtimes \operatorname{Aut}(G_i)$, then the tower height grows with $i$. The details of the construction may be found in the classical literature on group representation theory; here it is cited as a known result.
+\end{proof}
+
+\begin{remark}[The boundary of the H\"older programme]\label{rem:holder_program_boundary}
+Theorem \ref{thm:holder_program} shows that the tower height has no uniform upper bound; but by Wielandt's theorem (Theorem \ref{thm:higher_wielandt}) and Lemma \ref{lem:tower_height_finite}, the tower height of a centreless finite group is nevertheless finite. Hence the relation between the tower height and the group structure, and the triviality of the centre, is a precise manifestation of the `closure' theme of this chapter.
+\end{remark}
+
+\section{A Category-theoretic Perspective on the Automorphism Tower}
+
+\begin{remark}[Functoriality of the automorphism tower]\label{rem:tower_categorical}
+The automorphism tower may be regarded as the iteration of the endofunctor
+\[
+\operatorname{Aut}: \mathbf{Grp} \to \mathbf{Grp}.
+\]
+For each group $G$, $\operatorname{Aut}(G)$ is an object in the category of groups. The automorphism tower $G_{(k)}$ is the iterative orbit of the endofunctor $\operatorname{Aut}$ on $G$:
+\[
+G_{(k)} = \operatorname{Aut}^k(G).
+\]
+Stability of the tower means that this iterative orbit reaches a fixed point (or a periodic point) within finitely many steps.
+\end{remark}
+
+\begin{proposition}[Covariance of the automorphism functor]\label{prop:aut_functor}
+Let $\varphi: G\to H$ be a group isomorphism. Then there exists a group isomorphism
+\[
+\operatorname{Aut}(\varphi): \operatorname{Aut}(G)\to\operatorname{Aut}(H),\qquad \alpha\mapsto \varphi\circ\alpha\circ\varphi^{-1}.
+\]
+In particular, $\operatorname{Aut}$ maps group isomorphisms to group isomorphisms, and constitutes an endofunctor on the category of groups.
+\end{proposition}
+
+\begin{proof}
+$\operatorname{Aut}(\varphi)$ is a bijection, with inverse $\operatorname{Aut}(\varphi^{-1})$; and it is a group homomorphism: for any $\alpha,\beta\in\operatorname{Aut}(G)$,
+\[
+\operatorname{Aut}(\varphi)(\alpha\beta) = \varphi\alpha\beta\varphi^{-1} = (\varphi\alpha\varphi^{-1})(\varphi\beta\varphi^{-1}) = \operatorname{Aut}(\varphi)(\alpha)\operatorname{Aut}(\varphi)(\beta).
+\]
+Functoriality: $\operatorname{Aut}(\operatorname{id}_G)=\operatorname{id}_{\operatorname{Aut}(G)}$, and $\operatorname{Aut}(\psi\circ\varphi)=\operatorname{Aut}(\psi)\circ\operatorname{Aut}(\varphi)$.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=2.6cm,
+  obj/.style={draw, rounded corners, align=center, minimum width=2.6cm, minimum height=0.9cm, fill=blue!8}]
+\node[obj] (g) {$G$};
+\node[obj, right=of g] (h) {$H$};
+\node[obj, below=1.6cm of g] (autg) {$\operatorname{Aut}(G)$};
+\node[obj, below=1.6cm of h] (auth) {$\operatorname{Aut}(H)$};
+\draw[->, very thick] (g) -- node[above] {$\varphi$} (h);
+\draw[->, very thick] (autg) -- node[below] {$\operatorname{Aut}(\varphi)$} (auth);
+\draw[->, very thick] (g) -- (autg);
+\draw[->, very thick] (h) -- (auth);
+\node[align=center, font=\small] at (3.5,-4.4) {the automorphism functor: $\operatorname{Aut}$ maps the group isomorphism $\varphi$ to the isomorphism of automorphism groups $\operatorname{Aut}(\varphi)$};
+\end{tikzpicture}
+\caption{Covariance of the automorphism functor: a group isomorphism $\varphi: G\to H$ induces an isomorphism of automorphism groups $\operatorname{Aut}(\varphi): \operatorname{Aut}(G)\to\operatorname{Aut}(H)$.}
+\label{fig:aut_functor}
+\end{figure}
+
+\begin{corollary}[Functoriality of the tower]\label{cor:tower_functor}
+The automorphism tower $G_{(k)}=\operatorname{Aut}^k(G)$ is the orbit of the endofunctor $\operatorname{Aut}$ under its $k$-fold iteration; if $G\cong H$, then $G_{(k)}\cong H_{(k)}$ for all $k\ge 0$.
+\end{corollary}
+
+\begin{proof}
+By Proposition \ref{prop:aut_functor}, $\operatorname{Aut}$ maps isomorphisms to isomorphisms, so its iterates also map isomorphisms to isomorphisms. Taking $G\cong H$ and applying $\operatorname{Aut}$ repeatedly gives $G_{(k)}\cong H_{(k)}$.
+\end{proof}
+
+\begin{remark}[Tower stability and fixed points of iteration]\label{rem:tower_fixed_point}
+Tower stability $G_{(N+1)}\cong G_{(N)}$ means, category-theoretically, that the iterative orbit reaches a fixed point. More generally, the tower may enter a periodic orbit after finitely many steps (of period $>1$), but for a centreless finite group Wielandt's theorem guarantees that the orbit eventually reaches a fixed point.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & the left regular action on each level of the automorphism tower (Proposition \ref{prop:tower_three_operations}) \\
+Scaling & the level-by-level recursion of the outer automorphism group (Proposition \ref{prop:tower_three_operations}) \\
+Rotation & the level-by-level recursion of the inner automorphism group (Proposition \ref{prop:tower_three_operations}) \\
+Conservation & the conserved quantities on the tower (Definition \ref{def:higher_conservation_law_2}); the Noether correspondence on the tower (Remark \ref{thm:higher_noether}) \\
+Symmetry & the symmetry groups on the tower (Definition \ref{def:higher_symmetry_group}); inclusion relations among symmetry groups (Proposition \ref{prop:higher_symmetry_inclusion}) \\
+Closure & tower stability (Theorem \ref{thm:higher_wielandt}, Proposition \ref{prop:tower_heights}, Theorem \ref{thm:tower_stability_periodic}) \\
+Period & the periodic structures on the tower (Definition \ref{def:higher_period}); transfer of periods along the tower (Proposition \ref{prop:higher_period_transfer}); the cyclic group tower (Example \ref{ex:cyclic_tower_period}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item According to Definition \ref{def:higher_automorphism} and Definition \ref{def:higher_automorphism_group},
+    review the definitions of an automorphism of a group and of the automorphism group.
+    Explain why an automorphism must be both a bijection and a group homomorphism,
+    and verify Proposition \ref{prop:higher_automorphism_inverse}:
+    the inverse map of an automorphism also preserves the group operation.
+
+    \item Prove Proposition \ref{prop:higher_automorphism_invariants}:
+    automorphisms preserve the following group-structural invariants:
+    \begin{enumerate}[label=(\roman*)]
+        \item order: $|G|=|\varphi(G)|$;
+        \item identity element: $\varphi(e)=e$;
+        \item order of an element: $\operatorname{ord}(\varphi(g))=\operatorname{ord}(g)$;
+        \item centre: $\varphi(Z(G))=Z(G)$;
+        \item commutator subgroup: $\varphi([G,G])=[G,G]$.
+    \end{enumerate}
+    Write out the proofs separately, and explain why these invariants are `intrinsic'.
+
+    \item Prove Proposition \ref{prop:automorphism_preserves_conjugacy}:
+    an automorphism $\varphi\in\operatorname{Aut}(G)$ maps conjugacy classes to conjugacy classes:
+    \[
+    \varphi(\operatorname{Cl}(g))=\operatorname{Cl}(\varphi(g)).
+    \]
+    Explain why automorphisms preserve the partition into conjugacy classes.
+
+    \item Prove Lemma \ref{lem:automorphism_restricts_characteristic}:
+    if $H\le G$ is a characteristic subgroup of $G$, then there exists a group homomorphism
+    \[
+    \Phi:\operatorname{Aut}(G)\to\operatorname{Aut}(H),\quad \varphi\mapsto\varphi|_H.
+    \]
+    Verify that $\Phi$ is a homomorphism.
+
+    \item Prove Proposition \ref{prop:inner_automorphism_group}:
+    $\operatorname{Inn}(G)$ is a normal subgroup of $\operatorname{Aut}(G)$, and
+    \[
+    \operatorname{Inn}(G)\cong G/Z(G).
+    \]
+    Complete the proof in four steps: `verify that $\iota_g$ is an automorphism, verify that $\phi:g\mapsto\iota_g$ is a homomorphism,
+    compute the kernel to be $Z(G)$, and verify normality'.
+
+    \item Prove Proposition \ref{prop:inner_preserves_conjugacy}:
+    an inner automorphism $\iota_g$ maps every conjugacy class to itself:
+    \[
+    \iota_g(\operatorname{Cl}(h))=\operatorname{Cl}(h).
+    \]
+    Explain why inner automorphisms do not change conjugacy classes, whereas outer automorphisms in general change the partition into conjugacy classes.
+
+    \item Prove Proposition \ref{prop:automorphism_exact_sequence}:
+    there is an exact sequence
+    \[
+    1\to Z(G)\xrightarrow{\iota}G\xrightarrow{\phi}\operatorname{Aut}(G)
+    \xrightarrow{\pi}\operatorname{Out}(G)\to 1.
+    \]
+    Verify term by term:
+    \begin{enumerate}[label=(\roman*)]
+        \item $\ker\iota=\{e\}$;
+        \item $\operatorname{im}\iota=Z(G)=\ker\phi$;
+        \item $\operatorname{im}\phi=\operatorname{Inn}(G)=\ker\pi$;
+        \item $\operatorname{im}\pi=\operatorname{Out}(G)$.
+    \end{enumerate}
+
+    \item Prove Proposition \ref{prop:outer_automorphism_order}:
+    if $G$ is a finite group, then
+    \[
+    |\operatorname{Out}(G)|=\frac{|\operatorname{Aut}(G)|}{|G/Z(G)|}.
+    \]
+    Prove this using the exact sequence.
+
+    \item Prove Proposition \ref{prop:tower_embedding_chain}:
+    if $Z(G)=\{e\}$, then $Z(G_{(k)})=\{e\}$ for every level $k\ge0$,
+    and
+    \[
+    G_{(k)}\cong\operatorname{Inn}(G_{(k)})\subseteq
+    \operatorname{Aut}(G_{(k)})=G_{(k+1)}.
+    \]
+    Complete the proof by induction,
+    and explain why triviality of the centre is preserved level by level in the automorphism tower (Lemma \ref{ch10_centreless_preserved}).
+
+    \item Prove Lemma \ref{lem:tower_order_monotone} and Corollary \ref{cor:equal_order_stable}:
+    for a centreless finite group, the order $|G_{(k)}|$ is non-decreasing, and equal order implies stability.
+
+    \item Prove Theorem \ref{thm:higher_wielandt} (Wielandt's theorem):
+    let $G$ be a finite group with trivial centre $Z(G)$;
+    then the automorphism tower stabilises in finitely many steps.
+    Explain the role of the three steps in the proof, `the order is non-decreasing, equal order implies stability, and triviality of the centre is preserved level by level',
+    and point out why the condition that the centre be trivial cannot be omitted (see Remark \ref{rem:higher_wielandt_boundary}).
+
+    \item Prove Proposition \ref{prop:tower_three_operations}:
+    on each level $G_{(k)}$ of the automorphism tower there exist three standard constructions:
+    \begin{enumerate}[label=(\roman*)]
+        \item translation: the left regular action $L_g:G_{(k)}\to G_{(k)}$;
+        \item inner automorphisms: $\operatorname{Inn}(G_{(k)})\cong G_{(k)}/Z(G_{(k)})$;
+        \item outer automorphisms: $\operatorname{Out}(G_{(k)})=\operatorname{Aut}(G_{(k)})/\operatorname{Inn}(G_{(k)})$.
+    \end{enumerate}
+    Explain why these three constructions recur on every level.
+
+    \item According to Definition \ref{def:higher_conservation_law} and Remark \ref{cor:higher_conservation},
+    explain the three types of conserved quantity on the tower:
+    \begin{enumerate}[label=(\roman*)]
+        \item invariant under left translation---translation conserved quantities;
+        \item invariant under inner automorphisms---class functions;
+        \item covariant under outer automorphisms---automorphism invariants.
+    \end{enumerate}
+    Taking $G=C_3$ and $G=S_3$ as examples, write out the concrete form of each of these three types of conserved quantity.
+
+    \item Prove Property \ref{prop:tower_conservation_inclusion}:
+    the three types of conserved quantity on the tower satisfy the inclusion relations
+    \[
+    \text{automorphism invariants}\subseteq\text{class functions}\subseteq\text{translation invariants}.
+    \]
+
+    \item Prove Proposition \ref{prop:higher_period_preservation}:
+    let $f_{(0)}:G\to V$ be right $\Gamma$-periodic;
+    then for each level $k\ge0$ there exists a subgroup $\Gamma_{(k)}$ of $G_{(k)}$
+    such that $f_{(k)}$ is right $\Gamma_{(k)}$-periodic.
+    Construct the stabiliser $\Gamma_{(k+1)}$ by induction and complete the proof.
+
+    \item Prove Proposition \ref{prop:higher_function_regular_rep}:
+    the left regular representation on the function space $L^2(G_{(k)})$ of the tower is a unitary representation.
+    Explain how to deduce unitarity from the left invariance of the Haar measure.
+
+    \item Prove Proposition \ref{prop:higher_period_stabilization}:
+    the groups with periodic orbits on the tower cease to change where the tower stabilises. Explain how this relates to the `equal order implies stability' lemma.
+
+    \item Prove Proposition \ref{prop:higher_symmetry_inclusion}:
+    if $f_{(k+1)}$ is the natural extension of $f_{(k)}$ along the tower, then
+    \[
+    \operatorname{Symmetry}_{(k)}(f_{(k)})\subseteq
+    \operatorname{Symmetry}_{(k+1)}(f_{(k+1)}).
+    \]
+    Explain why the symmetry groups are included in one another level by level along the tower.
+
+    \item Verify the automorphism tower heights of the typical groups in Proposition \ref{prop:tower_heights}:
+    \begin{enumerate}[label=(\roman*)]
+        \item $C_2\to\{e\}$, height $1$;
+        \item $C_3\to C_2\to\{e\}$, height $2$;
+        \item $C_4\to C_2\to\{e\}$, height $2$;
+        \item $C_5\to C_4\to C_2\to\{e\}$, height $3$;
+        \item $S_3\to S_3$, height $0$.
+    \end{enumerate}
+    Compute the automorphism group at each level separately,
+    and explain why the automorphism group of $S_3$ is isomorphic to itself.
+
+    \item Prove Theorem \ref{thm:tower_stability_periodic}:
+    let $G$ be a finite group with $Z(G)=\{e\}$;
+    then the automorphism tower stabilises at step $N$ if and only if
+    \[
+    \operatorname{Out}(G_{(N)})=\{e\}.
+    \]
+    Prove the two directions separately.
+
+    \item Prove Corollary \ref{cor:tower_height_criterion}:
+    the tower height $h(G)$ is equal to the least non-negative integer $N$ such that $\operatorname{Out}(G_{(N)})=\{e\}$.
+
+    \item Verify the automorphism tower of the cyclic group $C_3$ in Example \ref{ex:cyclic_tower_period}:
+    \[
+    C_3\to C_2\to\{e\}.
+    \]
+    Compute $\operatorname{Aut}(C_3)$ and $\operatorname{Aut}(C_2)$,
+    and explain why an arbitrary function on $C_3$ has only the trivial group with periodic orbits.
+
+    \item Prove Proposition \ref{prop:aut_functor}:
+    $\operatorname{Aut}$ is an endofunctor on the category of groups, and maps group isomorphisms to group isomorphisms.
+
+    \item Prove Corollary \ref{cor:tower_functor}:
+    if $G\cong H$, then $G_{(k)}\cong H_{(k)}$ for all $k\ge 0$.
+
+    \item According to Remark \ref{rem:tower_categorical},
+    explain that the automorphism tower may be regarded as the iteration of the endofunctor
+    \[
+    \operatorname{Aut}:\mathbf{Grp}\to\mathbf{Grp}.
+    \]
+    Write out the iterative orbit of the tower
+    \[
+    G_{(k)}=\operatorname{Aut}^k(G),
+    \]
+    and explain how `stability of the tower' corresponds to `the iterative orbit reaching a fixed point within finitely many steps'.
+
+    \item Prove Theorem \ref{thm:higher_noether} (the Noether correspondence on the tower):
+    on each level $G_{(k)}$ of the automorphism tower:
+    \begin{enumerate}[label=(\roman*)]
+        \item left-translation symmetry corresponds to translation invariants;
+        \item inner automorphism symmetry corresponds to class functions;
+        \item outer automorphism symmetry corresponds to automorphism invariants.
+    \end{enumerate}
+    Explain that this is the level-by-level repetition on the tower of the Noether correspondence in the `Groups and Group Functions' chapter.
+
+    \item Synthesis: combining the automorphism tower (Definition \ref{def:higher_automorphism_tower}),
+    the three standard constructions on the tower (Proposition \ref{prop:tower_three_operations}),
+    the function spaces on the tower (Definition \ref{def:higher_function_space}),
+    the symmetries and conserved quantities on the tower (Definition \ref{def:higher_conservation_law_2}, Remark \ref{thm:higher_noether}),
+    the periodic structures on the tower (Definition \ref{def:higher_period})
+    and the stability of the tower (Theorem \ref{thm:higher_wielandt}, Theorem \ref{thm:tower_stability_periodic}),
+    explain how the idea that `the relation of a relation is again a group' is concretely realised in the automorphism tower.
+    Point out separately:
+    \begin{enumerate}[label=(\roman*)]
+        \item how each level of the tower repeats the three standard constructions;
+        \item how functions on the tower transfer the periodic structure along the tower;
+        \item how the stability of the tower corresponds to triviality of the centre for a finite group;
+        \item how the category-theoretic perspective on the tower understands automorphisms as the iteration of an endofunctor.
+    \end{enumerate}
+\end{enumerate}

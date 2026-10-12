@@ -1,0 +1,1695 @@
+\chapter{易经系统之周期结构}
+\label{chap:yijing-periodic}
+\markboth{易经系统之周期结构}{易经系统之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:yijing_ps_hook}
+本章判定研究目标是否具有周期性、确定其周期类型、以及查找最小正周期时，一律引用「周期系统」章：
+周期性判据见 \cref{thm:ps_periodicity_decision}，
+周期类型判别见 \cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}，
+最小正周期查找见 \cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}，
+由数据构建周期级数与周转圆组见 \cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}。
+\end{remark}
+
+\begin{remark}[本章定位：按「周期系统」章五步接口展开]\label{rem:yijing_five_steps_positioning}
+易经系统之周期结构研究《易经》符号体系中周期性与相位关系的数学表征。本章不另立周期性判据，而是把易经符号体系接入「周期系统」章规定的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把太极、两仪、四象、八卦、六十四卦、天干、地支、六十甲子等符号体系化为离散动力系统，引用 \cref{thm:ps_periodicity_decision} 判定是否具有周期性，并确定周期类型；
+    \item \textbf{构建}：由卦象、干支、节气、纳音等数据构建振幅级数、频率级数、相位级数，组装为易经周转圆组；
+    \item \textbf{调节}：用统一排序规则、张量结构、残差能量下降动态调节易经周转圆组；
+    \item \textbf{卷积}：在易经周转圆组上引入振幅卷积、相位卷积、频率卷积，并与周期卷积、六十甲子生成、河图洛书结构衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成易经周期诊断流程。
+\end{enumerate}
+本章使用的数学工具包括：循环群、不可约表示、张量积、离散傅里叶变换、有限阶作用、周期卷积、相位算子、周转圆嵌套生成、河图复变函数、洛书矩阵。
+\end{remark}
+
+\section{接入「周期系统」章的五步接口}
+\label{sec:yijing_five_steps}
+
+\subsection{第一步：易经目标的周期性判定}
+
+\begin{definition}[易经目标与判定输入]\label{def:yijing_target}
+一个\textbf{易经目标}是指下列对象之一：
+\begin{enumerate}[label=(\roman*)]
+    \item 一个卦象层级系统，其状态空间为 $\mathbb F_2^n$，演化映射为二进制自下而上的定序推进；
+    \item 一个干支序列，其状态空间为 $\mathbb Z_{10}\times \mathbb Z_{12}$，演化映射为天干、地支同步推进；
+    \item 一个六十甲子序列，其状态空间为循环群 $C_{60}$，演化映射为 $+1\pmod{60}$；
+    \item 一个节气或纳音序列，其状态空间为有限循环群 $C_T$，演化映射为 $+1\pmod T$。
+\end{enumerate}
+易经目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal D_{\mathrm{Y}}=(\mathcal S,\Phi),
+\]
+其中 $\mathcal S$ 是状态空间，$\Phi:\mathcal S\to\mathcal S$ 是定序推进、同步推进或循环平移所诱导的演化映射。若 $\mathcal S$ 为有限集，称目标为\textbf{有限易经目标}；若 $\mathcal S$ 为无限集，称目标为\textbf{无限易经目标}。
+\end{definition}
+
+\begin{definition}[易经判定映射]\label{def:yijing_periodization}
+设易经目标由判定输入 $\mathcal D_{\mathrm{Y}}=(\mathcal S,\Phi)$ 给出。若目标的状态由 $\Phi$ 的迭代生成，即存在 $x_0\in\mathcal S$ 使
+\[
+x_t=\Phi^t(x_0),\qquad t\in\mathbb Z,
+\]
+则称 $\Phi$ 为目标的\textbf{易经判定映射}。此时易经目标化为离散动力系统 $(\mathcal S,\Phi)$，可直接套用「周期基础」章与「周期系统」章的判据。
+\end{definition}
+
+\begin{theorem}[易经周期性判定定理]\label{thm:yijing_periodicity_decision}
+设易经目标的判定映射为 $\Phi$，且 $(\mathcal S,\Phi)$ 为离散动力系统。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 $m\in\mathbb N^+$ 使 $\Phi^m=\mathrm{id}$，则目标为一致周期易经系统；每条轨道闭合，且轨道长度整除 $m$。
+    \item \textbf{判定等价}：目标为一致周期易经系统当且仅当 $\operatorname{ord}(\Phi)<\infty$。
+    \item \textbf{逐点判据}：目标在状态 $x_0$ 处的轨道闭合当且仅当 $x_0$ 为周期点；此时轨道长度即该点处的周期。
+    \item \textbf{不可省略性}：守恒量与对称群的合取不能替代 $\operatorname{ord}(\Phi)<\infty$；准周期易经目标不属于周期易经系统。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:yijing_periodicity_decision} 是「周期系统」章 \cref{thm:ps_periodicity_decision} 的领域实例化：
+只需把判定映射 $f$ 与演化群替换为本章的 $\Phi$，(A) 充分判定、(B) 判定等价、(C) 逐点判据、
+(D) 不可省略性四条即逐条成立。依 \cref{rem:ps_applications_hook} 的约定，此处不再重复展开。
+\end{proof}
+
+\begin{corollary}[易经周期类型]\label{cor:yijing_period_type}
+经 \cref{thm:yijing_periodicity_decision} 判定后，易经目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 $m_0=1$，状态为不动点；
+    \item \textbf{严格周期型}：$1<m_0<\infty$，状态严格周期；
+    \item \textbf{一致周期型}：$\operatorname{ord}(\Phi)=m<\infty$，所有轨道长度整除 $m$；
+    \item \textbf{准周期型}：$\operatorname{ord}(\Phi)=\infty$，轨道不闭合但在紧致承载结构上稠密；
+    \item \textbf{最终周期型}：存在 $N$，使 $t\ge N$ 后目标为周期；
+    \item \textbf{离散周期型}：承载结构为 $\mathbb Z$，且归一化周期比 $\rho=T_x/\Delta x\in\mathbb Q$。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，残差按 $e^{-\kappa t}$ 衰减（见 \cref{def:ps_period_type}(vii)）。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于周期易经系统；(iv) 不属于周期易经系统，但可用有界逼近工具处理；(v) 只在稳定阶段是周期易经系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期易经系统，只在稳定阶段可用有界逼近工具处理。
+\end{corollary}
+
+\begin{proof}
+逐条由 \cref{thm:yijing_periodicity_decision} 与「周期系统」章 \cref{def:ps_period_type} 代入易经目标即得。
+\end{proof}
+
+\begin{lemma}[卦象层级的有限阶判定]\label{lem:yijing_bagua_finite_order}
+设卦象层级的状态空间为 $\mathbb F_2^n$，演化映射为二进制加一
+\[
+\Phi(b_0,\dots,b_{n-1})=(b_0,\dots,b_{n-1})+1\pmod{2^n}.
+\]
+则 $\operatorname{ord}(\Phi)=2^n$，卦象层级为一致周期系统。
+\end{lemma}
+
+\begin{proof}
+状态空间 $\mathbb F_2^n$ 在加法下同构于循环群 $C_{2^n}$。映射 $\Phi$ 是 $+1$，其阶为群阶 $2^n$。故 $\Phi^{2^n}=\mathrm{id}$，且对任何 $k<2^n$，$\Phi^k\neq\mathrm{id}$。因此 $\operatorname{ord}(\Phi)=2^n$。由 \cref{thm:yijing_periodicity_decision}，系统为一致周期系统。
+\end{proof}
+
+\begin{lemma}[天干地支的周期判定]\label{lem:yijing_ganzhi_finite_order}
+天干系统的状态空间为 $C_{10}$，地支系统的状态空间为 $C_{12}$。则
+\[
+\operatorname{ord}(\Phi_{\text{天干}})=10,\qquad
+\operatorname{ord}(\Phi_{\text{地支}})=12.
+\]
+两者均为一致周期系统。
+\end{lemma}
+
+\begin{proof}
+天干序列为十天干循环，地支序列为十二地支循环。由循环群定义，$+1\pmod{10}$ 的阶为 $10$，$+1\pmod{12}$ 的阶为 $12$。故结论成立。
+\end{proof}
+
+\begin{lemma}[六十甲子的周期判定]\label{lem:yijing_ganzhi60_finite_order}
+六十甲子系统的状态空间为 $C_{60}$，演化映射为 $+1\pmod{60}$。则
+\[
+\operatorname{ord}(\Phi_{\text{六十甲子}})=60.
+\]
+六十甲子为一致周期系统。
+\end{lemma}
+
+\begin{proof}
+六十甲子由天干与地支奇偶同步生成。由 \cref{ch20_ganzhi_parity_filter}，有效组合恰有 $60$ 个，且与 $C_{60}$ 同构。故 $+1\pmod{60}$ 的阶为 $60$。
+\end{proof}
+
+\begin{definition}[易经最小正周期算法]\label{def:yijing_minimal_period_algorithm}
+本定义与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{def:ps_minimal_period_algorithm} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处的差别仅为术语（易经目标 / 易经样本），算法步骤与结论完全相同。
+\end{definition}
+
+\begin{theorem}[易经最小正周期算法的正确性]\label{thm:yijing_minimal_period_correctness}
+本定理与第~\ref{chap:periodic_system}~章「周期性判定：目标是否具有周期性」节（\cref{sec:ps_periodicity_decision}）中的 \cref{thm:ps_minimal_period_correctness} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。本处的差别仅为术语（易经目标 / 易经样本），算法步骤与结论完全相同。
+\end{theorem}
+
+\begin{example}[太极至六十四卦的周期判定]\label{ex:yijing_taiji_to_64}
+\begin{enumerate}[label=(\roman*)]
+    \item 太极：$T=1$，平凡周期型；
+    \item 两仪：$T=2$，严格周期型；
+    \item 四象：$T=4$，一致周期型；
+    \item 八卦：$T=8$，一致周期型；
+    \item 六十四卦：$T=64$，一致周期型；
+    \item 天干：$T=10$，一致周期型；
+    \item 地支：$T=12$，一致周期型；
+    \item 六十甲子：$T=60$，一致周期型。
+\end{enumerate}
+\end{example}
+
+\begin{remark}[不变量不保证周期]\label{rem:yijing_invariant_not_period}
+易经符号体系中的某些守恒量（如奇偶同步、五行配属）是周期结构的辅助条件，但不构成充分条件。周期结构必须由 \cref{thm:yijing_periodicity_decision} 或上述有限阶判定引理给出。
+\end{remark}
+
+\subsection{第二步：易经周期级数与周转圆组的构建}
+
+\begin{definition}[易经振幅级数、频率级数、相位级数]\label{def:yijing_series}
+设易经目标的状态或输出序列为 $\{z_t\}$。若其可写为
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+则称
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+分别为易经目标的\textbf{振幅级数}、\textbf{频率级数}与\textbf{相位级数}。三者与「级数与卷积」章 \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} 一致。
+\end{definition}
+
+\begin{definition}[易经周转圆组]\label{def:yijing_epicycle_group}
+设易经目标的周期级数由振幅级数 $\{A_k\}$、频率级数 $\{\omega_k\}$ 与相位级数 $\{\phi_k\}$ 给出。对每个 $k$ 定义周转圆
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+其集合
+\[
+\mathfrak E_{\mathrm{Y}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+称为易经目标的\textbf{周转圆组}。其叠加即易经周期级数
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[由易经数据构建周期级数]\label{thm:yijing_series_reconstruction}
+设易经目标的输出为有限周期序列，周期为 $N$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 输出可展开为离散傅里叶级数
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item 振幅级数由 $|c_k|$ 给出，相位级数由 $\arg c_k$ 给出，频率级数由 $2\pi k/N$ 给出；
+    \item 若输出为卦象序列或干支序列，则各级谐波分别对应不同周期尺度。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 有限周期序列的离散傅里叶级数是标准结论：基函数 $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ 构成 $\mathbb C^N$ 的正交基。
+(ii) 由 $c_k=A_k e^{i\phi_k}$ 直接读出。
+(iii) 对卦象序列 $N=64$，基频对应六十四卦大周期，低次谐波对应阴阳、四象、八卦等子结构；对干支序列 $N=60$，基频对应六十甲子周期，谐波对应天干、地支与奇偶同步。
+\end{proof}
+
+\begin{proposition}[三参数对应：半径、相位与转速]\label{prop:yijing_epicycle_correspondence}
+易经周转圆组 $\mathfrak E_{\mathrm{Y}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ 的三个参数与三个几何—力学量一一对应：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{半径对应振幅}：$E_k$ 的半径 $|E_k|=A_k$ 即该分量的振幅；
+    \item \textbf{相位对应旋转时延}：初相 $\phi_k$ 对应时间平移 $\tau_k=\phi_k/\omega_k$，即该周转圆相对基准\textbf{超前} $\tau_k$（$\phi_k>0$ 表示波形相对基准\textbf{提前} $\tau_k$，等价于把基准延后 $\tau_k$ 后二者重合）；
+    \item \textbf{频率对应旋转速度}：$\omega_k$ 即该周转圆绕原点的角速度。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:yijing_epicycle_correspondence} 与「周期系统」章 \cref{prop:ps_epicycle_correspondence} 完全对应，
+三条对应——半径对应振幅、相位对应旋转时延、频率对应旋转速度——逐条平移至本章的周转圆组即得。
+证明见该处：(i) 由 $|E_k|=A_k$ 与能量分解，(ii) 由相位平移定理，(iii) 由频率级数定义。
+\end{proof}
+
+\begin{example}[天干周期级数]\label{ex:yijing_tiangan_series}
+十天干可视为 $C_{10}$ 上的周期序列，其离散傅里叶分解给出十个频率分量，基频对应十天干循环，二倍频对应阴阳交替，五倍频对应五行循环。
+\end{example}
+
+\begin{remark}[周期级数即复变函数]\label{rem:yijing_series_complex}
+设 $z=e^{i\omega_0t}$，则易经周期级数
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+在\textbf{各分量频率与 $\omega_0$ 可公度}（即 $\omega_k=k\omega_0$，$k\in\mathbb Z$）时可写为洛朗级数 $\sum_k c_k z^k$，其中 $c_k=A_k e^{i\phi_k}$。故\textbf{当所有分量与 $\omega_0$ 可公度时，周期级数即单位圆上的复变函数（否则为环面上的函数）}。
+\end{remark}
+
+\begin{definition}[统一排序规则]\label{def:unified_ordering}
+\begin{enumerate}[label=(\roman*)]
+    \item $k=0$（$\theta=0$）对应周期的\textbf{开始}。$T=2^n$ 时为全阴爻（震，木始）；其他周期为\textbf{阳木}。
+    \item 中间各相位按 $\theta_k = 2\pi k/T$ 升序排列。
+    \item $k=T-1$ 对应周期的\textbf{结束}。$T=2^n$ 时为全阳爻（坎，水终）；其他周期为\textbf{阴水}。
+\end{enumerate}
+对于 $T=2^n$，二进制自下而上读爻：初爻为 $b_0$，阴爻 $=0$，阳爻 $=1$。
+\end{definition}
+
+\subsection{第三步：易经周转圆组的动态调节}
+
+\begin{definition}[易经周转圆组的动态调节]\label{def:yijing_adaptive_adjustment}
+设当前易经周转圆组为 $\mathfrak E^{(j)}$，部分和
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+残差 $r^{(j)}=z-z^{(j)}$。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 $\|r^{(j)}\|^2>\delta$，则依残差周期图峰值新增一个周转圆；
+    \item \textbf{参数调节}：对已有周转圆参数按正则化最小二乘或统一排序规则更新。
+\end{enumerate}
+在易经系统中，数量调节对应增加卦象层级、干支层级或纳音层级；参数调节对应调整张量索引、五行配属或相位起点。
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:yijing_adaptive_growth}
+按 \cref{def:yijing_adaptive_adjustment}(i) 加入残差主频分量后，残差能量单调不增：
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+等号成立当且仅当残差在被选频率上无能量。
+\end{proposition}
+
+\begin{proof}
+本章的 \cref{prop:yijing_adaptive_growth} 与「周期系统」章 \cref{def:ps_adaptive_adjustment} 的动态调节机制一致：
+新增周转圆即把 $r^{(j)}$ 沿 $\hat\omega$ 的分量从残差中移出，由正交分解
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{被移出的分量}\|^2$ 即得不等式，
+等号当且仅当被移出分量的范数为零。完整论证见该处。
+\end{proof}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:yijing_adaptive_convergence}
+设易经目标为长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值有限周期序列}且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得易经周转圆组即目标的精确傅里叶数据；若序列为\textbf{复值}，则相应步数为至多 $T_0$ 步。
+\end{theorem}
+
+\begin{proof}
+长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值}有限周期序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波（含常数项）上完备；\textbf{复值}序列则需 $T_0$ 个分量。每步按 \cref{prop:yijing_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。
+\end{proof}
+
+\begin{definition}[结构指标调节]\label{def:yijing_structure_metric_adjustment}
+设易经目标的结构指标为
+\[
+\mathcal I=(\mathcal I_{\text{卦象}},\mathcal I_{\text{干支}},\mathcal I_{\text{五行}})
+=(\text{位宽之积},\ \text{奇偶同步度},\ \text{五行配属闭合度}).
+\]
+\textbf{结构指标调节}为：在参数空间 $\Theta$ 中每步选取使 $\mathcal I(\theta)$ 按字典序\textbf{严格递减}（极小化）的邻近参数 $\theta$；若不存在这样的邻近参数，则停止——此时 $\theta$ 为\textbf{局部最优}参数。
+\end{definition}
+
+\begin{proposition}[结构指标调节的有限收敛]\label{prop:yijing_structure_metric_convergence}
+设参数空间 $\Theta$ 有限，且每次调节使 $\mathcal I$ 按字典序\textbf{严格递减}。则调节在有限步内终止于局部最优参数。
+\end{proposition}
+
+\begin{proof}
+$\Theta$ 有限，$\mathcal I$ 取值有限。字典序在有限值集上是良基的，故字典序严格递减的序列不能无限延续，调节在有限步终止。终止时不存在使 $\mathcal I$ 按字典序严格递减的邻近参数，即局部最优。这里必须按\textbf{整条字典序}给出单调性：若只要求「某一分量严格增加／减小」，则 $(2,1)\to(1,2)\to(2,1)$ 这类循环无法排除，有限终止性不成立。
+\end{proof}
+
+\begin{remark}[动态调节的边界]\label{rem:yijing_adaptive_boundary}
+\cref{thm:yijing_adaptive_convergence} 依赖有限周期序列。对连续或准周期易经目标，不存在有限周转圆组精确表示，只能作有界逼近。结构指标调节不保证全局最优。
+\end{remark}
+
+\subsection{第四步：易经卷积}
+
+\begin{definition}[相位算子周期卷积]\label{def:PPO_periodic_convolution}
+设两个符号体系 $A$ 和 $B$ 的周期分别为 $T_A$ 和 $T_B$，相位算子集合分别为 $\mathcal{P}_{T_A}$ 和 $\mathcal{P}_{T_B}$。$A$ 与 $B$ 的\textbf{相位算子周期卷积}定义为
+\[
+(\mathcal{P}_{T_A} \circledast \mathcal{P}_{T_B})(n, m) = \mathcal{O}_n^{(T_A)} \cdot \mathcal{O}_m^{(T_B)} = e^{i2\pi(n/T_A + m/T_B)}.
+\]
+周期卷积保留了所有 $(n,m)$ 对之间的交互信息——这是两个周期体系之间全部相位关系算子的完整集合。
+\end{definition}
+
+\begin{proposition}[周期卷积与周转圆嵌套生成的一致性]\label{prop:periodic_conv_epicycle_consistency}
+周转圆嵌套生成是周期卷积在嵌套周转结构中的实现。合成相位算子 $\mathcal{O}_{a,b} = \mathcal{O}_a^{(T_{\text{内}})} \cdot \mathcal{O}_b^{(T_{\text{外}})}$ 正是周期卷积矩阵的 $(a,b)$ 元素。
+\end{proposition}
+
+\begin{proof}
+取 $A$ 为内圈体系（$T_A = T_{\text{内}}$）、$B$ 为外圈体系（$T_B = T_{\text{外}}$）。由定义 \ref{def:PPO_periodic_convolution}，周期卷积在 $(a,b)$ 处取值
+\[
+(\mathcal{P}_{T_{\text{内}}} \circledast \mathcal{P}_{T_{\text{外}}})(a,b) = \mathcal{O}_a^{(T_{\text{内}})} \cdot \mathcal{O}_b^{(T_{\text{外}})} = e^{i2\pi(a/T_{\text{内}} + b/T_{\text{外}})}.
+\]
+由定理 \ref{thm:epicycle_nesting_generation}，周转圆嵌套生成的合成相位算子 $\mathcal{O}_{a,b}$ 恰为同一表达式。二者逐元素相等。
+\end{proof}
+
+\begin{theorem}[六十甲子的周期卷积生成]\label{thm:ganzhi_periodic_convolution}
+六十甲子由天干（$T=10$）与地支（$T=12$）的周期卷积生成。有效组合条件 $n \equiv m \pmod{2}$ 筛选出 $60$ 个有效相位。
+\end{theorem}
+
+\begin{proof}
+由定义 \ref{def:PPO_periodic_convolution}，天干（$T_A = 10$）与地支（$T_B = 12$）的周期卷积遍历全部 $10 \times 12 = 120$ 个 $(n,m)$ 对，给出 $120$ 个合成相位算子 $\mathcal{O}_n^{(10)} \mathcal{O}_m^{(12)}$。阴阳同步要求奇偶一致，故有效组合条件为 $n \equiv m \pmod 2$。由引理 \ref{ch20_ganzhi_parity_filter}，该条件从 $120$ 对中筛出 $60$ 对，且与六十甲子一一对应；同理由引理所证群结构，这 $60$ 个相位构成循环群 $C_{60}$，故六十甲子周期为 $T = 60$。
+\end{proof}
+
+\begin{corollary}[所有周期体系的周期卷积统一]\label{cor:all_periods_periodic_conv}
+任意两个周期体系之间的全部相位关系，均可通过相位算子周期卷积统一计算。
+\end{corollary}
+
+\begin{proof}
+这是定义 \ref{def:PPO_periodic_convolution} 的直接推论：周期卷积 $\mathcal{O}_n^{(T_A)} \mathcal{O}_m^{(T_B)}$ 按定义遍历全部 $(n,m)$ 对，故两个周期体系之间的每一个相位关系算子都落在周期卷积矩阵中，无遗漏；而矩阵的每个元素又都是两个相位算子的乘积，由命题 \ref{prop:PPO_relation_structure} 的封闭性仍属相位算子，故无超出。
+\end{proof}
+
+\subsection{第五步：与离散采样、调和分析、时序分析的整合}
+
+\begin{definition}[易经周期诊断流程]\label{def:yijing_periodic_diagnosis}
+对于给定易经符号体系，使用周期数学框架进行诊断：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{周期判定}：验证易经目标的周期类型（\cref{thm:yijing_periodicity_decision}）；
+    \item \textbf{级数构建}：由卦象、干支、节气数据构建振幅、频率、相位级数与周转圆组（\cref{thm:yijing_series_reconstruction}）；
+    \item \textbf{张量诊断}：计算质因数分解、群结构、张量形状与嵌套生成来源；
+    \item \textbf{卷积诊断}：计算周期卷积、六十甲子生成、河图洛书结构；
+    \item \textbf{整合诊断}：接入离散采样、调和分析、时序分析工具链。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[易经周期诊断流程与三章接口]\label{thm:yijing_diagnosis_integration}
+\cref{def:yijing_periodic_diagnosis} 的五个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}、\cref{thm:intercalation_leakage_suppression}；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}、\cref{prop:twelve_to_six}；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}、\cref{def:ts_window_validation}。
+\end{enumerate}
+因此易经周期诊断不是独立方法，而是周期数学统一工具链在传统符号体系上的应用。
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:yijing_diagnosis_integration} 是「周期系统」章五步接口（\cref{tab:ps_five_steps}）在本领域的落地：
+周期判定用采样与谱估计，频率分解与相位核用「调和分析」章，周期图峰值、Fisher 检验与
+窗函数验证用「时序分析」章。故诊断流程由三章工具链合成，证明见该处。
+\end{proof}
+
+\begin{remark}[整合后的操作顺序]\label{rem:yijing_integration_order}
+实际诊断建议顺序为：先判定易经目标是否周期（\cref{thm:yijing_periodicity_decision}）；再构建卦象、干支、节气数据的傅里叶数据与周转圆组（\cref{thm:yijing_series_reconstruction}）；再用统一排序规则与动态调节优化参数（\cref{thm:yijing_adaptive_convergence}、\cref{prop:yijing_structure_metric_convergence}）；再作周期卷积与六十甲子生成分析（\cref{thm:ganzhi_periodic_convolution}）；最后按 \cref{def:yijing_periodic_diagnosis} 输出诊断。
+\end{remark}
+
+\section{周期相位算子}
+
+\begin{definition}[周期相位算子]\label{def:PPO_yijing}
+对任意周期 $T \in \mathbb{N}^+$，其第 $k$ 个相位对应的复数 $z_k^{(T)} = e^{i2\pi k/T}$ 称为\textbf{周期相位算子}，记作 $\mathcal{O}_k^{(T)}$。全部 $T$ 个相位算子构成集合：
+\[
+\mathcal{P}_T = \{\mathcal{O}_k^{(T)} = e^{i2\pi k/T} \mid k = 0, 1, \dots, T-1\}.
+\]
+
+周期相位算子具有\textbf{双重身份}：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{作为向量}：它是周期 $T$ 中第 $k$ 个相位点在单位圆上的方向向量——编码了该相位在周期中的位置。
+    \item \textbf{作为算子}：它通过复乘作用于任意复数向量，产生相位旋转：
+    \[
+    \mathcal{O}_k^{(T)} \cdot \mathbf{v} = \mathbf{v} \cdot e^{i2\pi k/T}.
+    \]
+    乘以 $\mathcal{O}_k^{(T)}$ 等价于将向量 $\mathbf{v}$ 旋转 $2\pi k/T$ 弧度。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[相位算子的关系结构]\label{prop:PPO_relation_structure}
+周期 $T$ 的 $T$ 个相位算子构成完整的关系谱系：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{阳算子（合同）}：$\mathcal{O}_0^{(T)} = 1$。乘以 $\mathcal{O}_0$ 得到自身——恒等关系。
+    \item \textbf{阴算子（对冲）}：$\mathcal{O}_{T/2}^{(T)} = -1$（当 $T$ 为偶数时）。乘以 $\mathcal{O}_{T/2}$ 得到反向量——对冲关系。
+    \item \textbf{一般旋转算子}：$\mathcal{O}_k^{(T)}$（$k \neq 0, T/2$）。部分旋转关系。
+\end{enumerate}
+全体相位算子在复乘下构成循环群 $C_T$：$\mathcal{O}_a \cdot \mathcal{O}_b = \mathcal{O}_{a+b \bmod T}$。
+\end{proposition}
+
+\begin{proof}
+(i) 阳算子：$\mathcal{O}_0^{(T)} = e^{i\cdot 0} = 1$，故对任意 $z$ 有 $\mathcal{O}_0^{(T)} z = z$。(ii) 阴算子：当 $T$ 为偶数时 $T/2 \in \mathbb{N}$，故 $\mathcal{O}_{T/2}^{(T)} = e^{i2\pi(T/2)/T} = e^{i\pi} = -1$。(iii) 一般旋转：对任意 $z = |z|e^{i\varphi}$，$\mathcal{O}_k^{(T)} z = |z| e^{i(\varphi + 2\pi k/T)}$，模不变而辐角增加 $2\pi k/T$。
+
+群结构验证：对任意 $a,b$，由指数函数加法定理
+\[
+\mathcal{O}_a^{(T)} \cdot \mathcal{O}_b^{(T)} = e^{i2\pi a/T} e^{i2\pi b/T} = e^{i2\pi(a+b)/T} = \mathcal{O}_{a+b \bmod T}^{(T)}.
+\]
+故 $\mathcal{P}_T$ 在复乘下封闭；结合律继承自复数乘法；单位元为 $\mathcal{O}_0^{(T)} = 1$；$\mathcal{O}_a^{(T)}$ 的逆元为 $\mathcal{O}_{T-a \bmod T}^{(T)}$。因此 $(\mathcal{P}_T, \cdot)$ 为循环群，由 $\mathcal{O}_1^{(T)}$ 生成且 $\mathcal{O}_1^{(T)}$ 的阶为 $T$，故 $\mathcal{P}_T \cong C_T$。
+\end{proof}
+
+\begin{proposition}[相位算子与不可约表示的对应]\label{prop:PPO_group_yijing}
+集合 $\mathcal{P}_T$ 在复乘运算下构成循环群 $C_T$，且与 $C_T$ 的不可约表示一一对应：
+\[
+\mathcal{O}_k^{(T)} = \rho_k(g).
+\]
+\end{proposition}
+
+\begin{proof}
+由命题 \ref{prop:PPO_relation_structure}，$(\mathcal{P}_T, \cdot) \cong C_T$，同构为 $\chi: C_T \to \mathcal{P}_T,\; g^j \mapsto \mathcal{O}_j^{(T)}$。循环群 $C_T = \langle g \mid g^T = 1 \rangle$ 的每个一维不可约表示 $\rho_k$（$k = 0,\dots,T-1$）由生成元 $g$ 的像唯一确定：$\rho_k(g) = \omega^k$，其中 $\omega = e^{i2\pi/T}$。于是 $\rho_k(g^j) = \omega^{kj} = \mathcal{O}_{kj \bmod T}^{(T)}$，即不可约表示 $\rho_k$ 在生成元处取值恰为相位算子 $\mathcal{O}_k^{(T)}$。因 $C_T$ 的共轭类数为 $T$，其一维不可约表示恰有 $T$ 个，而 $k \mapsto \rho_k$ 与 $k \mapsto \mathcal{O}_k^{(T)}$ 均为双射，故 $\mathcal{P}_T$ 与 $C_T$ 的不可约表示一一对应。
+\end{proof}
+
+\begin{definition}[正则表示与DFT对角化]\label{def:regular_representation_yijing}
+本定义与第~\ref{chap:harmonic}~章「单位根与循环群表示」节（\cref{sec:unit_roots_cyclic_rep}）中的 \cref{def:regular_representation_dft} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。本处仅以循环群 $\mathbb{Z}_T$ 的相位算子语言复述该定义，数学对象相同。
+\end{definition}
+
+\begin{remark}[相位算子的关系本质]
+相位算子的核心意义在于\textbf{定义关系}。任意两个相位 $\mathcal{O}_a$ 和 $\mathcal{O}_b$ 之间的复合 $\mathcal{O}_a \cdot \mathcal{O}_b$ 给出了从 $\mathcal{O}_b$ 到 $\mathcal{O}_{a+b}$ 的关系。相位算子的乘法封闭性保证了关系体系的完备性。
+\end{remark}
+
+\section{周转圆嵌套生成}
+
+\begin{definition}[周转圆嵌套生成规则]\label{def:epicycle_nesting_rule}
+设周期 $T_{\text{内}}$ 的周转圆（内圈）嵌套在周期 $T_{\text{外}}$ 的周转圆（外圈）上。\textbf{周转圆嵌套生成规则}为：
+\[
+\text{外圈每前进一步（旋转 } 2\pi/T_{\text{外}} \text{），内圈旋转一整圈（旋转 } 2\pi \text{）。}
+\]
+等价地，内圈角速度是外圈角速度的 $T_{\text{内}}$ 倍：$\omega_{\text{内}} = T_{\text{内}} \cdot \omega_{\text{外}}$。合成系统的周期为 $T_{\text{合成}} = T_{\text{内}} \times T_{\text{外}}$。
+\end{definition}
+
+\begin{theorem}[周转圆嵌套生成定理]\label{thm:epicycle_nesting_generation}
+设内圈周转圆有 $T_{\text{内}}$ 个等距相位点，外圈周转圆有 $T_{\text{外}}$ 个等距相位点。合成系统的相位为
+\[
+\theta_{a,b} = \frac{2\pi a}{T_{\text{内}}} + \frac{2\pi b}{T_{\text{外}}}, \quad a = 0, \dots, T_{\text{内}}-1,\; b = 0, \dots, T_{\text{外}}-1.
+\]
+合成系统的独立相位数为 $T_{\text{内}} \times T_{\text{外}}$，合成相位算子为 $\mathcal{O}_{a,b} = \mathcal{O}_a^{(T_{\text{内}})} \cdot \mathcal{O}_b^{(T_{\text{外}})}$。
+\end{theorem}
+
+\begin{proof}
+内圈相位 $a$ 提供相位角 $2\pi a/T_{\text{内}}$，外圈相位 $b$ 提供相位角 $2\pi b/T_{\text{外}}$，二者叠加得合成相位 $\theta_{a,b} = 2\pi a/T_{\text{内}} + 2\pi b/T_{\text{外}}$，故合成相位算子
+\[
+\mathcal{O}_{a,b} = e^{i\theta_{a,b}} = e^{i2\pi a/T_{\text{内}}} \cdot e^{i2\pi b/T_{\text{外}}} = \mathcal{O}_a^{(T_{\text{内}})} \cdot \mathcal{O}_b^{(T_{\text{外}})}.
+\]
+独立相位数：内外圈相位索引构成笛卡尔积 $\mathbb{Z}_{T_{\text{内}}} \times \mathbb{Z}_{T_{\text{外}}}$，其基数为 $T_{\text{内}} \times T_{\text{外}}$，对应张量积表示 $\mathcal{P}_{T_{\text{内}}} \otimes \mathcal{P}_{T_{\text{外}}}$ 的 $T_{\text{内}} \times T_{\text{外}}$ 个独立分量。当 $\gcd(T_{\text{内}}, T_{\text{外}}) = 1$ 时，相位和投影保持全部独立相位（见注释 \ref{ch20_epicycle_gcd_boundary}）。
+\end{proof}
+
+\begin{remark}[周转圆嵌套的相位和与张量积边界]\label{ch20_epicycle_gcd_boundary}
+相位和投影 $e^{i(\theta_a + \theta_b)}$ 把内外圈相位点映到同一单位圆，此时不同 $(a,b)$ 可能重合：相位和的全部取值构成循环子群 $\langle e^{i2\pi/\operatorname{lcm}(T_{\text{内}},T_{\text{外}})}\rangle$，共有 $\operatorname{lcm}(T_{\text{内}}, T_{\text{外}})$ 个不同点。当且仅当 $\gcd(T_{\text{内}}, T_{\text{外}}) = 1$ 时 $\operatorname{lcm} = T_{\text{内}} \times T_{\text{外}}$，相位和投影才保持全部 $T_{\text{内}} \times T_{\text{外}}$ 个独立相位。阴阳 $\times$ 五行（$2 \times 5$）与四象 $\times$ 三才（$4 \times 3$）互质，相位和即给出天干 $10$、地支 $12$；八卦 $\times$ 八卦因 $\gcd(8,8) = 8$，相位和只有 $8$ 个点，必须用张量积（直积）结构 $C_8 \times C_8$ 才得到 $64$ 卦。
+\end{remark}
+
+\begin{example}[天干的周转圆生成]\label{ex:tiangan_generation}
+五行周转圆为外圈（$T_{\text{外}} = 5$），阴阳周转圆为内圈（$T_{\text{内}} = 2$）。五行每前进一步（$72^\circ$），阴阳旋转一整圈（$360^\circ$）。独立相位数为 $2 \times 5 = 10$，恰为天干周期。
+\end{example}
+
+\begin{example}[地支的周转圆生成]\label{ex:dizhi_generation}
+四象周转圆为外圈（$T_{\text{外}} = 4$），三才周转圆为内圈（$T_{\text{内}} = 3$）。独立相位数为 $3 \times 4 = 12$，恰为地支周期。
+\end{example}
+
+\begin{example}[六十四卦的周转圆生成]\label{ex:liushisigua_generation}
+八卦周转圆为外圈（$T_{\text{外}} = 8$），八卦周转圆为内圈（$T_{\text{内}} = 8$）。独立相位数为 $8 \times 8 = 64$。群结构为 $C_8 \times C_8$。
+\end{example}
+
+\begin{lemma}[六十甲子的奇偶筛选]\label{ch20_ganzhi_parity_filter}
+设天干索引 $n \in \mathbb{Z}_{10}$、地支索引 $m \in \mathbb{Z}_{12}$，奇偶映射 $\varphi_2: \mathbb{Z}_{10} \to \mathbb{Z}_2,\; n \mapsto n \bmod 2$ 与 $\psi_2: \mathbb{Z}_{12} \to \mathbb{Z}_2,\; m \mapsto m \bmod 2$。则满足同步条件 $n \equiv m \pmod 2$ 的有效组合恰有 $60$ 个，且与六十甲子一一对应。
+\end{lemma}
+
+\begin{proof}
+有效组合集为纤维积
+\[
+E = \{(n,m) \in \mathbb{Z}_{10} \times \mathbb{Z}_{12} : \varphi_2(n) = \psi_2(m)\}.
+\]
+它是同态 $\Delta: \mathbb{Z}_{10} \times \mathbb{Z}_{12} \to \mathbb{Z}_2,\; (n,m) \mapsto \varphi_2(n) - \psi_2(m)$ 的核。因 $10,12$ 均含因子 $2$，$\varphi_2,\psi_2$ 均为满射，故 $\Delta$ 为满射，于是 $|E| = |\mathbb{Z}_{10} \times \mathbb{Z}_{12}| / |\mathbb{Z}_2| = 120/2 = 60$。直接计数验证：$\mathbb{Z}_{10}$ 中偶、奇数各 $5$ 个，$\mathbb{Z}_{12}$ 中偶、奇数各 $6$ 个，故 $|E| = 5\cdot 6 + 5\cdot 6 = 60$。
+
+对角嵌入 $\iota: \mathbb{Z}_{60} \to E,\; k \mapsto (k \bmod 10, k \bmod 12)$ 良定义（$k$ 的奇偶性在两种约化下一致）且为单射：若 $k \equiv k' \pmod{10}$ 且 $k \equiv k' \pmod{12}$，则 $k \equiv k' \pmod{\operatorname{lcm}(10,12) = 60}$。因 $|E| = 60 = |\mathbb{Z}_{60}|$，$\iota$ 为双射，故 $E \cong C_{60}$。逐 $k$ 对应（天干索引以甲为 $0$、地支索引以寅为 $0$，故 $k$ 即六十甲子的序数，甲子为序数 $10$）：$k=0 \mapsto (0,0)$（甲寅，序数 $0$）、$k=1 \mapsto (1,1)$（乙卯）、……、$k=10 \mapsto (0,10)$（甲子，序数 $10$），恰为以甲寅为首的六十甲子序列。
+\end{proof}
+
+\section{质因数分解与张量结构}
+
+\begin{theorem}[循环群的直积分解]\label{thm:cyclic_direct_product_yijing}
+设 $T = \prod_{j=1}^r m_j$ 且 $m_1, \dots, m_r$ 两两互质，则 $C_T \cong C_{m_1} \times \cdots \times C_{m_r}$。
+\end{theorem}
+
+\begin{proof}
+由中国剩余定理：当 $m_1, \dots, m_r$ 两两互质时，映射
+\[
+\varphi: \mathbb{Z}_T \to \mathbb{Z}_{m_1} \times \cdots \times \mathbb{Z}_{m_r}, \quad k \mapsto (k \bmod m_1, \dots, k \bmod m_r)
+\]
+是环同构，特别地是群同构。故 $C_T \cong C_{m_1} \times \cdots \times C_{m_r}$。
+\end{proof}
+
+\begin{definition}[相位算子的张量表示]\label{def:tensor_representation_yijing}
+在直积分解下，任意相位算子表示为 $r$ 阶张量：
+\[
+\mathbf{O}_{a_1,\dots,a_r} = \exp\left(i2\pi \sum_{j=1}^r \frac{a_j}{m_j}\right).
+\]
+\end{definition}
+
+\begin{proposition}[不可约表示的张量积]\label{prop:irrep_tensor_product_yijing}
+设 $G = G_1 \times \cdots \times G_r$ 为循环群因子的直积（本章十三符号体系的群结构均属此类）。则 $G$ 的每个不可约表示都是各因子不可约表示的张量积：$\rho = \rho_1 \otimes \cdots \otimes \rho_r$，且 $\widehat{G} \cong \widehat{G_1} \times \cdots \times \widehat{G_r}$。
+\end{proposition}
+
+\begin{proof}
+由定理 \ref{thm:cyclic_direct_product_yijing}，当 $T = \prod_j m_j$ 且两两互质时 $C_T \cong C_{m_1} \times \cdots \times C_{m_r}$。设各因子生成元为 $g_j$（$g_j^{m_j} = 1$），则 $G$ 中任意元素唯一写成 $g_1^{x_1} \cdots g_r^{x_r}$。$G$ 的任意一维不可约表示 $\rho$ 由 $\rho(g_1),\dots,\rho(g_r)$ 唯一确定；由 $\rho(g_j)^{m_j} = \rho(g_j^{m_j}) = \rho(1) = 1$，$\rho(g_j)$ 是 $m_j$ 次单位根，故存在 $a_j \in \mathbb{Z}_{m_j}$ 使 $\rho(g_j) = e^{i2\pi a_j/m_j}$。于是
+\[
+\rho(g_1^{x_1}\cdots g_r^{x_r}) = \prod_{j=1}^r e^{i2\pi a_j x_j / m_j},
+\]
+恰为各因子不可约表示 $\rho_j(g_j^{x_j}) = e^{i2\pi a_j x_j/m_j}$ 的张量积取值。指标 $(a_1,\dots,a_r)$ 独立遍历 $\mathbb{Z}_{m_1}\times\cdots\times\mathbb{Z}_{m_r}$，共 $\prod_j m_j = T$ 个组合，与 $C_T$ 的不可约表示总数 $T$ 相等，故既无遗漏也无重复。
+\end{proof}
+
+\section{河图复变函数}
+
+本节建立\textbf{河图复变函数}——以 $10$ 为周期的复变函数。河图结构揭示：周期 $10$ 的傅里叶分解中自动出现 $\mathbb{Z}_{10} \cong \mathbb{Z}_2 \times \mathbb{Z}_5$ 的代数分级，其中 $\mathbb{Z}_5$ 分量对应\textbf{五行}的相生循环，$\mathbb{Z}_2$ 分量对应\textbf{阴阳}的二重交替。
+
+\begin{definition}[河图数-五行对应]\label{def:hetu_mapping_yijing}
+定义\textbf{河图映射} $\varphi: \mathbb{Z}_{10} \to \mathbb{Z}_5$ 为
+\[
+\varphi(n) := n \bmod 5, \qquad n \in \mathbb{Z}_{10} = \{0, 1, \dots, 9\},
+\]
+其中约定余数 $0$ 对应五行中的“土”。具体地：
+\[
+\begin{array}{c|ccccc}
+\varphi(n) & 0 & 1 & 2 & 3 & 4 \\
+\hline
+\text{五行} & \text{土} & \text{水} & \text{火} & \text{木} & \text{金} \\
+\text{数字} & 5, 10 & 1, 6 & 2, 7 & 3, 8 & 4, 9
+\end{array}
+\]
+此外，\textbf{阴阳}分量由 $n$ 的奇偶性给出：$n$ 为奇数对应阳，$n$ 为偶数对应阴。因此河图映射是群同态
+\[
+\varphi: \mathbb{Z}_{10} \to \mathbb{Z}_5, \qquad \ker \varphi = \{0, 5\} \cong \mathbb{Z}_2.
+\]
+\end{definition}
+
+\begin{remark}[河图复变函数（与「级数与卷积」章同一定义）]\label{def:hetu_function_yijing}
+河图复变函数——即满足 $f(z + 10) = f(z)$ 的复函数——与「级数与卷积」章的 \cref{def:hetu_function} 是\textbf{同一个定义}，其傅里叶展开式 $f(z) = \sum_{n} c_n e^{2\pi i n z/10}$ 与系数公式亦完全相同，此处不再重复。
+\end{remark}
+
+\begin{remark}[河图傅里叶分解（重述）]\label{thm:hetu_fourier_decomposition_yijing}
+本定理与「级数与卷积」章 \cref{thm:hetu_fourier_decomposition} 是同一结论：一致收敛的河图复变函数可唯一分解为
+\[
+f(z) = \sum_{k=0}^{4} \Bigl( c_k + c_{k+5}\, e^{\pi i z} \Bigr) e^{2\pi i k z / 10},
+\]
+其中 $e^{\pi i z}$ 是周期为 $2$ 的阴阳因子。陈述与证明均见该处；本节的结论读者可直接引用那里。
+\end{remark}
+
+\begin{proof}
+本定理的证明与「级数与卷积」章 \cref{thm:hetu_fourier_decomposition} 的证明完全相同（那里逐项给出 $\mathbb{Z}_{10} \cong \mathbb{Z}_2 \times \mathbb{Z}_5$ 的代入计算），此处不再重复。
+\end{proof}
+
+\begin{definition}[五行分量]\label{def:hetu_five_components_yijing}
+在上述分解中，称
+\[
+f_k(z) := \Bigl( c_k + c_{k+5}\, e^{\pi i z} \Bigr)\, e^{2\pi i k z / 10}, \qquad k = 0, 1, 2, 3, 4
+\]
+为 $f$ 的\textbf{第 $k$ 个五行分量}。按照河图映射（定义 \ref{def:hetu_mapping_yijing}），五个分量依次对应：
+\[
+f_0 \leftrightarrow \text{土},\quad f_1 \leftrightarrow \text{水},\quad f_2 \leftrightarrow \text{火},\quad f_3 \leftrightarrow \text{木},\quad f_4 \leftrightarrow \text{金}.
+\]
+每个五行分量由两部分构成：$c_k\, e^{2\pi i k z / 10}$（阳分量）与 $c_{k+5}\, e^{\pi i z} e^{2\pi i k z / 10}$（阴分量）。
+\end{definition}
+
+\begin{remark}[五行分量的周期结构（五行命名下的重述）]\label{prop:hetu_five_periods_yijing}
+本命题是「级数与卷积」章 \cref{prop:hetu_five_periods} 在\textbf{五行命名}下的重述，数学内容完全相同；在那里的证明之后给出的是以 $k$ 为指标的周期表，这里只把指标换成五行名：
+\[
+\begin{array}{c|ccccc}
+k & 0 & 1 & 2 & 3 & 4 \\
+\hline
+\text{五行} & \text{土} & \text{水} & \text{火} & \text{木} & \text{金} \\
+\text{基频周期} & 1 & 10 & 5 & 10 & 5
+\end{array}
+\]
+即：$f_0$（土）仅含常数项；$f_1, f_3$（水、木）为周期 $10$ 的分量；$f_2, f_4$（火、金）为周期 $5$ 的分量。证明见 \cref{prop:hetu_five_periods}，此处不再重复。
+\end{remark}
+
+\begin{remark}[河图复变函数的阴阳翻转（五行命名下的重述）]\label{prop:hetu_yin_yang_flip_yijing}
+本命题与「级数与卷积」章 \cref{prop:hetu_yin_yang_flip} 是同一命题，此处不再重复陈述与证明；在五行命名下它的读法是：半周期平移 $z \mapsto z + 5$ 给每个分量一个因子 $(-1)^k$，偶数分量（$k = 0, 2, 4$，对应土、火、金）保持不变，奇数分量（$k = 1, 3$，对应水、木）整体变号。
+\end{remark}
+
+\begin{remark}[河图相位算子（与「级数与卷积」章同一定义）]\label{def:hetu_phase_operator_yijing}
+河图相位算子 $\mathcal{O}_n^{(10)} = e^{2\pi i n / 10}$ 与「级数与卷积」章的 \cref{def:hetu_phase_operator} 是\textbf{同一个对象}，其 $\mathbb{Z}_{10} \cong \mathbb{Z}_2 \times \mathbb{Z}_5$ 分解亦完全相同，此处不再重复定义。
+
+易经语境只是给这两个因子另取了名字：$\mathbb{Z}_2$ 分量 $(-1)^{\varepsilon}$ 称为\textbf{阴阳符号}，$\mathbb{Z}_5$ 分量 $e^{2\pi i k / 10}$ 称为\textbf{五行相位}。
+\end{remark}
+
+\begin{remark}[河图相位算子群的直积分解（重述）]\label{prop:hetu_phase_group_yijing}
+本命题与「级数与卷积」章 \cref{prop:hetu_phase_group} 是同一命题：相位算子群 $\{\mathcal{O}_n^{(10)}\}_{n=0}^{9}$ 同构于 $C_{10} \cong C_2 \times C_5$，其中 $C_2$ 对应阴阳、$C_5$ 对应五行。陈述与证明均见该处，此处不再重复。
+\end{remark}
+
+\begin{remark}[河图循环矩阵的 DFT 对角化（重述）]\label{thm:hetu_circulant_yijing}
+本定理与「级数与卷积」章 \cref{thm:hetu_circulant} 是同一结论：首行生成元为 $(h_0,\dots,h_9)$ 的 $10\times 10$ 循环矩阵被 DFT 矩阵酉对角化，且特征值 $\hat h_n$ 按 $n = 5\varepsilon + k$ 分为阴（$\varepsilon=1$）阳（$\varepsilon=0$）两组。陈述与证明均见该处。
+\end{remark}
+
+\begin{proof}
+本定理的证明与「级数与卷积」章 \cref{thm:hetu_circulant} 的证明完全相同（循环矩阵的 DFT 对角化、以及特征值按 $n = 5\varepsilon + k$ 的分级），此处不再重复。
+\end{proof}
+
+\begin{example}[河图复变函数的具体分解]\label{ex:hetu_concrete_yijing}
+本例与第~\ref{chap:series_conv}~章「河图复变函数：周期 $10$ 的 $\mathbb{Z}_2\times\mathbb{Z}_5$ 分解」节（\cref{sec:hetu_function}）中的 \cref{ex:hetu_concrete} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。两处的差别仅为分量表的列名（该处用「标签/分量」，此处用「五行/阴阳」），五行与阴阳的对应关系由 \cref{def:hetu_mapping} 给出，不另立新例。
+\end{example}
+
+\begin{remark}[河图结构的代数意义]
+本注与第~\ref{chap:series_conv}~章「河图复变函数：周期 $10$ 的 $\mathbb{Z}_2\times\mathbb{Z}_5$ 分解」节（\cref{sec:hetu_function}）中的 \cref{rem:hetu_algebraic_meaning} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。易经语境只是给两个因子另取了名字：$\mathbb{Z}_2$ 分量 $(-1)^{\varepsilon}$ 称为\textbf{阴阳符号}，$\mathbb{Z}_5$ 分量 $e^{2\pi i k/10}$ 称为\textbf{五行相位}。
+\end{remark}
+
+\section{洛书矩阵}
+
+本节在《易经》符号体系的语境下使用\textbf{洛书矩阵}的全部结论。该矩阵的定义、幻方性质、平衡点刻画、对径平衡、谱结构与平移--旋转分解已完整给出并逐条证明。本节各项均为该节结论的引用，不再重复其陈述与证明，仅保留章内引用所需的编号锚点；下文凡出现「见该处」者，一律指第~\ref{chap:linear_algebra}~章 \cref{sec:luoshu_matrix}。
+
+\begin{definition}[洛书矩阵]\label{def:luoshu_matrix_yijing}
+本定义与第~\ref{chap:linear_algebra}~章「洛书矩阵：以 $5$ 为平衡点的 $3\times 3$ 幻方」节（\cref{sec:luoshu_matrix}）中的 \cref{def:luoshu_matrix} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{definition}
+
+\begin{definition}[行和、列和与对角和]\label{def:luoshu_line_sums_yijing}
+本定义与第~\ref{chap:linear_algebra}~章「洛书矩阵：以 $5$ 为平衡点的 $3\times 3$ 幻方」节（\cref{sec:luoshu_matrix}）中的 \cref{def:luoshu_line_sums} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{definition}
+
+\begin{proposition}[洛书矩阵的幻方性质]\label{prop:luoshu_magic_sum_yijing}
+本命题与第~\ref{chap:linear_algebra}~章「洛书矩阵：以 $5$ 为平衡点的 $3\times 3$ 幻方」节（\cref{sec:luoshu_matrix}）中的 \cref{prop:luoshu_magic_sum} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。
+\end{proposition}
+
+\begin{definition}[洛书平衡点]\label{def:luoshu_balance_point_yijing}
+本定义与第~\ref{chap:linear_algebra}~章「洛书矩阵：以 $5$ 为平衡点的 $3\times 3$ 幻方」节（\cref{sec:luoshu_matrix}）中的 \cref{def:luoshu_balance_point} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{definition}
+
+\begin{proposition}[平衡点的三重刻画]\label{prop:luoshu_balance_triple_yijing}
+本命题与第~\ref{chap:linear_algebra}~章「洛书矩阵：以 $5$ 为平衡点的 $3\times 3$ 幻方」节（\cref{sec:luoshu_matrix}）中的 \cref{prop:luoshu_balance_triple} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。
+\end{proposition}
+
+\begin{proposition}[洛书对径配平]\label{prop:luoshu_antipodal_yijing}
+本命题与第~\ref{chap:linear_algebra}~章「洛书矩阵：以 $5$ 为平衡点的 $3\times 3$ 幻方」节（\cref{sec:luoshu_matrix}）中的 \cref{prop:luoshu_antipodal} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。
+\end{proposition}
+
+\begin{theorem}[洛书矩阵的特征值与谱结构]\label{thm:luoshu_eigenvalues_yijing}
+本定理与第~\ref{chap:linear_algebra}~章「洛书矩阵：以 $5$ 为平衡点的 $3\times 3$ 幻方」节（\cref{sec:luoshu_matrix}）中的 \cref{thm:luoshu_eigenvalues} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。
+\end{theorem}
+
+\begin{theorem}[洛书矩阵的平移-旋转分解]\label{thm:luoshu_decomposition_yijing}
+本定理与第~\ref{chap:linear_algebra}~章「洛书矩阵：以 $5$ 为平衡点的 $3\times 3$ 幻方」节（\cref{sec:luoshu_matrix}）中的 \cref{thm:luoshu_decomposition} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。
+\end{theorem}
+
+\begin{corollary}[洛书平衡点与幻和的结构意义]\label{cor:luoshu_structure}
+本推论与第~\ref{chap:linear_algebra}~章「洛书矩阵：以 $5$ 为平衡点的 $3\times 3$ 幻方」节（\cref{sec:luoshu_matrix}）中的 \cref{cor:luoshu_grammar} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。
+\end{corollary}
+
+\begin{example}[洛书矩阵的谱分解]\label{ex:luoshu_spectral_yijing}
+本例与第~\ref{chap:linear_algebra}~章「洛书矩阵：以 $5$ 为平衡点的 $3\times 3$ 幻方」节（\cref{sec:luoshu_matrix}）中的 \cref{ex:luoshu_spectral} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{example}
+
+\begin{remark}[洛书矩阵与河图结构的接口]\label{rem:luoshu_hetu_interface_yijing}
+洛书矩阵的幻和 $15 = 3 \times 5$ 中的因子 $5$ 与河图结构中 $\mathbb{Z}_{10} \cong \mathbb{Z}_2 \times \mathbb{Z}_5$ 的 $\mathbb{Z}_5$ 分量在代数上相关联：洛书中心 $5$ 对应五行循环的顶点，洛书对径配平（和为 $10 = 2 \times 5$）对应阴阳二重交替。洛书矩阵在 $\mathbf{1}^\perp$ 上的纯旋转特征值 $\pm 2\sqrt{6}i$ 提供了一个具体的 $3$ 维旋转例子，其周期 $\pi/\sqrt{6}$ 由矩阵的代数结构完全确定。
+\end{remark}
+
+\section{十三符号体系相位算子表}
+
+\subsection{\texorpdfstring{太极（$T=1$）}{太极（T=1）}}
+
+\begin{definition}[太极相位算子]\label{def:taiji_operators}
+太极周期 $T=1$，位宽 $W=1$，带宽 $\Delta\theta=2\pi$。群结构 $C_1$，张量形状 $1$。仅有一个相位点，描述“存在”。
+\end{definition}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3.5cm}}
+\toprule
+$k$ & 符号 & 相位 $\theta_k$ & 算子 $\mathcal{O}_k^{(1)}$ \\
+\midrule
+$0$ & 太极 & $0$ & $1+0i$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{\texorpdfstring{两仪（$T=2$）}{两仪（T=2）}}
+
+\begin{definition}[阴阳相位算子]\label{def:yinyang_operators}
+阴阳周期 $T=2$，位宽 $W=2$，带宽 $\Delta\theta=\pi$。群结构 $C_2$，张量形状 $2$。全阴爻（$k=0$）为震（木始），全阳爻（$k=1$）为坎（水终）。
+\end{definition}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}}
+\toprule
+$k$ & 二进制 & 符号 & 五行 & 相位 $\theta_k$ & 算子 $\mathcal{O}_k^{(2)}$ \\
+\midrule
+$0$ & $0$ & 阴 & 震（木始） & $0$ & $1+0i$ \\
+$1$ & $1$ & 阳 & 坎（水终） & $\pi$ & $-1+0i$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{\texorpdfstring{三才（$T=3$）}{三才（T=3）}}
+
+\begin{definition}[三才相位算子]\label{def:sancai_operators}
+三才周期 $T=3$，位宽 $W=3$，带宽 $\Delta\theta=2\pi/3$。群结构 $C_3$，张量形状 $3$。
+\end{definition}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{4cm}}
+\toprule
+$k$ & 符号 & 五行 & 相位 $\theta_k$ & 算子 $\mathcal{O}_k^{(3)}$ \\
+\midrule
+$0$ & 天 & 阳木（始） & $0$ & $1+0i$ \\
+$1$ & 人 & 火 & $2\pi/3$ & $-0.5+0.8660i$ \\
+$2$ & 地 & 阴水（终） & $4\pi/3$ & $-0.5-0.8660i$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{\texorpdfstring{四象（$T=4$）}{四象（T=4）}}
+
+\begin{definition}[四象相位算子]\label{def:sixiang_operators}
+四象周期 $T=4=2^2$，位宽 $W=4$，带宽 $\Delta\theta=\pi/2$。群结构 $C_4$，张量形状 $4$。
+\end{definition}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}}
+\toprule
+$k$ & 二进制 & 符号 & 五行 & 相位 $\theta_k$ & 算子 $\mathcal{O}_k^{(4)}$ \\
+\midrule
+$0$ & $00$ & 太阴 & 震（木始） & $0$ & $1+0i$ \\
+$1$ & $01$ & 少阳 & 木 & $\pi/2$ & $0+1i$ \\
+$2$ & $10$ & 少阴 & 金 & $\pi$ & $-1+0i$ \\
+$3$ & $11$ & 太阳 & 坎（水终） & $3\pi/2$ & $0-1i$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{\texorpdfstring{五行（$T=5$）}{五行（T=5）}}
+
+\begin{definition}[五行相位算子]\label{def:wuxing_operators}
+五行周期 $T=5$，位宽 $W=5$，带宽 $\Delta\theta=2\pi/5$。群结构 $C_5$，张量形状 $5$。
+\end{definition}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{4cm}}
+\toprule
+$k$ & 符号 & 五行 & 相位 $\theta_k$ & 算子 $\mathcal{O}_k^{(5)}$ \\
+\midrule
+$0$ & 木 & 阳木（始） & $0$ & $1+0i$ \\
+$1$ & 火 & 火 & $2\pi/5$ & $0.3090+0.9511i$ \\
+$2$ & 土 & 土 & $4\pi/5$ & $-0.8090+0.5878i$ \\
+$3$ & 金 & 金 & $6\pi/5$ & $-0.8090-0.5878i$ \\
+$4$ & 水 & 阴水（终） & $8\pi/5$ & $0.3090-0.9511i$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{\texorpdfstring{七政（$T=7$）}{七政（T=7）}}
+
+\begin{definition}[七政相位算子]\label{def:qizheng_operators}
+七政周期 $T=7$，位宽 $W=7$，带宽 $\Delta\theta=2\pi/7$。群结构 $C_7$，张量形状 $7$。
+\end{definition}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{4cm}}
+\toprule
+$k$ & 符号 & 五行 & 相位 $\theta_k$ & 算子 $\mathcal{O}_k^{(7)}$ \\
+\midrule
+$0$ & 日曜 & 阳木（始） & $0$ & $1+0i$ \\
+$1$ & 月曜 & --- & $2\pi/7$ & $0.6235+0.7818i$ \\
+$2$ & 火曜 & 火 & $4\pi/7$ & $-0.2225+0.9749i$ \\
+$3$ & 水曜 & 水 & $6\pi/7$ & $-0.9010+0.4339i$ \\
+$4$ & 木曜 & 木 & $8\pi/7$ & $-0.9010-0.4339i$ \\
+$5$ & 金曜 & 金 & $10\pi/7$ & $-0.2225-0.9749i$ \\
+$6$ & 土曜 & 阴水（终） & $12\pi/7$ & $0.6235-0.7818i$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{\texorpdfstring{八卦（$T=8$）}{八卦（T=8）}}
+
+\begin{definition}[八卦相位算子]\label{def:bagua_operators}
+八卦周期 $T=8=2^3$，位宽 $W=8$，带宽 $\Delta\theta=\pi/4$。群结构 $C_8$，张量形状 $8$。全阴爻（$000$，$k=0$，震）为木始，全阳爻（$111$，$k=7$，坎）为水终。
+\end{definition}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{3.5cm}}
+\toprule
+$k$ & 二进制 & 爻象 & 卦名 & 五行 & 相位 $\theta_k$ & 算子 $\mathcal{O}_k^{(8)}$ \\
+\midrule
+$0$ & $000$ & ☳ & 震 & 木（始） & $0$ & $1+0i$ \\
+$1$ & $001$ & ☴ & 巽 & 木 & $\pi/4$ & $0.7071+0.7071i$ \\
+$2$ & $010$ & ☶ & 艮 & 土 & $\pi/2$ & $0+1i$ \\
+$3$ & $011$ & ☲ & 离 & 火 & $3\pi/4$ & $-0.7071+0.7071i$ \\
+$4$ & $100$ & ☰ & 乾 & 金 & $\pi$ & $-1+0i$ \\
+$5$ & $101$ & ☷ & 坤 & 土 & $5\pi/4$ & $-0.7071-0.7071i$ \\
+$6$ & $110$ & ☱ & 兑 & 金 & $3\pi/2$ & $0-1i$ \\
+$7$ & $111$ & ☵ & 坎 & 水（终） & $7\pi/4$ & $0.7071-0.7071i$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{\texorpdfstring{天干（$T=10$）}{天干（T=10）}}
+
+\begin{definition}[天干相位算子]\label{def:tiangan_operators}
+天干周期 $T=10=2 \times 5$，位宽 $W=10$，带宽 $\Delta\theta=\pi/5$。群结构 $C_{10} \cong C_2 \times C_5$，张量形状 $2 \times 5$。由阴阳 $\times$ 五行周转圆嵌套生成。
+\end{definition}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{1.8cm}>{\centering\arraybackslash}p{1.8cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{3.5cm}}
+\toprule
+$k$ & 符号 & 阴阳五行 & 张量索引 & 相位 $\theta_k$ & 算子 $\mathcal{O}_k^{(10)}$ \\
+\midrule
+$0$ & 甲 & 阳木（始） & $(0,0)$ & $0$ & $1+0i$ \\
+$1$ & 乙 & 阴木 & $(0,1)$ & $\pi/5$ & $0.8090+0.5878i$ \\
+$2$ & 丙 & 阳火 & $(0,2)$ & $2\pi/5$ & $0.3090+0.9511i$ \\
+$3$ & 丁 & 阴火 & $(0,3)$ & $3\pi/5$ & $-0.3090+0.9511i$ \\
+$4$ & 戊 & 阳土 & $(0,4)$ & $4\pi/5$ & $-0.8090+0.5878i$ \\
+$5$ & 己 & 阴土 & $(1,0)$ & $\pi$ & $-1+0i$ \\
+$6$ & 庚 & 阳金 & $(1,1)$ & $6\pi/5$ & $-0.8090-0.5878i$ \\
+$7$ & 辛 & 阴金 & $(1,2)$ & $7\pi/5$ & $-0.3090-0.9511i$ \\
+$8$ & 壬 & 阳水 & $(1,3)$ & $8\pi/5$ & $0.3090-0.9511i$ \\
+$9$ & 癸 & 阴水（终） & $(1,4)$ & $9\pi/5$ & $0.8090-0.5878i$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{\texorpdfstring{地支（$T=12$）}{地支（T=12）}}
+
+\begin{definition}[地支相位算子]\label{def:dizhi_operators}
+地支周期 $T=12=4 \times 3$，位宽 $W=12$，带宽 $\Delta\theta=\pi/6$。群结构 $C_{12} \cong C_4 \times C_3$，张量形状 $4 \times 3$。由四象 $\times$ 三才周转圆嵌套生成。
+\end{definition}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{1.8cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{3.5cm}}
+\toprule
+$k$ & 符号 & 五行 & 张量索引 & 相位 $\theta_k$ & 算子 $\mathcal{O}_k^{(12)}$ \\
+\midrule
+$0$ & 寅 & 阳木（始） & $(0,0)$ & $0$ & $1+0i$ \\
+$1$ & 卯 & 阴木 & $(0,1)$ & $\pi/6$ & $0.8660+0.5i$ \\
+$2$ & 辰 & 阳土 & $(0,2)$ & $\pi/3$ & $0.5+0.8660i$ \\
+$3$ & 巳 & 阴火 & $(1,0)$ & $\pi/2$ & $0+1i$ \\
+$4$ & 午 & 阳火 & $(1,1)$ & $2\pi/3$ & $-0.5+0.8660i$ \\
+$5$ & 未 & 阴土 & $(1,2)$ & $5\pi/6$ & $-0.8660+0.5i$ \\
+$6$ & 申 & 阳金 & $(2,0)$ & $\pi$ & $-1+0i$ \\
+$7$ & 酉 & 阴金 & $(2,1)$ & $7\pi/6$ & $-0.8660-0.5i$ \\
+$8$ & 戌 & 阳土 & $(2,2)$ & $4\pi/3$ & $-0.5-0.8660i$ \\
+$9$ & 亥 & 阴水 & $(3,0)$ & $3\pi/2$ & $0-1i$ \\
+$10$ & 子 & 阳水 & $(3,1)$ & $5\pi/3$ & $0.5-0.8660i$ \\
+$11$ & 丑 & 阴水（终） & $(3,2)$ & $11\pi/6$ & $0.8660-0.5i$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{\texorpdfstring{二十四节气（$T=24$）}{二十四节气（T=24）}}
+
+\begin{definition}[二十四节气相位算子]\label{def:jieqi_operators}
+二十四节气周期 $T=24=8 \times 3$，位宽 $W=24$，带宽 $\Delta\theta=\pi/12$。群结构 $C_{24} \cong C_8 \times C_3$，张量形状 $8 \times 3$。由八卦 $\times$ 三才周转圆嵌套生成。
+\end{definition}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{3.5cm}}
+\toprule
+$k$ & 符号 & 五行 & 相位 $\theta_k$ & 算子 $\mathcal{O}_k^{(24)}$ \\
+\midrule
+$0$ & 立春 & 阳木（始） & $0$ & $1+0i$ \\
+$1$ & 雨水 & 阴木 & $\pi/12$ & $0.9659+0.2588i$ \\
+$2$ & 惊蛰 & 阳木 & $\pi/6$ & $0.8660+0.5i$ \\
+$3$ & 春分 & 阴木 & $\pi/4$ & $0.7071+0.7071i$ \\
+$4$ & 清明 & 阳木 & $\pi/3$ & $0.5+0.8660i$ \\
+$5$ & 谷雨 & 阴木 & $5\pi/12$ & $0.2588+0.9659i$ \\
+$6$ & 立夏 & 阳火 & $\pi/2$ & $0+1i$ \\
+$7$ & 小满 & 阴火 & $7\pi/12$ & $-0.2588+0.9659i$ \\
+$8$ & 芒种 & 阳火 & $2\pi/3$ & $-0.5+0.8660i$ \\
+$9$ & 夏至 & 阴火 & $3\pi/4$ & $-0.7071+0.7071i$ \\
+$10$ & 小暑 & 阳火 & $5\pi/6$ & $-0.8660+0.5i$ \\
+$11$ & 大暑 & 阴火 & $11\pi/12$ & $-0.9659+0.2588i$ \\
+$12$ & 立秋 & 阳金 & $\pi$ & $-1+0i$ \\
+$13$ & 处暑 & 阴金 & $13\pi/12$ & $-0.9659-0.2588i$ \\
+$14$ & 白露 & 阳金 & $7\pi/6$ & $-0.8660-0.5i$ \\
+$15$ & 秋分 & 阴金 & $5\pi/4$ & $-0.7071-0.7071i$ \\
+$16$ & 寒露 & 阳金 & $4\pi/3$ & $-0.5-0.8660i$ \\
+$17$ & 霜降 & 阴金 & $17\pi/12$ & $-0.2588-0.9659i$ \\
+$18$ & 立冬 & 阳水 & $3\pi/2$ & $0-1i$ \\
+$19$ & 小雪 & 阴水 & $19\pi/12$ & $0.2588-0.9659i$ \\
+$20$ & 大雪 & 阳水 & $5\pi/3$ & $0.5-0.8660i$ \\
+$21$ & 冬至 & 阴水 & $7\pi/4$ & $0.7071-0.7071i$ \\
+$22$ & 小寒 & 阳水 & $11\pi/6$ & $0.8660-0.5i$ \\
+$23$ & 大寒 & 阴水（终） & $23\pi/12$ & $0.9659-0.2588i$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{\texorpdfstring{三十纳音（$T=30$）}{三十纳音（T=30）}}
+
+\begin{definition}[三十纳音相位算子]\label{def:nayin_operators}
+三十纳音周期 $T=30=2 \times 3 \times 5$，位宽 $W=30$，带宽 $\Delta\theta=\pi/15$。群结构 $C_{30} \cong C_2 \times C_3 \times C_5$，张量形状 $2 \times 3 \times 5$。由阴阳 $\times$ 三才 $\times$ 五行周转圆嵌套生成。
+\end{definition}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{3.5cm}}
+\toprule
+$k$ & 纳音 & 干支 & 相位 $\theta_k$ & 算子 $\mathcal{O}_k^{(30)}$ \\
+\midrule
+$0$  & 大溪水   & 甲寅、乙卯 & $0$ & $1+0i$ \\
+$1$  & 沙中土   & 丙辰、丁巳 & $\pi/15$ & $0.9781+0.2079i$ \\
+$2$  & 天上火   & 戊午、己未 & $2\pi/15$ & $0.9135+0.4067i$ \\
+$3$  & 石榴木   & 庚申、辛酉 & $\pi/5$ & $0.8090+0.5878i$ \\
+$4$  & 大海水   & 壬戌、癸亥 & $4\pi/15$ & $0.6691+0.7431i$ \\
+$5$  & 海中金   & 甲子、乙丑 & $\pi/3$ & $0.5+0.8660i$ \\
+$6$  & 炉中火   & 丙寅、丁卯 & $2\pi/5$ & $0.3090+0.9511i$ \\
+$7$  & 大林木   & 戊辰、己巳 & $7\pi/15$ & $0.1045+0.9945i$ \\
+$8$  & 路旁土   & 庚午、辛未 & $8\pi/15$ & $-0.1045+0.9945i$ \\
+$9$  & 剑锋金   & 壬申、癸酉 & $3\pi/5$ & $-0.3090+0.9511i$ \\
+$10$ & 山头火   & 甲戌、乙亥 & $2\pi/3$ & $-0.5+0.8660i$ \\
+$11$ & 涧下水   & 丙子、丁丑 & $11\pi/15$ & $-0.6691+0.7431i$ \\
+$12$ & 城头土   & 戊寅、己卯 & $4\pi/5$ & $-0.8090+0.5878i$ \\
+$13$ & 白蜡金   & 庚辰、辛巳 & $13\pi/15$ & $-0.9135+0.4067i$ \\
+$14$ & 杨柳木   & 壬午、癸未 & $14\pi/15$ & $-0.9781+0.2079i$ \\
+$15$ & 泉中水   & 甲申、乙酉 & $\pi$ & $-1+0i$ \\
+$16$ & 屋上土   & 丙戌、丁亥 & $16\pi/15$ & $-0.9781-0.2079i$ \\
+$17$ & 霹雳火   & 戊子、己丑 & $17\pi/15$ & $-0.9135-0.4067i$ \\
+$18$ & 松柏木   & 庚寅、辛卯 & $6\pi/5$ & $-0.8090-0.5878i$ \\
+$19$ & 长流水   & 壬辰、癸巳 & $19\pi/15$ & $-0.6691-0.7431i$ \\
+$20$ & 沙中金   & 甲午、乙未 & $4\pi/3$ & $-0.5-0.8660i$ \\
+$21$ & 山下火   & 丙申、丁酉 & $7\pi/5$ & $-0.3090-0.9511i$ \\
+$22$ & 平地木   & 戊戌、己亥 & $22\pi/15$ & $-0.1045-0.9945i$ \\
+$23$ & 壁上土   & 庚子、辛丑 & $23\pi/15$ & $0.1045-0.9945i$ \\
+$24$ & 金箔金   & 壬寅、癸卯 & $8\pi/5$ & $0.3090-0.9511i$ \\
+$25$ & 覆灯火   & 甲辰、乙巳 & $5\pi/3$ & $0.5-0.8660i$ \\
+$26$ & 天河水   & 丙午、丁未 & $26\pi/15$ & $0.6691-0.7431i$ \\
+$27$ & 大驿土   & 戊申、己酉 & $9\pi/5$ & $0.8090-0.5878i$ \\
+$28$ & 钗钏金   & 庚戌、辛亥 & $28\pi/15$ & $0.9135-0.4067i$ \\
+$29$ & 桑柘木   & 壬子、癸丑 & $29\pi/15$ & $0.9781-0.2079i$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{\texorpdfstring{六十甲子（$T=60$）}{六十甲子（T=60）}}
+
+\begin{definition}[六十甲子相位算子]\label{def:ganzhi_operators}
+干支周期 $T=60=4 \times 3 \times 5$，位宽 $W=60$，带宽 $\Delta\theta=\pi/30$。群结构 $C_{60} \cong C_4 \times C_3 \times C_5$，张量形状 $4 \times 3 \times 5$。由天干 $\circledast$ 地支周期卷积生成。
+\end{definition}
+
+\begingroup
+\centering
+\begin{longtable}{>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{3.5cm}}
+\toprule
+$k$ & 干支 & 五行 & 相位 $\theta_k$ & 算子 $\mathcal{O}_k^{(60)}$ \\
+\midrule
+\endfirsthead
+
+\multicolumn{5}{c}{\small（续）} \\
+\toprule
+$k$ & 干支 & 五行 & 相位 $\theta_k$ & 算子 $\mathcal{O}_k^{(60)}$ \\
+\midrule
+\endhead
+
+\midrule
+\multicolumn{5}{r}{\small（续下页）} \\
+\endfoot
+
+\bottomrule
+\endlastfoot
+
+$0$ & 甲寅 & 阳木（始） & $0$ & $1+0i$ \\
+$1$ & 乙卯 & 阴木 & $\pi/30$ & $0.9945+0.1045i$ \\
+$2$ & 丙辰 & 阳土 & $\pi/15$ & $0.9781+0.2079i$ \\
+$3$ & 丁巳 & 阴火 & $\pi/10$ & $0.9511+0.3090i$ \\
+$4$ & 戊午 & 阳火 & $2\pi/15$ & $0.9135+0.4067i$ \\
+$5$ & 己未 & 阴土 & $\pi/6$ & $0.8660+0.5i$ \\
+$6$ & 庚申 & 阳金 & $\pi/5$ & $0.8090+0.5878i$ \\
+$7$ & 辛酉 & 阴金 & $7\pi/30$ & $0.7431+0.6691i$ \\
+$8$ & 壬戌 & 阳水 & $4\pi/15$ & $0.6691+0.7431i$ \\
+$9$ & 癸亥 & 阴水 & $3\pi/10$ & $0.5878+0.8090i$ \\
+$10$ & 甲子 & 阳木 & $\pi/3$ & $0.5+0.8660i$ \\
+$11$ & 乙丑 & 阴木 & $11\pi/30$ & $0.4067+0.9135i$ \\
+$12$ & 丙寅 & 阳火 & $2\pi/5$ & $0.3090+0.9511i$ \\
+$13$ & 丁卯 & 阴火 & $13\pi/30$ & $0.2079+0.9781i$ \\
+$14$ & 戊辰 & 阳土 & $7\pi/15$ & $0.1045+0.9945i$ \\
+$15$ & 己巳 & 阴土 & $\pi/2$ & $0+1i$ \\
+$16$ & 庚午 & 阳金 & $8\pi/15$ & $-0.1045+0.9945i$ \\
+$17$ & 辛未 & 阴金 & $17\pi/30$ & $-0.2079+0.9781i$ \\
+$18$ & 壬申 & 阳水 & $3\pi/5$ & $-0.3090+0.9511i$ \\
+$19$ & 癸酉 & 阴水 & $19\pi/30$ & $-0.4067+0.9135i$ \\
+$20$ & 甲戌 & 阳木 & $2\pi/3$ & $-0.5+0.8660i$ \\
+$21$ & 乙亥 & 阴木 & $7\pi/10$ & $-0.5878+0.8090i$ \\
+$22$ & 丙子 & 阳火 & $11\pi/15$ & $-0.6691+0.7431i$ \\
+$23$ & 丁丑 & 阴火 & $23\pi/30$ & $-0.7431+0.6691i$ \\
+$24$ & 戊寅 & 阳土 & $4\pi/5$ & $-0.8090+0.5878i$ \\
+$25$ & 己卯 & 阴土 & $5\pi/6$ & $-0.8660+0.5i$ \\
+$26$ & 庚辰 & 阳金 & $13\pi/15$ & $-0.9135+0.4067i$ \\
+$27$ & 辛巳 & 阴金 & $9\pi/10$ & $-0.9511+0.3090i$ \\
+$28$ & 壬午 & 阳水 & $14\pi/15$ & $-0.9781+0.2079i$ \\
+$29$ & 癸未 & 阴水 & $29\pi/30$ & $-0.9945+0.1045i$ \\
+$30$ & 甲申 & 阳木 & $\pi$ & $-1+0i$ \\
+$31$ & 乙酉 & 阴木 & $31\pi/30$ & $-0.9945-0.1045i$ \\
+$32$ & 丙戌 & 阳火 & $16\pi/15$ & $-0.9781-0.2079i$ \\
+$33$ & 丁亥 & 阴火 & $11\pi/10$ & $-0.9511-0.3090i$ \\
+$34$ & 戊子 & 阳土 & $17\pi/15$ & $-0.9135-0.4067i$ \\
+$35$ & 己丑 & 阴土 & $7\pi/6$ & $-0.8660-0.5i$ \\
+$36$ & 庚寅 & 阳金 & $6\pi/5$ & $-0.8090-0.5878i$ \\
+$37$ & 辛卯 & 阴金 & $37\pi/30$ & $-0.7431-0.6691i$ \\
+$38$ & 壬辰 & 阳水 & $19\pi/15$ & $-0.6691-0.7431i$ \\
+$39$ & 癸巳 & 阴水 & $13\pi/10$ & $-0.5878-0.9511i$ \\
+$40$ & 甲午 & 阳木 & $4\pi/3$ & $-0.5-0.8660i$ \\
+$41$ & 乙未 & 阴木 & $41\pi/30$ & $-0.4067-0.9135i$ \\
+$42$ & 丙申 & 阳火 & $7\pi/5$ & $-0.3090-0.9511i$ \\
+$43$ & 丁酉 & 阴火 & $43\pi/30$ & $-0.2079-0.9781i$ \\
+$44$ & 戊戌 & 阳土 & $22\pi/15$ & $-0.1045-0.9945i$ \\
+$45$ & 己亥 & 阴土 & $3\pi/2$ & $0-1i$ \\
+$46$ & 庚子 & 阳金 & $23\pi/15$ & $0.1045-0.9945i$ \\
+$47$ & 辛丑 & 阴金 & $47\pi/30$ & $0.2079-0.9781i$ \\
+$48$ & 壬寅 & 阳水 & $8\pi/5$ & $0.3090-0.9511i$ \\
+$49$ & 癸卯 & 阴水 & $49\pi/30$ & $0.4067-0.9135i$ \\
+$50$ & 甲辰 & 阳木 & $5\pi/3$ & $0.5-0.8660i$ \\
+$51$ & 乙巳 & 阴木 & $17\pi/10$ & $0.5878-0.8090i$ \\
+$52$ & 丙午 & 阳火 & $26\pi/15$ & $0.6691-0.7431i$ \\
+$53$ & 丁未 & 阴火 & $53\pi/30$ & $0.7431-0.6691i$ \\
+$54$ & 戊申 & 阳土 & $9\pi/5$ & $0.8090-0.5878i$ \\
+$55$ & 己酉 & 阴土 & $11\pi/6$ & $0.8660-0.5i$ \\
+$56$ & 庚戌 & 阳金 & $28\pi/15$ & $0.9135-0.4067i$ \\
+$57$ & 辛亥 & 阴金 & $19\pi/10$ & $0.9511-0.3090i$ \\
+$58$ & 壬子 & 阳水 & $29\pi/15$ & $0.9781-0.2079i$ \\
+$59$ & 癸丑 & 阴水（终） & $59\pi/30$ & $0.9945-0.1045i$ \\
+\end{longtable}
+\endgroup
+
+\subsection{\texorpdfstring{六十四卦（$T=64$）}{六十四卦（T=64）}}
+
+\begin{definition}[六十四卦相位算子]\label{def:liushisigua_operators}
+六十四卦周期 $T=64=8 \times 8$，位宽 $W=64$，带宽 $\Delta\theta=\pi/32$。群结构 $C_8 \times C_8$，张量形状 $8 \times 8$。由八卦 $\times$ 八卦周转圆嵌套生成。
+\end{definition}
+
+\begingroup
+\small
+\centering
+\begin{longtable}{>{\centering\arraybackslash}p{0.8cm}>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{2.8cm}}
+\toprule
+$k$ & 下卦 & 上卦 & 卦名 & 五行 & 相位 $\theta_k$ & 算子 $\mathcal{O}_k^{(64)}$ \\
+\midrule
+\endfirsthead
+
+\multicolumn{7}{c}{\small（续）} \\
+\toprule
+$k$ & 下卦 & 上卦 & 卦名 & 五行 & 相位 $\theta_k$ & 算子 $\mathcal{O}_k^{(64)}$ \\
+\midrule
+\endhead
+
+\midrule
+\multicolumn{7}{r}{\small（续下页）} \\
+\endfoot
+
+\bottomrule
+\endlastfoot
+
+$0$ & 震☳ & 震☳ & 震为雷 & 木（始） & $0$ & $1+0i$ \\
+$1$ & 巽☴ & 震☳ & 雷风恒 & 木 & $\pi/32$ & $0.9952+0.0980i$ \\
+$2$ & 艮☶ & 震☳ & 雷山小过 & 土 & $\pi/16$ & $0.9808+0.1951i$ \\
+$3$ & 离☲ & 震☳ & 雷火丰 & 火 & $3\pi/32$ & $0.9569+0.2903i$ \\
+$4$ & 乾☰ & 震☳ & 雷天大壮 & 金 & $\pi/8$ & $0.9239+0.3827i$ \\
+$5$ & 坤☷ & 震☳ & 雷地豫 & 土 & $5\pi/32$ & $0.8819+0.4714i$ \\
+$6$ & 兑☱ & 震☳ & 雷泽归妹 & 金 & $3\pi/16$ & $0.8315+0.5556i$ \\
+$7$ & 坎☵ & 震☳ & 雷水解 & 水 & $7\pi/32$ & $0.7730+0.6344i$ \\
+$8$ & 震☳ & 巽☴ & 风雷益 & 木 & $\pi/4$ & $0.7071+0.7071i$ \\
+$9$ & 巽☴ & 巽☴ & 巽为风 & 木 & $9\pi/32$ & $0.6344+0.7730i$ \\
+$10$ & 艮☶ & 巽☴ & 风山渐 & 土 & $5\pi/16$ & $0.5556+0.8315i$ \\
+$11$ & 离☲ & 巽☴ & 风火家人 & 火 & $11\pi/32$ & $0.4714+0.8819i$ \\
+$12$ & 乾☰ & 巽☴ & 风天小畜 & 金 & $3\pi/8$ & $0.3827+0.9239i$ \\
+$13$ & 坤☷ & 巽☴ & 风地观 & 土 & $13\pi/32$ & $0.2903+0.9569i$ \\
+$14$ & 兑☱ & 巽☴ & 风泽中孚 & 金 & $7\pi/16$ & $0.1951+0.9808i$ \\
+$15$ & 坎☵ & 巽☴ & 风水涣 & 水 & $15\pi/32$ & $0.0980+0.9952i$ \\
+$16$ & 震☳ & 艮☶ & 山雷颐 & 木 & $\pi/2$ & $0+1i$ \\
+$17$ & 巽☴ & 艮☶ & 山风蛊 & 木 & $17\pi/32$ & $-0.0980+0.9952i$ \\
+$18$ & 艮☶ & 艮☶ & 艮为山 & 土 & $9\pi/16$ & $-0.1951+0.9808i$ \\
+$19$ & 离☲ & 艮☶ & 山火贲 & 火 & $19\pi/32$ & $-0.2903+0.9569i$ \\
+$20$ & 乾☰ & 艮☶ & 山天大畜 & 金 & $5\pi/8$ & $-0.3827+0.9239i$ \\
+$21$ & 坤☷ & 艮☶ & 山地剥 & 土 & $21\pi/32$ & $-0.4714+0.8819i$ \\
+$22$ & 兑☱ & 艮☶ & 山泽损 & 金 & $11\pi/16$ & $-0.5556+0.8315i$ \\
+$23$ & 坎☵ & 艮☶ & 山水蒙 & 水 & $23\pi/32$ & $-0.6344+0.7730i$ \\
+$24$ & 震☳ & 离☲ & 火雷噬嗑 & 木 & $3\pi/4$ & $-0.7071+0.7071i$ \\
+$25$ & 巽☴ & 离☲ & 火风鼎 & 木 & $25\pi/32$ & $-0.7730+0.6344i$ \\
+$26$ & 艮☶ & 离☲ & 火山旅 & 土 & $13\pi/16$ & $-0.8315+0.5556i$ \\
+$27$ & 离☲ & 离☲ & 离为火 & 火 & $27\pi/32$ & $-0.8819+0.4714i$ \\
+$28$ & 乾☰ & 离☲ & 火天大有 & 金 & $7\pi/8$ & $-0.9239+0.3827i$ \\
+$29$ & 坤☷ & 离☲ & 火地晋 & 土 & $29\pi/32$ & $-0.9569+0.2903i$ \\
+$30$ & 兑☱ & 离☲ & 火泽睽 & 金 & $15\pi/16$ & $-0.9808+0.1951i$ \\
+$31$ & 坎☵ & 离☲ & 火水未济 & 水 & $31\pi/32$ & $-0.9952+0.0980i$ \\
+$32$ & 震☳ & 乾☰ & 天雷无妄 & 木 & $\pi$ & $-1+0i$ \\
+$33$ & 巽☴ & 乾☰ & 天风姤 & 木 & $33\pi/32$ & $-0.9952-0.0980i$ \\
+$34$ & 艮☶ & 乾☰ & 天山遁 & 土 & $17\pi/16$ & $-0.9808-0.1951i$ \\
+$35$ & 离☲ & 乾☰ & 天火同人 & 火 & $35\pi/32$ & $-0.9569-0.2903i$ \\
+$36$ & 乾☰ & 乾☰ & 乾为天 & 金 & $9\pi/8$ & $-0.9239-0.3827i$ \\
+$37$ & 坤☷ & 乾☰ & 天地否 & 土 & $37\pi/32$ & $-0.8819-0.4714i$ \\
+$38$ & 兑☱ & 乾☰ & 天泽履 & 金 & $19\pi/16$ & $-0.8315-0.5556i$ \\
+$39$ & 坎☵ & 乾☰ & 天水讼 & 水 & $39\pi/32$ & $-0.7730-0.6344i$ \\
+$40$ & 震☳ & 坤☷ & 地雷复 & 木 & $5\pi/4$ & $-0.7071-0.7071i$ \\
+$41$ & 巽☴ & 坤☷ & 地风升 & 木 & $41\pi/32$ & $-0.6344-0.7730i$ \\
+$42$ & 艮☶ & 坤☷ & 地山谦 & 土 & $21\pi/16$ & $-0.5556-0.8315i$ \\
+$43$ & 离☲ & 坤☷ & 地火明夷 & 火 & $43\pi/32$ & $-0.4714-0.8819i$ \\
+$44$ & 乾☰ & 坤☷ & 地天泰 & 金 & $11\pi/8$ & $-0.3827-0.9239i$ \\
+$45$ & 坤☷ & 坤☷ & 坤为地 & 土 & $45\pi/32$ & $-0.2903-0.9569i$ \\
+$46$ & 兑☱ & 坤☷ & 地泽临 & 金 & $23\pi/16$ & $-0.1951-0.9808i$ \\
+$47$ & 坎☵ & 坤☷ & 地水师 & 水 & $47\pi/32$ & $-0.0980-0.9952i$ \\
+$48$ & 震☳ & 兑☱ & 泽雷随 & 木 & $3\pi/2$ & $0-1i$ \\
+$49$ & 巽☴ & 兑☱ & 泽风大过 & 木 & $49\pi/32$ & $0.0980-0.9952i$ \\
+$50$ & 艮☶ & 兑☱ & 泽山咸 & 土 & $25\pi/16$ & $0.1951-0.9808i$ \\
+$51$ & 离☲ & 兑☱ & 泽火革 & 火 & $51\pi/32$ & $0.2903-0.9569i$ \\
+$52$ & 乾☰ & 兑☱ & 泽天夬 & 金 & $13\pi/8$ & $0.3827-0.9239i$ \\
+$53$ & 坤☷ & 兑☱ & 泽地萃 & 土 & $53\pi/32$ & $0.4714-0.8819i$ \\
+$54$ & 兑☱ & 兑☱ & 兑为泽 & 金 & $27\pi/16$ & $0.5556-0.8315i$ \\
+$55$ & 坎☵ & 兑☱ & 泽水困 & 水 & $55\pi/32$ & $0.6344-0.7730i$ \\
+$56$ & 震☳ & 坎☵ & 水雷屯 & 木 & $7\pi/4$ & $0.7071-0.7071i$ \\
+$57$ & 巽☴ & 坎☵ & 水风井 & 木 & $57\pi/32$ & $0.7730-0.6344i$ \\
+$58$ & 艮☶ & 坎☵ & 水山蹇 & 土 & $29\pi/16$ & $0.8315-0.5556i$ \\
+$59$ & 离☲ & 坎☵ & 水火既济 & 火 & $59\pi/32$ & $0.8819-0.4714i$ \\
+$60$ & 乾☰ & 坎☵ & 水天需 & 金 & $15\pi/8$ & $0.9239-0.3827i$ \\
+$61$ & 坤☷ & 坎☵ & 水地比 & 土 & $61\pi/32$ & $0.9569-0.2903i$ \\
+$62$ & 兑☱ & 坎☵ & 水泽节 & 金 & $31\pi/16$ & $0.9808-0.1951i$ \\
+$63$ & 坎☵ & 坎☵ & 坎为水 & 水（终） & $63\pi/32$ & $0.9952-0.0980i$ \\
+\end{longtable}
+\endgroup
+
+\section{周期卷积在易经符号系统中的应用}
+
+\section{周期体系张量结构总表}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2.5cm}}
+\toprule
+符号体系 & $T$ & 质因数分解 & 群结构 & 张量形状 & 嵌套生成 \\
+\midrule
+太极 & $1$ & $1$ & $C_1$ & $1$ & 基础 \\
+阴阳 & $2$ & $2$ & $C_2$ & $2$ & 基础 \\
+三才 & $3$ & $3$ & $C_3$ & $3$ & 基础 \\
+四象 & $4$ & $2^2$ & $C_4$ & $4$ & 阴阳 $\times$ 阴阳 \\
+五行 & $5$ & $5$ & $C_5$ & $5$ & 基础 \\
+七政 & $7$ & $7$ & $C_7$ & $7$ & 基础 \\
+八卦 & $8$ & $2^3$ & $C_8$ & $8$ & 阴阳 $\times$ 四象 \\
+天干 & $10$ & $2 \times 5$ & $C_2 \times C_5$ & $2 \times 5$ & 阴阳 $\times$ 五行 \\
+地支 & $12$ & $4 \times 3$ & $C_4 \times C_3$ & $4 \times 3$ & 四象 $\times$ 三才 \\
+二十四节气 & $24$ & $8 \times 3$ & $C_8 \times C_3$ & $8 \times 3$ & 八卦 $\times$ 三才 \\
+三十纳音 & $30$ & $2 \times 3 \times 5$ & $C_2 \times C_3 \times C_5$ & $2 \times 3 \times 5$ & 阴阳 $\times$ 三才 $\times$ 五行 \\
+六十甲子 & $60$ & $4 \times 3 \times 5$ & $C_4 \times C_3 \times C_5$ & $4 \times 3 \times 5$ & 天干 $\circledast$ 地支 \\
+六十四卦 & $64$ & $8 \times 8$ & $C_8 \times C_8$ & $8 \times 8$ & 八卦 $\times$ 八卦 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{remark}[两大表格的数学定位]
+“十三符号体系相位算子表”是定义 \ref{def:PPO_yijing} 与定义 \ref{def:tensor_representation_yijing} 的逐周期实例化：每个 $T$ 的相位算子 $\mathcal{O}_k^{(T)} = e^{i2\pi k/T}$ 与其符号、五行、张量索引的对应关系，是该周期循环群 $C_T$ 的完整元素表。“周期体系张量结构总表”汇总十三符号体系的质因数分解、群结构、张量形状与嵌套生成来源，是定理 \ref{thm:cyclic_direct_product_yijing} 与命题 \ref{prop:irrep_tensor_product_yijing} 的系统化索引。两张表不承载独立定理，其数学定位是把正文的群表示论与表示论结论落地为可查表的符号对应。
+\end{remark}
+
+\section{大运：干支在十年尺度上的逼近复制}
+\label{sec:dayun_yijing}
+
+\begin{remark}[本节定位：接入「周期系统」章五步接口]\label{rem:dayun_positioning_yijing}
+大运是传统命理学中用于刻画个体长期运势的十年一步序列。本节不把它当作新的天文周期，而是把它刻画为\textbf{本章已建立的六十甲子结构在十年尺度上的逼近复制}。具体接入「周期系统」章的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把大运序列化为 $C_{60}$ 上的离散动力系统，引用 \cref{thm:ps_periodicity_decision} 判定其周期类型；
+    \item \textbf{构建}：由大运干支序列构建振幅级数、频率级数、相位级数，组装为大运周转圆组；
+    \item \textbf{调节}：用起运岁数、方向选择与残差能量下降动态调节大运周转圆组；
+    \item \textbf{卷积}：在大运周转圆组上引入振幅卷积、相位卷积、频率卷积，并与本章的周期卷积框架衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成大运周期诊断流程。
+\end{enumerate}
+本节使用本章已有的工具：周期相位算子 $\mathcal O_k^{(T)}$（\cref{def:PPO_yijing}）、周转圆嵌套生成规则（\cref{def:epicycle_nesting_rule}）、六十甲子的周期卷积生成（\cref{thm:ganzhi_periodic_convolution}）。同时引用历法章关于节气相位（\cref{def:jieqi_zhongqi_dingyue}）与定长（\cref{def:fixed_length}）的结论。
+\end{remark}
+
+\begin{remark}[本节七主题导引]\label{rem:dayun_seven_themes}
+平移——大运序列沿六十甲子的定序推进（\cref{def:dayun_sequence_yijing}）；
+缩放——大运的十倍尺度复制（$10$ 年一步，\cref{thm:dayun_three_periods_yijing}）；
+旋转——方向 $\sigma=\pm 1$ 与流年相对相位的旋进（\cref{prop:dayun_liunian_phase_yijing}）；
+守恒——年干阴阳 $\epsilon$、步长 $L$ 与月柱 $M_0$ 的三重守恒（\cref{thm:dayun_conservation_yijing}）；
+对称——阳男阴女与阴男阳女的方向对偶（\cref{prop:dayun_direction_duality_yijing}）；
+闭合——大运序列以 $60$ 步（$600$ 年）为周期的闭合（\cref{thm:dayun_periodicity_yijing}）；
+周期——十年步长、百年天干周期、百二十年地支周期、六百年干支周期（\cref{thm:dayun_three_periods_yijing}）。
+\end{remark}
+
+\subsection{干支作为有理逼近的基本机制}
+
+\begin{definition}[天干周期与地支周期]\label{def:stem_branch_period_yijing}
+\textbf{天干}为十位符号，周期 $T_{\text{干}}=10$；
+\textbf{地支}为十二位符号，周期 $T_{\text{支}}=12$。
+\textbf{干支}为天干与地支的同步配对，其周期为
+\[
+T_{\text{干支}}=\operatorname{lcm}(T_{\text{干}},T_{\text{支}})=\operatorname{lcm}(10,12)=60.
+\]
+记为循环群 $C_{60}=C_{10}\times C_{12}/\sim$，其中等价关系 $\sim$ 由奇偶同步条件 $(a,b)\sim(a',b')$ 当且仅当 $a-b\equiv a'-b'\pmod 2$ 给出。
+\end{definition}
+
+\begin{proposition}[干支作为 $C_{10}$ 与 $C_{12}$ 的纤维积]\label{prop:ganzhi_fibre_product_yijing}
+循环群 $C_{60}$ 同构于 $C_{10}$ 与 $C_{12}$ 在奇偶投影下的纤维积：
+\[
+C_{60}\cong\{(a,b)\in C_{10}\times C_{12}\mid a\equiv b\pmod 2\}.
+\]
+\end{proposition}
+
+\begin{proof}
+由中国剩余定理的推广，$C_{10}\times C_{12}$ 的阶为 $120$。奇偶投影 $C_{10}\to C_2$、$C_{12}\to C_2$ 均为满射；纤维积的大小为 $|C_{10}\times C_{12}|/|C_2|=60$。映射 $C_{60}\to$ 纤维积，$n\mapsto(n\bmod 10,n\bmod 12)$，是群同态且为双射，故为同构。
+\end{proof}
+
+\begin{definition}[天文周期的经验值]\label{def:planetary_periods_yijing}
+以下天文周期的取值来自现代观测（单位：年）：
+\[
+\begin{aligned}
+T_J&\approx 11.862 &&(\text{木星公转}),\\
+T_S&\approx 29.457 &&(\text{土星公转}),\\
+T_{JS}&=\frac{T_J T_S}{T_S-T_J}\approx 19.859 &&(\text{木星--土星会合}).
+\end{aligned}
+\]
+\end{definition}
+
+\begin{proposition}[年干支对木星的逼近]\label{prop:year_ganzhi_jupiter_yijing}
+$60$ 年的干支周期对应木星约 $5$ 圈：
+\[
+\frac{60}{T_J}=\frac{60}{11.862}\approx 5.058\approx 5,
+\]
+相对误差约 $1.2\%$。这一逼近是\textbf{岁星纪年}（木星约 $12$ 年绕天一周）的结构性来源：地支 $12$ 是木星周期的整数逼近。
+\end{proposition}
+
+\begin{proof}
+$60/11.862=5.058$，与整数 $5$ 的相对误差为 $(5.058-5)/5=0.0116\approx 1.2\%$。地支周期 $12$ 与木星周期 $T_J\approx 11.862$ 的相对误差为 $1.1\%$，与之同量级。
+\end{proof}
+
+\begin{proposition}[年干支对土木会合的逼近]\label{prop:year_ganzhi_jupiter_saturn_yijing}
+$60$ 年的干支周期对应土木会合约 $3$ 次：
+\[
+\frac{60}{T_{JS}}=\frac{60}{19.859}\approx 3.021\approx 3,
+\]
+相对误差约 $0.7\%$。
+\end{proposition}
+
+\begin{proof}
+$60/19.859=3.021$，与整数 $3$ 的相对误差为 $0.021/3\approx 0.7\%$。
+\end{proof}
+
+\begin{remark}[年干支作为双重逼近]\label{rem:ganzhi_double_approximation_yijing}
+\cref{prop:year_ganzhi_jupiter_yijing} 与 \cref{prop:year_ganzhi_jupiter_saturn_yijing} 揭示：$60$ 年干支周期是对\textbf{木星 $5$ 圈}和\textbf{土木会合 $3$ 次}的双重有理逼近。这两个逼近恰好对应 $T_{\text{干}}=10$ 与 $T_{\text{支}}=12$ 的复合：
+\begin{itemize}
+    \item $T_{\text{支}}=12\approx T_J$（木星周期），$60$ 年内木星约 $5$ 圈；
+    \item $T_{\text{干支}}=60\approx 3\,T_{JS}$（土木会合 $3$ 次）。
+\end{itemize}
+天干周期 $T_{\text{干}}=10$ 的作用是调制 $T_{\text{支}}=12$ 的单一周期，使 $C_{10}\times C_{12}$ 的纤维积给出 $60$ 年的复合节律。这一结构与本章 \cref{thm:ganzhi_periodic_convolution}（六十甲子的周期卷积生成）在代数上一一对应。
+\end{remark}
+
+\subsection{大运的构成要素与十倍尺度复制}
+
+\begin{definition}[大运目标与判定输入]\label{def:dayun_target_yijing}
+一个\textbf{大运目标}由一个四元组刻画：
+\[
+\mathcal D_{\mathrm{D}}=(M_0,\sigma,a_0,L),\qquad L=10\ \text{年},
+\]
+其中 $M_0\in C_{60}$ 为月柱（起点），$\sigma\in\{+1,-1\}$ 为方向，$a_0\ge 0$ 为起运岁数，$L=10$ 为步长。状态空间为循环群 $\mathcal S=C_{60}$，演化映射为
+\[
+\Phi:\mathcal S\to\mathcal S,\qquad \Phi(m)=m+\sigma\pmod{60}.
+\]
+\end{definition}
+
+\begin{definition}[大运序列]\label{def:dayun_sequence_yijing}
+设大运目标的判定输入为 $\mathcal D_{\mathrm{D}}=(M_0,\sigma,a_0,L)$。\textbf{大运序列}定义为
+\[
+M_k=M_0+k\sigma\pmod{60},\qquad k=0,1,2,\dots
+\]
+第 $k$ 步大运对应时间区间 $[a_0+kL,\ a_0+(k+1)L)$。
+\end{definition}
+
+\begin{theorem}[大运的三个基本周期]\label{thm:dayun_three_periods_yijing}
+大运序列具有三个基本周期：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{天干周期}：$T_{\text{干}}^{\mathrm{(D)}}=T_{\text{干}}\cdot L=10\cdot 10=100$ 年；
+    \item \textbf{地支周期}：$T_{\text{支}}^{\mathrm{(D)}}=T_{\text{支}}\cdot L=12\cdot 10=120$ 年；
+    \item \textbf{干支周期}：$T_{\text{干支}}^{\mathrm{(D)}}=T_{\text{干支}}\cdot L=60\cdot 10=600$ 年。
+\end{enumerate}
+其中 $L=10$ 年的步长恰等于天干周期，使大运成为\textbf{年干支在十年尺度上的复制}。
+\end{theorem}
+
+\begin{proof}
+大运天干 $10$ 位，每位对应一步，故天干归位所需步数为 $10$，即 $10\times 10=100$ 年。同理，地支归位需 $12$ 步，即 $120$ 年。干支归位需 $\operatorname{lcm}(10,12)=60$ 步，即 $600$ 年。
+\end{proof}
+
+\begin{proposition}[大运周期性判定定理]\label{thm:dayun_periodicity_decision_yijing}
+设大运目标的判定映射为 $\Phi(m)=m+\sigma\pmod{60}$。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：$\Phi^{60}=\mathrm{id}$，故目标为一致周期大运系统；
+    \item \textbf{判定等价}：$\operatorname{ord}(\Phi)=60$；
+    \item \textbf{逐点判据}：大运序列在 $M_0$ 处的轨道长度为 $60$；
+    \item \textbf{相位无关性}：起运岁数 $a_0$ 只改变序列起点位置，不改变周期。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(A) $\Phi^{60}(m)=m+60\sigma\equiv m\pmod{60}$。
+(B) 若 $\operatorname{ord}(\Phi)=k<60$，则 $60\mid k$（因 $\gcd(\sigma,60)=1$），矛盾。
+(C) 由 (B) 与「周期基础」章 \cref{thm:finite_order_orbit}。
+(D) 由 \cref{def:dayun_sequence_yijing}，$M_k$ 与 $a_0$ 无关。
+\end{proof}
+
+\begin{corollary}[大运的三重天文逼近]\label{cor:dayun_triple_approximation_yijing}
+大运的三个基本周期分别逼近以下天文节律：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{天干周期 $100$ 年} $\approx$ 土木会合 $5$ 次：
+    \[
+    \frac{100}{T_{JS}}=\frac{100}{19.859}\approx 5.036\approx 5,\quad\text{相对误差 }0.7\%;
+    \]
+    \item \textbf{地支周期 $120$ 年} $\approx$ 木星 $10$ 圈：
+    \[
+    \frac{120}{T_J}=\frac{120}{11.862}\approx 10.12\approx 10,\quad\text{相对误差 }1.2\%;
+    \]
+    \item \textbf{干支周期 $600$ 年} $\approx$ 木星 $50$ 圈 $\approx$ 土木会合 $30$ 次：
+    \[
+    \frac{600}{T_J}\approx 50.6\approx 50,\qquad \frac{600}{T_{JS}}\approx 30.2\approx 30,
+    \]
+    相对误差分别为 $1.2\%$ 与 $0.7\%$。
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+逐项计算：
+(i) $100/19.859=5.036$，误差 $0.036/5=0.7\%$。
+(ii) $120/11.862=10.12$，误差 $0.12/10=1.2\%$。
+(iii) $600/11.862=50.58$，误差 $0.58/50=1.2\%$；$600/19.859=30.21$，误差 $0.21/30=0.7\%$。
+\end{proof}
+
+\begin{theorem}[大运与年干支的尺度对偶]\label{thm:dayun_vs_year_ganzhi_yijing}
+大运与年干支在结构上构成尺度对偶：
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+尺度 & 天干周期 & 地支周期 & 干支周期 \\
+\midrule
+年干支 & $10$ & $12$ & $60$ \\
+大运干支 & $100$ & $120$ & $600$ \\
+\midrule
+年干支天文逼近 & 土木会合 $\times 3$（$60$ 年） & 木星 $\times 5$（$60$ 年） & 同左 \\
+大运天文逼近 & 土木会合 $\times 5$（$100$ 年） & 木星 $\times 10$（$120$ 年） & 木星 $\times 50$（$600$ 年） \\
+\bottomrule
+\end{tabular}
+\end{center}
+两列在结构上完全平行：大运的每一步 $10$ 年，正是年干支天干周期 $T_{\text{干}}=10$ 的复制。这一结构与本章 \cref{thm:ganzhi_periodic_convolution} 中六十甲子的周期卷积生成同源。
+\end{theorem}
+
+\begin{proof}
+年干支周期为 $(T_{\text{干}},T_{\text{支}},T_{\text{干支}})=(10,12,60)$，见 \cref{def:stem_branch_period_yijing}。大运以步长 $L=T_{\text{干}}=10$ 年展开，故三个周期各自乘以 $10$，得 $(100,120,600)$。年干支逼近 $(T_J\times 5,\ T_{JS}\times 3)=(59.3,59.6)$，大运干支逼近 $(T_J\times 10,\ T_{JS}\times 5)=(118.6,99.3)$，两者精度同量级（相对误差 $1\%$ 量级）。
+\end{proof}
+
+\begin{example}[大运地支 $120$ 年与木星 $10$ 圈的数值验证]\label{ex:dayun_jupiter_120_yijing}
+$10\times T_J = 10\times 11.862 = 118.62$ 年。大运地支周期 $120$ 年与 $118.62$ 年的差为 $1.38$ 年，相对误差
+\[
+\frac{1.38}{120}\approx 1.15\%.
+\]
+与年干支地支 $12$ 年逼近木星 $11.862$ 年的相对误差 $1.2\%$ 完全同量级。
+\end{example}
+
+\begin{example}[大运天干 $100$ 年与土木会合 $5$ 次的数值验证]\label{ex:dayun_js_100_yijing}
+$5\times T_{JS}=5\times 19.859=99.30$ 年。大运天干周期 $100$ 年与 $99.30$ 年的差为 $0.70$ 年，相对误差
+\[
+\frac{0.70}{100}=0.70\%.
+\]
+\end{example}
+
+\subsection{大运方向的二值性}
+
+\begin{definition}[年干阴阳与性别]\label{def:year_stem_yin_yang_yijing}
+设年柱天干序数 $\epsilon_{\text{stem}}\in\{0,1,\dots,9\}$（甲 $=0$，乙 $=1$，$\dots$，癸 $=9$）。定义年干\textbf{阴阳标记}
+\[
+\epsilon=\begin{cases}1,&\epsilon_{\text{stem}}\in\{0,2,4,6,8\}\ (\text{阳}),\\0,&\epsilon_{\text{stem}}\in\{1,3,5,7,9\}\ (\text{阴}).\end{cases}
+\]
+定义\textbf{性别标记} $\eta\in\{0,1\}$（男 $=1$，女 $=0$）。
+\end{definition}
+
+\begin{definition}[大运方向]\label{def:dayun_direction_yijing}
+大运\textbf{方向} $\sigma\in\{+1,-1\}$ 由 $(\epsilon,\eta)$ 决定：
+\[
+\sigma=2\cdot\mathbb 1_{\{\epsilon=\eta\}}-1=
+\begin{cases}+1,&\epsilon=\eta\ (\text{阳男、阴女，顺排}),\\-1,&\epsilon\neq\eta\ (\text{阴男、阳女，逆排}).\end{cases}
+\]
+\end{definition}
+
+\begin{proposition}[大运方向的对偶性]\label{prop:dayun_direction_duality_yijing}
+大运方向满足：
+\begin{enumerate}[label=(\roman*)]
+    \item $\sigma(\epsilon,1-\eta)=-\sigma(\epsilon,\eta)$；
+    \item $\sigma(1-\epsilon,\eta)=-\sigma(\epsilon,\eta)$；
+    \item $\sigma(1-\epsilon,1-\eta)=\sigma(\epsilon,\eta)$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 若 $\epsilon=\eta$，则 $\epsilon\neq 1-\eta$，得 $\sigma=-1=-\sigma(\epsilon,\eta)$；若 $\epsilon\neq\eta$，则 $\epsilon=1-\eta$，得 $\sigma=+1=-\sigma(\epsilon,\eta)$。(ii)(iii) 同理。
+\end{proof}
+
+\begin{corollary}[大运方向的等价类]\label{cor:dayun_direction_classes_yijing}
+四种情形 $(\epsilon,\eta)\in\{0,1\}^2$ 在 $\sigma$ 下分为两个等价类：
+\[
+\{(1,1),(0,0)\}\xrightarrow{\sigma}+1,\qquad \{(1,0),(0,1)\}\xrightarrow{\sigma}-1.
+\]
+两个等价类在复合对偶 $(\epsilon,\eta)\mapsto(1-\epsilon,1-\eta)$ 下各自封闭。
+\end{corollary}
+
+\begin{proof}
+由 \cref{def:dayun_direction_yijing} 与 \cref{prop:dayun_direction_duality_yijing}(iii) 直接得出。
+\end{proof}
+
+\subsection{起运岁数的量化}
+
+\begin{definition}[起运岁数]\label{def:qiyun_age_yijing}
+设个体出生于时刻 $t_{\text{birth}}$。设 $\Delta d$ 为
+\[
+\Delta d=\begin{cases}t_{\text{next}}-t_{\text{birth}},&\sigma=+1,\\t_{\text{birth}}-t_{\text{prev}},&\sigma=-1,\end{cases}
+\]
+其中 $t_{\text{prev}}$、$t_{\text{next}}$ 为出生前后最近节气的时刻（节气定义见历法章 \cref{def:jieqi_zhongqi_dingyue}）。\textbf{起运岁数}为
+\[
+a_0=\frac{\Delta d}{3}\quad(\text{岁}),
+\]
+按传统量化规则 $3$ 天 $=1$ 岁，$1$ 天 $=4$ 月，$1$ 时辰 $=10$ 天。
+\end{definition}
+
+\begin{proposition}[起运岁数的量化界]\label{prop:qiyun_age_bound_yijing}
+设相邻两个节气的时间间隔为 $\Delta T_{\text{jie}}$，则
+\[
+0\le a_0\le \frac{\Delta T_{\text{jie}}}{3}.
+\]
+在平气法下 $\Delta T_{\text{jie}}=T_{\text{trop}}/24\approx 15.2184$ 天（历法章 \cref{def:fixed_length}），故 $a_0\le 5.07$ 岁。
+\end{proposition}
+
+\begin{proof}
+由 \cref{def:qiyun_age_yijing}，$0\le\Delta d\le\Delta T_{\text{jie}}$。代入 $a_0=\Delta d/3$ 即得。
+\end{proof}
+
+\begin{remark}[起运岁数的相位解释]\label{rem:qiyun_phase_yijing}
+起运岁数 $a_0=\Delta d/3$ 是\textbf{相位偏移}——它度量了出生时刻在节气周期中的相对位置。$a_0$ 不改变大运序列的周期性（\cref{thm:dayun_periodicity_decision_yijing}(D)），只改变序列起点在时间轴上的平移。这与本章周期相位算子 $\mathcal O_k^{(T)}=e^{i2\pi k/T}$ 的相位编码框架一致（\cref{def:PPO_yijing}）。
+\end{remark}
+
+\begin{example}[起运岁数的数值计算]\label{ex:qiyun_calc_yijing}
+设个体出生于立春后 $9$ 天，$\sigma=+1$。则 $a_0=9/3=3$ 岁，大运序列从 $3$ 岁开始。
+\end{example}
+
+\subsection{大运序列的周期结构与天文含义}
+
+\begin{theorem}[大运序列的周期结构]\label{thm:dayun_periodicity_yijing}
+设大运序列 $M_k=M_0+k\sigma\pmod{60}$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{代数周期}：$M_{k+60}=M_k$ 对所有 $k\in\mathbb Z$ 成立；
+    \item \textbf{时间周期}：$60\times 10=600$ 年；
+    \item \textbf{单轨道性}：$C_{60}$ 在大运平移群 $\langle\Phi\rangle$ 下为单轨道；
+    \item \textbf{无守恒量}：任何 $C_{60}$ 上关于大运平移的不变量必为常值。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 由 $\Phi^{60}=\mathrm{id}$（\cref{thm:dayun_periodicity_decision_yijing}(A)）。
+(ii) 每步 $10$ 年，$60$ 步 $600$ 年。
+(iii) $C_{60}$ 在 $\Phi$ 下为单轨道。
+(iv) 由「周期基础」章 \cref{thm:period_not_imply_conservation}，单轨道系统中守恒量必为常值。
+\end{proof}
+
+\begin{remark}[$600$ 年周期作为天文逼近的联合锁定]\label{rem:dayun_600_year_yijing}
+由 \cref{thm:dayun_three_periods_yijing} 与 \cref{cor:dayun_triple_approximation_yijing}，$600$ 年的大运周期同时逼近：
+\begin{itemize}
+    \item 木星 $50$ 圈：$50\times 11.862=593.1$ 年，相对误差 $1.2\%$；
+    \item 土星 $20$ 圈：$20\times 29.457=589.14$ 年，相对误差 $1.8\%$；
+    \item 土木会合 $30$ 次：$30\times 19.859=595.77$ 年，相对误差 $0.7\%$。
+\end{itemize}
+这三个天文节律在 $600$ 年尺度上被同时逼近——这是大运周期结构的深层天文含义。它解释了为什么 $60$ 步 $\times$ $10$ 年这个看似人为的构造，在传统历法体系中具有长期稳定性和经验价值。
+\end{remark}
+
+\begin{example}[大运序列的周期闭合实例]\label{ex:dayun_period_closure_yijing}
+设 $M_0=$「甲寅」（序数 $0$），$\sigma=+1$。第 $60$ 步大运 $M_{60}=M_0+60\equiv 0\pmod{60}$，回到甲寅。序列经 $600$ 年闭合。这与本章六十甲子循环（\cref{thm:ganzhi_periodic_convolution}）的周期闭合一致。
+\end{example}
+
+\subsection{大运与流年的相对相位}
+
+\begin{definition}[流年]\label{def:liunian_yijing}
+\textbf{流年}指具体年份的年柱。设起运岁数 $a_0$，第 $t$ 年（$t\ge a_0$）的流年为
+\[
+N_t=N_{a_0}+(t-a_0)\pmod{60}.
+\]
+\end{definition}
+
+\begin{proposition}[大运与流年的相对相位]\label{prop:dayun_liunian_phase_yijing}
+设起运年年柱 $N_{a_0}$，月柱 $M_0$。则第 $k$ 步大运与流年的相对相位为
+\[
+\Delta_k=N_{a_0+kL}-M_k\equiv (N_{a_0}-M_0)+k(L-\sigma)\pmod{60},
+\]
+其中 $L=10$。特别地：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{顺排}（$\sigma=+1$）：$\Delta_k\equiv\Delta_0+9k\pmod{60}$；
+    \item \textbf{逆排}（$\sigma=-1$）：$\Delta_k\equiv\Delta_0+11k\pmod{60}$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+第 $k$ 步大运起点对应年龄 $a_0+kL$，流年为 $N_{a_0+kL}=N_{a_0}+kL\pmod{60}$。相减得 $\Delta_k\equiv N_{a_0}-M_0+k(L-\sigma)\pmod{60}$。代入 $L=10$、$\sigma=\pm 1$ 即得。
+\end{proof}
+
+\begin{corollary}[大运--流年相对相位的周期]\label{cor:dayun_liunian_period_yijing}
+相对相位 $\Delta_k$ 的周期为 $T_\Delta=60/\gcd(L-\sigma,60)$。对于 $\sigma=+1$（$L-\sigma=9$，$\gcd(9,60)=3$），$T_\Delta=20$ 步；对于 $\sigma=-1$（$L-\sigma=11$，$\gcd(11,60)=1$），$T_\Delta=60$ 步。
+\end{corollary}
+
+\begin{proof}
+由 \cref{prop:dayun_liunian_phase_yijing}，$\Delta_k$ 是 $C_{60}$ 上步长 $(L-\sigma)$ 的平移序列，周期为 $60/\gcd(L-\sigma,60)$（「周期基础」章 \cref{lem:order_cyclic}）。
+\end{proof}
+
+\begin{remark}[顺排与逆排相位周期的不对称性]\label{rem:dayun_asymmetry_yijing}
+顺排的大运--流年相位周期为 $20$ 步（$200$ 年），逆排为 $60$ 步（$600$ 年）。这一不对称性源于 $\gcd(9,60)=3$ 而 $\gcd(11,60)=1$——$9$ 与 $60$ 有公因子，$11$ 与 $60$ 互素。它解释了传统上顺排与逆排在流年耦合上的结构性差异。
+\end{remark}
+
+\begin{example}[大运--流年相位闭合的具体计算]\label{ex:dayun_liunian_closure_yijing}
+设 $M_0=$「甲寅」（序数 $0$），$N_{a_0}=$「丙寅」（序数 $12$），$\sigma=+1$，$a_0=3$。则
+\[
+\Delta_0\equiv 2-50\equiv 12\pmod{60}.
+\]
+相对相位以步长 $9$ 递增：$\Delta_1=21$，$\Delta_2=30$，$\Delta_3=39$，$\Delta_4=48$，$\Delta_5=57$，$\dots$。由 \cref{cor:dayun_liunian_period_yijing}，$T_\Delta=20$，即 $20$ 步（$200$ 年）后相位闭合。
+\end{example}
+
+\subsection{大运系统的守恒量}
+
+\begin{theorem}[大运系统的三个不变量]\label{thm:dayun_conservation_yijing}
+大运系统具有三个不变量：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{方向守恒}：$\sigma\in\{+1,-1\}$ 在整个大运序列中不变；
+    \item \textbf{步长守恒}：$L=10$ 年在整个大运序列中不变；
+    \item \textbf{起点守恒}：$M_0\in C_{60}$ 是序列锚点，可反向唯一确定。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 由 \cref{def:dayun_direction_yijing}，$\sigma$ 由 $(\epsilon,\eta)$ 唯一确定。
+(ii) 由 \cref{def:dayun_sequence_yijing}，$L=10$ 为固定参数。
+(iii) 给定 $(\sigma,a_0)$ 与序列 $\{M_k\}$，$M_0$ 由 $k=0$ 直接读出。
+\end{proof}
+
+\subsection{大运周转圆组的构建与调节}
+
+\begin{definition}[大运振幅级数、频率级数、相位级数]\label{def:dayun_series_yijing}
+设大运序列在 $C_{60}$ 上的序数为 $\{m_k\}$。若
+\[
+m_k=\sum_{j}A_j e^{i(\omega_j k+\phi_j)}+\varepsilon_k,
+\]
+则称 $\mathcal A_m(k)=\sum_j A_j e^{ijk}$、$\mathcal F_m(s)=\sum_j\omega_j s^j$、$\mathcal P_m(k)=\sum_j e^{i(jk+\phi_j)}$ 为大运序列的振幅级数、频率级数与相位级数。
+\end{definition}
+
+\begin{definition}[大运周转圆组]\label{def:dayun_epicycle_group_yijing}
+大运目标的\textbf{周转圆组}为
+\[
+\mathfrak E_{\mathrm{D}}=\{(A_j,\omega_j,\phi_j)\}_{j\in\mathbb Z},
+\]
+其叠加为大运周期级数 $m_k=\sum_j A_j e^{i(\omega_j k+\phi_j)}$。这一表述与本章的周转圆嵌套生成规则（\cref{def:epicycle_nesting_rule}）一致。
+\end{definition}
+
+\begin{proposition}[大运序列的傅里叶展开]\label{prop:dayun_fourier_yijing}
+设大运序列在 $C_{60}$ 上取序数值，则其 $60$ 点 DFT 为
+\[
+\hat m_j=\frac{1}{60}\sum_{k=0}^{59}m_k e^{-i2\pi jk/60},\qquad j=0,1,\dots,59,
+\]
+且 $m_k=\sum_{j=0}^{59}\hat m_j e^{i2\pi jk/60}$。
+\end{proposition}
+
+\begin{proof}
+由 \cref{thm:dayun_periodicity_yijing}(i)，$\{m_k\}$ 是周期为 $60$ 的有限序列。由离散傅里叶级数标准结论，$60$ 点 DFT 给出上述分解。
+\end{proof}
+
+\begin{definition}[大运周转圆组的动态调节]\label{def:dayun_adaptive_yijing}
+设当前周转圆组为 $\mathfrak E^{(j)}$，残差 $r^{(j)}=m-m^{(j)}$。动态调节包括：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若 $\|r^{(j)}\|^2>\delta$，则依残差周期图峰值新增一个周转圆；
+    \item \textbf{参数调节}：对已有参数按正则化最小二乘更新。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[大运动态调节的单调性与收敛性]\label{prop:dayun_adaptive_convergence_yijing}
+按 \cref{def:dayun_adaptive_yijing}(i) 加入残差主频分量后，残差能量单调不增；若目标为长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值有限周期序列}且 $\delta=0$（本章 $T_0=60$），则动态调节在至多 $\lfloor 60/2\rfloor+1=31$ 步后残差为零（若序列为\textbf{复值}，则相应步数为至多 $60$ 步）。
+\end{proposition}
+
+\begin{proof}
+由正交分解，$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{被移出分量}\|^2$。长度 $60$ 的\textbf{实值}有限周期序列其 DFT 在 $31$ 个谐波（含常数项）上完备；\textbf{复值}序列则需 $60$ 个分量。
+\end{proof}
+
+\subsection{大运卷积}
+
+\begin{definition}[大运振幅卷积、相位卷积与频率卷积]\label{def:dayun_convolution_yijing}
+设两个大运周转圆组为 $\mathfrak E=\{(A_n,\omega_n,\phi_n)\}$、$\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}$。定义：
+\[
+\mathbb A_{mn}=A_nB_m,\quad \mathbb P_{mn}=e^{i(\phi_n-\psi_m)},\quad \mathbb F_{mn}=\omega_n\nu_m,\quad \mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}.
+\]
+\end{definition}
+
+\begin{proposition}[大运与流年的相位卷积]\label{prop:dayun_liunian_convolution_yijing}
+大运序列与流年序列的相位卷积 $\mathbb P_{kt}=e^{i(\phi_k^M-\phi_t^N)}$ 给出两者的相对相位，其辐角即为 $\Delta_k$ 对应的相位，度量了大运--流年耦合的强度。这与本章的周期卷积框架（\cref{def:PPO_periodic_convolution}）一致。
+\end{proposition}
+
+\begin{proof}
+由 \cref{def:dayun_convolution_yijing} 与 \cref{prop:dayun_liunian_phase_yijing} 直接得出。
+\end{proof}
+
+\subsection{与离散采样、调和分析、时序分析的整合}
+
+\begin{definition}[大运周期诊断流程]\label{def:dayun_diagnosis_yijing}
+对给定大运系统进行诊断：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{周期判定}：验证大运序列的周期为 $60$ 步（\cref{thm:dayun_periodicity_yijing}）；
+    \item \textbf{方向诊断}：由 $(\epsilon,\eta)$ 计算 $\sigma$（\cref{def:dayun_direction_yijing}）；
+    \item \textbf{起运诊断}：由 $\Delta d/3$ 计算 $a_0$（\cref{def:qiyun_age_yijing}）；
+    \item \textbf{相位诊断}：计算大运--流年相对相位 $\Delta_k$（\cref{prop:dayun_liunian_phase_yijing}）；
+    \item \textbf{天文逼近诊断}：验证三个周期 $100$、$120$、$600$ 年对木星与土木会合的逼近（\cref{cor:dayun_triple_approximation_yijing}）。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[大运周期诊断流程与三章接口]\label{thm:dayun_diagnosis_integration_yijing}
+\cref{def:dayun_diagnosis_yijing} 的五个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}（起运岁数量化是连续时间到离散岁月的采样）；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}（大运序列的 DFT 分解）；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}（大运--流年相位峰的显著性检验）。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 起运岁数 $a_0=\Delta d/3$ 是连续时间到离散岁月的采样。(ii) 大运序列周期 $60$，其 DFT 属调和分析工具。(iii) 大运--流年相对相位在周期内形成谱峰，可由周期图与 Fisher 检验判定显著性。
+\end{proof}
+
+\begin{remark}[大运系统的周期数学本质]\label{rem:dayun_math_essence_yijing}
+大运系统的周期数学本质总结为：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{起点} $M_0$：月柱，由节气相位与年干共同确定（历法章 \cref{def:jieqi_zhongqi_dingyue}、\cref{def:year_stem_yin_yang_yijing}）；
+    \item \textbf{方向} $\sigma$：由年干阴阳 $\epsilon$ 与性别 $\eta$ 的二值对偶决定（\cref{def:dayun_direction_yijing}）；
+    \item \textbf{相位偏移} $a_0$：起运岁数，由出生日到节气的天数按 $3$ 天 $=1$ 岁的量化规则给出（\cref{def:qiyun_age_yijing}）；
+    \item \textbf{序列} $M_k=M_0+k\sigma$：六十甲子循环上的平移，周期 $60$ 步。
+\end{enumerate}
+大运不是新的天文周期，而是\textbf{年干支对木星与土木会合的有理逼近在十年尺度上的复制}：年干支用 $60$ 年逼近木星 $5$ 圈，大运干支用 $600$ 年逼近木星 $50$ 圈，两者相对误差同量级（$1\%$ 量级）。
+\end{remark}
+
+\begin{remark}[大运与本章其他周期体系的衔接]\label{rem:dayun_relation_to_yijing}
+大运与本章其他周期系统的关系可总结为四个衔接：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{与六十甲子}：大运序列是六十甲子循环（\cref{thm:ganzhi_periodic_convolution}）在 $C_{60}$ 上的平移轨道——它不引入新的代数对象，而是把六十甲子的循环结构在一个新时间尺度上重新展开；
+    \item \textbf{与周期相位算子}：大运第 $k$ 步对应周期相位算子 $\mathcal O_k^{(60)}$ 的相位编码（\cref{def:PPO_yijing}），大运方向 $\sigma$ 对应相位旋转的正负号；
+    \item \textbf{与周期卷积}：大运--流年的相对相位是大运周转圆组与流年周转圆组的相位卷积（\cref{prop:dayun_liunian_convolution_yijing}）；
+    \item \textbf{与历法系统}：起运岁数的量化规则（$3$ 天 $=1$ 岁）与历法章的置闰（\cref{thm:calendar_continued_fraction_best}）同属最佳有理逼近框架，但作用对象不同——前者量化的时间到岁月的映射，后者量化的是阴阳合历的整数对。
+\end{enumerate}
+
+\textbf{核心洞察}：大运是年干支对木星与土木会合的有理逼近在十年尺度上的复制。年干支用 $(10,12,60)$ 逼近 $(T_J\times 5,\ T_{JS}\times 3)$，大运干支用 $(100,120,600)$ 逼近 $(T_J\times 50,\ T_{JS}\times 30)$，两个尺度的逼近精度同量级（$1\%$ 量级）。大运的核心贡献是：它把本章建立的六十甲子代数结构从“符号系统”落实为“可验证的天文逼近序列”——步长 $L=T_{\text{干}}=10$ 年正是年干支天干周期的复制。
+\end{remark}
+
+\section*{大运七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 大运对应 \\
+\midrule
+平移 & 大运序列 $M_k=M_0+k\sigma$ 沿六十甲子的定序推进（\cref{def:dayun_sequence_yijing}） \\
+缩放 & 大运的十倍尺度复制：$T_{\text{干}}^{\mathrm{(D)}}=100$ 年、$T_{\text{支}}^{\mathrm{(D)}}=120$ 年、$T_{\text{干支}}^{\mathrm{(D)}}=600$ 年（\cref{thm:dayun_three_periods_yijing}） \\
+旋转 & 大运方向 $\sigma=\pm 1$ 与流年相对相位 $\Delta_k$ 的旋进（\cref{prop:dayun_liunian_phase_yijing}） \\
+守恒 & 方向 $\sigma$、步长 $L$、起点 $M_0$ 的三重守恒（\cref{thm:dayun_conservation_yijing}） \\
+对称 & 阳男阴女与阴男阳女的方向对偶（\cref{prop:dayun_direction_duality_yijing}、\cref{cor:dayun_direction_classes_yijing}） \\
+闭合 & 大运序列以 $60$ 步（$600$ 年）为周期的闭合（\cref{thm:dayun_periodicity_yijing}） \\
+周期 & 三重天文逼近：$100$ 年 $\approx$ 土木会合 $5$ 次、$120$ 年 $\approx$ 木星 $10$ 圈、$600$ 年 $\approx$ 木星 $50$ 圈（\cref{cor:dayun_triple_approximation_yijing}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{remark}[与全书的统一]\label{rem:yijing_book_interface}
+本章建立的易经系统周期结构是周期数学在传统符号体系中的具体实现。核心观察是\textbf{相位即算子}：每个周期的每个相位 $\mathcal{O}_k^{(T)} = e^{i2\pi k/T}$ 都是一个关系算子。阳算子（$\mathcal{O}_0 = 1$）定义合同关系，阴算子（$\mathcal{O}_{T/2} = -1$）定义对冲关系，其余算子定义部分旋转关系。
+
+周转圆嵌套生成规则——外圈每前进一步，内圈旋转一整圈——统一了从基础周期到大周期的生成过程：阴阳 $\times$ 五行 $=$ 天干（$T=10$），四象 $\times$ 三才 $=$ 地支（$T=12$），八卦 $\times$ 八卦 $=$ 六十四卦（$T=64$）。六十甲子由天干与地支的同步推进通过周期卷积生成（\cref{thm:ganzhi_periodic_convolution}）。河图复变函数建立了 $\mathbb{Z}_{10} \cong \mathbb{Z}_2 \times \mathbb{Z}_5$ 的傅里叶分级（\cref{thm:hetu_fourier_decomposition_yijing}），洛书矩阵建立了 $3 \times 3$ 幻方的平移-旋转谱分解（\cref{thm:luoshu_decomposition_yijing}）。两者分别从复分析与线性代数两个角度，将传统符号体系与标准数学工具对接。
+
+\textbf{大运在本章代数结构中的位置}：大运不是新的代数对象，而是六十甲子循环 $C_{60}$ 在十年尺度上的\textbf{时间序列实现}。它把本章建立的抽象相位算子（\cref{def:PPO_yijing}）与周期卷积框架（\cref{thm:ganzhi_periodic_convolution}）落实到可验证的天文逼近序列上：年干支用 $(10,12,60)$ 逼近木星 $5$ 圈与土木会合 $3$ 次（\cref{prop:year_ganzhi_jupiter_yijing}、\cref{prop:year_ganzhi_jupiter_saturn_yijing}），大运干支用 $(100,120,600)$ 逼近木星 $50$ 圈与土木会合 $30$ 次（\cref{cor:dayun_triple_approximation_yijing}），两个尺度的逼近精度同量级（$1\%$ 量级）。这一结构说明：六十甲子循环不仅是一套符号体系，也是一套在 $10$ 年、$60$ 年、$120$ 年、$600$ 年等多个尺度上可被天文观测检验的\textbf{有理逼近序列}。本章的代数框架（相位算子、周转圆嵌套、周期卷积）与大运的时间序列实现，共同构成六十年周期的代数结构与天文内容两个侧面。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 天干（$T=10$）与地支（$T=12$）序列的定序推进，经奇偶同步 $n \equiv m \pmod 2$ 生成六十甲子（\cref{ch20_ganzhi_parity_filter}）；大运序列沿六十甲子的定序推进（\cref{def:dayun_sequence_yijing}） \\
+缩放 & 卦象层级倍增 $2^n$ 嵌套：阴阳 $2^1 \to$ 四象 $2^2 \to$ 八卦 $2^3$，及八卦 $\times$ 八卦 $= 8 \times 8 = 64$（\cref{ex:liushisigua_generation}）；大运的十倍尺度复制（\cref{thm:dayun_three_periods_yijing}） \\
+旋转 & 相位算子 $\mathcal{O}_k^{(T)} = e^{i2\pi k/T}$ 对相位点的旋转 $2\pi k/T$（\cref{def:PPO_yijing}、\cref{prop:PPO_relation_structure}）；洛书旋转子空间（\cref{thm:luoshu_decomposition_yijing}）；大运方向 $\sigma=\pm 1$ 与流年相对相位 $\Delta_k$ 的旋进（\cref{prop:dayun_liunian_phase_yijing}） \\
+平衡 & 八卦到六十四卦生成的组合守恒：独立相位数等于位宽之积 $T_{\text{内}} \times T_{\text{外}}$（\cref{thm:epicycle_nesting_generation}）；洛书对径配平和为 $10$（\cref{prop:luoshu_antipodal_yijing}）；大运方向 $\sigma$、步长 $L$、起点 $M_0$ 的三重守恒（\cref{thm:dayun_conservation_yijing}） \\
+对称 & 阴阳对合对称：阴算子 $\mathcal{O}_{T/2}^{(T)} = -1$ 乘 $-1$ 得反向量，$C_2$ 对合（\cref{prop:PPO_relation_structure}）；洛书对径反对称（\cref{prop:luoshu_antipodal_yijing}）；阳男阴女与阴男阳女的方向对偶（\cref{prop:dayun_direction_duality_yijing}） \\
+闭合 & 六十甲子（$T=60$）与六十四卦（$T=64$）各自回到起点的循环闭合（\cref{thm:ganzhi_periodic_convolution}、\cref{ex:liushisigua_generation}）；大运序列以 $60$ 步（$600$ 年）为周期的闭合（\cref{thm:dayun_periodicity_yijing}） \\
+周期 & 天干 $T=10$、地支 $T=12$、八卦 $T=8$ 等十三符号体系的周期体系；河图复变函数的傅里叶分级（\cref{thm:hetu_fourier_decomposition_yijing}）；洛书矩阵的旋转周期 $\pi/\sqrt{6}$（\cref{cor:luoshu_structure}）；大运三重天文逼近（\cref{cor:dayun_triple_approximation_yijing}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{易经周期性判定定理}（\ref{thm:yijing_periodicity_decision}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 验证\textbf{大运周期性判定定理}（\ref{thm:dayun_periodicity_decision_yijing}）的前提在本章领域对象上成立，并给出一个不满足前提的反例。
+
+    \item 考察\textbf{数量调节的单调性}（\ref{prop:yijing_adaptive_growth}）在参数退化时的行为，说明结论如何随之退化。
+
+    \item 说明\textbf{三参数对应：半径、相位与转速}（\ref{prop:yijing_epicycle_correspondence}）与「周期系统」章相应通用结论的关系（是一致、特例还是需要附加条件）。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{thm:yijing_periodicity_decision}、\ref{thm:dayun_periodicity_decision_yijing}、\ref{prop:yijing_adaptive_growth}、\ref{prop:yijing_epicycle_correspondence}。
+\end{enumerate}
+
+

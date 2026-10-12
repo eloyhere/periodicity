@@ -1,0 +1,1265 @@
+\chapter{历法系统之周期结构}
+\label{chap:calendar-periodic}
+\markboth{历法系统之周期结构}{历法系统之周期结构}
+
+\begin{remark}[本章目标的周期性判定（引用）]\label{rem:calendar_ps_hook}
+本章判定研究目标是否具有周期性、确定其周期类型、以及查找最小正周期时，一律引用「周期系统」章：
+周期性判据见 \cref{thm:ps_periodicity_decision}，
+周期类型判别见 \cref{def:ps_period_type}、\cref{prop:ps_type_discrimination}，
+最小正周期查找见 \cref{def:ps_minimal_period_algorithm}、\cref{thm:ps_minimal_period_correctness}，
+由数据构建周期级数与周转圆组见 \cref{thm:ps_series_reconstruction}、\cref{def:ps_epicycle_group}。
+\end{remark}
+
+\begin{remark}[本章定位：按「周期系统」章五步接口展开]\label{rem:calendar_chapter_positioning}
+历法系统之周期结构研究天文历法中多重周期嵌套与协调的数学表征。本章不另立周期性判据，而是把历法系统接入「周期系统」章规定的五步接口：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{判定}：把干支序列、节气序列、朔望月序列、回归年序列化为离散动力系统，引用 \cref{thm:ps_periodicity_decision} 判定是否具有周期性，并确定周期类型；
+    \item \textbf{构建}：由节气数据、朔望数据、干支数据构建振幅级数、频率级数、相位级数，组装为历法周转圆组；
+    \item \textbf{调节}：用置闰窗口、连分数最优逼近、残差能量下降动态调节历法周转圆组；
+    \item \textbf{卷积}：在历法周转圆组上引入振幅卷积、相位卷积、频率卷积，并与节气相位、朔望相位、干支相位衔接；
+    \item \textbf{整合}：接入「离散采样逼近、同余角与置闰」「调和分析」「时序分析」三章工具链，形成历法周期诊断流程。
+\end{enumerate}
+本章使用的历法与数学知识包括：《淮南子·天文训》与《皇极经世》的建元体系、二十四节气与中气、朔望月、六十甲子、元会运世、连分数与最佳有理逼近、最小公倍数与公度性、置闰误差有界定理、玛雅历法、彝族十月太阳历、古印度阴阳历。
+\end{remark}
+
+\begin{remark}[本章七主题导引]\label{rem:calendar_seven_themes}
+平移——干支序列的定序推进（绝对序列与相对序列的平移变换，\cref{prop:abs_rel_conversion}）；
+缩放——回归年与朔望月的定长标度（\(T_{\text{trop}}=365.2422\) 天、\(T_{\text{syn}}=29.5306\) 天，\cref{def:fixed_length}）；
+旋转——节气在黄道上的旋转分布（相位角与太阳黄经的 \(2\pi\) 轮转，\cref{tab:jieqi_sequence}）；
+平衡——置闰的定序与定长约束（\cref{thm:calendar_stability}）；
+对称——阴阳合历的日月对称（太阳历与太阴历的二元结构，\cref{thm:lunisolar_grammar_unity}）；
+闭合——干支六十周期的闭合（六十甲子循环，\cref{thm:yibu_ganzhi_shift}）；
+周期——回归年（\(365.2422\) 天）、朔望月（\(29.5306\) 天）与六十甲子周期（\cref{def:fixed_length}）。
+\end{remark}
+
+\section{历法目标的周期性判定：接入「周期系统」章第一步}
+\label{sec:calendar_periodicity_decision}
+
+\subsection{历法目标、判定输入与判定映射}
+
+\begin{definition}[历法目标与判定输入]\label{def:calendar_target}
+一个\textbf{历法目标}是指下列对象之一：
+\begin{enumerate}[label=(\roman*)]
+    \item 一个历法单位的定序系统，其状态空间为序列集合 \(\mathcal S=\mathbb Z\)，演化映射为 \(+1\) 推进；
+    \item 一个节气序列或朔望月序列，其状态空间为相位集合；
+    \item 一个干支周期系统，其状态空间为循环群 \(C_{60}\)；
+    \item 一个多周期耦合系统，其状态空间为 \(\mathbb Z_T\times\mathbb Z_S\times\cdots\)。
+\end{enumerate}
+历法目标的\textbf{判定输入}是一个二元组
+\[
+\mathcal D_{\mathrm{L}}=(\mathcal S,\Phi),
+\]
+其中 \(\mathcal S\) 是历法单位集合，\(\Phi:\mathcal S\to\mathcal S\) 是定序推进、节气旋转或干支循环诱导的演化映射。若 \(\mathcal S\) 为有限集，称目标为\textbf{有限历法目标}；若 \(\mathcal S\) 为无限集，称目标为\textbf{无限历法目标}。
+\end{definition}
+
+\begin{definition}[历法判定映射]\label{def:calendar_periodization}
+设历法目标由判定输入 \(\mathcal D_{\mathrm{L}}=(\mathcal S,\Phi)\) 给出。若目标的状态或输出由 \(\Phi\) 的迭代生成，即存在 \(x_0\in\mathcal S\) 使
+\[
+x_t=\Phi^t(x_0),\qquad t\in\mathbb Z,
+\]
+则称 \(\Phi\) 为目标的\textbf{历法判定映射}。此时历法目标化为离散动力系统 \((\mathcal S,\Phi)\)，可直接套用「周期基础」章与「周期系统」章的判据。
+\end{definition}
+
+\begin{theorem}[历法周期性判定定理]\label{thm:calendar_periodicity_decision}
+设历法目标的判定映射为 \(\Phi\)，且 \((\mathcal S,\Phi)\) 为离散动力系统。则：
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{充分判定}：若存在 \(m\in\mathbb N^+\) 使 \(\Phi^m=\mathrm{id}\)，则目标为一致周期历法系统；每条轨道闭合，且轨道长度整除 \(m\)。
+    \item \textbf{判定等价}：目标为一致周期历法系统当且仅当 \(\operatorname{ord}(\Phi)<\infty\)。
+    \item \textbf{逐点判据}：目标在状态 \(x_0\) 处的轨道闭合当且仅当 \(x_0\) 为周期点；此时轨道长度即该点处的周期。
+    \item \textbf{不可省略性}：守恒量与对称群的合取不能替代 \(\operatorname{ord}(\Phi)<\infty\)；准周期历法目标不属于周期历法系统。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:calendar_periodicity_decision} 是「周期系统」章 \cref{thm:ps_periodicity_decision} 的领域实例化：
+只需把判定映射 $f$ 与演化群替换为本章的 $\Phi$，(A) 充分判定、(B) 判定等价、(C) 逐点判据、
+(D) 不可省略性四条即逐条成立。依 \cref{rem:ps_applications_hook} 的约定，此处不再重复展开。
+\end{proof}
+
+\begin{corollary}[历法周期类型]\label{cor:calendar_period_type}
+经 \cref{thm:calendar_periodicity_decision} 判定后，历法目标落入下列类型之一：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平凡周期型}：最小周期 \(m_0=1\)，状态为不动点；
+    \item \textbf{严格周期型}：\(1<m_0<\infty\)，状态严格周期（如六十甲子循环 \(m_0=60\)）；
+    \item \textbf{一致周期型}：\(\operatorname{ord}(\Phi)=m<\infty\)，所有轨道长度整除 \(m\)；
+    \item \textbf{准周期型}：\(\operatorname{ord}(\Phi)=\infty\)，轨道不闭合但在紧致承载结构上稠密（如无置闰的阴阳合历）；
+    \item \textbf{最终周期型}：存在 \(N\)，使 \(t\ge N\) 后目标为周期；
+    \item \textbf{离散周期型}：承载结构为 \(\mathbb Z\)，且归一化周期比 \(\rho=T_x/\Delta x\in\mathbb Q\)。
+    \item \textbf{渐近周期（阻尼）型}：轨道不闭合，但渐近趋于一条闭合轨道或一个不动点，残差按 \(e^{-\kappa t}\) 衰减（见 \cref{def:ps_period_type}(vii)）。
+\end{enumerate}
+其中 (i)--(iii) 与 (vi) 属于周期历法系统；(iv) 不属于周期历法系统，但可用置闰有界逼近工具处理；(v) 只在稳定阶段是周期历法系统；(vii) 与 (iv) 同为极限意义下的类型，不属于周期历法系统，只在稳定阶段可用有界逼近工具处理。
+\end{corollary}
+
+\begin{proof}
+逐条由 \cref{thm:calendar_periodicity_decision} 与「周期系统」章 \cref{def:ps_period_type} 代入历法目标即得。
+\end{proof}
+
+\begin{lemma}[干支序列的周期判定]\label{lem:ganzhi_period}
+设六十甲子序列的状态平移为 \(\Phi:n\mapsto n+1\pmod{60}\)。则：
+\begin{enumerate}[label=(\roman*)]
+    \item \(\Phi\) 是 \(C_{60}\) 上的循环平移，周期为 \(60\)；
+    \item 状态空间 \(C_{60}\) 是单轨道，任何非平凡不变量必为常值；
+    \item 六十干支循环构成 \(C_{60}\) 的忠实作用，\(60\) 为最小正周期。
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(i) \(\Phi^{60}=\operatorname{id}\)，且对任何 \(k<60\)，\(\Phi^k\neq\operatorname{id}\)，故 \(\operatorname{ord}(\Phi)=60\)。
+(ii) \(C_{60}\) 在 \(\Phi\) 下为单轨道，由「周期基础」章 \cref{thm:period_not_imply_conservation}，任何守恒量必为常值。
+(iii) 由 (i)(ii) 即得。
+\end{proof}
+
+\begin{lemma}[节气序列的周期判定]\label{lem:jieqi_period}
+设节气序列的状态平移为 \(\Phi:n\mapsto n+1\pmod{24}\)。则节气序列周期为 \(24\)（一年），二十四节气构成 \(C_{24}\) 的忠实作用。
+\end{lemma}
+
+\begin{proof}
+一年恰含 \(24\) 个节气（定义 \ref{def:jieqi_zhongqi}），故 \(\Phi^{24}=\operatorname{id}\)。若 \(k<24\) 使 \(\Phi^k=\operatorname{id}\)，则第 \(k+1\) 个节气与第 \(1\) 个节气重合，与表 \ref{tab:jieqi_sequence} 中二十四节气两两不同矛盾。故 \(\operatorname{ord}(\Phi)=24\)。
+\end{proof}
+
+\begin{lemma}[朔望月序列的周期判定]\label{lem:synodic_month_period}
+朔望月序列不构成严格周期序列——\(\operatorname{ord}(\Phi)=\infty\)，因为 \(T_{\text{trop}}/T_{\text{syn}}\notin\mathbb Q\)（\textbf{经验观察／研究纲领}，见注 \cref{prop:length_incommensurability}）。朔望月序列属于准周期型，需通过置闰实现有界逼近。
+\end{lemma}
+
+\begin{proof}
+若存在整数 \(p,q\) 使 \(p\,T_{\text{trop}}=q\,T_{\text{syn}}\) 精确成立，则 \(T_{\text{trop}}/T_{\text{syn}}=q/p\in\mathbb Q\)。但按 \cref{prop:length_incommensurability} 的\textbf{经验观察／研究纲领}，现行测量精度下 \(T_{\text{trop}}/T_{\text{syn}}\approx 12.36827\) 与任何分母有界的 \(p/q\) 都不相符，矛盾。故在可测精度内朔望月与回归年不可公度，朔望月序列无严格周期。此处不能写成「由 \cref{prop:length_incommensurability} 可知 \(T_{\text{trop}}/T_{\text{syn}}\) 为无理数」——天文常量之比的无理性不能由测量数据证明。
+\end{proof}
+
+\begin{definition}[历法最小正周期算法]\label{def:calendar_minimal_period_algorithm}
+\textbf{输入}：历法目标样本 \(x_0,\dots,x_{N-1}\)，容差 \(\varepsilon\ge0\)。
+\textbf{输出}：最小正周期 \(T_0\)，或判定“不周期”。
+\textbf{步骤}：
+\begin{enumerate}[label=(\arabic*)]
+    \item 取候选集 \(\mathcal P=\{T\in\mathbb N^+:2T\le N\}\)，按 \(T\) 递增遍历；
+    \item 对每个 \(T\) 计算最大偏差
+    \[
+    E(T)=\max_{0\le n<N-T}\|x_{n+T}-x_n\|;
+    \]
+    \item 输出首个满足 \(E(T)\le\varepsilon\) 的 \(T\) 作为 \(T_0\)；若遍历完毕无解，输出“不周期”；
+    \item 公度性校核：以 \(\rho=T_x/\Delta x\)（\(\rho=p/q\) 既约时 \(T_0=p\)；另记 \(\ell=T_0\Delta x=qT_x\) 为 \(T_0\) 个采样点对应的连续时长）与「离散采样逼近、同余角与置闰」章 \cref{prop:commensurability_periodicity_parallel}、\cref{cor:sampling_period_relation_parallel} 核对 \(T_0\) 与连续周期 \(T_x\) 的换算关系。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[历法最小正周期算法的正确性]\label{thm:calendar_minimal_period_correctness}
+\begin{enumerate}[label=(\roman*)]
+    \item 若样本为严格周期序列且 \(\varepsilon=0\)、\(N\ge2T_0\)，则算法输出其离散基本周期 \(T_0\)。
+    \item 若样本由基本周期为 \(T_x\) 的连续历法目标以采样间隔 \(\Delta x\) 采样得到，且归一化周期比 \(\rho=T_x/\Delta x=p/q\) 既约，则算法输出 \(T_0=p\)。
+    \item 若 \(\rho\notin\mathbb Q\)，则不存在真周期：对任何 \(T\in\mathbb N^+\) 都有 \(E(T)>0\)。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+本章的 \cref{thm:calendar_minimal_period_correctness} 直接沿用「离散采样逼近、同余角与置闰」章的两条结论：
+(i) 由 \cref{def:discrete_fundamental_period}，$T_0$ 为最小正周期故 $E(T_0)=0$，而 $T<T_0$ 时 $E(T)>0$，
+算法按 $T$ 递增遍历，首个满足 $E(T)=0$ 者即 $T_0$；
+(ii)(iii) 分别由 \cref{prop:commensurability_periodicity_parallel}(ii)(iii) 代入即得。完整论证见该章。
+\end{proof}
+
+\begin{example}[干支序列的周期判定实例]\label{ex:calendar_ganzhi_period}
+六十甲子序列从甲子出发（按甲寅为序数 \(0\) 的约定，甲子为序数 \(10\)），经 \cref{lem:ganzhi_period}，最小周期为 \(60\)。状态轨道长度为 \(60\)，即「甲子$\to$乙丑$\to$……$\to$癸亥$\to$甲子」的完整循环。
+\end{example}
+
+\begin{example}[节气序列的周期判定实例]\label{ex:calendar_jieqi_period}
+从立春出发的节气序列，由 \cref{lem:jieqi_period}，最小周期为 \(24\)。轨道长度为 \(24\)，即「立春$\to$雨水$\to$……$\to$大寒$\to$立春」的完整循环。
+\end{example}
+
+\begin{remark}[守恒量不保证周期]\label{rem:calendar_invariant_not_period}
+历法系统的守恒量（如同隔守恒、定长守恒）是周期结构的辅助条件，但不构成充分条件。例如，无置闰的阴阳合历具有节气定长守恒，但朔望月序列与节气序列不可公度，不构成严格周期。历法周期结构的判定必须依赖 \cref{thm:calendar_periodicity_decision} 或 \cref{lem:ganzhi_period}、\cref{lem:jieqi_period} 等判据。
+\end{remark}
+
+\section{历法周期级数与周转圆组的构建：接入「周期系统」章第二步}
+\label{sec:calendar_series_construction}
+
+\begin{definition}[历法振幅级数、频率级数、相位级数]\label{def:calendar_series}
+设历法目标的状态或输出序列为 \(\{z_t\}\)。若其可写为
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+则称
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+分别为历法目标的\textbf{振幅级数}、\textbf{频率级数}与\textbf{相位级数}。三者与「级数与卷积」章 \cref{def:amplitude_series}、\cref{def:frequency_series}、\cref{def:phase_series} 一致。
+\end{definition}
+
+\begin{definition}[历法周转圆组]\label{def:calendar_epicycle_group}
+设历法目标的周期级数由振幅级数 \(\{A_k\}\)、频率级数 \(\{\omega_k\}\) 与相位级数 \(\{\phi_k\}\) 给出。对每个 \(k\) 定义周转圆
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+其集合
+\[
+\mathfrak E_{\mathrm{L}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+称为历法目标的\textbf{周转圆组}。其叠加即历法周期级数
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[由历法数据构建周期级数]\label{thm:calendar_series_reconstruction}
+设历法目标的输出为有限周期序列，周期为 \(N\)。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 输出可展开为离散傅里叶级数
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item 振幅级数由 \(|c_k|\) 给出，相位级数由 \(\arg c_k\) 给出，频率级数由 \(2\pi k/N\) 给出；
+    \item 若输出为节气序列或干支序列，则各级谐波分别对应年周期、半年周期、季周期、月周期等不同时间尺度。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 有限周期序列的离散傅里叶级数是标准结论：基函数 \(\{e^{i2\pi kt/N}\}_{k=0}^{N-1}\) 构成 \(\mathbb C^N\) 的正交基。
+(ii) 由 \(c_k=A_k e^{i\phi_k}\) 直接读出。
+(iii) 对节气序列 \(N=24\)，基频对应年周期，\(k=2\) 谐波对应半年周期，\(k=4\) 谐波对应季周期，\(k=12\) 谐波对应月周期。
+\end{proof}
+
+\begin{definition}[轩辕历法的象征建元与甲寅建元年]\label{def:xuanyuan_epoch}
+轩辕历法以黄帝纪元为纪年原点。设\textbf{象征建元年}为公元前 \(2697\) 年，该年为甲子岁（干支序数 \(10\)）。统一使用天文纪年：
+\[
+Y_0=-2697.
+\]
+甲寅的干支序数为 \(0\)，故\textbf{甲寅建元年}为
+\[
+-2697+50=-2647\quad(\text{天文纪年}),
+\]
+对应公元前 \(2647\) 年（甲寅年）。
+\end{definition}
+
+\begin{definition}[定长：历法单位的固有周期]\label{def:fixed_length}
+\textbf{定长}是历法单位的固有周期长度：
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}}
+\toprule
+历法单位 & 符号 & 定长 & 类型 \\
+\midrule
+回归年 & \(T_{\text{trop}}\) & \(365.2421897\) 平太阳日 & 太阳周期 \\
+朔望月 & \(T_{\text{syn}}\) & \(29.5305889\) 平太阳日 & 太阴周期 \\
+节气间隔 & \(\Delta T_{\text{jieqi}}\) & \(T_{\text{trop}}/24\approx 15.2184\) 天 & 太阳周期（平气法） \\
+中气间隔 & \(\Delta T_{\text{zhongqi}}\) & \(T_{\text{trop}}/12\approx 30.4368\) 天 & 太阳周期（平气法） \\
+节气月 & \(T_{\text{climate}}\) & \(14\)--\(18\) 天 & 太阳周期（定气法，可变） \\
+恒星年 & \(T_{\text{sid}}\) & \(365.2563630\) 平太阳日 & 恒星参考系 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{definition}
+
+\begin{definition}[绝对序列与相对序列]\label{def:absolute_relative_sequence}
+\textbf{绝对序列}是历法单位从轩辕历法建元年起算的连续序号：
+\[
+S_{\text{abs}}(U)\in\mathbb Z.
+\]
+\textbf{相对序列}是历法单位在当前周期内的编号：
+\[
+S_{\text{rel}}(U)\in\{1,2,\dots,T\}.
+\]
+\end{definition}
+
+\begin{proposition}[绝对序列与相对序列的转换]\label{prop:abs_rel_conversion}
+设历法单位 \(U\) 的绝对序列为 \(S_{\text{abs}}(U)\)，相对序列为 \(S_{\text{rel}}(U)\)，当前周期起点的绝对序列为 \(S_{\text{abs}}(P)\)。则
+\[
+S_{\text{rel}}(U)=S_{\text{abs}}(U)-S_{\text{abs}}(P)+1.
+\]
+\end{proposition}
+
+\begin{proof}
+相对序列从 \(1\) 起算，绝对序列从 \(S_{\text{abs}}(P)\) 起算，平移量 \(S_{\text{abs}}(P)-1\) 仅取决于周期起点选择。故 \(S_{\text{rel}}(U)=S_{\text{abs}}(U)-S_{\text{abs}}(P)+1\)。
+\end{proof}
+
+\begin{proposition}[节气的绝对序列计算]\label{prop:jieqi_absolute_sequence}
+第 \(n\) 个节气（从建元年立春起算）的绝对序列为 \(S_{\text{abs}}(J_n)=n\)。对应年份 \(Y(J_n)=Y_0+\lfloor (n-1)/24\rfloor\)。相对序列
+\[
+S_{\text{rel}}(J_n)=\bigl((n-1)\bmod 24\bigr)+1.
+\]
+\end{proposition}
+
+\begin{proof}
+由定义 \ref{def:absolute_relative_sequence}，绝对序列是从建元年起算的连续编号；建元年立春为第 \(1\) 个节气，故第 \(n\) 个节气的绝对序列恰为 \(S_{\text{abs}}(J_n)=n\)。因一个回归年恰含 \(24\) 个节气（定义 \ref{def:jieqi_zhongqi}），第 \(n\) 个节气落在自建元年起的第 \(\lfloor (n-1)/24\rfloor+1\) 个回归年内，故 \(Y(J_n)=Y_0+\lfloor (n-1)/24\rfloor\)。相对序列由 \cref{prop:abs_rel_conversion} 计算：取当前周期起点 \(P\) 为当年立春，其绝对序列为 \(S_{\text{abs}}(P)=24\lfloor (n-1)/24\rfloor+1\)，于是 \(S_{\text{rel}}(J_n)=((n-1)\bmod 24)+1\)。
+\end{proof}
+
+\section{历法周转圆组的动态调节：接入「周期系统」章第三步}
+\label{sec:calendar_adaptive}
+
+\begin{definition}[历法周转圆组的动态调节]\label{def:calendar_adaptive_adjustment}
+设当前历法周转圆组为 \(\mathfrak E^{(j)}\)，部分和
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+残差 \(r^{(j)}=z-z^{(j)}\)。\textbf{动态调节}由两条规则组成：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{数量调节}：若残差能量 \(\|r^{(j)}\|^2>\delta\)，则依残差周期图峰值新增一个周转圆；
+    \item \textbf{参数调节}：对已有周转圆参数按正则化最小二乘或置闰窗口更新。
+\end{enumerate}
+在历法系统中，数量调节对应增加节气项、朔望项或置闰项；参数调节对应调整置闰窗口长度、节气中气配对或干支起始相位。
+\end{definition}
+
+\begin{proposition}[数量调节的单调性]\label{prop:calendar_adaptive_growth}
+按 \cref{def:calendar_adaptive_adjustment}(i) 加入残差主频分量后，残差能量单调不增：
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2.
+\]
+\end{proposition}
+
+\begin{proof}
+由正交分解 \(\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{被移出的分量}\|^2\)，不等式成立。
+\end{proof}
+
+\begin{theorem}[动态调节的收敛性]\label{thm:calendar_adaptive_convergence}
+设历法目标为长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值有限周期序列}且 $\delta=0$。则动态调节在至多 $\lfloor T_0/2\rfloor+1$ 步后残差为零，所得历法周转圆组即目标的精确傅里叶数据；若序列为\textbf{复值}，则相应步数为至多 $T_0$ 步。
+\end{theorem}
+
+\begin{proof}
+长度 $T_0$（$T_0\in\mathbb N$）的\textbf{实值}有限周期序列其离散傅里叶级数在 $\lfloor T_0/2\rfloor+1$ 个谐波（含常数项）上完备；\textbf{复值}序列则需 $T_0$ 个分量。每步按 \cref{prop:calendar_adaptive_growth} 取出残差的一个主频分量且残差能量严格下降，故有限步后残差为零。
+\end{proof}
+
+\begin{remark}[定长的不可通约性（经验观察／研究纲领）]\label{prop:length_incommensurability}
+回归年 \(T_{\text{trop}}\) 与朔望月 \(T_{\text{syn}}\) 是否可通约，取决于两个天文常量之比 \(r=T_{\text{trop}}/T_{\text{syn}}\) 是否为有理数。此处必须声明：「\(r\) 为无理数」是\textbf{经验观察／研究纲领}，不是可证命题——任何有限精度的测量值都给出有理数 \(r\)，其连分数展开必终止；测量精度的提高只会延长该展开，绝不会证明它不终止。因此由连分数「持续延伸」推出无理性是\textbf{无效推理}，天文常量之比的无理性无法由数学证明。
+\textbf{经验假设}：在现行测量精度内，\(r\) 与任何分母有界的 \(p/q\) 都不相符，且其连分数收敛子序列在可测精度内稳定：
+\[
+r=[12;\,2,\,1,\,2,\,1,\,1,\,17,\ldots].
+\]
+在此假设下可以断言：不存在整数 \(p,q\) 使 \(p\,T_{\text{trop}}=q\,T_{\text{syn}}\) 精确成立——这是阴阳合历需要置闰的根本原因。\(r\) 的最佳有理逼近为连分数收敛子 \(235/19=12.36842\ldots\)，误差约 \(0.00015\)，这正给出「十九年七闰」的近似机制。
+\cref{lem:synodic_month_period}（朔望月序列不构成严格周期序列）与 \cref{thm:calendar_continued_fraction_best}（连分数最佳置闰）均以此经验假设为前提，二者是条件结论而非无条件定理。
+\end{remark}
+
+\begin{definition}[置闰窗口与置闰序列]\label{def:calendar_intercalation}
+设周期比 \(\rho=T_{\text{trop}}/T_{\text{syn}}>0\)。一列整数 \(\{N_m\}_{m\in\mathbb N}\) 称为 \(\rho\) 的\textbf{置闰序列}，若
+\[
+N_m\in\{\lfloor\rho\rfloor,\lceil\rho\rceil\},\qquad
+\lim_{M\to\infty}\frac1M\sum_{m=0}^{M-1}N_m=\rho.
+\]
+定义\textbf{累计采样数}
+\[
+S_M=\sum_{m=0}^{M-1}N_m,
+\]
+\textbf{置闰误差}
+\[
+E_M=S_M-M\rho.
+\]
+\end{definition}
+
+\begin{theorem}[置闰误差有界定理]\label{thm:calendar_intercalation_error_bound}
+设 \(\rho>0\)。则三种基本置闰序列满足：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{下置闰}：\(N_m^{\mathrm{floor}}=\lfloor (m+1)\rho\rfloor-\lfloor m\rho\rfloor\)，\(E_M^{\mathrm{floor}}\in(-1,0]\)；
+    \item \textbf{上置闰}：\(N_m^{\mathrm{ceil}}=\lceil (m+1)\rho\rceil-\lceil m\rho\rceil\)，\(E_M^{\mathrm{ceil}}=\lceil M\rho\rceil-M\rho\in[0,1)\)，当 \(M\rho\in\mathbb Z\) 时 \(E_M^{\mathrm{ceil}}=0\)；
+    \item \textbf{平衡置闰}：\(N_m^{\mathrm{round}}=\operatorname{round}((m+1)\rho)-\operatorname{round}(m\rho)\)，\(|E_M^{\mathrm{round}}|\le 1/2\)。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由下置闰定义，
+\[
+S_M^{\mathrm{floor}}=\sum_{m=0}^{M-1}(\lfloor (m+1)\rho\rfloor-\lfloor m\rho\rfloor)=\lfloor M\rho\rfloor,
+\]
+故 \(E_M^{\mathrm{floor}}=\lfloor M\rho\rfloor-M\rho=-\{M\rho\}\in(-1,0]\)。上置闰同理，\(E_M^{\mathrm{ceil}}=\lceil M\rho\rceil-M\rho\in[0,1)\)，当 \(M\rho\in\mathbb Z\)（置闰最理想、无泄漏）时 \(E_M^{\mathrm{ceil}}=0\)。平衡置闰 \(S_M^{\mathrm{round}}=\operatorname{round}(M\rho)\)，由 \(\operatorname{round}\) 的定义 \(|E_M^{\mathrm{round}}|\le 1/2\)。
+\end{proof}
+
+\begin{theorem}[连分数最佳置闰]\label{thm:calendar_continued_fraction_best}
+设 \(\rho>0\) 为无理数，\(\{p_j/q_j\}\) 为其连分数收敛子。则：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{误差上界}：\(|\rho-p_j/q_j|<1/(q_jq_{j+1})<1/q_j^2\)；
+    \item \textbf{最佳逼近性}：若 \(q<q_{j+1}\)，则 \(|q\rho-p|\ge|q_j\rho-p_j|\)；
+    \item \textbf{最优窗口}：置闰窗口的最优长度序列为 \(\{q_j\}\)，累计误差 \(|E_{q_j}|<1/q_{j+1}\)。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i)(ii) 为标准连分数理论结果（见「离散采样逼近、同余角与置闰」章 \cref{thm:continued_fraction_best_approx_parallel}）。
+(iii) 由 (i) 直接得 \(|E_{q_j}|=|q_j\rho-p_j|<1/q_{j+1}\)。由 (ii) 的最佳性，该上界在窗口长度 \(<q_{j+1}\) 中最小。
+\end{proof}
+
+\begin{theorem}[历法置闰的收敛性]\label{thm:calendar_intercalation_convergence}
+设 \(\rho=T_{\text{trop}}/T_{\text{syn}}\)。取置闰窗口为连分数分母序列 \(\{q_j\}\)，则：
+\begin{enumerate}[label=(\roman*)]
+    \item 累计误差 \(|E_{q_j}|<1/q_{j+1}\to 0\)；
+    \item 相对误差 \(|E_{q_j}|/q_j<1/(q_jq_{j+1})\to 0\)；
+    \item 太阳历与太阴历的相位在 \(q_j\) 年尺度上近似闭合。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 \cref{thm:calendar_continued_fraction_best}，\(|E_{q_j}|<1/q_{j+1}\)。\(q_j\to\infty\) 使 \(1/q_{j+1}\to 0\)，故 (i) 成立。(ii) 由 \(q_j\to\infty\) 与 (i) 即得。(iii) 相位闭合等价于 \(|E_{q_j}|\to 0\)，由 (i) 成立。
+\end{proof}
+
+\begin{remark}[动态调节的边界]\label{rem:calendar_adaptive_boundary}
+\cref{thm:calendar_adaptive_convergence} 依赖有限周期序列。对不可公度的阴阳合历，不存在有限周转圆组精确表示，只能作有界逼近。置闰窗口的选取受连分数收敛子限制；置闰不消除不可公度性的代价，只把误差降为有界。
+\end{remark}
+
+\section{历法卷积：接入「周期系统」章第四步}
+\label{sec:calendar_convolution}
+
+\begin{definition}[历法振幅卷积、相位卷积与频率卷积]\label{def:calendar_convolution_types}
+设两个历法周转圆组为
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+定义：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{振幅卷积}：\(\mathbb A_{mn}=A_nB_m\)；
+    \item \textbf{相位卷积}：\(\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}\)；
+    \item \textbf{频率卷积}：\(\mathbb F_{mn}=\omega_n\nu_m\)；
+    \item \textbf{趋势卷积}：\(\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}\)。
+\end{enumerate}
+这与「级数与卷积」章 \cref{def:amplitude_convolution}、\cref{def:phase_convolution}、\cref{def:frequency_convolution}、\cref{def:tendency_convolution} 一致。
+\end{definition}
+
+\begin{theorem}[三类卷积在历法周转圆组上的作用]\label{thm:calendar_convolution_action}
+设两个历法目标的周转圆组分别为 \(\mathfrak E\) 与 \(\mathfrak E'\)。则：
+\begin{enumerate}[label=(\roman*)]
+    \item 振幅卷积只作用于半径；
+    \item 相位卷积只作用于相位；
+    \item 频率卷积只作用于转速；
+    \item 趋势卷积同时保留振幅与相位。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 \cref{def:calendar_convolution_types} 直接读出。
+\end{proof}
+
+\begin{proposition}[六十甲子的周期卷积生成]\label{prop:ganzhi_periodic_convolution}
+天干周期 \(T_{\text{甲}}=10\) 与地支周期 \(T_{\text{支}}=12\) 的周期卷积，经奇偶同步条件 \(n\equiv m\pmod 2\) 筛选后恰给出 \(60\) 个有效相位，构成六十甲子循环。
+\end{proposition}
+
+\begin{proof}
+周期卷积遍历 \(10\times 12=120\) 个 \((n,m)\) 对。阴阳同步条件 \(n\equiv m\pmod 2\) 从 \(120\) 对中筛出 \(5\times 6+5\times 6=60\) 对，恰对应六十甲子。由「周期系统」章 \cref{thm:epicycle_nesting_generation}，这 \(60\) 个相位构成循环群 \(C_{60}\)。
+\end{proof}
+
+\begin{proposition}[节气与朔望的相位卷积]\label{prop:jieqi_synodic_phase_convolution}
+节气序列（周期 \(24\)）与朔望月序列（周期 \(12\) 或 \(13\)）的相位卷积给出节气相位与朔望相位的相对关系。无中气置闰对应相位卷积的特定零点：当某朔望月内节气相位与中气相位的相对差超出窗口时，该月为闰月。
+\end{proposition}
+
+\begin{proof}
+由 \cref{def:jieqi_zhongqi_dingyue}，正常月份恰含一个节气和一个中气，相位差在窗口内。当某月仅含节气不含中气时，节气相位与最近中气相位的差超出窗口，该月为闰月。相位卷积记录了所有节气—朔望相位对的相对关系。
+\end{proof}
+
+\begin{remark}[历法卷积与周期卷积的关系]\label{rem:calendar_convolution_relation}
+历法卷积不是新的卷积运算，而是「级数与卷积」章周期卷积在历法周转圆组上的实例。节气—朔望相位卷积、干支周期卷积、月—年周期卷积分别是相位卷积、频率卷积和振幅卷积在历法中的具体表现。
+\end{remark}
+
+\section{与离散采样、调和分析、时序分析的整合：接入「周期系统」章第五步}
+\label{sec:calendar_integration}
+
+\begin{definition}[历法周期诊断流程]\label{def:calendar_periodic_diagnosis}
+对于给定历法系统，使用周期数学框架进行诊断：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{定序诊断}：计算绝对序列与相对序列，验证平移变换；
+    \item \textbf{定长诊断}：计算回归年、朔望月等定长，验证不可通约性；
+    \item \textbf{置闰诊断}：计算置闰窗口的累计误差，验证置闰误差有界定理；
+    \item \textbf{相位诊断}：计算节气相位、朔望相位、干支相位的相对关系。
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[历法周期诊断流程与三章接口]\label{thm:calendar_diagnosis_integration}
+\cref{def:calendar_periodic_diagnosis} 的四个步骤分别接入：
+\begin{enumerate}[label=(\roman*)]
+    \item 「离散采样逼近、同余角与置闰」章 \cref{def:uniform_sampling_parallel}、\cref{thm:nyquist_shannon_parallel}、\cref{thm:intercalation_leakage_suppression}；
+    \item 「调和分析」章 \cref{def:fourier_series}、\cref{thm:parseval_fourier}、\cref{prop:twelve_to_six}；
+    \item 「时序分析」章 \cref{def:ts_period_detection}、\cref{prop:ts_period_significance}、\cref{def:ts_window_validation}。
+\end{enumerate}
+因此历法周期诊断不是独立方法，而是周期数学统一工具链在历法系统上的应用。
+\end{theorem}
+
+\begin{proof}
+逐条对应：
+(i) 定序诊断需要采样与谱估计；
+(ii) 频率分解与相位核见调和分析章；
+(iii) 周期图峰值、Fisher 检验与窗函数验证见时序分析章。
+故诊断流程由三章工具链合成。
+\end{proof}
+
+\begin{remark}[整合后的操作顺序]\label{rem:calendar_integration_order}
+实际诊断建议顺序为：先判定历法目标是否周期（\cref{thm:calendar_periodicity_decision}）；再构建节气、朔望、干支数据的傅里叶数据与周转圆组（\cref{thm:calendar_series_reconstruction}）；再用置闰窗口与动态调节优化参数（\cref{thm:calendar_adaptive_convergence}、\cref{thm:calendar_continued_fraction_best}）；再作历法卷积与相位关系分析（\cref{prop:ganzhi_periodic_convolution}、\cref{prop:jieqi_synodic_phase_convolution}）；最后按 \cref{def:calendar_periodic_diagnosis} 输出诊断。
+\end{remark}
+
+\section{定序与定长：历法单位的基本属性}
+\label{sec:calendar_sequence_length}
+
+\subsection{绝对序列与相对序列}
+
+\begin{definition}[绝对序列]\label{def:absolute_sequence}
+\textbf{绝对序列}是历法单位从轩辕历法建元年起算的连续序号。设建元年的天文纪年为 \(Y_0=-2697\)（历史纪年公元前 \(2697\) 年，甲子岁）。对于任意历法单位 \(U\)，其\textbf{绝对序列} \(S_{\text{abs}}(U)\) 定义为该单位从建元年起算的连续编号。
+
+绝对序列具有以下性质：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{连续无间断}：不因朝代更替、年号变更或历法改革而中断。
+    \item \textbf{唯一性}：每个历法单位有且仅有一个绝对序列号。
+    \item \textbf{单调递增}：随时间严格单调递增。
+    \item \textbf{跨周期可计算}：任意两个历法单位之间的时间间隔可直接通过序列差计算。
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[相对序列]\label{def:relative_sequence}
+\textbf{相对序列}是历法单位在当前周期内的编号：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{年的相对序列}：从当前年号元年起算。
+    \item \textbf{月的相对序列}：从当年正月（寅月）起算，闰月沿用前一月的序号。
+    \item \textbf{节气的相对序列}：从当年立春起算，立春为 \(1\)，大寒为 \(24\)。
+    \item \textbf{日的相对序列}：从当月朔日（初一）起算。
+\end{enumerate}
+相对序列度量历法单位在当前周期内的位置——其值取决于当前周期的起点选择。
+\end{definition}
+
+\subsection{定长：历法单位的固有周期}
+
+\begin{remark}[节气月的定长范围]\label{rem:climate_fixed_length}
+节气月（Climate）的定长不是固定的，而是在 \(14\)--\(18\) 天范围内变化。这是因为定气法下每个节气月的长度取决于太阳在黄道上的实际运行速度——冬至附近的节气月较短（约 \(14\) 天），夏至附近的节气月较长（约 \(16\)--\(18\) 天）。节气月的可变定长是太阳视运动不均匀性在定气法中的体现。
+\end{remark}
+
+\begin{remark}[不可通约性的数学意义]\label{rem:incommensurability_meaning}
+\cref{prop:length_incommensurability} 的\textbf{经验观察／研究纲领}表明：现行测量精度下太阳历与太阴历的周期不能由任何整数比精确统一。任何阴阳合历方案都只能在这两套周期的最佳有理逼近意义上实现近似协调。逼近的精度由连分数收敛子的误差给出。\(235/19\) 是 \(T_{\text{trop}}/T_{\text{syn}}\) 的高精度逼近，其相对误差约 \(1.2\times 10^{-5}\)，对应 \(19\) 年内的累积误差约 \(0.09\) 天——这为轩辕历法的置闰方案提供了误差控制基础。
+\end{remark}
+
+\section{节气与中气的定序与定长}
+\label{sec:jieqi_zhongqi}
+
+\begin{definition}[节气与中气的区分]\label{def:jieqi_zhongqi}
+二十四节气分为两组：\(12\) 个\textbf{节气}（节）标记各月的开始，\(12\) 个\textbf{中气}标记各月的中点。节气和中气交替排列：立春$\to$雨水$\to$惊蛰$\to$春分$\to$……$\to$小寒$\to$大寒。
+\end{definition}
+
+\begin{table}[htbp]
+    \centering
+    \caption{二十四节气的定序与定长}
+    \label{tab:jieqi_sequence}
+    \begin{tabular}{>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{1.8cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2.5cm}}
+        \toprule
+        相对序号 & 名称 & 类型 & 相位角 & 太阳黄经 & 月序 \\
+        \midrule
+        \(1\) & 立春 & 节气 & \(0\) & \(315^\circ\) & 寅月始 \\
+        \(2\) & 雨水 & 中气 & \(\pi/12\) & \(330^\circ\) & 寅月中 \\
+        \(3\) & 惊蛰 & 节气 & \(\pi/6\) & \(345^\circ\) & 卯月始 \\
+        \(4\) & 春分 & 中气 & \(\pi/4\) & \(0^\circ\) & 卯月中 \\
+        \(5\) & 清明 & 节气 & \(\pi/3\) & \(15^\circ\) & 辰月始 \\
+        \(6\) & 谷雨 & 中气 & \(5\pi/12\) & \(30^\circ\) & 辰月中 \\
+        \(7\) & 立夏 & 节气 & \(\pi/2\) & \(45^\circ\) & 巳月始 \\
+        \(8\) & 小满 & 中气 & \(7\pi/12\) & \(60^\circ\) & 巳月中 \\
+        \(9\) & 芒种 & 节气 & \(2\pi/3\) & \(75^\circ\) & 午月始 \\
+        \(10\) & 夏至 & 中气 & \(3\pi/4\) & \(90^\circ\) & 午月中 \\
+        \(11\) & 小暑 & 节气 & \(5\pi/6\) & \(105^\circ\) & 未月始 \\
+        \(12\) & 大暑 & 中气 & \(11\pi/12\) & \(120^\circ\) & 未月中 \\
+        \(13\) & 立秋 & 节气 & \(\pi\) & \(135^\circ\) & 申月始 \\
+        \(14\) & 处暑 & 中气 & \(13\pi/12\) & \(150^\circ\) & 申月中 \\
+        \(15\) & 白露 & 节气 & \(7\pi/6\) & \(165^\circ\) & 酉月始 \\
+        \(16\) & 秋分 & 中气 & \(5\pi/4\) & \(180^\circ\) & 酉月中 \\
+        \(17\) & 寒露 & 节气 & \(4\pi/3\) & \(195^\circ\) & 戌月始 \\
+        \(18\) & 霜降 & 中气 & \(17\pi/12\) & \(210^\circ\) & 戌月中 \\
+        \(19\) & 立冬 & 节气 & \(3\pi/2\) & \(225^\circ\) & 亥月始 \\
+        \(20\) & 小雪 & 中气 & \(19\pi/12\) & \(240^\circ\) & 亥月中 \\
+        \(21\) & 大雪 & 节气 & \(5\pi/3\) & \(255^\circ\) & 子月始 \\
+        \(22\) & 冬至 & 中气 & \(7\pi/4\) & \(270^\circ\) & 子月中 \\
+        \(23\) & 小寒 & 节气 & \(11\pi/6\) & \(285^\circ\) & 丑月始 \\
+        \(24\) & 大寒 & 中气 & \(23\pi/12\) & \(300^\circ\) & 丑月中 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\section{基于节气与中气定月序}
+\label{sec:dingyue}
+
+\begin{definition}[节气与中气定月序规则]\label{def:jieqi_zhongqi_dingyue}
+\textbf{朔望月的月序由其所含的节气和中气共同决定}：含立春（节气）和雨水（中气）的朔望月为正月（寅月）；含惊蛰和春分的朔望月为二月（卯月）；含清明和谷雨的朔望月为三月（辰月）；含立夏和小满的朔望月为四月（巳月）；含芒种和夏至的朔望月为五月（午月）；含小暑和大暑的朔望月为六月（未月）；含立秋和处暑的朔望月为七月（申月）；含白露和秋分的朔望月为八月（酉月）；含寒露和霜降的朔望月为九月（戌月）；含立冬和小雪的朔望月为十月（亥月）；含大雪和冬至的朔望月为十一月（子月）；含小寒和大寒的朔望月为十二月（丑月）。
+\end{definition}
+
+\begin{theorem}[立春必为寅月，冬至必为子月]\label{thm:lichun_yinyue_dongzhi_haiyue}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{立春必为寅月}：立春是寅月的节气，雨水是寅月的中气。含立春和雨水的朔望月为正月（寅月），立春必定落在寅月内。
+    \item \textbf{冬至必为子月}：冬至是子月的中气，大雪是子月的节气。含大雪和冬至的朔望月为十一月（子月），冬至必定落在子月内。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由定义 \ref{def:jieqi_zhongqi_dingyue}，含立春（节气）和雨水（中气）的朔望月为正月（寅月），含大雪（节气）和冬至（中气）的朔望月为十一月（子月）。由表 \ref{tab:jieqi_sequence}，立春为寅月始（相对序号 \(1\)，太阳黄经 \(315^\circ\)），雨水为寅月中（序号 \(2\)，黄经 \(330^\circ\)），故含立春的朔望月月序为寅月，立春必在寅月内；大雪为子月始（序号 \(21\)，黄经 \(255^\circ\)），冬至为子月中（序号 \(22\)，黄经 \(270^\circ\)），故含冬至的朔望月月序为子月，冬至必在子月内。月序由所含节气与中气的唯一配对决定（见 \cref{prop:dingyue_consistency}），故两条结论均无歧义。
+\end{proof}
+
+\begin{proposition}[只有节气没有中气的朔望月为闰月]\label{prop:wuzhongqi_run}
+\textbf{闰月的判定条件}：一个朔望月内\textbf{只有节气（节）而没有中气}——该月为\textbf{闰月}，沿用前一月的月序号。具体示例：若某朔望月内包含\textbf{立春}（节气）但不包含\textbf{雨水}（中气），则该月为\textbf{闰寅月}——沿用寅月的月序，标记为闰月。下一个包含雨水的朔望月才是正式的正月（寅月）。
+\end{proposition}
+
+\begin{proof}
+定气法下中气间隔不均匀：冬至前后较短（约 \(29.4\) 天），夏至前后较长（约 \(31.5\) 天）。朔望月定长 \(T_{\text{syn}}\approx 29.53\) 天。当两个相邻中气间隔超过 \(29.53\) 天时（夏至前后），可能存在一个朔望月完全不含中气——该月为闰月。当间隔小于 \(29.53\) 天时（冬至前后），可能存在一个朔望月含两个中气——此时以节气定月序，多余中气归入下一月。
+\end{proof}
+
+\begin{proposition}[节气中气定月序与无中气置闰的一致性]\label{prop:dingyue_consistency}
+节气中气定月序规则与无中气置闰规则完全一致：
+\begin{enumerate}[label=(\roman*)]
+    \item 正常月份（含一个节气和一个中气）：月序由节气+中气组合决定。
+    \item 闰月（只有节气没有中气）：沿用前一月的月序。
+    \item 特殊情况（含两个中气）：月序由节气决定，多余中气归入下一月。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+按朔望月所含节气与中气的情形分类讨论：
+\begin{enumerate}[label=(\roman*)]
+\item \textbf{正常月份（恰含一个节气与一个中气）}：由定义 \ref{def:jieqi_zhongqi_dingyue}，节气与中气按表 \ref{tab:jieqi_sequence} 交替配对（立春—雨水、惊蛰—春分、……），月序由该节气+中气组合唯一确定，无中气置闰规则对此月不起作用。
+\item \textbf{闰月（只有节气没有中气）}：此时定义 \ref{def:jieqi_zhongqi_dingyue} 缺少中气配对，无法直接给出月序，故按 \cref{prop:wuzhongqi_run} 沿用前一月月序并标记为闰月；两种规则在该情形下给出同一月序。
+\item \textbf{含两个中气}：由 \cref{prop:wuzhongqi_run} 的证明，当相邻中气间隔短于朔望月定长 \(T_{\text{syn}}\) 时可能出现一个月含两个中气；此时以节气定月序（节气唯一确定该月的归属），多余中气归入下一月。
+\end{enumerate}
+以上三种情形互斥且穷尽一切朔望月，且每一情形下「节气中气定月序」与「无中气置闰」给出的月序一致，故两规则完全一致。
+\end{proof}
+
+\section{数据架构：节气数据与朔望数据的外部加载}
+\label{sec:calendar_data_architecture}
+
+\begin{remark}[本节定位]\label{rem:calendar_data_positioning}
+本节及后续 UML 类图、流程图与接口说明属于\textbf{辅助性实现描述}，用于说明轩辕历法计算的程序化接口与数据结构，不承载定理或证明。本节涉及的数学结论（定序、定长、节气中气定月序、置闰判定）均已在前文各定义、命题与定理中严格给出，这里仅将其映射为工程实现结构。
+\end{remark}
+
+\subsection{外部数据加载原则}
+
+\begin{definition}[外部数据加载原则]\label{def:external_data_loading}
+轩辕历法的计算依赖于两类\textbf{外部加载数据}：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{节气数据}：二十四节气的精确时刻（儒略日数表示）。每条记录包含名称、类型（节气/中气）、太阳黄经和儒略日数。
+    \item \textbf{朔望数据}：每个朔望月的精确朔日时刻（儒略日数表示）。每条记录包含绝对序列号和朔日儒略日数。
+\end{enumerate}
+节气数据和朔望数据是两套独立的外部周期系统——节气数据提供回归年周期的精确采样，朔望数据提供朔望月周期的精确采样。历法计算程序不重新推导天文数据，直接加载使用。
+\end{definition}
+
+\subsection{Venn 图：数据与计算的集合关系}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[>=stealth]
+        \draw[fill=blue!15, opacity=0.6] (-1.5, 0) circle (2.2cm);
+        \draw[fill=red!15, opacity=0.6] (1.5, 0) circle (2.2cm);
+        \draw[fill=green!15, opacity=0.5] (0, 1.8) circle (1.8cm);
+        
+        \node[font=\small\bfseries, blue!60!black] at (-2.8, -0.5) {节气数据};
+        \node[font=\footnotesize, blue!60!black] at (-2.8, -1.0) {外部加载};
+        \node[font=\small\bfseries, red!60!black] at (2.8, -0.5) {朔望数据};
+        \node[font=\footnotesize, red!60!black] at (2.8, -1.0) {外部加载};
+        
+        \node[font=\footnotesize, align=center] at (0, 0.2) {定序计算\\绝对序列\\相对序列};
+        \node[font=\footnotesize, align=center] at (0, 2.6) {定月序\\节气中气定序\\置闰判定};
+        \node[font=\footnotesize, align=center] at (-1.0, 1.4) {节气定长};
+        \node[font=\footnotesize, align=center] at (1.0, 1.4) {朔望定长};
+        
+        \node[font=\footnotesize, text width=6cm, align=center] at (0, -3.3) {节气数据与朔望数据为外部加载的独立集合，\\定序和定月序计算是两者的交集运算};
+    \end{tikzpicture}
+    \caption{Venn 图：节气数据、朔望数据与计算逻辑的集合关系。}
+    \label{fig:venn_data}
+\end{figure}
+
+\subsection{UML 类图：Range 与时间单位继承体系}
+
+\begin{figure}[htbp]
+    \centering
+    \adjustbox{max width=\textwidth}{%
+    \begin{tikzpicture}[>=stealth,
+        classbox/.style={draw, rectangle, minimum width=3.5cm, minimum height=2.0cm, align=left, font=\scriptsize, inner sep=4pt},
+        subclassbox/.style={draw, rectangle, minimum width=2.5cm, minimum height=0.7cm, align=center, font=\scriptsize, inner sep=2pt},
+        arrow/.style={->, thick, >=stealth}]
+        
+        \node[classbox, fill=blue!10] (range) at (0, 0) {
+            \textbf{Range}\\[2pt]
+            \texttt{+ lowest : Number}\\
+            \texttt{+ lower : Number}\\
+            \texttt{+ higher : Number}\\
+            \texttt{+ hiest : Number}\\[2pt]
+            \texttt{+ valid() : Bool}\\
+            \texttt{+ clamp(value) : Number}
+        };
+        
+        \node[classbox, fill=green!10, minimum height=2.5cm] (unit) at (6.5, 0) {
+            \textbf{<<abstract>> TemporalUnit}\\[2pt]
+            \texttt{+ toNanos() : Number}\\
+            \texttt{+ toDays() : Number}\\
+            \texttt{+ length() : Number}\\
+            \texttt{+ isTimeBased() : Bool}\\
+            \texttt{+ isDateBased() : Bool}\\
+            \texttt{+ isFixed() : Bool}
+        };
+        
+        \node[subclassbox, fill=gray!10] (ns) at (-1.5, -3.5) {Nanosecond};
+        \node[subclassbox, fill=gray!10] (us) at (1.5, -3.5) {Microsecond};
+        \node[subclassbox, fill=gray!10] (ms) at (4.5, -3.5) {Millisecond};
+        \node[subclassbox, fill=gray!10] (sec) at (-1.5, -5) {Second};
+        \node[subclassbox, fill=gray!10] (min) at (1.5, -5) {Minute};
+        \node[subclassbox, fill=gray!10] (hr) at (4.5, -5) {Hour};
+        \node[subclassbox, fill=gray!10] (zodiac) at (0, -6.5) {Zodiac};
+        \node[subclassbox, fill=gray!10] (day) at (3, -6.5) {Day};
+        \node[classbox, fill=yellow!10, minimum height=1.3cm] (week) at (8, -3.5) {
+            \textbf{Week}\\[2pt]
+            \texttt{+ start : Timestamp}\\
+            \texttt{+ end : Timestamp}
+        };
+        
+        \draw[->, thick, dashed] (range.east) -- node[above, font=\scriptsize] {使用} (unit.west);
+        \draw[arrow] (unit.south) -- (ns.north);
+        \draw[arrow] (unit.south) -- (us.north);
+        \draw[arrow] (unit.south) -- (ms.north);
+        \draw[arrow] (unit.south) -- (sec.north);
+        \draw[arrow] (unit.south) -- (min.north);
+        \draw[arrow] (unit.south) -- (hr.north);
+        \draw[arrow] (unit.south) -- (zodiac.north);
+        \draw[arrow] (unit.south) -- (day.north);
+        \draw[arrow] (unit.south) -- (week.north);
+    \end{tikzpicture}%
+    }
+    \caption{UML 类图：Range 类与 TemporalUnit 基本单位继承体系。}
+    \label{fig:uml_basic_units}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \adjustbox{max height=0.8\textheight, max width=\textwidth}{%
+    \begin{tikzpicture}[>=stealth,
+        classbox/.style={draw, rectangle, minimum width=3.5cm, minimum height=2.8cm, align=left, font=\scriptsize, inner sep=4pt},
+        arrow/.style={->, thick, >=stealth}]
+        
+        \node[classbox, fill=blue!10] (climate) at (-2.5, 0) {
+            \textbf{Climate（节气月）}\\[2pt]
+            \texttt{+ start : Timestamp}\\
+            \texttt{+ end : Timestamp}\\[2pt]
+            \texttt{+ lengthOfDay() : Number}\\
+            \texttt{+ lengthOfWeek() : Number}
+        };
+        
+        \node[classbox, fill=red!10, minimum height=3.2cm] (phase) at (3.5, 0) {
+            \textbf{Phase（朔望月）}\\[2pt]
+            \texttt{+ start : Timestamp}\\
+            \texttt{+ end : Timestamp}\\[2pt]
+            \texttt{+ lengthOfDay() : Number}\\
+            \texttt{+ lengthOfWeek() : Number}\\
+            \texttt{+ isHigher() : Bool}\\
+            \texttt{+ isLower() : Bool}\\
+            \texttt{+ isLeap() : Bool}
+        };
+        
+        \node[classbox, fill=green!10, minimum height=3.0cm] (tropical) at (-2.5, -5.5) {
+            \textbf{Tropical（回归年）}\\[2pt]
+            \texttt{+ start : Timestamp}\\
+            \texttt{+ end : Timestamp}\\[2pt]
+            \texttt{+ lengthOfWeek() : Number}\\
+            \texttt{+ lengthOfClimate() : Number}\\
+            \texttt{+ lengthOfDay() : Number}
+        };
+        
+        \node[classbox, fill=orange!10, minimum height=3.5cm] (synodic) at (3.5, -5.5) {
+            \textbf{Synodic（朔望年）}\\[2pt]
+            \texttt{+ start : Timestamp}\\
+            \texttt{+ end : Timestamp}\\[2pt]
+            \texttt{+ lengthOfPhase() : Number}\\
+            \texttt{+ lengthOfWeek() : Number}\\
+            \texttt{+ lengthOfDay() : Number}\\
+            \texttt{+ isLeap() : Bool}
+        };
+        
+        \node[classbox, fill=purple!10, minimum height=3.5cm] (year) at (0.5, -11) {
+            \textbf{Year（合并 Tropical 与 Synodic）}\\[2pt]
+            \texttt{+ start : Timestamp}\\
+            \texttt{+ end : Timestamp}\\[2pt]
+            \texttt{+ lengthOfClimate() : Number}\\
+            \texttt{+ lengthOfPhase() : Number}\\
+            \texttt{+ lengthOfWeek() : Number}\\
+            \texttt{+ lengthOfDay() : Number}\\
+            \texttt{+ isLeap() : Bool}
+        };
+        
+        \draw[arrow, dashed, thick] (tropical.south) -- node[left, font=\scriptsize] {合并} (year.north west);
+        \draw[arrow, dashed, thick] (synodic.south) -- node[right, font=\scriptsize] {合并} (year.north east);
+    \end{tikzpicture}%
+    }
+    \caption{UML 类图：Climate、Phase、Tropical、Synodic 与合并后的 Year 类。}
+    \label{fig:uml_complex_units}
+\end{figure}
+
+\subsection{UML 类图：时间戳与时间字段}
+
+\begin{figure}[htbp]
+    \centering
+    \adjustbox{max width=\textwidth}{%
+    \begin{tikzpicture}[>=stealth,
+        classbox/.style={draw, rectangle, minimum width=3.0cm, minimum height=1.3cm, align=left, font=\scriptsize, inner sep=4pt},
+        enumbox/.style={draw, rectangle, minimum width=3.2cm, minimum height=2.0cm, align=left, font=\tiny, inner sep=3pt},
+        arrow/.style={->, thick, >=stealth}]
+        
+        \node[classbox, fill=blue!15] (timestamp) at (0, 0) {
+            \textbf{Timestamp}\\[2pt]
+            \texttt{+ days : Number}\\
+            \texttt{+ nanos : Number}
+        };
+        
+        \node[enumbox, fill=green!15, minimum height=3.0cm] (unit) at (6.5, 0.5) {
+            \textbf{<<enum>> TemporalUnit}\\[3pt]
+            Nanosecond, Microsecond,\\
+            Millisecond, Second, Minute,\\
+            Hour, Zodiac(时辰), Day,\\
+            Week, Climate(节气月),\\
+            Phase(朔望月),\\
+            Tropical(回归年),\\
+            Synodic(朔望年),\\
+            Year, Decade, Era, Epoch
+        };
+        
+        \node[enumbox, fill=orange!15, minimum height=4.0cm] (field1) at (0, -5.5) {
+            \textbf{<<enum>> TemporalField}\\[3pt]
+            NanosecondOfMicrosecond,\\
+            MicrosecondOfMillisecond,\\
+            MillisecondOfSecond,\\
+            SecondOfMinute, MinuteOfHour,\\
+            MinuteOfZodiac, HourOfZodiac,\\
+            HourOfDay, ZodiacOfDay,\\
+            DayOfWeek, DayOfClimate,\\
+            DayOfPhase, DayOfTropical,\\
+            DayOfSynodic, DayOfYear
+        };
+        
+        \node[enumbox, fill=orange!15, minimum height=4.0cm] (field2) at (6.5, -5.5) {
+            \textbf{<<enum>> TemporalField}\\[3pt]
+            ClimateOfTropical,\\
+            ClimateOfSynodic, ClimateOfYear,\\
+            PhaseOfTropical, PhaseOfSynodic,\\
+            PhaseOfYear, TropicalOfDecade,\\
+            SynodicOfDecade, YearOfDecade,\\
+            TropicalOfEra, SynodicOfEra,\\
+            YearOfEra, TropicalOfEpoch,\\
+            SynodicOfEpoch, YearOfEpoch,\\
+            EraOfEpoch
+        };
+        
+        \draw[arrow] (timestamp.east) -- node[above, font=\scriptsize] {使用} (unit.west);
+        \draw[arrow] (timestamp.south) -- node[left, font=\scriptsize] {使用} (field1.north);
+        \draw[arrow] (unit.south) -- node[right, font=\scriptsize] {使用} (field2.north);
+    \end{tikzpicture}%
+    }
+    \caption{UML 类图：Timestamp 与 TemporalUnit、TemporalField 枚举。}
+    \label{fig:uml_timestamp}
+\end{figure}
+
+\begin{remark}[Range 类的历法含义]\label{rem:range_class}
+\textbf{Range} 类定义了范围约束——\(lowest\le lower\le higher\le hiest\)。\(valid()\) 检查值是否在 \([lowest,hiest]\) 范围内，\(clamp(value)\) 将值截断到该范围内。在历法系统中，Range 用于约束各时间字段的合法取值范围——如月的相对序列必须在 \([1,12]\) 范围内，日的相对序列必须在 \([1,30]\)（大月）或 \([1,29]\)（小月）范围内。
+\end{remark}
+
+\begin{remark}[Climate 与 Phase 的 lengthOfWeek 方法]\label{rem:climate_phase_length}
+\textbf{Climate}（节气月）和\textbf{Phase}（朔望月）均包含 \textbf{lengthOfWeek} 方法——返回该月内的完整周数。节气月长度在 \(14\)--\(18\) 天范围内，朔望月长度约 \(29.53\) 天。因此节气月内通常包含 \(2\)--\(3\) 个完整周，朔望月内通常包含 \(4\)--\(5\) 个完整周。lengthOfWeek 方法对安排月内工作日程和确定周日对应的农历日期具有实际意义。
+\end{remark}
+
+\begin{remark}[TemporalUnit 的 length 方法与 isFixed]\label{rem:temporal_unit_length}
+\textbf{length()} 返回当前单位所拥有的下一级单位数量：\(\texttt{Day.length()}=24\)，\(\texttt{Week.length()}=7\)，\(\texttt{Climate.length()}\approx 15\)（\(14\)--\(18\) 天范围内），\(\texttt{Phase.length()}\approx 29.53\)，\(\texttt{Tropical.length()}=12\)，\(\texttt{Synodic.length()}=12\) 或 \(13\)。\textbf{isFixed} 返回单位是否具有固定长度：\(\texttt{Hour.isFixed()}=true\)，\(\texttt{Phase.isFixed()}=false\)，\(\texttt{Climate.isFixed()}=false\)。
+\end{remark}
+
+\begin{remark}[Year 类的合并语义]\label{rem:year_class}
+\textbf{Year} 是 \textbf{Tropical} 和 \textbf{Synodic} 的合并——同时拥有 \(\texttt{lengthOfClimate}\)（回归年内节气月数 \(=12\)）、\(\texttt{lengthOfPhase}\)（年内朔望月数 \(=12\) 或 \(13\)）、\(\texttt{lengthOfWeek}\)（年内周数）、\(\texttt{lengthOfDay}\)（年内天数 \(=365\) 或 \(366\)）和 \(\texttt{isLeap}\)（闰年判定）。合并体现了阴阳合历的本质——一个公历年同时被太阳历（节气月）和太阴历（朔望月）两种系统所描述。
+\end{remark}
+
+\subsection{流程图}
+
+\begin{figure}[htbp]
+    \centering
+    \adjustbox{max width=\textwidth}{%
+    \begin{tikzpicture}[>=stealth,
+        databox/.style={draw, rounded corners, fill=blue!10, minimum width=2.2cm, minimum height=0.7cm, align=center, font=\scriptsize},
+        calcbox/.style={draw, rounded corners, fill=green!10, minimum width=2.2cm, minimum height=0.7cm, align=center, font=\scriptsize},
+        outbox/.style={draw, rounded corners, fill=purple!10, minimum width=2.2cm, minimum height=0.7cm, align=center, font=\scriptsize},
+        arrow/.style={->, thick, >=stealth}]
+        
+        \node[databox] (load_jieqi) at (0, 0) {加载节气数据};
+        \node[databox] (load_shuo) at (5, 0) {加载朔望数据};
+        \node[calcbox] (calc_abs) at (0, -1.8) {计算绝对序列};
+        \node[calcbox] (calc_rel) at (5, -1.8) {计算相对序列};
+        \node[calcbox] (calc_len) at (2.5, -3.6) {计算定长};
+        \node[calcbox] (dingyue) at (2.5, -5.4) {节气中气定月序};
+        \node[calcbox, fill=yellow!15] (run_check) at (2.5, -7.2) {无中气置闰判定};
+        \node[outbox] (out_normal) at (-1, -9) {输出正常月序};
+        \node[outbox] (out_run) at (5, -9) {输出闰月};
+        \node[outbox, fill=cyan!15] (out_calendar) at (2.5, -10.8) {输出完整历法};
+        
+        \draw[arrow] (load_jieqi) -- (calc_abs);
+        \draw[arrow] (load_shuo) -- (calc_rel);
+        \draw[arrow] (calc_abs) -- (calc_len);
+        \draw[arrow] (calc_rel) -- (calc_len);
+        \draw[arrow] (calc_len) -- (dingyue);
+        \draw[arrow] (dingyue) -- (run_check);
+        \draw[arrow] (run_check) -- node[left, font=\tiny] {含中气} (out_normal);
+        \draw[arrow] (run_check) -- node[right, font=\tiny] {无中气} (out_run);
+        \draw[arrow] (out_normal) -- (out_calendar);
+        \draw[arrow] (out_run) -- (out_calendar);
+    \end{tikzpicture}%
+    }
+    \caption{历法计算流程图：外部数据加载$\to$定序$\to$定长$\to$节气中气定月序$\to$置闰判定$\to$输出历法。}
+    \label{fig:flow_calendar}
+\end{figure}
+
+\section{节气系统与朔望月系统的独立性}
+\label{sec:calendar_independence}
+
+\subsection{节气系统——太阳历}
+
+\begin{definition}[节气系统]\label{def:solar_term_system}
+\textbf{二十四节气}是中国古代独创的太阳历系统，将回归年等分为 \(24\) 个时间节点。节气系统以回归年 \(T_{\text{trop}}\) 为基本周期。
+\end{definition}
+
+\begin{definition}[平气法]\label{def:pingqi_method}
+\textbf{平气法}将回归年均匀等分为 \(24\) 份：\(\Delta T_{\text{平气}}=T_{\text{trop}}/24\approx 15.2184\) 天。对应平太阳时——均匀时间分割。
+\end{definition}
+
+\begin{definition}[定气法]\label{def:dingqi_method}
+\textbf{定气法}根据太阳在黄道上的实际视位置确定节气时刻，每隔 \(15^\circ\) 设置一个节气。对应真太阳时——非均匀时间分割。
+\end{definition}
+
+\begin{proposition}[平气法与定气法的对比]\label{prop:pingqi_dingqi_comparison}
+平气法以均匀时间分割为基础（对应平太阳时），定气法以太阳黄经的均匀角度分割为基础（对应真太阳时）。平气法向定气法的转变是从时间均匀化向黄经均匀化的转变。
+\end{proposition}
+
+\begin{proof}
+由 \cref{def:pingqi_method}，平气法把回归年均匀等分为 \(24\) 份，节气间隔 \(\Delta T_{\text{平气}}=T_{\text{trop}}/24\) 为常数，即时间轴上的均匀分割。由 \cref{def:dingqi_method}，定气法按太阳黄经每隔 \(15^\circ\) 取节气；因太阳视运动在近日点（冬至附近）快、远日点（夏至附近）慢，各节气间的时间间隔非均匀，对应黄道上的均匀角度分割。故平气法实现时间均匀化，定气法实现黄经均匀化。
+\end{proof}
+
+\subsection{朔望月系统——太阴历}
+
+\begin{definition}[朔望月系统]\label{def:synodic_month_system}
+\textbf{朔望月系统}是以月球绕地球公转的会合周期为基础的太阴历系统。\(T_{\text{syn}}=29.5305889\) 平太阳日。\(12\) 个朔望月构成太阴年，比回归年短约 \(10.875\) 天。
+\end{definition}
+
+\begin{proposition}[朔望月系统的独立周期]\label{prop:synodic_month_conservation}
+朔望月系统与节气系统的周期不可通度，即
+\[
+\frac{T_{\text{trop}}}{T_{\text{syn}}}\approx 12.36827,
+\]
+因此不可能用简单的整数比将太阳历与太阴历完美统一。
+\end{proposition}
+
+\begin{proof}
+由 \cref{def:synodic_month_system}，朔望月系统以 \(T_{\text{syn}}=29.5305889\) 平太阳日为周期；由 \cref{def:fixed_length}，节气系统以 \(T_{\text{trop}}=365.2421897\) 平太阳日为周期。两者之比
+\[
+\frac{T_{\text{trop}}}{T_{\text{syn}}}=\frac{365.2421897}{29.5305889}\approx 12.36827
+\]
+在现行测量精度内与任何分母有界的 \(p/q\) 都不相符（\textbf{经验观察／研究纲领}，见 \cref{prop:length_incommensurability}），故不存在整数 \(p,q\) 使 \(p\,T_{\text{trop}}=q\,T_{\text{syn}}\)。因此朔望月系统的周期独立于节气系统的周期，二者各自保持自身的周期尺度。
+\end{proof}
+
+\subsection{阴阳合历的协调——置闰}
+
+\begin{lemma}[默冬周期（十九年七闰）]\label{ch18_metonic_cycle}
+\(19\) 个回归年与 \(235\) 个朔望月近似等长：
+\[
+19\,T_{\text{trop}}\approx 235\,T_{\text{syn}},
+\]
+其中 \(19\,T_{\text{trop}}\approx 6939.60\) 天、\(235\,T_{\text{syn}}\approx 6939.69\) 天，两者相差约 \(0.09\) 天。故经过 \(19\) 年，太阳与月亮的相位几乎复原；又 \(235=12\times 19+7\)，故 \(19\) 年内应置 \(7\) 个闰月（置闰周期比为 \(235/19\)）。
+\end{lemma}
+
+\begin{proof}
+由 \cref{def:fixed_length} 的定长值计算可得
+\[
+19\,T_{\text{trop}}=19\times 365.2421897=6939.6016\ \text{天},
+\]
+\[
+235\,T_{\text{syn}}=235\times 29.5305889=6939.6884\ \text{天}.
+\]
+两者相差
+\[
+6939.6884-6939.6016=0.0868\ \text{天},
+\]
+远小于一个朔望月（\(29.53\) 天），因此 \(19\) 个回归年与 \(235\) 个朔望月几乎同时复原，太阳历与太阴历的相位在 \(19\) 年内闭合。
+若不置闰，\(19\) 年仅含 \(12\times 19=228\) 个朔望月，比 \(235\) 少 \(7\) 个。故须在 \(19\) 年内增设 \(7\) 个闰月，使两历对齐，由此给出置闰周期比
+\[
+\frac{235}{19}.
+\qedhere
+\]
+\end{proof}
+
+\begin{definition}[置闰——两套系统的相位对齐]\label{def:intercalation}
+十九年七闰（默冬章）：\(19\times T_{\text{trop}}\approx 6939.60\) 天，\(235\times T_{\text{syn}}\approx 6939.69\) 天。经过 \(19\) 年，太阳和月亮的相位几乎复原。置闰周期比为 \(235/19\)。
+\end{definition}
+
+\begin{proposition}[无中气置闰——与节气中气定月序的一致性]\label{prop:wuzhongqi_rule}
+若一个朔望月内只有节气没有中气，则该月为闰月——与 \cref{prop:wuzhongqi_run} 的判定规则一致。无中气置闰确保岁首（正月）始终在立春前后。
+\end{proposition}
+
+\begin{proof}
+第一句即 \cref{prop:wuzhongqi_run} 的闰月判定条件，其成立机制已在该命题的证明中给出（中气间隔超过朔望月定长时出现无中气之月）。第二句说明置闰的目的：按 \cref{def:jieqi_zhongqi_dingyue}，含立春与雨水的朔望月为正月（寅月）；无中气置闰保证正月始终含有立春，从而岁首与立春的偏离不超过一个朔望月的量级，故岁首始终在立春前后。
+\end{proof}
+
+\section{阴阳合历的周期结构}
+\label{sec:lunisolar_structure}
+
+\begin{theorem}[阴阳合历的三种周期尺度]\label{thm:lunisolar_grammar_unity}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{节气系统（太阳历）}：以回归年 \(T_{\text{trop}}\) 为周期，年内的节气分布由太阳黄经决定。
+    \item \textbf{朔望月系统（太阴历）}：以朔望月 \(T_{\text{syn}}\) 为周期，月相的重复由日、地、月三者的相对位置决定。
+    \item \textbf{置闰系统（协调层）}：以十九年七闰为规则，置闰周期比为 \(235/19\)，在 \(19\) 年尺度上协调前两套周期。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+逐条验证三种周期尺度的实现：
+\begin{enumerate}[label=(\roman*)]
+\item 节气系统以回归年 \(T_{\text{trop}}\) 为周期（\cref{def:solar_term_system}），平气法将其均匀等分为 \(24\) 份（\cref{def:pingqi_method}），给出时间轴上的均匀节气划分。
+\item 朔望月系统以 \(T_{\text{syn}}\) 为周期（\cref{def:synodic_month_system}），度量月球绕地公转的会合相位——月相的重复周期。
+\item 置闰系统协调前两者：由默冬周期引理（十九年七闰），\(19\) 个回归年内安排 \(235\) 个朔望月，置闰周期比为 \(235/19\)；这是两套独立周期之间的协调层。
+\end{enumerate}
+\end{proof}
+
+\section{天文纪年与历史纪年的数学结构}
+\label{sec:calendar_year_numbering}
+
+\begin{definition}[天文纪年]\label{def:astronomical_year_numbering}
+天文纪年在整数轴上连续：公元 1 年为 \(+1\)，公元前 1 年为 \(0\)，公元前 \(n\) 年为 \(-(n-1)\)。\(0\) 是合法的年份编号。
+\end{definition}
+
+\begin{definition}[历史纪年]\label{def:historical_year_numbering}
+历史纪年不存在公元 0 年——公元前 1 年之后直接进入公元 1 年。
+\end{definition}
+
+\begin{proposition}[天文纪年与历史纪年的转换]\label{prop:year_conversion}
+\(Y_{\text{ast}}\ge 1\) 时 \(Y_{\text{hist}}=Y_{\text{ast}}\)；\(Y_{\text{ast}}\le 0\) 时 \(Y_{\text{hist}}=1-Y_{\text{ast}}\)。
+\end{proposition}
+
+\begin{proof}
+由 \cref{def:astronomical_year_numbering}，天文纪年把公元 \(1\) 年记为 \(+1\)，公元前 \(n\) 年记为 \(-(n-1)\)。当 \(Y_{\text{ast}}\ge 1\) 时，天文纪年与历史纪年的公元年份编号相同，故 \(Y_{\text{hist}}=Y_{\text{ast}}\)。当 \(Y_{\text{ast}}\le 0\) 时，\(Y_{\text{ast}}\) 对应公元前 \((1-Y_{\text{ast}})\) 年：例如 \(Y_{\text{ast}}=0\) 对应公元前 \(1\) 年，\(Y_{\text{ast}}=-1\) 对应公元前 \(2\) 年；一般地由 \(-(n-1)=Y_{\text{ast}}\) 解得 \(n=1-Y_{\text{ast}}\)，故 \(Y_{\text{hist}}=1-Y_{\text{ast}}\)。
+\end{proof}
+
+\begin{theorem}[跨公元时间间隔的修正定理]\label{thm:cross_era_correction}
+从公元前 \(m\) 年出发，经过 \(P\) 年后到达的历史纪年为：
+\[
+Y_{\text{hist}}=\begin{cases}
+m-P, & P<m,\\
+P-m+1, & P\ge m.
+\end{cases}
+\]
+当 \(P\ge m\) 时（跨越公元分界线），需 \(+1\) 修正。
+\end{theorem}
+
+\begin{proof}
+在 \cref{prop:year_conversion} 的天文纪年坐标下计算。公元前 \(m\) 年的天文纪年为 \(Y_{\text{ast}}=-(m-1)\)（\cref{def:astronomical_year_numbering}），经过 \(P\) 年后天文纪年变为 \(Y'_{\text{ast}}=-(m-1)+P=P-m+1\)。
+\begin{itemize}
+\item 若 \(P<m\)，则 \(Y'_{\text{ast}}=P-m+1\le 0\)，仍在公元前；由 \cref{prop:year_conversion}，\(Y_{\text{hist}}=1-Y'_{\text{ast}}=m-P\)。
+\item 若 \(P\ge m\)，则 \(Y'_{\text{ast}}=P-m+1\ge 1\)，已进入公元；此时 \(Y_{\text{hist}}=Y'_{\text{ast}}=P-m+1\)，其中 \(+1\) 恰为跨越「无公元 \(0\) 年」分界点所需的修正。
+\end{itemize}
+综合两种情况即得所证。
+\end{proof}
+
+\section{《淮南子·天文训》的建元体系}
+\label{sec:huainanzi}
+
+\begin{definition}[一纪]\label{def:yiji}
+一纪为 \(76\) 年：\(76\times 365.25=940\times 29.53085=27759\) 天——回归年与朔望月的最小公倍周期。
+\end{definition}
+
+\begin{definition}[一部——1520 年大终]\label{def:yibu}
+一部为 \(1520\) 年 \(=76\times 20\)。\(1520\bmod 60=20\)——每经历一部，干支向前推进 \(20\) 位。
+\end{definition}
+
+\begin{theorem}[一部的干支推移定理]\label{thm:yibu_ganzhi_shift}
+经过 \(k\) 部后，干支序数 \(S_k=S_0+20k\pmod{60}\)。\(k=3\) 时干支复原。一部内干支按 \(+20\) 推进，甲寅、甲戌、甲午三柱循环；建元序列中出现的甲柱为甲子（象征建元起点）、甲寅、甲戌、甲午。
+\end{theorem}
+
+\begin{proof}
+\(1520\bmod 60=20\)。干支序数在每一部中增加 \(20\)。\(20\times 3=60\equiv 0\pmod{60}\)。
+\end{proof}
+
+\section{轩辕历法的建元推演}
+\label{sec:xuanyuan_epoch}
+
+\begin{proposition}[第一部终的干支确定]\label{prop:first_yibu_ganzhi}
+从甲寅建元年（\(-2647\)）出发，经过一部到达第一终：\(-2647+1520=-1127\)。干支序数 \(0+20=20\)（甲戌）。公元前 \(1127\) 年（甲戌年）。
+\end{proposition}
+
+\begin{proof}
+由 \cref{def:xuanyuan_epoch}，甲寅建元年为 \(-2647\)（干支序数 \(0\)）；由 \cref{def:yibu}，一部为 \(1520\) 年且每历一部干支前移 \(20\) 位（\(1520\bmod 60=20\)，见 \cref{thm:yibu_ganzhi_shift}）。故第一终天文纪年为 \(-2647+1520=-1127\)，干支序数为 \(0+20=20\pmod{60}\)。由六十甲子序（甲寅 \(=0\)），序数 \(20\) 对应甲戌。
+\end{proof}
+
+\begin{proposition}[第二部终的干支确定与公元修正]\label{prop:second_yibu_correction}
+天文纪年终点：\(-1127+1520=393\)。历史纪年：\(393+1=394\)。干支序数 \(20+20=40\)（甲午）。公元 \(394\) 年（甲午年）。
+\end{proposition}
+
+\begin{proof}
+第一终为 \(-1127\)（\cref{prop:first_yibu_ganzhi}），再历一部得第二终天文纪年 \(-1127+1520=393\)。因 \(393\ge 1\) 且跨越了公元分界线，由 \cref{thm:cross_era_correction}（取 \(P\ge m\) 情形），历史纪年需 \(+1\) 修正，得 \(393+1=394\)，即公元 \(394\) 年。干支序数由 \cref{thm:yibu_ganzhi_shift} 再前移 \(20\) 位：\(20+20=40\)，对应甲午。
+\end{proof}
+
+\begin{proposition}[第三部终的干支确定]\label{prop:third_yibu_ganzhi}
+天文纪年终点：\(393+1520=1913\)。历史纪年：\(1913+1=1914\)。干支序数 \(40+20=60\equiv 0\)（甲寅）。公元 \(1914\) 年（甲寅年，民国三年）。
+\end{proposition}
+
+\begin{proof}
+第二终为天文纪年 \(393\)（\cref{prop:second_yibu_correction}），再历一部得第三终天文纪年 \(393+1520=1913\)；由 \cref{thm:cross_era_correction} 的 \(+1\) 修正，历史纪年为 \(1913+1=1914\)。干支序数再前移 \(20\) 位：\(40+20=60\equiv 0\pmod{60}\)，对应甲寅（甲寅 \(=0\)、甲子 \(=10\)）。
+\end{proof}
+
+\begin{theorem}[轩辕历法建元序列的完整性]\label{thm:xuanyuan_complete_sequence}
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}}
+\toprule
+建元次序 & 天文纪年 & 历史纪年 & 干支 & 备注 \\
+\midrule
+起点 & \(-2697\) & 前 \(2697\) & 甲子 & 黄帝纪元假设 \\
+甲寅建元 & \(-2647\) & 前 \(2647\) & 甲寅 & 甲子后第 50 年 \\
+第一终 & \(-1127\) & 前 \(1127\) & 甲戌 & 未跨公元 \\
+第二终 & \(393\) & \(394\) & 甲午 & 跨公元 \(+1\) 修正 \\
+第三终 & \(1913\) & \(1914\) & 甲寅 & 民国三年 \\
+\bottomrule
+\end{tabular}
+\end{center}
+三部总计 \(4560\) 年，干支从甲寅回归甲寅，完成完整的 \(60\) 干支循环。
+\end{theorem}
+
+\begin{proof}
+由 \cref{prop:first_yibu_ganzhi}、\cref{prop:second_yibu_correction}、\cref{prop:third_yibu_ganzhi}，建元起点甲寅（序数 \(0\)）经三部后干支序数为 \(0+3\times 20=60\equiv 0\pmod{60}\)，即回归甲寅。三部总年数 \(3\times 1520=4560=76\times 60\)，故 \(4560\equiv 0\pmod{60}\)，六十甲子恰好循环 \(76\) 次。
+\end{proof}
+
+\begin{remark}[天文纪年与历史纪年的差异]\label{rem:calendar_year_difference}
+从第二终开始，天文纪年与历史纪年相差 \(1\)：天文纪年 \(393\) 对应历史纪年 \(394\)。这一差异源于天文纪年包含 \(0\) 年，而历史纪年没有 \(0\) 年。
+\end{remark}
+
+\section{《皇极经世》的嵌套周期体系}
+\label{sec:huangji_jingshi}
+
+\begin{definition}[元会运世]\label{def:yuan_hui_yun_shi}
+一世 \(=30\) 年，一运 \(=12\) 世 \(=360\) 年，一会 \(=30\) 运 \(=10800\) 年，一元 \(=12\) 会 \(=129600\) 年。
+\end{definition}
+
+\begin{theorem}[轩辕历法与元会运世的周期对应]\label{thm:xuanyuan_yuanhuiyunshi}
+一元 \(=85\times 1520+400\) 年。干支在一元内恰好复原。
+\end{theorem}
+
+\begin{proof}
+\(129600\div 1520=85\) 余 \(400\)。\(85\times 20+400\equiv 20+40=60\equiv 0\pmod{60}\)。
+\end{proof}
+
+\section{世界主要历法体系的周期结构比较}
+\label{sec:world_calendars}
+
+\begin{definition}[彝族十月太阳历]\label{def:yi_calendar}
+\textbf{彝族十月太阳历}以地球绕太阳公转的回归年为周期，采用十二属相循环纪日。每三个属相周期（\(36\) 日）为一月，全年共 \(10\) 个月 \(360\) 日，另加 \(5\) 天“过年日”（闰年 \(6\) 天），平均年长 \(365.25\) 日。
+\end{definition}
+
+\begin{proposition}[彝族十月历的周期结构]\label{prop:yi_calendar_structure}
+彝族十月太阳历的周期结构由以下参数决定：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{纪日周期}：\(12\) 属相循环，即 \(T_{\text{生肖}}=12\) 日。
+    \item \textbf{月周期}：\(3\) 个属相周期 \(=36\) 日，即 \(T_{\text{月}}=3\times 12=36\) 日。
+    \item \textbf{年周期}：\(10\) 个月 \(=360\) 日，加上过年日 \(5\) 或 \(6\) 日，\(T_{\text{年}}=365\) 或 \(366\) 日。
+    \item \textbf{季周期}：\(2\) 个月 \(=72\) 日，即 \(T_{\text{季}}=2\times 36=72\) 日。
+\end{enumerate}
+月周期与纪日周期的关系为 \(T_{\text{月}}=3\times T_{\text{生肖}}\)——每月恰好包含三个完整的生肖循环，这使得月内日期的生肖归属完全确定。
+\end{proposition}
+
+\begin{proof}
+由 \cref{def:yi_calendar}，每月 \(36\) 日，生肖周期 \(12\) 日，\(36=3\times 12\)，故每月恰为 \(3\) 个生肖周期。同理，全年 \(360=30\times 12\)。一年 \(10\) 个月，每季 \(2\) 个月，故季周期为 \(2\times 36=72\) 日。
+\end{proof}
+
+\begin{definition}[玛雅历法的周期结构]\label{def:maya_calendar}
+\textbf{玛雅历法}由两套独立周期组成：\textbf{卓尔金历}（Tzolk'in）以 \(260\) 日为周期（\(13\) 日数 \(\times 20\) 日名），\textbf{哈布历}（Haab'）以 \(365\) 日为周期（\(18\) 个月 \(\times 20\) 日 \(+5\) 天）。两套历法组合形成\textbf{历法循环}（Calendar Round），其周期为 \(260\) 与 \(365\) 的最小公倍数：
+\[
+T_{\text{CR}}=\operatorname{lcm}(260,365)=18980\ \text{日}=52\ \text{哈布年}.
+\]
+玛雅人还使用\textbf{长计历}（Long Count）以 \(20\) 为基数进行累进计时，其单位依次为金（\(1\) 天）、乌纳（\(20\) 天）、盾（\(360\) 天）、卡盾（\(7200\) 天）、伯克盾（\(144000\) 天）。
+\end{definition}
+
+\begin{proposition}[玛雅历法的周期协调]\label{prop:maya_calendar_coordination}
+玛雅历法的周期结构与轩辕历法具有结构同源性：
+\begin{enumerate}[label=(\roman*)]
+    \item 卓尔金历（\(260\) 日）与哈布历（\(365\) 日）的不可通约性（\(\gcd(260,365)=5\)）与回归年-朔望月的不可通约性在结构上一致。
+    \item 历法循环周期 \(18980\) 日 \(=52\) 哈布年，对应于轩辕历法中 \(19\) 年 \(=235\) 朔望月的置闰周期——两者都是两套独立周期通过最小公倍数实现协调的实例。
+    \item 长计历的 \(20\) 进制累进体系与轩辕历法的元会运世嵌套体系在结构上具有可比性。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) \(260\) 与 \(365\) 的最大公约数为 \(5\)，最小公倍数为 \(18980\)；回归年与朔望月之比在可测精度内与任何简单整数比都不相符（\textbf{经验观察／研究纲领}，见 \cref{prop:length_incommensurability}），两者都不能用简单整数比精确统一。
+(ii) 历法循环周期 \(18980\) 日是 \(260\) 与 \(365\) 的最小公倍数，对应于轩辕历法中 \(19\) 年 \(=235\) 朔望月是回归年与朔望月的最佳有理逼近。
+(iii) 长计历的 \(20\) 进制累进结构与元会运世的 \(12\) 进制和 \(30\) 进制嵌套结构都是通过多级嵌套实现长时间跨度的精确记录。
+\end{proof}
+
+\begin{definition}[古印度阴阳历]\label{def:indian_calendar}
+\textbf{古印度阴阳历}以 \(5\) 年为一个谐调周期，\(5\) 个太阳年（\(1830\) 日）中有 \(62\) 个朔望月，一个周期内置 \(2\) 个闰月。
+\end{definition}
+
+\begin{proposition}[古印度阴阳历的置闰参数]\label{prop:indian_calendar_intercalation}
+古印度阴阳历的置闰参数与轩辕历法的十九年七闰在结构上相同——两者都是用一组整数参数近似满足
+\[
+p\cdot T_{\text{太阳年}}\approx q\cdot T_{\text{朔望月}},
+\]
+其中古印度历取 \((p,q)=(5,62)\)，轩辕历法取 \((p,q)=(19,235)\)。两个参数对都是 \(T_{\text{trop}}/T_{\text{syn}}\) 的连分数收敛子——\((5,62)\) 对应 \(62/5=12.4\)，\((19,235)\) 对应 \(235/19=12.368\ldots\)。
+\end{proposition}
+
+\begin{proof}
+古印度历的太阳年长取 \(1830/5=366\) 日（与真回归年 \(365.2422\) 日的误差约 \(0.76\) 日），朔望月长取 \(1830/62=29.516\ldots\) 日。轩辕历法的太阳年长 \(T_{\text{trop}}=365.2422\) 日，朔望月长 \(T_{\text{syn}}=29.5306\) 日，\(19\) 年内含 \(235\) 个朔望月。两者的共同结构是：选取整数 \(p,q\) 使 \(p\cdot T_{\text{太阳年}}\approx q\cdot T_{\text{朔望月}}\)，且 \(q-12p\) 给出闰月总数（古印度历 \(2\) 个，轩辕历法 \(7\) 个）。
+\end{proof}
+
+\begin{theorem}[世界主要历法的周期结构统一框架]\label{thm:world_calendar_unification}
+轩辕历法、彝族十月太阳历、玛雅历法、古印度阴阳历，虽然天文参考系和文化背景各异，但在周期结构上共享以下共同框架：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{基本天文周期}：所有历法都以太阳周期（回归年）和/或太阴周期（朔望月）为基本周期。
+    \item \textbf{独立周期系统}：每种历法都包含两套或以上的独立周期系统（太阳-太阴、卓尔金-哈布、节气-朔望）。
+    \item \textbf{协调机制}：通过置闰（轩辕历法、古印度历）、固定周期组合（玛雅历法）或固定日数分配（彝族十月历）实现多套周期的协调。
+    \item \textbf{嵌套结构}：不同时间尺度的周期以嵌套方式组织（元会运世、长计历、季节-月-日）。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+逐条验证：
+\begin{enumerate}[label=(\roman*)]
+\item 轩辕历法以回归年和朔望月为基本周期；彝族十月历以回归年为基本周期；玛雅历法以卓尔金历 \(260\) 日和哈布历 \(365\) 日为基本周期；古印度阴阳历以太阳年和朔望月为基本周期。
+\item 轩辕历法包含节气系统和朔望月系统两套；玛雅历法包含卓尔金历和哈布历两套；古印度阴阳历包含太阳年和朔望月两套；彝族十月历为纯太阳历。
+\item 轩辕历法和古印度历通过置闰协调太阳-太阴周期；玛雅历法通过 \(260\) 与 \(365\) 的固定组合产生 \(18980\) 日历法循环；彝族十月历通过 \(360+5/6\) 的固定日数分配。
+\item 元会运世和长计历都是多级嵌套结构。
+\end{enumerate}
+\end{proof}
+
+\section{定序与定长的稳定性}
+\label{sec:calendar_stability}
+
+\begin{theorem}[历法定序与定长的稳定性]\label{thm:calendar_stability}
+历法系统中存在三种稳定性：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{干支稳定性}：六十干支在绝对序列上的循环结构保持不变。
+    \item \textbf{节气中气定序稳定性}：节气中气定月序规则在长时段内保持稳定——立春恒为寅月节气，冬至恒为子月中气。
+    \item \textbf{定长稳定性}：各历法单位的定长在无外部扰动时保持恒定。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\begin{enumerate}[label=(\roman*)]
+\item 由 \cref{thm:yibu_ganzhi_shift}，干支序数按 \(S_k=S_0+20k\pmod{60}\) 推移，\(60\) 为固定模，故六十干支在绝对序列上的循环结构保持不变。
+\item 由 \cref{thm:lichun_yinyue_dongzhi_haiyue}，立春恒为寅月节气、冬至恒为子月中气；这是 \cref{def:jieqi_zhongqi_dingyue} 的配对规则在长时段内的稳定体现。
+\item 由 \cref{def:fixed_length}，各历法单位的定长为固有周期尺度；在无外部扰动时保持恒定。
+\end{enumerate}
+\end{proof}
+
+\begin{remark}[与全书的衔接]\label{rem:calendar_book_interface}
+本章建立的定序与定长体系是周期数学在时间纪年中的应用。绝对序列给出时间轴上的单向推进，相对序列度量周期内的位置，定长给出各单位的固有周期尺度。节气中气定月序规则通过节气+中气的组合实现了太阳历与太阴历的精确协调。世界主要历法体系的比较表明：无论天文参考系和文化背景如何不同，历法体系的周期结构都遵循「基本天文周期—独立周期系统—协调机制—嵌套结构」的共同框架。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 干支序列的定序推进：绝对序列与相对序列的平移变换 \(S_{\text{rel}}=S_{\text{abs}}-S_{\text{abs}}(P)+1\)（\cref{prop:abs_rel_conversion}） \\
+缩放 & 回归年与朔望月的定长标度：\(T_{\text{trop}}=365.2422\) 天、\(T_{\text{syn}}=29.5306\) 天（\cref{def:fixed_length}） \\
+旋转 & 节气在黄道上的旋转分布：相位角与太阳黄经的 \(2\pi\) 轮转（\cref{tab:jieqi_sequence}） \\
+平衡 & 置闰的定序与定长稳定性（\cref{thm:calendar_stability}） \\
+对称 & 阴阳合历的日月对称：太阳历与太阴历的二元结构（\cref{thm:lunisolar_grammar_unity}） \\
+闭合 & 干支六十周期的闭合：六十甲子循环，三部 \(4560\) 年回归甲寅（\cref{thm:yibu_ganzhi_shift}、\cref{thm:xuanyuan_complete_sequence}） \\
+周期 & 回归年（\(365.2422\) 天）、朔望月（\(29.5306\) 天）与六十甲子周期（\cref{def:fixed_length}）；置闰周期 \(235/19\)（\cref{ch18_metonic_cycle}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明本章的\textbf{历法周期性判定定理}（\ref{thm:calendar_periodicity_decision}）。提示：先写出本章目标的判定映射与演化群，再套用「周期系统」章通用判据的证明结构。
+
+    \item 验证\textbf{数量调节的单调性}（\ref{prop:calendar_adaptive_growth}）的前提在本章领域对象上成立，并给出一个不满足前提的反例。
+
+    \item 考察\textbf{历法周期诊断流程与三章接口}（\ref{thm:calendar_diagnosis_integration}）在参数退化时的行为，说明结论如何随之退化。
+
+    \item 说明\textbf{三类卷积在历法周转圆组上的作用}（\ref{thm:calendar_convolution_action}）与「周期系统」章相应通用结论的关系（是一致、特例还是需要附加条件）。
+
+    \item 根据本章七主题对照表，分别指出本章在\textbf{平移}、\textbf{缩放}、\textbf{旋转}三个主题上的具体载体，并各举一个领域数据实例。
+
+    \item 综合题：用「周期系统」章的五步标准接口（表 \ref{tab:ps_five_steps}）重述本章的诊断流程，并逐一注明每一步所依赖的本章定理：\ref{thm:calendar_periodicity_decision}、\ref{prop:calendar_adaptive_growth}、\ref{thm:calendar_diagnosis_integration}、\ref{thm:calendar_convolution_action}。
+\end{enumerate}
+
+

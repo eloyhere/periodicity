@@ -1,0 +1,712 @@
+\chapter{Periodic Structure of Economic Systems}
+\markboth{Periodic Structure of Economic Systems}{Periodic Structure of Economic Systems}
+
+\begin{remark}[Periodicity decision for the target of this chapter (citation)]\label{rem:econ_ps_hook}
+When this chapter decides whether a research target is periodic, determines its period type, or seeks its minimal positive period, reference is always made to the `Periodic Systems' chapter:
+for the periodicity criterion see \cref{thm:ps_periodicity_decision},
+for the discrimination of period types see \cref{def:ps_period_type}, \cref{prop:ps_type_discrimination},
+for the search for the minimal positive period see \cref{def:ps_minimal_period_algorithm}, \cref{thm:ps_minimal_period_correctness},
+and for the construction of period series and epicycle groups from data see \cref{thm:ps_series_reconstruction}, \cref{def:ps_epicycle_group}.
+\end{remark}
+
+\begin{remark}[Positioning of this chapter: developing via the five-step interface of the `Periodic Systems' chapter]\label{rem:econ_five_steps_positioning}
+The periodic structure of economic systems studies the mathematical characterisation of periodic fluctuations, long-range correlations and structural change in economic activity. This chapter does not establish a separate periodicity criterion; instead it connects economic systems to the five-step interface prescribed in the `Periodic Systems' chapter:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{Decision}: reduce such targets as macroeconomic variables, price series, investment cycles and long waves to discrete or continuous dynamical systems, invoke \cref{thm:ps_periodicity_decision} to decide whether they are periodic, and determine the period type;
+    \item \textbf{Construction}: build the amplitude series, frequency series and phase series from data such as GDP, prices, interest rates, unemployment, investment, consumption and the money supply, and assemble them into an economic epicycle group;
+    \item \textbf{Adjustment}: dynamically adjust the economic epicycle group by residual-energy descent, information criteria (AIC/BIC) and Bayesian model selection;
+    \item \textbf{Convolution}: introduce amplitude convolution, phase convolution and frequency convolution on the economic epicycle group, and connect them with autocorrelation, cross-correlation and phase coupling;
+    \item \textbf{Integration}: connect to the tool chains of the three chapters `Discrete Sampling and Intercalation of Periodic Signals', `Harmonic Analysis' and `Time Series Analysis', forming an economic periodicity diagnosis pipeline.
+\end{enumerate}
+The mathematical tools used in this chapter include: gradient flows, delayed negative feedback, damped oscillators, second-order linear difference equations, Fourier analysis, window functions, similarity and trend, the refraction index, periodic convolution, epicycle groups and phase operators.
+\end{remark}
+
+\begin{remark}[Seven-theme guide for this chapter]\label{rem:econ_seven_themes}
+\textbf{Translation}---the price-translation adjustment of supply--demand equilibrium and the delayed oscillation of the cobweb model (Definition \ref{def:supply_demand}, Proposition \ref{prop:cobweb_convergence}); \textbf{scaling}---forward/reverse scaling by the multiplier effect $1/(1-c)$ and the accelerator $v$ (Definition \ref{def:multiplier_accelerator}), and the Pareto exponent $\alpha$ (Definition \ref{def:pareto_distribution}); \textbf{rotation}---the expansion--contraction alternation of the business cycle and the phase rotation of momentum--reversal (Definition \ref{def:momentum_reversal}); \textbf{conservation}---the value identity, the money constraint and the information constraint (Theorem \ref{thm:economic_conservation}); \textbf{symmetry}---the reflection symmetry of the alternation between high and low prices in the cobweb model (period $T=2$, Proposition \ref{prop:cobweb_convergence}); \textbf{closure}---the closure of the multiplier--accelerator feedback loop and the closure of the reversion of price to the mean (Proposition \ref{prop:mult_acc_periodic}, Definition \ref{def:momentum_reversal}); \textbf{period}---the three-level nesting of the inventory cycle ($3$--$5$ years), the investment cycle ($7$--$11$ years) and the Kondratiev long wave ($45$--$60$ years) (Proposition \ref{prop:nested_business_cycles}), and the multi-window period decomposition of stock prices (Proposition \ref{prop:multi_window_stock}).
+\end{remark}
+
+\section{Periodicity decision for economic targets: the first step of the `Periodic Systems' chapter}
+\label{sec:econ_periodicity_decision}
+
+\subsection{Economic targets, decision inputs and decision maps}
+
+\begin{definition}[Economic targets and decision inputs]\label{def:econ_target}
+An \textbf{economic target} is one of the following objects:
+\begin{enumerate}[label=(\roman*)]
+    \item a macroeconomic variable sequence, such as gross domestic product $Y(t)$, the price level $P(t)$, the interest rate $r(t)$ or the unemployment rate $u(t)$;
+    \item a market equilibrium system, whose state space is the price--output phase space;
+    \item an investment--consumption feedback system, whose state space is the income--capital phase space;
+    \item a financial market time series, such as a stock price $P(t)$ or a return $r_t$;
+    \item an income distribution, whose state space is the set of values of income or wealth.
+\end{enumerate}
+The \textbf{decision input} of an economic target is the pair
+\[
+\mathcal D_{\mathrm{E}}=(\mathcal T,x),
+\]
+where $\mathcal T$ is the time index set (which may be $\mathbb Z$ or $\mathbb R$) and $x:\mathcal T\to V$ is the value of the economic variable over time. If $\mathcal T=\mathbb Z$, the target is called a \textbf{discrete economic target}; if $\mathcal T=\mathbb R$, it is called a \textbf{continuous economic target}.
+\end{definition}
+
+\begin{definition}[Economic decision map]\label{def:econ_periodization}
+Let an economic target be given by the decision input $\mathcal D_{\mathrm{E}}=(\mathcal T,x)$. If there exist a map $\Phi:\mathcal S\to\mathcal S$ and an initial value $x_0\in\mathcal S$ such that the states of the target are generated by $\Phi$, that is,
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+for $t\in\mathbb Z$ the state $x_t$ is generated by iteration of $\Phi$; for $t\in\mathbb R$ it is described by the one-parameter evolution family $\{\Phi_t\}_{t\in\mathbb R}$, where each $\Phi_t:\mathcal S\to\mathcal S$, $\Phi_0=\operatorname{id}$, $\Phi_{s+t}=\Phi_s\circ\Phi_t$ for all $s,t\in\mathbb R$, and $(t,x)\mapsto\Phi_t(x)$ is continuous.
+then $\Phi$ is called the \textbf{economic decision map} of the target. The economic target is thereby reduced to the discrete dynamical system $(\mathcal S,\Phi)$ when $t\in\mathbb Z$ and to the continuous dynamical system $(\mathcal S,\{\Phi_t\}_{t\in\mathbb R})$ when $t\in\mathbb R$; in both cases the criteria of the `Operations and Periodicity' chapter and of the `Periodic Systems' chapter may be applied directly.
+\end{definition}
+
+\begin{theorem}[Economic periodicity decision theorem]\label{thm:econ_periodicity_decision}
+Let the decision map of an economic target be $\Phi$, and let $(\mathcal S,\Phi)$ be a discrete dynamical system. Then:
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{Sufficient criterion}: if there exists $m\in\mathbb N^+$ such that $\Phi^m=\mathrm{id}$, then the target is a uniformly periodic economic system; every orbit is closed, and the orbit length divides $m$.
+    \item \textbf{Equivalence of the decision}: the target is a uniformly periodic economic system if and only if $\operatorname{ord}(\Phi)<\infty$.
+    \item \textbf{Pointwise criterion}: the orbit of the target at the state $x_0$ is closed if and only if $x_0$ is a periodic point; the orbit length is then the period at that point.
+    \item \textbf{Non-eliminability}: the conjunction of conserved quantities and the symmetry group cannot replace $\operatorname{ord}(\Phi)<\infty$; a quasi-periodic economic target is not a periodic economic system.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:econ_periodicity_decision} of this chapter is the domain instantiation of \cref{thm:ps_periodicity_decision} in the `Periodic Systems' chapter:
+it suffices to replace the decision map $f$ and the evolution group by $\Phi$ of this chapter, and then (A) sufficient criterion, (B) equivalence of the decision, (C) pointwise criterion and
+(D) non-eliminability hold one by one. By the convention of \cref{rem:ps_applications_hook}, they are not expanded again here.
+\end{proof}
+
+\begin{corollary}[Economic period types]\label{cor:econ_period_type}
+After the decision by \cref{thm:econ_periodicity_decision}, an economic target falls into one of the following types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Trivial period type}: the minimal period is $m_0=1$, and the state is a fixed point (for example a static equilibrium);
+    \item \textbf{Strictly periodic type}: $1<m_0<\infty$, and the state is strictly periodic (for example the $T=2$ oscillation of the cobweb model, or the inventory cycle);
+    \item \textbf{Uniformly periodic type}: $\operatorname{ord}(\Phi)=m<\infty$, and every orbit length divides $m$;
+    \item \textbf{Quasi-periodic type}: $\operatorname{ord}(\Phi)=\infty$; the orbits are not closed but are dense in a compact carrier structure (for example the superposition of Kondratiev long waves, or multiple periods in financial markets);
+    \item \textbf{Eventually periodic type}: there exists $N$ such that the target is periodic for $t\ge N$;
+    \item \textbf{Discrete periodic type}: the carrier structure is $\mathbb Z$ and the normalised period ratio is $\rho=T_x/\Delta x\in\mathbb Q$.
+    \item \textbf{Asymptotically periodic (damped) type}: the orbit is not closed, but tends asymptotically to a closed orbit or to a fixed point, the residual decaying as $e^{-\kappa t}$ (see \cref{def:ps_period_type}(vii)).
+\end{enumerate}
+Among these, (i)--(iii) and (vi) belong to periodic economic systems; (iv) does not belong to periodic economic systems, but can be handled by bounded-approximation tools; (v) is a periodic economic system only in its stable stage; (vii), like (iv), is a type in the limiting sense; it is not a periodic economic system and can be handled with bounded-approximation tools only in its stable stage.
+\end{corollary}
+
+\begin{proof}
+Each item follows by substituting an economic target into \cref{thm:econ_periodicity_decision} and \cref{def:ps_period_type} of the `Periodic Systems' chapter.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for the cobweb model]\label{lem:econ_cobweb_periodic}
+Let the cobweb model be described by the difference equation $P_t = \frac{a-c}{b} - \frac{d}{b}P_{t-1}$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item if $d/b<1$, the price converges to the equilibrium, and the system is of asymptotically periodic (damped) type (tending to a fixed point);
+    \item if $d/b=1$, the price oscillates with constant amplitude and period $T=2$, and the system is of uniformly periodic type;
+    \item if $d/b>1$, the price diverges, and the system is not periodic.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+By Proposition \ref{prop:cobweb_convergence}, the periodic solution is $P_t=P^*+(P_0-P^*)(-d/b)^t$. When $d/b<1$, $(-d/b)^t\to0$, so the price tends to the equilibrium; when $d/b=1$, $(-1)^t$ alternates, with period $2$; when $d/b>1$, the modulus diverges.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for the multiplier--accelerator model]\label{lem:econ_mult_acc_periodic}
+Let the characteristic equation of the multiplier--accelerator model be $\lambda^2-c(1+v)\lambda+cv=0$. If the discriminant satisfies $\Delta<0$, then income $Y_t$ oscillates as a damped sine wave:
+\[
+Y_t=Y^*+Ar^t\cos(\omega t+\phi),\qquad r=\sqrt{cv}.
+\]
+When $cv<1$ it converges and is of asymptotically periodic (damped) type; when $cv=1$ the amplitude is constant (uniformly periodic type), and when $cv>1$ it diverges.
+\end{lemma}
+
+\begin{proof}
+By Proposition \ref{prop:mult_acc_periodic}, complex conjugate characteristic roots give a damped oscillation; the damping factor $r=\sqrt{cv}$ determines the convergence.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for the nesting of the inventory cycle and the investment cycle]\label{lem:econ_nested_business_cycles}
+The inventory cycle ($T_K\approx4$ years) and the fixed-capital investment cycle ($T_J\approx9$ years) form a nested structure: $\omega_K/\omega_J\approx2.25\in(2,3)$. When the two are superposed, the whole is of quasi-periodic type (if the frequency ratio is irrational) or of uniformly periodic type (if the frequency ratio is rational).
+\end{lemma}
+
+\begin{proof}
+By Proposition \ref{prop:nested_business_cycles}, the frequency ratio $\omega_K/\omega_J=T_J/T_K=9/4=2.25\in\mathbb Q$, so the superposed orbit is closed, with common period $4T_J=36$ years, and is of uniformly periodic type; only when the frequency ratio is taken as an irrational approximation is it of quasi-periodic type.
+\end{proof}
+
+\begin{definition}[Algorithm for the minimal positive period of economic systems]\label{def:econ_minimal_period_algorithm}
+This definition has the same content as that of Chapter~\ref{chap:periodic_system}, section `Periodicity Decision: Is the Target Periodic?' (\cref{sec:ps_periodicity_decision}), \cref{def:ps_minimal_period_algorithm}; to avoid repetition, only the reference anchor is retained here, and the full statement is given there. The only difference here is terminology (economic target / economic sample); the steps of the algorithm and the conclusions are exactly the same.
+\end{definition}
+
+\begin{theorem}[Correctness of the algorithm for the minimal positive period of economic systems]\label{thm:econ_minimal_period_correctness}
+This theorem has the same content as that of Chapter~\ref{chap:periodic_system}, section `Periodicity Decision: Is the Target Periodic?' (\cref{sec:ps_periodicity_decision}), \cref{thm:ps_minimal_period_correctness}; to avoid repetition, only the reference anchor is retained here, and the full statement and proof are given there. The only difference here is terminology (economic target / economic sample); the steps of the algorithm and the conclusions are exactly the same.
+\end{theorem}
+
+\begin{example}[Examples of economic periodicity decisions]\label{ex:econ_periodic_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item Cobweb model: $T=2$ when $d/b=1$, uniformly periodic type; asymptotically periodic (damped) type when $d/b<1$.
+    \item Multiplier--accelerator: constant-amplitude oscillation when $cv=1$, uniformly periodic type.
+    \item Inventory cycle: $T_K\approx4$ years, uniformly periodic type (locally).
+    \item Investment cycle: $T_J\approx9$ years, uniformly periodic type (locally).
+    \item Kondratiev long wave: $T_{\mathrm{Kond}}\approx55$ years, quasi-periodic type (subject to the randomness of technological revolutions).
+    \item Stock-price series: nested at multiple scales, quasi-periodic type.
+\end{enumerate}
+\end{example}
+
+\begin{remark}[Conserved quantities do not guarantee periodicity]\label{rem:econ_invariant_not_period}
+In economic systems, the value identity, the money constraint and the information constraint are auxiliary conditions for periodic structure, but they do not constitute sufficient conditions. For example, a static equilibrium economy that satisfies the value identity will not spontaneously generate periodic oscillations. An economic periodic structure must be decided by \cref{thm:econ_periodicity_decision} or by the lemmas above.
+\end{remark}
+
+\subsection{The second step: construction of the economic period series and the epicycle group}
+
+\begin{definition}[Economic amplitude series, frequency series and phase series]\label{def:econ_series}
+Let the state or output sequence of an economic target be $\{z_t\}$. If it can be written as
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+then
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+are called respectively the \textbf{amplitude series}, the \textbf{frequency series} and the \textbf{phase series} of the economic target. The three agree with \cref{def:amplitude_series}, \cref{def:frequency_series} and \cref{def:phase_series} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{definition}[Economic epicycle group]\label{def:econ_epicycle_group}
+Let the period series of an economic target be given by the amplitude series $\{A_k\}$, the frequency series $\{\omega_k\}$ and the phase series $\{\phi_k\}$. For each $k$ define the epicycle
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+whose collection
+\[
+\mathfrak E_{\mathrm{E}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+is called the \textbf{epicycle group} of the economic target. Its superposition is the economic period series
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[Construction of the period series from economic data]\label{thm:econ_series_reconstruction}
+Let the output of an economic target be a finite periodic sequence of period $N$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the output can be expanded as a discrete Fourier series
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item the amplitude series is given by $|c_k|$, the phase series by $\arg c_k$ and the frequency series by $2\pi k/N$;
+    \item if the output is a GDP growth-rate sequence, then the fundamental frequency corresponds to the long-run growth trend and the harmonics correspond to the inventory cycle and the investment cycle; if the output is a stock-price sequence, then the harmonics at each order correspond to market periods on different time scales.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) The discrete Fourier series of a finite periodic sequence is a standard result: the basis functions $\{e^{i2\pi kt/N}\}_{k=0}^{N-1}$ form an orthogonal basis of $\mathbb C^N$.
+(ii) This is read off directly from $c_k=A_k e^{i\phi_k}$.
+(iii) For a GDP growth-rate sequence, $N$ is the number of samples, the fundamental frequency corresponds to the average growth over the sample length, and the low-order harmonics correspond to the business cycle; for a stock-price sequence the same holds.
+\end{proof}
+
+\begin{proposition}[Three-parameter correspondence: radius, phase and angular speed]\label{prop:econ_epicycle_correspondence}
+The three parameters of the economic epicycle group $\mathfrak E_{\mathrm{E}}=\{(A_k,\omega_k,\phi_k)\}_{k}$ are in one-to-one correspondence with three geometric--economic quantities:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Radius corresponds to amplitude}: the radius $|E_k|=A_k$ of $E_k$ is the amplitude of that economic oscillation component;
+    \item \textbf{Phase corresponds to rotational delay}: the initial phase $\phi_k$ corresponds to the time translation $\tau_k=\phi_k/\omega_k$; when $\phi_k>0$ this component \textbf{leads} the baseline by $\tau_k$ (equivalently, the component coincides with the baseline once the baseline is postponed by $\tau_k$);
+    \item \textbf{Frequency corresponds to rotational speed}: $\omega_k$ is the angular frequency of that economic oscillation component.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:econ_epicycle_correspondence} of this chapter corresponds exactly to \cref{prop:ps_epicycle_correspondence} of the `Periodic Systems' chapter,
+and the three correspondences---radius to amplitude, phase to rotational delay, frequency to rotational speed---are obtained one by one by translating them to the epicycle group of this chapter.
+The proof is given there: (i) from $|E_k|=A_k$ and the energy decomposition, (ii) from the phase-translation theorem, (iii) from the definition of the frequency series.
+\end{proof}
+
+\begin{example}[Period series of an economic time series]\label{ex:econ_series_example}
+The GDP growth rate can be decomposed into a long-run trend, the inventory cycle (about 4 years), the investment cycle (about 9 years) and the long wave (about 55 years). In the epicycle group, the long wave corresponds to the outer, large epicycles (low frequency, high amplitude), whilst the inventory cycle corresponds to the inner, small epicycles (high frequency, low amplitude).
+\end{example}
+
+\begin{remark}[The period series is a complex function]\label{rem:econ_series_complex}
+Let $z=e^{i\omega_0t}$. Then the economic period series
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}
+\]
+when all components are commensurable with $\omega_0$ (that is, $\omega_k=k\omega_0$, $k\in\mathbb Z$) it can be written as the Laurent series $\sum_k c_k z^k$, where $c_k=A_k e^{i\phi_k}$: in that case the economic period series is a complex function on the unit circle, and otherwise it is merely a function on the torus.
+\end{remark}
+
+\subsection{The third step: dynamic adjustment of the economic epicycle group}
+
+\begin{definition}[Dynamic adjustment of the economic epicycle group]\label{def:econ_adaptive_adjustment}
+Let the current economic epicycle group be $\mathfrak E^{(j)}$, with partial sum
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+and residual $r^{(j)}=z-z^{(j)}$. \textbf{Dynamic adjustment} consists of two rules:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Cardinality adjustment}: if the residual energy satisfies $\|r^{(j)}\|^2>\delta$, add one new epicycle according to the peaks of the residual periodogram;
+    \item \textbf{Parameter adjustment}: update the parameters of the existing epicycles by regularised least squares or an information criterion.
+\end{enumerate}
+In economic systems, cardinality adjustment corresponds to adding an economic cycle component (for example adding a newly identified cycle); parameter adjustment corresponds to tuning the amplitude, phase and frequency so as to balance goodness of fit against model parsimony.
+\end{definition}
+
+\begin{proposition}[Monotonicity of cardinality adjustment]\label{prop:econ_adaptive_growth}
+After the dominant-frequency component of the residual is added as in \cref{def:econ_adaptive_adjustment}(i), the residual energy is monotonically non-increasing:
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+with equality if and only if the residual has no energy at the selected frequency.
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:econ_adaptive_growth} of this chapter is consistent with the dynamic adjustment mechanism of \cref{def:ps_adaptive_adjustment} in the `Periodic Systems' chapter:
+adding an epicycle removes the component of $r^{(j)}$ along $\hat\omega$ from the residual, and the orthogonal decomposition
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{the removed component}\|^2$ gives the inequality,
+with equality if and only if the norm of the removed component is zero. The complete argument is given there.
+\end{proof}
+
+\begin{theorem}[Convergence of dynamic adjustment]\label{thm:econ_adaptive_convergence}
+Let the economic target be a finite periodic sequence of period $T_0$ and let $\delta=0$. Then after at most $\lfloor T_0/2\rfloor+1$ steps of dynamic adjustment the residual is zero, and the resulting economic epicycle group is the exact Fourier data of the target. If the target is a complex-valued sequence, the number of independent harmonics is $T_0$, and the corresponding bound is at most $T_0$ steps.
+\end{theorem}
+
+\begin{proof}
+The discrete Fourier series of a sequence of period $T_0$ is complete on $\lfloor T_0/2\rfloor+1$ harmonics. At each step one dominant-frequency component of the residual is extracted as in \cref{prop:econ_adaptive_growth}, and the residual energy decreases strictly; hence after finitely many steps the residual is zero.
+\end{proof}
+
+\begin{definition}[Structural metric adjustment]\label{def:econ_structure_metric_adjustment}
+Let the structural metric of an economic target be
+\[
+\mathcal I=(\mathcal I_{\text{fit}},\mathcal I_{\text{parsimony}},\mathcal I_{\text{prediction}})
+=(\text{residual sum of squares},\ \text{number of parameters},\ \text{cross-validation error}).
+\]
+\textbf{Structural-metric adjustment} consists in choosing $\theta$ in the parameter space $\Theta$: at each step take a neighbouring parameter for which $\mathcal I(\theta)$ is \textbf{strictly decreasing} in the lexicographic order (minimisation); if no such parameter exists, the process stops, and the parameter is then locally optimal (that is, the residual is reduced first, then the number of parameters is controlled, and finally the prediction error is optimised).
+\end{definition}
+
+\begin{proposition}[Finite convergence of structural metric adjustment]\label{prop:econ_structure_metric_convergence}
+Let the parameter space $\Theta$ be finite, and let each adjustment make $\mathcal I$ strictly decreasing in the lexicographic order. Then the adjustment terminates after finitely many steps at a locally optimal parameter.
+\end{proposition}
+
+\begin{proof}
+Since $\Theta$ is finite, $\mathcal I$ takes only finitely many values, and the lexicographic order is a total order on a finite set; a strictly decreasing sequence in that order cannot continue indefinitely, so the adjustment terminates after finitely many steps. At termination there is no neighbouring parameter that makes $\mathcal I$ strictly decrease in the lexicographic order, that is, the parameter is locally optimal.
+\end{proof}
+
+\begin{example}[Selecting an economic period series by BIC]\label{ex:econ_bic}
+Fit $K$ epicycles to a GDP growth-rate sequence and compute $\operatorname{BIC}(K)=n\ln(\operatorname{RSS}/n)+K\ln n$. Choose the $K$ that minimises the BIC. Usually $K=3$--$5$ suffices to capture the main cycles.
+\end{example}
+
+\begin{remark}[Boundaries of dynamic adjustment]\label{rem:econ_adaptive_boundary}
+\cref{thm:econ_adaptive_convergence} relies on a finite periodic sequence. For a continuous spectrum or a quasi-periodic economic target (such as a long wave or a stock price), no finite epicycle group represents it exactly, and only a bounded approximation is possible. Structural metric adjustment does not guarantee a global optimum.
+\end{remark}
+
+\subsection{The fourth step: economic convolution}
+
+\begin{definition}[Economic amplitude, phase and frequency convolutions]\label{def:econ_convolution_types}
+Let two economic epicycle groups be
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+Define:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Amplitude convolution}: $\mathbb A_{mn}=A_nB_m$;
+    \item \textbf{Phase convolution}: $\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}$;
+    \item \textbf{Frequency convolution}: $\mathbb F_{mn}=\omega_n\nu_m$;
+    \item \textbf{Trend convolution}: $\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}$.
+\end{enumerate}
+This agrees with \cref{def:amplitude_convolution}, \cref{def:phase_convolution}, \cref{def:frequency_convolution} and \cref{def:tendency_convolution} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{theorem}[Action of the three convolutions on the economic epicycle group]\label{thm:econ_convolution_action}
+Let the epicycle groups of two economic targets be $\mathfrak E$ and $\mathfrak E'$ respectively. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item amplitude convolution acts only on the radius;
+    \item phase convolution acts only on the phase;
+    \item frequency convolution acts only on the rotational speed;
+    \item trend convolution preserves both amplitude and phase.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+This is read off directly from \cref{def:econ_convolution_types}.
+\end{proof}
+
+\begin{proposition}[Autocorrelation and trend convolution]\label{prop:econ_autocorr_phase_convolution}
+Let $\{z_t\}$ be an economic period sequence with autocorrelation function
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+In the language of the economic epicycle group, the autocorrelation function is the projection of trend convolution onto the diagonal:
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:econ_autocorr_phase_convolution} of this chapter is the realisation in this domain of the convolution-action conclusion of \cref{thm:ps_convolution_action} in the `Periodic Systems' chapter:
+substituting $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ into the definition of the autocorrelation, cancelling all off-diagonal cross terms by orthogonality and retaining only the diagonal term of the trend convolution
+(the factorisation of the three convolutions, \cref{prop:ps_convolution_factorization}), which yields $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$.
+The full expansion is given there.
+\end{proof}
+
+\begin{remark}[Relation between economic convolution and periodic convolution]\label{rem:econ_convolution_relation}
+Economic convolution is not a new convolution operation, but an instance of the periodic convolution of the `Series and Convolution' chapter on economic epicycle groups. Autocorrelation is the projection of the trend convolution onto the diagonal; cross-correlation and phase coupling are respectively the concrete manifestations in economics of amplitude convolution and frequency convolution.
+\end{remark}
+
+\subsection{The fifth step: integration with discrete sampling, harmonic analysis and time series analysis}
+
+\begin{definition}[Economic periodicity diagnosis pipeline]\label{def:econ_periodic_diagnosis}
+For a given economic system, diagnosis is carried out using the framework of periodic mathematics:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Periodicity decision}: verify the period type of the economic target (\cref{thm:econ_periodicity_decision});
+    \item \textbf{Series construction}: build the amplitude, frequency and phase series and the epicycle group from data such as GDP, prices and interest rates (\cref{thm:econ_series_reconstruction});
+    \item \textbf{Conservation diagnosis}: verify the value identity, the money constraint and the information constraint (\cref{thm:economic_conservation});
+    \item \textbf{Convolution diagnosis}: compute the autocorrelation (the diagonal projection of the trend convolution, \cref{prop:econ_autocorr_phase_convolution}) and the phase convolution;
+    \item \textbf{Integration diagnosis}: connect to the tool chains of discrete sampling, harmonic analysis and time series analysis.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[The economic periodicity diagnosis pipeline and its interface with three chapters]\label{thm:econ_diagnosis_integration}
+The five steps of \cref{def:econ_periodic_diagnosis} are connected respectively to:
+\begin{enumerate}[label=(\roman*)]
+    \item the `Discrete Sampling and Intercalation of Periodic Signals' chapter \cref{def:uniform_sampling_parallel}, \cref{thm:nyquist_shannon_parallel}, \cref{thm:intercalation_leakage_suppression};
+    \item the `Harmonic Analysis' chapter \cref{def:fourier_series}, \cref{thm:parseval_fourier}, \cref{prop:twelve_to_six};
+    \item the `Time Series Analysis' chapter \cref{def:ts_period_detection}, \cref{prop:ts_period_significance}, \cref{def:ts_window_validation}.
+\end{enumerate}
+Hence the economic periodicity diagnosis is not an independent method, but an application of the unified tool chain of periodic mathematics to economic systems.
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:econ_diagnosis_integration} of this chapter is the implementation in this domain of the five-step interface of the `Periodic Systems' chapter (\cref{tab:ps_five_steps}):
+periodicity is decided by sampling and spectral estimation, the frequency decomposition and the phase kernel use the `Harmonic Analysis' chapter, and the periodogram peaks, Fisher test and
+window-function validation use the `Time Series Analysis' chapter. The diagnostic pipeline is therefore synthesised from the tool chains of the three chapters; the proof is given there.
+\end{proof}
+
+\begin{remark}[The order of operations after integration]\label{rem:econ_integration_order}
+The recommended order for an actual diagnosis is: first decide whether the economic target is periodic (\cref{thm:econ_periodicity_decision}); then construct the Fourier data and the epicycle group of the economic data (\cref{thm:econ_series_reconstruction}); then optimise the parameters using the conservation constraints and dynamic adjustment (\cref{thm:econ_adaptive_convergence}, \cref{prop:econ_structure_metric_convergence}); then carry out the economic convolution and autocorrelation analysis (\cref{prop:econ_autocorr_phase_convolution}); and finally output the diagnosis as in \cref{def:econ_periodic_diagnosis}.
+\end{remark}
+
+\section{Mathematical foundations of economic systems}
+
+\begin{definition}[Basic quantities of the economic system]\label{def:economic_quantities}
+An economic system is described by the following basic variables:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Gross domestic product (GDP)} $Y(t)$: the total value of the final goods and services produced by a country at time $t$. The growth rate $\dot{Y}/Y$ of GDP is a core indicator of the business cycle.
+    \item \textbf{Price level} $P(t)$: the weighted average price of a basket of representative goods and services. The inflation rate $\pi(t) = \dot{P}/P$ measures the rate of decay of the purchasing power of money.
+    \item \textbf{Interest rate} $r(t)$: the cost of using borrowed funds. The difference between the nominal interest rate $i$ and the real interest rate $r = i - \pi$ reflects inflation expectations.
+    \item \textbf{Unemployment rate} $u(t)$: the proportion of the labour force that is seeking work but has not found it. There is a negative correlation between the unemployment rate and the GDP growth rate (Okun's law).
+    \item \textbf{Investment} $I(t)$ and \textbf{consumption} $C(t)$: the two main components of aggregate expenditure. Investment fluctuates far more widely than consumption and is the main driver of the business cycle.
+    \item \textbf{Money supply} $M(t)$: the total quantity of money circulating in the economy. The growth rate of the money supply and the inflation rate are highly correlated in the long run (the quantity theory of money).
+\end{enumerate}
+The core feature of an economic system is \textbf{multi-scale nested periodicity}---periods on different time scales (the inventory cycle, the fixed-capital investment cycle and the Kondratiev long wave) coexist within the same economic system.
+\end{definition}
+
+\section{Supply--demand equilibrium and the cobweb model}
+
+\begin{definition}[Supply--demand equilibrium]\label{def:supply_demand}
+The core mechanism of a market economy is the \textbf{adjustment of supply and demand by price}. Let the demand function be $D(P)$ (demand falls as the price rises, $D' < 0$) and the supply function be $S(P)$ (supply rises as the price rises, $S' > 0$). The equilibrium price $P^*$ satisfies $D(P^*) = S(P^*)$. When the market price deviates from the equilibrium, the excess demand $D(P) - S(P)$ drives the price adjustment:
+\[
+\frac{dP}{dt} = \lambda \cdot (D(P) - S(P)),
+\]
+where $\lambda > 0$ is the speed of price adjustment. When $D(P) > S(P)$ (excess demand) the price rises, and when $D(P) < S(P)$ (excess supply) the price falls.
+
+The price adjustment mechanism can be regarded as a gradient flow on the potential function $V(P) = -\int (D - S)\,dP$: $dP/dt = -\lambda \nabla V(P)$. The equilibrium price is a minimum point of the potential function, and the fluctuations of the market price near the equilibrium point are oscillations in the gradient flow.
+\end{definition}
+
+\begin{definition}[Cobweb model]\label{def:cobweb_model}
+When there is a time lag in the response of supply to price (output is decided at sowing time for agricultural products, and the price is determined only at harvest), a \textbf{cobweb cycle} appears in the market. Let the demand function be $D(P_t) = a - bP_t$ and the supply function be $S(P_{t-1}) = c + dP_{t-1}$ (current supply is determined by the previous period's price). The market-clearing condition $D(P_t) = S(P_{t-1})$ gives the difference equation:
+\[
+P_t = \frac{a-c}{b} - \frac{d}{b} P_{t-1}.
+\]
+The cobweb model is a classic instance of periodic oscillation generated by delayed negative feedback: the current price $P_t$ is determined by the equilibrium of current demand with current supply (which is determined by the previous period's price). When $d/b < 1$ (the demand curve is steeper than the supply curve), the price converges to the equilibrium; when $d/b > 1$, the price diverges; when $d/b = 1$, the price oscillates with constant amplitude.
+\end{definition}
+
+\begin{proposition}[Convergence condition for the cobweb cycle]\label{prop:cobweb_convergence}
+The periodic solution of the cobweb model is $P_t = P^* + (P_0 - P^*)(-d/b)^t$. The convergence condition is $d/b < 1$ (demand elasticity greater than supply elasticity). On convergence, the price oscillates about the equilibrium with period $T = 2$---a complete `high price--low price' cycle is completed every two time units. The divergence condition $d/b > 1$ corresponds to price fluctuations that grow period by period, and the system becomes unstable.
+
+The cobweb model is a coupling of a gradient flow with delayed feedback: the price adjustment drives the system towards equilibrium, and the time lag produces a rotational component in phase space. When the divergence strength ($d/b$) exceeds $1$, the amplifying effect of the rotational component exceeds the restoring effect of the gradient, and the system diverges.
+\end{proposition}
+
+\begin{proof}
+From the market-clearing condition $a - bP_t = c + dP_{t-1}$, we solve for $P_t = \frac{a-c}{b} - \frac{d}{b}P_{t-1}$. The equilibrium price $P^*$ satisfies $P^* = \frac{a-c}{b} - \frac{d}{b}P^*$, whence $P^* = \frac{a-c}{b+d}$. Let $\Delta P_t = P_t - P^*$; then $\Delta P_t = -\frac{d}{b}\Delta P_{t-1}$. By recursion, $\Delta P_t = (-\frac{d}{b})^t \Delta P_0$. When $d/b < 1$, $|\Delta P_t| \to 0$ (convergence). On convergence, the sign of $\Delta P_t$ reverses once each period---high-price periods alternate with low-price periods, with period $2$.
+\end{proof}
+
+\section{The multiplier--accelerator model}
+
+\begin{definition}[Multiplier--accelerator model]\label{def:multiplier_accelerator}
+Samuelson's multiplier--accelerator model explains the endogenous driving mechanism of the business cycle. The model consists of three equations:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Consumption function}: $C_t = cY_{t-1}$ (current consumption is determined by the previous period's income, and $c \in (0,1)$ is the marginal propensity to consume).
+    \item \textbf{Investment function}: $I_t = v(C_t - C_{t-1}) + I_0$ (induced investment is driven by the change in consumption, $v > 0$ is the accelerator, and $I_0$ is autonomous investment).
+    \item \textbf{Income identity}: $Y_t = C_t + I_t + G_t$ (in a closed economy government purchases $G_t$ are exogenous).
+\end{enumerate}
+Combining these gives the second-order linear difference equation: $Y_t - c(1+v)Y_{t-1} + cvY_{t-2} = I_0 + G_t$.
+
+The core mechanism of the multiplier--accelerator model: the multiplier effect ($1/(1-c)$) is forward scaling---$1$ unit of autonomous expenditure generates an increase of $1/(1-c)$ units in total income through multiple rounds of the consumption--income cycle. The accelerator effect ($v$) is reverse scaling---a deceleration in consumption growth triggers a fall in investment (the acceleration principle). The coupling of the multiplier and the accelerator generates periodic fluctuations in income $Y_t$---the amplitude and persistence of the fluctuations depend on the values of the parameters $c$ and $v$.
+\end{definition}
+
+\begin{proposition}[Periodic solutions of the multiplier--accelerator model]\label{prop:mult_acc_periodic}
+The characteristic equation of the multiplier--accelerator model is $\lambda^2 - c(1+v)\lambda + cv = 0$. The condition for the existence of periodic solutions is that the discriminant satisfies $\Delta = c^2(1+v)^2 - 4cv < 0$. When the characteristic roots are complex conjugates, income $Y_t$ oscillates about the equilibrium in the form of a damped sine wave:
+\[
+Y_t = Y^* + Ar^t\cos(\omega t + \phi),
+\]
+where $r = \sqrt{cv}$ is the damping factor and $\omega = \arccos(c(1+v)/(2\sqrt{cv}))$ is the angular frequency of the oscillation. When $cv < 1$, $r < 1$ (damped oscillation, converging to the equilibrium); when $cv = 1$, $r = 1$ (constant-amplitude oscillation); when $cv > 1$, $r > 1$ (divergent oscillation).
+
+The periodic solution of the multiplier--accelerator model is a coupling of rotational feedback and damped decay: the term $c(1+v)$ is the feedback coupling (current income feeds back to the next period's income through consumption and investment), and the term $cv$ is the damping (the second-order lag damps the first-order lag). The period $T = 2\pi/\omega$ is jointly determined by $c$ and $v$---the larger $c$ is (the higher the marginal propensity to consume) and the larger $v$ is (the larger the accelerator), the longer the period.
+\end{proposition}
+
+\begin{proof}
+The roots of the characteristic equation $\lambda^2 - c(1+v)\lambda + cv = 0$ are $\lambda_{1,2} = \frac{c(1+v) \pm \sqrt{c^2(1+v)^2 - 4cv}}{2}$. When the discriminant satisfies $\Delta < 0$, $\lambda_{1,2} = \sqrt{cv} \cdot e^{\pm i\omega}$, where $\omega = \arctan(\sqrt{4cv - c^2(1+v)^2} / c(1+v))$. The damping factor is $r = |\lambda| = \sqrt{cv}$. The oscillation period is $T = 2\pi/\omega$. When $cv < 1$, $r < 1$ and the oscillation decays. When $cv = 1$, $r = 1$ and the oscillation has constant amplitude.
+\end{proof}
+
+\section{The inventory cycle and the fixed-capital investment cycle}
+
+\begin{definition}[Inventory cycle (Kitchin cycle)]\label{def:kitchin_cycle}
+The \textbf{inventory cycle} (Kitchin cycle) is the shortest business cycle in the economy, lasting about $3$--$5$ years. The driving force of the inventory cycle is the adjustment of inventory levels by firms: when demand unexpectedly increases, firms deplete inventories to meet orders and then increase production to replenish them (inventory investment grows); when demand unexpectedly falls, firms accumulate unintended inventories and then cut production to work them off (inventory investment contracts). The periodic fluctuation of inventory investment $I_{\text{inv}}(t)$ is the core of the inventory cycle.
+
+The inventory cycle is the realisation of a gradient flow in the behaviour of individual firms: when the inventory level deviates from the target inventory, the firm adjusts production so that inventories return to target---$dI_{\text{inv}}/dt = -\alpha(H - H^*)$ (where $H$ is actual inventory and $H^*$ is target inventory). The time lag in inventory adjustment (the time from order to delivery) introduces delayed feedback and produces a periodic oscillation of $3$--$5$ years.
+\end{definition}
+
+\begin{definition}[Fixed-capital investment cycle (Juglar cycle)]\label{def:juglar_cycle}
+The \textbf{fixed-capital investment cycle} (Juglar cycle) is a medium-length business cycle, lasting about $7$--$11$ years. The driving force of the fixed-capital investment cycle is the renewal of equipment and the expansion of capacity by firms: during a boom firms invest heavily in new equipment (an investment boom); after overcapacity appears investment plunges (an investment trough); once the old equipment is fully depreciated a new round of renewal begins (investment recovery).
+
+The fixed-capital investment cycle is the realisation of rotational motion in aggregate investment behaviour: investment $I(t)$ and the capital stock $K(t)$ form a limit cycle in phase space---during booms investment is high and capital grows fast, whilst during recessions investment is low and capital depreciates. The length of the investment cycle is determined by the average service life of equipment (about $10$ years).
+\end{definition}
+
+\begin{proposition}[Nested structure of inventory and investment cycles]\label{prop:nested_business_cycles}
+The inventory cycle ($3$--$5$ years) is nested within the fixed-capital investment cycle ($7$--$11$ years). A typical Juglar cycle contains $2$--$3$ Kitchin cycles. This nested structure corresponds to a multi-level epicycle system: the inventory cycle is the inner, fast, small epicycle (high frequency, low amplitude), whilst the investment cycle is the outer, slow, large epicycle (low frequency, high amplitude).
+
+Let the dominant frequency of the inventory cycle be $\omega_K = 2\pi/T_K$ ($T_K \approx 4$ years) and that of the investment cycle be $\omega_J = 2\pi/T_J$ ($T_J \approx 9$ years). The frequency ratio of the two is $\omega_K/\omega_J \approx 2.25$---the inventory cycle completes about $2$--$3$ full cycles within each phase of the investment cycle. When the two are in phase (booms superimposed), the economy overheats; when the two are in antiphase (an inventory recession superimposed on an investment recession), the economy is depressed.
+\end{proposition}
+
+\begin{proof}
+The frequency ratio $\omega_K/\omega_J = T_J/T_K \approx 9/4 = 2.25$, that is, one Juglar cycle contains $2.25$ Kitchin cycles. The phase difference $\Delta\theta(t) = (\omega_K - \omega_J)t$ evolves at the beat frequency $\omega_K - \omega_J = 2\pi(1/T_K - 1/T_J)$; the instants at which the two periods are in phase are $t = nT_KT_J/(T_J-T_K)\approx7.2n$ years, whilst at $t = \operatorname{lcm}(T_K, T_J) \cdot n = 36n$ years the joint state repeats exactly---at these instants the booms are superimposed and the economy overheats; at antiphase (phase difference $\pi$) an inventory recession is superimposed on an investment recession, and the economy is depressed. The nested structure is precisely $\omega_K/\omega_J \approx 2.25 \in (2,3)$: the inner cycle completes about $2$--$3$ full cycles within the outer cycle.
+\end{proof}
+
+\section{The Kondratiev long wave}
+
+\begin{definition}[Kondratiev long wave]\label{def:kondratiev_wave}
+The \textbf{Kondratiev long wave} (Kondratiev wave) is the longest cycle in the economy, lasting about $45$--$60$ years. Kondratiev held that the capitalist economy exhibits long-run fluctuations of about half a century---each long wave comprises a rising phase (about $25$ years) and a falling phase (about $25$ years). The driving force of the long wave is the clustered emergence and diffusion of major technological innovations:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{First wave (about 1780--1840)}: the steam engine and the mechanisation of textiles---the Industrial Revolution.
+    \item \textbf{Second wave (about 1840--1890)}: railways and steel---the railway age.
+    \item \textbf{Third wave (about 1890--1940)}: electricity, the internal combustion engine and the chemical industry---the age of electrification.
+    \item \textbf{Fourth wave (about 1940--1980)}: petrochemicals, electronics and nuclear energy---the post-war boom.
+    \item \textbf{Fifth wave (about 1980--2020)}: information technology and the internet---the digital economy.
+    \item \textbf{Sixth wave (from about 2020)}: artificial intelligence, renewable energy and biotechnology.
+\end{enumerate}
+The Kondratiev long wave is a scaling cycle driven by technological innovation: technological innovation is forward scaling---breakthroughs in new technology bring stepwise growth in productivity; the saturation of technology diffusion is reverse scaling---the old technological paradigm reaches its limit and growth slows. The $45$--$60$ year period of each long wave is determined by the life cycle of a major technology from invention to maturity.
+\end{definition}
+
+\begin{proposition}[Fourier analysis of the Kondratiev long wave]\label{prop:kondratiev_fourier}
+Fourier analysis of a time series of world GDP growth rates (about $200$ years) identifies a dominant period of about $55$ years (with a peak near $0.018$ year$^{-1}$). The spectral energy of the Kondratiev long wave is concentrated in the low-frequency band---this is the manifestation of $1/f$ noise in macroeconomics. The length of the long wave, $T_{\mathrm{Kond}} \approx 55$ years, is roughly equal to the working life of two generations---one generation enters the labour market during the technological upswing and retires when the technology matures.
+
+The Kondratiev long wave is the outer structure of the nested business cycles: one long wave contains about $5$--$6$ Juglar investment cycles and $10$--$15$ Kitchin inventory cycles. The three-level nested structure (Kitchin $\subset$ Juglar $\subset$ Kondratiev) is the macroscopic manifestation of multi-scale periodic coupling in economic systems.
+\end{proposition}
+
+\section{The periodic structure of financial markets}
+
+\begin{definition}[Momentum and reversal of asset prices]\label{def:momentum_reversal}
+Asset prices in financial markets display an alternation of the \textbf{momentum effect} (continuation of trend) and \textbf{mean reversion} (reversal of trend) on different time scales:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Short-term momentum} ($1$--$12$ months): stocks that have performed well in the past tend to continue to perform well in the short term---the price trend continues. This is a translation of price along the direction of the trend.
+    \item \textbf{Long-term reversal} ($3$--$5$ years): stocks that have performed well in the past tend to perform worse in the long term---the price trend reverses. This is a rotation of price in phase space, returning from an overvalued region to a fair valuation.
+\end{enumerate}
+The alternation of momentum and reversal is the coupling of the trend component and the rotational component in asset pricing: momentum corresponds to price inertia, and reversal corresponds to the reversion of price to the mean. The duration of the momentum effect, about $12$ months, is determined by investors' underreaction to information and the gradual diffusion of information. The duration of the reversal effect, about $3$--$5$ years, is determined by investors' overreaction to information and the mean reversion of valuations.
+\end{definition}
+
+\begin{proposition}[Autocorrelation structure of price momentum]\label{prop:momentum_autocorr}
+The returns of a momentum strategy display positive autocorrelation over holding periods of $1$--$12$ months: $\rho(h) > 0$ ($h = 1,\dots,12$ months). The returns of a reversal strategy display negative autocorrelation over holding periods of $3$--$5$ years: $\rho(h) < 0$ ($h = 36,\dots,60$ months). The change of sign of the autocorrelation function $\rho(h)$ (from positive to negative) is the mark of a phase transition in the market cycle---intervals of positive correlation correspond to the dominance of momentum, and intervals of negative correlation to the dominance of reversal.
+
+The autocorrelation structure of price is related to phase similarity: when $\rho(h) > 0$, the directions of the price at the two instants agree ($\cos(\theta_t - \theta_{t+h}) \approx 1$); when $\rho(h) < 0$, the directions of the price at the two instants are opposite ($\cos(\theta_t - \theta_{t+h}) \approx -1$).
+\end{proposition}
+
+\begin{proof}
+The autocorrelation function is defined as $\rho(h) = \operatorname{Corr}(r_t, r_{t+h})$ ($r_t$ being the return). The empirical regularities of momentum and reversal (Jegadeesh--Titman 1993; De Bondt--Thaler 1985) give the observed fact that $\rho(h)$ is positive at short lags and negative at long lags---the numerical intervals of this proposition ($1$--$12$ months, $36$--$60$ months) are a citation of that empirical regularity rather than a derivation from a theorem. Their correspondence with similarity is at the level of an identity: $\cos(\theta_t - \theta_{t+h})$ is the inner product of the direction vectors, and its sign agrees with the common direction of the returns.
+\end{proof}
+
+\section{Income distribution and the power-law exponent}
+
+\begin{definition}[Pareto distribution]\label{def:pareto_distribution}
+The \textbf{Pareto distribution} describes the power-law distribution of income and wealth among high-income groups. Let $X$ be income or wealth; its complementary cumulative distribution function is
+\[
+\mathbb{P}(X > x) = \left(\frac{x_{\min}}{x}\right)^\alpha, \quad x \ge x_{\min} > 0, \quad \alpha > 0,
+\]
+where $\alpha$ is the \textbf{Pareto exponent}. The smaller $\alpha$ is, the more unequal the income distribution (a minority holds most of the wealth). Empirical studies show that the Pareto exponent $\alpha$ of income distributions lies between $1.5$ and $2.5$ across countries, and remains relatively stable across countries and across periods.
+
+The Pareto distribution has scale invariance: $\mathbb{P}(X > \lambda x) = \lambda^{-\alpha} \mathbb{P}(X > x)$---the tail of the income distribution retains its form under scaling transformations. The stability of $\alpha$ (across countries and across periods) is empirical evidence for the stability of the power-law exponent in economic systems.
+\end{definition}
+
+\begin{remark}[Pareto exponent and the economic growth cycle (empirical observation)]\label{prop:pareto_growth}
+The Pareto exponent $\alpha$ fluctuates slowly about its mean in the long run, and its fluctuation period is synchronised with the Kondratiev long wave. In the phase in which a technological revolution breaks out (the rising phase of the long wave), $\alpha$ falls (inequality intensifies)---innovators obtain excess returns; in the phase in which technology diffusion matures (the falling phase of the long wave), $\alpha$ rises (inequality is alleviated)---the technological dividend diffuses to the masses. The fluctuation period of $\alpha$ is about $50$--$60$ years, consistent with the Kondratiev long wave.
+
+The periodic fluctuation of the Pareto exponent is the periodic modulation of the power-law exponent in the dimension of economic inequality---the `creative destruction' of technological innovation (Schumpeterian creative destruction) manifests itself at the macroeconomic level as the periodic rise and fall of the power-law exponent. The above is an empirical observation and an analogical explanation, not a mathematical theorem; its rigour depends on the availability of long-run income distribution data.
+\end{remark}
+
+\section{Identities and constraints of the economic system}
+
+\begin{theorem}[The three identities and constraints of the economic system]\label{thm:economic_conservation}
+The dynamics of an economic system is governed by three kinds of identity and constraint:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Value identity (gradient flow)}: in a closed economy, total output $Y$ equals total income $Y$ equals total expenditure $Y$---the national income accounting identity $Y = C + I + G + (X - M)$. Value is not created or destroyed out of nothing; it can only be transferred between sectors. In the long run, the growth of labour productivity is the fundamental source of real wage growth---value creation is driven by technological progress.
+    \item \textbf{Money constraint (divergence flow)}: the quantity equation of money $MV = PY$ describes the relation among the money supply $M$, the velocity of money $V$, the price level $P$ and real output $Y$. In the long run the velocity of money $V$ is relatively stable, and when the money supply $M$ grows faster than real output $Y$, the price level $P$ rises (inflation). The change in the money stock $=$ money issuance $-$ money withdrawal---the central bank regulates the money supply through monetary policy.
+    \item \textbf{Information constraint (rotational flow)}: market prices contain all the information of market participants about supply and demand (the efficient market hypothesis). In a strongly efficient market, prices already reflect all public and private information---no one can obtain excess returns by analysing available information. The transmission of information among market participants satisfies a constraint---one person's informational advantage necessarily comes at the cost of another's informational disadvantage. Insider trading is an instance in which the information constraint is violated.
+\end{enumerate}
+The hierarchical relation among the three identities and constraints is as follows: the value identity is the substantive basis of economic activity, the money constraint is the constraint on nominal variables, and the information constraint is the theoretical guarantee of market efficiency. Together the three constitute the guarantee of self-consistency of the periodic structure of economic systems.
+\end{theorem}
+
+\begin{proof}
+(i) Value identity: the national income accounting identity $Y = C + I + G + NX$ ($NX = X - M$ being net exports) is an accounting identity---every expenditure corresponds to an income. The three methods of computing GDP (the production method, the income method and the expenditure method) give the same result in theory. In a closed economy, $Y = C + S + T$ (income $=$ consumption $+$ saving $+$ taxes) and $Y = C + I + G$ (expenditure $=$ consumption $+$ investment $+$ government purchases); subtracting the two equations gives $S - I = G - T$ (private-sector surplus $=$ government-sector deficit).
+
+(ii) Money constraint: the quantity equation of money $MV = PY$ is an identity---the left-hand side is the total value of money changing hands, and the right-hand side is the total value of goods traded. Taking logarithmic differences: $\Delta\ln M + \Delta\ln V = \pi + \Delta\ln Y$. In the long run $\Delta\ln V \approx 0$ (the velocity of circulation is stable) and $\Delta\ln Y \approx 2\%$--$3\%$ (the long-run growth trend), so $\pi \approx \Delta\ln M - \Delta\ln Y$---the inflation rate is approximately equal to the money growth rate minus the real growth rate.
+
+(iii) Information constraint: Fama's efficient market hypothesis has three levels. Weak efficiency: prices reflect all historical trading information---technical analysis is ineffective. Semi-strong efficiency: prices reflect all public information---fundamental analysis is ineffective. Strong efficiency: prices reflect all information (including inside information)---no one can obtain excess returns. Empirically, markets are usually semi-strong efficient---public information is rapidly absorbed by prices, but inside information and long-term reversal anomalies exist.
+\end{proof}
+
+\section{Window-function periodicity diagnosis of the stock market}
+
+\begin{definition}[Cyclical structure of stock prices]\label{def:stock_price_cycle}
+The time series of a stock price $P(t)$ contains multiple nested periods: intraday periods (intraday fluctuations between the open and the close), weekly periods (the beginning-of-week and end-of-week effect), monthly periods (fund flows at the beginning and the end of the month), quarterly periods (expectations and realisations in the earnings season) and annual periods (the January effect, the Santa Claus rally). These periods are superimposed on the price chart and form complex fluctuation patterns. The stock price $P(t)$ can be expanded as a nested epicycle system:
+\[
+P(t) = \sum_{k=1}^{K} A_k(t) e^{i(\omega_k t + \phi_k(t))},
+\]
+where the amplitudes $A_k(t)$ and phases $\phi_k(t)$ of the epicycles at each level vary slowly with time---this corresponds to the evolution of the trend and the formation of inflection points.
+\end{definition}
+
+\begin{definition}[Application of window functions in stock-price periodicity diagnosis]\label{def:window_function_stock}
+The window function $W(t; \Delta)$ is used in stock-price analysis to extract periodic signals on a specific time scale. For a given window radius $\Delta$, the \textbf{window-function smoothed trend} and the \textbf{window-function local fluctuation} of the stock price $P(t)$ are respectively:
+\[
+P_{\text{trend}}(t; \Delta) = \int_{-\infty}^{\infty} P(t+\tau) K\left(\frac{\tau}{\Delta}\right) \frac{d\tau}{\Delta},
+\]
+\[
+P_{\text{fluct}}(t; \Delta) = P(t) - P_{\text{trend}}(t; \Delta),
+\]
+where $K$ is the kernel function (Gaussian kernel, Mexican-hat kernel, exponential kernel, etc.). The effect of a window function is similar to that of a moving average, but the kernel function $K$ assigns different weights to observations at different time distances. The window radius $\Delta$ controls the time scale---the smaller $\Delta$ is, the more sensitive the trend (capturing short-term fluctuations); the larger $\Delta$ is, the smoother the trend (revealing the long-term direction).
+
+Window-function smoothing is a degenerate form of periodic convolution on a univariate time series---taking $f = g = P$, $\alpha = 1$, $d = 1$ and the kernel function $K$ as the weight kernel, the output is the trend component. The window-function local fluctuation $P_{\text{fluct}}$ is the difference between the original signal and the trend---it corresponds to the directional trend in periodic convolution ($d=2$, the sine of the difference angle) and measures the strength of the rotation of the price away from the trend.
+\end{definition}
+
+\begin{lemma}[Spectral-filtering property of window-function trend extraction]\label{ch29_window_spectral}
+Window-function smoothing
+\[
+P_{\text{trend}}(t;\Delta) = \int P(t+\tau) K(\tau/\Delta)\, d\tau/\Delta
+\]
+is the convolution of $P$ with the kernel $K_\Delta$, whose frequency-domain form is
+\[
+\widehat{P_{\text{trend}}}(\omega; \Delta) = \hat K(\Delta\omega) \cdot \hat P(\omega).
+\]
+That is, smoothing with window radius $\Delta$ is, in the frequency domain, filtering with $\hat K(\Delta\omega)$ as the passband: low frequencies $|\omega| \lesssim 1/\Delta$ are retained and high frequencies suppressed---the larger $\Delta$ is, the narrower the passband.
+\end{lemma}
+
+\begin{proof}
+By the Fourier property of convolution $\widehat{P * K_\Delta}(\omega) = \hat P(\omega)\cdot \widehat{K_\Delta}(\omega)$, where $\widehat{K_\Delta}(\omega) = \hat K(\Delta\omega)$ (the Fourier transform of a scaled variable). In the Gaussian-kernel case $\hat K(\Delta\omega) = e^{-\Delta^2\omega^2/2}$, and the passband width is $\sim 1/\Delta$.
+\end{proof}
+
+\begin{proposition}[Periodic decomposition by superposing multiple window functions]\label{prop:multi_window_stock}
+Using a family of window functions with different radii $\{\Delta_1, \Delta_2, \dots, \Delta_K\}$ ($\Delta_1 < \Delta_2 < \dots < \Delta_K$), a multi-scale period decomposition of a stock price can be carried out. The trend components $\{P_{\text{trend}}(t; \Delta_k)\}_{k=1}^{K}$ extracted by the respective window functions correspond to periodic structures on different time scales:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Small window} ($\Delta_1 \approx 5$--$20$ trading days): extracts intraday to weekly periods---corresponding to high-frequency trading signals.
+    \item \textbf{Medium window} ($\Delta_2 \approx 50$--$120$ trading days): extracts monthly to quarterly periods---corresponding to medium-term trends.
+    \item \textbf{Large window} ($\Delta_3 \approx 250$ trading days): extracts annual periods---corresponding to long-term trends.
+\end{enumerate}
+Multi-window decomposition is the realisation of a nested epicycle system in stock-price analysis---the small window corresponds to the inner, fast, small epicycles (high frequency, low amplitude), and the large window to the outer, slow, large epicycles (low frequency, high amplitude). The periodic convolution $\mathcal{K}^{(d)}\{P_{\text{trend}}(\cdot; \Delta_i), P_{\text{trend}}(\cdot; \Delta_j)\}$ between the trend components $P_{\text{trend}}(t; \Delta_k)$ extracted by the respective window functions measures the strength of the phase coupling between trends on different time scales.
+\end{proposition}
+
+\begin{proof}
+By Lemma \ref{ch29_window_spectral}, the smoothing with window $\Delta_k$ retains, in the frequency domain, the low-frequency band $|\omega| \lesssim 1/\Delta_k$. Taking $\Delta_1 < \Delta_2 < \Delta_3$, the three trend components $P_{\text{trend}}(\cdot;\Delta_k)$ carry in turn the information of the high-frequency band, the medium-frequency band and the low-frequency band---the small window extracts short periods and the large window long periods, forming a multi-scale decomposition stratified by frequency band. The periodic convolution $\mathcal{K}^{(d)}\{P_i, P_j\}$ between a pair of components computes the phase interaction of the trends in the two frequency bands; when $i \neq j$ the two bands do not overlap, and the non-trivial values of $\mathcal{K}^{(d)}$ are the cross-scale couplings (such as the phase alignment of the monthly trend with the annual trend).
+\end{proof}
+
+\section{Inflection-point detection: refraction index, similarity and trend}
+
+\begin{definition}[Mathematical definition of stock inflection points]\label{def:stock_inflection_point}
+An \textbf{inflection point} of a stock price is a critical point at which the price trend passes from one state to another. In periodic mathematics, an inflection point corresponds to a jump in the phase $\theta(t) = \arctan(\dot{P}(t)/P(t))$---when the absolute value of $\dot{\theta}(t)$ exceeds a threshold, the direction or the rate of the trend changes markedly. Inflection points fall into two types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Peak inflection point} (from rise to fall): $\dot{P}(t) > 0$ becomes $\dot{P}(t) < 0$, and the phase $\theta(t)$ passes from positive (rising) to negative (falling). The corresponding sine difference-angle similarity $\operatorname{Similarity}^{(2)}(\theta_t, \theta_{t-\Delta t})$ changes from positive to negative.
+    \item \textbf{Trough inflection point} (from fall to rise): $\dot{P}(t) < 0$ becomes $\dot{P}(t) > 0$, and the phase $\theta(t)$ passes from negative (falling) to positive (rising). The corresponding sine difference-angle similarity $\operatorname{Similarity}^{(2)}(\theta_t, \theta_{t-\Delta t})$ changes from negative to positive.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Refraction index: a measure of momentum change at inflection points]\label{def:refraction_index_stock}
+The \textbf{refraction index} $\eta(t)$ borrows from Snell's law in optics and is used to measure the \textbf{strength of the change in momentum} of a stock price at an inflection point. Let the trend directions in the two time windows before and after the inflection point be $\mathbf{v}_{\text{in}}$ (the incident direction) and $\mathbf{v}_{\text{out}}$ (the refracted direction), with trend strengths (momenta) $m_{\text{in}}$ and $m_{\text{out}}$ respectively. The refraction index is defined as
+\[
+\eta(t) = \frac{m_{\text{out}}}{m_{\text{in}}} = \frac{\|\mathbf{v}_{\text{out}}\|}{\|\mathbf{v}_{\text{in}}\|},
+\]
+where $\mathbf{v}_{\text{in}} = P_{\text{trend}}(t; \Delta) - P_{\text{trend}}(t-\Delta; \Delta)$ (the trend momentum before the inflection point) and $\mathbf{v}_{\text{out}} = P_{\text{trend}}(t+\Delta; \Delta) - P_{\text{trend}}(t; \Delta)$ (the trend momentum after the inflection point). $\eta > 1$ means that the momentum strengthens after the inflection point (accelerating rise or accelerating fall), $\eta < 1$ means that the momentum weakens after the inflection point (decelerating rise or decelerating fall), and $\eta = 1$ means that the momentum is unchanged (uniform motion).
+
+The refraction index is the generalisation of the law of refraction (the scaling of sine trends) to the analysis of stock inflection points: the trend momentum $m_{\text{in}}$ before the inflection point and the trend momentum $m_{\text{out}}$ after it are related through the refraction index $\eta$---$\eta = m_{\text{out}}/m_{\text{in}}$. When $\eta > 1$ the momentum is amplified; when $\eta < 1$ the momentum decays.
+\end{definition}
+
+\begin{proposition}[Sine difference-angle similarity and the inflection-point criterion]\label{prop:sine_diff_inflection}
+\textbf{Sine difference-angle similarity} is the most sensitive indicator for detecting stock inflection points. Let $\theta_t$ be the limit angle of the logarithmic return of the price at time $t$: $\theta_t = \arctan(r_t)$, where $r_t = \ln(P_t/P_{t-1})$. The \textbf{sine difference-angle directional similarity} between time $t$ and time $t-\Delta t$ is
+\[
+\operatorname{Similarity}^{(2)}(\theta_t, \theta_{t-\Delta t}) = \sin(\theta_t - \theta_{t-\Delta t}).
+\]
+The inflection-point criterion is:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{$\operatorname{Similarity}^{(2)} < 0$ (the sine difference angle is negative)}: $\theta_t < \theta_{t-\Delta t}$---the current phase lags behind the past phase, and the direction of the trend is reversing. This is a \textbf{necessary condition for an inflection point}.
+    \item \textbf{$\operatorname{Similarity}^{(2)}$ crosses the zero line (from positive to negative, or from negative to positive)}: the trend direction passes from continuation (positive) to reversal (negative), or from reversal (negative) to continuation (positive). The crossing instant corresponds to the \textbf{exact location of the inflection point}.
+    \item \textbf{The absolute value $|\operatorname{Similarity}^{(2)}|$ of $\operatorname{Similarity}^{(2)}$ exceeds a threshold $\eta_{\text{th}}$ (such as $0.5$)}: the strength of the trend reversal is large enough, and the inflection-point signal is reliable.
+\end{enumerate}
+Sine difference-angle similarity is a direct application of rotational motion in inflection-point detection: $\sin(\theta_t - \theta_{t-\Delta t})$ measures the rotation of the price phase over the time $\Delta t$---a positive value indicates that the phase advances (trend continuation), and a negative value that the phase retreats (trend reversal). An inflection point is the critical instant at which the phase drift exceeds the stable range.
+\end{proposition}
+
+\begin{proof}
+The logarithmic return $r_t = \ln(P_t/P_{t-1})$ is approximately equal to the percentage change in price. The limit angle $\theta_t = \arctan(r_t)$ maps the return into the interval $(-\pi/2, \pi/2)$. During a period of trend continuation, $\theta_t \approx \theta_{t-\Delta t}$ and $\sin(\theta_t - \theta_{t-\Delta t}) \approx 0$. At an inflection point, $\theta_t$ and $\theta_{t-\Delta t}$ have opposite signs (a rise becoming a fall, or a fall becoming a rise), and $\sin(\theta_t - \theta_{t-\Delta t})$ departs from the zero line. At a peak inflection point $\theta_t < 0 < \theta_{t-\Delta t}$, so $\sin(\theta_t - \theta_{t-\Delta t}) < 0$. At a trough inflection point $\theta_t > 0 > \theta_{t-\Delta t}$, so $\sin(\theta_t - \theta_{t-\Delta t}) > 0$. Hence the change of sign of the sine difference-angle similarity marks the inflection point precisely.
+\end{proof}
+
+\begin{proposition}[Trend similarity and trend-strength confirmation]\label{prop:trend_similarity_stock}
+\textbf{Difference-angle cosine similarity} (basic difference-angle value similarity) $\operatorname{Similarity}^{(1)}(\theta_t, \theta_{t-\Delta t}) = \cos(\theta_t - \theta_{t-\Delta t})$ measures the consistency of the trend. In a strong trend, $\cos(\theta_t - \theta_{t-\Delta t}) \approx 1$ (the phases agree and the trend continues). Near an inflection point, $\cos(\theta_t - \theta_{t-\Delta t})$ falls, indicating that the coherence of the trend is weakening. The \textbf{double-angle similarities} $\operatorname{Similarity}^{(3)}(\theta_t, \theta_{t-\Delta t}) = \cos(2(\theta_t - \theta_{t-\Delta t}))$ and $\operatorname{Similarity}^{(4)}(\theta_t, \theta_{t-\Delta t}) = \sin(2(\theta_t - \theta_{t-\Delta t}))$ measure respectively the second-order trend consistency and the second-order trend reversal strength, and have an amplified detection effect on inflection points.
+
+The combined criterion for confirming an inflection point is:
+\begin{enumerate}[label=(\roman*)]
+    \item $\operatorname{Similarity}^{(2)} < 0$ (the sine difference angle is negative---a necessary condition for an inflection point).
+    \item $\operatorname{Similarity}^{(1)}$ falls from $\approx 1$ (the coherence of the trend weakens---an auxiliary condition for an inflection point).
+    \item $|\operatorname{Similarity}^{(4)}|$ increases (the second-order reversal strength is amplified---a reinforcing condition for an inflection point).
+    \item The refraction index $\eta(t)$ departs from $1$ (the momentum changes---a strength condition for an inflection point).
+\end{enumerate}
+When the four conditions hold simultaneously, the inflection-point signal has high confidence.
+\end{proposition}
+
+\begin{proof}
+The trigonometric relations among the four criteria: (1) $\sin(\theta_t - \theta_{t-\Delta t}) < 0$ if and only if the direction angle retreats ($\theta_t < \theta_{t-\Delta t}$, for $|\Delta\theta| < \pi$)---a necessary condition for a reversal; (2) in a strong trend $\theta_t \approx \theta_{t-\Delta t}$, and continuity gives $\cos\Delta\theta \approx 1$; as a reversal approaches, $|\Delta\theta|$ increases and $\cos\Delta\theta$ falls; (3) $|\sin 2\Delta\theta| = 2|\sin\Delta\theta\cos\Delta\theta|$ is strictly increasing in $|\Delta\theta|$ for $|\Delta\theta| < \pi/4$ (double-angle amplification); (4) $\eta \neq 1$ means that the momentum changes, which follows directly from the definition of the refraction index. The simultaneous validity of the four conditions is equivalent to `direction retreat $+$ weakening coherence $+$ second-order amplification $+$ momentum change'---that is, a high-confidence inflection point.
+\end{proof}
+
+\begin{example}[Application of window functions to stock inflection-point detection]
+Taking the daily closing-price data of a certain stock $P(t)$ as an example, take a window radius $\Delta = 20$ trading days (about one calendar month) and smooth with the Gaussian kernel $K_{\text{Gauss}}$. Compute the following indicators:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Window-function smoothed trend} $P_{\text{trend}}(t; 20)$.
+    \item \textbf{Limit angle} $\theta_t = \arctan(r_t)$, where $r_t = \ln(P_{\text{trend}}(t)/P_{\text{trend}}(t-1))$.
+    \item \textbf{Sine difference-angle similarity} $\operatorname{Similarity}^{(2)}(t) = \sin(\theta_t - \theta_{t-5})$ (a delay of $5$ days).
+    \item \textbf{Cosine difference-angle similarity} $\operatorname{Similarity}^{(1)}(t) = \cos(\theta_t - \theta_{t-5})$.
+    \item \textbf{Refraction index} $\eta(t) = \|\mathbf{v}_{\text{out}}\|/\|\mathbf{v}_{\text{in}}\|$.
+\end{enumerate}
+When $\operatorname{Similarity}^{(2)}(t)$ crosses the zero line downwards (from positive to negative) and $\eta(t) > 1$, a peak inflection point is detected---the price passes from a rise to an accelerating fall. When $\operatorname{Similarity}^{(2)}(t)$ crosses the zero line upwards (from negative to positive) and $\eta(t) > 1$, a trough inflection point is detected---the price passes from a fall to an accelerating rise. If $\operatorname{Similarity}^{(2)}(t) < 0$ but $\eta(t) < 1$, the momentum decays---the inflection-point signal is weak and may be a false inflection point or a period of sideways consolidation.
+
+This diagnostic procedure is an application of periodic convolution to a univariate financial time series: the sine difference-angle similarity $\operatorname{Similarity}^{(2)}$ measures the strength of the phase rotation, the cosine difference-angle similarity $\operatorname{Similarity}^{(1)}$ measures the consistency of the trend, and the refraction index $\eta$ measures the scaling transformation of the momentum. The joint use of the three constitutes a complete tool chain for stock inflection-point diagnosis.
+\end{example}
+
+\begin{remark}[Unity with the rest of the book]
+The theory of the periodic structure of economic systems established in this chapter is a systematic application of periodic mathematics in economics. Supply--demand equilibrium and the cobweb model are the realisation of the gradient flow in the price mechanism---excess demand drives the price up, excess supply drives it down, and the time lag introduces a rotational component that produces periodic oscillation. The multiplier--accelerator model is the realisation of feedback coupling in the determination of macroeconomic income---the coupling of the multiplier effect (forward scaling) and the accelerator effect (reverse scaling) drives the business cycle. The inventory cycle, the fixed-capital investment cycle and the Kondratiev long wave constitute a three-level nested periodic structure. The momentum--reversal alternation of financial markets is the coupling of the trend component and the rotational component in asset pricing. Multi-scale window-function decomposition and inflection-point diagnosis (sine/cosine difference-angle similarity, refraction index) are direct applications of periodic convolution to financial time series. The power-law exponent $\alpha$ of the Pareto distribution remains relatively stable under technological and institutional change. The three identities and constraints of the economic system---the value identity, the money constraint and the information constraint---together constitute the guarantee of self-consistency of the periodic structure of economic systems.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & The price-translation adjustment of supply--demand equilibrium (Definition \ref{def:supply_demand}); the delayed oscillation of the cobweb model (Proposition \ref{prop:cobweb_convergence}) \\
+Scaling & Forward/reverse scaling by the multiplier effect $1/(1-c)$ and the accelerator $v$ (Definition \ref{def:multiplier_accelerator}); the Pareto exponent $\alpha$ (Definition \ref{def:pareto_distribution}) \\
+Rotation & The expansion--contraction alternation of the business cycle (inventory/investment cycles); the phase rotation of momentum--reversal (Definition \ref{def:momentum_reversal}) \\
+Conservation & The value identity ($Y=C+I+G+NX$), the money constraint ($MV=PY$) and the information constraint (efficient markets) (Theorem \ref{thm:economic_conservation}) \\
+Symmetry & The reflection symmetry of the alternation between high and low prices in the cobweb model (period $T=2$, Proposition \ref{prop:cobweb_convergence}) \\
+Closure & The closure of the feedback loop of the multiplier--accelerator (periodic solutions of the characteristic equation, Proposition \ref{prop:mult_acc_periodic}); the closure of the reversion of price to the mean (Definition \ref{def:momentum_reversal}) \\
+Period & The three-level nesting of the inventory cycle ($3$--$5$ years, Definition \ref{def:kitchin_cycle}), the investment cycle ($7$--$11$ years, Definition \ref{def:juglar_cycle}) and the Kondratiev long wave ($45$--$60$ years, Definition \ref{def:kondratiev_wave}) (Proposition \ref{prop:nested_business_cycles}); the multi-window period decomposition of stock prices (Proposition \ref{prop:multi_window_stock}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the \textbf{economic periodicity decision theorem} of this chapter (\ref{thm:econ_periodicity_decision}). Hint: first write down the decision map and the evolution group of this chapter's target, then apply the proof structure of the general criterion given in the `Periodic Systems' chapter.
+
+    \item Verify that the hypotheses of the \textbf{monotonicity of cardinality adjustment} (\ref{prop:econ_adaptive_growth}) hold for the domain objects of this chapter, and give a counterexample in which the hypotheses fail.
+
+    \item Examine the behaviour of the \textbf{three-parameter correspondence: radius, phase and angular speed} (\ref{prop:econ_epicycle_correspondence}) under parameter degeneration, and explain how the conclusion degenerates accordingly.
+
+    \item Explain the relation between the \textbf{economic periodicity diagnosis pipeline and its interface with three chapters} (\ref{thm:econ_diagnosis_integration}) and the corresponding general conclusions of the `Periodic Systems' chapter (whether they agree, whether this is a special case, or whether additional conditions are required).
+
+    \item Using the seven-theme comparison table of this chapter, identify the concrete carriers of the themes \textbf{translation}, \textbf{scaling} and \textbf{rotation} in this chapter, and give one example of domain data for each.
+
+    \item Synthesis: restate the diagnostic procedure of this chapter using the five-step standard interface of the `Periodic Systems' chapter (Table \ref{tab:ps_five_steps}), noting for each step the theorem of this chapter on which it depends: \ref{thm:econ_periodicity_decision}, \ref{prop:econ_adaptive_growth}, \ref{prop:econ_epicycle_correspondence}, \ref{thm:econ_diagnosis_integration}.
+\end{enumerate}
+
+

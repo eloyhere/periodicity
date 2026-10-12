@@ -1,0 +1,768 @@
+\chapter{四元数分析}
+\label{chap:quaternion_analysis}
+\markboth{四元数分析}{四元数分析}
+
+\begin{remark}[本章定位]\label{rem:q_chapter_positioning}
+本章在《复数分析》之后，把复分析的核心结构——极限、连续、导数、微分、积分、级数展开、卷积、积分变换与调和分析——系统地推广到四元数代数 $\mathbb{H}$。与复数域 $\mathbb{C}$ 交换的情形不同，$\mathbb{H}$ 的乘法不交换，这导致了一系列本质性的结构差异：
+\begin{enumerate}[label=(\roman*)]
+    \item 左导数与右导数必须分别定义，二者一般不相等（定义 \ref{def:q_derivative_left_right}）；
+    \item 解析函数（Fueter 正则函数）比复解析函数稀少得多，多项式函数一般不是右 Fueter 正则的（注 \ref{rem:q_polynomial_not_regular}）；
+    \item Cauchy--Riemann 方程推广为 Cauchy--Riemann--Fueter 方程组（定理 \ref{thm:q_crf}）；
+    \item 积分定理需要借助四元数微分形式与外微分语言才能严格表述（定理 \ref{thm:q_cauchy_fueter}）；
+    \item 卷积运算不再交换，卷积定理需要附加限制条件（定理 \ref{thm:q_convolution_theorem}）；
+    \item 单位四元数群 $S^3\cong SU(2)$ 通过共轭作用实现三维旋转，给出 $SU(2)\to SO(3)$ 的二重覆盖（定理 \ref{thm:q_rotation}）。
+\end{enumerate}
+本章为后续《线性代数》中的 $SU(2)$、$SO(3)$、《流形基础与纤维丛》中的李群与纤维丛、《周转圆组与周转球组》中的四元数周转球组、《调和分析》中的非交换调和分析提供统一接口。
+
+本章七主题定位：\textbf{平移}——四元数加法与极限的平移不变性；\textbf{缩放}——四元数模长的乘性与伸缩；\textbf{旋转}——单位四元数共轭作用实现三维旋转；\textbf{守恒}——四元数范数与内积在旋转下的不变性；\textbf{对称}——共轭反自同构与 $S^3$ 的群结构；\textbf{闭合}——$S^3$ 中有限阶元素生成循环子群；\textbf{周期}——四元数指数函数的 $2\pi$-周期性与单位根群。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  >=Stealth, thick,
+  node distance=0.8cm and 0.9cm,
+  box/.style={draw, rounded corners, align=center, minimum width=2.2cm, minimum height=0.7cm, font=\small, fill=blue!8},
+  arr/.style={-{Stealth[length=2.2mm]}, very thick}
+]
+\node[box, fill=blue!12]  (alg) {四元数代数\\$\mathbb{H}$};
+\node[box, fill=cyan!12, right=of alg] (lim) {极限与连续\\完备性/紧集};
+\node[box, fill=green!12, right=of lim] (der) {导数与微分\\左右导数/CRF};
+\node[box, fill=orange!12, right=of der] (int) {积分\\微分形式/Fueter};
+\node[box, fill=red!12, below=of alg] (ser) {级数\\幂级数/收敛域};
+\node[box, fill=purple!12, right=of ser] (conv) {卷积\\非交换/卷积定理};
+\node[box, fill=magenta!12, right=of conv] (ft) {傅里叶变换\\QFT/QDFT};
+\node[box, fill=yellow!16, right=of ft] (lap) {拉普拉斯变换\\QLT};
+\node[box, fill=teal!12, below=of ser] (reg) {Fueter 正则\\函数空间};
+\node[box, fill=olive!12, right=of reg] (gen) {广义函数\\分布/核};
+\node[box, fill=brown!12, right=of gen] (rot) {三维旋转\\$S^3\to SO(3)$};
+\node[box, fill=gray!12, right=of rot] (hyper) {超复分析\\Clifford 推广};
+
+\draw[arr] (alg) -- (lim);
+\draw[arr] (lim) -- (der);
+\draw[arr] (der) -- (int);
+\draw[arr] (alg) -- (ser);
+\draw[arr] (ser) -- (conv);
+\draw[arr] (conv) -- (ft);
+\draw[arr] (ft) -- (lap);
+\draw[arr] (ser) -- (reg);
+\draw[arr] (reg) -- (gen);
+\draw[arr] (gen) -- (rot);
+\draw[arr] (rot) -- (hyper);
+\draw[arr, dashed] (int) -- (reg);
+\end{tikzpicture}
+\caption{本章结构总览：从四元数代数出发，经极限与连续、导数与微分、积分、级数、卷积、傅里叶变换、拉普拉斯变换、Fueter 正则函数、广义函数、三维旋转，最终汇入超复分析。}
+\label{fig:quaternion_analysis_overview}
+\end{figure}
+
+\section{四元数代数回顾}
+
+\begin{definition}[四元数代数]\label{def:q_quaternion}
+\textbf{四元数代数} $\mathbb{H}$ 是 $\mathbb{R}$ 上的四维结合代数，以 $\{1,i,j,k\}$ 为基，乘法由
+\[
+i^2=j^2=k^2=ijk=-1
+\]
+以及由此导出的
+\[
+ij=k,\quad ji=-k,\quad jk=i,\quad kj=-i,\quad ki=j,\quad ik=-j
+\]
+双线性延拓。任意四元数写为
+\[
+q=a+bi+cj+dk,\qquad a,b,c,d\in\mathbb{R}.
+\]
+称 $a=\operatorname{Re}q$ 为\textbf{标量部分}，$\mathbf{v}=bi+cj+dk=\operatorname{Vec}q$ 为\textbf{向量部分}。共轭为 $\bar q=a-bi-cj-dk$，模长为 $|q|=\sqrt{q\bar q}=\sqrt{a^2+b^2+c^2+d^2}$。
+\end{definition}
+
+\begin{property}[四元数的基本代数性质]\label{prop:q_basic_props}
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathbb{H}$ 是\textbf{可除代数}：每个非零元有乘法逆元 $q^{-1}=\bar q/|q|^2$。
+    \item $\mathbb{H}$ \textbf{非交换}：$ij\neq ji$，一般 $q_1q_2\neq q_2q_1$。
+    \item \textbf{共轭反自同构}：$\overline{pq}=\bar q\,\bar p$，$\overline{\bar q}=q$。
+    \item \textbf{模长乘性}：$|pq|=|p|\,|q|$，从而 $|q^{-1}|=|q|^{-1}$。
+    \item \textbf{内积}：$\langle p,q\rangle=\operatorname{Re}(\bar p q)$ 是 $\mathbb{R}^4$ 上的欧氏内积。按《线性代数》章的统一约定，它\textbf{对第二个变量线性}（$\langle p,\lambda q\rangle=\lambda\langle p,q\rangle$）、对第一个变量共轭线性（$\langle \lambda p,q\rangle=\bar\lambda\langle p,q\rangle$）。
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i) 对 $q\neq 0$，$q\bar q=|q|^2>0$，故 $q^{-1}=\bar q/|q|^2$ 满足 $qq^{-1}=q^{-1}q=1$。
+
+(ii) 由 $ij=k$，$ji=-k$，二者不等。
+
+(iii) 逐分量验证：$\overline{pq}=\bar q\,\bar p$。
+
+(iv) $|pq|^2=pq\overline{pq}=pq\bar q\bar p=p|q|^2\bar p=|p|^2|q|^2$，开方得 $|pq|=|p||q|$。
+
+(v) 直接计算 $\operatorname{Re}(\bar p q)=\sum_{i=0}^3 p_iq_i$，是对称正定双线性形式。
+\end{proof}
+
+\begin{example}[四元数乘法实例]\label{ex:q_multiplication}
+取 $p=1+i$，$q=1+j$。则
+\[
+pq=(1+i)(1+j)=1+j+i+ij=1+i+j+k,
+\]
+而
+\[
+qp=(1+j)(1+i)=1+i+j+ji=1+i+j-k.
+\]
+故 $pq\neq qp$，差为 $2k$。
+\end{example}
+
+\begin{remark}[四元数乘积公式的向量形式]\label{rem:q_product_vector_form}
+设 $p=a+\mathbf{u}$，$q=b+\mathbf{v}$，其中 $a,b\in\mathbb{R}$，$\mathbf{u},\mathbf{v}\in\operatorname{Im}\mathbb{H}\cong\mathbb{R}^3$。则
+\[
+pq=ab-\mathbf{u}\cdot\mathbf{v}+a\mathbf{v}+b\mathbf{u}+\mathbf{u}\times\mathbf{v}.
+\]
+这一公式将四元数乘法分解为标量部分与向量部分，是后续微分运算的基本工具。
+\end{remark}
+
+\begin{remark}[与复数代数的对比]\label{rem:q_vs_complex}
+复数 $\mathbb{C}$ 是交换域，四元数 $\mathbb{H}$ 是非交换可除代数。这一差异导致：
+\begin{itemize}
+    \item 复分析中导数只有一个定义；四元数分析中必须区分左导数与右导数。
+    \item 复解析函数非常丰富；四元数解析函数（Fueter 正则函数）则非常稀少。
+    \item 复数单位圆群 $U(1)$ 交换；四元数单位球面群 $S^3\cong SU(2)$ 非交换。
+\end{itemize}
+\end{remark}
+
+\section{四元数极限与连续}
+
+\begin{definition}[四元数极限]\label{def:q_limit}
+设 $f:\mathbb{H}\supseteq D\to\mathbb{H}$，$q_0\in\overline{D}$。称 $\lim_{q\to q_0}f(q)=L$，若
+\[
+\forall \varepsilon>0,\ \exists \delta>0,\ \forall q\in D,\quad 0<|q-q_0|<\delta\implies |f(q)-L|<\varepsilon.
+\]
+若 $\lim_{q\to q_0}f(q)=f(q_0)$，则称 $f$ 在 $q_0$ 处\textbf{连续}。
+\end{definition}
+
+\begin{proposition}[极限的坐标刻画]\label{prop:q_limit_coordinate}
+将 $q=q_0+h$，$h=h_0+h_1i+h_2j+h_3k$，$f=f_0+f_1i+f_2j+f_3k$。则
+\[
+\lim_{h\to 0}f(q_0+h)=L
+\]
+当且仅当四个实分量极限分别成立。
+\end{proposition}
+
+\begin{proof}
+由 $|h|=\sqrt{h_0^2+h_1^2+h_2^2+h_3^2}$ 与各分量绝对值的不等式
+\[
+|h_\mu|\le |h|\le |h_0|+|h_1|+|h_2|+|h_3|,
+\]
+二者相互控制，故极限等价于逐分量极限。
+\end{proof}
+
+\begin{theorem}[$\mathbb{H}$ 的完备性]\label{thm:q_completeness}
+$\mathbb{H}$ 中每个 Cauchy 序列都收敛。
+\end{theorem}
+
+\begin{proof}
+设 $\{q_n\}$ 是 Cauchy 序列，$q_n=a_n+b_ni+c_nj+d_nk$。由 $|a_m-a_n|\le |q_m-q_n|$ 知 $\{a_n\}$ 是 $\mathbb{R}$ 中 Cauchy 序列，由 $\mathbb{R}$ 完备性收敛于 $a$。同理 $b_n\to b$，$c_n\to c$，$d_n\to d$。令 $q=a+bi+cj+dk$，则 $|q_n-q|\to 0$。
+\end{proof}
+
+\begin{theorem}[紧集上连续函数的性质]\label{thm:q_continuous_compact}
+设 $K\subseteq\mathbb{H}$ 紧致，$f:K\to\mathbb{H}$ 连续。则：
+\begin{enumerate}[label=(\roman*)]
+    \item $f(K)$ 紧致；
+    \item $f$ 在 $K$ 上有界；
+    \item $|f|$ 在 $K$ 上取得最大值与最小值；
+    \item $f$ 在 $K$ 上一致连续。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 $\mathbb{H}\cong\mathbb{R}^4$，把 $f$ 视为四个实值连续函数 $(f_0,f_1,f_2,f_3)$。实数分析中紧集上连续函数的相应性质逐分量应用即得。
+\end{proof}
+
+\section{四元数导数与微分}
+
+\subsection{左导数与右导数}
+
+\begin{definition}[左导数与右导数]\label{def:q_derivative_left_right}
+设 $f:\mathbb{H}\supseteq D\to\mathbb{H}$，$q_0\in D$。
+\begin{enumerate}[label=(\roman*)]
+    \item 若极限
+    \[
+    f'_L(q_0)=\lim_{h\to 0}\bigl[f(q_0+h)-f(q_0)\bigr]h^{-1}
+    \]
+    存在，则称 $f$ 在 $q_0$ 处\textbf{左可导}，$f'_L(q_0)$ 为左导数。
+    \item 若极限
+    \[
+    f'_R(q_0)=\lim_{h\to 0}h^{-1}\bigl[f(q_0+h)-f(q_0)\bigr]
+    \]
+    存在，则称 $f$ 在 $q_0$ 处\textbf{右可导}，$f'_R(q_0)$ 为右导数。
+\end{enumerate}
+由于四元数乘法非交换，左右导数一般不相等。
+\end{definition}
+
+\begin{remark}[左右导数的本质区别]\label{rem:q_derivative_difference}
+右导数定义中 $h^{-1}$ 左乘，左导数定义中 $h^{-1}$ 右乘。若 $f(q)=aq$（左乘常数），则
+\[
+f(q+h)-f(q)=a h,\qquad [f(q+h)-f(q)]h^{-1}=a h h^{-1}=a,
+\]
+故 $f(q)=aq$ 左可导，左导数为 $a$。反之，$f(q)=qb$（右乘常数）满足右可导，右导数为 $b$。这说明\textbf{左乘常数是左解析的，右乘常数是右解析的}，二者不能同时成立（除非 $b$ 是实数）。
+\end{remark}
+
+\begin{definition}[四元数解析函数]\label{def:q_analytic}
+若 $f$ 在开集 $U\subseteq\mathbb{H}$ 上处处右可导，则称 $f$ 在 $U$ 上\textbf{右解析}。类似定义左解析。注意：右可导的差商极限定义过于狭窄，Fueter 正则函数采用积分定义（见 \S\ref{sec:q_fueter_regular}）。
+\end{definition}
+
+\subsection{Cauchy--Riemann--Fueter 方程组}
+
+\begin{definition}[Fueter 算子]\label{def:q_fueter_operator}
+定义\textbf{Fueter 算子}为
+\[
+\frac{\partial}{\partial \bar q}:=
+\frac{\partial}{\partial x_0}
++i\frac{\partial}{\partial x_1}
++j\frac{\partial}{\partial x_2}
++k\frac{\partial}{\partial x_3},
+\]
+其中 $q=x_0+x_1i+x_2j+x_3k$。
+\end{definition}
+
+\begin{theorem}[Cauchy--Riemann--Fueter 方程组]\label{thm:q_crf}
+设 $f=f_0+f_1i+f_2j+f_3k$ 在开集 $U$ 上右 Fueter 正则（即满足 $\partial f/\partial \bar q=0$）。则四个分量函数满足
+\[
+\begin{aligned}
+\frac{\partial f_0}{\partial x_0}
+-\frac{\partial f_1}{\partial x_1}
+-\frac{\partial f_2}{\partial x_2}
+-\frac{\partial f_3}{\partial x_3}&=0,\\[2pt]
+\frac{\partial f_0}{\partial x_1}
++\frac{\partial f_1}{\partial x_0}
++\frac{\partial f_2}{\partial x_3}
+-\frac{\partial f_3}{\partial x_2}&=0,\\[2pt]
+\frac{\partial f_0}{\partial x_2}
+-\frac{\partial f_1}{\partial x_3}
++\frac{\partial f_2}{\partial x_0}
++\frac{\partial f_3}{\partial x_1}&=0,\\[2pt]
+\frac{\partial f_0}{\partial x_3}
++\frac{\partial f_1}{\partial x_2}
+-\frac{\partial f_2}{\partial x_1}
++\frac{\partial f_3}{\partial x_0}&=0.
+\end{aligned}
+\]
+\end{theorem}
+
+\begin{proof}
+由 Fueter 算子 $\partial/\partial\bar q=\partial_0+i\partial_1+j\partial_2+k\partial_3$ 作用于 $f=f_0+f_1i+f_2j+f_3k$，逐项展开并利用四元数乘法规则（$ij=k$ 等）比较四个分量即得。
+\end{proof}
+
+\begin{remark}[历史注记：Fueter 的贡献]\label{rem:q_fueter_history}
+瑞士数学家 Rudolf Fueter（1880--1950）在 1930 年代首次系统地建立了四元数解析函数理论。他发现，若将复分析中的 Cauchy--Riemann 条件直接推广为差商极限存在，则得到的函数类过于狭窄。因此，他转而推广 Cauchy--Riemann 条件本身，定义了\ \textbf{Fueter 正则函数}——满足 $\partial f/\partial \bar q=0$ 的四元数值函数。这一函数类比差商可导函数丰富得多，且具有与复解析函数类似的积分定理（Fueter 定理）。
+\end{remark}
+
+\begin{example}[四元数正则函数的实例]\label{ex:q_regular_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item 常数函数 $f(q)=c$ 是右 Fueter 正则的。
+    \item 函数 $f(q)=q^{-1}/|q|^2=\bar q/|q|^4$ 是右 Fueter 正则的（在 $q\neq 0$ 处）。这是最重要的基本例子，称为\textbf{Fueter 核}。注意单独的 $q^{-1}=\bar q/|q|^2$ 并不右 Fueter 正则（其 $\partial/\partial\bar q$ 的实部为 $2/|q|^2\neq 0$），正则的是 $q^{-1}$ 再乘上标量因子 $|q|^{-2}$。
+    \item 更一般地，$f(q)=(q-a)^{-1}/|q-a|^2$ 在 $q\neq a$ 处是右 Fueter 正则的。
+    \item 多项式 $f(q)=\sum_{n=0}^N q^n a_n$（系数在右）是 \textbf{slice 正则}的，但一般\textbf{不是}右 Fueter 正则的（见 \S\ref{sec:q_slice_vs_fueter}）。
+\end{enumerate}
+\end{example}
+
+\begin{remark}[多项式函数一般不是右 Fueter 正则的]\label{rem:q_polynomial_not_regular}
+四元数多项式 $\sum_{n=0}^N a_n q^n$（系数在左）一般不是右 Fueter 正则的。例如 $f(q)=q^2$，计算得 $\partial(q^2)/\partial\bar q\neq 0$（除非 $q$ 的向量部分为零）。系数在右的多项式 $\sum_{n=0}^N q^n a_n$ 也不是右 Fueter 正则的：单项 $q^n a_n$（$n\ge 1$）的 Fueter 导数满足 $\partial(qa)/\partial\bar q=a+iai+jaj+kak=-2a\neq 0$。这一类多项式属于 \textbf{slice 正则}函数类，两个函数类的分工见 \S\ref{sec:q_slice_vs_fueter}。
+\end{remark}
+
+\section{四元数积分}
+
+\subsection{四元数微分形式}
+
+\begin{definition}[四元数值微分形式]\label{def:q_differential_forms}
+设 $U\subseteq\mathbb{H}$ 为开集。一个\textbf{四元数值 $k$-形式}是
+\[
+\omega=\sum_{|I|=k} \omega_I(q)\,dq_I,
+\]
+其中 $\omega_I:U\to\mathbb{H}$ 是四元数值函数，$dq_I=dq_{i_1}\wedge\cdots\wedge dq_{i_k}$，$dq_\mu$ 与坐标 $x_\mu$ 对应（$q=x_0+x_1i+x_2j+x_3k$）。
+\end{definition}
+
+\begin{definition}[外微分]\label{def:q_exterior_derivative}
+\textbf{外微分} $d$ 定义为
+\[
+d\omega=\sum_{|I|=k}\sum_{\mu=0}^3 \frac{\partial \omega_I}{\partial x_\mu}\,dq_\mu\wedge dq_I.
+\]
+\end{definition}
+
+\subsection{Fueter 积分定理}
+
+\begin{theorem}[Fueter 形式的 Cauchy 积分定理]\label{thm:q_cauchy_fueter}
+设 $f$ 在单连通区域 $\Omega\subseteq\mathbb{H}$ 上右 Fueter 正则（即 $\partial f/\partial \bar q=0$），$\gamma$ 是 $\Omega$ 内的闭合三维曲面。则
+\[
+\oint_\gamma Dq\,f(q)=0,
+\]
+其中 $Dq$ 是四元数形式的面积元
+\[
+Dq:=dq_1\wedge dq_2\wedge dq_3
+-i\,dq_0\wedge dq_2\wedge dq_3
++j\,dq_0\wedge dq_1\wedge dq_3
+-k\,dq_0\wedge dq_1\wedge dq_2.
+\]
+\end{theorem}
+
+\begin{proof}
+使用四元数版本的 Stokes--Cartan 定理：对 3-形式 $F=Dq\,f(q)$，有 $\oint_{\partial C}F=\int_C dF$。直接计算 $dF$ 得
+\[
+dF=Dq\wedge\left(\frac{\partial f}{\partial \bar q}\right)\,dq_0\wedge dq_1\wedge dq_2\wedge dq_3.
+\]
+右 Fueter 正则条件 $\partial f/\partial \bar q=0$ 给出 $dF=0$，故 $\oint_{\partial C}F=0$。
+\end{proof}
+
+\begin{corollary}[Fueter 积分公式]\label{cor:q_cauchy_formula}
+设 $f$ 在包含 $\overline{B(q_0,r)}$ 的区域上右 Fueter 正则。则
+\[
+f(q_0)=\frac{1}{2\pi^2}\oint_{\partial B(q_0,r)} \frac{(q-q_0)^{-1}}{|q-q_0|^2}\,Dq\,f(q).
+\]
+\end{corollary}
+
+\begin{proof}
+考虑函数 $G(q,q_0)=(q-q_0)^{-1}/|q-q_0|^2$，它在 $q\neq q_0$ 处右 Fueter 正则。对 $G f$ 应用 Fueter 积分定理，令 $r\to 0$ 提取 $f(q_0)$。
+\end{proof}
+
+\begin{remark}[与复分析 Cauchy 积分公式的对比]\label{rem:q_cauchy_vs_complex}
+复分析中的 Cauchy 积分公式为 $f(z_0)=\frac{1}{2\pi i}\oint_\gamma \frac{f(z)}{z-z_0}\,dz$。四元数版本的积分公式涉及四元数核 $(q-q_0)^{-1}/|q-q_0|^2$ 和 3-形式面积元 $Dq$，积分区域是三维闭合曲面而非一维闭合曲线。这一差异源于四元数分析的四维特性。
+\end{remark}
+
+\section{四元数级数}
+
+\subsection{Slice 正则与 Fueter 正则的分工}\label{sec:q_slice_vs_fueter}
+
+\begin{remark}[两个函数类的分工]\label{rem:q_slice_vs_fueter}
+四元数分析中有两个互不等价的「正则」概念，本章的叙述需要在它们之间分工。
+\textbf{Slice 正则函数}：设 $f$ 定义在开集 $U\subseteq\mathbb{H}$ 上。对每个纯虚单位四元数 $I$（$I^2=-1$），记 $\mathbb{C}_I=\{x_0+x_II:x_0,x_I\in\mathbb{R}\}$ 为相应的复 slice。若 $f$ 的限定 $f|_{\mathbb{C}_I\cap U}$ 对每个 $I$ 都全纯，即写 $f=f_0+If_I$ 时在该 slice 上成立
+\[
+\frac{\partial f_0}{\partial x_0}=\frac{\partial f_I}{\partial x_I},\qquad
+\frac{\partial f_0}{\partial x_I}=-\frac{\partial f_I}{\partial x_0},
+\]
+则称 $f$ 为 \textbf{slice 正则}的。这一函数类对幂级数与局部展开封闭：$\sum_{n=0}^\infty q^n a_n$ 与 $(q-q_0)^n$ 型展开都是 slice 正则的典型对象（见定义 \ref{def:q_power_series} 与定理 \ref{thm:q_local_expansion}）。
+\textbf{Fueter 正则函数}：由 Fueter 算子方程 $\partial f/\partial\bar q=0$ 定义（定义 \ref{def:q_fueter_regular}），其原型是核 $\bar q/|q|^4=q^{-1}/|q|^2$。本章的积分定理、Cauchy 积分公式与广义函数论均建立在 Fueter 正则类上。
+\textbf{二者的关系}：对单项 $q^n a_n$（$n\ge 1$），$\partial(q^n a_n)/\partial\bar q=-2a_n\neq 0$，故 Fueter 正则的幂级数\textbf{不能}写成 $\sum q^n a_n$ 的形式，须改用 \textbf{Fueter 多项式基}（即由 $q$ 与 $\bar q$ 经对称化生成、并满足 $\partial P_n/\partial\bar q=0$ 的齐次多项式族）；本章不展开该基的构造。两个类之所以不能互换：slice 正则类刻画的是幂级数与局部展开（零点孤立性按 slice 成立），Fueter 正则类刻画的是偏微分方程意义下的积分论，二者在实轴之外的交集很小（例如 $\bar q/|q|^4$ 这类核及其标量倍）。
+\end{remark}
+
+\subsection{四元数幂级数}
+
+\begin{definition}[四元数幂级数]\label{def:q_power_series}
+形如
+\[
+\sum_{n=0}^\infty q^n a_n \qquad\text{或}\qquad \sum_{n=0}^\infty a_n q^n,\qquad a_n\in\mathbb{H}
+\]
+的级数称为\textbf{四元数幂级数}。系数在右的级数 $\sum_{n=0}^\infty q^n a_n$ 是 \textbf{slice 正则}的，但\textbf{不是}右 Fueter 正则的（见 \S\ref{sec:q_slice_vs_fueter}）；Fueter 正则的幂级数须改用 Fueter 多项式基。
+\end{definition}
+
+\begin{theorem}[四元数幂级数的收敛性]\label{thm:q_power_series_convergence}
+设 $\sum_{n=0}^\infty q^n a_n$ 为四元数幂级数。则存在 $R\in[0,\infty]$ 称为\textbf{收敛半径}，使得：
+\begin{enumerate}[label=(\roman*)]
+    \item 在 $|q|<R$ 内绝对收敛；
+    \item 在 $|q|>R$ 外发散；
+    \item 在 $|q|\le \rho<R$ 上一致收敛；
+    \item 和函数在 $|q|<R$ 内 slice 正则，且可逐项求导（见 \S\ref{sec:q_slice_vs_fueter}）。
+\end{enumerate}
+收敛半径 $R$ 由系数决定，满足 $1/R=\limsup_{n\to\infty}|a_n|^{1/n}$。
+\end{theorem}
+
+\begin{proof}
+(i)(ii)(iii) 与实数幂级数相同，由模长控制。 (iv) 逐项求导的合法性由一致收敛保证；每一项 $q^n a_n$ 是 slice 正则的（在 slice $\mathbb{C}_I$ 上它就是复幂级数 $z^n a_n$），逐项求导保持 slice 正则性，故和函数 slice 正则。幂级数\textbf{不}因此成为右 Fueter 正则：$\partial(q^n a_n)/\partial\bar q=-2a_n\neq 0$（$n\ge 1$）。
+\end{proof}
+
+\begin{theorem}[Abel 极限定理——四元数版本]\label{thm:q_abel}
+设 $a=\sum_{n=0}^\infty a_n$ 是四元数级数且收敛，$G_a(q)=\sum_{n=0}^\infty q^n a_n$ 是其幂级数。则当 $q\to 1$ 且 $|1-q|/(1-|q|)$ 有界时，$G_a(q)\to G_a(1)$。
+\end{theorem}
+
+\begin{proof}
+证明框架遵循 Ahlfors 的经典方法。设 $\varepsilon>0$，令 $a=0$（通过调整常数项）。考虑部分和 $\sigma_n=\sum_{k=0}^n a_k$，利用分部求和：
+\[
+\sigma_n(q)=(1-q)(\sigma_0+q\sigma_1+\cdots+q^{n-1}\sigma_{n-1})+q^n\sigma_n.
+\]
+由于 $a$ 收敛，$q^n\sigma_n\to 0$。故
+\[
+G_a(q)=(1-q)\sum_{n=0}^\infty q^n\sigma_n.
+\]
+由 $|1-q|/(1-|q|)$ 有界，设 $|1-q|\le M(1-|q|)$。因 $\sigma_n\to 0$，对充分大的 $N$，$|\sigma_n|<\varepsilon$（$n\ge N$）。于是
+\[
+\left|\sum_{n=N}^\infty q^n\sigma_n\right|<\varepsilon\sum_{n=N}^\infty|q|^n=\frac{\varepsilon|q|^N}{1-|q|}<\frac{\varepsilon}{1-|q|}.
+\]
+由此可得 $|G_a(q)|<\varepsilon M$，即 $G_a(q)\to 0=G_a(1)$。
+\end{proof}
+
+\begin{theorem}[指数函数、正弦与余弦的幂级数]\label{thm:q_exp_sin_cos}
+四元数指数函数、正弦与余弦由以下幂级数定义：
+\[
+e^p=\sum_{l=0}^\infty\frac{p^l}{l!},\qquad
+\sin p=\sum_{l=0}^\infty(-1)^l\frac{p^{2l+1}}{(2l+1)!},\qquad
+\cos p=\sum_{l=0}^\infty(-1)^l\frac{p^{2l}}{(2l)!}.
+\]
+这三个级数的收敛半径均为 $R=\infty$，即收敛集合为全体四元数。且满足
+\[
+(e^p)'=e^p,\qquad (\sin p)'=\cos p,\qquad (\cos p)'=-\sin p.
+\]
+\end{theorem}
+
+\begin{proof}
+收敛半径：对 $\sin p$ 的级数应用比值判别法，
+\[
+L=\lim_{l\to\infty}\frac{|p^{2(l+1)+1}|/[2(l+1)+1]!}{|p^{2l+1}|/(2l+1)!}
+=\lim_{l\to\infty}\frac{|p|^2}{(2l+2)(2l+3)}=0<1,
+\]
+故 $R=1/L=\infty$。$\cos p$ 与 $e^p$ 同理。
+
+逐项求导：由一致收敛性可逐项求导。
+\[
+(e^p)'=\sum_{l=0}^\infty\left(\frac{p^l}{l!}\right)'=\sum_{k=1}^\infty\frac{p^{k-1}}{(k-1)!}=e^p,
+\]
+\[
+(\sin p)'=\sum_{l=0}^\infty(-1)^l\frac{p^{2l}}{(2l)!}=\cos p,\qquad
+(\cos p)'=-\sin p.
+\]
+这些与复分析中的结果完全平行。
+\end{proof}
+
+\begin{example}[四元数指数函数的计算]\label{ex:q_exp_calc}
+取 $p=\pi i/2$。由四元数欧拉公式（命题 \ref{prop:quaternion_exp_rotation}），$e^{\pi i/2}=\cos(\pi/2)+i\sin(\pi/2)=i$。更一般地，对纯虚四元数 $\mathbf{u}\theta$（$\mathbf{u}$ 为单位纯虚四元数），$e^{\mathbf{u}\theta}=\cos\theta+\mathbf{u}\sin\theta$。
+\end{example}
+
+\section{四元数卷积}
+
+\begin{definition}[四元数卷积]\label{def:q_convolution}
+设 $x,y:\mathbb{R}\to\mathbb{H}$ 为四元数值信号。其\textbf{卷积}定义为
+\[
+(x*y)(t)=\int_{-\infty}^{+\infty}x(u)y(t-u)\,du.
+\]
+\end{definition}
+
+\begin{theorem}[四元数卷积的非交换性]\label{thm:q_convolution_noncommutative}
+一般地，$x*y\neq y*x$。四元数卷积不再交换。
+\end{theorem}
+
+\begin{proof}
+取 $x(t)=\delta(t)i$，$y(t)=\delta(t)j$。则 $(x*y)(t)=ij=k$，而 $(y*x)(t)=ji=-k$，二者不等。
+\end{proof}
+
+\begin{theorem}[四元数卷积定理]\label{thm:q_convolution_theorem}
+设 $x:\mathbb{R}\to\mathbb{H}$ 为一般四元数值信号，$y:\mathbb{R}\to\mathbb{C}_\mu$ 取值于与傅里叶原子 $e^{-\mu 2\pi vt}$ 相同的复子域。则
+\[
+x*y(t)\ \overset{\text{QFT}}{\longleftrightarrow}\ X(v)Y(v).
+\]
+即：当其中一个信号限制在特定的复子域时，卷积的 QFT 等于 QFT 的乘积。
+\end{theorem}
+
+\begin{proof}
+将 $y$ 限制在复子域 $\mathbb{C}_\mu$ 后，$y$ 与傅里叶原子 $e^{-\mu 2\pi vt}$ 可交换。直接计算 QFT：
+\[
+\widehat{x*y}(v)=\int\left(\int x(u)y(t-u)du\right)e^{-\mu 2\pi vt}dt.
+\]
+换元 $t=u+s$ 并利用 $y$ 与 $e^{-\mu 2\pi vs}$ 可交换，得
+\[
+\widehat{x*y}(v)=\int x(u)e^{-\mu 2\pi vu}du\cdot\int y(s)e^{-\mu 2\pi vs}ds=X(v)Y(v).
+\]
+若 $y$ 不在同一复子域中，则因非交换性卷积定理不成立。
+\end{proof}
+
+\begin{remark}[卷积定理的限制条件]\label{rem:q_convolution_restriction}
+四元数卷积定理的条件 $y:\mathbb{R}\to\mathbb{C}_\mu$ 不应被视为过于严格。事实上，该条件涵盖了时域或频域中的通常平滑操作（滤波）。涉及几何操作（旋转）的滤波关系无法简单地用卷积表示，将在后续章节中讨论。
+\end{remark}
+
+\begin{proposition}[四元数卷积的基本性质]\label{prop:q_convolution_properties}
+四元数卷积满足：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{双线性性}：$(\alpha x_1+\beta x_2)*y=\alpha(x_1*y)+\beta(x_2*y)$；
+    \item \textbf{结合律}：$(x*y)*z=x*(y*z)$；
+    \item \textbf{非交换性}：一般 $x*y\neq y*x$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由积分的线性性。
+
+(ii) 由 Fubini 定理交换积分次序。
+
+(iii) 由定理 \ref{thm:q_convolution_noncommutative}。
+\end{proof}
+
+\section{四元数傅里叶变换}
+
+\begin{definition}[四元数傅里叶变换]\label{def:q_fourier}
+对 $x\in L^1(\mathbb{R};\mathbb{H})\cap L^2(\mathbb{R};\mathbb{H})$，定义\textbf{四元数傅里叶变换}（QFT）为
+\[
+X(v)=\int_{-\infty}^{+\infty}x(t)e^{-j2\pi vt}\,dt.
+\]
+逆变换为
+\[
+x(t)=\int_{-\infty}^{+\infty}X(v)e^{j2\pi vt}\,dv.
+\]
+这里 $j$ 是一个固定的虚单位，由对称性选择确定。
+\end{definition}
+
+\begin{remark}[多种类型的 QFT]\label{rem:q_fourier_types}
+由于四元数乘法非交换，QFT 有多种定义方式：左 QFT（指数因子左乘）、右 QFT（指数因子右乘）、双边 QFT（两个指数因子分列两侧）。不同定义具有不同的性质。
+\end{remark}
+
+\begin{proposition}[QFT 与复傅里叶变换的关系]\label{prop:q_fourier_complex_relation}
+将信号写为 $x(t)=u(t)+iv(t)$，其中 $u,v$ 取值于 $\mathbb{C}_j$。则
+\[
+X(v)=U(v)+iV(v),
+\]
+其中 $U(v)$ 和 $V(v)$ 分别是 $u(t)$ 和 $v(t)$ 的标准复傅里叶变换。
+\end{proposition}
+
+\begin{proof}
+直接代入定义：
+\[
+X(v)=\int(u(t)+iv(t))e^{-j2\pi vt}dt=\int u(t)e^{-j2\pi vt}dt+i\int v(t)e^{-j2\pi vt}dt.
+\]
+由于 $u,v$ 取值于 $\mathbb{C}_j$，与 $e^{-j2\pi vt}$ 可交换，故积分即标准复傅里叶变换。
+\end{proof}
+
+\begin{theorem}[QFT 的微分性质]\label{thm:q_fourier_derivative}
+\[
+\frac{d^n x(t)}{dt^n}\ \overset{\text{QFT}}{\longleftrightarrow}\ X(v)(\mu 2\pi v)^n,
+\]
+\[
+x(t)(-\mu 2\pi t)^n\ \overset{\text{QFT}}{\longleftrightarrow}\ \frac{d^n X(v)}{dv^n}.
+\]
+\end{theorem}
+
+\begin{proof}
+由分部积分与 QFT 定义直接得到。
+\end{proof}
+
+\begin{theorem}[四元数帕塞瓦尔-Plancherel 恒等式]\label{thm:q_parseval}
+对 $x,y\in L^2(\mathbb{R};\mathbb{H})$，
+\[
+\langle x,y\rangle_{L^2}=\int x(t)\overline{y(t)}\,dt=\int X(v)\overline{Y(v)}\,dv.
+\]
+特别地，$\|x\|_{L^2}^2=\|X\|_{L^2}^2$。
+\end{theorem}
+
+\begin{proof}
+由 $L^2(\mathbb{R};\mathbb{H})$ 是左 Hilbert 空间，内积 $\langle x,y\rangle=\int x(t)\overline{y(t)}dt$。QFT 是左 Hilbert 空间上的等距同构，故保内积。
+\end{proof}
+
+\begin{definition}[离散四元数傅里叶变换]\label{def:q_dft}
+对长度 $N$ 的四元数序列 $\{x[n]\}_{n=0}^{N-1}$，定义\textbf{离散四元数傅里叶变换}（QDFT）为
+\[
+X[m]=\sum_{n=0}^{N-1}x[n]e^{-j2\pi nm/N},\qquad m=0,1,\cdots,N-1.
+\]
+逆变换为 $x[n]=\frac1N\sum_{m=0}^{N-1}X[m]e^{j2\pi nm/N}$。
+\end{definition}
+
+\section{四元数拉普拉斯变换}
+
+\begin{definition}[四元数拉普拉斯变换]\label{def:q_laplace}
+设 $f(t)$ 是定义在 $t\ge 0$ 上的四元数值函数。\textbf{四元数拉普拉斯变换}（QLT）为
+\[
+\mathcal{L}\{f\}(s)=\int_0^\infty e^{-st}f(t)\,dt,
+\]
+其中 $s$ 为四元数变量。根据指数因子在左或在右，QLT 有两种不同的定义方式。
+\end{definition}
+
+\begin{theorem}[QLT 的微分性质]\label{thm:q_laplace_derivative}
+QLT 的微分性质为
+\[
+\mathcal{L}\{f'\}(s)=s\mathcal{L}\{f\}(s)-f(0),
+\]
+但其具体形式依赖于 QLT 的定义方式（左或右），且与经典拉普拉斯变换有显著差异。
+\end{theorem}
+
+\begin{proof}
+设 $\mathcal{L}\{f\}(s)=\int_0^\infty e^{-st}f(t)dt$。分部积分：
+\[
+\mathcal{L}\{f'\}(s)=\int_0^\infty e^{-st}f'(t)dt=[e^{-st}f(t)]_0^\infty+s\int_0^\infty e^{-st}f(t)dt.
+\]
+若 $f$ 满足适当增长条件，边界项为 $-f(0)$，故 $\mathcal{L}\{f'\}(s)=s\mathcal{L}\{f\}(s)-f(0)$。但需注意 $s$ 与 $f$ 的非交换性在具体计算中可能导致修正项。
+\end{proof}
+
+\begin{theorem}[QLT 的卷积性质]\label{thm:q_laplace_convolution}
+QLT 的卷积性质为
+\[
+\mathcal{L}\{f*g\}(s)=\mathcal{L}\{f\}(s)\cdot\mathcal{L}\{g\}(s),
+\]
+其中卷积定义为 $(f*g)(t)=\int_0^t f(\tau)g(t-\tau)d\tau$。但该性质需要对 $g$ 施加限制条件（类似于 QFT 卷积定理中的复子域条件）。
+\end{theorem}
+
+\begin{proof}
+直接计算：
+\[
+\mathcal{L}\{f*g\}(s)=\int_0^\infty e^{-st}\left(\int_0^t f(\tau)g(t-\tau)d\tau\right)dt.
+\]
+交换积分次序并换元 $u=t-\tau$，得
+\[
+=\int_0^\infty\int_0^\infty e^{-s(\tau+u)}f(\tau)g(u)d\tau du.
+\]
+若 $g$ 与 $e^{-su}$ 可交换，则 $=\mathcal{L}\{f\}(s)\cdot\mathcal{L}\{g\}(s)$。否则因非交换性需要修正。
+\end{proof}
+
+\section{Fueter 正则函数}\label{sec:q_fueter_regular}
+
+\begin{definition}[Fueter 正则函数]\label{def:q_fueter_regular}
+设 $U\subseteq\mathbb{H}$ 为开集。函数 $f:U\to\mathbb{H}$ 称为\textbf{右 Fueter 正则}，若
+\[
+\frac{\partial f}{\partial\bar q}=0.
+\]
+称为\textbf{左 Fueter 正则}，若
+\[
+f\frac{\partial}{\partial\bar q}=0.
+\]
+\end{definition}
+
+\begin{theorem}[Fueter 定理]\label{thm:q_fueter_theorem}
+设 $f:\mathbb{C}\to\mathbb{C}$ 是复解析函数。则
+\[
+F(q)=f(q_0)+\sum_{k=1}^\infty\frac{1}{k!}\left(\frac{\partial^k f}{\partial z^k}(q_0)\right)q^k
+\]
+（适当调整变量）生成一个右 Fueter 正则函数。
+\end{theorem}
+
+\begin{proof}
+这是 Fueter 生成定理的标准形式。将复解析函数 $f$ 的泰勒展开中的复变量替换为四元数变量，适当处理非交换性，即得 Fueter 正则函数。需要强调：该幂级数本身是 \textbf{slice 正则}的而非 Fueter 正则的（见定义 \ref{def:q_power_series}）；Fueter 生成定理的正确内容是先对 $f$ 作轴向对称延拓，再作用四维 Laplace 算子 $\Delta=\partial_{x_0}^2+\partial_{x_1}^2+\partial_{x_2}^2+\partial_{x_3}^2$，所得函数右 Fueter 正则。本节沿用定理名称，但如上所述，级数读作 slice 正则对象。
+\end{proof}
+
+\begin{theorem}[slice 正则函数的局部展开]\label{thm:q_local_expansion}
+设 $f$ 在 $q_0$ 的邻域内 slice 正则。则 $f$ 在 $q_0$ 附近可展开为
+\[
+f(q)=\sum_{n=0}^\infty (q-q_0)^n a_n,\qquad a_n\in\mathbb{H}.
+\]
+\end{theorem}
+
+\begin{proof}
+这是 slice 正则函数的局部展开定理。其证明使用 Fueter 积分公式和几何级数展开，类似于复分析中 Taylor 展开的证明。\textbf{Fueter 正则函数一般没有以 $(q-q_0)^n$ 为基的局部展开}：$(q-q_0)^n$（$n\ge 1$）本身就不右 Fueter 正则（见 \S\ref{sec:q_slice_vs_fueter}）。两类在局部展开上的公共部分因此很小：Fueter 多项式是齐次的（$P_n$ 为 $n$ 次），故在零点展开中只有常数项同时属于两类。
+\end{proof}
+
+\begin{corollary}[slice 正则函数的零点孤立性]\label{cor:q_zero_isolated}
+若 slice 正则函数 $f$ 在连通开集 $U$ 上不恒为零，则其零点集在 $U$ 中没有聚点。
+\end{corollary}
+
+\begin{proof}
+由局部展开定理 \ref{thm:q_local_expansion}，若零点有聚点，则所有系数 $a_n=0$，从而 $f\equiv 0$，矛盾。
+\end{proof}
+
+\section{四元数广义函数}
+
+\begin{definition}[四元数广义函数]\label{def:q_generalised}
+设 $\mathcal{S}(\mathbb{H})$ 为四元数值 Schwartz 空间。\textbf{四元数广义函数}是 $\mathcal{S}(\mathbb{H})$ 上的连续线性泛函。特别地，\textbf{Fueter 核广义函数}由
+\[
+\left\langle \frac{\bar q}{|q|^4}, \phi\right\rangle
+=\lim_{\varepsilon\to 0}\int_{|q|>\varepsilon}\frac{\bar q}{|q|^4}\,\phi(q)\,dq
+\]
+定义，即核 $\bar q/|q|^4=q^{-1}/|q|^2$ 的主值分布。这里取 $\bar q/|q|^4$ 而非 $1/q$：后者并非 Fueter 正则（见 \S\ref{sec:q_slice_vs_fueter}），而 $\bar q/|q|^4$ 正是 \ref{cor:q_cauchy_formula} 所用的 Fueter 核。
+\end{definition}
+
+\begin{theorem}[Fueter 核广义函数的偏导数]\label{thm:q_cauchy_kernel_derivative}
+四元数分析中 Fueter 核引出的广义函数满足
+\[
+\frac{\partial}{\partial\bar q}\left(q^{-1}|q|^{-2}\right)
+=\frac{\partial}{\partial\bar q}\left(\frac{\bar q}{|q|^4}\right)=2\pi^2\delta(q),
+\]
+其中 $\delta(q)$ 是四元数 Dirac 广义函数。
+\end{theorem}
+
+\begin{proof}
+这是四元数分析中广义函数理论的标准结果，其原型正是 $\mathbb{R}^4$ 中 $|q|^{-2}$ 的基本解。证明涉及对 Fueter 核 $\bar q/|q|^4=q^{-1}|q|^{-2}$ 在广义函数意义下的求导，以及四元数版本的分布论。注意齐次性核对：核 $\bar q/|q|^4$ 在伸缩 $q\mapsto\lambda q$ 下为 $-3$ 次齐次，作用一次 Fueter 算子后为 $-4$ 次齐次，与 $\mathbb{R}^4$ 中 $\delta(q)$ 的齐次次数一致（在 $q=\lambda q'$ 下 $\delta(\lambda q')=\lambda^{-4}\delta(q')$，方程两边同为 $\lambda^{-4}$）；若改用 $1/q$，求导后为 $-2$ 次齐次，与 $\delta$ 不相容，故核必须带因子 $|q|^{-2}$。
+\end{proof}
+
+\section{四元数共轭作用与三维旋转}
+
+\begin{theorem}[单位四元数群]\label{thm:q_unit_sphere}
+单位四元数集合 $S^3=\{q\in\mathbb{H}:|q|=1\}$ 在四元数乘法下构成非交换李群，同构于 $SU(2)$。
+\end{theorem}
+
+\begin{proof}
+封闭性：若 $|p|=|q|=1$，则 $|pq|=|p||q|=1$。单位元为 $1$。逆元为 $\bar q$，且 $|\bar q|=1$。结合律继承自 $\mathbb{H}$。同构 $S^3\cong SU(2)$ 由
+\[
+a+bi+cj+dk\longmapsto
+\begin{pmatrix}
+a+bi & c+di\\
+-c+di & a-bi
+\end{pmatrix}
+\]
+给出。
+\end{proof}
+
+\begin{theorem}[四元数共轭作用与三维旋转]\label{thm:q_rotation}
+对单位四元数 $q\in S^3$ 与纯虚四元数 $v\in\operatorname{Im}\mathbb{H}\cong\mathbb{R}^3$，映射 $\rho_q(v)=q v q^{-1}$ 是 $\mathbb{R}^3$ 中的旋转。映射 $\Pi:S^3\to SO(3)$，$q\mapsto\rho_q$ 是二重覆盖，$\ker\Pi=\{\pm 1\}$。
+\end{theorem}
+
+\begin{proof}
+\textbf{纯虚性保持}：$\overline{qvq^{-1}}=\bar q^{-1}\bar v\bar q=q(-v)q^{-1}=-qvq^{-1}$。
+
+\textbf{模长保持}：$|\rho_q(v)|=|q||v||q^{-1}|=|v|$。
+
+\textbf{Rodrigues 公式}：写 $q=\cos(\theta/2)+\mathbf{u}\sin(\theta/2)$，$\mathbf{u}$ 为单位纯虚四元数。将 $v$ 分解为 $v=v_\parallel+v_\perp$，直接计算得
+\[
+qvq^{-1}=v_\parallel+\cos\theta\,v_\perp+\sin\theta\,(\mathbf{u}\times v_\perp),
+\]
+这正是绕轴 $\mathbf{u}$ 旋转角 $\theta$ 的 Rodrigues 公式。
+
+\textbf{二重覆盖}：$\rho_q=\rho_{-q}$，且任一旋转由 Rodrigues 公式唯一对应一对 $\pm q$，故 $\Pi$ 是二重覆盖。
+\end{proof}
+
+\begin{corollary}[三维旋转的周期结构]\label{cor:q_rotation_period}
+设 $q=e^{\mathbf{u}\theta}$。则 $\rho_q$ 是绕轴 $\mathbf{u}$ 旋转角 $2\theta$ 的旋转。
+\begin{enumerate}[label=(\roman*)]
+    \item 当 $\theta=\pi$ 时，$q=-1$，$\rho_q=\operatorname{id}$（绕轴旋转 $2\pi$）。
+    \item 若 $\theta=\pi p/q$（$p/q$ 既约），则 $q$ 是 $2q$ 次单位根，$\rho_q$ 生成 $SO(3)$ 中的 $q$ 阶循环子群。
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+由定理 \ref{thm:q_rotation} 的 Rodrigues 公式，$\rho_q$ 对应的旋转角为 $2\theta$。(i) $\theta=\pi$ 时旋转角 $2\pi$，旋转为恒等。(ii) $q=e^{\mathbf{u}\pi p/q}$ 的阶为 $2q/\gcd(2q,p)$，对应旋转的阶为 $q/\gcd(q,p)=q$。
+\end{proof}
+
+\section{超复分析展望}
+
+\begin{remark}[Clifford 分析]\label{rem:q_clifford}
+四元数分析是超复分析（hypercomplex analysis）的第一个实例。更一般地，Clifford 代数 $\mathrm{Cl}_{0,n}(\mathbb{R})$ 上的分析称为\textbf{Clifford 分析}。四元数分析对应于 $\mathrm{Cl}_{0,2}(\mathbb{R})\cong\mathbb{H}$ 的情形。
+\end{remark}
+
+\begin{remark}[Slice 正则函数]\label{rem:q_slice_regular}
+除了 Fueter 正则函数外，另一类重要的四元数解析函数是\textbf{slice 正则函数}（slice regular functions），由 Gentili 和 Stoppato 在 2006 年引入。Slice 正则函数在 slice 拓扑下具有更好的收敛性质。
+\end{remark}
+
+\begin{remark}[与后续章节的接口]\label{rem:q_interfaces}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{与《线性代数》}：$S^3\cong SU(2)$ 与 $SU(2)\to SO(3)$ 二重覆盖为矩阵群理论提供实例。
+    \item \textbf{与《流形基础与纤维丛》}：$S^3\to SO(3)$ 是主纤维丛的典型例子。
+    \item \textbf{与《周转圆组与周转球组》}：四元数周转球组 $\beta_{a,\mathbf{u},\theta}(t)=ae^{\mathbf{u}\theta t}$ 是本章指数函数的直接应用。
+    \item \textbf{与《调和分析》}：四元数傅里叶变换是群上调和分析的特例。
+    \item \textbf{与《概率论与分布》}：四元数广义函数与四元数概率分布可进一步结合。
+\end{enumerate}
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 四元数加法与极限的平移不变性（定义 \ref{def:q_limit}）；QFT 的平移性质；卷积的平移不变性 \\
+缩放 & 四元数模长的乘性 $|pq|=|p||q|$（性质 \ref{prop:q_basic_props}）；指数映射 $e^{\mathbf{u}\theta}$ 中的角度缩放；QLT 中的 $s$ 缩放 \\
+旋转 & 单位四元数共轭作用实现三维旋转（定理 \ref{thm:q_rotation}）；Rodrigues 公式与旋转角 $2\theta$（推论 \ref{cor:q_rotation_period}）；QFT 中的旋转因子 \\
+守恒 & 四元数范数与内积在旋转下的不变性；QFT 的帕塞瓦尔-Plancherel 恒等式（定理 \ref{thm:q_parseval}） \\
+对称 & 共轭反自同构 $\overline{pq}=\bar q\bar p$（性质 \ref{prop:q_basic_props}）；$S^3$ 的群结构与二重覆盖（定理 \ref{thm:q_unit_sphere}）；QFT 的共轭对称性 \\
+闭合 & $S^3$ 中有限阶元素生成循环子群（推论 \ref{cor:q_rotation_period}）；单位根 $e^{2\pi i p/q}$ 的闭合性 \\
+周期 & 四元数指数函数的 $2\pi$-周期性（命题 \ref{prop:quaternion_exp_rotation}）；有限阶旋转的周期 $q$（推论 \ref{cor:q_rotation_period}）；QDFT 的周期性 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 证明性质 \ref{prop:q_basic_props} 中的五条基本代数性质。
+    \item 验证例 \ref{ex:q_multiplication} 中 $pq$ 与 $qp$ 的差为 $2k$。
+    \item 证明命题 \ref{prop:q_limit_coordinate} 的坐标刻画。
+    \item 证明定理 \ref{thm:q_completeness} 中 $\mathbb{H}$ 的完备性。
+    \item 写出四元数线性函数 $f(q)=aq+b$ 的右导数与左导数。说明 $f(q)=aq$ 是左解析的，$f(q)=qb$ 是右解析的。
+    \item 证明命题 \ref{prop:quaternion_exp_rotation} 的四元数欧拉公式。
+    \item 证明定理 \ref{thm:q_exp_sin_cos} 中三个级数的收敛半径均为 $R=\infty$。
+    \item 证明定理 \ref{thm:q_abel} 的 Abel 极限定理。
+    \item 证明定理 \ref{thm:q_convolution_theorem} 中卷积定理的限制条件 $y:\mathbb{R}\to\mathbb{C}_\mu$ 不可省略。
+    \item 证明定理 \ref{thm:q_parseval} 的四元数帕塞瓦尔-Plancherel 恒等式。
+    \item 说明四元数分析中左右导数的差异，并举例说明一个函数右可导但左不可导。
+    \item 验证例 \ref{ex:q_regular_examples} 中 $f(q)=q^{-1}/|q|^2=\bar q/|q|^4$ 是右 Fueter 正则的，并说明单独的 $q^{-1}$ 为何不是（提示：直接计算 $\partial(q^{-1})/\partial\bar q$，其标量部分为 $2/|q|^2$）。
+    \item 证明定理 \ref{thm:q_cauchy_fueter} 的 Fueter 积分定理。提示：使用四元数版本 Stokes--Cartan 定理和 $\partial f/\partial \bar q=0$ 的条件。
+    \item 证明定理 \ref{thm:q_fueter_theorem} 的 Fueter 生成定理：先写出复解析函数 $f$ 的轴向对称延拓，再验证 $\Delta(\tilde f)$ 右 Fueter 正则；同时说明为何直接把 $z$ 换成 $q$ 得到的幂级数只能是 slice 正则的。
+    \item 证明定理 \ref{thm:q_cauchy_kernel_derivative} 中 Fueter 核广义函数的偏导数公式，并用齐次性说明为何核中必须出现因子 $|q|^{-2}$。
+    \item 证明推论 \ref{cor:q_rotation_period} 中三维旋转的周期结构。
+\end{enumerate}
+

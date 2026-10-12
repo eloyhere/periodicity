@@ -1,0 +1,2138 @@
+\chapter{Real Analysis}
+\label{chap:real_analysis}
+\markboth{Real Analysis}{Real Analysis}
+
+\begin{remark}[Positioning of this chapter]\label{rem:real_analysis_positioning}
+Building on the `Number Systems' chapter and the `Functions and Limits' chapter, this chapter establishes the theory of topology, continuity, differentiation, integration and uniform convergence in Euclidean space, and provides the rigorous analytic prerequisites for the subsequent `Series and Convolution', `Probability and Distribution' and `Vector Analysis' chapters. This chapter does not repeat the details of the construction of the completeness of the real numbers given in the `Number Systems' chapter, nor the basic definitions and elementary properties of single-variable limits, continuity, derivatives and integrals given in the `Functions and Limits' chapter; the emphasis of this chapter is: \textbf{to lift single-variable analysis to Euclidean spaces and metric spaces}, and to establish \textbf{multivariable differential calculus}, \textbf{multiple integrals and line and surface integrals}, \textbf{uniform convergence of sequences and series of functions}, \textbf{parameter-dependent integrals and differentiation under the integral sign}, together with such tools as \textbf{null sets and piecewise-smooth boundaries}. These tools are the necessary prerequisites for the rigorous statements of the gradient, the divergence, the curl, Green's formula, Stokes' theorem and Gauss's theorem in the `Vector Analysis' chapter, and they are also the foundation of the arguments on uniform convergence of series of functions, power series and Fourier series in the `Series and Convolution' chapter.
+
+\textbf{Guide to the seven themes}: Translation---translation in Euclidean space and the translation invariance of limits; Scaling---ball neighbourhoods, covers and scales in metric spaces; Rotation---orthogonal transformations of Euclidean space and topological invariance; Conservation---conservation of topological invariants such as compactness, completeness and connectedness; Symmetry---preservation of the symmetry of open sets, closed sets and compact sets under continuous maps; Closure---closure, closed sets, nested closed intervals and the closure of limits; Period---the uniform convergence and parameter-dependent integral tools prepared for periodic series, periodic convolution and Fourier analysis in later chapters.
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{fittikz}
+\begin{tikzpicture}[
+  >=Stealth, thick,
+  node distance=0.8cm and 1.0cm,
+  box/.style={draw, rounded corners, align=center, minimum width=2.6cm, minimum height=0.8cm, font=\small, fill=blue!8},
+  arr/.style={-{Stealth[length=2.2mm]}, very thick}
+]
+\node[box, fill=blue!12]  (topo) {Euclidean-space topology\\open/closed/compact sets};
+\node[box, fill=cyan!12, right=of topo] (cont) {Continuous maps\\compactness and connectedness};
+\node[box, fill=green!12, right=of cont] (diff) {Multivariable differential calculus\\total differential/implicit function/rank theorem};
+\node[box, fill=orange!12, right=of diff] (int) {Multiple integrals and line/surface integrals\\Fubini/change of variables};
+\node[box, fill=red!12, below=of topo] (conv) {Uniform convergence\\sequences and series of functions};
+\node[box, fill=purple!12, right=of conv] (param) {Parameter-dependent integrals\\differentiation under the integral sign};
+\node[box, fill=magenta!12, right=of param] (null) {Null sets\\piecewise-smooth boundaries};
+\node[box, fill=yellow!16, right=of null] (vec) {Vector analysis\\Green/Stokes/Gauss};
+\draw[arr] (topo) -- (cont);
+\draw[arr] (cont) -- (diff);
+\draw[arr] (diff) -- (int);
+\draw[arr] (topo) -- (conv);
+\draw[arr] (conv) -- (param);
+\draw[arr] (param) -- (null);
+\draw[arr] (null) -- (vec);
+\draw[arr, dashed] (int) -- (vec);
+\end{tikzpicture}
+\end{fittikz}
+\caption{Overview of the structure of this chapter: Euclidean-space topology $\to$ continuous maps $\to$ multivariable differential calculus $\to$ multiple integrals and line and surface integrals; below, uniform convergence, parameter-dependent integrals, null sets and piecewise-smooth boundaries are established in parallel; finally everything flows into vector analysis.}
+\label{fig:real_analysis_overview}
+\end{figure}
+
+\section{Euclidean Space and Metric Spaces}
+
+\subsection{Euclidean space}
+
+\begin{definition}[Euclidean space]\label{def:euclidean_space}
+Let $n \in \mathbb{N}^+$. The \textbf{$n$-dimensional Euclidean space} $\mathbb{R}^n$ is the set
+\[
+\mathbb{R}^n := \{(x_1, \dots, x_n) : x_i \in \mathbb{R},\ i = 1, \dots, n\},
+\]
+equipped with the \textbf{inner product}
+\[
+\langle x, y \rangle := \sum_{i=1}^{n} x_i y_i, \qquad x = (x_1, \dots, x_n),\ y = (y_1, \dots, y_n),
+\]
+together with the \textbf{norm} induced by the inner product
+\[
+\|x\| := \sqrt{\langle x, x \rangle} = \left( \sum_{i=1}^{n} x_i^2 \right)^{1/2},
+\]
+and the \textbf{distance}
+\[
+d(x, y) := \|x - y\|, \qquad x, y \in \mathbb{R}^n.
+\]
+\end{definition}
+
+\begin{proposition}[Basic properties of the inner product and the norm]\label{prop:inner_norm_properties}
+Let $x, y, z \in \mathbb{R}^n$, $\alpha \in \mathbb{R}$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Symmetry of the inner product}: $\langle x, y \rangle = \langle y, x \rangle$;
+    \item \textbf{Bilinearity of the inner product}: $\langle \alpha x + \beta y, z \rangle = \alpha \langle x, z \rangle + \beta \langle y, z \rangle$;
+    \item \textbf{Positive definiteness of the inner product}: $\langle x, x \rangle \ge 0$, and $\langle x, x \rangle = 0 \iff x = \mathbf{0}$;
+    \item \textbf{Cauchy--Schwarz inequality}: $|\langle x, y \rangle| \le \|x\| \|y\|$;
+    \item \textbf{Triangle inequality}: $\|x + y\| \le \|x\| + \|y\|$;
+    \item \textbf{Homogeneity}: $\|\alpha x\| = |\alpha| \|x\|$;
+    \item \textbf{Positive definiteness}: $\|x\| \ge 0$, and $\|x\| = 0 \iff x = \mathbf{0}$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\langle x, y \rangle = \sum_i x_i y_i = \sum_i y_i x_i = \langle y, x \rangle$.
+
+(ii) Verify componentwise from the definition of the inner product:
+\[
+\langle \alpha x + \beta y, z \rangle = \sum_i (\alpha x_i + \beta y_i) z_i = \alpha \sum_i x_i z_i + \beta \sum_i y_i z_i = \alpha \langle x, z \rangle + \beta \langle y, z \rangle.
+\]
+
+(iii) $\langle x, x \rangle = \sum_i x_i^2 \ge 0$, and it equals zero if and only if every $x_i = 0$.
+
+(iv) If $y = \mathbf{0}$, both sides of the inequality are $0$ and equality holds. Suppose that $y \neq \mathbf{0}$. For any real number $t$, by positive definiteness,
+\[
+0 \le \langle x + t y, x + t y \rangle = \langle x, x \rangle + 2t \langle x, y \rangle + t^2 \langle y, y \rangle.
+\]
+The right-hand side is a quadratic polynomial in $t$ that is always non-negative, so its discriminant is non-positive:
+\[
+(2 \langle x, y \rangle)^2 - 4 \langle x, x \rangle \langle y, y \rangle \le 0,
+\]
+that is, $|\langle x, y \rangle| \le \|x\| \|y\|$.
+
+(v) By the Cauchy--Schwarz inequality,
+\[
+\|x + y\|^2 = \|x\|^2 + 2\langle x, y \rangle + \|y\|^2 \le \|x\|^2 + 2\|x\| \|y\| + \|y\|^2 = (\|x\| + \|y\|)^2.
+\]
+Taking square roots of both sides gives the result.
+
+(vi) $\|\alpha x\|^2 = \langle \alpha x, \alpha x \rangle = \alpha^2 \langle x, x \rangle = \alpha^2 \|x\|^2$, and taking square roots gives $\|\alpha x\| = |\alpha| \|x\|$.
+
+(vii) This follows directly from the positive definiteness of the inner product.
+\end{proof}
+
+\begin{corollary}[The three axioms of a distance]\label{cor:metric_axioms}
+Let $x, y, z \in \mathbb{R}^n$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Positive definiteness}: $d(x, y) \ge 0$, and $d(x, y) = 0 \iff x = y$;
+    \item \textbf{Symmetry}: $d(x, y) = d(y, x)$;
+    \item \textbf{Triangle inequality}: $d(x, z) \le d(x, y) + d(y, z)$.
+\end{enumerate}
+Hence $(\mathbb{R}^n, d)$ is a metric space.
+\end{corollary}
+
+\begin{proof}
+(i) $d(x, y) = \|x - y\| \ge 0$; $d(x, y) = 0 \iff \|x - y\| = 0 \iff x - y = \mathbf{0} \iff x = y$.
+
+(ii) $\|x - y\| = \|-(y - x)\| = |-1| \|y - x\| = \|y - x\|$.
+
+(iii) $d(x, z) = \|x - z\| = \|(x - y) + (y - z)\| \le \|x - y\| + \|y - z\| = d(x, y) + d(y, z)$.
+\end{proof}
+
+\begin{example}[$\mathbb{R}$, $\mathbb{R}^2$, $\mathbb{R}^3$]\label{ex:euclidean_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item $n = 1$: the distance on $\mathbb{R}$ is $d(x, y) = |x - y|$.
+    \item $n = 2$: the distance on $\mathbb{R}^2$ is $d(x, y) = \sqrt{(x_1 - y_1)^2 + (x_2 - y_2)^2}$, that is, the Euclidean distance in the plane.
+    \item $n = 3$: the distance on $\mathbb{R}^3$ is the Euclidean distance in three-dimensional space.
+    \item The $n$-dimensional sphere $S^{n-1} = \{x \in \mathbb{R}^n : \|x\| = 1\}$, equipped with the induced distance, is a metric subspace of $\mathbb{R}^n$.
+\end{enumerate}
+\end{example}
+
+\subsection{Open sets, closed sets and basic topological notions}
+
+\begin{definition}[Open balls and ball neighbourhoods]\label{def:open_ball}
+Let $x_0 \in \mathbb{R}^n$, $r > 0$.
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Open ball}: $B(x_0, r) := \{x \in \mathbb{R}^n : \|x - x_0\| < r\}$.
+    \item \textbf{Closed ball}: $\overline{B}(x_0, r) := \{x \in \mathbb{R}^n : \|x - x_0\| \le r\}$.
+    \item \textbf{Sphere}: $S(x_0, r) := \{x \in \mathbb{R}^n : \|x - x_0\| = r\}$.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Open sets and closed sets]\label{def:open_closed_set}
+Let $E \subseteq \mathbb{R}^n$.
+\begin{enumerate}[label=(\roman*)]
+    \item $E$ is called an \textbf{open set} if for every $x \in E$ there exists $r > 0$ such that $B(x, r) \subseteq E$.
+    \item $E$ is called a \textbf{closed set} if its complement $\mathbb{R}^n \setminus E$ is open.
+    \item The \textbf{interior} of $E$ is defined as $\operatorname{int}(E) := \bigcup \{U : U \subseteq E,\ U \text{ open}\}$.
+    \item The \textbf{closure} of $E$ is defined as $\overline{E} := \bigcap \{F : F \supseteq E,\ F \text{ closed}\}$.
+    \item The \textbf{boundary} of $E$ is defined as $\partial E := \overline{E} \setminus \operatorname{int}(E)$.
+    \item The \textbf{derived set} of $E$ is defined as $E' := \{x \in \mathbb{R}^n : \text{every } B(x, r) \text{ contains a point of } E \text{ different from } x\}$. A point of $E'$ is called an \textbf{accumulation point} or a \textbf{limit point} of $E$.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Basic properties of open and closed sets]\label{prop:open_closed_properties}
+Let $\{U_\alpha\}_{\alpha \in A}$ be a family of open sets, $\{F_\alpha\}_{\alpha \in A}$ a family of closed sets, $U, V$ open sets and $F, G$ closed sets. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathbb{R}^n$ and $\emptyset$ are both open and closed;
+    \item an arbitrary union $\bigcup_{\alpha \in A} U_\alpha$ is open;
+    \item a finite intersection $U \cap V$ is open;
+    \item an arbitrary intersection $\bigcap_{\alpha \in A} F_\alpha$ is closed;
+    \item a finite union $F \cup G$ is closed;
+    \item $E$ is closed $\iff$ $E = \overline{E}$ $\iff$ $E' \subseteq E$;
+    \item $\operatorname{int}(E)$ is the largest open set contained in $E$; $\overline{E}$ is the smallest closed set containing $E$;
+    \item $\overline{E} = E \cup E'$, and $\partial E$ is closed.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\mathbb{R}^n$ is open: for any $x \in \mathbb{R}^n$, take $r = 1$; then $B(x, 1) \subseteq \mathbb{R}^n$. $\mathbb{R}^n$ is closed: its complement is $\emptyset$, and $\emptyset$ is open (`for every $x \in \emptyset$' is a vacuously true proposition). Similarly $\emptyset$ is both open and closed.
+
+(ii) Let $x \in \bigcup_\alpha U_\alpha$. Then there exists $\alpha_0$ such that $x \in U_{\alpha_0}$. Since $U_{\alpha_0}$ is open, there exists $r > 0$ such that $B(x, r) \subseteq U_{\alpha_0} \subseteq \bigcup_\alpha U_\alpha$. Hence the union is open.
+
+(iii) Let $x \in U \cap V$. Then $x \in U$ and $x \in V$. There exist $r_1, r_2 > 0$ such that $B(x, r_1) \subseteq U$ and $B(x, r_2) \subseteq V$. Take $r = \min(r_1, r_2) > 0$; then $B(x, r) \subseteq U \cap V$. Hence a finite intersection is open.
+
+(iv) By De Morgan's laws, the complement of $\bigcap_\alpha F_\alpha$ is $\bigcup_\alpha (\mathbb{R}^n \setminus F_\alpha)$, a union of open sets, hence open; therefore $\bigcap_\alpha F_\alpha$ is closed.
+
+(v) By De Morgan's laws, the complement of $F \cup G$ is $(\mathbb{R}^n \setminus F) \cap (\mathbb{R}^n \setminus G)$, the intersection of two open sets, hence open; therefore $F \cup G$ is closed.
+
+(vi) If $E$ is closed, then $\mathbb{R}^n \setminus E$ is open. By (i) and the definition, $\overline{E}$ is the smallest closed set containing $E$, so $\overline{E} \subseteq E$; and since $E \subseteq \overline{E}$, we have $E = \overline{E}$. Conversely, if $E = \overline{E}$, then $E$ is closed by the definition of the closure. The relation $E' \subseteq E$ is equivalent to: if $x \notin E$, then $x$ is not an accumulation point, that is, there exists $r > 0$ such that $B(x, r) \cap E = \emptyset$ (note that $x \notin E$, so it suffices that $B(x, r)$ contain no point of $E$); and this is equivalent to $\mathbb{R}^n \setminus E$ being open.
+
+(vii) By definition, $\operatorname{int}(E)$ is a union of open sets, hence open; it is a subset of $E$, and every open set contained in $E$ is contained in this union, so it is the largest such. $\overline{E}$ is an intersection of closed sets, hence closed; it contains $E$, and every closed set containing $E$ is contained in this intersection, so it is the smallest such.
+
+(viii) First we prove that $\overline{E} \subseteq E \cup E'$: let $x \notin E \cup E'$. Then $x \notin E$ and $x \notin E'$. Since $x \notin E'$, there exists $r > 0$ such that $B(x, r) \cap E \subseteq \{x\}$. Since $x \notin E$, we have $B(x, r) \cap E = \emptyset$, that is, $B(x, r) \subseteq \mathbb{R}^n \setminus E$. This shows that $\mathbb{R}^n \setminus E$ is open, that is, $E$ is closed, so $\overline{E} = E \subseteq E \cup E'$, a contradiction. Hence $\overline{E} \subseteq E \cup E'$. Next we prove that $E \cup E' \subseteq \overline{E}$: the inclusion $E \subseteq \overline{E}$ follows directly from the closure containing $E$. If $x \in E'$ and $x \notin \overline{E}$, then $\mathbb{R}^n \setminus \overline{E}$ is open and contains $x$, so there exists $r > 0$ such that $B(x, r) \subseteq \mathbb{R}^n \setminus \overline{E} \subseteq \mathbb{R}^n \setminus E$, contradicting the fact that $x$ is an accumulation point. Hence $x \in \overline{E}$. In summary, $\overline{E} = E \cup E'$. Finally, $\partial E = \overline{E} \setminus \operatorname{int}(E)$ is the difference of a closed set and an open set, and a closed set minus an open set is closed (because $\overline{E}$ is closed and $\operatorname{int}(E)$ is open, and $\overline{E} \setminus \operatorname{int}(E) = \overline{E} \cap (\mathbb{R}^n \setminus \operatorname{int}(E))$, the intersection of two closed sets).
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0,>=Stealth,thick]
+  \draw[fill=blue!10] (0,0) ellipse (3.0 and 2.0);
+  \draw[thick, blue!70!black] (0,0) ellipse (3.0 and 2.0);
+  \node[blue!70!black, font=\small] at (0,2.3) {$E$};
+  \draw[fill=green!15, opacity=0.7] (0,0) ellipse (2.0 and 1.3);
+  \draw[thick, green!60!black] (0,0) ellipse (2.0 and 1.3);
+  \node[green!60!black, font=\small] at (0,0) {$\operatorname{int}(E)$};
+  \draw[thick, red!70!black, dashed] (0,0) ellipse (2.6 and 1.7);
+  \node[red!70!black, font=\small] at (0,1.9) {$\partial E$};
+  \filldraw[black] (1.6,1.0) circle (1.5pt);
+  \node[font=\footnotesize, right=2pt] at (1.6,1.0) {accumulation point};
+\end{tikzpicture}
+\caption{Schematic diagram of the open set $E$, the interior $\operatorname{int}(E)$ and the boundary $\partial E$.}
+\label{fig:open_set_interior_boundary}
+\end{figure}
+
+\begin{example}[Examples of open and closed sets]\label{ex:open_closed_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item The open ball $B(x_0, r)$ is open. Verification: for any $x \in B(x_0, r)$, put $\rho = r - \|x - x_0\| > 0$. If $\|y - x\| < \rho$, then $\|y - x_0\| \le \|y - x\| + \|x - x_0\| < \rho + \|x - x_0\| = r$, so $B(x, \rho) \subseteq B(x_0, r)$.
+    \item The closed ball $\overline{B}(x_0, r)$ is closed. Its complement $\{x : \|x - x_0\| > r\}$ is open (verified similarly).
+    \item The half-open interval $(0, 1]$ is neither open nor closed in $\mathbb{R}$.
+    \item $\mathbb{Q}$ is neither open nor closed in $\mathbb{R}$, and $\operatorname{int}(\mathbb{Q}) = \emptyset$, $\overline{\mathbb{Q}} = \mathbb{R}$, $\partial \mathbb{Q} = \mathbb{R}$.
+    \item The Cantor set $C \subseteq [0,1]$ is closed, and $\operatorname{int}(C) = \emptyset$, $\partial C = C$.
+\end{enumerate}
+\end{example}
+
+\begin{definition}[Subspace topology]\label{def:subspace_topology}
+Let $E \subseteq \mathbb{R}^n$. The \textbf{subspace topology} of $E$ is defined as
+\[
+\mathcal{T}_E := \{E \cap U : U \text{ is an open set in } \mathbb{R}^n\}.
+\]
+A set in $\mathcal{T}_E$ is called a \textbf{relatively open set} of $E$. If $E \cap F$ is the complement of a relatively open set of $E$, then $E \cap F$ is called a \textbf{relatively closed set} of $E$.
+\end{definition}
+
+\begin{proposition}[Characterisation of relatively open and relatively closed sets]\label{prop:relative_open_closed}
+Let $E \subseteq \mathbb{R}^n$, $A \subseteq E$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item $A$ is a relatively open set of $E$ $\iff$ there exists an open set $U$ in $\mathbb{R}^n$ such that $A = E \cap U$;
+    \item $A$ is a relatively closed set of $E$ $\iff$ there exists a closed set $F$ in $\mathbb{R}^n$ such that $A = E \cap F$;
+    \item if $E$ is an open set in $\mathbb{R}^n$, then $A$ is a relatively open set of $E$ $\iff$ $A$ is an open set in $\mathbb{R}^n$;
+    \item if $E$ is a closed set in $\mathbb{R}^n$, then $A$ is a relatively closed set of $E$ $\iff$ $A$ is a closed set in $\mathbb{R}^n$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) This follows directly from the definition.
+
+(ii) $A$ is a relatively closed set of $E$ $\iff$ $E \setminus A$ is a relatively open set of $E$ $\iff$ there exists an open set $U$ such that $E \setminus A = E \cap U$ $\iff$ $A = E \setminus (E \cap U) = E \cap (\mathbb{R}^n \setminus U)$, where $\mathbb{R}^n \setminus U$ is closed.
+
+(iii) If $E$ is open and $A = E \cap U$ (with $U$ open), then $A$ is the intersection of two open sets, hence open. Conversely, if $A$ is open and $A \subseteq E$, then $A = E \cap A$, which is a relatively open set.
+
+(iv) Similar to (iii).
+\end{proof}
+
+\subsection{Compactness and connectedness}
+
+\begin{definition}[Open covers and compactness]\label{def:compactness}
+Let $K \subseteq \mathbb{R}^n$.
+\begin{enumerate}[label=(\roman*)]
+    \item An \textbf{open cover} of $K$ is a family of open sets $\{U_\alpha\}_{\alpha \in A}$ such that $K \subseteq \bigcup_{\alpha \in A} U_\alpha$.
+    \item $K$ is called \textbf{compact} if every open cover of $K$ has a finite subcover, that is, there exist $\alpha_1, \dots, \alpha_m$ such that $K \subseteq \bigcup_{i=1}^{m} U_{\alpha_i}$.
+    \item $K$ is called \textbf{sequentially compact} if every sequence in $K$ has a subsequence converging to a point of $K$.
+    \item $K$ is called \textbf{bounded} if there exists $R > 0$ such that $K \subseteq B(\mathbf{0}, R)$.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[Heine--Borel theorem]\label{thm:heine_borel}
+Let $K \subseteq \mathbb{R}^n$. Then $K$ is compact if and only if $K$ is bounded and closed.
+\end{theorem}
+
+\begin{proof}
+\textbf{Necessity}.
+
+First we prove that $K$ is bounded. The family of open balls $\{B(\mathbf{0}, m)\}_{m \in \mathbb{N}^+}$ is an open cover of $K$. By compactness there is a finite subcover, that is, there exist $m_1 < \dots < m_k$ such that $K \subseteq \bigcup_{i=1}^{k} B(\mathbf{0}, m_i) = B(\mathbf{0}, m_k)$. Hence $K$ is bounded.
+
+Next we prove that $K$ is closed. It suffices to prove that $\mathbb{R}^n \setminus K$ is open. Let $x \in \mathbb{R}^n \setminus K$. For each $y \in K$, put $r_y = \|x - y\| / 2 > 0$. The family of open balls $\{B(y, r_y)\}_{y \in K}$ is an open cover of $K$. By compactness, there exist $y_1, \dots, y_m \in K$ such that $K \subseteq \bigcup_{i=1}^{m} B(y_i, r_{y_i})$. Put $r = \min_{1 \le i \le m} r_{y_i} > 0$. We claim that $B(x, r) \cap K = \emptyset$. Otherwise there exists $z \in B(x, r) \cap K$, and then $z \in B(y_i, r_{y_i})$ for some $i$, so that
+\[
+\|x - y_i\| \le \|x - z\| + \|z - y_i\| < r + r_{y_i} \le 2 r_{y_i} = \|x - y_i\|,
+\]
+a contradiction. Hence $B(x, r) \subseteq \mathbb{R}^n \setminus K$, that is, the complement is open and $K$ is closed.
+
+\textbf{Sufficiency}. Suppose that $K$ is bounded and closed. Since $K$ is bounded, there exists $R > 0$ such that $K \subseteq [-R, R]^n$. First we prove that $[-R, R]^n$ is compact.
+
+\textbf{Step 1}: $[-R, R]$ is compact. Let $\{U_\alpha\}$ be an open cover of $[-R, R]$. Suppose, to the contrary, that there is no finite subcover. Divide $[-R, R]$ into two closed intervals of length $R$; at least one of them has no finite subcover, denote it by $I_1$. Divide $I_1$ into two equal parts; at least one of them has no finite subcover, denote it by $I_2$. Continuing in this way we obtain a nested sequence of closed intervals $I_1 \supseteq I_2 \supseteq \cdots$ with lengths $|I_k| = 2R / 2^k \to 0$. By the nested-interval theorem, there exists a unique $x_0 \in \bigcap_{k=1}^{\infty} I_k$. Since $\{U_\alpha\}$ covers $[-R, R]$, there exists $\alpha_0$ such that $x_0 \in U_{\alpha_0}$. Since $U_{\alpha_0}$ is open, there exists $r > 0$ such that $B(x_0, r) \subseteq U_{\alpha_0}$. Take $k$ large enough that $|I_k| < r$. Since $x_0 \in I_k$, we have $I_k \subseteq B(x_0, r) \subseteq U_{\alpha_0}$, that is, $I_k$ is covered by the single set $U_{\alpha_0}$, contradicting the fact that $I_k$ has no finite subcover. Hence $[-R, R]$ is compact.
+
+\textbf{Step 2}: $[-R, R]^n$ is compact. We argue by induction on $n$. The case $n = 1$ has already been proved. Suppose that $[-R, R]^{n-1}$ is compact. Let $\{U_\alpha\}$ be an open cover of $[-R, R]^n = [-R, R]^{n-1} \times [-R, R]$. For each $x \in [-R, R]^{n-1}$, the section $\{x\} \times [-R, R]$ is compact (it is homeomorphic to $[-R, R]$), so finitely many of the $U_\alpha$ cover it. By the tubular neighbourhood lemma (see below), there exists an open neighbourhood $V_x \subseteq [-R, R]^{n-1}$ of $x$ such that $V_x \times [-R, R]$ is covered by the same finitely many $U_\alpha$. The family $\{V_x\}_{x}$ is an open cover of $[-R, R]^{n-1}$. By the induction hypothesis, there exist finitely many $x_1, \dots, x_m$ such that $[-R, R]^{n-1} = \bigcup_{i=1}^{m} V_{x_i}$. Consequently $[-R, R]^n = \bigcup_{i=1}^{m} (V_{x_i} \times [-R, R])$, which is covered by finitely many of the $U_\alpha$. Hence $[-R, R]^n$ is compact.
+
+\textbf{Step 3}: $K$ is compact. Let $\{U_\alpha\}$ be an open cover of $K$. Then $\{U_\alpha\} \cup \{\mathbb{R}^n \setminus K\}$ is an open cover of $[-R, R]^n$ (because $K \subseteq [-R, R]^n$ and $\mathbb{R}^n \setminus K$ is open). Since $[-R, R]^n$ is compact, there is a finite subcover. If $\mathbb{R}^n \setminus K$ is not among its members, then finitely many of the $U_\alpha$ already cover $[-R, R]^n \supseteq K$; if it is among them, then finitely many of the $U_\alpha$ cover $[-R, R]^n \setminus (\mathbb{R}^n \setminus K) = K$. In either case $K$ has a finite subcover.
+\end{proof}
+
+\begin{lemma}[Tubular neighbourhood lemma]\label{lem:tube_neighbourhood}
+Let $X$ be a compact metric space, $Y$ a metric space, and $\{U_\alpha\}_{\alpha \in A}$ an open cover of $X \times Y$. If for every $x \in X$ the set $\{x\} \times Y$ is covered by finitely many of the $U_\alpha$, and $Y$ is compact, then there exists an open neighbourhood $V_x$ of $x$ such that $V_x \times Y$ is covered by the same finitely many $U_\alpha$.
+\end{lemma}
+
+\begin{proof}
+Fix $x \in X$. Suppose that $\{x\} \times Y \subseteq \bigcup_{i=1}^{m} U_{\alpha_i}$. Since $Y$ is compact, for every $y \in Y$ there exist $i(y)$, an open neighbourhood $V_y$ of $x$ and an open neighbourhood $W_y$ of $y$ such that $V_y \times W_y \subseteq U_{\alpha_{i(y)}}$ (because $U_{\alpha_{i(y)}}$ is open and contains $(x, y)$). The family $\{W_y\}_{y \in Y}$ is an open cover of $Y$. Since $Y$ is compact, there is a finite subcover $W_{y_1}, \dots, W_{y_k}$. Put $V_x = \bigcap_{j=1}^{k} V_{y_j}$; then $V_x$ is an open neighbourhood of $x$. For any $(x', y') \in V_x \times Y$ there exists $j$ such that $y' \in W_{y_j}$, so that $(x', y') \in V_{y_j} \times W_{y_j} \subseteq U_{\alpha_{i(y_j)}}$. Hence $V_x \times Y \subseteq \bigcup_{j=1}^{k} U_{\alpha_{i(y_j)}}$.
+\end{proof}
+
+\begin{theorem}[Bolzano--Weierstrass theorem]\label{thm:bolzano_weierstrass}
+Let $K \subseteq \mathbb{R}^n$. Then $K$ is sequentially compact if and only if $K$ is bounded and closed.
+\end{theorem}
+
+\begin{proof}
+By the Heine--Borel theorem (Theorem \ref{thm:heine_borel}), it suffices to prove that $K$ is compact $\iff$ $K$ is sequentially compact.
+
+\textbf{Compact $\Rightarrow$ sequentially compact}. Suppose that $K$ is compact and that $\{x_k\}$ is a sequence in $K$. If $\{x_k\}$ has no convergent subsequence, then for every $x \in K$ there exists $r_x > 0$ such that $B(x, r_x)$ contains only finitely many of the $x_k$ (otherwise one could construct a subsequence converging to $x$). The family $\{B(x, r_x)\}_{x \in K}$ is an open cover of $K$. By compactness there is a finite subcover $B(x_1, r_{x_1}), \dots, B(x_m, r_{x_m})$. Each ball contains only finitely many of the $x_k$, so $K$ contains only finitely many of the $x_k$, contradicting the fact that $\{x_k\}$ is an infinite sequence.
+
+\textbf{Sequentially compact $\Rightarrow$ compact}. Suppose that $K$ is sequentially compact. First we prove that $K$ is bounded. If $K$ were unbounded, then for each $k$ there would exist $x_k \in K$ with $\|x_k\| > k$. The sequence $\{x_k\}$ would have no convergent subsequence (any convergent subsequence must be bounded), contradicting sequential compactness. Hence $K$ is bounded. Next we prove that $K$ is closed. Let $x \in \overline{K}$. Then there exist $x_k \in K$ with $x_k \to x$. By sequential compactness, $\{x_k\}$ has a subsequence converging to some point $y$ of $K$. But a subsequence of a convergent sequence converges to the same limit, so $y = x \in K$. Therefore $\overline{K} \subseteq K$ and $K$ is closed. By the Heine--Borel theorem, $K$ is compact.
+\end{proof}
+
+\begin{definition}[Connectedness]\label{def:connectedness}
+Let $E \subseteq \mathbb{R}^n$.
+\begin{enumerate}[label=(\roman*)]
+    \item $E$ is called \textbf{disconnected} if there exist two non-empty relatively open sets $A, B \subseteq E$ such that $E = A \cup B$ and $A \cap B = \emptyset$. Such a decomposition is called a \textbf{separation} of $E$.
+    \item $E$ is called \textbf{connected} if $E$ is not disconnected.
+    \item $E$ is called \textbf{path-connected} if for any $x, y \in E$ there exists a continuous map $\gamma: [0, 1] \to E$ such that $\gamma(0) = x$ and $\gamma(1) = y$.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Basic properties of connected sets]\label{prop:connected_properties}
+\begin{enumerate}[label=(\roman*)]
+    \item $E$ is connected $\iff$ there do not exist non-empty relatively closed sets $A, B \subseteq E$ such that $E = A \cup B$ and $A \cap B = \emptyset$.
+    \item Path-connected $\Rightarrow$ connected.
+    \item Continuous maps preserve connectedness: if $E$ is connected and $f: E \to \mathbb{R}^m$ is continuous, then $f(E)$ is connected.
+    \item The connected subsets of $\mathbb{R}$ are precisely the intervals.
+    \item If $\{E_\alpha\}$ is a family of connected sets and $\bigcap_\alpha E_\alpha \neq \emptyset$, then $\bigcup_\alpha E_\alpha$ is connected.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $A \subseteq E$ is a relatively open set $\iff$ $E \setminus A$ is a relatively closed set. Hence the definition of a separation may equivalently be formulated in terms of relatively closed sets.
+
+(ii) Suppose that $E$ is path-connected. If $E = A \cup B$ is a separation (with $A, B$ non-empty and relatively open), take $x \in A$ and $y \in B$. There exists a continuous $\gamma: [0, 1] \to E$ such that $\gamma(0) = x$ and $\gamma(1) = y$. Put $A' = \gamma^{-1}(A)$ and $B' = \gamma^{-1}(B)$. Since $\gamma$ is continuous and $A, B$ are relatively open sets of $E$, the sets $A', B'$ are relatively open sets of $[0, 1]$. Moreover $A' \cup B' = [0, 1]$, $A' \cap B' = \emptyset$, $0 \in A'$ and $1 \in B'$. But $[0, 1]$ is connected (by (iv)), a contradiction.
+
+(iii) Suppose that $f(E) = A \cup B$ is a separation (with $A, B$ non-empty and relatively open). Then $E = f^{-1}(A) \cup f^{-1}(B)$, and $f^{-1}(A), f^{-1}(B)$ are non-empty relatively open sets of $E$ (because $f$ is continuous) with empty intersection, contradicting the connectedness of $E$.
+
+(iv) Suppose that $E \subseteq \mathbb{R}$ is connected. If $E$ is not an interval, then there exist $a < b < c$ with $a, c \in E$ but $b \notin E$. Put $A = E \cap (-\infty, b)$ and $B = E \cap (b, \infty)$. Then $A, B$ are non-empty relatively open sets of $E$, $E = A \cup B$ and $A \cap B = \emptyset$, contradicting the connectedness of $E$. Conversely, suppose that $E$ is an interval and that $E = A \cup B$ is a separation. Take $a \in A$ and $b \in B$; without loss of generality $a < b$. Put $c = \sup(A \cap [a, b])$. Since $A$ is relatively closed and $a \in A$, we have $c \in A$. If $c < b$, then $c \in A$ and $(c, b] \subseteq B$ (otherwise there would be a point of $A$ with value $> c$), so $c$ is an accumulation point of $B$. But $B$ is relatively closed, so $c \in B$, contradicting $A \cap B = \emptyset$. Hence $c = b$, that is, $b \in A$, contradicting $b \in B$.
+
+(v) Let $E = \bigcup_\alpha E_\alpha$ and $x_0 \in \bigcap_\alpha E_\alpha$. If $E = A \cup B$ is a separation, then without loss of generality $x_0 \in A$. For each $\alpha$, the set $E_\alpha$ is connected and $x_0 \in E_\alpha$, so $E_\alpha \subseteq A$ (otherwise $E_\alpha \cap A$ and $E_\alpha \cap B$ would form a separation of $E_\alpha$). Hence $E \subseteq A$, that is, $B = \emptyset$, a contradiction.
+\end{proof}
+
+\begin{definition}[Simple connectedness]\label{def:simply_connected}
+Let $\Omega \subseteq \mathbb{R}^n$ be an open set. $\Omega$ is called \textbf{simply connected} if for every continuous closed curve $\gamma: S^1 \to \Omega$ there exists a continuous map $H: S^1 \times [0, 1] \to \Omega$ such that $H(\theta, 0) = \gamma(\theta)$ and $H(\theta, 1) = p$ (with $p \in \Omega$ fixed), that is, $\gamma$ can be continuously contracted to a point inside $\Omega$.
+\end{definition}
+
+\begin{proposition}[Convex sets in $\mathbb{R}^n$ are simply connected]\label{prop:convex_simply_connected}
+Every convex open set in $\mathbb{R}^n$ is simply connected.
+\end{proposition}
+
+\begin{proof}
+Let $\Omega$ be convex and open, and let $\gamma: S^1 \to \Omega$ be a continuous closed curve. Take $p \in \Omega$ (if $\Omega = \emptyset$ the proposition is trivial). Define $H: S^1 \times [0, 1] \to \Omega$ by
+\[
+H(\theta, t) = (1 - t) \gamma(\theta) + t p.
+\]
+By convexity, $H(\theta, t) \in \Omega$ for all $(\theta, t)$. The map $H$ is continuous (because a linear combination of continuous maps is continuous), $H(\theta, 0) = \gamma(\theta)$ and $H(\theta, 1) = p$. Hence $\Omega$ is simply connected.
+\end{proof}
+
+\begin{example}[Comparison of connectedness and simple connectedness]\label{ex:connected_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathbb{R}^n$ is connected, path-connected and simply connected.
+    \item The open ball $B(x_0, r)$ is connected, path-connected and simply connected (it is convex).
+    \item The circle $S^1$ is connected and path-connected, but not simply connected (a closed curve winding once around the centre cannot be contracted).
+    \item The slit plane $\mathbb{R}^2 \setminus \{(x, 0) : x \geq 0\}$ is connected and path-connected, but not simply connected.
+    \item $[0, 1] \cup [2, 3]$ is disconnected.
+    \item The topologist's sine curve $\{(x, \sin(1/x)) : x > 0\} \cup \{(0, y) : -1 \le y \le 1\}$ is connected but not path-connected.
+\end{enumerate}
+\end{example}
+
+\section{Sequences, Limits and Completeness}
+
+\subsection{Sequences in Euclidean space}
+
+\begin{definition}[Convergence of a sequence]\label{def:sequence_convergence}
+Let $\{x_k\}$ be a sequence in $\mathbb{R}^n$ and $x \in \mathbb{R}^n$. The sequence $\{x_k\}$ is said to \textbf{converge} to $x$, written $x_k \to x$ or $\lim_{k \to \infty} x_k = x$, if
+\[
+\forall \varepsilon > 0,\ \exists K \in \mathbb{N}^+,\ \forall k \ge K,\quad \|x_k - x\| < \varepsilon.
+\]
+$x$ is called the \textbf{limit} of $\{x_k\}$.
+\end{definition}
+
+\begin{proposition}[Coordinate characterisation of convergence]\label{prop:coordinate_convergence}
+Let $x_k = (x_{k,1}, \dots, x_{k,n})$ and $x = (x_1, \dots, x_n)$. Then
+\[
+x_k \to x \iff x_{k,i} \to x_i,\quad i = 1, \dots, n.
+\]
+\end{proposition}
+
+\begin{proof}
+($\Rightarrow$) For each $i$, $|x_{k,i} - x_i| \le \|x_k - x\| \to 0$, so $x_{k,i} \to x_i$.
+
+($\Leftarrow$) For each $i$, $x_{k,i} \to x_i$. Given $\varepsilon > 0$, for each $i$ there exists $K_i$ such that $|x_{k,i} - x_i| < \varepsilon/\sqrt{n}$ whenever $k \ge K_i$. Take $K = \max_i K_i$; then for $k \ge K$,
+\[
+\|x_k - x\| = \left( \sum_{i=1}^{n} |x_{k,i} - x_i|^2 \right)^{1/2} < \left( n \cdot \frac{\varepsilon^2}{n} \right)^{1/2} = \varepsilon.
+\]
+\end{proof}
+
+\begin{proposition}[Algebraic properties of limits]\label{prop:limit_operations_ra}
+Let $x_k \to x$ and $y_k \to y$ (in $\mathbb{R}^n$), and $\alpha_k \to \alpha$ (in $\mathbb{R}$). Then:
+\begin{enumerate}[label=(\roman*)]
+    \item $x_k + y_k \to x + y$;
+    \item $\alpha_k x_k \to \alpha x$;
+    \item $\langle x_k, y_k \rangle \to \langle x, y \rangle$;
+    \item $\|x_k\| \to \|x\|$;
+    \item uniqueness of the limit: if $x_k \to x$ and $x_k \to y$, then $x = y$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\|(x_k + y_k) - (x + y)\| \le \|x_k - x\| + \|y_k - y\| \to 0$.
+
+(ii)
+\[
+\|\alpha_k x_k - \alpha x\| \le \|\alpha_k x_k - \alpha_k x\| + \|\alpha_k x - \alpha x\| = |\alpha_k| \|x_k - x\| + |\alpha_k - \alpha| \|x\|.
+\]
+Since the convergent sequence $\{\alpha_k\}$ is bounded, suppose that $|\alpha_k| \le M$. Then $\|\alpha_k x_k - \alpha x\| \le M \|x_k - x\| + |\alpha_k - \alpha| \|x\| \to 0$.
+
+(iii) By the Cauchy--Schwarz inequality,
+\[
+|\langle x_k, y_k \rangle - \langle x, y \rangle| \le |\langle x_k - x, y_k \rangle| + |\langle x, y_k - y \rangle| \le \|x_k - x\| \|y_k\| + \|x\| \|y_k - y\| \to 0.
+\]
+
+(iv) By the reverse triangle inequality, $| \|x_k\| - \|x\| | \le \|x_k - x\| \to 0$.
+
+(v) If $x \neq y$, take $\varepsilon = \|x - y\|/2 > 0$. There exists $K_1$ such that $\|x_k - x\| < \varepsilon$ for $k \ge K_1$, and $K_2$ such that $\|x_k - y\| < \varepsilon$ for $k \ge K_2$. Take $k \ge \max(K_1, K_2)$; then
+\[
+\|x - y\| \le \|x - x_k\| + \|x_k - y\| < 2\varepsilon = \|x - y\|,
+\]
+a contradiction.
+\end{proof}
+
+\begin{definition}[Cauchy sequence]\label{def:cauchy_sequence}
+A sequence $\{x_k\}$ is called a \textbf{Cauchy sequence} if
+\[
+\forall \varepsilon > 0,\ \exists K \in \mathbb{N}^+,\ \forall m, k \ge K,\quad \|x_m - x_k\| < \varepsilon.
+\]
+\end{definition}
+
+\begin{proposition}[A convergent sequence is a Cauchy sequence]\label{prop:convergent_cauchy_ra}
+If $\{x_k\}$ converges, then $\{x_k\}$ is a Cauchy sequence.
+\end{proposition}
+
+\begin{proof}
+Suppose that $x_k \to x$. Given $\varepsilon > 0$, there exists $K$ such that $\|x_k - x\| < \varepsilon/2$ for $k \ge K$. Then for $m, k \ge K$,
+\[
+\|x_m - x_k\| \le \|x_m - x\| + \|x - x_k\| < \varepsilon/2 + \varepsilon/2 = \varepsilon.
+\]
+\end{proof}
+
+\begin{theorem}[Completeness of $\mathbb{R}^n$]\label{thm:rn_completeness}
+Every Cauchy sequence in $\mathbb{R}^n$ converges.
+\end{theorem}
+
+\begin{proof}
+Let $\{x_k\}$ be a Cauchy sequence in $\mathbb{R}^n$. By the coordinate characterisation, for each $i$ the sequence $\{x_{k,i}\}$ is a Cauchy sequence in $\mathbb{R}$ (because $|x_{m,i} - x_{k,i}| \le \|x_m - x_k\|$). By the completeness of $\mathbb{R}$ (the `Number Systems' chapter), $x_{k,i} \to x_i$ for some $x_i \in \mathbb{R}$. Put $x = (x_1, \dots, x_n)$. By Proposition \ref{prop:coordinate_convergence}, $x_k \to x$.
+\end{proof}
+
+\begin{definition}[Accumulation points and upper/lower limits]\label{def:cluster_upper_lower_limit}
+Let $\{x_k\}$ be a sequence in $\mathbb{R}^n$.
+\begin{enumerate}[label=(\roman*)]
+    \item $x \in \mathbb{R}^n$ is called an \textbf{accumulation point} of $\{x_k\}$ if $\{x_k\}$ has a subsequence converging to $x$.
+    \item For a real sequence $\{a_k\}$, define
+    \[
+    \limsup_{k \to \infty} a_k := \lim_{k \to \infty} \left( \sup_{j \ge k} a_j \right), \qquad \liminf_{k \to \infty} a_k := \lim_{k \to \infty} \left( \inf_{j \ge k} a_j \right).
+    \]
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[Bolzano--Weierstrass theorem, sequential form]\label{thm:bolzano_weierstrass_seq}
+Every bounded sequence in $\mathbb{R}^n$ has a convergent subsequence.
+\end{theorem}
+
+\begin{proof}
+By the Heine--Borel theorem (Theorem \ref{thm:heine_borel}), a bounded closed set is compact; by Theorem \ref{thm:bolzano_weierstrass}, a compact set is sequentially compact. Concretely, suppose that $\{x_k\}$ is bounded; then there exists $R > 0$ such that $\{x_k\} \subseteq \overline{B}(\mathbf{0}, R)$. By the `compact $\Rightarrow$ sequentially compact' part of Theorem \ref{thm:bolzano_weierstrass} ($\overline{B}(\mathbf{0}, R)$ is bounded and closed, hence compact), $\{x_k\}$ has a convergent subsequence.
+\end{proof}
+
+\begin{proposition}[Relation between upper/lower limits and accumulation points]\label{prop:limsup_cluster}
+Let $\{a_k\}$ be a real sequence. Then $\limsup_{k \to \infty} a_k$ is the largest accumulation point of $\{a_k\}$, and $\liminf_{k \to \infty} a_k$ is the smallest. In particular, $\{a_k\}$ converges $\iff$ $\limsup a_k = \liminf a_k$.
+\end{proposition}
+
+\begin{proof}
+Let $s_k = \sup_{j \ge k} a_j$. The sequence $\{s_k\}$ is monotonically non-increasing, so $\lim s_k = \inf_k s_k =: L$ exists (possibly equal to $\pm\infty$).
+
+First we prove that $L$ is an accumulation point. If $L = -\infty$, then $s_k \to -\infty$, so $\{a_k\}$ is unbounded below and one can construct a subsequence tending to $-\infty$; thus $L$ is an accumulation point. If $L \in \mathbb{R}$, then for each $k$, since $s_k = \sup_{j \ge k} a_j$, there exists $j_k \ge k$ such that $a_{j_k} > s_k - 1/k$. Also $a_{j_k} \le s_k$. Hence $|a_{j_k} - s_k| \le 1/k$. Since $s_k \to L$, we have $a_{j_k} \to L$. The subsequence $\{a_{j_k}\}$ converges to $L$, so $L$ is an accumulation point.
+
+Next we prove that $L$ is the largest accumulation point. Let $M$ be any accumulation point, so that there is a subsequence $a_{k_j} \to M$. For each $j$, $a_{k_j} \le s_{k_j}$. Since $s_k \to L$ and $s_k$ is monotonically non-increasing, $\lim_{j \to \infty} s_{k_j} = L$. Hence $M = \lim a_{k_j} \le \lim s_{k_j} = L$.
+
+Similarly, $\liminf$ is the smallest accumulation point.
+
+Finally, $\{a_k\}$ converges to $L$ $\iff$ every subsequence converges to $L$ $\iff$ the largest accumulation point = the smallest accumulation point = $L$ $\iff$ $\limsup = \liminf$.
+\end{proof}
+
+\begin{example}[Computing upper and lower limits]\label{ex:limsup_example}
+\begin{enumerate}[label=(\roman*)]
+    \item $a_k = (-1)^k$: $\limsup = 1$, $\liminf = -1$, and the sequence does not converge.
+    \item $a_k = 1/k$: $\limsup = \liminf = 0$, and the sequence converges to $0$.
+    \item $a_k = \sin(k)$: $\limsup = 1$, $\liminf = -1$ (because $\{k \bmod 2\pi\}$ is dense in $[0, 2\pi)$).
+\end{enumerate}
+\end{example}
+
+\subsection{The contraction-mapping principle}
+
+\begin{definition}[Contraction mapping]\label{def:contraction_mapping}
+Let $(X, d)$ be a metric space. A map $T: X \to X$ is called a \textbf{contraction mapping} if there exists a constant $0 \le q < 1$ such that
+\[
+d(T(x), T(y)) \le q \, d(x, y), \qquad \forall x, y \in X.
+\]
+$q$ is called the \textbf{contraction constant} of $T$.
+\end{definition}
+
+\begin{theorem}[Banach contraction-mapping principle]\label{thm:banach_fixed_point}
+Let $(X, d)$ be a complete metric space and $T: X \to X$ a contraction mapping. Then $T$ has a unique fixed point $x^* \in X$, that is, $T(x^*) = x^*$. Moreover, for any $x_0 \in X$ the iteration sequence $x_{k+1} = T(x_k)$ converges to $x^*$, and the error estimate
+\[
+d(x_k, x^*) \le \frac{q^k}{1 - q} d(x_1, x_0).
+\]
+holds.
+\end{theorem}
+
+\begin{proof}
+\textbf{Existence}. Choose any $x_0 \in X$ and define $x_{k+1} = T(x_k)$. First we prove that $\{x_k\}$ is a Cauchy sequence. For any $k \ge 1$,
+\[
+d(x_{k+1}, x_k) = d(T(x_k), T(x_{k-1})) \le q \, d(x_k, x_{k-1}) \le \cdots \le q^k d(x_1, x_0).
+\]
+Hence for $m > k$,
+\[
+d(x_m, x_k) \le \sum_{j=k}^{m-1} d(x_{j+1}, x_j) \le \sum_{j=k}^{m-1} q^j d(x_1, x_0) \le \frac{q^k}{1 - q} d(x_1, x_0).
+\]
+Since $q < 1$, we have $q^k \to 0$, so $\{x_k\}$ is a Cauchy sequence. Since $X$ is complete, $x_k \to x^*$ for some $x^* \in X$.
+
+By the continuity of $T$ (a contraction mapping is necessarily continuous: $d(T(x), T(y)) \le q \, d(x, y) \to 0$ as $x \to y$),
+\[
+T(x^*) = T\left( \lim_{k \to \infty} x_k \right) = \lim_{k \to \infty} T(x_k) = \lim_{k \to \infty} x_{k+1} = x^*.
+\]
+Hence $x^*$ is a fixed point.
+
+\textbf{Uniqueness}. Suppose that $x^*, y^*$ are both fixed points. Then
+\[
+d(x^*, y^*) = d(T(x^*), T(y^*)) \le q \, d(x^*, y^*).
+\]
+Since $q < 1$, this gives $d(x^*, y^*) = 0$, that is, $x^* = y^*$.
+
+\textbf{Error estimate}. For $k \ge 1$ and $m > k$, letting $m \to \infty$ in the estimate above (with $k$ fixed) gives
+\[
+d(x_k, x^*) = \lim_{m \to \infty} d(x_k, x_m) \le \frac{q^k}{1 - q} d(x_1, x_0).
+\]
+\end{proof}
+
+\begin{corollary}[Local form of the contraction-mapping principle]\label{cor:banach_local}
+Let $(X, d)$ be a complete metric space and $T: X \to X$ a map satisfying: there exist $q \in [0, 1)$ and a closed ball $\overline{B}(x_0, r)$ such that
+\begin{enumerate}[label=(\roman*)]
+    \item $T(\overline{B}(x_0, r)) \subseteq \overline{B}(x_0, r)$;
+    \item $d(T(x), T(y)) \le q \, d(x, y)$ for all $x, y \in \overline{B}(x_0, r)$.
+\end{enumerate}
+Then $T$ has a unique fixed point in $\overline{B}(x_0, r)$.
+\end{corollary}
+
+\begin{proof}
+The closed ball $\overline{B}(x_0, r)$, being a closed subset of a complete metric space, is complete. Apply Theorem \ref{thm:banach_fixed_point} to $T|_{\overline{B}(x_0, r)}$.
+\end{proof}
+
+\begin{example}[Applications of the contraction-mapping principle]\label{ex:contraction_applications}
+\begin{enumerate}[label=(\roman*)]
+    \item Solving the equation $x = \cos x$. The map $T(x) = \cos x$ is a contraction mapping on $[0, 1]$ (since $|T'(x)| = |\sin x| \le \sin 1 < 1$), so the equation has a unique solution.
+    \item Existence and uniqueness of the solution of the initial-value problem for an ordinary differential equation (the Picard--Lindel\"of theorem): under suitable conditions the integral operator $T(y)(t) = y_0 + \int_{t_0}^t F(s, y(s)) \, ds$ is a contraction mapping.
+    \item The proof of the implicit-function theorem: construct a contraction mapping and solve by iteration.
+\end{enumerate}
+\end{example}
+
+\section{Continuous Maps and Compactness}
+
+\subsection{Continuous maps}
+
+\begin{definition}[Continuous map]\label{def:continuous_map}
+Let $E \subseteq \mathbb{R}^n$, $f: E \to \mathbb{R}^m$ and $x_0 \in E$.
+\begin{enumerate}[label=(\roman*)]
+    \item $f$ is \textbf{continuous} at $x_0$ if
+    \[
+    \forall \varepsilon > 0,\ \exists \delta > 0,\ \forall x \in E,\quad \|x - x_0\| < \delta \implies \|f(x) - f(x_0)\| < \varepsilon.
+    \]
+    \item $f$ is continuous on $E$ if $f$ is continuous at every point of $E$.
+    \item $f$ is \textbf{uniformly continuous} on $E$ if
+    \[
+    \forall \varepsilon > 0,\ \exists \delta > 0,\ \forall x, y \in E,\quad \|x - y\| < \delta \implies \|f(x) - f(y)\| < \varepsilon.
+    \]
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Equivalent characterisations of continuity]\label{prop:continuity_equivalent}
+Let $E \subseteq \mathbb{R}^n$, $f: E \to \mathbb{R}^m$ and $x_0 \in E$. Then the following conditions are equivalent:
+\begin{enumerate}[label=(\roman*)]
+    \item $f$ is continuous at $x_0$;
+    \item for every sequence $x_k \to x_0$ in $E$, one has $f(x_k) \to f(x_0)$;
+    \item for every open neighbourhood $V$ of $f(x_0)$ there exists an open neighbourhood $U$ of $x_0$ such that $f(E \cap U) \subseteq V$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\Rightarrow$ (ii): Given $\varepsilon > 0$, by continuity there exists $\delta > 0$ such that $\|f(x) - f(x_0)\| < \varepsilon$ whenever $\|x - x_0\| < \delta$. Since $x_k \to x_0$, there exists $K$ such that $\|x_k - x_0\| < \delta$ for $k \ge K$, and hence $\|f(x_k) - f(x_0)\| < \varepsilon$. Thus $f(x_k) \to f(x_0)$.
+
+(ii) $\Rightarrow$ (i): Suppose, to the contrary, that $f$ is not continuous at $x_0$. Then there exists $\varepsilon_0 > 0$ such that for every $k$ there exists $x_k \in E$ with $\|x_k - x_0\| < 1/k$ but $\|f(x_k) - f(x_0)\| \ge \varepsilon_0$. Then $x_k \to x_0$ but $f(x_k) \not\to f(x_0)$, a contradiction.
+
+(i) $\Rightarrow$ (iii): Let $V$ be an open neighbourhood of $f(x_0)$; there exists $\varepsilon > 0$ such that $B(f(x_0), \varepsilon) \subseteq V$. By continuity there exists $\delta > 0$ such that $\|f(x) - f(x_0)\| < \varepsilon$ whenever $\|x - x_0\| < \delta$. Take $U = B(x_0, \delta)$; then $f(E \cap U) \subseteq B(f(x_0), \varepsilon) \subseteq V$.
+
+(iii) $\Rightarrow$ (i): Given $\varepsilon > 0$, take $V = B(f(x_0), \varepsilon)$. There exists an open neighbourhood $U$ of $x_0$ such that $f(E \cap U) \subseteq V$. There exists $\delta > 0$ such that $B(x_0, \delta) \subseteq U$. Then $\|x - x_0\| < \delta$ implies $x \in E \cap U$, hence $f(x) \in V$, that is, $\|f(x) - f(x_0)\| < \varepsilon$.
+\end{proof}
+
+\begin{theorem}[Global characterisation of continuous maps]\label{thm:continuity_global}
+Let $E \subseteq \mathbb{R}^n$ and $f: E \to \mathbb{R}^m$. Then the following conditions are equivalent:
+\begin{enumerate}[label=(\roman*)]
+    \item $f$ is continuous on $E$;
+    \item for every open set $V$ in $\mathbb{R}^m$, the set $f^{-1}(V)$ is a relatively open set of $E$;
+    \item for every closed set $F$ in $\mathbb{R}^m$, the set $f^{-1}(F)$ is a relatively closed set of $E$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) $\Rightarrow$ (ii): Let $V$ be an open set in $\mathbb{R}^m$ and $x_0 \in f^{-1}(V)$. Then $f(x_0) \in V$. By Proposition \ref{prop:continuity_equivalent} (iii), there exists an open neighbourhood $U$ of $x_0$ in $\mathbb{R}^n$ such that $f(E \cap U) \subseteq V$. Hence $E \cap U \subseteq f^{-1}(V)$, that is, $f^{-1}(V)$ is a relatively open set of $E$.
+
+(ii) $\Rightarrow$ (i): Let $x_0 \in E$. For every open neighbourhood $V$ of $f(x_0)$, the set $f^{-1}(V)$ is a relatively open set of $E$ containing $x_0$. Hence there exists an open set $U$ such that $x_0 \in E \cap U \subseteq f^{-1}(V)$, that is, $f(E \cap U) \subseteq V$. By Proposition \ref{prop:continuity_equivalent} (iii), $f$ is continuous at $x_0$.
+
+(ii) $\iff$ (iii): This follows directly from $f^{-1}(\mathbb{R}^m \setminus F) = E \setminus f^{-1}(F)$ and De Morgan's laws.
+\end{proof}
+
+\begin{theorem}[Properties of continuous maps on compact sets]\label{thm:continuous_compact}
+Let $K \subseteq \mathbb{R}^n$ be compact and $f: K \to \mathbb{R}^m$ continuous. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item $f(K)$ is compact;
+    \item $f$ is bounded on $K$;
+    \item if $m = 1$, then $f$ attains its maximum and its minimum on $K$;
+    \item $f$ is uniformly continuous on $K$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) Let $\{V_\alpha\}$ be an open cover of $f(K)$. Then $\{f^{-1}(V_\alpha)\}$ is an open cover of $K$ (since $f$ is continuous, each $f^{-1}(V_\alpha)$ is a relatively open set of $K$). Since $K$ is compact, there is a finite subcover $f^{-1}(V_{\alpha_1}), \dots, f^{-1}(V_{\alpha_k})$. Then $V_{\alpha_1}, \dots, V_{\alpha_k}$ cover $f(K)$. Hence $f(K)$ is compact.
+
+(ii) By (i), $f(K)$ is compact. By the Heine--Borel theorem (Theorem \ref{thm:heine_borel}), $f(K)$ is bounded, that is, there exists $R > 0$ such that $f(K) \subseteq B(\mathbf{0}, R)$. Hence $\|f(x)\| \le R$ for all $x \in K$.
+
+(iii) By (i), $f(K)$ is a compact set in $\mathbb{R}$. By the Heine--Borel theorem, $f(K)$ is bounded and closed. Hence $\sup f(K)$ and $\inf f(K)$ both belong to $f(K)$, that is, $f$ attains its maximum and its minimum.
+
+(iv) Suppose, to the contrary, that $f$ is not uniformly continuous. Then there exists $\varepsilon_0 > 0$ such that for every $k$ there exist $x_k, y_k \in K$ with $\|x_k - y_k\| < 1/k$ but $\|f(x_k) - f(y_k)\| \ge \varepsilon_0$. Since $K$ is sequentially compact (Theorem \ref{thm:bolzano_weierstrass}), $\{x_k\}$ has a subsequence $x_{k_j} \to x_0 \in K$. Since $\|x_{k_j} - y_{k_j}\| < 1/k_j \to 0$, we have $y_{k_j} \to x_0$. By the continuity of $f$, $f(x_{k_j}) \to f(x_0)$ and $f(y_{k_j}) \to f(x_0)$. But $\|f(x_{k_j}) - f(y_{k_j})\| \ge \varepsilon_0$, contradicting convergence.
+\end{proof}
+
+\begin{corollary}[Heine--Cantor theorem]\label{cor:heine_cantor}
+Let $K \subseteq \mathbb{R}^n$ be compact and $f: K \to \mathbb{R}^m$ continuous. Then $f$ is uniformly continuous on $K$.
+\end{corollary}
+
+\begin{proof}
+This is Theorem \ref{thm:continuous_compact} (iv).
+\end{proof}
+
+\begin{theorem}[Generalised intermediate-value theorem]\label{thm:intermediate_value_general}
+Let $E \subseteq \mathbb{R}^n$ be connected and $f: E \to \mathbb{R}$ continuous. If $x, y \in E$ and $f(x) < c < f(y)$, then there exists $z \in E$ such that $f(z) = c$.
+\end{theorem}
+
+\begin{proof}
+By Proposition \ref{prop:connected_properties} (iii), $f(E)$ is connected. By Proposition \ref{prop:connected_properties} (iv), $f(E)$ is an interval in $\mathbb{R}$. Since $f(x), f(y) \in f(E)$ and $c$ lies between them, we have $c \in f(E)$, that is, there exists $z \in E$ such that $f(z) = c$.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0,>=Stealth,thick]
+  \draw[->] (-0.3,0) -- (7.5,0) node[right] {$E$};
+  \draw[->] (0,-0.3) -- (0,3.5) node[above] {$f$};
+  \draw[thick, blue!70!black, fill=blue!10] (0.5,0.3) .. controls (2.0,2.8) and (4.5,2.8) .. (6.8,0.5) .. controls (5.0,-0.5) and (2.0,-0.5) .. cycle;
+  \node[blue!70!black] at (3.6,2.0) {$E$ connected};
+  \filldraw[red] (1.5,1.0) circle (2pt) node[below left,font=\footnotesize] {$x$};
+  \filldraw[red] (5.5,1.0) circle (2pt) node[below right,font=\footnotesize] {$y$};
+  \draw[dashed, orange] (1.5,1.0) -- (1.5,2.5) -- (5.5,2.5) -- (5.5,1.0);
+  \filldraw[green!60!black] (3.5,2.5) circle (2pt) node[above,font=\footnotesize] {$z$};
+  \node[orange, font=\footnotesize] at (3.5,2.1) {$f(z)=c$};
+\end{tikzpicture}
+\caption{A continuous function on a connected set attains intermediate values: if $f(x) < c < f(y)$, then there exists $z$ with $f(z)=c$.}
+\label{fig:intermediate_value}
+\end{figure}
+
+\begin{example}[Examples and counterexamples of continuous maps]\label{ex:continuous_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item A polynomial map $f: \mathbb{R}^n \to \mathbb{R}$, $f(x) = \sum_{|\alpha| \le d} c_\alpha x^\alpha$, is continuous.
+    \item A linear map $f(x) = Ax$ (with $A$ an $m \times n$ matrix) is continuous.
+    \item The norm map $f(x) = \|x\|$ is continuous (by the reverse triangle inequality).
+    \item The inner-product map $f(x, y) = \langle x, y \rangle$ is continuous.
+    \item $f: (0, 1] \to \mathbb{R}$, $f(x) = 1/x$, is continuous but not uniformly continuous (it is unbounded as $x \to 0^+$).
+    \item $f: [0, 1] \to \mathbb{R}$, $f(x) = 1/x$ for $x > 0$ and $f(0) = 0$, is discontinuous at $0$.
+\end{enumerate}
+\end{example}
+
+\section{Multivariable Differential Calculus}
+
+\subsection{Directional derivatives and partial derivatives}
+
+\begin{definition}[Directional derivative]\label{def:directional_derivative}
+Let $f: \Omega \to \mathbb{R}$ with $\Omega \subseteq \mathbb{R}^n$ open, let $x_0 \in \Omega$, and let $v \in \mathbb{R}^n$ be a unit vector. The \textbf{directional derivative} of $f$ at $x_0$ in the direction $v$ is defined as
+\[
+D_v f(x_0) := \lim_{t \to 0} \frac{f(x_0 + t v) - f(x_0)}{t},
+\]
+provided this limit exists.
+\end{definition}
+
+\begin{definition}[Partial derivative]\label{def:partial_derivative_ra}
+Let $f: \Omega \to \mathbb{R}$ with $\Omega \subseteq \mathbb{R}^n$ open and $x_0 \in \Omega$. The \textbf{partial derivative} of $f$ at $x_0$ with respect to the $i$-th coordinate is defined as
+\[
+\frac{\partial f}{\partial x_i}(x_0) := \lim_{t \to 0} \frac{f(x_0 + t e_i) - f(x_0)}{t},
+\]
+where $e_i$ is the $i$-th standard basis vector. That is, $\partial f/\partial x_i(x_0) = D_{e_i} f(x_0)$.
+\end{definition}
+
+\begin{proposition}[Existence of partial derivatives does not imply continuity]\label{prop:partial_not_continuous}
+There exists a function $f: \mathbb{R}^2 \to \mathbb{R}$ such that both partial derivatives of $f$ exist at the origin, but $f$ is discontinuous at the origin.
+\end{proposition}
+
+\begin{proof}
+Define
+\[
+f(x, y) = \begin{cases} \frac{xy}{x^2 + y^2}, & (x, y) \neq (0, 0), \\ 0, & (x, y) = (0, 0). \end{cases}
+\]
+The partial derivatives are
+\[
+\frac{\partial f}{\partial x}(0, 0) = \lim_{t \to 0} \frac{f(t, 0) - f(0, 0)}{t} = \lim_{t \to 0} \frac{0 - 0}{t} = 0,
+\]
+and similarly $\partial f/\partial y(0, 0) = 0$. But it is discontinuous: along the line $y = kx$,
+\[
+\lim_{x \to 0} f(x, kx) = \lim_{x \to 0} \frac{k x^2}{x^2 + k^2 x^2} = \frac{k}{1 + k^2},
+\]
+which varies with $k$, so $\lim_{(x, y) \to (0, 0)} f(x, y)$ does not exist.
+\end{proof}
+
+\begin{definition}[Gradient]\label{def:gradient_ra}
+Let $f: \Omega \to \mathbb{R}$ with $\Omega \subseteq \mathbb{R}^n$ open, and suppose that all partial derivatives of $f$ exist at $x_0$. The \textbf{gradient} of $f$ at $x_0$ is
+\[
+\nabla f(x_0) := \left( \frac{\partial f}{\partial x_1}(x_0), \dots, \frac{\partial f}{\partial x_n}(x_0) \right) \in \mathbb{R}^n.
+\]
+\end{definition}
+
+\subsection{Total differential}
+
+\begin{definition}[Total differential and differentiability]\label{def:total_differential_ra}
+Let $f: \Omega \to \mathbb{R}^m$ with $\Omega \subseteq \mathbb{R}^n$ open and $x_0 \in \Omega$. The map $f$ is \textbf{differentiable} at $x_0$ if there exists a linear map $L: \mathbb{R}^n \to \mathbb{R}^m$ such that
+\[
+f(x_0 + h) = f(x_0) + L(h) + o(\|h\|), \qquad \|h\| \to 0,
+\]
+that is,
+\[
+\lim_{h \to 0} \frac{\|f(x_0 + h) - f(x_0) - L(h)\|}{\|h\|} = 0.
+\]
+The linear map $L$ is called the \textbf{total differential} or the \textbf{derivative} of $f$ at $x_0$, and is denoted by $Df(x_0)$ or $f'(x_0)$.
+\end{definition}
+
+\begin{proposition}[Uniqueness of the total differential]\label{prop:differential_uniqueness}
+If $f$ is differentiable at $x_0$, then the total differential $L = Df(x_0)$ is unique.
+\end{proposition}
+
+\begin{proof}
+Suppose that $L_1, L_2$ both satisfy the definition. Then
+\[
+L_1(h) - L_2(h) = o(\|h\|), \qquad \|h\| \to 0.
+\]
+For any $v \neq 0$, take $h = t v$ (with $t > 0$); then
+\[
+\frac{\|L_1(t v) - L_2(t v)\|}{t \|v\|} = \frac{\|t (L_1(v) - L_2(v))\|}{t \|v\|} = \frac{\|L_1(v) - L_2(v)\|}{\|v\|} \to 0.
+\]
+Hence $L_1(v) = L_2(v)$ for every $v$, so $L_1 = L_2$.
+\end{proof}
+
+\begin{theorem}[Differentiability implies existence of partial derivatives, and $L$ is given by the Jacobian matrix]\label{thm:differentiable_jacobian}
+Let $f: \Omega \to \mathbb{R}^m$ with $\Omega \subseteq \mathbb{R}^n$ open, and suppose that $f$ is differentiable at $x_0 \in \Omega$. Then all the partial derivatives $\partial f_i/\partial x_j(x_0)$ exist, and
+\[
+Df(x_0)(h) = J_f(x_0) h, \qquad h \in \mathbb{R}^n,
+\]
+where
+\[
+J_f(x_0) = \begin{pmatrix} \frac{\partial f_1}{\partial x_1}(x_0) & \cdots & \frac{\partial f_1}{\partial x_n}(x_0) \\ \vdots & \ddots & \vdots \\ \frac{\partial f_m}{\partial x_1}(x_0) & \cdots & \frac{\partial f_m}{\partial x_n}(x_0) \end{pmatrix}
+\]
+is the \textbf{Jacobian matrix} of $f$ at $x_0$.
+\end{theorem}
+
+\begin{proof}
+Take $h = t e_j$ (with $t \neq 0$). By differentiability,
+\[
+f(x_0 + t e_j) = f(x_0) + t L(e_j) + o(|t|).
+\]
+Hence
+\[
+\frac{f(x_0 + t e_j) - f(x_0)}{t} = L(e_j) + \frac{o(|t|)}{t} \to L(e_j), \qquad t \to 0.
+\]
+That is, $\partial f/\partial x_j(x_0) = L(e_j)$. Since $L$ is linear, $L(h) = L(\sum_j h_j e_j) = \sum_j h_j L(e_j) = J_f(x_0) h$.
+\end{proof}
+
+\begin{theorem}[Continuous partial derivatives imply differentiability]\label{thm:continuous_partial_implies_differentiable}
+Let $f: \Omega \to \mathbb{R}$ with $\Omega \subseteq \mathbb{R}^n$ open. If all the partial derivatives of $f$ exist in some neighbourhood of $x_0$ and are continuous at $x_0$, then $f$ is differentiable at $x_0$.
+\end{theorem}
+
+\begin{proof}
+It suffices to prove the $n$-dimensional case. Let $h = (h_1, \dots, h_n)$. Write
+\[
+f(x_0 + h) - f(x_0) = \sum_{j=1}^{n} [f(x_0 + h_1 e_1 + \cdots + h_j e_j) - f(x_0 + h_1 e_1 + \cdots + h_{j-1} e_{j-1})].
+\]
+For the $j$-th term, fixing the other coordinates and applying the one-variable mean-value theorem gives
+\[
+f(x_0 + h_1 e_1 + \cdots + h_j e_j) - f(x_0 + h_1 e_1 + \cdots + h_{j-1} e_{j-1}) = h_j \frac{\partial f}{\partial x_j}(\xi_j),
+\]
+where $\xi_j$ lies between $x_0 + h_1 e_1 + \cdots + h_{j-1} e_{j-1}$ and $x_0 + h_1 e_1 + \cdots + h_j e_j$. Hence
+\[
+f(x_0 + h) - f(x_0) = \sum_{j=1}^{n} h_j \frac{\partial f}{\partial x_j}(\xi_j).
+\]
+Since the partial derivatives are continuous at $x_0$, we have $\partial f/\partial x_j(\xi_j) = \partial f/\partial x_j(x_0) + o(1)$ (as $h \to 0$ we have $\xi_j \to x_0$). Hence
+\[
+f(x_0 + h) - f(x_0) = \sum_{j=1}^{n} h_j \frac{\partial f}{\partial x_j}(x_0) + \sum_{j=1}^{n} h_j \cdot o(1) = \nabla f(x_0) \cdot h + o(\|h\|).
+\]
+That is, $f$ is differentiable at $x_0$, and $Df(x_0)(h) = \nabla f(x_0) \cdot h$.
+\end{proof}
+
+\begin{corollary}[$C^1$ functions are differentiable]\label{cor:c1_differentiable}
+If all the partial derivatives of $f$ exist and are continuous on $\Omega$ (written $f \in C^1(\Omega)$), then $f$ is differentiable on $\Omega$.
+\end{corollary}
+
+\begin{proof}
+Apply Theorem \ref{thm:continuous_partial_implies_differentiable} at each point $x_0 \in \Omega$.
+\end{proof}
+
+\begin{theorem}[Chain rule]\label{thm:chain_rule_ra}
+Let $\Omega \subseteq \mathbb{R}^n$ and $\Omega' \subseteq \mathbb{R}^m$ be open, let $g: \Omega \to \Omega'$ be differentiable at $x_0$, and let $f: \Omega' \to \mathbb{R}^p$ be differentiable at $y_0 = g(x_0)$. Then $f \circ g$ is differentiable at $x_0$, and
+\[
+D(f \circ g)(x_0) = Df(y_0) \circ Dg(x_0),
+\]
+that is,
+\[
+J_{f \circ g}(x_0) = J_f(y_0) \cdot J_g(x_0).
+\]
+\end{theorem}
+
+\begin{proof}
+By differentiability,
+\[
+g(x_0 + h) = g(x_0) + Dg(x_0)(h) + o(\|h\|) = y_0 + k + o(\|h\|),
+\]
+where $k = Dg(x_0)(h)$ and $\|k\| \le \|Dg(x_0)\| \|h\| + o(\|h\|) = O(\|h\|)$. Also
+\[
+f(y_0 + k) = f(y_0) + Df(y_0)(k) + o(\|k\|).
+\]
+Hence
+\[
+(f \circ g)(x_0 + h) = f(y_0 + k + o(\|h\|)) = f(y_0) + Df(y_0)(k + o(\|h\|)) + o(\|k + o(\|h\|)\|).
+\]
+By the linearity of $Df(y_0)$,
+\[
+Df(y_0)(k + o(\|h\|)) = Df(y_0)(k) + Df(y_0)(o(\|h\|)) = Df(y_0)(Dg(x_0)(h)) + o(\|h\|).
+\]
+Also $o(\|k + o(\|h\|)\|) = o(\|h\|)$. Hence
+\[
+(f \circ g)(x_0 + h) = (f \circ g)(x_0) + (Df(y_0) \circ Dg(x_0))(h) + o(\|h\|).
+\]
+That is, $D(f \circ g)(x_0) = Df(y_0) \circ Dg(x_0)$.
+\end{proof}
+
+\begin{definition}[$C^k$ map]\label{def:ck_mapping}
+Let $\Omega \subseteq \mathbb{R}^n$ be open and $f: \Omega \to \mathbb{R}^m$. We write $f \in C^k(\Omega)$ if all partial derivatives of $f$ of order at most $k$ exist and are continuous. The set $C^\infty(\Omega) := \bigcap_{k=0}^{\infty} C^k(\Omega)$ is called the set of \textbf{smooth maps}.
+\end{definition}
+
+\begin{theorem}[Equality of mixed partials --- Clairaut's theorem]\label{thm:clairaut_ra}
+Let $f: \Omega \to \mathbb{R}$ with $\Omega \subseteq \mathbb{R}^n$ open and $f \in C^2(\Omega)$. Then for all $i, j$,
+\[
+\frac{\partial^2 f}{\partial x_i \partial x_j} = \frac{\partial^2 f}{\partial x_j \partial x_i}.
+\]
+\end{theorem}
+
+\begin{proof}
+It suffices to prove the case $n = 2$. Let $(x_0, y_0) \in \Omega$. Take $h, k$ small enough that the rectangle $[x_0, x_0 + h] \times [y_0, y_0 + k] \subseteq \Omega$. Define
+\[
+\Delta(h, k) = f(x_0 + h, y_0 + k) - f(x_0 + h, y_0) - f(x_0, y_0 + k) + f(x_0, y_0).
+\]
+Put $\varphi(x) = f(x, y_0 + k) - f(x, y_0)$. Then $\Delta(h, k) = \varphi(x_0 + h) - \varphi(x_0)$. By the one-variable mean-value theorem, there exists $\xi \in (x_0, x_0 + h)$ such that
+\[
+\Delta(h, k) = h \varphi'(\xi) = h \left[ \frac{\partial f}{\partial x}(\xi, y_0 + k) - \frac{\partial f}{\partial x}(\xi, y_0) \right].
+\]
+Applying the mean-value theorem once more, now with respect to $y$, we obtain $\eta \in (y_0, y_0 + k)$ such that
+\[
+\Delta(h, k) = hk \frac{\partial^2 f}{\partial y \partial x}(\xi, \eta).
+\]
+Similarly, put $\psi(y) = f(x_0 + h, y) - f(x_0, y)$; then $\Delta(h, k) = \psi(y_0 + k) - \psi(y_0)$. By the mean-value theorem,
+\[
+\Delta(h, k) = hk \frac{\partial^2 f}{\partial x \partial y}(\xi', \eta').
+\]
+Hence
+\[
+\frac{\partial^2 f}{\partial y \partial x}(\xi, \eta) = \frac{\partial^2 f}{\partial x \partial y}(\xi', \eta').
+\]
+Let $(h, k) \to (0, 0)$; then $(\xi, \eta) \to (x_0, y_0)$ and $(\xi', \eta') \to (x_0, y_0)$. By the continuity of the second-order partial derivatives,
+\[
+\frac{\partial^2 f}{\partial y \partial x}(x_0, y_0) = \frac{\partial^2 f}{\partial x \partial y}(x_0, y_0).
+\]
+\end{proof}
+
+\begin{example}[When continuity of mixed partials fails, equality fails]\label{ex:clairaut_failure_ra}
+Define
+\[
+f(x, y) = \begin{cases} \frac{xy(x^2 - y^2)}{x^2 + y^2}, & (x, y) \neq (0, 0), \\ 0, & (x, y) = (0, 0). \end{cases}
+\]
+Then $f \in C^1(\mathbb{R}^2)$, but at $(0, 0)$,
+\[
+\frac{\partial^2 f}{\partial x \partial y}(0, 0) = 1, \qquad \frac{\partial^2 f}{\partial y \partial x}(0, 0) = -1.
+\]
+Hence the $C^2$ hypothesis cannot be omitted.
+\end{example}
+
+\subsection{Mean-value theorems and Taylor's formula}
+
+\begin{theorem}[Multivariable mean-value theorem]\label{thm:multivariable_mean_value}
+Let $f: \Omega \to \mathbb{R}$ with $\Omega \subseteq \mathbb{R}^n$ open and $f \in C^1(\Omega)$. If $x, y \in \Omega$ and the line segment $[x, y] \subseteq \Omega$, then there exists $\xi \in (x, y)$ such that
+\[
+f(y) - f(x) = \nabla f(\xi) \cdot (y - x).
+\]
+\end{theorem}
+
+\begin{proof}
+Define $g: [0, 1] \to \mathbb{R}$ by $g(t) = f(x + t(y - x))$. By the chain rule, $g \in C^1([0, 1])$ and
+\[
+g'(t) = \nabla f(x + t(y - x)) \cdot (y - x).
+\]
+By the one-variable mean-value theorem, there exists $t_0 \in (0, 1)$ such that $g(1) - g(0) = g'(t_0)$. Put $\xi = x + t_0(y - x)$; then
+\[
+f(y) - f(x) = \nabla f(\xi) \cdot (y - x).
+\]
+\end{proof}
+
+\begin{theorem}[Second-order Taylor formula]\label{thm:taylor_second_order}
+Let $f: \Omega \to \mathbb{R}$ with $\Omega \subseteq \mathbb{R}^n$ open and $f \in C^2(\Omega)$. If $x \in \Omega$ and $h \in \mathbb{R}^n$ are such that $x + t h \in \Omega$ for $t \in [0, 1]$, then there exists $\xi \in (x, x + h)$ such that
+\[
+f(x + h) = f(x) + \nabla f(x) \cdot h + \frac{1}{2} h^{\mathsf T} H_f(\xi) h,
+\]
+where $H_f(\xi) = \left( \frac{\partial^2 f}{\partial x_i \partial x_j}(\xi) \right)_{i,j}$ is the \textbf{Hessian matrix} of $f$ at $\xi$.
+\end{theorem}
+
+\begin{proof}
+Put $g(t) = f(x + t h)$. Then $g \in C^2([0, 1])$. By the chain rule,
+\[
+g'(t) = \nabla f(x + t h) \cdot h, \qquad g''(t) = h^{\mathsf T} H_f(x + t h) h.
+\]
+By the one-variable second-order Taylor formula, there exists $t_0 \in (0, 1)$ such that
+\[
+g(1) = g(0) + g'(0) + \frac{1}{2} g''(t_0).
+\]
+Substitute $g(1) = f(x + h)$, $g(0) = f(x)$, $g'(0) = \nabla f(x) \cdot h$ and $g''(t_0) = h^{\mathsf T} H_f(x + t_0 h) h$. Putting $\xi = x + t_0 h$ gives the result.
+\end{proof}
+
+\begin{corollary}[Second-order condition for extrema]\label{cor:extremum_second_order}
+Let $f: \Omega \to \mathbb{R}$ with $\Omega \subseteq \mathbb{R}^n$ open, $f \in C^2(\Omega)$, $x_0 \in \Omega$ and $\nabla f(x_0) = \mathbf{0}$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item if $H_f(x_0)$ is positive definite, then $x_0$ is a local minimum point;
+    \item if $H_f(x_0)$ is negative definite, then $x_0$ is a local maximum point;
+    \item if $H_f(x_0)$ is indefinite, then $x_0$ is a saddle point.
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+By Taylor's formula, $f(x_0 + h) - f(x_0) = \frac{1}{2} h^{\mathsf T} H_f(x_0) h + o(\|h\|^2)$.
+
+(i) If $H_f(x_0)$ is positive definite, there exists $\lambda > 0$ such that $h^{\mathsf T} H_f(x_0) h \ge \lambda \|h\|^2$. Take $\delta > 0$ such that $|o(\|h\|^2)| < \frac{\lambda}{4} \|h\|^2$ whenever $\|h\| < \delta$. Then for $\|h\| < \delta$ we have $f(x_0 + h) - f(x_0) \ge \frac{\lambda}{4} \|h\|^2 > 0$, so $x_0$ is a local minimum point.
+
+(ii) Similar.
+
+(iii) If $H_f(x_0)$ is indefinite, there exist $h_+, h_-$ such that $h_+^{\mathsf T} H_f(x_0) h_+ > 0$ and $h_-^{\mathsf T} H_f(x_0) h_- < 0$. Taking $h = t h_+$ (with $t$ sufficiently small) gives $f(x_0 + h) > f(x_0)$; taking $h = t h_-$ gives $f(x_0 + h) < f(x_0)$. Hence $x_0$ is a saddle point.
+\end{proof}
+
+\begin{theorem}[Method of Lagrange multipliers]\label{thm:lagrange_multiplier_ra}
+Let $f, g_1, \dots, g_m: \Omega \to \mathbb{R}$ with $\Omega \subseteq \mathbb{R}^n$ open and $f, g_i \in C^1(\Omega)$. Suppose that $x_0 \in \Omega$ is a local extremum point of $f$ under the constraints $g_1(x) = \dots = g_m(x) = 0$, and that $\nabla g_1(x_0), \dots, \nabla g_m(x_0)$ are linearly independent. Then there exist $\lambda_1, \dots, \lambda_m \in \mathbb{R}$ such that
+\[
+\nabla f(x_0) = \sum_{i=1}^{m} \lambda_i \nabla g_i(x_0).
+\]
+\end{theorem}
+
+\begin{proof}
+By the implicit-function theorem (Theorem \ref{thm:implicit_function}), the constraint set $M = \{x : g_1(x) = \dots = g_m(x) = 0\}$ is an $n - m$-dimensional submanifold near $x_0$. Since $x_0$ is a local extremum point of $f|_M$, we have $Df(x_0)(v) = 0$ for every $v \in T_{x_0} M$. Moreover $T_{x_0} M = \bigcap_{i=1}^{m} \ker Dg_i(x_0)$. Hence $\nabla f(x_0)$ is orthogonal to $\bigcap_i \ker \nabla g_i(x_0)$, that is, $\nabla f(x_0)$ belongs to $\operatorname{span}\{\nabla g_1(x_0), \dots, \nabla g_m(x_0)\}$. Therefore there exist $\lambda_i$ such that $\nabla f(x_0) = \sum_i \lambda_i \nabla g_i(x_0)$.
+\end{proof}
+
+\section{Inverse-Function, Implicit-Function and Rank Theorems}
+
+\subsection{The inverse-function theorem}
+
+\begin{theorem}[Inverse-function theorem]\label{thm:inverse_function}
+Let $\Omega \subseteq \mathbb{R}^n$ be open, let $f: \Omega \to \mathbb{R}^n$ be a $C^1$ map and let $x_0 \in \Omega$. If $Df(x_0)$ is invertible (that is, $\det J_f(x_0) \neq 0$), then there exist an open neighbourhood $U \subseteq \Omega$ of $x_0$ and an open neighbourhood $V$ of $f(x_0)$ such that $f: U \to V$ is a bijection and the inverse map $f^{-1}: V \to U$ is $C^1$, satisfying
+\[
+D(f^{-1})(y) = [Df(f^{-1}(y))]^{-1}, \qquad y \in V.
+\]
+\end{theorem}
+
+\begin{proof}
+\textbf{Step 1: simplification}. By translation and a linear transformation we may assume that $x_0 = \mathbf{0}$, $f(x_0) = \mathbf{0}$ and $Df(\mathbf{0}) = I$ (the identity matrix). The general case: put $\tilde{f}(x) = [Df(x_0)]^{-1} (f(x_0 + x) - f(x_0))$; then $\tilde{f}(\mathbf{0}) = \mathbf{0}$ and $D\tilde{f}(\mathbf{0}) = I$. If $\tilde{f}$ has a local $C^1$ inverse, then so does $f$.
+
+\textbf{Step 2: construction of a contraction mapping}. Define $g(x) = x - f(x)$. Then $Dg(\mathbf{0}) = I - Df(\mathbf{0}) = \mathbf{0}$. Since $Dg$ is continuous, there exists $r > 0$ such that $\|Dg(x)\| \le 1/2$ whenever $\|x\| \le r$. By the mean-value theorem, $\|g(x) - g(y)\| \le \frac{1}{2} \|x - y\|$ for $\|x\|, \|y\| \le r$.
+
+For a fixed $y \in \mathbb{R}^n$, solving $f(x) = y$ is equivalent to solving $x = y + g(x)$. Define $T_y(x) = y + g(x)$. If $\|y\| \le r/2$ and $\|x\| \le r$, then
+\[
+\|T_y(x)\| \le \|y\| + \|g(x)\| \le \frac{r}{2} + \frac{1}{2} \|x\| \le \frac{r}{2} + \frac{r}{2} = r.
+\]
+Also $\|T_y(x) - T_y(x')\| = \|g(x) - g(x')\| \le \frac{1}{2} \|x - x'\|$. Hence $T_y$ is a contraction mapping on $\overline{B}(\mathbf{0}, r)$. By the Banach contraction-mapping principle (Theorem \ref{thm:banach_fixed_point}), $T_y$ has a unique fixed point $x = T_y(x)$, that is, $f(x) = y$. Hence for every $y \in B(\mathbf{0}, r/2)$ there exists a unique $x \in \overline{B}(\mathbf{0}, r)$ such that $f(x) = y$.
+
+\textbf{Step 3: continuity of the inverse map}. Let $f(x) = y$ and $f(x') = y'$. Then
+\[
+\|x - x'\| = \|(y + g(x)) - (y' + g(x'))\| \le \|y - y'\| + \frac{1}{2} \|x - x'\|.
+\]
+Hence $\|x - x'\| \le 2 \|y - y'\|$. That is, $\|f^{-1}(y) - f^{-1}(y')\| \le 2 \|y - y'\|$, so $f^{-1}$ is continuous (in fact Lipschitz continuous).
+
+\textbf{Step 4: differentiability of the inverse map}. Let $f(x) = y$ and $f(x + h) = y + k$. Then
+\[
+k = f(x + h) - f(x) = Df(x) h + o(\|h\|).
+\]
+Since $Df(x)$ is invertible (because $Df$ is continuous and $Df(\mathbf{0}) = I$, taking $r$ smaller ensures $\|Df(x) - I\| < 1/2$, so $Df(x)$ is invertible),
+\[
+h = [Df(x)]^{-1} k + o(\|k\|).
+\]
+Hence
+\[
+f^{-1}(y + k) = f^{-1}(y) + [Df(f^{-1}(y))]^{-1} k + o(\|k\|).
+\]
+That is, $f^{-1}$ is differentiable at $y$, and $D(f^{-1})(y) = [Df(f^{-1}(y))]^{-1}$.
+
+\textbf{Step 5: the inverse map is $C^1$}. We have $D(f^{-1})(y) = [Df(f^{-1}(y))]^{-1}$. The right-hand side is a continuous function of $y$ ($Df$ is continuous, $f^{-1}$ is continuous, and matrix inversion is continuous), so $D(f^{-1})$ is continuous and $f^{-1} \in C^1$.
+\end{proof}
+
+\begin{example}[Polar-coordinate transformation]\label{ex:polar_coordinates}
+The polar-coordinate transformation $f(r, \theta) = (r \cos\theta, r \sin\theta)$ (with $r > 0$). Its Jacobian matrix is
+\[
+J_f(r, \theta) = \begin{pmatrix} \cos\theta & -r \sin\theta \\ \sin\theta & r \cos\theta \end{pmatrix}, \qquad \det J_f = r > 0.
+\]
+Hence $f$ is locally invertible at every point $(r, \theta)$ with $r > 0$. But $f$ is not globally invertible ($(\theta + 2\pi k)$ gives the same point).
+\end{example}
+
+\subsection{The implicit-function theorem}
+
+\begin{theorem}[Implicit-function theorem]\label{thm:implicit_function}
+Let $\Omega \subseteq \mathbb{R}^{n+m}$ be open, let $F: \Omega \to \mathbb{R}^m$ be a $C^1$ map, and let $(x_0, y_0) \in \Omega$ satisfy $F(x_0, y_0) = \mathbf{0}$. If $D_y F(x_0, y_0)$ (the $m \times m$ matrix of partial derivatives of $F$ with respect to $y$) is invertible, then there exist an open neighbourhood $U \subseteq \mathbb{R}^n$ of $x_0$, an open neighbourhood $V \subseteq \mathbb{R}^m$ of $y_0$, and a unique $C^1$ map $g: U \to V$ such that $g(x_0) = y_0$ and
+\[
+F(x, g(x)) = \mathbf{0}, \qquad \forall x \in U.
+\]
+Moreover
+\[
+Dg(x) = -[D_y F(x, g(x))]^{-1} D_x F(x, g(x)).
+\]
+\end{theorem}
+
+\begin{proof}
+Define $\Phi: \Omega \to \mathbb{R}^{n+m}$ by $\Phi(x, y) = (x, F(x, y))$. Then
+\[
+D\Phi(x_0, y_0) = \begin{pmatrix} I_n & \mathbf{0} \\ D_x F(x_0, y_0) & D_y F(x_0, y_0) \end{pmatrix}.
+\]
+Thus $\det D\Phi(x_0, y_0) = \det D_y F(x_0, y_0) \neq 0$. By the inverse-function theorem (Theorem \ref{thm:inverse_function}), there exist an open neighbourhood $W$ of $(x_0, y_0)$ and an open neighbourhood $W'$ of $\Phi(x_0, y_0) = (x_0, \mathbf{0})$ such that $\Phi: W \to W'$ is a $C^1$ bijection. Write $\Phi^{-1}(x, z) = (x, h(x, z))$ (because the first component of $\Phi$ is $x$ itself). Then $F(x, h(x, z)) = z$. Put $g(x) = h(x, \mathbf{0})$; then $F(x, g(x)) = \mathbf{0}$. The map $g$ is $C^1$ (because $\Phi^{-1}$ is $C^1$).
+
+Differentiation formula: differentiating both sides of $F(x, g(x)) = \mathbf{0}$ gives
+\[
+D_x F(x, g(x)) + D_y F(x, g(x)) Dg(x) = \mathbf{0}.
+\]
+Since $D_y F(x_0, y_0)$ is invertible and $D_y F$ is continuous, the matrix $D_y F(x, g(x))$ is invertible in some neighbourhood of $x_0$. Hence
+\[
+Dg(x) = -[D_y F(x, g(x))]^{-1} D_x F(x, g(x)).
+\]
+\end{proof}
+
+\begin{corollary}[Regular level sets are submanifolds]\label{cor:regular_level_set_ra}
+Let $F: \Omega \to \mathbb{R}^m$ with $\Omega \subseteq \mathbb{R}^{n+m}$ open and $F \in C^1(\Omega)$. If $c \in \mathbb{R}^m$ and $DF(x)$ is surjective for every $x \in F^{-1}(c)$ (that is, the $m$ row vectors are linearly independent), then $F^{-1}(c)$ is an $n$-dimensional $C^1$ submanifold.
+\end{corollary}
+
+\begin{proof}
+For any $p \in F^{-1}(c)$, the surjectivity of $DF(p)$ means that $m$ of its columns are linearly independent, that is, there are $m$ variables for which the corresponding $m \times m$ submatrix is invertible. Without loss of generality, suppose that the matrix of partial derivatives with respect to the last $m$ variables is invertible. By the implicit-function theorem (Theorem \ref{thm:implicit_function}), there exist a neighbourhood $U$ of $p$ and a $C^1$ map $g$ such that $F^{-1}(c) \cap U = \{(x, g(x)) : x \in U'\}$, where $U' \subseteq \mathbb{R}^n$ is open. This is a local coordinate representation of an $n$-dimensional $C^1$ submanifold.
+\end{proof}
+
+\begin{example}[Applications of the implicit-function theorem]\label{ex:implicit_function_application}
+\begin{enumerate}[label=(\roman*)]
+    \item The unit circle $x^2 + y^2 = 1$. Here $F(x, y) = x^2 + y^2 - 1$ and $\partial F/\partial y = 2y$. At a point $(x_0, y_0)$ with $y_0 \neq 0$ one can solve locally for $y = g(x) = \pm\sqrt{1 - x^2}$.
+    \item The surface $z = f(x, y)$ is the level set of $F(x, y, z) = z - f(x, y) = 0$. Since $\partial F/\partial z = 1 \neq 0$, one can solve locally for $z = f(x, y)$.
+    \item For the system of equations $F_1(x, y, z) = 0$, $F_2(x, y, z) = 0$, at points where $\det \partial(F_1, F_2)/\partial(y, z) \neq 0$ one can solve locally for $y = g_1(x)$ and $z = g_2(x)$.
+\end{enumerate}
+\end{example}
+
+\subsection{The rank theorem}
+
+\begin{theorem}[Rank theorem]\label{thm:rank_theorem}
+Let $\Omega \subseteq \mathbb{R}^n$ be open, let $f: \Omega \to \mathbb{R}^m$ be a $C^k$ map ($k \ge 1$), let $x_0 \in \Omega$, and suppose that the rank of $Df(x_0)$ is $r$ (with $r \le \min(n, m)$). Then there exist an open neighbourhood $U$ of $x_0$ and a $C^k$ diffeomorphism $\varphi: U \to \varphi(U) \subseteq \mathbb{R}^n$ (with $\varphi(x_0) = \mathbf{0}$), together with an open neighbourhood $V$ of $f(x_0)$ and a $C^k$ diffeomorphism $\psi: V \to \psi(V) \subseteq \mathbb{R}^m$ (with $\psi(f(x_0)) = \mathbf{0}$), such that
+\[
+(\psi \circ f \circ \varphi^{-1})(x_1, \dots, x_n) = (x_1, \dots, x_r, 0, \dots, 0).
+\]
+That is, near $x_0$ the map $f$ is equivalent to the standard projection.
+\end{theorem}
+
+\begin{proof}
+\textbf{Step 1: simplification}. By translation and a linear transformation we may assume that $x_0 = \mathbf{0}$, $f(x_0) = \mathbf{0}$, and that the submatrix formed by the first $r$ rows and the first $r$ columns of $Df(\mathbf{0})$ is invertible.
+
+\textbf{Step 2: construction of an auxiliary map}. Write $f = (f^1, f^2)$, where $f^1: \Omega \to \mathbb{R}^r$ consists of the first $r$ components. Define $\Phi: \Omega \to \mathbb{R}^n$ by
+\[
+\Phi(x) = (f^1(x), x_{r+1}, \dots, x_n).
+\]
+Then
+\[
+D\Phi(\mathbf{0}) = \begin{pmatrix} D_{x^1} f^1(\mathbf{0}) & D_{x^2} f^1(\mathbf{0}) \\ \mathbf{0} & I_{n-r} \end{pmatrix},
+\]
+where $D_{x^1} f^1(\mathbf{0})$ is an invertible $r \times r$ matrix. Hence $\det D\Phi(\mathbf{0}) \neq 0$. By the inverse-function theorem (Theorem \ref{thm:inverse_function}), there exists an open neighbourhood $U$ of $\mathbf{0}$ such that $\Phi: U \to \Phi(U)$ is a $C^k$ diffeomorphism.
+
+\textbf{Step 3: composition}. Put $\varphi = \Phi$. Then $\varphi(x) = (y^1, y^2)$, where $y^1 = f^1(x) \in \mathbb{R}^r$ and $y^2 = x^2 \in \mathbb{R}^{n-r}$. By the inverse-function theorem, $x = \varphi^{-1}(y^1, y^2)$.
+
+On $U$ we have $f(x) = (f^1(x), f^2(x)) = (y^1, f^2(\varphi^{-1}(y^1, y^2)))$. Since $y^1 = f^1(x)$ and $x = \varphi^{-1}(y^1, y^2)$, the expression $f^2(\varphi^{-1}(y^1, y^2))$ is a function of $(y^1, y^2)$. But the rank of $Df$ at $\mathbf{0}$ is $r$, and the first $r$ columns of $Df^1(\mathbf{0})$ are invertible, so every row of $Df^2(\mathbf{0})$ is a linear combination of the rows of $Df^1(\mathbf{0})$. By continuity, near $\mathbf{0}$ every row of $Df^2$ is still a linear combination of the rows of $Df^1$, that is, $f^2$ is locally a function of $f^1$ on $U$: there exists a $C^k$ map $h: \mathbb{R}^r \to \mathbb{R}^{m-r}$ such that $f^2(x) = h(f^1(x))$ on $U$.
+
+\textbf{Step 4: construction of $\psi$}. Define $\psi: \mathbb{R}^m \to \mathbb{R}^m$ by
+\[
+\psi(z^1, z^2) = (z^1, z^2 - h(z^1)), \qquad z^1 \in \mathbb{R}^r,\ z^2 \in \mathbb{R}^{m-r}.
+\]
+Then $\psi$ is a $C^k$ diffeomorphism (its inverse is $(z^1, z^2) \mapsto (z^1, z^2 + h(z^1))$) and $\psi(\mathbf{0}) = \mathbf{0}$. Moreover
+\[
+(\psi \circ f)(x) = \psi(f^1(x), f^2(x)) = (f^1(x), f^2(x) - h(f^1(x))) = (f^1(x), \mathbf{0}).
+\]
+Hence
+\[
+(\psi \circ f \circ \varphi^{-1})(y^1, y^2) = (y^1, \mathbf{0}).
+\]
+That is, $(\psi \circ f \circ \varphi^{-1})(x_1, \dots, x_n) = (x_1, \dots, x_r, 0, \dots, 0)$.
+\end{proof}
+
+\section{Multiple Integrals}
+
+\subsection{Review and generalisation of the Riemann integral}
+
+\begin{definition}[Riemann integral over a rectangle]\label{def:riemann_integral_rectangle}
+Let $R = [a_1, b_1] \times \cdots \times [a_n, b_n] \subseteq \mathbb{R}^n$ be a closed rectangle and let $f: R \to \mathbb{R}$ be bounded.
+\begin{enumerate}[label=(\roman*)]
+    \item A \textbf{partition} of $R$ is a division of each $[a_i, b_i]$ into finitely many subintervals, thereby dividing $R$ into finitely many closed subrectangles $R_1, \dots, R_N$.
+    \item The \textbf{mesh} of a partition is $\|\mathcal{P}\| := \max_j \operatorname{diam}(R_j)$.
+    \item Choosing a point $\xi_j$ in each $R_j$, one forms the \textbf{Riemann sum}
+    \[
+    S(f, \mathcal{P}, \{\xi_j\}) := \sum_{j=1}^{N} f(\xi_j) |R_j|,
+    \]
+    where $|R_j|$ is the volume of $R_j$.
+    \item $f$ is \textbf{Riemann integrable} on $R$ if there exists $I \in \mathbb{R}$ such that for every $\varepsilon > 0$ there exists $\delta > 0$ such that for every partition $\mathcal{P}$ with $\|\mathcal{P}\| < \delta$ and every choice of points $\{\xi_j\}$,
+    \[
+    |S(f, \mathcal{P}, \{\xi_j\}) - I| < \varepsilon.
+    \]
+    In this case we write $I = \int_R f$.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Darboux upper and lower sums]\label{def:darboux_sums}
+Let $f: R \to \mathbb{R}$ be bounded and let $\mathcal{P}$ be a partition. Define
+\[
+M_j := \sup_{x \in R_j} f(x), \qquad m_j := \inf_{x \in R_j} f(x),
+\]
+\[
+U(f, \mathcal{P}) := \sum_{j=1}^{N} M_j |R_j| \quad (\text{upper sum}), \qquad
+L(f, \mathcal{P}) := \sum_{j=1}^{N} m_j |R_j| \quad (\text{lower sum}).
+\]
+The \textbf{upper integral} and the \textbf{lower integral} of $f$ are respectively
+\[
+\overline{\int_R} f := \inf_{\mathcal{P}} U(f, \mathcal{P}), \qquad
+\underline{\int_R} f := \sup_{\mathcal{P}} L(f, \mathcal{P}).
+\]
+\end{definition}
+
+\begin{theorem}[Necessary and sufficient condition for Riemann integrability]\label{thm:riemann_integrable_criterion}
+Let $f: R \to \mathbb{R}$ be bounded. Then the following conditions are equivalent:
+\begin{enumerate}[label=(\roman*)]
+    \item $f$ is Riemann integrable on $R$;
+    \item $\overline{\int_R} f = \underline{\int_R} f$;
+    \item for every $\varepsilon > 0$ there exists a partition $\mathcal{P}$ such that $U(f, \mathcal{P}) - L(f, \mathcal{P}) < \varepsilon$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) $\Rightarrow$ (ii): Suppose that $f$ is integrable with integral value $I$. For every $\varepsilon > 0$ there exists $\delta > 0$ such that $|S(f, \mathcal{P}, \{\xi_j\}) - I| < \varepsilon$ whenever $\|\mathcal{P}\| < \delta$. Fix such a $\mathcal{P}$; taking the supremum over the $\xi_j$ gives $U(f, \mathcal{P}) \le I + \varepsilon$, and taking the infimum gives $L(f, \mathcal{P}) \ge I - \varepsilon$. Hence $\overline{\int_R} f \le I + \varepsilon$ and $\underline{\int_R} f \ge I - \varepsilon$. Since $\varepsilon$ is arbitrary, $\overline{\int_R} f = \underline{\int_R} f = I$.
+
+(ii) $\Rightarrow$ (iii): By the definition of the upper and lower integrals, there exist partitions $\mathcal{P}_1, \mathcal{P}_2$ such that $U(f, \mathcal{P}_1) < \overline{\int_R} f + \varepsilon/2$ and $L(f, \mathcal{P}_2) > \underline{\int_R} f - \varepsilon/2$. Taking a common refinement $\mathcal{P}$, we obtain $U(f, \mathcal{P}) - L(f, \mathcal{P}) \le U(f, \mathcal{P}_1) - L(f, \mathcal{P}_2) < \varepsilon$.
+
+(iii) $\Rightarrow$ (i): Put $I = \overline{\int_R} f = \underline{\int_R} f$. For every $\varepsilon > 0$ there exists a partition $\mathcal{P}_0$ such that $U(f, \mathcal{P}_0) - L(f, \mathcal{P}_0) < \varepsilon$. Let the mesh of $\mathcal{P}_0$ be $\delta_0$. For every partition $\mathcal{P}$ with $\|\mathcal{P}\| < \delta_0$ we have $L(f, \mathcal{P}) \le I \le U(f, \mathcal{P})$ and $U(f, \mathcal{P}) - L(f, \mathcal{P}) < \varepsilon$ (by taking the common refinement of $\mathcal{P}$ and $\mathcal{P}_0$). Hence $|S(f, \mathcal{P}, \{\xi_j\}) - I| < \varepsilon$, so $f$ is integrable.
+\end{proof}
+
+\begin{theorem}[Continuous functions are integrable]\label{thm:continuous_integrable}
+Let $R \subseteq \mathbb{R}^n$ be a closed rectangle and let $f: R \to \mathbb{R}$ be continuous. Then $f$ is Riemann integrable on $R$.
+\end{theorem}
+
+\begin{proof}
+Since $R$ is compact and $f$ is continuous, $f$ is uniformly continuous on $R$ (Theorem \ref{thm:continuous_compact} (iv)). Given $\varepsilon > 0$, there exists $\delta > 0$ such that $|f(x) - f(y)| < \varepsilon / |R|$ whenever $\|x - y\| < \delta$. Take a partition $\mathcal{P}$ with $\|\mathcal{P}\| < \delta$. Then for every $R_j$ we have $\sup_{R_j} f - \inf_{R_j} f < \varepsilon / |R|$. Hence
+\[
+U(f, \mathcal{P}) - L(f, \mathcal{P}) = \sum_{j=1}^{N} \left( \sup_{R_j} f - \inf_{R_j} f \right) |R_j| < \frac{\varepsilon}{|R|} \sum_{j=1}^{N} |R_j| = \varepsilon.
+\]
+By Theorem \ref{thm:riemann_integrable_criterion}, $f$ is integrable.
+\end{proof}
+
+\begin{theorem}[Fubini's theorem]\label{thm:fubini_ra}
+Let $R = [a_1, b_1] \times \cdots \times [a_n, b_n]$ and let $f: R \to \mathbb{R}$ be continuous. Then
+\[
+\int_R f = \int_{a_1}^{b_1} \left( \cdots \left( \int_{a_n}^{b_n} f(x_1, \dots, x_n) \, dx_n \right) \cdots \right) dx_1.
+\]
+That is, a multiple integral can be reduced to an iterated integral, and the order of integration may be interchanged arbitrarily.
+\end{theorem}
+
+\begin{proof}
+We prove the case $n = 2$. Let $R = [a, b] \times [c, d]$. Define $F(x) = \int_c^d f(x, y) \, dy$. Since $f$ is uniformly continuous on $R$, the function $F$ is continuous on $[a, b]$. Given partitions $\mathcal{P}_x, \mathcal{P}_y$ of $[a, b]$ and $[c, d]$, construct a partition of $R$. For each subrectangle $R_{ij} = [x_{i-1}, x_i] \times [y_{j-1}, y_j]$, by the one-variable mean-value theorem for integrals there exists $\eta_{ij} \in [y_{j-1}, y_j]$ such that $\int_{y_{j-1}}^{y_j} f(x_i, y) \, dy = f(x_i, \eta_{ij}) \Delta y_j$. Hence
+\[
+\sum_j \int_{y_{j-1}}^{y_j} f(x_i, y) \, dy = \sum_j f(x_i, \eta_{ij}) \Delta y_j.
+\]
+Letting $\Delta y_j \to 0$, the right-hand side tends to $\int_c^d f(x_i, y) \, dy = F(x_i)$. Hence
+\[
+\int_a^b F(x) \, dx = \lim_{\|\mathcal{P}_x\| \to 0} \sum_i F(x_i) \Delta x_i = \lim_{\|\mathcal{P}\| \to 0} \sum_{i,j} f(x_i, \eta_{ij}) \Delta x_i \Delta y_j.
+\]
+The right-hand side is a Riemann sum for $f$, with limit $\int_R f$. Hence $\int_R f = \int_a^b \left( \int_c^d f(x, y) \, dy \right) dx$. Symmetrically, $\int_R f = \int_c^d \left( \int_a^b f(x, y) \, dx \right) dy$.
+
+The $n$-dimensional case follows by induction.
+\end{proof}
+
+\begin{theorem}[Change-of-variables formula]\label{thm:change_of_variables_ra}
+Let $\Omega, \Omega' \subseteq \mathbb{R}^n$ be open and let $\Phi: \Omega \to \Omega'$ be a $C^1$ diffeomorphism. Then for every continuous function $f: \Omega' \to \mathbb{R}$,
+\[
+\int_{\Omega'} f(y) \, dy = \int_{\Omega} f(\Phi(x)) \, |\det J_\Phi(x)| \, dx.
+\]
+\end{theorem}
+
+\begin{proof}
+\textbf{Step 1: local linearisation}. By continuity, for every $\varepsilon > 0$ and every $x_0 \in \Omega$ there exists $r > 0$ such that $B(x_0, r) \subseteq \Omega$ and $\|J_\Phi(x) - J_\Phi(x_0)\| < \varepsilon$ for $x \in B(x_0, r)$. By the mean-value theorem, $\Phi(x) = \Phi(x_0) + J_\Phi(x_0)(x - x_0) + o(\|x - x_0\|)$.
+
+\textbf{Step 2: volume scaling of a linear transformation}. For a linear map $A$,
+\[
+\operatorname{vol}(A(B(x_0, r))) = |\det A| \operatorname{vol}(B(x_0, r)).
+\]
+For a general $C^1$ diffeomorphism, the map $\Phi$ is locally approximated by $J_\Phi(x_0)$, so
+\[
+\operatorname{vol}(\Phi(B(x_0, r))) \approx |\det J_\Phi(x_0)| \operatorname{vol}(B(x_0, r)).
+\]
+The rigorous error estimate is $o(r^n)$.
+
+\textbf{Step 3: Riemann sums}. Divide $\Omega$ into small measurable sets and on each small set approximate $\Phi$ by a linear map. The Riemann sum
+\[
+\sum_j f(\Phi(x_j)) |\det J_\Phi(x_j)| |E_j| \to \int_\Omega f(\Phi(x)) |\det J_\Phi(x)| \, dx.
+\]
+On the other hand, the right-hand side is a Riemann sum for $\int_{\Omega'} f(y) \, dy$ (via the image under $\Phi$). Hence the equality holds.
+\end{proof}
+
+\begin{example}[Multiple integrals in polar coordinates]\label{ex:polar_integral}
+$\Phi(r, \theta) = (r \cos\theta, r \sin\theta)$, $\det J_\Phi = r$. Hence
+\[
+\int_{\Omega'} f(x, y) \, dx \, dy = \int_{\Omega} f(r \cos\theta, r \sin\theta) \, r \, dr \, d\theta.
+\]
+For example, the integral over the unit disc:
+\[
+\int_{x^2 + y^2 \le 1} f(x, y) \, dx \, dy = \int_0^{2\pi} \int_0^1 f(r \cos\theta, r \sin\theta) \, r \, dr \, d\theta.
+\]
+\end{example}
+
+\section{Line and Surface Integrals}
+
+\subsection{Line integrals}
+
+\begin{definition}[Curves and parametrisation]\label{def:curve_parameterization}
+Let $[a, b] \subseteq \mathbb{R}$.
+\begin{enumerate}[label=(\roman*)]
+    \item A $C^1$ \textbf{curve} is a $C^1$ map $\gamma: [a, b] \to \mathbb{R}^n$.
+    \item $\gamma$ is called \textbf{regular} if $\gamma'(t) \neq \mathbf{0}$ for all $t \in [a, b]$.
+    \item $\gamma$ is called \textbf{simple} if $\gamma$ is injective on $(a, b)$.
+    \item $\gamma$ is called \textbf{closed} if $\gamma(a) = \gamma(b)$.
+    \item Two curves $\gamma_1, \gamma_2$ are called \textbf{equivalent} if there exists a $C^1$ bijection $\varphi: [a_1, b_1] \to [a_2, b_2]$ such that $\gamma_2 = \gamma_1 \circ \varphi$.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Line integral of the first kind (arc-length integral)]\label{def:line_integral_first_kind}
+Let $\gamma: [a, b] \to \mathbb{R}^n$ be a $C^1$ curve and let $f: \mathbb{R}^n \to \mathbb{R}$ be continuous. The \textbf{line integral of the first kind} of $f$ along $\gamma$ is defined as
+\[
+\int_\gamma f \, ds := \int_a^b f(\gamma(t)) \, \|\gamma'(t)\| \, dt.
+\]
+If $f \equiv 1$, then $\int_\gamma ds$ is the arc length of $\gamma$.
+\end{definition}
+
+\begin{proposition}[Independence of the first-kind line integral from parametrisation]\label{prop:line_integral_first_kind_invariance}
+The line integral of the first kind is independent of the regular parametrisation of the curve.
+\end{proposition}
+
+\begin{proof}
+Let $\gamma_2 = \gamma_1 \circ \varphi$, where $\varphi$ is a $C^1$ bijection. Then $\gamma_2'(t) = \gamma_1'(\varphi(t)) \varphi'(t)$. Hence
+\[
+\int_{a_2}^{b_2} f(\gamma_2(t)) \|\gamma_2'(t)\| \, dt = \int_{a_2}^{b_2} f(\gamma_1(\varphi(t))) \|\gamma_1'(\varphi(t))\| |\varphi'(t)| \, dt.
+\]
+Putting $s = \varphi(t)$ and $ds = \varphi'(t) dt$, we obtain
+\[
+= \int_{a_1}^{b_1} f(\gamma_1(s)) \|\gamma_1'(s)\| \, ds.
+\]
+\end{proof}
+
+\begin{definition}[Line integral of the second kind (integral of a vector field along a curve)]\label{def:line_integral_second_kind}
+Let $\gamma: [a, b] \to \mathbb{R}^n$ be a $C^1$ curve and let $\mathbf{F}: \mathbb{R}^n \to \mathbb{R}^n$ be continuous. The \textbf{line integral of the second kind} of $\mathbf{F}$ along $\gamma$ is defined as
+\[
+\int_\gamma \mathbf{F} \cdot d\mathbf{r} := \int_a^b \mathbf{F}(\gamma(t)) \cdot \gamma'(t) \, dt.
+\]
+\end{definition}
+
+\begin{proposition}[Additivity and reversal of the second-kind line integral]\label{prop:line_integral_second_kind_properties}
+\begin{enumerate}[label=(\roman*)]
+    \item If $\gamma = \gamma_1 \cup \gamma_2$ (joined end to end), then
+    \[
+    \int_\gamma \mathbf{F} \cdot d\mathbf{r} = \int_{\gamma_1} \mathbf{F} \cdot d\mathbf{r} + \int_{\gamma_2} \mathbf{F} \cdot d\mathbf{r}.
+    \]
+    \item If $\gamma^-$ is the curve $\gamma$ traversed in the opposite direction, then
+    \[
+    \int_{\gamma^-} \mathbf{F} \cdot d\mathbf{r} = -\int_\gamma \mathbf{F} \cdot d\mathbf{r}.
+    \]
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) This follows directly from the additivity of the Riemann integral over intervals.
+
+(ii) Let $\gamma^-(t) = \gamma(a + b - t)$. Then $(\gamma^-)'(t) = -\gamma'(a + b - t)$. Hence
+\[
+\int_{\gamma^-} \mathbf{F} \cdot d\mathbf{r} = \int_a^b \mathbf{F}(\gamma(a + b - t)) \cdot (-\gamma'(a + b - t)) \, dt.
+\]
+Putting $s = a + b - t$ and $ds = -dt$, we obtain
+\[
+= \int_b^a \mathbf{F}(\gamma(s)) \cdot \gamma'(s) \, ds = -\int_a^b \mathbf{F}(\gamma(s)) \cdot \gamma'(s) \, ds = -\int_\gamma \mathbf{F} \cdot d\mathbf{r}.
+\]
+\end{proof}
+
+\subsection{Surface integrals}
+
+\begin{definition}[Surfaces and parametrisation]\label{def:surface_parameterization}
+Let $D \subseteq \mathbb{R}^2$ be a bounded closed region.
+\begin{enumerate}[label=(\roman*)]
+    \item A $C^1$ \textbf{surface} is a $C^1$ map $\mathbf{r}: D \to \mathbb{R}^3$.
+    \item $\mathbf{r}$ is called \textbf{regular} if $\mathbf{r}_u \times \mathbf{r}_v \neq \mathbf{0}$ for all $(u, v) \in D$, where $\mathbf{r}_u = \partial \mathbf{r}/\partial u$ and $\mathbf{r}_v = \partial \mathbf{r}/\partial v$.
+    \item $\mathbf{r}$ is called \textbf{simple} if $\mathbf{r}$ is injective on the interior of $D$.
+    \item The \textbf{area element} is $dS := \|\mathbf{r}_u \times \mathbf{r}_v\| \, du \, dv$.
+    \item The \textbf{unit normal vector} is $\mathbf{n} := \frac{\mathbf{r}_u \times \mathbf{r}_v}{\|\mathbf{r}_u \times \mathbf{r}_v\|}$.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Surface integral of the first kind (area integral)]\label{def:surface_integral_first_kind}
+Let $\mathbf{r}: D \to \mathbb{R}^3$ be a regular $C^1$ surface and let $f: \mathbb{R}^3 \to \mathbb{R}$ be continuous. The \textbf{surface integral of the first kind} of $f$ over the surface $S = \mathbf{r}(D)$ is defined as
+\[
+\int_S f \, dS := \int_D f(\mathbf{r}(u, v)) \, \|\mathbf{r}_u \times \mathbf{r}_v\| \, du \, dv.
+\]
+If $f \equiv 1$, then $\int_S dS$ is the area of the surface.
+\end{definition}
+
+\begin{definition}[Surface integral of the second kind (flux integral)]\label{def:surface_integral_second_kind}
+Let $\mathbf{r}: D \to \mathbb{R}^3$ be a regular $C^1$ surface and let $\mathbf{F}: \mathbb{R}^3 \to \mathbb{R}^3$ be continuous. The \textbf{surface integral of the second kind} (flux) of $\mathbf{F}$ over the surface $S$ is defined as
+\[
+\int_S \mathbf{F} \cdot d\mathbf{S} := \int_D \mathbf{F}(\mathbf{r}(u, v)) \cdot (\mathbf{r}_u \times \mathbf{r}_v) \, du \, dv.
+\]
+\end{definition}
+
+\begin{definition}[Orientation of a surface]\label{def:surface_orientation}
+A surface $S$ is called \textbf{orientable} if there exists a continuous unit normal vector field $\mathbf{n}: S \to S^2$. Two orientations $\mathbf{n}_1, \mathbf{n}_2$ are called the same if $\mathbf{n}_1 = \mathbf{n}_2$, and opposite if $\mathbf{n}_1 = -\mathbf{n}_2$. A surface with a chosen orientation is called an \textbf{oriented surface}.
+\end{definition}
+
+\begin{proposition}[Relation between flux integral and orientation]\label{prop:flux_orientation}
+If $S^-$ denotes $S$ with the opposite orientation, then
+\[
+\int_{S^-} \mathbf{F} \cdot d\mathbf{S} = -\int_S \mathbf{F} \cdot d\mathbf{S}.
+\]
+\end{proposition}
+
+\begin{proof}
+The opposite orientation corresponds to interchanging $u, v$ in the parametrisation or to changing the sign of the parametrisation. The vector $\mathbf{r}_u \times \mathbf{r}_v$ changes sign, so the integral changes sign.
+\end{proof}
+
+\begin{example}[Area and flux of a sphere]\label{ex:sphere_surface}
+Parametrise the sphere $S^2$ by $\mathbf{r}(\theta, \varphi) = (\sin\theta \cos\varphi, \sin\theta \sin\varphi, \cos\theta)$ with $\theta \in [0, \pi]$ and $\varphi \in [0, 2\pi]$. Computation gives
+\[
+\mathbf{r}_\theta \times \mathbf{r}_\varphi = \sin\theta \, (\sin\theta \cos\varphi, \sin\theta \sin\varphi, \cos\theta),
+\]
+so $\|\mathbf{r}_\theta \times \mathbf{r}_\varphi\| = \sin\theta$. Hence the area of the sphere is
+\[
+\int_{S^2} dS = \int_0^{2\pi} \int_0^{\pi} \sin\theta \, d\theta \, d\varphi = 4\pi.
+\]
+For the radial field $\mathbf{F}(x, y, z) = (x, y, z)$, the flux is
+\[
+\int_{S^2} \mathbf{F} \cdot d\mathbf{S} = \int_0^{2\pi} \int_0^{\pi} \sin\theta \, d\theta \, d\varphi = 4\pi.
+\]
+\end{example}
+
+\section{Uniform Convergence of Sequences and Series of Functions}
+
+\subsection{Uniform convergence}
+
+\begin{definition}[Uniform convergence of a sequence of functions]\label{def:uniform_convergence}
+Let $E \subseteq \mathbb{R}^n$, let $f_k: E \to \mathbb{R}^m$ ($k = 1, 2, \dots$) and let $f: E \to \mathbb{R}^m$.
+\begin{enumerate}[label=(\roman*)]
+    \item $\{f_k\}$ \textbf{converges pointwise} to $f$ if $f_k(x) \to f(x)$ for every $x \in E$.
+    \item $\{f_k\}$ \textbf{converges uniformly} to $f$ if
+    \[
+    \lim_{k \to \infty} \sup_{x \in E} \|f_k(x) - f(x)\| = 0,
+    \]
+    that is,
+    \[
+    \forall \varepsilon > 0,\ \exists K \in \mathbb{N}^+,\ \forall k \ge K,\ \forall x \in E,\quad \|f_k(x) - f(x)\| < \varepsilon.
+    \]
+\end{enumerate}
+We write $f_k \rightrightarrows f$.
+\end{definition}
+
+\begin{proposition}[Uniform convergence implies pointwise convergence]\label{prop:uniform_implies_pointwise}
+Uniform convergence implies pointwise convergence.
+\end{proposition}
+
+\begin{proof}
+Suppose that $f_k \rightrightarrows f$. For a fixed $x \in E$, $\|f_k(x) - f(x)\| \le \sup_{y \in E} \|f_k(y) - f(y)\| \to 0$. Hence $f_k(x) \to f(x)$.
+\end{proof}
+
+\begin{proposition}[Difference between uniform and pointwise convergence]\label{prop:uniform_vs_pointwise}
+There exists a sequence of functions that converges pointwise but not uniformly.
+\end{proposition}
+
+\begin{proof}
+Take $E = [0, 1]$ and $f_k(x) = x^k$. The pointwise limit is
+\[
+f(x) = \begin{cases} 0, & x \in [0, 1), \\ 1, & x = 1. \end{cases}
+\]
+The convergence is pointwise. But $\sup_{x \in [0,1]} |x^k - f(x)| = 1$ (take $x \to 1^-$), so the convergence is not uniform.
+\end{proof}
+
+\begin{theorem}[Uniform convergence preserves continuity]\label{thm:uniform_continuity_preservation}
+Let $E \subseteq \mathbb{R}^n$, let $f_k: E \to \mathbb{R}^m$ be continuous and suppose that $f_k \rightrightarrows f$. Then $f$ is continuous.
+\end{theorem}
+
+\begin{proof}
+Let $x_0 \in E$. Given $\varepsilon > 0$, take $K$ such that $\|f_k(x) - f(x)\| < \varepsilon/3$ for all $x \in E$ whenever $k \ge K$. Fix $k = K$. Since $f_K$ is continuous at $x_0$, there exists $\delta > 0$ such that $\|f_K(x) - f_K(x_0)\| < \varepsilon/3$ whenever $\|x - x_0\| < \delta$. Then
+\[
+\begin{aligned}
+\|f(x) - f(x_0)\| &\le \|f(x) - f_K(x)\| + \|f_K(x) - f_K(x_0)\| + \|f_K(x_0) - f(x_0)\|\\
+&< \varepsilon/3 + \varepsilon/3 + \varepsilon/3 = \varepsilon.
+\end{aligned}
+\]
+Hence $f$ is continuous at $x_0$.
+\end{proof}
+
+\begin{theorem}[Uniform convergence preserves integration]\label{thm:uniform_continuity_integral}
+Let $E = [a, b] \subseteq \mathbb{R}$, let $f_k: [a, b] \to \mathbb{R}$ be continuous and suppose that $f_k \rightrightarrows f$. Then
+\[
+\lim_{k \to \infty} \int_a^b f_k(x) \, dx = \int_a^b f(x) \, dx.
+\]
+That is, integration and the limit may be interchanged.
+\end{theorem}
+
+\begin{proof}
+By uniform convergence, $\sup_{x \in [a, b]} |f_k(x) - f(x)| \to 0$. Hence
+\[
+\left| \int_a^b f_k(x) \, dx - \int_a^b f(x) \, dx \right| \le \int_a^b |f_k(x) - f(x)| \, dx \le (b - a) \sup_{x \in [a, b]} |f_k(x) - f(x)| \to 0.
+\]
+\end{proof}
+
+\begin{theorem}[Uniform convergence preserves differentiation]\label{thm:uniform_continuity_derivative}
+Let $f_k: (a, b) \to \mathbb{R}$ be $C^1$, suppose that $f_k \rightrightarrows f$ on $(a, b)$ and that $f_k' \rightrightarrows g$ on $(a, b)$. Then $f \in C^1(a, b)$ and $f' = g$.
+\end{theorem}
+
+\begin{proof}
+Fix $x_0 \in (a, b)$. For any $x \in (a, b)$, by the fundamental theorem of calculus,
+\[
+f_k(x) - f_k(x_0) = \int_{x_0}^{x} f_k'(t) \, dt.
+\]
+Since $f_k \rightrightarrows f$ and $f_k' \rightrightarrows g$, passing to the limit gives
+\[
+f(x) - f(x_0) = \int_{x_0}^{x} g(t) \, dt.
+\]
+By the fundamental theorem of calculus, the right-hand side is differentiable with respect to $x$, with derivative $g(x)$. Hence $f'(x) = g(x)$ for all $x \in (a, b)$. By Theorem \ref{thm:uniform_continuity_preservation}, $g$ is continuous, so $f \in C^1(a, b)$.
+\end{proof}
+
+\begin{theorem}[Weierstrass M-test]\label{thm:weierstrass_m_test_ra}
+Let $E \subseteq \mathbb{R}^n$, let $u_k: E \to \mathbb{R}^m$, and suppose that there exist constants $M_k \ge 0$ such that $\|u_k(x)\| \le M_k$ for all $x \in E$. If $\sum_{k=1}^{\infty} M_k < \infty$, then $\sum_{k=1}^{\infty} u_k(x)$ converges uniformly on $E$.
+\end{theorem}
+
+\begin{proof}
+Since $\sum_k M_k$ converges, for every $\varepsilon > 0$ there exists $K$ such that $\sum_{k=K}^{\infty} M_k < \varepsilon$. For any $m > k \ge K$ and any $x \in E$,
+\[
+\left\| \sum_{j=k+1}^{m} u_j(x) \right\| \le \sum_{j=k+1}^{m} \|u_j(x)\| \le \sum_{j=k+1}^{m} M_j < \varepsilon.
+\]
+Hence the sequence of partial sums satisfies the Cauchy criterion uniformly on $E$, that is, it converges uniformly.
+\end{proof}
+
+\begin{example}[Examples of uniform convergence]\label{ex:uniform_convergence_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item $f_k(x) = x^k$ converges uniformly to $0$ on $[0, a]$ (with $a < 1$); but it does not converge uniformly on $[0, 1]$.
+    \item $f_k(x) = \sin(kx)/k$ converges uniformly to $0$ on $\mathbb{R}$.
+    \item $\sum_{k=1}^{\infty} x^k / k^2$ converges uniformly on $[-1, 1]$ (by the M-test, with $M_k = 1/k^2$).
+    \item $\sum_{k=1}^{\infty} x^k / k$ converges pointwise but not uniformly on $[-1, 1)$ (it diverges at $x = 1$, and the rate of convergence slows down as $x \to 1^-$).
+\end{enumerate}
+\end{example}
+
+\subsection{Power series}
+
+\begin{definition}[Power series]\label{def:power_series_ra}
+Let $x_0 \in \mathbb{R}$ and let $\{a_k\}$ be a real sequence. A \textbf{power series} is
+\[
+\sum_{k=0}^{\infty} a_k (x - x_0)^k.
+\]
+\end{definition}
+
+\begin{theorem}[Cauchy--Hadamard radius-of-convergence formula]\label{thm:cauchy_hadamard_ra}
+Let $\sum_{k=0}^{\infty} a_k (x - x_0)^k$ be a power series. Define
+\[
+R := \frac{1}{\limsup_{k \to \infty} |a_k|^{1/k}},
+\]
+with the conventions $1/0 = \infty$ and $1/\infty = 0$. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the power series converges absolutely when $|x - x_0| < R$;
+    \item the power series diverges when $|x - x_0| > R$;
+    \item it converges uniformly on $|x - x_0| \le r < R$.
+\end{enumerate}
+$R$ is called the \textbf{radius of convergence}.
+\end{theorem}
+
+\begin{proof}
+Let $L = \limsup_{k \to \infty} |a_k|^{1/k}$ and $R = 1/L$.
+
+(i) If $|x - x_0| < R$, then $L |x - x_0| < 1$. By the root test,
+\[
+\limsup_{k \to \infty} |a_k (x - x_0)^k|^{1/k} = L |x - x_0| < 1,
+\]
+so the series converges absolutely.
+
+(ii) If $|x - x_0| > R$, then $L |x - x_0| > 1$. By the root test the series diverges (its general term does not tend to zero).
+
+(iii) Suppose that $|x - x_0| \le r < R$. Then $|a_k (x - x_0)^k| \le |a_k| r^k$. Take $r' \in (r, R)$; then $L r' < 1$, so $\sum_k |a_k| (r')^k$ converges. By the comparison test, $\sum_k |a_k| r^k \le \sum_k |a_k| (r')^k < \infty$. By the Weierstrass M-test (Theorem \ref{thm:weierstrass_m_test_ra}), the power series converges uniformly on $|x - x_0| \le r$.
+\end{proof}
+
+\begin{theorem}[Termwise differentiation and integration of power series]\label{thm:power_series_termwise}
+Let $\sum_{k=0}^{\infty} a_k (x - x_0)^k$ have radius of convergence $R > 0$ and sum function $f(x)$. Then $f \in C^\infty(|x - x_0| < R)$, and
+\[
+f'(x) = \sum_{k=1}^{\infty} k a_k (x - x_0)^{k-1}, \qquad
+\int_{x_0}^{x} f(t) \, dt = \sum_{k=0}^{\infty} \frac{a_k}{k+1} (x - x_0)^{k+1},
+\]
+both with radius of convergence $R$.
+\end{theorem}
+
+\begin{proof}
+By the Cauchy--Hadamard formula, the radius of convergence of $\sum_k k a_k (x - x_0)^{k-1}$ is
+\[
+\frac{1}{\limsup_k |k a_k|^{1/(k-1)}} = \frac{1}{\limsup_k |a_k|^{1/k}} = R.
+\]
+Hence $\sum_k k a_k (x - x_0)^{k-1}$ converges uniformly on $|x - x_0| \le r < R$. By Theorem \ref{thm:uniform_continuity_derivative}, $f$ is differentiable and $f'(x) = \sum_k k a_k (x - x_0)^{k-1}$. Induction gives $f \in C^\infty$.
+
+Integration is similar: the radius of convergence of $\sum_k a_k/(k+1) \cdot (x - x_0)^{k+1}$ is likewise $R$, so by the preservation of integration under uniform convergence (Theorem \ref{thm:uniform_continuity_integral}) termwise integration holds.
+\end{proof}
+
+\begin{example}[Common power series]\label{ex:power_series_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item $e^x = \sum_{k=0}^{\infty} x^k / k!$, $R = \infty$.
+    \item $\sin x = \sum_{k=0}^{\infty} (-1)^k x^{2k+1} / (2k+1)!$, $R = \infty$.
+    \item $\cos x = \sum_{k=0}^{\infty} (-1)^k x^{2k} / (2k)!$, $R = \infty$.
+    \item $1/(1-x) = \sum_{k=0}^{\infty} x^k$, $R = 1$.
+    \item $\ln(1+x) = \sum_{k=1}^{\infty} (-1)^{k+1} x^k / k$, $R = 1$.
+    \item $(1+x)^\alpha = \sum_{k=0}^{\infty} \binom{\alpha}{k} x^k$, $R = 1$ (for $\alpha \notin \mathbb{N}$).
+\end{enumerate}
+\end{example}
+
+\section{Parameter-dependent Integrals and Differentiation under the Integral Sign}
+
+\subsection{Proper parameter-dependent integrals}
+
+\begin{definition}[Parameter-dependent integral]\label{def:parametric_integral}
+Let $D \subseteq \mathbb{R}^n$ be a parameter set and let $f: D \times [a, b] \to \mathbb{R}$. Define
+\[
+F(t) := \int_a^b f(t, x) \, dx, \qquad t \in D.
+\]
+$F$ is called a \textbf{parameter-dependent integral} and $t$ is the parameter.
+\end{definition}
+
+\begin{theorem}[Continuity of parameter-dependent integrals]\label{thm:parametric_integral_continuity}
+Let $f: D \times [a, b] \to \mathbb{R}$ be continuous and let $D \subseteq \mathbb{R}^n$ be compact. Then $F(t) = \int_a^b f(t, x) \, dx$ is continuous on $D$.
+\end{theorem}
+
+\begin{proof}
+Since $f$ is continuous on the compact set $D \times [a, b]$, the Heine--Cantor theorem shows that $f$ is uniformly continuous. Given $\varepsilon > 0$, there exists $\delta > 0$ such that $|f(t, x) - f(t_0, x)| < \varepsilon / (b - a)$ for all $x \in [a, b]$ whenever $\|t - t_0\| < \delta$. Then
+\[
+|F(t) - F(t_0)| \le \int_a^b |f(t, x) - f(t_0, x)| \, dx < \varepsilon.
+\]
+\end{proof}
+
+\begin{theorem}[Leibniz rule --- differentiation under the integral sign]\label{thm:leibniz_rule}
+Let $f: D \times [a, b] \to \mathbb{R}$ be continuous and suppose that $\partial f/\partial t$ exists and is continuous. Then $F(t) = \int_a^b f(t, x) \, dx$ is differentiable on $D$, and
+\[
+F'(t) = \int_a^b \frac{\partial f}{\partial t}(t, x) \, dx.
+\]
+\end{theorem}
+
+\begin{proof}
+Fix $t_0 \in D$. For $h \neq 0$,
+\[
+\frac{F(t_0 + h) - F(t_0)}{h} = \int_a^b \frac{f(t_0 + h, x) - f(t_0, x)}{h} \, dx.
+\]
+By the one-variable mean-value theorem, for each $x$ there exists $\xi_x$ between $t_0$ and $t_0 + h$ such that
+\[
+\frac{f(t_0 + h, x) - f(t_0, x)}{h} = \frac{\partial f}{\partial t}(\xi_x, x).
+\]
+Since $\partial f/\partial t$ is continuous on $D \times [a, b]$, the Heine--Cantor theorem shows that $\partial f/\partial t$ is uniformly continuous. Given $\varepsilon > 0$, there exists $\delta > 0$ such that $|\partial f/\partial t(\xi_x, x) - \partial f/\partial t(t_0, x)| < \varepsilon/(b - a)$ for all $x$ whenever $|h| < \delta$. Then
+\[
+\left| \frac{F(t_0 + h) - F(t_0)}{h} - \int_a^b \frac{\partial f}{\partial t}(t_0, x) \, dx \right| \le \int_a^b \left| \frac{\partial f}{\partial t}(\xi_x, x) - \frac{\partial f}{\partial t}(t_0, x) \right| \, dx < \varepsilon.
+\]
+Hence $F'(t_0) = \int_a^b \partial f/\partial t(t_0, x) \, dx$.
+\end{proof}
+
+\begin{corollary}[Leibniz formula for variable limits]\label{cor:leibniz_variable_limits}
+Let $f(t, x)$ and $\partial f/\partial t$ be continuous, and let $a(t), b(t)$ be differentiable. Then
+\[
+\frac{d}{dt} \int_{a(t)}^{b(t)} f(t, x) \, dx = f(t, b(t)) b'(t) - f(t, a(t)) a'(t) + \int_{a(t)}^{b(t)} \frac{\partial f}{\partial t}(t, x) \, dx.
+\]
+\end{corollary}
+
+\begin{proof}
+Define $G(t, u, v) = \int_u^v f(t, x) \, dx$. By the chain rule,
+\[
+\frac{d}{dt} G(t, a(t), b(t)) = \frac{\partial G}{\partial t} + \frac{\partial G}{\partial u} a'(t) + \frac{\partial G}{\partial v} b'(t).
+\]
+Here $\partial G/\partial t = \int_u^v \partial f/\partial t \, dx$ (by Theorem \ref{thm:leibniz_rule}); $\partial G/\partial v = f(t, v)$; and $\partial G/\partial u = -f(t, u)$. Substituting $u = a(t)$ and $v = b(t)$ gives the result.
+\end{proof}
+
+\subsection{Improper parameter-dependent integrals}
+
+\begin{definition}[Uniform convergence of an improper parameter-dependent integral]\label{def:uniform_improper_integral}
+Let $f: D \times [a, \infty) \to \mathbb{R}$. The improper parameter-dependent integral
+\[
+F(t) = \int_a^{\infty} f(t, x) \, dx
+\]
+is said to \textbf{converge uniformly} on $D$ if
+\[
+\lim_{M \to \infty} \sup_{t \in D} \left| \int_M^{\infty} f(t, x) \, dx \right| = 0.
+\]
+\end{definition}
+
+\begin{theorem}[Weierstrass M-test for improper parameter-dependent integrals]\label{thm:improper_m_test}
+Let $f: D \times [a, \infty) \to \mathbb{R}$ satisfy $|f(t, x)| \le g(x)$ for all $t \in D$, and suppose that $\int_a^{\infty} g(x) \, dx < \infty$. Then $\int_a^{\infty} f(t, x) \, dx$ converges uniformly on $D$.
+\end{theorem}
+
+\begin{proof}
+Given $\varepsilon > 0$. Since $\int_a^{\infty} g(x) \, dx$ converges, there exists $M_0$ such that $\int_M^{\infty} g(x) \, dx < \varepsilon$ whenever $M > M_0$. Then for any $t \in D$,
+\[
+\left| \int_M^{\infty} f(t, x) \, dx \right| \le \int_M^{\infty} |f(t, x)| \, dx \le \int_M^{\infty} g(x) \, dx < \varepsilon.
+\]
+Hence $\sup_{t \in D} |\int_M^{\infty} f(t, x) \, dx| \to 0$.
+\end{proof}
+
+\begin{theorem}[Continuity of improper parameter-dependent integrals]\label{thm:improper_integral_continuity}
+Let $f: D \times [a, \infty) \to \mathbb{R}$ be continuous and let $D$ be compact. If $\int_a^{\infty} f(t, x) \, dx$ converges uniformly on $D$, then $F(t) = \int_a^{\infty} f(t, x) \, dx$ is continuous on $D$.
+\end{theorem}
+
+\begin{proof}
+For each $M > a$, define $F_M(t) = \int_a^M f(t, x) \, dx$. By Theorem \ref{thm:parametric_integral_continuity}, $F_M$ is continuous on $D$. By uniform convergence, $F_M \rightrightarrows F$. By Theorem \ref{thm:uniform_continuity_preservation}, $F$ is continuous.
+\end{proof}
+
+\begin{theorem}[Differentiation under the integral sign for improper integrals]\label{thm:improper_leibniz_rule}
+Let $f: D \times [a, \infty) \to \mathbb{R}$ and $\partial f/\partial t$ be continuous. If
+\begin{enumerate}[label=(\roman*)]
+    \item $F(t) = \int_a^{\infty} f(t, x) \, dx$ converges on $D$;
+    \item $\int_a^{\infty} \partial f/\partial t(t, x) \, dx$ converges uniformly on $D$,
+\end{enumerate}
+then $F$ is differentiable on $D$, and
+\[
+F'(t) = \int_a^{\infty} \frac{\partial f}{\partial t}(t, x) \, dx.
+\]
+\end{theorem}
+
+\begin{proof}
+For each $M > a$, define
+\[
+F_M(t) = \int_a^M f(t, x) \, dx.
+\]
+By Theorem \ref{thm:leibniz_rule},
+\[
+F_M'(t) = \int_a^M \partial f/\partial t(t, x) \, dx.
+\]By the uniform convergence of $\int_a^{\infty} \partial f/\partial t(t, x) \, dx$, we have $F_M' \rightrightarrows G$, where $G(t) = \int_a^{\infty} \partial f/\partial t(t, x) \, dx$. Since $F_M \rightrightarrows F$ (uniform convergence) and $F_M' \rightrightarrows G$, Theorem \ref{thm:uniform_continuity_derivative} gives $F' = G$.
+\end{proof}
+
+\begin{example}[Classical examples of parameter-dependent integrals]\label{ex:parametric_integral_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item $\int_0^{\infty} e^{-tx} \, dx = 1/t$ (for $t > 0$). Differentiating with respect to $t$ gives $\int_0^{\infty} -x e^{-tx} \, dx = -1/t^2$, that is, $\int_0^{\infty} x e^{-tx} \, dx = 1/t^2$.
+    \item $\int_0^{\infty} \frac{\sin x}{x} \, dx = \frac{\pi}{2}$. Consider $F(t) = \int_0^{\infty} e^{-tx} \frac{\sin x}{x} \, dx$ (for $t > 0$). By the Leibniz rule, $F'(t) = -\int_0^{\infty} e^{-tx} \sin x \, dx = -1/(1 + t^2)$. Hence $F(t) = C - \arctan t$. Since $F(\infty) = 0$, we have $C = \pi/2$. Letting $t \to 0^+$ gives $\int_0^{\infty} \sin x / x \, dx = \pi/2$.
+    \item $\int_0^{\infty} x^{s-1} e^{-x} \, dx = \Gamma(s)$ (for $s > 0$), that is, the Gamma function.
+\end{enumerate}
+\end{example}
+
+\section{Null Sets and Piecewise-smooth Boundaries}
+
+\subsection{Null sets}
+
+\begin{definition}[Null set]\label{def:null_set}
+Let $E \subseteq \mathbb{R}^n$. $E$ is called a \textbf{null set} (or a set of \textbf{measure zero}) if for every $\varepsilon > 0$ there exist at most countably many closed rectangles $R_1, R_2, \dots$ such that
+\[
+E \subseteq \bigcup_{j=1}^{\infty} R_j, \qquad \sum_{j=1}^{\infty} |R_j| < \varepsilon.
+\]
+\end{definition}
+
+\begin{proposition}[Basic properties of null sets]\label{prop:null_set_properties}
+\begin{enumerate}[label=(\roman*)]
+    \item A subset of a null set is a null set;
+    \item a countable union of null sets is a null set;
+    \item a singleton and a countable set are null sets;
+    \item a $k$-dimensional hyperplane in $\mathbb{R}^n$ (with $k < n$) is a null set;
+    \item if $E$ is a null set and $f: E \to \mathbb{R}^m$ is a Lipschitz map, then $f(E)$ is a null set.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) This follows directly from the definition.
+
+(ii) Let $E_1, E_2, \dots$ be null sets. Given $\varepsilon > 0$, for each $j$ there exists a family of rectangles $\{R_{j,k}\}_k$ covering $E_j$ with $\sum_k |R_{j,k}| < \varepsilon / 2^j$. Then $\{R_{j,k}\}_{j,k}$ covers $\bigcup_j E_j$ and $\sum_{j,k} |R_{j,k}| < \sum_j \varepsilon / 2^j = \varepsilon$.
+
+(iii) A singleton $\{x\}$ can be covered by arbitrarily small balls, so it is a null set. A countable set is a countable union of singletons, hence a null set by (ii).
+
+(iv) Let $H$ be the hyperplane $\{x : x_n = 0\}$. For every $\varepsilon > 0$, take the rectangles $R_j = [-j, j]^{n-1} \times [-\delta_j, \delta_j]$, where the $\delta_j$ are to be determined. The union $\bigcup_j R_j$ covers $H$ (if $\delta_j \to 0$, covering the whole of $H$ requires $j \to \infty$; note that $H$ is unbounded). More precisely: $H \cap [-j, j]^n \subseteq [-j, j]^{n-1} \times [-\varepsilon/(2^j \cdot 2j), \varepsilon/(2^j \cdot 2j)]$, of volume $(2j)^{n-1} \cdot \varepsilon/(2^j \cdot j) = 2^{n-1} \varepsilon / 2^j$. Summing gives $\le 2^{n-1} \varepsilon$. Since $\varepsilon$ is arbitrary, $H$ is a null set. A general hyperplane is reduced to this case by an orthogonal transformation.
+
+(v) Let $f$ be Lipschitz with Lipschitz constant $L$. Given $\varepsilon > 0$, there exists a family of rectangles $\{R_j\}$ covering $E$ with $\sum_j |R_j| < \varepsilon$. The set $f(R_j)$ can be covered by a rectangle $\tilde{R}_j$ whose side lengths are enlarged by a factor of about $L$, so $|\tilde{R}_j| \le C_n L^n |R_j|$ (with $C_n$ a constant). Then $f(E) \subseteq \bigcup_j \tilde{R}_j$ and $\sum_j |\tilde{R}_j| \le C_n L^n \varepsilon$. Since $\varepsilon$ is arbitrary, $f(E)$ is a null set.
+\end{proof}
+
+\begin{theorem}[Lebesgue criterion for Riemann integrability]\label{thm:riemann_lebesgue_criterion}
+Let $f: R \to \mathbb{R}$ be a bounded function on a closed rectangle $R$. Then $f$ is Riemann integrable on $R$ if and only if the set of discontinuity points of $f$ is a null set.
+\end{theorem}
+
+\begin{proof}
+\textbf{Necessity}. Suppose that $f$ is integrable. For each $k$, by Theorem \ref{thm:riemann_integrable_criterion} there exists a partition $\mathcal{P}_k$ such that $U(f, \mathcal{P}_k) - L(f, \mathcal{P}_k) < 1/k$. Let $D_k$ be the union of all those subrectangles of $\mathcal{P}_k$ whose oscillation satisfies $\sup_{R_j} f - \inf_{R_j} f \ge 1/k$. Then $\sum_{j \in D_k} |R_j| \le k \cdot 1/k = 1$ (a rough estimate). Put $D = \bigcap_k D_k$. Then $D$ is a null set (since $|D_k| \to 0$). Moreover $f$ is continuous outside $D$ (if $x \notin D$, there exists $k$ such that $x \notin D_k$, and then the oscillation of $f$ in some neighbourhood of $x$ is $< 1/k$, so $f$ is continuous at $x$). Hence the set of discontinuity points $\subseteq D$ is a null set.
+
+\textbf{Sufficiency}. Suppose that the set of discontinuity points $D$ of $f$ is a null set. The function $f$ is bounded; suppose that $|f| \le M$. Given $\varepsilon > 0$, the set $D$ can be covered by a family of rectangles $\{R_j\}$ with $\sum_j |R_j| < \varepsilon / (4M)$. On each $R_j$ the oscillation of $f$ is $\le 2M$. On the compact subset $R \setminus \bigcup_j R_j$ the function $f$ is continuous, hence uniformly continuous. There exists a partition $\mathcal{P}$ such that the oscillation on the subrectangles contained in $R \setminus \bigcup_j R_j$ is $< \varepsilon / (2|R|)$. Combining the two estimates gives
+\[
+U(f, \mathcal{P}) - L(f, \mathcal{P}) \le 2M \sum_j |R_j| + \frac{\varepsilon}{2|R|} |R| < \frac{\varepsilon}{2} + \frac{\varepsilon}{2} = \varepsilon.
+\]
+By Theorem \ref{thm:riemann_integrable_criterion}, $f$ is integrable.
+\end{proof}
+
+\begin{example}[Examples of null sets]\label{ex:null_set_examples}
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathbb{Q} \cap [0, 1]$ is a null set (it is countable).
+    \item The Cantor ternary set is a null set (the total length $\sum_k 2^k \cdot 3^{-k} = 1$ does not converge\dots in fact the Cantor set has measure $0$: at step $k$ there remain $2^k$ intervals of length $3^{-k}$, with total length $(2/3)^k \to 0$).
+    \item A line in $\mathbb{R}^2$ is a null set.
+    \item A smooth curve in $\mathbb{R}^2$ is a null set (it is a Lipschitz image).
+\end{enumerate}
+\end{example}
+
+\subsection{Piecewise-smooth boundaries}
+
+\begin{definition}[$C^k$ piecewise-smooth boundary]\label{def:piecewise_smooth_boundary}
+Let $\Omega \subseteq \mathbb{R}^n$ be a bounded open set. The boundary $\partial \Omega$ of $\Omega$ is called \textbf{$C^k$ piecewise-smooth} if there exist finitely many $C^k$ embedded submanifolds $S_1, \dots, S_m$ (each of dimension $n-1$) such that
+\[
+\partial \Omega = \bigcup_{i=1}^{m} S_i,
+\]
+and each $S_i$ can be covered by finitely many coordinate charts, and the `edges' of $\partial \Omega$ form a null set.
+\end{definition}
+
+\begin{definition}[Regular domain]\label{def:regular_domain}
+Let $\Omega \subseteq \mathbb{R}^n$ be a bounded open set. $\Omega$ is called a \textbf{regular domain} if:
+\begin{enumerate}[label=(\roman*)]
+    \item $\overline{\Omega}$ is compact;
+    \item $\partial \Omega$ is $C^1$ piecewise-smooth;
+    \item $\Omega$ is simply connected;
+    \item the `edges' of $\partial \Omega$ (where the submanifolds intersect) form a null set, and the values taken by the outward normal vector $\mathbf{n}$ on them do not affect the surface integral.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[The outward normal of a regular domain exists almost everywhere]\label{prop:regular_domain_normal}
+Let $\Omega \subseteq \mathbb{R}^n$ be a regular domain. Then the outward normal vector $\mathbf{n}: \partial \Omega \to S^{n-1}$ exists almost everywhere (that is, everywhere except on a null set), and $\mathbf{n}$ is almost everywhere continuous on $\partial \Omega$.
+\end{proposition}
+
+\begin{proof}
+By Definition \ref{def:piecewise_smooth_boundary}, $\partial \Omega = \bigcup_i S_i$, and each $S_i$ is a $C^1$ embedded submanifold. On $S_i$ the outward normal vector exists and is continuous (by the $C^1$ structure). At the intersections of the $S_i$ (the edges) the normal vector may be discontinuous. By Definition \ref{def:regular_domain}(iv), the edges form a null set. Hence $\mathbf{n}$ exists and is continuous on $\partial \Omega$ everywhere except on a null set.
+\end{proof}
+
+\begin{theorem}[Regularity prerequisites for Gauss's divergence theorem]\label{thm:gauss_regularity}
+Let $\Omega \subseteq \mathbb{R}^3$ be a regular domain and let $\mathbf{F}: \overline{\Omega} \to \mathbb{R}^3$ be a $C^1$ vector field. Then
+\[
+\int_\Omega (\nabla \cdot \mathbf{F}) \, dV = \oint_{\partial \Omega} \mathbf{F} \cdot \mathbf{n} \, dS,
+\]
+where $\mathbf{n}$ is the unit outward normal vector of $\partial \Omega$ and $dS$ is the area element.
+\end{theorem}
+
+\begin{proof}
+The proof is in three steps.
+
+\textbf{Step 1: rectangular box}. Let $\Omega = [a_1, b_1] \times [a_2, b_2] \times [a_3, b_3]$. Taking $\mathbf{F} = (F_1, F_2, F_3)$ as an example, it suffices to prove that $\int_\Omega \partial F_1/\partial x \, dV = \oint_{\partial \Omega} F_1 n_1 \, dS$ (the remaining components are analogous). By Fubini's theorem,
+\[
+\int_\Omega \frac{\partial F_1}{\partial x} \, dV = \int_{a_2}^{b_2} \int_{a_3}^{b_3} \left( \int_{a_1}^{b_1} \frac{\partial F_1}{\partial x} \, dx \right) dy \, dz = \int_{a_2}^{b_2} \int_{a_3}^{b_3} [F_1(b_1, y, z) - F_1(a_1, y, z)] \, dy \, dz.
+\]
+The right-hand side is precisely $\oint_{\partial \Omega} F_1 n_1 \, dS$ (with $n_1 = +1$ on $x = b_1$, $n_1 = -1$ on $x = a_1$, and $n_1 = 0$ on the remaining faces).
+
+\textbf{Step 2: $z$-simple region}. Let $\Omega = \{(x, y, z) : (x, y) \in D,\ \varphi_1(x, y) \le z \le \varphi_2(x, y)\}$. For the $F_3$ component,
+\[
+\int_\Omega \frac{\partial F_3}{\partial z} \, dV = \int_D \left( \int_{\varphi_1}^{\varphi_2} \frac{\partial F_3}{\partial z} \, dz \right) dx \, dy = \int_D [F_3(x, y, \varphi_2) - F_3(x, y, \varphi_1)] \, dx \, dy.
+\]
+The right-hand side is $\oint_{\partial \Omega} F_3 n_3 \, dS$. For the $F_1, F_2$ components, represent $\Omega$ as an $x$-simple or a $y$-simple region and argue analogously.
+
+\textbf{Step 3: general regular domain}. Use finitely many planes parallel to the coordinate planes to divide $\Omega$ into finitely many $z$-simple subregions. Apply Step 2 to each subregion and sum. The fluxes across the internal common faces cancel in pairs (the normal vectors are opposite), leaving only the flux across the outer boundary.
+\end{proof}
+
+\begin{remark}[Regularity prerequisites for Stokes' theorem and Green's formula]\label{rem:stokes_green_regularity}
+The rigorous statements of Stokes' theorem and Green's formula likewise require such prerequisites as $\partial S$ being piecewise-smooth and $S$ being orientable. The precise formulation of these prerequisites is given in the `Vector Analysis' chapter. The notions of a null set and of a piecewise-smooth boundary provided in this section are the analytic foundation of those prerequisites: \textbf{the edges form a null set} guarantees that the normal vector exists almost everywhere and that the surface integral is unaffected by the values taken on the edges; \textbf{piecewise smoothness} guarantees that parametrisations exist locally and that the Jacobian determinant is defined almost everywhere.
+\end{remark}
+
+\section{Interfaces with Subsequent Chapters}
+
+\begin{remark}[Interface with the `Series and Convolution' chapter]\label{rem:ra_to_series}
+The theory of uniform convergence of this chapter (Theorems \ref{thm:uniform_continuity_preservation}, \ref{thm:uniform_continuity_integral}, \ref{thm:uniform_continuity_derivative}) and the Weierstrass M-test (Theorem \ref{thm:weierstrass_m_test_ra}) provide the basis for the rigorous convergence arguments for series of functions, power series, Taylor series and Fourier series in the `Series and Convolution' chapter. The estimate of the remainder of Taylor's formula in that chapter (with the Lagrange remainder) may invoke the ideas of the multivariable mean-value theorem (Theorem \ref{thm:multivariable_mean_value}) and of Taylor's formula (Theorem \ref{thm:taylor_second_order}) of this chapter.
+\end{remark}
+
+\begin{remark}[Interface with the `Vector Analysis' chapter]\label{rem:ra_to_vector_analysis}
+This chapter provides the `Vector Analysis' chapter with:
+\begin{enumerate}[label=(\roman*)]
+    \item such topological notions as open sets, closed sets, compact sets, connectedness and simple connectedness (Definitions \ref{def:open_closed_set}, \ref{def:compactness}, \ref{def:connectedness}, \ref{def:simply_connected});
+    \item regular domains and piecewise-smooth boundaries (Definitions \ref{def:piecewise_smooth_boundary}, \ref{def:regular_domain});
+    \item $C^k$ differentiability, the Jacobian matrix and the chain rule (Definition \ref{def:total_differential_ra}, Theorem \ref{thm:differentiable_jacobian}, Theorem \ref{thm:chain_rule_ra});
+    \item directional derivatives and the gradient (Definitions \ref{def:directional_derivative}, \ref{def:gradient_ra});
+    \item the implicit-function theorem, the inverse-function theorem and the rank theorem (Theorems \ref{thm:inverse_function}, \ref{thm:implicit_function}, \ref{thm:rank_theorem});
+    \item multiple integrals, Fubini's theorem and change of variables (Theorems \ref{thm:fubini_ra}, \ref{thm:change_of_variables_ra});
+    \item line and surface integrals of the first and second kinds (Definitions \ref{def:line_integral_first_kind}, \ref{def:line_integral_second_kind}, \ref{def:surface_integral_first_kind}, \ref{def:surface_integral_second_kind});
+    \item null sets and piecewise-smooth boundaries (Definitions \ref{def:null_set}, \ref{def:piecewise_smooth_boundary}).
+\end{enumerate}
+The rigorous statements of Green's formula, Stokes' theorem and Gauss's divergence theorem in the `Vector Analysis' chapter may invoke the regularity prerequisites of this chapter, without having to repeat them inside vector analysis itself.
+\end{remark}
+
+\begin{remark}[Interface with the `Probability and Distribution' chapter]\label{rem:ra_to_probability}
+If a subsequent revision is planned to include Lebesgue measure and integration, then the `Probability and Distribution' chapter may invoke the notions of measure, measurable function and integral of this chapter. At present this chapter has established null sets (Definition \ref{def:null_set}) and the Lebesgue criterion for Riemann integrability (Theorem \ref{thm:riemann_lebesgue_criterion}), providing the `Probability and Distribution' chapter with preliminary tools concerning null sets and almost everywhere. If a more complete measure theory is required, one may add a section `Elements of measure and Lebesgue integration' on the basis of this chapter, or make measure theory an independent chapter.
+\end{remark}
+
+\begin{remark}[Open problems of this chapter]\label{rem:ra_open}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Lebesgue measure and integration}: this chapter establishes only null sets and the Lebesgue criterion for Riemann integrability, and does not develop Lebesgue measure and integration. If probability theory, harmonic analysis or $L^p$ spaces require them later, a separate chapter may be set up.
+    \item \textbf{Sobolev spaces}: this chapter deals only with $C^k$ maps and does not touch on weak derivatives or Sobolev spaces. These are necessary for the modern theory of partial differential equations, but they lie beyond the scope of this chapter.
+    \item \textbf{Analysis on manifolds}: this chapter establishes analysis only on Euclidean space; differentiation and integration on manifolds (de Rham cohomology, the general form of Stokes' theorem) are treated in the `Manifold and Fibre Bundle' chapter.
+    \item \textbf{Finer conditions for uniform convergence and the interchange of limits}: Theorem \ref{thm:uniform_continuity_derivative} of this chapter requires $f_k' \rightrightarrows g$, which is a fairly strong condition. In the `Harmonic Analysis' chapter, the termwise differentiation of Fourier series requires finer conditions (such as absolute convergence, the rate of decay of the coefficients, and so on).
+\end{enumerate}
+\end{remark}
+
+\section{Two Basic Properties of Periodic Functions within the Framework of Real Analysis}
+\label{sec:periodic_functions_in_real_analysis}
+
+The theory of completeness, uniform convergence and parameter-dependent integrals established in this chapter gives the concept of `period' a rigorous analytic vehicle for the first time. This section presents two basic properties; they use respectively the theory of uniform convergence and the theory of parameter-dependent integrals of this chapter as tools, and they provide the analytic prerequisites for the treatment of Fourier series in the subsequent chapters.
+
+\begin{proposition}[The integral of a periodic function is independent of the starting point]\label{prop:period_integral_shift_invariant}
+Let $f:\mathbb R\to\mathbb R$ be periodic with period $T>0$ and continuous on $[0,T]$. Then for every $a\in\mathbb R$,
+\[
+\int_a^{a+T}f(x)\,dx=\int_0^{T}f(x)\,dx .
+\]
+That is, \textbf{the value of the integral depends only on the length of the period and not on the starting point of the interval of integration}.
+\end{proposition}
+
+\begin{proof}
+Define the parameter-dependent integral $F(a):=\int_a^{a+T}f(x)\,dx$. By the differentiation rule for parameter-dependent integrals of this chapter (Theorem \ref{thm:leibniz_rule}),
+\[
+F'(a)=f(a+T)-f(a).
+\]
+By the $T$-periodicity of $f$, we have $f(a+T)=f(a)$, so $F'(a)\equiv0$, that is, $F$ is a constant function; taking $a=0$ gives $F(a)=F(0)=\int_0^{T}f$.
+\end{proof}
+
+\begin{corollary}[Equivalence of zero mean and periodicity]\label{cor:periodic_zero_mean}
+Let $f$ be as in Proposition \ref{prop:period_integral_shift_invariant}, and denote the \textbf{mean} over one period by $m:=\frac1T\int_0^{T}f(x)\,dx$. Then
+\[
+g(x):=\int_0^{x}\bigl(f(t)-m\bigr)\,dt
+\]
+is periodic with period $T$, and $g$ is a primitive of $f$ with period $T$ if and only if $m=0$.
+\end{corollary}
+
+\begin{proof}
+By Proposition \ref{prop:period_integral_shift_invariant} (applied separately to $f$ and to the constant function $m$),
+\[
+g(x+T)-g(x)=\int_x^{x+T}\bigl(f-m\bigr)=\int_0^{T}f-mT=0,
+\]
+so $g$ is periodic with period $T$. Also $g'=f-m$, so $g$ is a primitive of $f$ if and only if $m=0$.
+\end{proof}
+
+\begin{remark}[Interface with the `Periodicity' theme]\label{rem:ra_period_interface}
+The common structure of these two properties is: \textbf{periodicity turns a quantity of integration that `depends on the starting point' into a quantity that `does not depend on the starting point'}---this is precisely the realisation, at the analytic level of this chapter, of `translation symmetry $\Rightarrow$ conservation' in the `Operations and Periodicity' chapter. This structure recurs repeatedly in the subsequent chapters: the reason why the Fourier coefficients are well defined rests on the independence from the starting point in Proposition \ref{prop:period_integral_shift_invariant}; the relation between the zero-mean condition and the periodicity of primitives in the `Harmonic Analysis' chapter is the continuous version of Corollary \ref{cor:periodic_zero_mean}; and the `Discrete Sampling and Intercalation of Periodic Signals' chapter, when treating the discrete case, replaces integrals by sums and the form of the conclusion is unchanged. This chapter thus gains an entry point on the theme of `period': \textbf{the analytic consequence of periodicity is an integral invariant}.
+\end{remark}
+
+
+\section*{Seven-theme comparison table for this chapter}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & Translation in Euclidean space and the translation invariance of limits (Definition \ref{def:euclidean_space}); uniform convergence of sequences of functions (Definition \ref{def:uniform_convergence}); parameter-dependent integrals (Definition \ref{def:parametric_integral}) \\
+Scaling & Ball neighbourhoods, covers and scales in metric spaces (Definitions \ref{def:open_ball}, \ref{def:compactness}); volume scaling under change of variables (Theorem \ref{thm:change_of_variables_ra}) \\
+Rotation & Orthogonal transformations of Euclidean space and topological invariance; parametrisation of line and surface integrals (Definitions \ref{def:curve_parameterization}, \ref{def:surface_parameterization}) \\
+Conservation & Conservation of topological invariants such as compactness, completeness and connectedness (Theorems \ref{thm:heine_borel}, \ref{thm:rn_completeness}, \ref{prop:connected_properties}) \\
+Symmetry & Preservation of the symmetry of open sets, closed sets and compact sets under continuous maps (Theorems \ref{thm:continuity_global}, \ref{thm:continuous_compact}) \\
+Closure & Closure, closed sets, nested closed intervals and the closure of limits (Definition \ref{def:open_closed_set}, Theorem \ref{thm:bolzano_weierstrass}); necessary and sufficient condition for Riemann integrability (Theorem \ref{thm:riemann_integrable_criterion}) \\
+Period & The uniform convergence and parameter-dependent integral tools prepared for periodic series, periodic convolution and Fourier analysis in later chapters (Theorems \ref{thm:weierstrass_m_test_ra}, \ref{thm:leibniz_rule}, \ref{thm:improper_leibniz_rule}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\clearpage
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+
+    \item Starting from Definition \ref{def:open_ball} and Definition \ref{def:open_closed_set}, prove:
+    \begin{enumerate}[label=(\roman*)]
+        \item the open ball $B(x_0,r)$ is an open set;
+        \item the closed ball $\overline{B}(x_0,r)$ is a closed set;
+        \item the sphere $S(x_0,r)$ is a closed set with empty interior.
+    \end{enumerate}
+    Write out the complete $\varepsilon$-$\delta$ verification, and explain why the proofs for the open ball and the closed ball cannot replace one another.
+
+    \item Prove the following parts of Proposition \ref{prop:open_closed_properties}:
+    \begin{enumerate}[label=(\roman*)]
+        \item a union of arbitrarily many open sets is open;
+        \item an intersection of finitely many open sets is open;
+        \item an intersection of arbitrarily many closed sets is closed;
+        \item a union of finitely many closed sets is closed.
+    \end{enumerate}
+    In each case give a counterexample showing that an intersection of infinitely many open sets need not be open, and a union of infinitely many closed sets need not be closed.
+
+    \item Prove the `necessity' part of Theorem \ref{thm:heine_borel}:
+    if $K \subseteq \mathbb{R}^n$ is compact, then $K$ is bounded and closed.
+    Write out the complete proof in the order `first boundedness, then closedness',
+    and explain the role played by the family of open balls $\{B(\mathbf{0},m)\}_{m\in\mathbb{N}^+}$ in the proof of boundedness.
+
+    \item Prove Theorem \ref{thm:bolzano_weierstrass}:
+    let $K \subseteq \mathbb{R}^n$. Then $K$ is sequentially compact if and only if $K$ is bounded and closed.
+    Prove the two implications `compact $\Rightarrow$ sequentially compact' and `sequentially compact $\Rightarrow$ compact' separately,
+    and explain why sequential compactness implies closedness.
+
+    \item Prove the following parts of Proposition \ref{prop:connected_properties}:
+    \begin{enumerate}[label=(\roman*)]
+        \item path-connected $\Rightarrow$ connected;
+        \item continuous maps preserve connectedness;
+        \item the connected subsets of $\mathbb{R}$ are precisely the intervals;
+        \item if a family of connected sets has a common point, then its union is connected.
+    \end{enumerate}
+    Prove (i) by contradiction, prove (ii) using preimages of relatively open sets,
+    and prove (iii) using the order structure of intervals.
+
+    \item Prove Theorem \ref{thm:banach_fixed_point} (the Banach contraction-mapping principle):
+    a contraction mapping on a complete metric space has a unique fixed point, and the iteration sequence converges to that fixed point.
+    Write out the complete proof of existence, uniqueness and the error estimate,
+    and use the theorem to prove that the equation $x=\cos x$ has a unique solution on $[0,1]$.
+
+    \item Prove Proposition \ref{prop:differential_uniqueness}:
+    if $f$ is differentiable at $x_0$, then the total differential $L=Df(x_0)$ is unique.
+    Also explain: why does the existence of partial derivatives not guarantee differentiability?
+    Using the function from Proposition \ref{prop:partial_not_continuous},
+    \[
+    f(x,y)=\begin{cases}
+    \dfrac{xy}{x^2+y^2}, & (x,y)\neq(0,0),\\
+    0, & (x,y)=(0,0)
+    \end{cases}
+    \]
+    verify that at the origin both partial derivatives exist but the function is discontinuous, hence not differentiable.
+
+    \item Prove Theorem \ref{thm:chain_rule_ra} (the chain rule):
+    if $g$ is differentiable at $x_0$ and $f$ is differentiable at $y_0=g(x_0)$,
+    then $f\circ g$ is differentiable at $x_0$, and
+    \[
+    D(f\circ g)(x_0)=Df(y_0)\circ Dg(x_0).
+    \]
+    Complete the proof using the definition `differentiable = linear principal part + $o(\|h\|)$',
+    and write out the chain rule in the form of Jacobian matrices.
+
+    \item Prove Theorem \ref{thm:clairaut_ra} (the theorem on the interchange of mixed partial derivatives):
+    if $f\in C^2(\Omega)$, then
+    \[
+    \frac{\partial^2 f}{\partial x_i\partial x_j}
+    =
+    \frac{\partial^2 f}{\partial x_j\partial x_i}.
+    \]
+    Taking $n=2$ as an example, write out the complete proof using the second-order difference and two applications of the mean-value theorem,
+    and explain why the $C^2$ condition cannot be omitted.
+    Verify further: the function
+    \[
+    f(x,y)=\begin{cases}
+    \dfrac{xy(x^2-y^2)}{x^2+y^2}, & (x,y)\neq(0,0),\\
+    0, & (x,y)=(0,0)
+    \end{cases}
+    \]
+    has both mixed partial derivatives at the origin, but they are unequal.
+
+    \item Prove Theorem \ref{thm:multivariable_mean_value} (the multivariable mean-value theorem):
+    if $f\in C^1(\Omega)$, $x,y\in\Omega$ and the line segment $[x,y]\subseteq\Omega$,
+    then there exists $\xi\in(x,y)$ such that
+    \[
+    f(y)-f(x)=\nabla f(\xi)\cdot(y-x).
+    \]
+    Complete the proof by constructing the one-variable function $g(t)=f(x+t(y-x))$.
+
+    \item Prove Theorem \ref{thm:taylor_second_order} (the second-order Taylor formula):
+    if $f\in C^2(\Omega)$, then
+    \[
+    f(x+h)=f(x)+\nabla f(x)\cdot h
+    +\frac12 h^{\mathsf T}H_f(\xi)h
+    \]
+    for some $\xi\in(x,x+h)$.
+    Write out the substitution into the one-variable second-order Taylor formula,
+    and prove the second-order condition for extrema in Corollary \ref{cor:extremum_second_order}.
+
+    \item Prove Theorem \ref{thm:lagrange_multiplier_ra} (the method of Lagrange multipliers):
+    let $x_0$ be a local extremum point of $f$ under the constraints $g_1=\cdots=g_m=0$,
+    and suppose that $\nabla g_1(x_0),\dots,\nabla g_m(x_0)$ are linearly independent.
+    Then there exist $\lambda_1,\dots,\lambda_m$ such that
+    \[
+    \nabla f(x_0)=\sum_{i=1}^m\lambda_i\nabla g_i(x_0).
+    \]
+    Use the implicit-function theorem to parametrise the constraint set,
+    and explain why $\nabla f(x_0)$ must belong to the normal space
+    $\operatorname{span}\{\nabla g_1(x_0),\dots,\nabla g_m(x_0)\}$.
+
+    \item Prove Theorem \ref{thm:inverse_function} (the inverse-function theorem):
+    if $f:\Omega\to\mathbb{R}^n$ is a $C^1$ map and
+    $Df(x_0)$ is invertible, then $f$ has a $C^1$ inverse near $x_0$.
+    Write out the complete proof in the five steps `simplification by translation and a linear transformation, construction of a contraction mapping, proof of continuity, proof of differentiability,
+    proof of $C^1$',
+    and explain why the contraction constant may be taken to be $1/2$.
+
+    \item Prove Theorem \ref{thm:implicit_function} (the implicit-function theorem):
+    if $F(x_0,y_0)=0$ and $D_yF(x_0,y_0)$ is invertible,
+    then there exists a $C^1$ map $g$ such that $F(x,g(x))=0$.
+    Complete the proof by constructing $\Phi(x,y)=(x,F(x,y))$ and applying the inverse-function theorem,
+    and derive the formula
+    \[
+    Dg(x)=-[D_yF(x,g(x))]^{-1}D_xF(x,g(x)).
+    \]
+
+    \item Prove Theorem \ref{thm:rank_theorem} (the rank theorem):
+    if the rank of $Df(x_0)$ is $r$, then there exist local diffeomorphisms $\varphi,\psi$ such that
+    \[
+    (\psi\circ f\circ\varphi^{-1})(x_1,\dots,x_n)
+    =(x_1,\dots,x_r,0,\dots,0).
+    \]
+    Write out the complete procedure for constructing $\Phi(x)=(f^1(x),x_{r+1},\dots,x_n)$
+    and applying the inverse-function theorem and the implicit-function theorem.
+
+    \item Prove Theorem \ref{thm:riemann_integrable_criterion}:
+    a bounded function $f:R\to\mathbb{R}$ is Riemann integrable
+    if and only if its upper integral equals its lower integral,
+    if and only if for every $\varepsilon>0$ there exists a partition with $U-L<\varepsilon$.
+    Write out the complete proof that the three conditions are cyclically equivalent,
+    and explain the relation between the Darboux upper and lower sums and Riemann sums.
+
+    \item Prove Theorem \ref{thm:continuous_integrable}:
+    a continuous function on a closed rectangle is Riemann integrable.
+    Use uniform continuity to prove that $U(f,\mathcal{P})-L(f,\mathcal{P})<\varepsilon$,
+    and explain why compactness cannot be dispensed with in the proof.
+
+    \item Prove Theorem \ref{thm:fubini_ra} (Fubini's theorem):
+    a continuous function on a closed rectangle can be reduced to an iterated integral, and the order of integration may be interchanged.
+    Taking $n=2$ as an example, complete the proof using partitions and the one-variable mean-value theorem for integrals,
+    and explain why continuity is an important condition guaranteeing the equality of the iterated integrals.
+
+    \item Prove Theorem \ref{thm:change_of_variables_ra} (the change-of-variables formula):
+    if $\Phi:\Omega\to\Omega'$ is a $C^1$ diffeomorphism, then
+    \[
+    \int_{\Omega'}f(y)\,dy
+    =
+    \int_{\Omega}f(\Phi(x))\,|\det J_\Phi(x)|\,dx.
+    \]
+    Explain the origin of the local linearisation and of the volume scaling factor,
+    and compute the multiple-integral formula for the polar-coordinate transformation
+    $\Phi(r,\theta)=(r\cos\theta,r\sin\theta)$.
+
+    \item Compute the following line and surface integrals, writing out the complete procedure:
+    \begin{enumerate}[label=(\roman*)]
+        \item $\displaystyle\int_{\gamma}(x^2+y^2)\,ds$,
+        where $\gamma$ is the unit circle;
+        \item $\displaystyle\int_{\gamma}\mathbf{F}\cdot d\mathbf{r}$,
+        where $\mathbf{F}(x,y)=(-y,x)$ and $\gamma$ is the unit circle traversed once anticlockwise;
+        \item the area of the sphere $S^2$ and the flux of the radial field
+        $\mathbf{F}(x,y,z)=(x,y,z)$ through $S^2$.
+    \end{enumerate}
+    Explain why the first-kind integral is independent of the parametrisation, whilst
+    the second-kind integral depends on the orientation.
+
+    \item Prove Theorems \ref{thm:uniform_continuity_preservation},
+    \ref{thm:uniform_continuity_integral},
+    \ref{thm:uniform_continuity_derivative}:
+    uniform convergence preserves continuity, integration and differentiation respectively.
+    Write out the three proofs separately,
+    and explain why, in the proof of `preservation of differentiation',
+    it is necessary to assume that $f_k'\rightrightarrows g$,
+    whilst the assumption $f_k\rightrightarrows f$ alone is not enough.
+
+    \item Prove Theorem \ref{thm:weierstrass_m_test_ra} (the Weierstrass M-test):
+    if $\|u_k(x)\|\le M_k$ and $\sum_k M_k<\infty$,
+    then $\sum_k u_k(x)$ converges uniformly.
+    Complete the proof using the uniform Cauchy criterion for convergence,
+    and give an example illustrating the difference between uniform and pointwise convergence.
+
+    \item Prove Theorem \ref{thm:cauchy_hadamard_ra} (the Cauchy--Hadamard radius-of-convergence formula):
+    the radius of convergence of the power series $\sum_{k=0}^\infty a_k(x-x_0)^k$ is
+    \[
+    R=\frac{1}{\limsup_{k\to\infty}|a_k|^{1/k}}.
+    \]
+    Use the root test to prove that the series converges absolutely when $|x-x_0|<R$ and
+    diverges when $|x-x_0|>R$,
+    and prove that it converges uniformly on $|x-x_0|\le r<R$.
+
+    \item Prove Theorem \ref{thm:leibniz_rule} (the Leibniz rule):
+    if $f$ and $\partial f/\partial t$ are continuous, then
+    \[
+    \frac{d}{dt}\int_a^b f(t,x)\,dx
+    =
+    \int_a^b\frac{\partial f}{\partial t}(t,x)\,dx.
+    \]
+    Complete the proof using the mean-value theorem and uniform continuity,
+    and derive the Leibniz formula for parameter-dependent integrals with variable limits
+    in Corollary \ref{cor:leibniz_variable_limits}.
+
+    \item Prove Theorem \ref{thm:improper_m_test} and
+    Theorem \ref{thm:improper_leibniz_rule}:
+    the M-test for the uniform convergence of improper parameter-dependent integrals,
+    and the legitimacy of differentiation under the integral sign under the condition of uniform convergence.
+    Taking
+    \[
+    F(t)=\int_0^\infty e^{-tx}\frac{\sin x}{x}\,dx
+    \]
+    as an example, verify that $F'(t)=-\dfrac{1}{1+t^2}$,
+    and hence compute $\displaystyle\int_0^\infty\frac{\sin x}{x}\,dx=\frac{\pi}{2}$.
+
+    \item Prove Proposition \ref{prop:null_set_properties}:
+    \begin{enumerate}[label=(\roman*)]
+        \item a subset of a null set is a null set;
+        \item a countable union of null sets is a null set;
+        \item a countable set is a null set;
+        \item a $k$-dimensional hyperplane in $\mathbb{R}^n$ is a null set;
+        \item Lipschitz maps preserve null sets.
+    \end{enumerate}
+    Write out the proofs separately, and explain why the Cantor ternary set is a null set.
+
+    \item Prove Theorem \ref{thm:riemann_lebesgue_criterion}
+    (the Lebesgue criterion for Riemann integrability):
+    a bounded function $f:R\to\mathbb{R}$ is Riemann integrable
+    if and only if its set of discontinuity points is a null set.
+    Write out the construction of the null set $D=\bigcap_k D_k$ in the necessity part,
+    together with the argument in the sufficiency part using a cover by null sets and uniform continuity.
+
+    \item Explain why, in the proof of Theorem \ref{thm:gauss_regularity} (Gauss's divergence theorem),
+    the hypothesis that `$\Omega$ is a regular domain' is needed.
+    Point out:
+    \begin{enumerate}[label=(\roman*)]
+        \item where the piecewise-smooth boundary is used;
+        \item where the almost everywhere existence of the outward normal vector is used;
+        \item where the fact that the edges form a null set is used;
+        \item where simple connectedness is used.
+    \end{enumerate}
+    Also construct a region whose boundary is not smooth, and explain why the direct statement of the divergence theorem fails for it.
+
+    \item Comprehensive question: combining the Euclidean-space topology, multivariable differential calculus,
+    multiple integrals and line and surface integrals, uniform convergence and parameter-dependent integrals, and null sets and piecewise-smooth boundaries of this chapter,
+    explain how this chapter provides a rigorous analytic foundation for the following in the `Vector Analysis' chapter:
+    \begin{enumerate}[label=(\roman*)]
+        \item the differentiability prerequisites for the gradient, the divergence and the curl;
+        \item the regularity prerequisites for Green's formula, Stokes' theorem and Gauss's divergence theorem;
+        \item the simple-connectedness condition in the existence of a potential function;
+        \item the orientation and boundary conditions in flux and circulation integrals
+    \end{enumerate}
+    Point out the corresponding definitions, theorems or propositions of this chapter in each case.
+
+\end{enumerate}

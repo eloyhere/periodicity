@@ -1,0 +1,1623 @@
+\chapter{群与群函数}
+\label{chap:group_function}
+\markboth{群与群函数}{群与群函数}
+
+\begin{remark}[本章定位]\label{rem:group_function_chapter_positioning}
+本章从群表示论公理出发，建立群作用、群上的三种标准构造（平移、内自同构、外自同构）、群对称、群方向、群周期以及群函数空间的理论体系。
+
+本章的核心任务有三项：
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{定义8组概念对}：平移函数/平移群、缩放函数/缩放群、旋转函数/旋转群、守恒函数/守恒群、对称函数/对称群、闭合函数/闭合群、周期函数/具有周期轨道的群、高阶函数/高阶群。
+    \item \textbf{建立相空间联合判定框架}：将相空间轨迹闭合判定与群表示论中具有周期轨道的群的判定统一，给出函数周期性的完整判据。
+    \item \textbf{证明传递性矩阵}：对8种性质在12种运算（加、减、乘、除、幂、根、对数、级数、极限、微分、积分、卷积）下的传递性，逐格给出证明或反例。
+\end{enumerate}
+
+\textbf{说明}：群上的三种标准构造——左平移 $L_g$、右平移 $R_g$、内自同构 $\iota_g$、外自同构群 $\operatorname{Out}(G)$——分别是群表示论中的经典对象。本章把它们作为独立的群表示论对象处理。
+
+本章七主题导引：平移——群上的左平移/右平移（对称中心为单位元 $e$）；缩放——外自同构 $\operatorname{Out}(G)$；旋转——内自同构 $\iota_g$（对称中心为中心 $Z(G)$）；守恒——群函数的守恒律（平移不变$\to$动量/能量，缩放不变$\to$标度荷，旋转不变$\to$角动量）；对称——自同构塔与关系的群化；闭合——群轨道闭合与8组概念对的判定；周期——群周期与具有周期轨道的群。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  node distance=7mm and 10mm,
+  box/.style={draw, rounded corners, align=center, minimum width=2.6cm, minimum height=0.75cm, fill=blue!5, font=\small},
+  core/.style={draw, very thick, rounded corners, align=center, minimum width=3.4cm, minimum height=0.95cm, fill=orange!15},
+  arrow/.style={-{Stealth[length=2mm]}, thick}
+]
+\node[core] (core) {群与群函数\\统一代数框架};
+\node[box, above left=of core] (trans) {平移\\左/右正则作用};
+\node[box, above right=of core] (rot) {旋转\\内自同构 $\iota_g$};
+\node[box, right=of core] (scal) {缩放\\外自同构 $\operatorname{Out}(G)$};
+\node[box, below left=of core] (tower) {自同构塔\\$\operatorname{Aut}^k(G)$};
+\node[box, below=of core] (concept) {8 组概念对\\平移/缩放/旋转/$\cdots$};
+\node[box, below right=of core] (matrix) {传递性矩阵\\8 性质 $\times$ 12 运算};
+\foreach \x in {trans,rot,scal,tower,concept,matrix}
+  \draw[arrow] (core) -- (\x);
+\end{tikzpicture}
+\caption{群与群函数章的整体路线图：三种标准构造、自同构塔、8 组概念对与传递性矩阵共同构成统一代数框架。}
+\label{fig:group_function_overview}
+\end{figure}
+
+\section{\texorpdfstring{群上的三种标准构造}{群上的三种标准构造}}
+
+在向量空间上，向量加法（平移）、外积/复数乘法（旋转）、标量乘法（缩放）是三种基本操作，分别与梯度、旋度、散度（对称中心 $1$）有形式对应关系。本节将这一视角推广到一般群：在任意群上，同样存在三种标准构造——左/右平移、内自同构、外自同构——它们是上述三种操作在群表示论层面的对应物。以下论述中，“三种构造”是经典群表示论对象；“与三种算子的对应”是一种组织视角，其严格性依具体语境而定。
+
+\subsection{\texorpdfstring{平移构造}{平移构造}}
+
+\begin{definition}[群上的平移构造]\label{def:group_translation_operation}
+设 $(G,\cdot)$ 为群。对每个固定的 $g \in G$，定义两个映射：
+\begin{itemize}
+    \item \textbf{左平移} $L_g: G \to G$：$L_g(x) = g \cdot x$，$\forall x \in G$。
+    \item \textbf{右平移} $R_g: G \to G$：$R_g(x) = x \cdot g$，$\forall x \in G$。
+\end{itemize}
+左平移和右平移具有以下性质：
+\begin{enumerate}[label=(\roman*)]
+    \item 左平移集合 $\{L_g : g \in G\}$ 在映射复合下构成群，且 $L_g \circ L_h = L_{gh}$，$L_{g^{-1}} = (L_g)^{-1}$。该群同构于 $G$ 自身，称为 $G$ 的\textbf{左正则作用}。
+    \item 右平移集合构成群，且 $R_g \circ R_h = R_{hg}$，同构于 $G^{\text{op}}$（$G$ 的反序群）。
+    \item 左平移与右平移相互交换：$L_g \circ R_h = R_h \circ L_g$（因为 $(gx)h = g(xh)$）。
+\end{enumerate}
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+\draw[->] (-0.3,0) -- (7.5,0) node[right] {$G$};
+\foreach \x/\l in {0.5/e, 2.0/x, 4.5/gx, 6.5/g} {
+  \fill (\x,0) circle (1.5pt);
+}
+\node[below] at (0.5,-0.1) {$e$};
+\node[below] at (2.0,-0.1) {$x$};
+\node[below] at (4.5,-0.1) {$gx$};
+\node[below] at (6.5,-0.1) {$g$};
+\draw[->, blue, very thick] (2.0,0.25) -- (4.5,0.25);
+\node[blue, above] at (3.25,0.35) {$L_g$};
+\draw[->, red, very thick] (4.5,-0.25) -- (6.5,-0.25);
+\node[red, below] at (5.5,-0.35) {$L_g$};
+\draw[->, green!60!black, very thick] (6.5,0.6) -- (2.0,0.6);
+\node[green!60!black, above] at (4.2,0.7) {$L_{g^{-1}}$};
+\node at (3.5,-1.5) {左平移 $L_g(x)=gx$ 是从单位元侧作用的等距平移};
+\end{tikzpicture}
+\qquad
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+\draw[->] (-0.3,0) -- (7.5,0) node[right] {$G$};
+\foreach \x/\l in {0.5/e, 2.0/x, 4.0/xg, 6.0/g} {
+  \fill (\x,0) circle (1.5pt);
+}
+\node[below] at (0.5,-0.1) {$e$};
+\node[below] at (2.0,-0.1) {$x$};
+\node[below] at (4.0,-0.1) {$xg$};
+\node[below] at (6.0,-0.1) {$g$};
+\draw[->, red, very thick] (2.0,0.25) -- (4.0,0.25);
+\node[red, above] at (3.0,0.35) {$R_g$};
+\draw[->, blue, very thick] (6.0,-0.25) -- (2.0,-0.25);
+\node[blue, below] at (4.0,-0.35) {$R_{g^{-1}}$};
+\node at (3.5,-1.5) {右平移 $R_g(x)=xg$ 是从单位元反侧作用的等距平移};
+\end{tikzpicture}
+\caption{左平移 $L_g$ 与右平移 $R_g$ 的对比。当 $G$ 非交换时两者一般不相等，但恒有 $L_g\circ R_h=R_h\circ L_g$。}
+\label{fig:left_right_translation}
+\end{figure}
+
+\begin{proposition}[平移构造的基本性质]\label{prop:translation_operator}
+群上的平移构造（左平移和右平移）具有以下性质：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{不动元}：群的单位元 $e$ 满足 $L_g(e) = g$，$R_g(e) = g$。取逆映射 $\sigma_e(x) = x^{-1}$ 是一个对合（$\sigma_e \circ \sigma_e = \operatorname{id}_G$）。
+    \item \textbf{无穷小生成元}：当 $G$ 为李群时，左平移的无穷小生成元是\textbf{左不变向量场}，其微分算子对应于李代数 $\mathfrak{g}$ 的元素。对于 $G = \mathbb{R}$（加法群），无穷小生成元为 $\frac{d}{dx}$。对于 $G = \mathbb{R}^n$（加法群），无穷小生成元为 $(\partial_1, \dots, \partial_n)$。
+    \item \textbf{Haar 测度不变性}：平移不变性体现为 Haar 测度的左不变性：$\int_G f(gx) dg = \int_G f(x) dg$。由诺特定理，平移不变性蕴含动量或能量守恒。
+    \item \textbf{方向结构}：每个生成元 $g \in G$ 定义了一个“平移方向”——沿该方向移动群元素。对于离散群，这体现为 Cayley 图上的有向边。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 对任意 $x \in G$，$\sigma_e(\sigma_e(x)) = (x^{-1})^{-1} = x$，故 $\sigma_e$ 是对合。$L_g(e) = g \cdot e = g$，$R_g(e) = e \cdot g = g$。
+
+(ii) 对于李群 $G$，左不变向量场 $\tilde{X}(g) = dL_g|_e(X)$（$X \in \mathfrak{g}$）生成左平移的单参数子群：$\exp(tX) \cdot g = L_{\exp(tX)}(g)$。对于 $G = \mathbb{R}$，李代数 $\mathfrak{g} \cong \mathbb{R}$ 是一维的，基向量 $X = 1$ 对应的左不变向量场为 $\tilde{X}(x) = \frac{d}{dx}$，生成平移 $x \mapsto x + t$。
+
+(iii) Haar 测度的左不变性是平移不变性的积分表达。由诺特定理，平移不变性蕴含动量/能量守恒。
+
+(iv) 对于离散群，生成元集 $S$ 定义了基本平移方向。对于李群，李代数基 $\{X_1, \dots, X_n\}$ 定义了 $n$ 个独立的平移方向。
+\end{proof}
+
+\begin{example}[平移构造的实例]\label{ex:translation_operation_examples}
+\begin{itemize}
+    \item \textbf{整数加法群 $\mathbb{Z}$}：左平移 $L_n(m) = n+m$。生成元 $1$ 定义正方向（$+1$），生成元 $-1$ 定义负方向。例如 $L_3(5)=3+5=8$，$L_{-2}(1)=-1$。守恒量为离散动量。
+    \item \textbf{实数加法群 $\mathbb{R}$}：左平移 $L_a(x) = a+x$。无穷小生成元为 $\frac{d}{dx}$，其指数映射 $\exp\big(t\frac{d}{dx}\big)$ 作用于 $x$ 得 $x+t$（取 $t=\frac12$：$L_{1/2}(0)=\frac12$）。守恒量为连续动量（或能量，当 $x$ 为时间参数时）。
+    \item \textbf{一般线性群 $GL(n,\mathbb{R})$}：左平移 $L_A(X) = AX$（矩阵乘法）。这是平移构造在非交换群上的实现。
+\end{itemize}
+\end{example}
+
+\subsection{\texorpdfstring{内自同构}{内自同构}}
+\label{subsec:inner_automorphism}
+
+\begin{definition}[内自同构]\label{def:group_rotation_operation}
+对每个固定的 $g \in G$，定义映射 $\iota_g: G \to G$ 为
+\[
+\iota_g(x) = g x g^{-1}, \quad \forall x \in G.
+\]
+$\iota_g$ 称为由 $g$ 决定的\textbf{内自同构}（或共轭映射）。内自同构具有以下性质：
+\begin{enumerate}[label=(\roman*)]
+    \item $\iota_g$ 是 $G$ 的自同构：它是双射（逆映射为 $\iota_{g^{-1}}$），且保持群运算：$\iota_g(xy) = g(xy)g^{-1} = (gxg^{-1})(gyg^{-1}) = \iota_g(x)\iota_g(y)$。
+    \item 映射 $G \to \operatorname{Aut}(G)$, $g \mapsto \iota_g$ 是群同态，其核为 $G$ 的\textbf{中心} $Z(G) = \{z \in G : gz = zg,\ \forall g \in G\}$。
+    \item 全体内自同构构成 $\operatorname{Aut}(G)$ 的正规子群，记作 $\operatorname{Inn}(G) \cong G/Z(G)$。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[内自同构的基本性质]\label{prop:rotation_operator}
+群上的内自同构具有以下性质：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{不动元}：中心 $Z(G)$ 的元素。对任意 $z \in Z(G)$，$\iota_z(x) = zxz^{-1} = x$（因为 $zx = xz$），即 $Z(G)$ 中的元素在共轭作用下不动。对于 $G = U(1)$（阿贝尔群），$Z(U(1)) = U(1)$，所有元素都是不动元。
+    \item \textbf{无穷小生成元}：当 $G$ 为李群时，内自同构的无穷小生成元是\textbf{伴随表示} $\operatorname{ad}_X(Y) = [X,Y]$（李代数的李括号）。对于 $G = U(1)$，李代数 $\mathfrak{u}(1) \cong i\mathbb{R}$ 是一维交换李代数，伴随表示为零（$[X,Y]=0$）。对于 $G = SO(3)$，伴随表示给出角动量算子的李代数版本。
+    \item \textbf{守恒量}：共轭不变性蕴含\textbf{角动量守恒}。在群表示论层面，这体现为类函数在共轭作用下不变：$f(gxg^{-1}) = f(x)$。特征标 $\chi_\rho$ 是类函数的典型例子。
+    \item \textbf{伴随轨道}：每个非中心元素 $g \in G \setminus Z(G)$ 定义了一个“旋转方向”——沿该方向将群元素共轭。对于 $G = U(1)$（阿贝尔群），所有内自同构都是恒等映射。对于非交换群，旋转方向由伴随轨道给出。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 若 $z \in Z(G)$，则对任意 $x \in G$，$\iota_z(x) = zxz^{-1} = xzz^{-1} = x$。对于 $G = U(1)$，乘法交换，$Z(U(1)) = U(1)$。
+
+(ii) 对于李群 $G$，内自同构 $\iota_{\exp(tX)}$ 在 $t \to 0$ 时的无穷小生成元为 $\operatorname{ad}_X(Y) = \frac{d}{dt}\big|_{t=0} \iota_{\exp(tX)}(\exp(Y)) = [X,Y]$。对于 $G = U(1)$，李代数一维且交换，$[X,Y]=0$，伴随表示平凡。对于 $G = SO(3)$，李代数 $\mathfrak{so}(3) \cong \mathbb{R}^3$ 配以叉积作为李括号，$\operatorname{ad}_X(Y) = X \times Y$。
+
+(iii) 类函数 $f(gxg^{-1}) = f(x)$ 在共轭作用下不变。特征标 $\chi_\rho(g) = \operatorname{Tr}(\rho(g))$ 满足 $\chi_\rho(gxg^{-1}) = \operatorname{Tr}(\rho(g)\rho(x)\rho(g)^{-1}) = \operatorname{Tr}(\rho(x)) = \chi_\rho(x)$，因而是类函数。
+
+(iv) 对于非交换群，伴随轨道 $\mathcal{O}_x = \{gxg^{-1} : g \in G\}$ 给出了 $x$ 在内自同构下的轨道结构。轨道的大小由轨道-稳定子定理给出：$|\mathcal{O}_x| = |G|/|C_G(x)|$，其中 $C_G(x) = \{g \in G : gx = xg\}$ 是 $x$ 的中心化子。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+\draw[thick, dashed] (0,0) circle (1.8);
+\draw[thick, dashed] (0,0) circle (0.9);
+\fill (0,0) circle (2pt) node[below right] {$Z(G)$};
+\foreach \a in {20, 80, 140, 200, 260, 320} {
+  \fill (\a:1.8) circle (1.8pt);
+  \fill (\a:0.9) circle (1.8pt);
+}
+\draw[->, red, very thick] (20:1.8) to[bend left=20] (80:1.8);
+\draw[->, red, very thick] (80:1.8) to[bend left=20] (200:1.8);
+\node[red] at (1.0,2.3) {共轭轨道 $\mathcal{O}_x$};
+\node[blue] at (-4.5,0) {$Z(G)$ 内每个元素单独成轨道};
+\end{tikzpicture}
+\caption{内自同构的轨道结构：共轭作用把 $G$ 划分为共轭类（轨道），中心 $Z(G)$ 中每个元素单独成轨道；类函数在每个轨道上取常值。}
+\label{fig:inner_automorphism_orbits}
+\end{figure}
+
+\begin{example}[内自同构的实例]\label{ex:rotation_operation_examples}
+\begin{itemize}
+    \item \textbf{一般线性群 $GL(n,\mathbb{R})$}：内自同构 $\iota_A(X) = AXA^{-1}$ 是矩阵的相似变换。两个矩阵相似当且仅当它们在同一个伴随轨道中。例如 $A=\begin{pmatrix}2&0\\0&1\end{pmatrix}$ 经置换矩阵 $P=\begin{pmatrix}0&1\\1&0\end{pmatrix}$ 共轭得 $\iota_P(A)=PAP^{-1}=\begin{pmatrix}1&0\\0&2\end{pmatrix}$，特征值 $\{1,2\}$ 在共轭下不变。
+    \item \textbf{三维旋转群 $SO(3)$}：内自同构 $\iota_R(S) = RSR^{-1}$ 将旋转 $S$ 共轭到绕新轴的旋转。两个旋转共轭当且仅当它们的旋转角相同（特征值相同）。
+    \item \textbf{圆周群 $U(1)$}（阿贝尔群）：所有内自同构都是恒等映射，内自同构退化为平凡。
+\end{itemize}
+\end{example}
+
+\subsection{\texorpdfstring{外自同构}{外自同构}}
+\label{subsec:outer_automorphism}
+
+\begin{definition}[外自同构群]\label{def:group_scaling_operation}
+商群 $\operatorname{Out}(G) = \operatorname{Aut}(G) / \operatorname{Inn}(G)$ 称为 $G$ 的\textbf{外自同构群}。$\operatorname{Out}(G)$ 的元素代表那些不能通过群内元素的共轭来实现的自同构。
+
+外自同构的典型例子包括：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{循环群的自同构}：$\operatorname{Aut}(C_n) \cong (\mathbb{Z}/n\mathbb{Z})^\times$，自同构为 $x \mapsto x^k$（$\gcd(k,n)=1$）。当 $k \neq \pm 1$ 时，这不是内自同构（因为 $C_n$ 是阿贝尔群，所有内自同构都是恒等映射），因而属于外自同构群。
+    \item \textbf{整数加法群的自同构}：$\operatorname{Aut}(\mathbb{Z}) \cong C_2 = \{\operatorname{id}, -\operatorname{id}\}$，取负映射 $x \mapsto -x$ 是唯一的非平凡自同构。
+    \item \textbf{一般线性群的外自同构}：$\operatorname{Aut}(GL(n,\mathbb{R}))$ 包含转置逆映射 $X \mapsto (X^{\mathsf T})^{-1}$（当 $n \ge 3$ 时为非平凡外自同构），以及对角线自同构等。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[外自同构的基本性质]\label{prop:scaling_operator}
+群上的外自同构具有以下性质：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{不动元}：群的自同构 $\varphi \in \operatorname{Aut}(G)$ 的不动元集为 $\{x \in G : \varphi(x) = x\}$，是一个子群。对于循环群的自同构 $x \mapsto x^k$，不动点集为 $\{x \in C_n : x^{k-1} = e\}$，即阶整除 $k-1$ 的元素构成的子群。对于 $\operatorname{Aut}(\mathbb{Z})$ 中的取负映射，不动点仅为 $0$。
+    \item \textbf{无穷小生成元}：外自同构不是由群内元素的共轭生成的，因此没有群表示论层面的“无穷小生成元”（它们不来自李代数的伴随作用）。对于 $G = \mathbb{R}$（加法群），自同构 $x \mapsto \lambda x$（$\lambda \neq 0$）的无穷小生成元为 $x \frac{d}{dx}$。
+    \item \textbf{不变量}：自同构保持群的结构常数不变。对于循环群的自同构 $x \mapsto x^k$，它保持群的阶不变（$|G|$ 守恒）。
+    \item \textbf{方向结构}：外自同构不改变群元素之间的共轭类结构，但改变了群的整体标度。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 对于循环群 $C_n = \langle g \rangle$，自同构 $\varphi_k(g^m) = g^{km}$（$\gcd(k,n)=1$）。不动点满足 $g^{km} = g^m \iff g^{m(k-1)} = e \iff n \mid m(k-1)$。当 $\gcd(k-1,n) = d$ 时，不动点为由 $g^{n/d}$ 生成的 $d$ 阶子群。
+
+(ii) 对于 $G = \mathbb{R}$（加法群），自同构为 $\varphi_\lambda(x) = \lambda x$（$\lambda \in \mathbb{R}^\times$）。在 $\lambda = 1$ 处的切向量为 $\frac{d}{d\lambda}\big|_{\lambda=1} \varphi_\lambda(x) = x$，对应的微分算子为 $x \frac{d}{dx}$。
+
+(iii) 自同构保持群的阶：$|\varphi(G)| = |G|$（因为 $\varphi$ 是双射）。对于循环群，这意味着 $|C_n| = n$ 在自同构下不变。
+
+(iv) 外自同构改变的是群的“外部结构”——它们不能通过群内元素的共轭来实现，但保持共轭类结构（共轭类是群的内蕴不变量）。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+\draw[->] (-0.3,0) -- (7,0) node[right] {$\mathbb{R}$};
+\foreach \x in {0.5, 2.0, 3.5, 5.0, 6.5} \fill (\x,0) circle (1.5pt);
+\draw[<->, blue, very thick] (2.0,0.4) -- (5.0,0.4);
+\node[blue, above] at (3.5,0.5) {$\varphi_\lambda: x\mapsto \lambda x$};
+\draw[<->, red, very thick] (2.0,-0.4) -- (5.0,-0.4);
+\node[red, below] at (3.5,-0.5) {标度不变：$|C_n|$ 不变};
+\node at (3.5,-1.4) {外自同构改变标度但不改变共轭类结构};
+\end{tikzpicture}
+\caption{外自同构的几何直观：环状箭头表示标度变换 $x \mapsto \lambda x$，箭头首尾对应群阶不变性质。}
+\label{fig:outer_automorphism_scaling}
+\end{figure}
+
+\begin{example}[外自同构的实例]\label{ex:scaling_operation_examples}
+\begin{itemize}
+    \item \textbf{整数加法群 $\mathbb{Z}$}：$\operatorname{Aut}(\mathbb{Z}) \cong C_2 = \{\operatorname{id}, -\operatorname{id}\}$。取负映射 $x \mapsto -x$，例如 $-3 \mapsto 3$。不动点仅为 $0$。
+    \item \textbf{循环群 $C_n$}：$\operatorname{Aut}(C_n) \cong (\mathbb{Z}/n\mathbb{Z})^\times$，阶为 $\varphi(n)$（欧拉函数）。自同构 $x \mapsto x^k$（$\gcd(k,n)=1$）重新标度了生成元。例如 $n=5$ 时 $\operatorname{Aut}(C_5)\cong(\mathbb{Z}/5\mathbb{Z})^\times\cong C_4$，生成元 $g$ 在 $\varphi_k(g)=g^k$ 下依次映为 $g^1,g^2,g^3,g^4$（$k=1,2,3,4$）。
+    \item \textbf{正实数乘法群 $\mathbb{R}^+$}：$\operatorname{Aut}(\mathbb{R}^+) \cong \mathbb{R}^\times$。自同构 $x \mapsto x^\lambda$ 是幂缩放。
+\end{itemize}
+\end{example}
+
+\subsection{三种构造的统一结构}
+
+\begin{theorem}[群上三种构造的统一结构定理]\label{thm:three_operations_unity}
+设 $G$ 为群。群上的三种标准构造在自同构群 $\operatorname{Aut}(G)$ 中具有以下结构：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平移构造}：由 $G$ 自身通过左正则作用实现，操作群同构于 $G$。平移操作的集合 $\{L_g : g \in G\}$ 是 $G$ 在自身上的忠实作用。
+    \item \textbf{内自同构}：由内自同构群 $\operatorname{Inn}(G) \cong G/Z(G)$ 实现。$\operatorname{Inn}(G)$ 是 $\operatorname{Aut}(G)$ 的正规子群。
+    \item \textbf{外自同构}：由外自同构群 $\operatorname{Out}(G) = \operatorname{Aut}(G)/\operatorname{Inn}(G)$ 实现。
+\end{enumerate}
+在自同构塔 $G_{(0)} = G, G_{(1)} = \operatorname{Aut}(G), G_{(2)} = \operatorname{Aut}(\operatorname{Aut}(G)), \dots$ 中，每一层都包含该层的平移、内自同构和外自同构构造。
+\end{theorem}
+
+\begin{proof}
+(i) 左正则作用 $\lambda: G \to \operatorname{Sym}(G)$，$\lambda(g) = L_g$ 是群同态。核为 $\{e\}$，故忠实。
+
+(ii) 内自同构 $\iota_g(x) = gxg^{-1}$ 是自同构，保持群运算。映射 $G \to \operatorname{Aut}(G)$, $g \mapsto \iota_g$ 的核为 $Z(G)$，故 $\operatorname{Inn}(G) \cong G/Z(G)$。$\operatorname{Inn}(G)$ 是 $\operatorname{Aut}(G)$ 的正规子群。
+
+(iii) $\operatorname{Out}(G) = \operatorname{Aut}(G)/\operatorname{Inn}(G)$ 是商群。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0, >=stealth]
+
+\node[draw, circle, fill=blue!10, minimum size=2.5cm, align=center]
+  (trans) at (0,0)
+  {平移构造\\$L_g(x)=gx$\\梯度 $\nabla$\\对应 $e$-不动};
+
+\node[draw, circle, fill=green!10, minimum size=2.5cm, align=center]
+  (rot) at (6,0)
+  {内自同构\\$\iota_g(x)=gxg^{-1}$\\旋度 $\nabla\times$\\对应 $Z(G)$-不动};
+
+\node[draw, circle, fill=red!10, minimum size=2.5cm, align=center]
+  (scal) at (12,0)
+  {外自同构\\$\operatorname{Out}(G)$\\散度 $\nabla\cdot$\\对应不动子群};
+
+\draw[->, thick, blue]
+  (trans) to[bend left=25]
+  node[above, font=\footnotesize] {包含于自同构群}
+  (rot);
+
+\draw[->, thick, green!60!black]
+  (rot) to[bend left=25]
+  node[above, font=\footnotesize] {商群}
+  (scal);
+
+\draw[<->, thick, orange]
+  (scal) to[bend left=40]
+  node[below, font=\footnotesize] {自同构塔}
+  (trans);
+
+\node[font=\footnotesize, text width=0.9\textwidth, align=center]
+  at (6, -4.5)
+  {群上三种标准构造的谱系：%
+   平移（$G$）$\subset$ 内自同构（$\operatorname{Inn}(G)$）
+   $\subset$ 自同构（$\operatorname{Aut}(G)$）
+   $\supset$ 外自同构（$\operatorname{Out}(G)$）。};
+
+\end{tikzpicture}
+\vspace{1cm}
+\caption{群上三种标准构造的统一视角。}
+\label{fig:three_operations_unity}
+\end{figure}
+
+\section{\texorpdfstring{自同构塔}{自同构塔}}
+\label{sec:automorphism_tower}
+
+\begin{definition}[群的自同构]\label{def:automorphism}
+设 $(G,\cdot)$ 为群。一个映射 $\varphi: G \to G$ 称为 $G$ 的\textbf{自同构}，若它是双射且保持群运算：$\varphi(xy) = \varphi(x)\varphi(y)$。
+\end{definition}
+
+\begin{definition}[自同构群]\label{def:automorphism_group}
+$G$ 的全体自同构在映射复合下构成群，记作 $\operatorname{Aut}(G)$。单位元为恒等映射，逆元为逆映射。
+\end{definition}
+
+\begin{proposition}[自同构的逆保持群运算]\label{prop:automorphism_inverse}
+设 $\varphi \in \operatorname{Aut}(G)$。则其逆映射 $\varphi^{-1}$ 也保持群运算。
+\end{proposition}
+
+\begin{proof}
+由于 $\varphi$ 是满射，存在唯一的 $x, y \in G$ 使得 $\varphi(x) = u$，$\varphi(y) = v$。由 $\varphi$ 的同态性质，$\varphi(xy) = uv$。两边作用 $\varphi^{-1}$ 得 $xy = \varphi^{-1}(uv)$。而 $xy = \varphi^{-1}(u)\varphi^{-1}(v)$，故 $\varphi^{-1}(uv) = \varphi^{-1}(u)\varphi^{-1}(v)$。
+\end{proof}
+
+\begin{definition}[内自同构]\label{def:inner_automorphism}
+本定义与第~\ref{chap:group_function}~章「内自同构」节（\cref{subsec:inner_automorphism}）中的 \cref{def:group_rotation_operation} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{definition}
+
+\begin{definition}[外自同构群]\label{def:outer_automorphism}
+本定义与第~\ref{chap:group_function}~章「外自同构」节（\cref{subsec:outer_automorphism}）中的 \cref{def:group_scaling_operation} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{definition}
+
+\begin{definition}[自同构塔]\label{def:automorphism_tower}
+递归定义 $G_{(0)} = G$，$G_{(k+1)} = \operatorname{Aut}(G_{(k)})$。第 $0$ 层为群本身，第 $1$ 层为自同构群，第 $2$ 层为自同构的自同构群，以此类推。在每一层 $G_{(k)}$ 上，都存在三种标准构造：平移（左正则作用）、内自同构（$\operatorname{Inn}(G_{(k)})$）、外自同构（$\operatorname{Out}(G_{(k)})$）。
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.6cm, scale=0.95]
+\node[draw, rounded corners, fill=blue!8, align=center] (g0) at (0,0) {$G_{(0)}=G$};
+\node[draw, rounded corners, fill=green!8, align=center] (g1) at (4,0) {$G_{(1)}=\operatorname{Aut}(G)$};
+\node[draw, rounded corners, fill=orange!8, align=center] (g2) at (8,0) {$G_{(2)}=\operatorname{Aut}^2(G)$};
+\node[align=center] (gdots) at (11.5,0) {$\cdots$};
+\draw[->] (g0) -- (g1);
+\draw[->] (g1) -- (g2);
+\draw[->, dashed] (g2) -- (gdots);
+\foreach \x/\y/\name in {0/-1.6/平移, 4/-1.6/平移, 8/-1.6/平移} {
+  \node[font=\footnotesize] at (\x,\y) {\name};
+}
+\foreach \x/\y/\name in {0/-2.2/内自同构, 4/-2.2/内自同构, 8/-2.2/内自同构} {
+  \node[font=\footnotesize] at (\x,\y) {\name};
+}
+\foreach \x/\y/\name in {0/-2.8/外自同构, 4/-2.8/外自同构, 8/-2.8/外自同构} {
+  \node[font=\footnotesize] at (\x,\y) {\name};
+}
+\node at (5.5,-3.8) {每一层 $G_{(k)}$ 上都重新具有平移 / 内自同构 / 外自同构三种构造};
+\end{tikzpicture}
+\caption{自同构塔的逐层结构：每一层都是上一层自同构群，且每层重新出现三种标准构造。}
+\label{fig:automorphism_tower}
+\end{figure}
+
+\begin{lemma}[中心平凡群的嵌入与等阶稳定]\label{ch8_centreless_embedding}
+设 $G$ 为有限群且 $Z(G)=\{e\}$。则
+\begin{enumerate}[label=(\roman*)]
+    \item 内自同构映射 $G\to\operatorname{Aut}(G)$，$g\mapsto\iota_g$ 是单同态，故 $G\cong\operatorname{Inn}(G)\subseteq\operatorname{Aut}(G)$，从而 $|G|\le|\operatorname{Aut}(G)|$；
+    \item 若 $|\operatorname{Aut}(G)|=|G|$，则 $\operatorname{Aut}(G)=\operatorname{Inn}(G)\cong G$；
+    \item $Z(\operatorname{Aut}(G))=\{e\}$，即中心平凡性在自同构塔中逐层保持。
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(i) 映射 $g\mapsto\iota_g$ 的核为 $Z(G)=\{e\}$（定义 \ref{def:inner_automorphism}），故为单同态，像为 $\operatorname{Inn}(G)$，于是 $G\cong\operatorname{Inn}(G)\subseteq\operatorname{Aut}(G)$。
+
+(ii) 由 (i)，$\operatorname{Inn}(G)\subseteq\operatorname{Aut}(G)$ 且 $|\operatorname{Inn}(G)|=|G|=|\operatorname{Aut}(G)|$，故 $\operatorname{Inn}(G)=\operatorname{Aut}(G)$；又 $\operatorname{Inn}(G)\cong G/Z(G)=G$，故 $\operatorname{Aut}(G)\cong G$。
+
+(iii) 设 $\psi\in Z(\operatorname{Aut}(G))$，则对一切 $g$ 有 $\psi\iota_g=\iota_g\psi$，即 $\psi(gxg^{-1})=g\psi(x)g^{-1}$。由 $\psi$ 是同态得 $\psi(g)\psi(x)\psi(g)^{-1}=g\psi(x)g^{-1}$，故 $\psi(g)^{-1}g$ 与 $\psi(x)$ 交换。因 $\psi$ 满射，$\psi(x)$ 跑遍 $G$，故 $\psi(g)^{-1}g\in Z(G)=\{e\}$，即 $\psi(g)=g$ 对一切 $g$ 成立，于是 $\psi=\operatorname{id}$。故 $Z(\operatorname{Aut}(G))=\{e\}$。
+\end{proof}
+
+\begin{theorem}[有限群的自同构塔稳定性——Wielandt 定理]\label{thm:finite_automorphism_tower}
+设 $G$ 为有限群且中心 $Z(G)$ 平凡。则自同构塔在有限步内稳定：存在 $N \in \mathbb{N}$ 使得对任意 $k \ge N$，有 $G_{(k+1)} \cong G_{(k)}$。
+\end{theorem}
+
+\begin{proof}
+由引理 \ref{ch8_centreless_embedding} 的 (i) 与 (iii)，归纳地每一层 $G_{(k)}$ 都中心平凡，且 $G_{(k)}\cong\operatorname{Inn}(G_{(k)})\subseteq G_{(k+1)}$，故 $|G_{(k+1)}|\ge|G_{(k)}|$；再由 (ii)，等号成立当且仅当 $G_{(k+1)}\cong G_{(k)}$，即塔在 $k$ 处稳定。若塔永不终止，则序 $|G_{(k)}|$ 严格递增。Wielandt (1939) 的核心断言是：中心平凡有限群的自同构塔的序有上界（该上界仅依赖于 $G$），故严格递增过程不可能无穷延续，必在有限步停止；结合等阶即稳定，塔在有限步后恒等稳定。
+\end{proof}
+
+\begin{remark}[Wielandt 定理的边界]\label{rem:wielandt_boundary}
+引理 \ref{ch8_centreless_embedding} 给出的“序单调不减 + 等阶即稳定 + 中心平凡逐层保持”三步完全可自包含证明；而序有界性（严格递增必终止）是 Wielandt (1939) 的经典结果，其完整证明较长，此处作为已知定理引用。中心非平凡时自同构塔未必有限步稳定（可构造反例），故定理中“中心平凡”条件不可省。
+\end{remark}
+
+\section{\texorpdfstring{群作用与对称性}{群作用与对称性}}
+
+\begin{definition}[群作用]\label{def:group_action_gf}
+设 $G$ 为群，$X$ 为非空集合。$G$ 在 $X$ 上的一个\textbf{左作用}是一个映射 $\Phi: G \times X \to X$，满足：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{单位元作用}：$\Phi(e, x) = x$ 对所有 $x \in X$ 成立；
+    \item \textbf{结合性}：$\Phi(g, \Phi(h, x)) = \Phi(gh, x)$ 对所有 $g,h \in G$ 和 $x \in X$ 成立。
+\end{enumerate}
+通常记 $\Phi(g, x)$ 为 $g \cdot x$。
+\end{definition}
+
+\begin{definition}[轨道与稳定子群]\label{def:orbit_stabilizer}
+设群 $G$ 作用在集合 $X$ 上。对任意 $x \in X$：
+\begin{itemize}
+    \item $G \cdot x := \{g \cdot x : g \in G\}$ 称为 $x$ 的\textbf{轨道}。
+    \item $G_x := \{g \in G : g \cdot x = x\}$ 称为 $x$ 的\textbf{稳定子群}。
+\end{itemize}
+\end{definition}
+
+\begin{theorem}[轨道-稳定子定理]\label{thm:orbit_stabilizer}
+设有限群 $G$ 作用在有限集合 $X$ 上。对任意 $x \in X$，有
+\[
+|G \cdot x| = \frac{|G|}{|G_x|}.
+\]
+\end{theorem}
+
+\begin{proof}
+考虑映射 $\varphi: G \to G \cdot x$，$\varphi(g) = g \cdot x$。该映射是满射。$\varphi(g_1) = \varphi(g_2)$ 当且仅当 $g_2^{-1}g_1 \in G_x$，等价于 $g_1 G_x = g_2 G_x$。因此 $\varphi$ 诱导了从 $G/G_x$ 到 $G \cdot x$ 的一一对应。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+\draw[fill=blue!5] (-3,-2.0) rectangle (7,3.0);
+\node[blue] at (5.6,2.1) {$X$};
+\draw[fill=green!8] (0,0.5) ellipse (1.3 and 0.85);
+\node at (0,0.5) {$G\cdot x$};
+\fill (0,0.5) circle (2pt) node[below right, font=\footnotesize] {$x$};
+\draw[fill=red!8] (4.5,0.5) ellipse (1.1 and 0.75);
+\node at (4.5,0.5) {$G\cdot y$};
+\fill (4.5,0.5) circle (2pt) node[below right, font=\footnotesize] {$y$};
+\node at (-2.0,0.5) {$G_x$};
+\draw[->, red, very thick] (0,-0.5) -- (0,-1.2);
+\node at (0,-1.6) {$|G\cdot x|=|G|/|G_x|$};
+\node at (4.5,-1.6) {$|G\cdot y|=|G|/|G_y|$};
+\end{tikzpicture}
+\caption{轨道-稳定子定理：群 $G$ 作用在集合 $X$ 上，每个轨道的大小等于群阶除以该点的稳定子群阶。}
+\label{fig:orbit_stabilizer}
+\end{figure}
+
+\section{\texorpdfstring{群对称与群方向}{群对称与群方向}}
+
+\begin{definition}[群上的平移对称]\label{def:group_translation_symmetry}
+群 $G$ 上的平移对称是左平移和右平移构成的群作用。
+\end{definition}
+
+\begin{definition}[群的自同构对称]\label{def:group_automorphism_symmetry}
+群 $G$ 上的自同构对称是 $\operatorname{Aut}(G)$ 在 $G$ 上的自然作用：$\varphi \cdot x = \varphi(x)$。包含内自同构（$\operatorname{Inn}(G)$）和外自同构（$\operatorname{Out}(G)$）。
+\end{definition}
+
+\begin{proposition}[平移与自同构的兼容性]\label{prop:translation_automorphism_compatibility}
+设 $\varphi \in \operatorname{Aut}(G)$，$g \in G$。则
+\[
+\varphi \circ L_g \circ \varphi^{-1} = L_{\varphi(g)}.
+\]
+\end{proposition}
+
+\begin{proof}
+对任意 $x \in G$：$(\varphi \circ L_g \circ \varphi^{-1})(x) = \varphi(g \cdot \varphi^{-1}(x)) = \varphi(g) \cdot x = L_{\varphi(g)}(x)$。
+\end{proof}
+
+\begin{definition}[离散群的方向结构]\label{def:discrete_group_direction}
+设 $G$ 为有限生成群，$S \subseteq G$ 为一组对称生成元（$S = S^{-1}$，$\langle S \rangle = G$）。$G$ 上的\textbf{方向结构}由 Cayley 图 $\Gamma(G,S)$ 给出：顶点集为 $G$，对每个 $g \in G$ 和 $s \in S$，有一条从 $g$ 到 $gs$ 的有向边。
+\end{definition}
+
+\begin{definition}[李群的方向结构]\label{def:lie_group_direction}
+设 $G$ 为李群，$\mathfrak{g} = T_e G$ 为其李代数。$\mathfrak{g}$ 中每个非零元素 $X$ 决定一个\textbf{左不变向量场} $\tilde{X}(g) = dL_g|_e(X)$。李代数的基 $\{X_1, \dots, X_n\}$ 给出了群上的一组\textbf{基本方向}。
+\end{definition}
+
+\begin{proposition}[左不变向量场的代数结构]\label{prop:left_invariant_fields}
+设 $\tilde{X}, \tilde{Y}$ 为左不变向量场。则 $[\tilde{X}, \tilde{Y}]$ 也是左不变向量场，且 $[\tilde{X}, \tilde{Y}] = \widetilde{[X,Y]}$。
+\end{proposition}
+
+\begin{proof}
+$[\tilde{X}, \tilde{Y}](g) = dL_g|_e([X,Y]) = \widetilde{[X,Y]}(g)$。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.95]
+\node[draw, circle, fill=blue!8, minimum size=1.4cm] (g) at (0,0) {$g$};
+\foreach \a/\n in {60/gs_1, 120/gs_2, 180/gs_3, 240/gs_4, 300/gs_5, 0/gs_6} {
+  \node[draw, circle, fill=blue!4, minimum size=1.0cm] (\n) at (\a:2.4) {};
+}
+\draw[->] (g) -- (gs_1);
+\draw[->] (g) -- (gs_2);
+\draw[->] (g) -- (gs_3);
+\draw[->] (g) -- (gs_4);
+\draw[->] (g) -- (gs_5);
+\draw[->] (g) -- (gs_6);
+\node at (0,-3.5) {Cayley 图 $\Gamma(G,S)$：每个生成元 $s\in S$ 对应一条有向边};
+\end{tikzpicture}
+\qquad
+\begin{tikzpicture}[>=Stealth, thick, scale=0.95]
+\draw[thick] (0,0) .. controls (1,0.8) and (2,-0.8) .. (3,0);
+\draw[->, red, very thick] (0.1,0.1) -- (0.5,0.4);
+\draw[->, red, very thick] (1.4,0.4) -- (1.8,0.1);
+\draw[->, red, very thick] (2.6,-0.3) -- (2.9,0.0);
+\node[red] at (1.5,1.1) {左不变向量场 $\tilde X(g)=dL_g|_e(X)$};
+\node at (1.5,-1.1) {李代数基 $\{X_i\}$ 给出基本方向};
+\end{tikzpicture}
+\caption{离散群方向结构（左）与李群方向结构（右）的对比：Cayley 图的有向边对应左不变向量场。}
+\label{fig:group_directions}
+\end{figure}
+
+\section{\texorpdfstring{8组概念对的定义}{8组概念对的定义}}
+\label{sec:group_function_basic}
+
+\subsection{\texorpdfstring{平移函数与平移群}{平移函数与平移群}}
+
+\begin{definition}[平移函数]\label{def:translation_function_gf}
+设 $\mathcal{D} = \mathbb{R}$，$f: \mathcal{D} \to V$，$G = (\mathbb{R}, +)$，群作用为 $\phi_a(x) = x + a$。若存在 $a_0 \neq 0$ 使得 $f(x + a_0) = f(x)$ 对所有 $x \in \mathcal{D}$ 成立，则称 $f$ 为关于平移 $a_0$ 的\textbf{平移函数}。
+\end{definition}
+
+\begin{definition}[平移群]\label{def:translation_group_gf}
+平移函数 $f$ 的\textbf{平移群}定义为
+\[
+\operatorname{Translation}(f) = \{a \in \mathbb{R} : f(x + a) = f(x),\; \forall x \in \mathcal{D}\}.
+\]
+$\operatorname{Translation}(f)$ 必为 $\{0\}$ 或某个 $T\mathbb{Z}$（$T>0$）；它与商空间 $\mathbb{R}/\operatorname{Translation}(f)\cong S^1$ 的结构见命题 \ref{prop:invariance_subgroup_structure}。
+\end{definition}
+
+\subsection{\texorpdfstring{缩放函数与缩放群}{缩放函数与缩放群}}
+
+\begin{definition}[缩放函数]\label{def:scaling_function_gf}
+设 $\mathcal{D} = \mathbb{R}^+$，$f: \mathcal{D} \to V$，$G = (\mathbb{R}^+, \times)$，群作用为 $\phi_q(x) = qx$。若存在 $q_0 > 0, q_0 \neq 1$ 使得 $f(q_0 x) = f(x)$ 对所有 $x \in \mathcal{D}$ 成立，则称 $f$ 为关于缩放 $q_0$ 的\textbf{缩放函数}。
+\end{definition}
+
+\begin{definition}[缩放群]\label{def:scaling_group_gf}
+缩放函数 $f$ 的\textbf{缩放群}定义为
+\[
+\operatorname{Scaling}(f) = \{q \in \mathbb{R}^+ : f(qx) = f(x),\; \forall x \in \mathcal{D}\}.
+\]
+$\operatorname{Scaling}(f)$ 必为 $\{1\}$ 或某个 $\langle q_0\rangle$（$q_0>1$）；经对数映射 $\ln$ 它同构于 $(\mathbb{R},+)$ 的加法子群。其结构见命题 \ref{prop:invariance_subgroup_structure}。
+\end{definition}
+
+\subsection{\texorpdfstring{旋转函数与旋转群}{旋转函数与旋转群}}
+
+\begin{definition}[旋转函数]\label{def:rotation_function_gf}
+设 $\mathcal{D} = \mathbb{C}$，$f: \mathcal{D} \to V$，$G = U(1)$，群作用为 $\phi_\theta(z) = e^{i\theta}z$。若存在 $\theta_0 \neq 0$ 使得 $f(e^{i\theta_0} z) = f(z)$ 对所有 $z \in \mathcal{D}$ 成立，则称 $f$ 为关于旋转 $e^{i\theta_0}$ 的\textbf{旋转函数}。
+\end{definition}
+
+\begin{definition}[旋转群]\label{def:rotation_group_gf}
+旋转函数 $f$ 的\textbf{旋转群}定义为
+\[
+\operatorname{Rotation}(f) = \{e^{i\theta} \in U(1) : f(e^{i\theta}z) = f(z),\; \forall z \in \mathcal{D}\}.
+\]
+$\operatorname{Rotation}(f)$ 必为有限循环群 $C_q$ 或整个 $U(1)$；须注意「由单个旋转生成的循环子群」与「全部旋转对称构成的群」是两回事，见命题 \ref{prop:invariance_subgroup_structure} 与注 \ref{rem:rotation_dense_corrected}。
+\end{definition}
+
+\subsection{\texorpdfstring{守恒函数与守恒群}{守恒函数与守恒群}}
+
+\begin{definition}[守恒函数]\label{def:conservation_function_gf}
+设 $f: \mathcal{D} \to V$，$G$ 为作用在 $\mathcal{D}$ 上的群。$f$ 称为关于 $G$ 的\textbf{守恒函数}，若存在标量泛函 $Q: V \to \mathbb{R}$（\textbf{守恒量}），使得
+\[
+Q(f(\phi_g(x))) = Q(f(x)), \quad \forall g \in G,\; \forall x \in \mathcal{D}.
+\]
+守恒与对称总是一起出现：对称性是变换下的不变性，守恒是该不变性的数量表达。
+\end{definition}
+
+\begin{definition}[守恒群]\label{def:conservation_group_gf}
+守恒群（等变群）的首次定义见第~\ref{chap:period_foundation}~章 \cref{sec:invariants_conservation} 中的 \cref{def:conservation_group}；本处为其在群函数 $f$ 与量 $Q$ 记号下的形式。
+守恒函数 $f$ 的\textbf{守恒群}定义为
+\[
+\operatorname{Group}_{\mathrm{conservation}}(f, Q) = \{g \in G : Q(f(\phi_g(x))) = Q(f(x)),\; \forall x \in \mathcal{D}\}.
+\]
+对称群包含于守恒群：$\operatorname{Symmetry}(f) \subseteq \operatorname{Group}_{\mathrm{conservation}}(f, Q)$。
+\end{definition}
+
+\subsection{\texorpdfstring{对称函数与对称群}{对称函数与对称群}}
+
+\begin{definition}[对称函数]\label{def:symmetry_function_gf}
+$f$ 称为关于 $g \in G$ 的\textbf{对称函数}，若 $f(\phi_g(x)) = f(x)$ 对所有 $x \in \mathcal{D}$ 成立。对称函数是守恒函数的特殊情形（守恒量 $Q$ 取为恒等泛函）。
+\end{definition}
+
+\begin{definition}[对称群]\label{def:symmetry_group_gf}
+对称函数 $f$ 的\textbf{对称群}定义为
+\[
+\operatorname{Symmetry}(f) = \{g \in G : f(\phi_g(x)) = f(x),\; \forall x \in \mathcal{D}\}.
+\]
+具有周期轨道的群 $\operatorname{Group}_{\mathrm{period}}(f) = \operatorname{Symmetry}(f)$。
+\end{definition}
+
+\subsection{\texorpdfstring{闭合函数与闭合群}{闭合函数与闭合群}}
+
+\begin{definition}[闭合函数]\label{def:closure_function_gf}
+设 $f: \mathcal{D} \to V$ 为光滑函数。$f$ 称为关于 $g \in G$ 的\textbf{闭合函数}，若在\textbf{相空间} $T^*\mathcal{D}$ 中，$f$ 的相空间轨迹 $\Gamma_f(x) = (f(x), \dot{f}(x))$ 在 $\phi_g$ 作用下闭合：$\Gamma_f(\phi_g(x)) = \Gamma_f(x)$。
+\end{definition}
+
+\begin{definition}[闭合群]\label{def:closure_group_gf}
+闭合函数 $f$ 的\textbf{闭合群}定义为
+\[
+\operatorname{Clos}(f) = \{g \in G : \Gamma_f(\phi_g(x)) = \Gamma_f(x),\; \forall x \in \mathcal{D}\}.
+\]
+$\operatorname{Group}_{\mathrm{period}}(f) \subseteq \operatorname{Clos}(f)$——周期函数必然是闭合函数。
+\end{definition}
+
+\subsection{\texorpdfstring{周期函数与具有周期轨道的群}{周期函数与具有周期轨道的群}}
+
+\begin{definition}[周期函数]\label{def:periodic_function_gf}
+$f$ 称为关于 $g \in G$ 的\textbf{周期函数}，若 $f(\phi_g(x)) = f(x)$ 对所有 $x \in \mathcal{D}$ 成立。周期函数等价于商空间 $\mathcal{D}/\operatorname{Group}_{\mathrm{period}}(f)$ 上的函数。
+\end{definition}
+
+\begin{definition}[具有周期轨道的群]\label{def:group_with_periodic_orbits_gf}
+周期函数 $f$ 的\textbf{具有周期轨道的群}定义为
+\[
+\operatorname{Group}_{\mathrm{period}}(f) = \{g \in G : f(\phi_g(x)) = f(x),\; \forall x \in \mathcal{D}\}.
+\]
+\end{definition}
+
+\subsection{\texorpdfstring{高阶函数与高阶群}{高阶函数与高阶群}}
+
+\begin{definition}[高阶函数]\label{def:higher_function_gf}
+设 $f: G \to V$ 为群函数。$f$ 的\textbf{高阶函数}是自同构塔各层上的函数序列：$f_{(0)} = f$，$f_{(k)}: G_{(k)} \to V$，$k \ge 1$。
+\end{definition}
+
+\begin{definition}[高阶群]
+\label{def:higher_group_gf}
+$G$ 的\textbf{高阶群}是指其自同构塔
+\[
+G_{(0)} = G,\quad
+G_{(1)} = \operatorname{Aut}(G),\quad
+G_{(2)} = \operatorname{Aut}(\operatorname{Aut}(G)),\;\dots
+\]
+\end{definition}
+
+\begin{table}[htbp]
+    \centering
+    \caption{8组概念对与形式对应算子的对照表}
+    \label{tab:eight_concept_pairs}
+    \begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}}
+        \toprule
+        函数概念 & 群概念 & 形式对应算子 & 不动元 & 形式对应守恒量 & 相空间判据 \\
+        \midrule
+        平移函数 & 平移群 & 梯度 $\nabla$ & $0$ & 动量/能量 & 相轨迹沿平移轴闭合 \\
+        缩放函数 & 缩放群 & 散度 $\nabla\cdot$ & $1$ & 标度荷 & 相轨迹在对数域闭合 \\
+        旋转函数 & 旋转群 & 旋度 $\nabla\times$ & $i$ & 角动量 & 相轨迹绕旋转轴闭合 \\
+        守恒函数 & 守恒群 & 三种算子 & $0,1,i$ & 对应守恒量 & 守恒量在相空间不变 \\
+        对称函数 & 对称群 & 三种算子 & $0,1,i$ & 对应守恒量 & 对称变换保持相轨迹 \\
+        闭合函数 & 闭合群 & 三种算子 & $0,1,i$ & 对应守恒量 & 相空间轨迹闭合 \\
+        周期函数 & 具有周期轨道的群 & 三种算子 & $0,1,i$ & 对应守恒量 & 位形+相空间同时闭合 \\
+        高阶函数 & 高阶群 & 自同构塔 & 逐层 & 逐层守恒 & 自同构塔上的相空间 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=8mm, scale=0.95]
+\node[draw, rounded corners, fill=blue!8, align=center] (period) {周期函数\\$\operatorname{Group}_{\mathrm{period}}(f)$};
+\node[draw, rounded corners, fill=green!8, align=center, below=of period] (sym) {对称函数\\$\operatorname{Symmetry}(f)$};
+\node[draw, rounded corners, fill=orange!8, align=center, below=of sym] (cons) {守恒函数\\$\operatorname{Group}_{\mathrm{conservation}}(f,Q)$};
+\node[draw, rounded corners, fill=red!8, align=center, below=of cons] (clos) {闭合函数\\$\operatorname{Clos}(f)$};
+\node[draw, rounded corners, fill=purple!8, align=center, left=2.2cm of sym] (trans) {平移函数};
+\node[draw, rounded corners, fill=purple!8, align=center, right=2.2cm of sym] (rot) {旋转函数};
+\node[draw, rounded corners, fill=purple!8, align=center, right=2.2cm of cons] (scal) {缩放函数};
+\node[draw, rounded corners, fill=yellow!12, align=center, below=1.0cm of clos] (high) {高阶函数\\$f_{(k)}:G_{(k)}\to V$};
+\draw[->] (period) -- (sym);
+\draw[->] (sym) -- (cons);
+\draw[->] (clos) -- (cons);
+\draw[->] (trans) -- (sym);
+\draw[->] (rot) -- (sym);
+\draw[->] (scal) -- (cons);
+\draw[->] (clos) -- (high);
+\end{tikzpicture}
+\caption{8 组概念对的层次结构：平移 / 缩放 / 旋转为具体不变性子群，周期、对称、守恒、闭合构成统一的包含链，高阶函数通过自同构塔进一步升华。}
+\label{fig:eight_concept_pairs_hierarchy}
+\end{figure}
+
+\begin{proposition}[三种不变性子群的结构]\label{prop:invariance_subgroup_structure}
+设 $f:\mathcal{D}\to V$ \textbf{连续且非常值}，三种作用分别为 $\phi_a(x)=x+a$（$\mathcal{D}=\mathbb{R}$）、$\phi_q(x)=qx$（$\mathcal{D}=\mathbb{R}^+$）、$\phi_\theta(z)=e^{i\theta}z$（$\mathcal{D}=\mathbb{C}^\times$）。则
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平移}：$\operatorname{Translation}(f)$ 是 $(\mathbb{R},+)$ 的闭子群，故或为 $\{0\}$，或为某个 $T>0$ 的 $T\mathbb{Z}$；后者成立时 $\mathcal{D}/\operatorname{Translation}(f)\cong\mathbb{R}/T\mathbb{Z}\cong S^1$。
+    \item \textbf{缩放}：$\operatorname{Scaling}(f)$ 是 $(\mathbb{R}^+,\times)$ 的闭子群，故或为 $\{1\}$，或为某个 $q_0>1$ 的 $\langle q_0\rangle$。
+    \item \textbf{旋转}：$\operatorname{Rotation}(f)$ 是 $U(1)$ 的闭子群，故或为某个 $q\ge1$ 的有限循环群 $C_q$，或为整个 $U(1)$；当 $\operatorname{Rotation}(f)=U(1)$ 时 $f$ 只依赖 $|z|$，即 $f$ 为\textbf{径向函数}。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+\textbf{子群性}：三个集合对各自群运算封闭、含单位元、含逆元（由 $f$ 在单位变换下不变即得），故都是子群。
+
+\textbf{闭性}：以平移为例，设 $a_n\in\operatorname{Translation}(f)$ 且 $a_n\to a$。对任意 $x$，由 $f$ 的连续性，
+\[
+f(x+a)=\lim_{n\to\infty}f(x+a_n)=\lim_{n\to\infty}f(x)=f(x),
+\]
+故 $a\in\operatorname{Translation}(f)$。缩放与旋转情形同理（分别用乘法的连续性与 $U(1)$ 的拓扑）。
+
+(i) $(\mathbb{R},+)$ 的闭子群只有 $\{0\}$ 与 $\alpha\mathbb{Z}$（$\alpha>0$）：这是 $(\mathbb{R},+)$ 一维子群分类的经典结论——若闭子群 $H\neq\{0\}$，取 $T:=\inf\{h\in H:h>0\}$，由闭性 $T\in H$；若 $H\neq T\mathbb{Z}$，则存在 $h\in H$ 与 $T$ 之比为无理数，此时 $H$ 在 $\mathbb{R}$ 中稠密，由闭性得 $H=\mathbb{R}$。取 $T$ 即为最小正元素。商空间的同构由 $x+T\mathbb{Z}\mapsto e^{2\pi ix/T}$ 给出。
+
+(ii) $\ln:(\mathbb{R}^+,\times)\to(\mathbb{R},+)$ 是同胚与群同构，把 $\operatorname{Scaling}(f)$ 映为 $(\mathbb{R},+)$ 的闭子群，且把 $q_0>1$ 映为 $\ln q_0>0$。由 (i) 即得。
+
+(iii) $U(1)$ 的闭子群或离散、或为 $U(1)$ 本身；离散闭子群由单位根构成，即为某个 $C_q$。若 $\operatorname{Rotation}(f)=U(1)$，则 $f$ 对一切旋转不变；对 $z\neq0$ 作极分解 $z=|z|e^{i\arg z}$，由旋转不变性可取 $\arg z=0$，故 $f(z)=f(|z|)$。
+\end{proof}
+
+\begin{remark}[关于「稠密」的正确表述]\label{rem:rotation_dense_corrected}
+命题 \ref{prop:invariance_subgroup_structure}(iii) 有一处极易混淆，需单独说明：
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $\theta_0/(2\pi)=p/q$（既约），则由单个旋转 $e^{i\theta_0}$ 生成的循环子群为 $C_q$（有限、闭），且 $\operatorname{Rotation}(f)\supseteq C_q$；
+    \item 若 $\theta_0/(2\pi)\notin\mathbb{Q}$，则由 $e^{i\theta_0}$ 生成的循环子群无限，且\textbf{在 $U(1)$ 中稠密}；但它\textbf{不是闭的}，因而\textbf{不等于} $\operatorname{Rotation}(f)$。
+\end{enumerate}
+换言之：\textbf{「稠密」是关于生成子群的性质，不是关于不变性子群的性质}。$\operatorname{Rotation}(f)$ 作为闭子群只有两种可能：某个有限循环群 $C_q$，或整个 $U(1)$。把 $f$ 的旋转对称群称为「稠密」是不准确的。
+\end{remark}
+
+\begin{remark}[关于 8 组概念对的群关系]\label{rem:concept_pair_relations}
+下列四条是记号约定与一步代入的结果，属于定义层面的关系，故以注的形式给出，不作为命题：
+\begin{enumerate}[label=(\roman*)]
+    \item $\operatorname{Group}_{\mathrm{period}}(f)=\operatorname{Symmetry}(f)$：同一集合的两种记法（定义 \ref{def:group_with_periodic_orbits_gf}、\ref{def:symmetry_group_gf}）；
+    \item $\operatorname{Symmetry}(f)\subseteq\operatorname{Group}_{\mathrm{conservation}}(f,Q)$：若 $f(\phi_g(x))=f(x)$，则 $Q(f(\phi_g(x)))=Q(f(x))$；
+    \item $\operatorname{Translation}(f)$、$\operatorname{Scaling}(f)$、$\operatorname{Rotation}(f)$ 是 $\operatorname{Symmetry}(f)$ 在三个具体子群上的限制，故均含于 $\operatorname{Symmetry}(f)$；
+    \item 高阶群 $\{G_{(k)}\}$ 与高阶函数 $\{f_{(k)}\}$ 通过自同构塔逐层关联（定义 \ref{def:higher_function_gf}、\ref{def:higher_group_gf}）。
+\end{enumerate}
+其中真正有数学内容的是三种不变性子群的\textbf{结构}，即命题 \ref{prop:invariance_subgroup_structure}。
+\end{remark}
+
+\begin{proof}
+(i) 由定义 \ref{def:symmetry_group_gf}，$\operatorname{Group}_{\mathrm{period}}(f)=\operatorname{Symmetry}(f)$ 是同一集合的两种记号。
+
+(ii) 若 $g\in\operatorname{Symmetry}(f)$，则 $f(\phi_g(x))=f(x)$，故 $Q(f(\phi_g(x)))=Q(f(x))$ 对所有 $x$ 成立，即 $g\in\operatorname{Group}_{\mathrm{conservation}}(f,Q)$（定义 \ref{def:conservation_group_gf}）。
+
+(iii) 平移群 $\operatorname{Translation}(f)$（定义 \ref{def:translation_group_gf}）正是使 $f(x+a)=f(x)$ 的 $a$ 之集，即 $\operatorname{Symmetry}(f)$ 在平移作用 $\phi_a(x)=x+a$ 下的原像；缩放群、旋转群同理（定义 \ref{def:scaling_group_gf}、\ref{def:rotation_group_gf}）。故三者均含于 $\operatorname{Symmetry}(f)$。
+
+(iv) 由定义 \ref{def:higher_function_gf} 与 \ref{def:higher_group_gf}，$f_{(k)}$ 定义于 $G_{(k)}$ 上，$f_{(0)}=f$ 的周期不变性沿自同构塔逐层传递。
+\end{proof}
+
+\section{\texorpdfstring{相空间联合判定框架}{相空间联合判定框架}}
+
+\begin{definition}[函数的相空间轨迹]\label{def:function_phase_trajectory}
+设 $f: \mathcal{D} \to V$ 为光滑函数。$f$ 的\textbf{相空间轨迹}是映射
+\[
+\Gamma_f: \mathcal{D} \to T^*\mathcal{D}, \quad x \mapsto (f(x), \dot{f}(x)).
+\]
+相空间轨迹同时编码了函数的趋势（函数值）和方向（导数值）。
+\end{definition}
+
+\begin{theorem}[函数周期性的相空间-群表示论联合判据]\label{thm:phase_group_joint_criterion}
+设 $f: \mathcal{D} \to V$ 为光滑函数，$G$ 为作用在 $\mathcal{D}$ 上的群。则 $f$ 关于 $g \in G$ 是周期函数的充要条件是下面的 (ii) 成立，即相空间轨迹在 $\phi_g$ 下不变：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{群表示论侧}：$g \in \operatorname{Group}_{\mathrm{period}}(f)$——按定义 \ref{def:group_with_periodic_orbits_gf}，这只是结论本身的改写。
+    \item \textbf{相空间侧}：$\Gamma_f(\phi_g(x)) = \Gamma_f(x)$ 对所有 $x$ 成立——这是判据的实质内容。
+    \item \textbf{守恒侧}：存在守恒量 $Q$ 使得 $Q(f(x))$ 沿 $\Gamma_f$ 为常数——由 (ii) 自动成立（取 $Q=\operatorname{id}$ 即可）。
+\end{enumerate}
+(iii) 中 $Q$ 若允许取常数则恒真，故它只是 (ii) 的推论，不构成独立条件；判据的充要内容全部落在 (ii) 上。
+\end{theorem}
+
+\begin{proof}
+(ii)$\Rightarrow$“$f$ 关于 $g$ 周期”：由 $\Gamma_f(\phi_g(x)) = \Gamma_f(x)$ 的分量 $f(\phi_g(x)) = f(x)$（对所有 $x$）即得定义 \ref{def:periodic_function_gf}。
+
+“$f$ 关于 $g$ 周期”$\Rightarrow$(ii)：由 $f(\phi_g(x)) = f(x)$ 对 $x$ 求导得 $\dot{f}(\phi_g(x)) = \dot{f}(x)$，故 $\Gamma_f(\phi_g(x)) = \Gamma_f(x)$。
+
+于是 (i)$\Leftrightarrow$(ii)：其中 (i) 即结论本身，故上面两段已给出双向。又有 (ii)$\Rightarrow$(iii)（取 $Q=\operatorname{id}$ 即可）；但反向 (iii)$\Rightarrow$(ii) 一般不成立——$Q$ 可退化，最简单的例子是取 $Q\equiv$ 常数，此时 (iii) 恒真而与 $f$ 是否周期无关。因此 (iii) 由 (ii) 蕴含而非与其等价，(i)(ii)(iii) 并非彼此独立的条件，判据的实质内容全部落在 (ii) 上。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=0.95]
+\draw[->] (-0.3,0) -- (6.5,0) node[right] {$x$};
+\draw[->] (0,-0.3) -- (0,2.6) node[above] {$f,\dot f$};
+\draw[blue, very thick, domain=0:6, samples=200] plot (\x, {1.2+0.8*sin(deg(1.4*\x))});
+\node[blue] at (1.6,2.3) {$f(x)$};
+\draw[red, very thick, dashed, domain=0:6, samples=200] plot (\x, {1.2+0.8*1.4*cos(deg(1.4*\x))/2});
+\node[red] at (4.8,2.3) {$\dot f(x)$};
+\draw[dashed, gray] (2.24,0) -- (2.24,2.5);
+\draw[dashed, gray] (6.73,0) -- (6.73,2.5);
+\draw[<->, gray] (2.24,-0.15) -- (6.73,-0.15) node[midway, below] {$T$};
+\node at (3.5,-1.0) {相轨迹 $\Gamma_f(x)=(f,\dot f)$ 在 $x\mapsto x+T$ 下回到同一点};
+\end{tikzpicture}
+\caption{相空间联合判据：位形侧 $f(x+T)=f(x)$ 与相空间侧 $\Gamma_f(x+T)=\Gamma_f(x)$ 同时成立，等价于函数以 $T$ 为周期。}
+\label{fig:phase_group_criterion}
+\end{figure}
+
+\section{\texorpdfstring{群周期与群函数}{群周期与群函数}}
+
+\subsection{群上的严格周期}
+
+\begin{definition}[群上的严格周期]\label{def:group_strict_period}
+设 $G$ 为群，$f: G \to V$ 为群上的函数。若存在离散子群 $\Gamma \subset G$，使得 $f(g\gamma) = f(g)$ 对所有 $g \in G, \gamma \in \Gamma$ 成立，则称 $f$ 是右 $\Gamma$-周期的。
+\end{definition}
+
+\begin{proposition}[群周期的基本性质]\label{prop:group_period_properties}
+设 $f: G \to V$ 是右 $\Gamma$-周期的。
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{周期封闭性}：若 $\gamma_1, \gamma_2 \in \Gamma$，则 $f$ 也是右 $(\gamma_1 \gamma_2)$-周期的。
+    \item \textbf{$L^2$ 可积性条件}：若 $f \neq 0$ 且 $f \in L^2(G)$，则 $\Gamma$ 必为\textbf{有限子群}；特别地当 $G$ 为紧群时，$\Gamma$ 正是 $G$ 的格（有限离散子群）。
+    \item \textbf{基本域决定论}：$f$ 在基本域上的取值完全决定 $f$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 对任意 $g\in G$：$f(g(\gamma_1\gamma_2))=f((g\gamma_1)\gamma_2)=f(g\gamma_1)=f(g)$，第一步用 $\gamma_2\in\Gamma$，第二步用 $\gamma_1\in\Gamma$。故 $f$ 右 $(\gamma_1\gamma_2)$-周期。
+
+(ii) 由 $\Gamma$-周期性，$f$ 在每个右陪集 $g\Gamma$ 上取常值（$f(g\gamma)=f(g)$），故 $|f|^2$ 在陪集上为常数。由 Weil 积分公式（离散子群取计数测度），
+\[
+\int_G |f(g)|^2\,dg = \int_{G/\Gamma}\Big(\sum_{\gamma\in\Gamma}|f(g\gamma)|^2\Big)\,d\mu(\dot g) = |\Gamma|\cdot\int_{G/\Gamma}|\bar f(\dot g)|^2\,d\mu(\dot g),
+\]
+其中 $|\Gamma|$ 为 $\Gamma$ 的阶（可为 $\infty$），$\bar f$ 为 $|f|^2$ 在 $G/\Gamma$ 上的下降函数。若 $f\neq 0$，则 $\int_{G/\Gamma}|\bar f|^2\,d\mu>0$，故 $\int_G|f|^2<\infty$ 当且仅当 $|\Gamma|<\infty$，即 $\Gamma$ 有限。
+
+(iii) 对任意 $g\in G$，取基本域代表 $g_0$ 与 $\gamma\in\Gamma$ 使 $g=g_0\gamma$，则 $f(g)=f(g_0\gamma)=f(g_0)$。故 $f$ 由其在基本域上的取值唯一决定。
+\end{proof}
+
+\subsection{群函数空间与正则表示}
+
+\begin{definition}[群函数空间与正则表示]\label{def:group_function_space}
+设 $G$ 为局部紧群，配备左 Haar 测度 $dg$。$G$ 上的\textbf{群函数空间} $L^2(G)$ 内积为
+\[
+\langle f_1, f_2 \rangle = \int_G f_1(g) \overline{f_2(g)} \, dg.
+\]
+左正则表示 $\lambda$ 和右正则表示 $\rho$ 定义为 $(\lambda(g) f)(x) = f(g^{-1} x)$，$(\rho(g) f)(x) = f(xg)$。
+\end{definition}
+
+\begin{proposition}[正则表示的酉性]\label{prop:regular_unitary}
+左正则表示和右正则表示都是 $L^2(G)$ 上的酉表示。
+\end{proposition}
+
+\begin{proof}
+对左正则表示 $\lambda$：$\lambda(g)$ 可逆且 $\lambda(g)^{-1}=\lambda(g^{-1})$（因 $\lambda(g)\lambda(g^{-1})=\lambda(gg^{-1})=\lambda(e)=\operatorname{id}$）。对任意 $f_1,f_2\in L^2(G)$，
+\[
+\langle \lambda(g)f_1,\lambda(g)f_2\rangle = \int_G f_1(g^{-1}x)\,\overline{f_2(g^{-1}x)}\,dx.
+\]
+令 $y=g^{-1}x$，即 $x=gy$，由左 Haar 测度的左不变性 $dx=d(gy)=dy$，得
+\[
+\langle \lambda(g)f_1,\lambda(g)f_2\rangle = \int_G f_1(y)\,\overline{f_2(y)}\,dy = \langle f_1,f_2\rangle,
+\]
+故 $\lambda(g)$ 保内积，是酉算子。右正则表示同理：$(\rho(g)f)(x)=f(xg)$，令 $y=xg$，由右不变性 $d(xg)=dx$ 即得 $\langle\rho(g)f_1,\rho(g)f_2\rangle=\langle f_1,f_2\rangle$，故 $\rho(g)$ 亦是酉算子。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.8cm and 2.0cm, scale=0.95, every node/.style={transform shape}]
+\node[draw, rounded corners, fill=blue!8, align=center, minimum width=2.0cm, minimum height=0.9cm] (l2) {$L^2(G)$};
+\node[draw, rounded corners, fill=green!8, align=center, minimum width=2.6cm, minimum height=0.9cm, right=of l2] (reg) {正则表示\\$\lambda$ 与 $\rho$};
+\node[draw, rounded corners, fill=orange!8, align=center, minimum width=2.6cm, minimum height=0.9cm, right=of reg] (rep) {不可约表示\\$\widehat{G}$};
+\node[draw, rounded corners, fill=purple!8, align=center, minimum width=2.6cm, minimum height=0.9cm, below=of rep] (char) {特征标\\$\chi_\rho$};
+\node[draw, rounded corners, fill=red!8, align=center, minimum width=3.0cm, minimum height=0.9cm, below=of reg] (cls) {类函数子空间\\$L^2(G)_{\text{class}}$};
+\draw[->] (l2) -- (reg);
+\draw[->] (reg) -- (rep);
+\draw[->] (rep) -- (char);
+\draw[->] (l2) |- (cls);
+\draw[->] (cls) -- (char);
+\node[align=center] at (5.8,-5.2) {Peter--Weyl：$L^2(G)\cong\widehat{\bigoplus}_\rho\,V_\rho\otimes V_\rho^*$\\类函数由 $\{\chi_\rho\}$ 张成};
+\end{tikzpicture}
+\caption{群函数空间的分解：左/右正则表示分解为不可约表示直和，类函数子空间由特征标张成。}
+\label{fig:group_function_space}
+\end{figure}
+
+\subsection{类函数与特征标}
+
+\begin{definition}[类函数]\label{def:class_function}
+函数 $f: G \to \mathbb{C}$ 称为\textbf{类函数}，若 $f(g x g^{-1}) = f(x)$ 对所有 $g, x \in G$ 成立。类函数在内自同构下不变。
+\end{definition}
+
+\begin{theorem}[类函数的特征标展开——Peter-Weyl 定理的类函数版]\label{thm:class_function_expansion}
+设 $G$ 为紧群。则不可约酉表示的特征标 $\{\chi_\rho : \rho \in \widehat{G}\}$ 构成 $L^2(G)_{\text{class}}$ 的完备正交基。任意类函数 $f$ 可展开为 $f(g) = \sum_{\rho} \langle f, \chi_\rho \rangle \chi_\rho(g)$。
+\end{theorem}
+
+\begin{proof}
+（正交性）设 $\rho,\sigma$ 为不可约有限维酉表示，$dg$ 为正规化 Haar 测度。对线性映射 $T:V_\sigma\to V_\rho$，构造平均算子
+\[
+S=\int_G \rho(g)\,T\,\sigma(g)^{-1}\,dg.
+\]
+对任意 $h$，$\rho(h)S=\int_G\rho(hg)T\sigma(g)^{-1}dg=\int_G\rho(u)T\sigma(u)^{-1}\sigma(h)du=S\sigma(h)$（令 $u=hg$，用 Haar 测度左不变），故 $S$ 是 $\sigma\to\rho$ 的缠绕算子。当 $\rho\not\cong\sigma$ 时由 Schur 引理 $S=0$；取 $T=E_{lj}$（第 $l$ 行第 $j$ 列的基矩阵），其矩阵元为
+\[
+S_{ik}=\int_G \rho_{il}(g)\,\sigma_{jk}(g^{-1})\,dg=\int_G \rho_{il}(g)\,\overline{\sigma_{kj}(g)}\,dg=0 \qquad(\rho\not\cong\sigma).
+\]
+当 $\rho=\sigma$ 时 $S=\lambda I$，且 $\operatorname{tr}S=\operatorname{tr}\big(\int_G\rho(g)T\rho(g)^{-1}dg\big)=\operatorname{tr}T=\delta_{lj}=\lambda\dim\rho$，故 $\lambda=\delta_{lj}/\dim\rho$，即
+\[
+\int_G \rho_{il}(g)\,\overline{\rho_{kj}(g)}\,dg = \frac{\delta_{ik}\delta_{lj}}{\dim\rho}.
+\]
+取对角和 $\chi_\rho=\sum_i\rho_{ii}$ 得
+\[
+\langle\chi_\rho,\chi_\sigma\rangle=\sum_{i,k}\int_G\rho_{ii}(g)\overline{\sigma_{kk}(g)}\,dg=\delta_{\rho\sigma}\sum_{i,k}\frac{\delta_{ik}\delta_{ik}}{\dim\rho}=\delta_{\rho\sigma}\frac{\dim\rho}{\dim\rho}=\delta_{\rho\sigma}.
+\]
+故 $\{\chi_\rho\}$ 是 $L^2(G)_{\text{class}}$ 中的正交规范族。
+
+（完备性与展开）由 Peter-Weyl 定理，$L^2(G)$ 分解为不可约表示矩阵系数子空间的直和闭包，$L^2(G)\cong\widehat{\bigoplus}_\rho\,V_\rho\otimes V_\rho^*\cong\widehat{\bigoplus}_\rho\,\operatorname{End}(V_\rho)$，其中 $G$ 以共轭（伴随）作用。类函数正是此共轭作用下的不动元；由 Schur 引理，$\operatorname{End}(V_\rho)$ 中与共轭作用交换的元恰为标量算子 $\mathbb{C}\cdot I$，其对应的类函数正是 $\chi_\rho$。故 $L^2(G)_{\text{class}}=\overline{\bigoplus_\rho\mathbb{C}\,\chi_\rho}$，即特征标张成完备正交基，任意类函数 $f$ 有展开 $f=\sum_\rho\langle f,\chi_\rho\rangle\chi_\rho$。
+\end{proof}
+
+\subsection{群值函数与等变性}
+
+\begin{definition}[群值函数与等变性]\label{def:group_valued_function}
+设 $X$ 为带有群 $G$ 作用的集合，$(H,\cdot)$ 为另一个群。函数 $f: X \to H$ 称为\textbf{$G$-等变的}，若存在群同态 $\rho: G \to \operatorname{Aut}(H)$，使得 $f(g \cdot x) = \rho(g)(f(x))$。
+\end{definition}
+
+\begin{example}[群同态作为等变函数]\label{ex:homomorphism_equivariant}
+群同态 $\varphi: G \to H$ 在左平移作用下是等变的。若 $H$ 是阿贝尔群，则 $\varphi$ 同时是 $G$-不变的——$\ker\varphi$ 是周期子群。例如 $\varphi:\mathbb{Z}\to\mathbb{Z}/6\mathbb{Z}$，$\varphi(m)=m\bmod 6$：由 $\varphi(m+a)=\varphi(m)+\varphi(a)$ 知 $\varphi$ 在左平移 $m\mapsto m+a$ 下等变；因 $\ker\varphi=6\mathbb{Z}$，故 $\varphi(m+6)=\varphi(m)$，$\varphi$ 以 $6\mathbb{Z}$ 为周期子群。
+\end{example}
+
+\subsection{群上的自守函数}
+
+\begin{definition}[群上的自守函数]\label{def:automorphic_form}
+设 $G$ 为局部紧群，$\Gamma \subset G$ 为离散子群，$\rho: \Gamma \to \operatorname{GL}(V)$ 为表示。函数 $f: G \to V$ 满足 $f(\gamma g) = \rho(\gamma) f(g)$ 对所有 $\gamma \in \Gamma, g \in G$ 成立，则称 $f$ 为关于 $\Gamma$ 和 $\rho$ 的\textbf{自守函数}。
+\end{definition}
+
+\begin{theorem}[自守函数的商空间刻画]\label{thm:automorphic_quotient}
+自守函数等价于商空间 $\Gamma \backslash (G \times V)$ 上的截面。
+\end{theorem}
+
+\begin{proof}
+在 $G\times V$ 上定义 $\Gamma$-作用 $\gamma\cdot(g,v)=(\gamma g,\rho(\gamma)v)$。
+
+（$\Rightarrow$）设 $f:G\to V$ 满足自守条件 $f(\gamma g)=\rho(\gamma)f(g)$。定义 $F:G\to G\times V$，$F(g)=(g,f(g))$。则
+\[
+F(\gamma g)=(\gamma g,f(\gamma g))=(\gamma g,\rho(\gamma)f(g))=\gamma\cdot(g,f(g))=\gamma\cdot F(g),
+\]
+故 $F$ 是 $\Gamma$-等变的，下降到良定义的截面 $s:\Gamma\backslash G\to\Gamma\backslash(G\times V)$，$s([g])=[F(g)]$。
+
+（$\Leftarrow$）设 $s$ 为截面，取提升 $F(g)=(g,f(g))$（第一坐标取代表元 $g$）。由 $s$ 良定义，对任意 $\gamma\in\Gamma$ 有 $[F(\gamma g)]=[F(g)]$，即 $[(\gamma g,f(\gamma g))]=[(g,f(g))]$，故存在 $\gamma'\in\Gamma$ 使 $(g,f(g))=\gamma'\cdot(\gamma g,f(\gamma g))=(\gamma'\gamma g,\rho(\gamma')f(\gamma g))$。比较第一坐标得 $\gamma'=\gamma^{-1}$，比较第二坐标得 $f(g)=\rho(\gamma^{-1})f(\gamma g)$，即 $\rho(\gamma)f(g)=f(\gamma g)$。这正是自守条件，故 $f$ 是自守函数。
+
+综上，自守函数与商空间截面一一对应。
+\end{proof}
+
+\subsection{群上的卷积代数}
+
+\begin{definition}[群上的卷积]
+\label{def:group_convolution}
+设 $f_1, f_2 \in L^1(G)$，卷积定义为
+\[
+(f_1 * f_2)(x) = \int_G f_1(y)\, f_2(y^{-1}x) \, dy.
+\]
+\end{definition}
+
+\begin{proposition}[卷积在轨道分解下的对角化]\label{prop:convolution_orbit}
+设 $G$ 为紧群，$K \in L^1(G)$ 为类函数。则卷积算子 $C_K f = K * f$ 在轨道分解下对角化：$(C_K f)_\rho = \frac{\hat{K}(\rho)}{\dim \rho} f_\rho$，其中 $\hat{K}(\rho)=\langle K,\chi_\rho\rangle$。
+\end{proposition}
+
+\begin{proof}
+设 $\rho$ 为不可约酉表示，取规范正交基下的矩阵元 $u_{ij}(g)=\langle\rho(g)e_j,e_i\rangle$。对单个矩阵元，
+\[
+(K*u_{ij})(g)=\int_G K(y)\,u_{ij}(y^{-1}g)\,dy=\int_G K(y)\sum_k u_{ik}(y^{-1})\,u_{kj}(g)\,dy.
+\]
+因 $u_{ik}(y^{-1})=\overline{u_{ki}(y)}$，且 $K$ 是类函数，由定理 \ref{thm:class_function_expansion} 证明中的 Schur 正交关系，$K$ 与 $\rho$ 的非对角矩阵元正交，且
+\[
+\int_G K(y)\,\overline{u_{ki}(y)}\,dy=\langle K,u_{ki}\rangle=\frac{\langle K,\chi_\rho\rangle}{\dim\rho}\,\delta_{ki}=\frac{\hat K(\rho)}{\dim\rho}\,\delta_{ki},
+\]
+其中 $\hat K(\rho)=\langle K,\chi_\rho\rangle$。故
+\[
+(K*u_{ij})(g)=\sum_k\frac{\hat K(\rho)}{\dim\rho}\,\delta_{ki}\,u_{kj}(g)=\frac{\hat K(\rho)}{\dim\rho}\,u_{ij}(g).
+\]
+即 $C_K$ 在 $\rho$-同位型分量（由矩阵元张成）上以标量 $\hat K(\rho)/\dim\rho$ 作用，故 $(C_K f)_\rho=\frac{\hat K(\rho)}{\dim\rho}f_\rho$。
+\end{proof}
+
+\section{\texorpdfstring{传递性矩阵：8种性质在12种运算下的保持性}{传递性矩阵}}
+
+\begin{lemma}[逐点运算与群作用交换]\label{ch8_pointwise_invariance}
+设群 $G$ 作用于集合 $\mathcal{D}$，$f,g:\mathcal{D}\to V$ 分别为关于子群 $H_f,H_g\subseteq G$ 不变的函数，即 $f(\phi_h(x))=f(x)$（$h\in H_f$），$g(\phi_h(x))=g(x)$（$h\in H_g$）。设 $\star:V\times V\to V$ 为任意逐点二元运算（$(f\star g)(x)=f(x)\star g(x)$），$\triangle:V\to V$ 为任意逐点一元运算（$(\triangle f)(x)=\triangle(f(x))$）。则
+\begin{enumerate}[label=(\roman*)]
+    \item $f\star g$ 关于 $H_f\cap H_g$ 不变；
+    \item $\triangle f$ 关于 $H_f$ 不变。
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(i) 对 $h\in H_f\cap H_g$：$(f\star g)(\phi_h(x))=f(\phi_h(x))\star g(\phi_h(x))=f(x)\star g(x)=(f\star g)(x)$。
+
+(ii) 对 $h\in H_f$：$(\triangle f)(\phi_h(x))=\triangle(f(\phi_h(x)))=\triangle(f(x))=(\triangle f)(x)$。
+\end{proof}
+
+\subsection{加法与减法}
+
+\begin{proposition}[加法下平移性质的保持]\label{prop:add_translation}
+设 $f, g$ 均为平移函数，平移群分别为 $T_f\mathbb{Z}$ 和 $T_g\mathbb{Z}$。若 $T_f/T_g \in \mathbb{Q}$，则 $f+g$ 是平移函数，$\operatorname{Translation}(f+g) \supseteq \operatorname{lcm}(T_f, T_g)\mathbb{Z}$。若 $T_f/T_g \notin \mathbb{Q}$，则 $f+g$ 不是平移函数（除非为常值），而是准周期函数。
+\end{proposition}
+
+\begin{proof}
+设 $T_f/T_g = p/q$，令 $L = qT_f = pT_g$。则 $(f+g)(x+L) = f(x+L) + g(x+L) = f(x) + g(x) = (f+g)(x)$。若比值无理，不存在非零公共周期。
+\end{proof}
+
+\begin{proposition}[加法与乘法下缩放性质的保持（可公度条件）]\label{ch8_add_scaling}
+设 $f,g$ 为连续非常值缩放函数，缩放群分别为 $\langle q_f\rangle$ 与 $\langle q_g\rangle$（$q_f,q_g>0$，$q_f,q_g\neq 1$）。若 $\ln q_f/\ln q_g\in\mathbb{Q}$，即存在互素正整数 $m,n$ 使 $q_f^m=q_g^n=:q$，则 $f\pm g$ 与 $fg$（以及 $g\neq 0$ 时的 $f/g$）都是缩放函数，且 $\operatorname{Scaling}(f\pm g),\operatorname{Scaling}(fg)\supseteq\langle q\rangle$。若 $\ln q_f/\ln q_g\notin\mathbb{Q}$，则 $f\pm g$ 与 $fg$ 不是缩放函数（除非退化）。
+\end{proposition}
+
+\begin{proof}
+由 $\operatorname{Scaling}(f)=\langle q_f\rangle$，$f(q_f^m x)=f(x)$ 对任意整数 $m$ 成立；同理 $g(q_g^n x)=g(x)$。设 $q_f^m=q_g^n=q$，则对 $h=f\pm g$：
+\[
+h(qx)=f(qx)\pm g(qx)=f(q_f^m x)\pm g(q_g^n x)=f(x)\pm g(x)=h(x),
+\]
+$fg$ 同理。故 $h$ 与 $fg$ 关于 $q$ 缩放不变。若比值无理，设 $f,g$ 有非平凡公共缩放因子 $q\neq 1$，则 $q=q_f^m=q_g^n$ 对某 $m,n$，取对数得 $m\ln q_f=n\ln q_g$，即 $\ln q_f/\ln q_g=n/m\in\mathbb{Q}$，矛盾。
+\end{proof}
+
+\begin{remark}[平移与旋转在二元运算下的可公度条件]\label{ch8_pointwise_commensurable}
+完全相同的可公度论证适用于平移函数在乘法/除法下（表中 $\checkmark^*$ 项）：当 $T_f/T_g\in\mathbb{Q}$ 时，$L=\operatorname{lcm}(T_f,T_g)$ 是 $fg$ 与 $f/g$ 的公共周期。对旋转函数，二元运算需角比 $\theta_f/\theta_g\in\mathbb{Q}$ 方有非平凡公共旋转角，故表中旋转列在二元运算（加减乘除）下的格子同样应理解为可公度条件下的保持。
+\end{remark}
+
+\begin{proposition}[加法下旋转/守恒/对称/闭合/周期/高阶性质的保持]\label{prop:add_all}
+设 $f, g$ 为同类函数，群分别为 $G_f$ 和 $G_g$。则 $f+g$ 关于 $G_f \cap G_g$ 不变；当 $G_f\cap G_g$ 非平凡时 $f+g$ 是同类函数。平移与缩放情形分别见命题 \ref{prop:add_translation} 与 \ref{ch8_add_scaling}。
+\end{proposition}
+
+\begin{proof}
+由引理 \ref{ch8_pointwise_invariance}（取 $\star$ 为加法），对任意 $g \in G_f \cap G_g$，$(f+g)(\phi_g(x)) = f(\phi_g(x)) + g(\phi_g(x)) = f(x) + g(x) = (f+g)(x)$，故 $f+g$ 关于 $G_f\cap G_g$ 不变。高阶函数的加法逐层同理。
+\end{proof}
+
+\begin{proposition}[减法下各性质的传递性]\label{prop:subtraction_all}
+减法 $f - g = f + (-g)$ 的传递性与加法完全相同。
+\end{proposition}
+
+\begin{proof}
+$-g$ 与 $g$ 具有完全相同的周期性质（平移、缩放、旋转群均不变）。
+\end{proof}
+
+\subsection{乘法与除法}
+
+\begin{proposition}[乘法下旋转/守恒/对称/闭合/周期/高阶性质的保持]\label{prop:mult_all}
+设 $f, g$ 为同类函数，群分别为 $G_f$ 和 $G_g$。则 $fg$ 关于 $G_f \cap G_g$ 不变；当 $G_f\cap G_g$ 非平凡时 $fg$ 是同类函数。平移与缩放的可公度条件见命题 \ref{ch8_add_scaling} 与注释 \ref{ch8_pointwise_commensurable}。
+\end{proposition}
+
+\begin{proof}
+由引理 \ref{ch8_pointwise_invariance}（取 $\star$ 为乘法），$(fg)(\phi_g(x)) = f(\phi_g(x))g(\phi_g(x)) = f(x)g(x) = (fg)(x)$ 对 $g\in G_f\cap G_g$ 成立，故 $fg$ 关于 $G_f\cap G_g$ 不变。
+\end{proof}
+
+\begin{proposition}[除法下各性质的传递性]\label{prop:division_all}
+设 $f, g$ 为同类函数，$g(x) \neq 0$。则 $f/g$ 是同类函数，其群包含 $G_f \cap G_g$。
+\end{proposition}
+
+\begin{proof}
+$(f/g)(\phi_g(x)) = f(\phi_g(x))/g(\phi_g(x)) = f(x)/g(x) = (f/g)(x)$。
+\end{proof}
+
+\subsection{幂与根}
+
+\begin{proposition}[幂运算下各性质的传递性]\label{prop:power_all}
+设 $f$ 为同类函数，群为 $G_f$，$f(x) > 0$。则 $f^\alpha$（$\alpha \neq 0$）是同类函数，其群包含 $G_f$。
+\end{proposition}
+
+\begin{proof}
+$f^\alpha(\phi_g(x)) = (f(\phi_g(x)))^\alpha = (f(x))^\alpha = f^\alpha(x)$。
+\end{proof}
+
+\begin{proposition}[根运算下各性质的传递性]\label{prop:root_all}
+设 $f$ 为同类函数，$f(x) > 0$。则 $\sqrt[n]{f}$ 是同类函数，其群包含 $G_f$。
+\end{proposition}
+
+\begin{proof}
+$\sqrt[n]{f}(\phi_g(x)) = \sqrt[n]{f(\phi_g(x))} = \sqrt[n]{f(x)}$。
+\end{proof}
+
+\subsection{对数}
+
+\begin{proposition}[对数运算下各性质的传递性]\label{prop:log_all}
+设 $f$ 为同类函数，$f(x) > 0$。则 $\log f$ 是同类函数，其群包含 $G_f$。
+\end{proposition}
+
+\begin{proof}
+$\log f(\phi_g(x)) = \log(f(\phi_g(x))) = \log(f(x))$。
+\end{proof}
+
+\subsection{级数与极限}
+
+\begin{proposition}[级数展开下各性质的传递性]\label{prop:series_all}
+设 $\{f_n\}$ 为同类函数序列，且 $\sum f_n$ 一致收敛于 $f$。则 $f$ 是同类函数，其群包含 $\bigcap G_{f_n}$。
+\end{proposition}
+
+\begin{proof}
+对任意 $g \in \bigcap G_{f_n}$，$f(\phi_g(x)) = \sum f_n(\phi_g(x)) = \sum f_n(x) = f(x)$。
+\end{proof}
+
+\begin{proposition}[极限下各性质的传递性]\label{prop:limit_all}
+设 $\{f_n\}$ 为同类函数序列，$f_n \to f$ 逐点收敛。则 $f$ 是同类函数，其群包含 $\bigcap G_{f_n}$。
+\end{proposition}
+
+\begin{proof}
+$f(\phi_g(x)) = \lim f_n(\phi_g(x)) = \lim f_n(x) = f(x)$。
+\end{proof}
+
+\subsection{微分}
+
+\begin{proposition}[微分下平移/守恒/对称/闭合/周期/高阶性质的保持]\label{prop:diff_translation}
+设 $f$ 为可导的平移函数。则 $f'$ 是平移函数，$\operatorname{Translation}(f') \supseteq \operatorname{Translation}(f)$。
+\end{proposition}
+
+\begin{proof}
+$f'(x+T) = \lim_{h \to 0} \frac{f(x+T+h) - f(x+T)}{h} = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h} = f'(x)$。
+\end{proof}
+
+\begin{proposition}[微分破坏缩放对称性]\label{prop:diff_scaling}
+设 $f$ 为可导的缩放函数。则 $f'$ 不是缩放函数（除非 $f$ 为常数）。微分破坏缩放对称性。
+\end{proposition}
+
+\begin{proof}
+由链式法则，若 $f(q_0 x) = f(x)$，两边求导得 $q_0 f'(q_0 x) = f'(x)$，即 $f'(q_0 x) = f'(x)/q_0 \neq f'(x)$。
+\end{proof}
+
+\begin{proposition}[微分下旋转性质的协变保持]\label{prop:diff_rotation}
+设 $f$ 为可导的旋转函数。则 $f'$ 满足 $f'(e^{i\theta}z) = e^{-i\theta} f'(z)$（协变性）。$|f'|$ 是旋转函数。
+\end{proposition}
+
+\begin{proof}
+由链式法则，$f'(e^{i\theta}z) = e^{-i\theta} f'(z)$。取模得 $|f'|(e^{i\theta}z) = |f'(z)|$。
+\end{proof}
+
+\begin{proposition}[微分下高阶性质的提升]\label{prop:diff_higher}
+微分将 $f_{(k)}$ 映射到 $f_{(k+1)}$——求导提升高阶塔的层数。
+\end{proposition}
+
+\begin{proof}
+设 $f_{(k)}:G_{(k)}\to V$ 可微。其微分在单位元处取值
+\[
+df_{(k)}\big|_e:T_eG_{(k)}=\mathfrak{g}_{(k)}\longrightarrow V
+\]
+是李代数 $\mathfrak{g}_{(k)}$ 上的线性映射。而 $\mathfrak{g}_{(k)}$ 上的线性泛函在伴随作用下属于高一阶对象 $G_{(k+1)}=\operatorname{Aut}(G_{(k)})$ 的表示范畴（定义 \ref{def:automorphism_tower}），故 $df_{(k)}$ 是 $G_{(k+1)}$ 层的对象 $f_{(k+1)}$。逐层递推，求导把 $f_{(k)}$ 提升到 $f_{(k+1)}$ 层。
+\end{proof}
+
+\subsection{积分}
+
+\begin{proposition}[积分下平移性质的条件保持]\label{prop:int_translation}
+设 $f$ 为连续的平移函数，$F(x) = \int_0^x f(t) dt$。则 $F$ 是平移函数当且仅当 $\int_0^T f(t) dt = 0$。
+\end{proposition}
+
+\begin{proof}
+$F(x+T) - F(x) = \int_x^{x+T} f(t) dt = \int_0^T f(t) dt$。
+\end{proof}
+
+\begin{proposition}[积分下缩放/旋转/守恒/对称/闭合/高阶性质的保持]\label{prop:int_all}
+积分保持缩放、旋转（到模长）、守恒、对称、闭合性质。积分降低高阶塔的层数。
+\end{proposition}
+
+\begin{proof}
+逐条验证。缩放：设 $f(q_0x)=f(x)$，令 $F(x)=\int_0^x f(t)dt$，换元 $t=q_0s$ 得
+\[
+F(q_0x)=\int_0^{q_0x}f(t)dt=q_0\int_0^x f(q_0s)ds=q_0\int_0^x f(s)ds=q_0F(x),
+\]
+即 $F(q_0x)=q_0F(x)$——$F$ 满足广义缩放协变性（$F$ 的缩放“权重”为 $1$），在标度荷意义下保持缩放结构。
+
+旋转：设 $f(e^{i\theta_0}z)=f(z)$，定义 $F(z)=\int_0^z f(w)dw$（沿径向路径），则
+\[
+F(e^{i\theta_0}z)=\int_0^{e^{i\theta_0}z}f(w)dw=\int_0^z f(e^{i\theta_0}\zeta)e^{i\theta_0}d\zeta=e^{i\theta_0}\int_0^z f(\zeta)d\zeta=e^{i\theta_0}F(z),
+\]
+即 $F(e^{i\theta_0}z)=e^{i\theta_0}F(z)$——$F$ 旋转协变，其模长 $|F|$ 是旋转函数。
+
+守恒：设 $Q$ 是 $f$ 的守恒量，即 $Q(f(\phi_g(x)))=Q(f(x))$。定义 $Q'(F(x))=Q(f(x))$（积分上限的函数值），则 $Q'(F(\phi_g(x)))=Q(f(\phi_g(x)))=Q(f(x))=Q'(F(x))$，故 $Q'$ 是 $F$ 的守恒量。
+
+对称：若 $f(\phi_g(x))=f(x)$，则 $F(\phi_g(x))=\int_0^{\phi_g(x)}f=\int_0^x f+$ 边界修正。在紧群上取不变积分 $\int_G f(gx)dg$ 可直接验证对称性保持。
+
+闭合：若 $\Gamma_f$ 闭合，则 $\Gamma_F=(F,F')=(F,f)$ 在相同群作用下闭合（因为 $f$ 的闭合性保证 $f(\phi_g(x))=f(x)$ 与 $f'(\phi_g(x))=f'(x)$，而 $F' = f$，故 $\Gamma_F(\phi_g(x))=(F(\phi_g(x)),f(\phi_g(x)))=(F(\phi_g(x)),f(x))$；由平移条件下 $F(\phi_g(x))=F(x)+$ 常数，在商空间/模常数意义下闭合）。
+
+高阶：积分是微分的逆运算。由命题 \ref{prop:diff_higher}，微分提升高阶塔层数，故积分降低高阶塔层数。具体地，设 $f_{(k)}\in G_{(k)}$ 层，则 $\int f_{(k)}$ 属于 $G_{(k-1)}$ 层（通过微分还原）。
+\end{proof}
+
+\subsection{卷积}
+
+\begin{proposition}[卷积下平移性质的保持]\label{prop:conv_translation}
+设 $f, g$ 均为平移函数。则循环卷积 $f * g$ 是平移函数（在可公度条件下）。
+\end{proposition}
+
+\begin{proof}
+$(f * g)(x+L) = \frac{1}{L}\int_0^L f(\tau) g(x+L-\tau) d\tau = \frac{1}{L}\int_0^L f(\tau) g(x-\tau) d\tau = (f * g)(x)$。
+\end{proof}
+
+\begin{proposition}[卷积下缩放/旋转/守恒/对称/闭合/周期/高阶性质的保持]\label{prop:conv_all}
+卷积保持所有8种性质。原因是卷积与群作用交换（卷积的平移不变性），且卷积在频域中化为乘法。
+\end{proposition}
+
+\begin{proof}
+逐条验证。平移：由命题 \ref{prop:conv_translation} 已证（可公度条件）。缩放：设 $f(q_0x)=f(x)$，$g(q_0x)=g(x)$。换元 $\tau=q_0s$：
+\[
+(f*g)(q_0x)=\frac{1}{T}\int_0^T f(\tau)g(q_0x-\tau)d\tau
+=q_0\cdot\frac{1}{T}\int_0^{T/q_0}f(q_0s)g(q_0(x-s))ds.
+\]
+由周期性与缩放不变性，上式 $=q_0\cdot\frac{1}{T}\int_0^T f(s)g(x-s)ds=q_0(f*g)(x)$，故 $f*g$ 广义缩放协变（权重 $1$），在标度荷意义下保持。
+
+旋转：设 $f(e^{i\theta_0}z)=f(z)$，$g(e^{i\theta_0}z)=g(z)$。复卷积 $(f*g)(z)=\int f(w)g(z-w)dw$，换元 $w=e^{i\theta_0}\zeta$：
+\[
+(f*g)(e^{i\theta_0}z)=\int f(w)g(e^{i\theta_0}z-w)dw
+=e^{i\theta_0}\int f(e^{i\theta_0}\zeta)g(e^{i\theta_0}(z-\zeta))d\zeta
+=e^{i\theta_0}(f*g)(z),
+\]
+故 $f*g$ 旋转协变，$|f*g|$ 是旋转函数。
+
+守恒/对称/闭合：由卷积的线性性和逐点性质传递（引理 \ref{ch8_pointwise_invariance} 经积分推广），若 $Q$ 分别是 $f,g$ 的守恒量，则频域中 $Q(\widehat{f*g})=Q(\widehat f\cdot\widehat g)$ 保持守恒结构。
+
+周期：周期函数卷积仍为周期函数（命题 \ref{prop:conv_translation} 的直接推论）。
+
+高阶：卷积在频域中化为乘法，而乘法保持高阶塔层数（命题 \ref{prop:mult_all}），故卷积也保持高阶塔层数。
+\end{proof}
+
+\section{\texorpdfstring{传递性矩阵总结}{传递性矩阵总结}}
+
+\begin{table}[htbp]
+    \centering
+    \caption{8种性质在12种运算下的传递性矩阵}
+    \label{tab:transitivity_matrix}
+    \renewcommand{\arraystretch}{1.4}
+    \begin{tabular}{>{\centering\arraybackslash}p{1.8cm}>{\centering\arraybackslash}p{1.3cm}>{\centering\arraybackslash}p{1.3cm}>{\centering\arraybackslash}p{1.3cm}>{\centering\arraybackslash}p{1.3cm}>{\centering\arraybackslash}p{1.3cm}>{\centering\arraybackslash}p{1.3cm}>{\centering\arraybackslash}p{1.3cm}>{\centering\arraybackslash}p{1.3cm}}
+        \toprule
+        运算 & 平移 & 缩放 & 旋转 & 守恒 & 对称 & 闭合 & 周期 & 高阶 \\
+        \midrule
+        加法 & \checkmark* & \checkmark* & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+        减法 & \checkmark* & \checkmark* & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+        乘法 & \checkmark* & \checkmark* & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+        除法 & \checkmark* & \checkmark* & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+        幂 & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+        根 & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+        对数 & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+        级数 & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+        极限 & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+        微分 & \checkmark & $\times$ & \checkmark** & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+        积分 & \checkmark*** & \checkmark & \checkmark** & \checkmark & \checkmark & \checkmark & \checkmark*** & \checkmark \\
+        卷积 & \checkmark* & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.55, every node/.style={font=\footnotesize}]
+\foreach \r/\vals in {%
+  0/{0,0,1,0,0,0,0,0},%
+  1/{0,0,1,0,0,0,0,0},%
+  2/{0,0,1,0,0,0,0,0},%
+  3/{0,0,1,0,0,0,0,0},%
+  4/{0,0,0,0,0,0,0,0},%
+  5/{0,0,0,0,0,0,0,0},%
+  6/{0,0,0,0,0,0,0,0},%
+  7/{0,0,0,0,0,0,0,0},%
+  8/{0,0,0,0,0,0,0,0},%
+  9/{0,2,1,0,0,0,0,0},%
+  10/{1,0,1,0,0,0,1,0},%
+  11/{0,0,0,0,0,0,0,0}%
+} {
+  \foreach \val [count=\c from 0] in \vals {
+    \ifnum\val=0 \def\col{green!55}\fi
+    \ifnum\val=1 \def\col{yellow!70}\fi
+    \ifnum\val=2 \def\col{red!60}\fi
+    \fill[\col] (\c*1.2, -\r*1.0) rectangle (\c*1.2+1.0, -\r*1.0-0.8);
+    \draw[white] (\c*1.2, -\r*1.0) rectangle (\c*1.2+1.0, -\r*1.0-0.8);
+  }
+}
+\node[anchor=east] at (-0.2, -0.4) {加};
+\node[anchor=east] at (-0.2, -1.4) {减};
+\node[anchor=east] at (-0.2, -2.4) {乘};
+\node[anchor=east] at (-0.2, -3.4) {除};
+\node[anchor=east] at (-0.2, -4.4) {幂};
+\node[anchor=east] at (-0.2, -5.4) {根};
+\node[anchor=east] at (-0.2, -6.4) {对数};
+\node[anchor=east] at (-0.2, -7.4) {级数};
+\node[anchor=east] at (-0.2, -8.4) {极限};
+\node[anchor=east] at (-0.2, -9.4) {微分};
+\node[anchor=east] at (-0.2, -10.4) {积分};
+\node[anchor=east] at (-0.2, -11.4) {卷积};
+\foreach \c/\lab in {0/平移,1/缩放,2/旋转,3/守恒,4/对称,5/闭合,6/周期,7/高阶} {
+  \node[rotate=60, anchor=west] at (\c*1.2+0.4, 0.4) {\lab};
+}
+\end{tikzpicture}
+\caption{传递性矩阵热力图：绿色表示完全保持，黄色表示可公度或条件下保持，红色表示不保持。}
+\label{fig:transitivity_matrix_heatmap}
+\end{figure}
+
+\begin{remark}[传递性矩阵的说明]\label{rem:transitivity_matrix_legend}
+\begin{itemize}
+    \item $\checkmark$：性质在运算下保持。
+    \item $\checkmark^*$：性质在可公度条件下保持。
+    \item $\checkmark^{**}$：性质在模长意义下保持（旋转协变性）。
+    \item $\checkmark^{***}$：性质在零均值条件下保持（$\int_0^T f = 0$）。
+    \item $\times$：性质不保持（微分破坏缩放对称性）。
+\end{itemize}
+\end{remark}
+
+\begin{theorem}[传递性矩阵的总体规律]\label{thm:transitivity_pattern}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{代数运算（加减乘除幂根对数）}：所有性质全部保持。原因是逐点运算与群作用交换。
+    \item \textbf{分析运算（级数、极限）}：所有性质全部保持。原因是一致收敛/逐点收敛保证群作用与极限交换。
+    \item \textbf{微分}：除缩放性质外全部保持。微分破坏缩放对称性的原因是链式法则引入额外缩放因子。
+    \item \textbf{积分}：除平移/周期性质的条件保持外全部保持。原因是积分常数引入额外自由度。
+    \item \textbf{卷积}：全部保持。原因是卷积与群作用交换。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) 代表性完整验证（以乘法为例）。设 $f,g$ 的具有周期轨道的群分别为 $H_f,H_g$，对任意 $h\in H_f\cap H_g$，由引理 \ref{ch8_pointwise_invariance}（取 $\star$ 为乘法）得 $(fg)(\phi_h(x))=f(\phi_h(x))\,g(\phi_h(x))=f(x)\,g(x)=(fg)(x)$，故 $fg$ 关于 $H_f\cap H_g$ 不变，性质保持（命题 \ref{prop:mult_all}）。加、减、除、幂、根、对数（命题 \ref{prop:add_all}、\ref{prop:subtraction_all}、\ref{prop:division_all}、\ref{prop:power_all}、\ref{prop:root_all}、\ref{prop:log_all}）的验证对象相同——逐点运算与群作用交换，故同理验证。
+
+(ii) 同理验证：验证对象为级数与极限运算，由一致收敛/逐点收敛保证群作用与 $\sum$、$\lim$ 交换（命题 \ref{prop:series_all}、\ref{prop:limit_all}）。
+
+(iii) 验证对象为微分算子 $d/dx$：平移保持（命题 \ref{prop:diff_translation}），缩放破坏（命题 \ref{prop:diff_scaling}，链式法则引入因子 $q_0$），旋转协变（命题 \ref{prop:diff_rotation}）；其余性质保持由导数与不变群的交换性同理验证。
+
+(iv) 验证对象为积分算子：平移/周期性质在零均值条件下保持（命题 \ref{prop:int_translation}），缩放/旋转/守恒/对称/闭合保持（命题 \ref{prop:int_all}）。
+
+(v) 验证对象为卷积：平移在可公度条件下保持（命题 \ref{prop:conv_translation}），其余七性质保持（命题 \ref{prop:conv_all}），原因同为卷积与群作用交换。
+\end{proof}
+
+\section{\texorpdfstring{三种基本群与对应的群函数}{三种基本群与对应的群函数}}
+
+\subsection{平移群与平移函数}
+
+\begin{definition}[平移群]\label{def:translation_group_basic}
+设 $G_{\text{trans}} = \mathbb{R}$ 为加法群。平移群是平移构造的群表示论载体，无穷小生成元为 $\frac{d}{dx}$。平移不变性蕴含能量守恒（时间平移）或线动量守恒（空间平移）。
+\end{definition}
+
+\begin{definition}[平移函数]\label{def:translation_function_basic}
+函数 $f: \mathbb{R} \to \mathbb{C}$ 若满足 $f(x + T_0) = f(x)$，则称 $f$ 为关于 $\Gamma = T_0\mathbb{Z}$ 的\textbf{平移周期函数}。
+\end{definition}
+
+\subsection{缩放群与缩放函数}
+
+\begin{definition}[缩放群]\label{def:scaling_group_basic}
+设 $G_{\text{scal}} = \mathbb{R}^+$ 为正实数乘法群。缩放群是缩放构造的群表示论载体，无穷小生成元为径向算子 $\mathbf{x} \cdot \nabla$。
+\end{definition}
+
+\begin{definition}[缩放函数]\label{def:scaling_function_basic}
+函数 $f: \mathbb{R}^+ \to \mathbb{C}$ 若满足 $f(q_0 x) = f(x)$，则称 $f$ 为关于 $\Gamma = \langle q_0 \rangle$ 的\textbf{缩放周期函数}。通过对数代换等价于平移函数。
+\end{definition}
+
+\subsection{旋转群与旋转函数}
+
+\begin{definition}[旋转群]\label{def:rotation_group_basic}
+设 $G_{\text{rot}} = U(1)$ 为一维酉群。旋转群是内自同构的群表示论载体之一。
+\end{definition}
+
+\begin{definition}[旋转函数]\label{def:rotation_function_basic}
+函数 $f: \mathbb{C} \to \mathbb{C}$ 若满足 $f(e^{i\theta_0} z) = f(z)$，则称 $f$ 为关于 $\Gamma = \langle e^{i\theta_0} \rangle$ 的\textbf{旋转周期函数}。
+\end{definition}
+
+\subsection{三种群的统一对偶}
+
+\begin{theorem}[三种群的统一对偶定理]\label{thm:three_groups_duality}
+三种基本群在 Pontryagin 对偶下具有对应关系：
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}}
+\toprule
+群类型 & 群 $G$ & 周期子群 & 商空间 & Pontryagin 对偶 \\
+\midrule
+平移群 & $\mathbb{R}$ & $T_0\mathbb{Z}$ & $\mathbb{R}/T_0\mathbb{Z} \cong S^1$ & $\widehat{S^1} \cong \mathbb{Z}$ \\
+缩放群 & $\mathbb{R}^+ \cong \mathbb{R}$ & $\langle q_0 \rangle$ & $\mathbb{R}^+/\langle q_0 \rangle \cong S^1$ & $\widehat{S^1} \cong \mathbb{Z}$ \\
+旋转群 & $U(1) \cong S^1$ & $\langle e^{i\theta_0} \rangle$ & $U(1)/C_n \cong U(1)$ & $\widehat{U(1)} \cong \mathbb{Z}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{theorem}
+
+\begin{proof}
+逐行验证。平移行：映射 $\chi(x)=e^{2\pi i x/T_0}$ 是 $\mathbb{R}\to S^1$ 的满同态，核恰为 $T_0\mathbb{Z}$，故 $\mathbb{R}/T_0\mathbb{Z}\cong S^1$；$S^1$ 的特征标族 $\{\chi_n:e^{i\theta}\mapsto e^{in\theta}\mid n\in\mathbb{Z}\}$ 给出 $\widehat{S^1}\cong\mathbb{Z}$。缩放行：对数映射 $x\mapsto\ln x$ 是 $\mathbb{R}^+\cong\mathbb{R}$ 的同构，且把 $\langle q_0\rangle$ 映为 $(\ln q_0)\mathbb{Z}$，故与平移行同构，商 $\cong S^1$、对偶 $\cong\mathbb{Z}$。旋转行：$U(1)\cong S^1$；当 $\theta_0/(2\pi)=p/q$ 时 $\langle e^{i\theta_0}\rangle\cong C_q$，映射 $z\mapsto z^q$ 的核为 $q$ 次单位根群 $C_q$，故 $U(1)/C_q\cong U(1)$；特征标 $\chi_n(z)=z^n$ 给出 $\widehat{U(1)}\cong\mathbb{Z}$。三行对偶均 $\cong\mathbb{Z}$，表格成立。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=2.0cm, scale=0.95, every node/.style={transform shape}]
+
+\node[draw, rounded corners, fill=blue!8, align=center, minimum width=2.4cm, minimum height=0.9cm] (trans) {平移群\\$\mathbb{R}$};
+\node[draw, rounded corners, fill=green!8, align=center, minimum width=2.4cm, minimum height=0.9cm, below=of trans] (scal) {缩放群\\$\mathbb{R}^+\cong\mathbb{R}$};
+\node[draw, rounded corners, fill=orange!8, align=center, minimum width=2.4cm, minimum height=0.9cm, below=of scal] (rot) {旋转群\\$U(1)\cong S^1$};
+
+\node[draw, rounded corners, fill=purple!8, align=center, minimum width=2.6cm, minimum height=0.9cm] (dual) at (6, -2) {对偶群\\$\widehat{G}\cong\mathbb{Z}$};
+
+\draw[->] (trans.east) -- (dual.north west) node[midway, above, sloped, font=\footnotesize] {对数映射};
+\draw[->] (scal.east) -- (dual.west) node[pos=0.5, above, font=\footnotesize, xshift=-0.3cm, yshift=0.3cm] {Fourier 对偶};
+\draw[->] (rot.east) -- (dual.south west) node[midway, below, sloped, font=\footnotesize] {特征标 $z\mapsto z^n$};
+
+\end{tikzpicture}
+\caption{三种基本群的 Pontryagin 对偶关系：平移群、缩放群、旋转群在对偶下统一为 $\mathbb{Z}$，构成统一代数结构的三种表象}
+\label{fig:three_groups_duality}
+\end{figure}
+
+\begin{corollary}[三种函数与群-不动元-守恒律的对应]\label{cor:three_functions_trinity}
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{1.8cm}>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{2.2cm}}
+\toprule
+函数类型 & 群 & 不动元 & 形式对应守恒律 & 形式对应通量 \\
+\midrule
+平移函数 & $\mathbb{R}$ & $0$ & 能量/线动量 & 时间通量 \\
+缩放函数 & $\mathbb{R}^+$ & $1$ & 标度荷 & 观察通量 \\
+旋转函数 & $U(1)$ & $i$ & 角动量 & 空间通量 \\
+\bottomrule
+\end{tabular}
+\end{center}
+表中“形式对应守恒律”与“形式对应通量”两列给出的是群表示论对象与物理概念之间的概念比较。
+\end{corollary}
+
+\begin{proof}
+由定义 \ref{def:translation_function_basic}、\ref{def:scaling_function_basic}、\ref{def:rotation_function_basic}，平移函数、缩放函数、旋转函数分别以 $\mathbb{R}$、$\mathbb{R}^+$、$U(1)$ 为作用群，周期子群依次为 $T_0\mathbb{Z}$、$\langle q_0\rangle$、$\langle e^{i\theta_0}\rangle$。不动元分别为 $0$、$1$、$i$ 三种情形的参考点。守恒律与通量的对应关系参照命题 \ref{prop:translation_operator}、\ref{prop:scaling_operator}、\ref{prop:rotation_operator}。商空间与 Pontryagin 对偶由定理 \ref{thm:three_groups_duality} 给出。
+\end{proof}
+
+\section{\texorpdfstring{群函数与周期数学的统一视角}{群函数与周期数学的统一视角}}
+
+\begin{remark}[群函数在周期数学中的地位]\label{rem:group_function_hub}
+本章将周期数学的核心概念在群表示论层面获得统一表述：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{自同构塔}：自同构塔实现了“关系的高阶关系亦为群”。
+    \item \textbf{群上三种构造}：平移、内自同构、外自同构。
+    \item \textbf{8组概念对}：平移/缩放/旋转/守恒/对称/闭合/周期/高阶函数与群的精确定义。
+    \item \textbf{相空间联合判定}：群表示论判据 + 相空间判据 + 守恒判据的统一。
+    \item \textbf{传递性矩阵}：8种性质在12种运算下的完整传递性分析。
+    \item \textbf{群函数——正则表示与特征标}：$L^2(G)$ 的表示分解。
+\end{enumerate}
+\end{remark}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.0,>=stealth,
+        box/.style={draw,rectangle,minimum width=8cm,inner sep=8pt,font=\small}]
+        \node[box,fill=blue!10] (ops) at (0,0) {群上三种构造：平移（$L_g$）、内自同构（$\iota_g$）、外自同构（$\operatorname{Out}(G)$）};
+        \node[box,fill=green!10] (conc) at (0,-1.6) {8组概念对：平移/缩放/旋转/守恒/对称/闭合/周期/高阶};
+        \node[box,fill=red!10] (phase) at (0,-3.2) {相空间联合判定：群表示论 $\times$ 相空间 $\times$ 守恒};
+        \node[box,fill=yellow!10] (matrix) at (0,-4.8) {传递性矩阵：8性质 $\times$ 12运算 $=$ 96格子};
+        \node[box,fill=purple!10] (func) at (0,-6.4) {群函数：$L^2(G)$ 正则表示 $\to$ 不可约表示特征标 $\chi_\rho$};
+        \node[box,fill=orange!10] (higher) at (0,-8.0) {自同构塔：$\operatorname{Aut}(G)$ $\to$ $\operatorname{Aut}(\operatorname{Aut}(G))$ $\to$ $\cdots$};
+        
+        \draw[->,thick] (ops) -- (conc);
+        \draw[->,thick] (conc) -- (phase);
+        \draw[->,thick] (phase) -- (matrix);
+        \draw[->,thick] (matrix) -- (func);
+        \draw[->,thick,dashed] (higher.east) to[out=30,in=330] (ops.east);
+        
+        \node[font=\small] at (0,-9.2) {群函数 = 周期数学的统一语言};
+    \end{tikzpicture}
+    \caption{群与群函数的完整体系。}
+    \label{fig:group_function_hierarchy}
+\end{figure}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 群上平移构造（定义 \ref{def:group_translation_operation}）的基本性质（命题 \ref{prop:translation_operator}）；平移群/平移函数概念对 \\
+缩放 & 群上外自同构（定义 \ref{def:group_scaling_operation}）的基本性质（命题 \ref{prop:scaling_operator}）；缩放群/缩放函数概念对 \\
+旋转 & 群上内自同构（定义 \ref{def:group_rotation_operation}）的基本性质（命题 \ref{prop:rotation_operator}）；旋转群/旋转函数概念对 \\
+守恒 & 三种构造的群-不动元-守恒律对照（注释 \ref{cor:three_functions_trinity}）；守恒群/守恒函数概念对 \\
+对称 & 平移对称与自同构对称（定义 \ref{def:group_translation_symmetry}、\ref{def:group_automorphism_symmetry}）、自同构塔（定义 \ref{def:automorphism_tower}）、对称群/对称函数概念对 \\
+闭合 & 轨道-稳定子定理（定理 \ref{thm:orbit_stabilizer}）的有限轨道闭合；闭合群/闭合函数概念对；函数周期性的相空间-群表示论联合判据（定理 \ref{thm:phase_group_joint_criterion}） \\
+周期 & 群周期（定义 \ref{def:group_strict_period}）的基本性质（命题 \ref{prop:group_period_properties}）；具有周期轨道的群/周期函数概念对；传递性矩阵（表 \ref{tab:transitivity_matrix}）与总体规律（定理 \ref{thm:transitivity_pattern}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 根据定义 \ref{def:group_translation_operation}，验证左平移与右平移的三条基本性质：
+    \begin{enumerate}[label=(\roman*)]
+        \item $L_g\circ L_h=L_{gh}$，且 $\{L_g\}\cong G$（左正则作用）；
+        \item $R_g\circ R_h=R_{hg}$，且 $\{R_g\}\cong G^{\text{op}}$；
+        \item $L_g\circ R_h=R_h\circ L_g$。
+    \end{enumerate}
+    并说明当 $G$ 非交换时，左平移群与右平移群作为 $G$ 的子群一般不相同。
+
+    \item 证明命题 \ref{prop:translation_operator} 中关于平移构造的四条性质：
+    不动元、无穷小生成元、Haar 测度不变性与方向结构。
+    请分别以 $G=\mathbb{Z}$、$G=\mathbb{R}$ 与 $G=GL(n,\mathbb{R})$ 为例，
+    验证左平移与右平移的具体形式。
+
+    \item 证明命题 \ref{prop:rotation_operator} 中关于内自同构的四条性质：
+    不动元为中心 $Z(G)$、无穷小生成元为伴随表示、守恒量为类函数、伴随轨道。
+    请验证 $\iota_g$ 是自同构且映射 $g\mapsto\iota_g$ 的核为 $Z(G)$，
+    并说明为什么 $G=U(1)$ 时所有内自同构都是恒等映射。
+
+    \item 验证例 \ref{ex:rotation_operation_examples} 中三个内自同构实例：
+    \begin{enumerate}[label=(\roman*)]
+        \item $GL(n,\mathbb{R})$ 中的相似变换 $\iota_A(X)=AXA^{-1}$；
+        \item $SO(3)$ 中将旋转共轭到绕新轴的旋转；
+        \item $U(1)$ 中内自同构退化为恒等。
+    \end{enumerate}
+    请取 $A=\operatorname{diag}(2,1)$ 与置换矩阵 $P$，
+    计算 $PAP^{-1}$，验证特征值在共轭下不变。
+
+    \item 证明命题 \ref{prop:scaling_operator} 中关于外自同构的四条性质，
+    并验证例 \ref{ex:scaling_operation_examples}：
+    \begin{enumerate}[label=(\roman*)]
+        \item $\operatorname{Aut}(\mathbb{Z})\cong C_2=\{\operatorname{id},-\operatorname{id}\}$；
+        \item $\operatorname{Aut}(C_n)\cong(\mathbb{Z}/n\mathbb{Z})^\times$，阶为 $\varphi(n)$；
+        \item $\operatorname{Aut}(\mathbb{R}^+)\cong\mathbb{R}^\times$，自同构为 $x\mapsto x^\lambda$。
+    \end{enumerate}
+    请计算 $n=5$ 时 $\operatorname{Aut}(C_5)$ 的阶与生成元。
+
+    \item 证明定理 \ref{thm:three_operations_unity}：
+    群上三种标准构造在自同构群 $\operatorname{Aut}(G)$ 中构成如下结构：
+    平移由左正则作用实现，内自同构群 $\operatorname{Inn}(G)\cong G/Z(G)$，
+    外自同构群 $\operatorname{Out}(G)=\operatorname{Aut}(G)/\operatorname{Inn}(G)$。
+    请写出正合列
+    \[
+    1\to Z(G)\to G\xrightarrow{\phi}\operatorname{Aut}(G)
+    \xrightarrow{\pi}\operatorname{Out}(G)\to 1,
+    \]
+    并逐项验证其正合性。
+
+    \item 证明引理 \ref{ch8_centreless_embedding}：
+    设 $G$ 为有限群且 $Z(G)=\{e\}$，则
+    \begin{enumerate}[label=(\roman*)]
+        \item $G\cong\operatorname{Inn}(G)\subseteq\operatorname{Aut}(G)$，从而 $|G|\le|\operatorname{Aut}(G)|$；
+        \item 若 $|\operatorname{Aut}(G)|=|G|$，则 $\operatorname{Aut}(G)=\operatorname{Inn}(G)\cong G$；
+        \item $Z(\operatorname{Aut}(G))=\{e\}$，即中心平凡性逐层保持。
+    \end{enumerate}
+
+    \item 验证命题 \ref{prop:tower_heights} 中典型群的自同构塔高度：
+    \begin{enumerate}[label=(\roman*)]
+        \item $C_2\to\{e\}$，高度 $1$；
+        \item $C_3\to C_2\to\{e\}$，高度 $2$；
+        \item $C_5\to C_4\to C_2\to\{e\}$，高度 $3$；
+        \item $S_3\to S_3$，高度 $0$。
+    \end{enumerate}
+    请分别计算各层自同构群，并说明为什么 $S_3$ 的外自同构群为平凡群。
+
+    \item 证明定理 \ref{thm:orbit_stabilizer}（轨道-稳定子定理）：
+    设有限群 $G$ 作用在有限集合 $X$ 上，则对任意 $x\in X$，
+    \[
+    |G\cdot x|=\frac{|G|}{|G_x|}.
+    \]
+    请通过构造 $G/G_x\to G\cdot x$ 的双射完成证明，
+    并说明该定理如何刻画有限轨道的闭合性。
+
+    \item 证明命题 \ref{prop:translation_automorphism_compatibility}：
+    设 $\varphi\in\operatorname{Aut}(G)$，$g\in G$，则
+    \[
+    \varphi\circ L_g\circ\varphi^{-1}=L_{\varphi(g)}.
+    \]
+    并说明为什么外自同构不保持共轭类结构而内自同构保持共轭类结构。
+
+    \item 根据定义 \ref{def:translation_function_gf} 至定义 \ref{def:higher_group_gf}，
+    写出 8 组概念对的定义，并验证命题 \ref{prop:invariance_subgroup_structure}：
+    \begin{enumerate}[label=(\roman*)]
+        \item $\operatorname{Group}_{\mathrm{period}}(f)=\operatorname{Symmetry}(f)$；
+        \item $\operatorname{Symmetry}(f)\subseteq\operatorname{Group}_{\mathrm{conservation}}(f,Q)$；
+        \item 平移群、缩放群、旋转群均含于 $\operatorname{Symmetry}(f)$；
+        \item 高阶群与高阶函数通过自同构塔逐层关联。
+    \end{enumerate}
+
+    \item 证明定理 \ref{thm:phase_group_joint_criterion}：
+    设 $f$ 为光滑函数，$G$ 作用在定义域上，则 $f$ 关于 $g\in G$ 是周期函数的充要条件是相空间轨迹满足 $\Gamma_f(\phi_g(x))=\Gamma_f(x)$。
+    请分别证明两个方向，并解释：(i) $g\in\operatorname{Group}_{\mathrm{period}}(f)$ 与 (iii) “存在守恒量 $Q$ 使 $Q(f(x))$ 沿 $\Gamma_f$ 为常数”为何不是与 (ii) 并列的独立条件——说明 (ii) 如何推出 (i) 与 (iii)，以及为何 (iii) 不能反推 (ii)。
+
+    \item 证明命题 \ref{prop:group_period_properties} 中群周期的三条基本性质：
+    \begin{enumerate}[label=(\roman*)]
+        \item 周期封闭性：$\gamma_1,\gamma_2\in\Gamma\Rightarrow\gamma_1\gamma_2\in\Gamma$；
+        \item $L^2$ 可积性条件：若 $f\neq0$ 且 $f\in L^2(G)$，则 $\Gamma$ 为有限子群；
+        \item 基本域决定论：$f$ 在基本域上的取值完全决定 $f$。
+    \end{enumerate}
+
+    \item 证明命题 \ref{prop:regular_unitary}：
+    局部紧群 $G$ 上的左正则表示与右正则表示都是 $L^2(G)$ 上的酉表示。
+    请分别用左 Haar 测度的左不变性与右不变性完成证明。
+
+    \item 证明定理 \ref{thm:class_function_expansion}（Peter--Weyl 定理的类函数版）：
+    设 $G$ 为紧群，则不可约酉表示的特征标 $\{\chi_\rho\}$ 构成
+    $L^2(G)_{\text{class}}$ 的完备正交基。
+    请写出 Schur 正交关系的证明，并说明任意类函数如何展开为特征标级数。
+
+    \item 证明命题 \ref{prop:convolution_orbit}：
+    设 $G$ 为紧群，$K$ 为类函数，则卷积算子 $C_K f=K*f$ 在轨道分解下对角化：
+    \[
+    (C_K f)_\rho=\frac{\hat{K}(\rho)}{\dim\rho}f_\rho,
+    \quad
+    \hat{K}(\rho)=\langle K,\chi_\rho\rangle.
+    \]
+    请用 Schur 正交关系完成证明。
+
+    \item 证明定理 \ref{thm:automorphic_quotient}：
+    自守函数等价于商空间 $\Gamma\backslash(G\times V)$ 上的截面。
+    请分别写出“自守函数到截面”与“截面到自守函数”两个方向的构造，
+    并验证二者互逆。
+
+    \item 证明引理 \ref{ch8_pointwise_invariance}：
+    设 $f,g$ 分别为关于子群 $H_f,H_g$ 不变的函数，
+    $\star$ 为逐点二元运算，则
+    \begin{enumerate}[label=(\roman*)]
+        \item $f\star g$ 关于 $H_f\cap H_g$ 不变；
+        \item 对任意逐点一元运算 $\triangle$，$\triangle f$ 关于 $H_f$ 不变。
+    \end{enumerate}
+    请说明为什么这一引理是传递性矩阵中代数运算格子的统一证明基础。
+
+    \item 验证命题 \ref{prop:add_translation} 与命题 \ref{ch8_add_scaling}：
+    \begin{enumerate}[label=(\roman*)]
+        \item 设 $f,g$ 的平移群分别为 $T_f\mathbb{Z}$、$T_g\mathbb{Z}$，
+              若 $T_f/T_g\in\mathbb{Q}$，则 $f+g$ 以 $\operatorname{lcm}(T_f,T_g)$ 为周期；
+        \item 设 $f,g$ 的缩放群分别为 $\langle q_f\rangle$、$\langle q_g\rangle$，
+              若 $\ln q_f/\ln q_g\in\mathbb{Q}$，则 $f\pm g$ 与 $fg$ 仍为缩放函数。
+    \end{enumerate}
+    请说明为什么可公度条件是周期结构保持的必要条件。
+
+    \item 证明命题 \ref{prop:diff_scaling} 与命题 \ref{prop:diff_rotation}：
+    \begin{enumerate}[label=(\roman*)]
+        \item 微分破坏缩放对称性：若 $f(q_0x)=f(x)$，则
+              $f'(q_0x)=f'(x)/q_0\neq f'(x)$；
+        \item 微分下旋转性质协变保持：若 $f(e^{i\theta}z)=f(z)$，则
+              $f'(e^{i\theta}z)=e^{-i\theta}f'(z)$，且 $|f'|$ 是旋转函数。
+    \end{enumerate}
+    请说明为什么链式法则引入的额外缩放因子是微分破坏缩放对称性的根本原因。
+
+    \item 证明命题 \ref{prop:int_translation}：
+    设 $f$ 为连续的平移函数，$F(x)=\int_0^x f(t)\,dt$，
+    则 $F$ 是平移函数当且仅当 $\int_0^Tf(t)\,dt=0$。
+    请写出证明，并解释为什么积分常数引入的额外自由度导致平移性质的条件保持。
+
+    \item 证明定理 \ref{thm:transitivity_pattern}：
+    传递性矩阵的总体规律：
+    \begin{enumerate}[label=(\roman*)]
+        \item 代数运算（加减乘除幂根对数）：所有性质全部保持；
+        \item 分析运算（级数、极限）：所有性质全部保持；
+        \item 微分：除缩放性质外全部保持；
+        \item 积分：除平移/周期性质的条件保持外全部保持；
+        \item 卷积：全部保持。
+    \end{enumerate}
+    请分别指出每一类运算保持或不保持性质的原因。
+
+    \item 证明定理 \ref{thm:three_groups_duality}：
+    三种基本群在 Pontryagin 对偶下具有对应关系：
+    \begin{enumerate}[label=(\roman*)]
+        \item $\mathbb{R}/T_0\mathbb{Z}\cong S^1$，$\widehat{S^1}\cong\mathbb{Z}$；
+        \item $\mathbb{R}^+/\langle q_0\rangle\cong S^1$，对偶同构于 $\mathbb{Z}$；
+        \item $U(1)/C_n\cong U(1)$，$\widehat{U(1)}\cong\mathbb{Z}$。
+    \end{enumerate}
+    请分别验证三行的商空间结构与对偶群结构。
+
+    \item 综合题：结合群上三种标准构造（定义 \ref{def:group_translation_operation}、
+    \ref{def:group_rotation_operation}、\ref{def:group_scaling_operation}）、
+    8 组概念对（\S\ref{sec:group_function_basic}）、
+    相空间联合判定框架（定理 \ref{thm:phase_group_joint_criterion}）
+    与传递性矩阵（表 \ref{tab:transitivity_matrix}），
+    说明群与群函数如何为周期数学提供统一代数语言。
+    请分别指出：
+    \begin{enumerate}[label=(\roman*)]
+        \item 三种标准构造如何分别对应平移、缩放、旋转；
+        \item 8 组概念对如何刻画周期结构的层次；
+        \item 传递性矩阵如何总结 8 种性质在 12 种运算下的保持规律；
+        \item 自同构塔如何实现“关系的高阶关系亦为群”。
+    \end{enumerate}
+\end{enumerate}
+

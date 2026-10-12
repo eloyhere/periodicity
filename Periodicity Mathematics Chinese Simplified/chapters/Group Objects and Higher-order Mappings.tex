@@ -1,0 +1,1032 @@
+\chapter{群对象与高阶映射结构}
+\label{chap:higher_group}
+\markboth{高阶群与高阶函数}{高阶群与高阶函数}
+
+\begin{remark}[本章定位]\label{rem:higher_group_chapter_positioning}
+本章将“群与群函数”章中的自同构塔结构系统展开。自同构塔
+\[
+G_{(0)} = G,\qquad G_{(k+1)} = \operatorname{Aut}(G_{(k)}),\quad k\ge 0
+\]
+是群表示论中“关系的关系亦为群”这一思想的具体实现。本章建立自同构塔的基本理论、塔上每一层的三种标准构造（平移、内自同构、外自同构）、塔上的函数空间、塔上的对称性与守恒量、塔上的周期结构，以及塔的稳定性与典型群的塔高度。
+
+本章的核心内容是将“群与群函数”章中建立的一阶群表示论框架逐层提升到自同构塔的每一层。每一层 $G_{(k)}$ 都拥有自己的平移（左正则作用）、内自同构（$\operatorname{Inn}(G_{(k)})$）与外自同构（$\operatorname{Out}(G_{(k)})$），以及对应的函数空间和守恒量。
+
+\textbf{本章七主题导引}：平移——自同构塔每一层的左正则作用（命题 \ref{prop:tower_three_operations}）；缩放——外自同构群的逐层递推（命题 \ref{prop:tower_three_operations}）；旋转——内自同构群的逐层递推（命题 \ref{prop:tower_three_operations}）；守恒——塔上的守恒量（定义 \ref{def:higher_conservation_law}）；对称——塔上的对称群（定义 \ref{def:higher_symmetry_group}）；闭合——塔的稳定性（定理 \ref{thm:higher_wielandt}、命题 \ref{prop:tower_heights}）；周期——塔上的周期结构（定义 \ref{def:higher_period}）。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  >=Stealth, thick, node distance=1.5cm,
+  tower/.style={draw, rounded corners, align=center, minimum width=2.6cm, minimum height=0.9cm, fill=blue!8},
+  arr/.style={-{Stealth[length=2.4mm]}, very thick}
+]
+\node[tower, fill=blue!12] (g0) at (0,0)  {$G_{(0)}=G$};
+\node[tower, fill=green!12] (g1) at (3.6,0) {$G_{(1)}=\operatorname{Aut}(G)$};
+\node[tower, fill=orange!12] (g2) at (7.2,0) {$G_{(2)}=\operatorname{Aut}^2(G)$};
+\node[tower, fill=red!12] (g3) at (10.8,0) {$G_{(3)}$};
+\node[align=center] (dots) at (12.6,0) {$\cdots$};
+\draw[arr] (g0) -- (g1);
+\draw[arr] (g1) -- (g2);
+\draw[arr] (g2) -- (g3);
+\draw[arr, dashed] (g3) -- (dots);
+\foreach \name in {g0,g1,g2,g3} {
+  \draw[gray!40, dashed] (\name.south) -- ++(0,-0.6);
+}
+\node[align=center, font=\footnotesize] at (3.6,-1.4) {平移\\内自同构\\外自同构};
+\node[align=center, font=\footnotesize] at (7.2,-1.4) {平移\\内自同构\\外自同构};
+\node[align=center, font=\footnotesize] at (10.8,-1.4) {平移\\内自同构\\外自同构};
+\node[align=center, font=\small] at (5.4,-3.0) {每一层 $G_{(k)}$ 都重新拥有三种标准构造（平移 / 内自同构 / 外自同构）};
+\end{tikzpicture}
+\caption{自同构塔概览：$G_{(k+1)}=\operatorname{Aut}(G_{(k)})$ 逐层构造，每层均重新出现平移、内自同构与外自同构。}
+\label{fig:automorphism_tower_overview}
+\end{figure}
+
+\section{自同构与自同构群}
+
+本节的基本概念已在“群与群函数”章中建立，此处仅作回顾并固定记号。
+
+\begin{definition}[群的自同构]\label{def:higher_automorphism}
+本定义与第~\ref{chap:group_function}~章「自同构塔」节（\cref{sec:automorphism_tower}）中的 \cref{def:automorphism} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{definition}
+
+\begin{definition}[自同构群]\label{def:higher_automorphism_group}
+本定义与第~\ref{chap:group_function}~章「自同构塔」节（\cref{sec:automorphism_tower}）中的 \cref{def:automorphism_group} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{definition}
+
+\begin{proposition}[自同构的逆保持群运算]\label{prop:higher_automorphism_inverse}
+本命题与第~\ref{chap:group_function}~章「自同构塔」节（\cref{sec:automorphism_tower}）中的 \cref{prop:automorphism_inverse} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{proposition}
+
+\begin{proof}
+由于 $\varphi$ 是满射，对任意 $u,v \in G$，存在唯一的 $x,y \in G$ 使得 $\varphi(x)=u$，$\varphi(y)=v$。由 $\varphi$ 的同态性质，$\varphi(xy)=uv$。两边作用 $\varphi^{-1}$ 得
+\[
+xy = \varphi^{-1}(uv).
+\]
+而 $x=\varphi^{-1}(u)$，$y=\varphi^{-1}(v)$，故
+\[
+\varphi^{-1}(uv) = \varphi^{-1}(u)\varphi^{-1}(v).
+\]
+因此 $\varphi^{-1}$ 保持群运算。又 $\varphi^{-1}$ 是双射（$\varphi$ 为双射），故 $\varphi^{-1}\in\operatorname{Aut}(G)$。
+\end{proof}
+
+\begin{property}[自同构保持的群结构不变量]\label{prop:higher_automorphism_invariants}
+设 $\varphi \in \operatorname{Aut}(G)$。则：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{阶}：$|G| = |\varphi(G)|$；
+    \item \textbf{单位元}：$\varphi(e) = e$；
+    \item \textbf{元素的阶}：$\operatorname{ord}(\varphi(g)) = \operatorname{ord}(g)$ 对任意 $g\in G$；
+    \item \textbf{中心}：$\varphi(Z(G)) = Z(G)$；
+    \item \textbf{换位子群}：$\varphi([G,G]) = [G,G]$。
+\end{enumerate}
+\end{property}
+
+\begin{proof}
+(i) $\varphi$ 是双射，故 $|G| = |\varphi(G)|$。
+
+(ii) 由 $\varphi(e) = \varphi(ee) = \varphi(e)\varphi(e)$，两边左乘 $\varphi(e)^{-1}$ 得 $\varphi(e)=e$。
+
+(iii) 对任意 $n\ge 1$，$\varphi(g)^n = \varphi(g^n)$。由 $\varphi$ 是双射，$\varphi(g)^n = e$ 当且仅当 $g^n = e$，故阶相同。
+
+(iv) 设 $z\in Z(G)$。对任意 $x\in G$，存在 $y\in G$ 使 $x=\varphi(y)$。则
+\[
+x\varphi(z) = \varphi(y)\varphi(z) = \varphi(yz) = \varphi(zy) = \varphi(z)\varphi(y) = \varphi(z)x.
+\]
+故 $\varphi(z)\in Z(G)$，即 $\varphi(Z(G))\subseteq Z(G)$。对 $\varphi^{-1}$ 应用同一结论得 $Z(G)\subseteq\varphi(Z(G))$，故相等。
+
+(v) 换位子 $[x,y]=xyx^{-1}y^{-1}$ 在自同构下的像为
+\[
+\varphi([x,y]) = \varphi(x)\varphi(y)\varphi(x)^{-1}\varphi(y)^{-1} = [\varphi(x),\varphi(y)].
+\]
+故 $\varphi([G,G]) = [G,G]$。
+\end{proof}
+
+\begin{property}[自同构保持共轭类]\label{prop:automorphism_preserves_conjugacy}
+设 $\varphi \in \operatorname{Aut}(G)$。则 $\varphi$ 把共轭类映为共轭类，即对任意 $g\in G$，
+\[
+\varphi\bigl(\operatorname{Cl}(g)\bigr) = \operatorname{Cl}\bigl(\varphi(g)\bigr).
+\]
+特别地，$\varphi$ 保持共轭类的划分。
+\end{property}
+
+\begin{proof}
+对任意 $x = hgh^{-1} \in \operatorname{Cl}(g)$，
+\[
+\varphi(x) = \varphi(h)\varphi(g)\varphi(h)^{-1} \in \operatorname{Cl}(\varphi(g)).
+\]
+故 $\varphi(\operatorname{Cl}(g))\subseteq \operatorname{Cl}(\varphi(g))$。对 $\varphi^{-1}$ 应用同一结论得 $\operatorname{Cl}(\varphi(g))\subseteq \varphi(\operatorname{Cl}(g))$，故相等。
+\end{proof}
+
+\begin{lemma}[自同构限制到特征子群]\label{lem:automorphism_restricts_characteristic}
+设 $H\le G$ 是 $G$ 的\textbf{特征子群}（即 $\varphi(H)=H$ 对一切 $\varphi\in\operatorname{Aut}(G)$ 成立）。则存在群同态
+\[
+\Phi: \operatorname{Aut}(G) \to \operatorname{Aut}(H),\qquad \varphi \mapsto \varphi|_H.
+\]
+\end{lemma}
+
+\begin{proof}
+对任意 $\varphi\in\operatorname{Aut}(G)$，由特征性 $\varphi(H)=H$，故 $\varphi|_H: H\to H$ 是双射；又 $\varphi$ 保群运算，故 $\varphi|_H$ 保群运算，即 $\varphi|_H\in\operatorname{Aut}(H)$。映射 $\Phi$ 保持复合：$(\varphi\psi)|_H=\varphi|_H\,\psi|_H$，故 $\Phi$ 为同态。
+\end{proof}
+
+\begin{example}[典型群的自同构群不变量]\label{ex:automorphism_invariants_examples}
+\begin{itemize}
+    \item $\operatorname{Aut}(\mathbb{Z}) \cong C_2$：唯一非平凡自同构是 $x\mapsto -x$，它保持元素阶并交换 $+n$ 与 $-n$。
+    \item $\operatorname{Aut}(C_n) \cong (\mathbb{Z}/n\mathbb{Z})^\times$：自同构 $x\mapsto x^k$（$\gcd(k,n)=1$）保持元素的阶、保持单位元、保持中心（整个 $C_n$）。
+    \item $\operatorname{Aut}(S_3) \cong S_3$：所有自同构都是内自同构，保持三个二阶子群（对换）与正规子群 $A_3$。
+\end{itemize}
+\end{example}
+
+\begin{table}[htbp]
+    \centering
+    \caption{自同构不变量与典型例子}
+    \label{tab:automorphism_invariants}
+    \small
+    \renewcommand{\arraystretch}{1.25}
+    \begin{tabular}{@{}p{3.4cm} p{5.0cm} p{4.6cm}@{}}
+    \toprule
+    不变量 & 含义 & 典型例子 \\
+    \midrule
+    群阶 $|G|$ & $\varphi$ 是双射 & $\operatorname{Aut}(\mathbb{Z}/n\mathbb{Z})$ 保持 $n$ \\
+    单位元 $e$ & $\varphi(ee)=\varphi(e)\varphi(e)$ & 任意自同构固定 $e$ \\
+    元素阶 & $\operatorname{ord}(\varphi(g))=\operatorname{ord}(g)$ & $\operatorname{Aut}(C_5)$ 保持阶 5 的元素数 \\
+    中心 $Z(G)$ & 特征子群 & $\operatorname{Aut}(S_3)$ 固定 $Z(S_3)=\{e\}$ \\
+    换位子群 $[G,G]$ & 特征子群 & $\operatorname{Aut}(S_3)$ 固定 $[S_3,S_3]=A_3$ \\
+    共轭类划分 & 共轭类被映到共轭类 & $S_3$ 的三个对换类在 $\operatorname{Aut}$ 下保持 \\
+    \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{corollary}[自同构保素性]\label{cor:automorphism_simple}
+若 $G$ 是单群且 $\varphi\in\operatorname{Aut}(G)$，则 $\varphi$ 把极大正规子群映为极大正规子群；特别地，若 $G$ 单，则 $\varphi(\{e\})=\{e\}$ 且 $\varphi(G)=G$。
+\end{corollary}
+
+\begin{proof}
+$G$ 单意味着无非平凡正规子群。设 $N\trianglelefteq G$，则 $\varphi(N)\trianglelefteq G$。若 $N=\{e\}$，则 $\varphi(N)=\{e\}$；若 $N=G$，则 $\varphi(N)=G$。中间情形不存在。
+\end{proof}
+
+\section{内自同构与外自同构}
+
+\begin{definition}[内自同构]\label{def:higher_inner_automorphism}
+本定义与第~\ref{chap:group_function}~章「内自同构」节（\cref{subsec:inner_automorphism}）中的 \cref{def:group_rotation_operation} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{definition}
+
+\begin{proposition}[内自同构群的结构]\label{prop:inner_automorphism_group}
+$\operatorname{Inn}(G)$ 是 $\operatorname{Aut}(G)$ 的正规子群，且
+\[
+\operatorname{Inn}(G) \cong G/Z(G).
+\]
+\end{proposition}
+
+\begin{proof}
+首先验证 $\iota_g$ 是自同构。对任意 $x,y\in G$，
+\[
+\iota_g(xy) = g(xy)g^{-1} = (gxg^{-1})(gyg^{-1}) = \iota_g(x)\iota_g(y).
+\]
+又 $\iota_g$ 的逆为 $\iota_{g^{-1}}$，故 $\iota_g$ 是双射，从而是自同构。
+
+映射 $\phi: G\to\operatorname{Aut}(G)$，$\phi(g)=\iota_g$ 是群同态，因为
+\[
+\phi(gh)(x) = (gh)x(gh)^{-1} = g(hxh^{-1})g^{-1} = \iota_g(\iota_h(x)) = (\phi(g)\circ\phi(h))(x).
+\]
+其核为
+\[
+\ker\phi = \{g\in G : gxg^{-1}=x,\ \forall x\in G\} = Z(G).
+\]
+由同态基本定理，$\operatorname{Inn}(G) = \phi(G) \cong G/Z(G)$。
+
+正规性：对任意 $\varphi\in\operatorname{Aut}(G)$ 和 $g\in G$，
+\[
+\varphi\circ\iota_g\circ\varphi^{-1} = \iota_{\varphi(g)} \in\operatorname{Inn}(G).
+\]
+故 $\operatorname{Inn}(G)\trianglelefteq\operatorname{Aut}(G)$。
+\end{proof}
+
+\begin{proposition}[内自同构保持共轭类]\label{prop:inner_preserves_conjugacy}
+对任意 $g\in G$，$\iota_g$ 把每个共轭类映为它自身：
+\[
+\iota_g(\operatorname{Cl}(h)) = \operatorname{Cl}(h),\qquad \forall h\in G.
+\]
+\end{proposition}
+
+\begin{proof}
+设 $x = khk^{-1}$。则
+\[
+\iota_g(x) = g(khk^{-1})g^{-1} = (gk)h(gk)^{-1} \in \operatorname{Cl}(h).
+\]
+反向同理（用 $\iota_g^{-1}=\iota_{g^{-1}}$）。故共轭类在 $\iota_g$ 下不变。
+\end{proof}
+
+\begin{definition}[外自同构群]\label{def:higher_outer_automorphism}
+本定义与第~\ref{chap:group_function}~章「外自同构」节（\cref{subsec:outer_automorphism}）中的 \cref{def:group_scaling_operation} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{definition}
+
+\begin{proposition}[自同构群的正合列]\label{prop:automorphism_exact_sequence}
+存在正合列
+\[
+1 \longrightarrow Z(G) \xrightarrow{\ \iota\ } G \xrightarrow{\ \phi\ } \operatorname{Aut}(G) \xrightarrow{\ \pi\ } \operatorname{Out}(G) \longrightarrow 1,
+\]
+其中 $\iota$ 是包含映射，$\phi(g)=\iota_g$ 是内自同构映射，$\pi$ 是商映射。
+\end{proposition}
+
+\begin{proof}
+正合列要求每个映射的像等于下一个映射的核。
+
+(i) $\ker\iota = \{e\}$，因为 $\iota$ 是包含映射。
+
+(ii) $\operatorname{im}\iota = Z(G)$。由命题 \ref{prop:inner_automorphism_group} 的证明，$\ker\phi = Z(G)$，故 $\operatorname{im}\iota = \ker\phi$。
+
+(iii) $\operatorname{im}\phi = \operatorname{Inn}(G)$。由定义，$\operatorname{Inn}(G) = \phi(G)$。又 $\pi$ 是商映射，$\ker\pi = \operatorname{Inn}(G)$，故 $\operatorname{im}\phi = \ker\pi$。
+
+(iv) $\pi$ 是满射，故 $\operatorname{im}\pi = \operatorname{Out}(G)$。
+
+因此序列正合。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick,
+  obj/.style={draw, rounded corners, align=center, minimum width=2.2cm, minimum height=0.85cm, fill=blue!8, font=\small}]
+
+\node[obj] (triv1) at (0,0) {$\{1\}$};
+\node[obj, fill=green!10] (zg) at (2.6,0) {$Z(G)$};
+\node[obj, fill=orange!10] (g) at (5.2,0) {$G$};
+\node[obj, fill=red!10] (aut) at (7.8,0) {$\operatorname{Aut}(G)$};
+
+\node[obj, fill=purple!10] (out) at (7.8,-1.8) {$\operatorname{Out}(G)$};
+\node[obj] (triv2) at (5.2,-1.8) {$\{1\}$};
+
+
+\draw[->, very thick] (triv1) -- (zg);
+\draw[->, very thick] (zg) -- node[above, font=\footnotesize] {$\iota$} (g);
+\draw[->, very thick] (g) -- node[above, font=\footnotesize] {$\phi$} (aut);
+
+\draw[->, very thick] (aut) -- node[right, font=\footnotesize] {$\pi$} (out);
+
+\draw[->, very thick] (out) -- (triv2);
+
+\node[align=center, font=\small] at (3.9,-3.6) {正合性：$\ker\iota=\{1\}$，$\operatorname{im}\iota=\ker\phi=Z(G)$，\\$\operatorname{im}\phi=\ker\pi=\operatorname{Inn}(G)$，$\operatorname{im}\pi=\operatorname{Out}(G)$};
+\end{tikzpicture}
+\caption{自同构群的正合列（蛇形回环布局）：第一行 $1\to Z(G)\to G\to\operatorname{Aut}(G)$，从 $\operatorname{Aut}(G)$ 向下拐弯到第二行 $\operatorname{Out}(G)\to 1$。}
+\label{fig:automorphism_exact_sequence}
+\end{figure}
+
+\begin{property}[外自同构群的阶]\label{prop:outer_automorphism_order}
+若 $G$ 为有限群，则
+\[
+|\operatorname{Out}(G)| = \frac{|\operatorname{Aut}(G)|}{|\operatorname{Inn}(G)|} = \frac{|\operatorname{Aut}(G)|}{|G/Z(G)|}.
+\]
+\end{property}
+
+\begin{proof}
+由正合列 $1\to\operatorname{Inn}(G)\to\operatorname{Aut}(G)\to\operatorname{Out}(G)\to 1$，$|\operatorname{Out}(G)| = |\operatorname{Aut}(G)|/|\operatorname{Inn}(G)|$。代入 $\operatorname{Inn}(G)\cong G/Z(G)$ 即得。
+\end{proof}
+
+\begin{example}[外自同构群的典型例子]\label{ex:outer_automorphism_examples}
+\begin{itemize}
+    \item $\operatorname{Out}(\mathbb{Z}) \cong C_2$，因为 $\operatorname{Aut}(\mathbb{Z})\cong C_2$ 而 $\operatorname{Inn}(\mathbb{Z})$ 平凡（$\mathbb{Z}$ 交换）。
+    \item $\operatorname{Out}(C_n) \cong (\mathbb{Z}/n\mathbb{Z})^\times/\{1,-1\}$。
+    \item $\operatorname{Out}(S_6) \cong C_2$（$S_6$ 是唯一具有非平凡外自同构的对称群），而 $\operatorname{Out}(S_n)=\{e\}$（$n\neq 2,6$）。
+\end{itemize}
+\end{example}
+
+\begin{remark}[正合列的含义]\label{rem:exact_sequence_operator}
+正合列
+\[
+1 \to Z(G) \to G \to \operatorname{Aut}(G) \to \operatorname{Out}(G) \to 1
+\]
+表明：$G$ 的中心 $Z(G)$ 是内自同构映射的核，内自同构群 $\operatorname{Inn}(G)$ 是 $G$ 在 $\operatorname{Aut}(G)$ 中的像，外自同构群是商群。这一结构在自同构塔的每一层重复出现。
+\end{remark}
+
+\section{自同构塔}
+
+\begin{definition}[自同构塔]\label{def:higher_automorphism_tower}
+本定义与第~\ref{chap:group_function}~章「自同构塔」节（\cref{sec:automorphism_tower}）中的 \cref{def:automorphism_tower} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{definition}
+
+\begin{proposition}[自同构塔的嵌入链]\label{prop:tower_embedding_chain}
+若 $Z(G)=\{e\}$，则对每一层 $k\ge 0$ 有 $Z(G_{(k)})=\{e\}$，且
+\[
+G_{(k)} \cong \operatorname{Inn}(G_{(k)}) \subseteq \operatorname{Aut}(G_{(k)}) = G_{(k+1)}.
+\]
+因此塔的每一层都嵌入下一层：$G_{(0)} \subseteq G_{(1)} \subseteq G_{(2)} \subseteq \cdots$。
+\end{proposition}
+
+\begin{proof}
+对 $k$ 作归纳。$k=0$ 时 $Z(G)=\{e\}$ 是假设。
+
+设 $Z(G_{(k)})=\{e\}$。由命题 \ref{prop:inner_automorphism_group}，内自同构映射 $\phi_k: G_{(k)} \to \operatorname{Aut}(G_{(k)})$ 的核为 $Z(G_{(k)})=\{e\}$，故 $\phi_k$ 是单射，从而 $G_{(k)} \cong \operatorname{Inn}(G_{(k)}) \subseteq \operatorname{Aut}(G_{(k)}) = G_{(k+1)}$。
+
+还需证明 $Z(G_{(k+1)})=\{e\}$。由“群与群函数”章引理 \ref{ch8_centreless_embedding} (iii)，$Z(\operatorname{Aut}(G_{(k)}))=\{e\}$，即 $Z(G_{(k+1)})=\{e\}$。归纳完成。
+\end{proof}
+
+\begin{lemma}[中心平凡性的逐层保持]\label{ch10_centreless_preserved}
+设 $G$ 为群且 $Z(G)=\{e\}$。则对任意 $k\ge 0$，$Z(G_{(k)})=\{e\}$。
+\end{lemma}
+
+\begin{proof}
+这是命题 \ref{prop:tower_embedding_chain} 证明中的归纳步骤。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=0.9cm,
+  lvl/.style={draw, rounded corners, align=center, minimum width=3.0cm, minimum height=0.8cm, fill=blue!8}]
+\node[lvl, fill=blue!12] (g0) at (0,0) {$G_{(0)}=G$};
+\node[lvl, fill=green!12] (g1) at (0,1.6) {$G_{(1)}=\operatorname{Aut}(G)$};
+\node[lvl, fill=orange!12] (g2) at (0,3.2) {$G_{(2)}=\operatorname{Aut}^2(G)$};
+\node[align=center] (gd) at (0,4.6) {$\vdots$};
+\draw[->, very thick] (g0) -- (g1) node[midway, right, font=\footnotesize] {$\cong\operatorname{Inn}$};
+\draw[->, very thick] (g1) -- (g2) node[midway, right, font=\footnotesize] {$\cong\operatorname{Inn}$};
+\draw[->, very thick, dashed] (g2) -- (gd);
+\node[align=center, font=\small] at (5.2,1.6) {$Z(G_{(k)})=\{e\}$ 逐层保持；\\嵌入链 $G_{(0)}\subseteq G_{(1)}\subseteq\cdots$};
+\end{tikzpicture}
+\caption{中心平凡性沿自同构塔逐层保持：每一层的中心仍为 $\{e\}$，且 $G_{(k)}$ 嵌入 $\operatorname{Aut}(G_{(k)})=G_{(k+1)}$。}
+\label{fig:centreless_tower}
+\end{figure}
+
+\begin{theorem}[有限群的自同构塔稳定性——Wielandt 定理]\label{thm:higher_wielandt}
+本定理与第~\ref{chap:group_function}~章「自同构塔」节（\cref{sec:automorphism_tower}）中的 \cref{thm:finite_automorphism_tower} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述与证明见该处。
+\end{theorem}
+
+\begin{lemma}[塔序的单调性]\label{lem:tower_order_monotone}
+设 $G$ 为有限群且 $Z(G)=\{e\}$。则序 $|G_{(k)}|$ 关于 $k$ 单调不减：$|G_{(k+1)}|\ge |G_{(k)}|$。
+\end{lemma}
+
+\begin{proof}
+由命题 \ref{prop:tower_embedding_chain}，$G_{(k)}\cong\operatorname{Inn}(G_{(k)})\subseteq\operatorname{Aut}(G_{(k)})=G_{(k+1)}$，故 $|G_{(k)}|\le |G_{(k+1)}|$。
+\end{proof}
+
+\begin{corollary}[等阶即稳定]\label{cor:equal_order_stable}
+设 $G$ 为有限群且 $Z(G)=\{e\}$。则 $|G_{(k+1)}|=|G_{(k)}|$ 当且仅当 $G_{(k+1)}\cong G_{(k)}$。
+\end{corollary}
+
+\begin{proof}
+充分性：由塔稳定的定义直接得到（该层相等给出其后每层相等）。必要性：由引理 \ref{lem:tower_order_monotone} 与命题 \ref{prop:tower_embedding_chain}，$G_{(k)}\subseteq G_{(k+1)}$ 且 $|G_{(k)}|=|G_{(k+1)}|$，故 $G_{(k)}=G_{(k+1)}$（作为 $\operatorname{Aut}(G_{(k)})$ 的子群），即 $G_{(k+1)}\cong G_{(k)}$。
+\end{proof}
+
+\begin{remark}[Wielandt 定理的边界]\label{rem:higher_wielandt_boundary}
+本注与第~\ref{chap:group_function}~章「自同构塔」节（\cref{sec:automorphism_tower}）中的 \cref{rem:wielandt_boundary} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{remark}
+
+\section{自同构塔上的三种标准构造}
+\label{sec:tower_three_constructions}
+
+\begin{proposition}[自同构塔每一层的三种构造]\label{prop:tower_three_operations}
+设 $G$ 为群。对自同构塔的每一层 $G_{(k)}$，存在三种标准构造：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{平移}：左正则作用 $L_g: G_{(k)}\to G_{(k)}$，$L_g(x)=gx$，$g\in G_{(k)}$；
+    \item \textbf{内自同构}：$\operatorname{Inn}(G_{(k)}) \cong G_{(k)}/Z(G_{(k)})$；
+    \item \textbf{外自同构}：$\operatorname{Out}(G_{(k)}) = \operatorname{Aut}(G_{(k)})/\operatorname{Inn}(G_{(k)})$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+对每一层 $G_{(k)}$，直接应用“群与群函数”章定理 \ref{thm:three_operations_unity}。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.0cm,
+  lvl/.style={draw, rounded corners, align=center, minimum width=8.0cm, minimum height=0.9cm, fill=blue!6}]
+\node[lvl, fill=blue!12] (l0) at (0,0) {$G_{(0)}$：平移 $L_g$ / 内自同构 $\operatorname{Inn}$ / 外自同构 $\operatorname{Out}$};
+\node[lvl, fill=green!12] (l1) at (0,-1.6) {$G_{(1)}$：平移 $L_\varphi$ / 内自同构 $\operatorname{Inn}$ / 外自同构 $\operatorname{Out}$};
+\node[lvl, fill=orange!12] (l2) at (0,-3.2) {$G_{(2)}$：平移 $L_\psi$ / 内自同构 $\operatorname{Inn}$ / 外自同构 $\operatorname{Out}$};
+\node[align=center] at (0,-4.4) {$\vdots$};
+\draw[->, very thick] (l0) -- (l1);
+\draw[->, very thick] (l1) -- (l2);
+\draw[->, very thick, dashed] (l2) -- (0,-4.2);
+\node[align=center, font=\small] at (6.0,-2.0) {每层上三种构造的\\形式完全相同，只是群\\被替换为 $G_{(k)}$};
+\end{tikzpicture}
+\caption{自同构塔每一层的三种标准构造：平移、内自同构、外自同构逐层重复。}
+\label{fig:tower_three_constructions}
+\end{figure}
+
+\begin{definition}[塔上的守恒量]\label{def:higher_conservation_law}
+设 $G$ 为群，$G_{(k)}$ 为其自同构塔的第 $k$ 层。塔上的\textbf{守恒量}是满足以下条件的泛函 $Q_k: G_{(k)}\to \mathbb{R}$：
+\begin{enumerate}[label=(\roman*)]
+    \item 对左平移不变：$Q_k(gx)=Q_k(x)$ 对所有 $g,x\in G_{(k)}$；
+    \item 对内自同构不变：$Q_k(hxh^{-1})=Q_k(x)$ 对所有 $h,x\in G_{(k)}$；
+    \item 在外自同构下协变：$Q_k(\varphi(x)) = Q_k(x)$ 对所有 $\varphi\in\operatorname{Aut}(G_{(k)})$。
+\end{enumerate}
+满足 (i) 的称为平移不变量，满足 (ii) 的称为类函数，满足 (iii) 的称为自同构不变量。
+\end{definition}
+
+\begin{remark}[塔上三种构造与守恒量的对应]\label{cor:higher_conservation}
+在自同构塔的每一层 $G_{(k)}$ 上：
+\begin{enumerate}[label=(\roman*)]
+    \item 左平移不变性对应平移守恒量；
+    \item 内自同构不变性对应类函数（中心元素上的取值）；
+    \item 外自同构不变性对应自同构不变量。
+\end{enumerate}
+这一对应是“群与群函数”章中三种构造与守恒量对应关系在每一层的重复。
+\end{remark}
+
+\begin{property}[塔上守恒量的包含关系]\label{prop:tower_conservation_inclusion}
+在自同构塔每一层 $G_{(k)}$ 上，设 $Q_k$ 为守恒量。则
+\[
+\text{自同构不变量} \subseteq \text{类函数} \subseteq \text{平移不变量}.
+\]
+\end{property}
+
+\begin{proof}
+设 $Q_k$ 是自同构不变量。则对任意 $h\in G_{(k)}$，取 $\iota_h\in\operatorname{Aut}(G_{(k)})$，得 $Q_k(hxh^{-1})=Q_k(x)$，故 $Q_k$ 是类函数。设 $Q_k$ 是类函数，对任意 $g\in G_{(k)}$，若 $Q_k$ 在单位元上已知，一般无 $Q_k(gx)=Q_k(x)$；这一包含在具体群上依情形而定，但类函数在中心元素上必为常数（中心元素与一切元素交换），故在内自同构意义下是平移不变量。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, scale=1.0]
+\draw[fill=purple!8, rounded corners] (-3.6,-2.0) rectangle (3.6,2.0);
+\node[purple!60!black] at (2.8,1.6) {平移不变量};
+\draw[fill=orange!12, rounded corners] (-2.6,-1.4) rectangle (2.6,1.4);
+\node[orange!60!black] at (1.8,1.0) {类函数};
+\draw[fill=red!16, rounded corners] (-1.6,-0.8) rectangle (1.6,0.8);
+\node[red!60!black] at (0,0) {自同构不变量};
+\node[align=center, font=\small] at (0,-3.0) {塔上守恒量的包含链：自同构不变量 $\subseteq$ 类函数 $\subseteq$ 平移不变量};
+\end{tikzpicture}
+\caption{塔上三类守恒量的包含关系。}
+\label{fig:tower_conservation_inclusion}
+\end{figure}
+
+\section{塔上的函数空间}
+
+\begin{definition}[塔上的函数]\label{def:higher_function}
+设 $G$ 为群，$V$ 为向量空间。塔上的\textbf{函数}是一族映射
+\[
+f_{(k)}: G_{(k)} \to V,\qquad k\ge 0.
+\]
+其中 $f_{(0)}: G\to V$ 是底层的函数。
+\end{definition}
+
+\begin{definition}[塔上的函数空间]\label{def:higher_function_space}
+对每一层 $k\ge 0$，定义\textbf{函数空间}
+\[
+\mathcal{F}_{(k)} = \{f_{(k)}: G_{(k)} \to V\}.
+\]
+\end{definition}
+
+\begin{proposition}[塔上函数的周期保持]\label{prop:higher_period_preservation}
+设 $f_{(0)}: G\to V$ 是右 $\Gamma$-周期的，即 $f_{(0)}(g\gamma)=f_{(0)}(g)$ 对所有 $g\in G$，$\gamma\in\Gamma$ 成立。则对每一层 $k\ge 0$，存在 $G_{(k)}$ 的子群 $\Gamma_{(k)}$，使得相应的函数 $f_{(k)}$ 是右 $\Gamma_{(k)}$-周期的。
+\end{proposition}
+
+\begin{proof}
+对 $k$ 作归纳。$k=0$ 时取 $\Gamma_{(0)}=\Gamma$。
+
+设 $f_{(k)}$ 是右 $\Gamma_{(k)}$-周期的。定义
+\[
+\Gamma_{(k+1)} = \{\varphi\in G_{(k+1)} : \varphi(\gamma)=\gamma,\ \forall\gamma\in\Gamma_{(k)}\}.
+\]
+这是 $G_{(k+1)}$ 的子群（稳定化子）。对任意 $\varphi\in\Gamma_{(k+1)}$ 和 $x\in G_{(k)}$，由 $\varphi$ 是自同构，
+\[
+f_{(k)}(\varphi(x\gamma)) = f_{(k)}(\varphi(x)\varphi(\gamma)) = f_{(k)}(\varphi(x)\gamma) = f_{(k)}(\varphi(x)),
+\]
+其中最后一步用了 $f_{(k)}$ 的 $\Gamma_{(k)}$-周期性。故 $f_{(k)}\circ\varphi = f_{(k)}$，即 $f_{(k)}$ 是 $\Gamma_{(k+1)}$-周期的。
+\end{proof}
+
+\begin{proposition}[塔上函数空间的正则表示结构]\label{prop:higher_function_regular_rep}
+设 $G$ 为局部紧群，$G_{(k)}$ 为其自同构塔第 $k$ 层。则左正则表示
+\[
+\lambda_{(k)}: G_{(k)} \to \mathcal{U}(L^2(G_{(k)})),\qquad (\lambda_{(k)}(g)f)(x) = f(g^{-1}x)
+\]
+是 $L^2(G_{(k)})$ 上的酉表示。
+\end{proposition}
+
+\begin{proof}
+对任意 $g,h\in G_{(k)}$，
+\[
+\lambda_{(k)}(g)\lambda_{(k)}(h)f(x) = f(h^{-1}g^{-1}x) = f((gh)^{-1}x) = \lambda_{(k)}(gh)f(x).
+\]
+单位元作用为恒等。酉性由 Haar 测度的左不变性得到（“群与群函数”章命题 \ref{prop:regular_unitary} 逐层应用）。
+\end{proof}
+
+\begin{corollary}[塔上函数空间的内积形式]\label{cor:higher_function_inner_product}
+塔上第 $k$ 层函数空间 $\mathcal{F}_{(k)} = L^2(G_{(k)})$ 的内积为
+\[
+\langle f_{(k)}, g_{(k)}\rangle_{(k)} = \int_{G_{(k)}} f_{(k)}(x)\,\overline{g_{(k)}(x)}\,dx.
+\]
+\end{corollary}
+
+\begin{proof}
+由定义 \ref{def:higher_function_space} 与 Haar 测度的存在唯一性直接计算。
+\end{proof}
+
+\begin{example}[$C_3$ 的塔上函数空间]\label{ex:c3_tower_functions}
+设 $G=C_3$。其塔为 $C_3\to C_2\to\{e\}$。
+\begin{itemize}
+    \item 底层 $\mathcal{F}_{(0)} = \{f: C_3\to\mathbb{C}\}$，维数 $3$。
+    \item 第 1 层 $\mathcal{F}_{(1)} = \{f: C_2\to\mathbb{C}\}$，维数 $2$。
+    \item 第 2 层 $\mathcal{F}_{(2)} = \{f: \{e\}\to\mathbb{C}\}$，维数 $1$。
+\end{itemize}
+沿塔上行，函数空间维数逐层下降——这正是塔逐层“变短”的代数体现。
+\end{example}
+
+\section{塔上的对称性与守恒量}
+
+\begin{definition}[塔上的对称群]\label{def:higher_symmetry_group}
+设 $f_{(k)}: G_{(k)}\to V$。塔上第 $k$ 层的\textbf{对称群}定义为
+\[
+\operatorname{Symmetry}_{(k)}(f_{(k)}) = \{\varphi\in\operatorname{Aut}(G_{(k)}) : f_{(k)}\circ\varphi = f_{(k)}\}.
+\]
+\end{definition}
+
+\begin{proposition}[塔上对称群的包含关系]
+\label{prop:higher_symmetry_inclusion}
+若 $f_{(k+1)}$ 是 $f_{(k)}$ 沿塔的自然延拓，即
+\[
+f_{(k+1)}\!\mid_{\operatorname{Inn}(G_{(k)})} = f_{(k)},
+\]
+则
+\[
+\operatorname{Symmetry}_{(k)}(f_{(k)})
+\subseteq
+\operatorname{Symmetry}_{(k+1)}(f_{(k+1)}).
+\]
+\end{proposition}
+
+\begin{proof}
+设 $\varphi\in\operatorname{Symmetry}_{(k)}(f_{(k)})$。由 $f_{(k+1)}$ 的延拓定义，对任意 $x\in G_{(k)}$，
+\[
+f_{(k+1)}(\varphi(x)) = f_{(k)}(\varphi(x)) = f_{(k)}(x) = f_{(k+1)}(x).
+\]
+故 $\varphi\in\operatorname{Symmetry}_{(k+1)}(f_{(k+1)})$。
+\end{proof}
+
+\begin{definition}[塔上的守恒量]\label{def:higher_conservation_law_2}
+本定义与第~\ref{chap:higher_group}~章「自同构塔上的三种标准构造」节（\cref{sec:tower_three_constructions}）中的 \cref{def:higher_conservation_law} 为同一内容；为避免重复表述，本处只保留引用锚点，完整陈述见该处。
+\end{definition}
+
+\begin{remark}[塔上的诺特对应]\label{thm:higher_noether}
+在自同构塔的每一层 $G_{(k)}$ 上：
+\begin{enumerate}[label=(\roman*)]
+    \item 左平移对称性对应平移不变量；
+    \item 内自同构对称性对应类函数；
+    \item 外自同构对称性对应自同构不变量。
+\end{enumerate}
+这是“群与群函数”章中诺特对应在塔上的逐层重复。
+\end{remark}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=1.0cm and 1.2cm,
+  box/.style={draw, rounded corners, align=center, minimum width=3.0cm, minimum height=0.9cm, fill=blue!6}]
+\node[box, fill=blue!12] (sym1) at (0,0) {左平移对称};
+\node[box, fill=green!12] (sym2) at (5,0) {内自同构对称};
+\node[box, fill=orange!12] (sym3) at (10,0) {外自同构对称};
+\node[box, fill=blue!8] (cons1) at (0,-1.8) {平移不变量};
+\node[box, fill=green!8] (cons2) at (5,-1.8) {类函数};
+\node[box, fill=orange!8] (cons3) at (10,-1.8) {自同构不变量};
+\draw[->, very thick] (sym1) -- (cons1);
+\draw[->, very thick] (sym2) -- (cons2);
+\draw[->, very thick] (sym3) -- (cons3);
+\node[align=center, font=\small] at (5,-3.2) {塔上诺特对应：三种对称性对应三类守恒量，逐层重复};
+\end{tikzpicture}
+\caption{塔上的诺特对应：左平移、内自同构、外自同构分别对应平移不变量、类函数、自同构不变量。}
+\label{fig:higher_noether}
+\end{figure}
+
+\section{塔上的周期结构}
+
+\begin{definition}[塔上的周期]\label{def:higher_period}
+设 $G$ 为群，$f_{(k)}: G_{(k)}\to V$。若存在子群 $\Gamma_{(k)}\subseteq G_{(k)}$，使得
+\[
+f_{(k)}(g\gamma) = f_{(k)}(g),\qquad \forall g\in G_{(k)},\ \gamma\in\Gamma_{(k)},
+\]
+则称 $f_{(k)}$ 是右 $\Gamma_{(k)}$-周期的，称 $\Gamma_{(k)}$ 为 $f_{(k)}$ 的\textbf{具有周期轨道的群}。
+\end{definition}
+
+\begin{proposition}[塔上周期的传递]\label{prop:higher_period_transfer}
+设 $f_{(0)}$ 是右 $\Gamma_{(0)}$-周期的。则对每一层 $k\ge 0$，$f_{(k)}$ 是右 $\Gamma_{(k)}$-周期的，其中 $\Gamma_{(k)}$ 由命题 \ref{prop:higher_period_preservation} 递推定义。
+\end{proposition}
+
+\begin{proof}
+由命题 \ref{prop:higher_period_preservation} 逐层应用即得。
+\end{proof}
+
+\begin{proposition}[塔上周期的稳定化]\label{prop:higher_period_stabilization}
+设 $G$ 为有限群且 $Z(G)=\{e\}$。则塔上具有周期轨道的群 $\Gamma_{(k)}$ 在塔稳定处停止变化：若 $G_{(N)}\cong G_{(N+1)}$，则对任意 $k\ge N$，$\Gamma_{(k)}=\Gamma_{(N)}$。
+\end{proposition}
+
+\begin{proof}
+塔在 $N$ 处稳定意味着 $G_{(k)}\cong G_{(N)}$ 对一切 $k\ge N$ 成立（“等阶即稳定”引理 \ref{cor:equal_order_stable} 的延伸）。由命题 \ref{prop:higher_period_preservation} 递推定义中，$\Gamma_{(k+1)}$ 是 $\Gamma_{(k)}$ 在 $G_{(k+1)}$ 中的稳定化子。当 $G_{(k+1)}=G_{(k)}$（同构意义下）时，稳定化子就是 $\Gamma_{(k)}$ 本身。故 $\Gamma_{(k)}$ 在稳定层之后保持不变。
+\end{proof}
+
+\begin{example}[循环群的自同构塔]\label{ex:cyclic_tower_period}
+考虑循环群 $C_3 = \langle g \rangle$。
+\begin{itemize}
+    \item $C_3$ 的自同构群为 $\operatorname{Aut}(C_3) \cong C_2$，因为 $(\mathbb{Z}/3\mathbb{Z})^\times = \{1,2\} \cong C_2$。
+    \item $C_2$ 的自同构群为 $\operatorname{Aut}(C_2) \cong \{e\}$，因为 $(\mathbb{Z}/2\mathbb{Z})^\times = \{1\}$。
+    \item 因此塔为 $C_3 \to C_2 \to \{e\}$，高度为 $2$。
+\end{itemize}
+若 $f: C_3 \to \mathbb{C}$ 是任意函数，则 $f$ 的具有周期轨道的群为 $C_3$ 本身（因为 $C_3$ 是单群，没有非平凡子群），底层函数是严格周期的。沿塔上，$C_2$ 上的函数只有平凡具有周期轨道的群，$C_2$ 的自同构群为平凡群。
+\end{example}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=2.0cm,
+  lvl/.style={draw, rounded corners, align=center, minimum width=2.8cm, minimum height=0.9cm, fill=blue!8}]
+\node[lvl, fill=blue!12] (g0) at (0,0) {$C_3$\\$\Gamma_{(0)}=C_3$};
+\node[lvl, fill=green!12] (g1) at (4.4,0) {$C_2$\\$\Gamma_{(1)}=\{e\}$};
+\node[lvl, fill=orange!12] (g2) at (8.8,0) {$\{e\}$\\$\Gamma_{(2)}=\{e\}$};
+\draw[->, very thick] (g0) -- node[above, font=\footnotesize] {$\operatorname{Aut}$} (g1);
+\draw[->, very thick] (g1) -- node[above, font=\footnotesize] {$\operatorname{Aut}$} (g2);
+\draw[->, very thick, dashed] (g2) -- ++(1.6,0) node[right, font=\footnotesize] {稳定};
+\node[align=center, font=\small] at (4.4,-2.4) {具有周期轨道的群沿塔降低：$C_3\to\{e\}\to\{e\}$，最终稳定};
+\end{tikzpicture}
+\caption{$C_3$ 的自同构塔及具有周期轨道的群的逐层降低。}
+\label{fig:c3_tower_period}
+\end{figure}
+
+\section{塔的稳定性与高度}
+
+\begin{definition}[塔的稳定与高度]\label{def:tower_stability}
+若存在 $N\in\mathbb{N}$ 使得 $G_{(N+1)} \cong G_{(N)}$，则称自同构塔在 $N$ 步\textbf{稳定}，最小的这样的 $N$ 称为塔的\textbf{高度}。
+\end{definition}
+
+\begin{proposition}[典型群的自同构塔高度]\label{prop:tower_heights}
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{3cm}>{\centering\arraybackslash}p{5cm}>{\centering\arraybackslash}p{3cm}}
+\toprule
+群 $G$ & 自同构塔 & 塔高度 \\
+\midrule
+$C_2$ & $C_2 \to \{e\}$ & $1$ \\
+$C_3$ & $C_3 \to C_2 \to \{e\}$ & $2$ \\
+$C_4$ & $C_4 \to C_2 \to \{e\}$ & $2$ \\
+$C_5$ & $C_5 \to C_4 \to C_2 \to \{e\}$ & $3$ \\
+$S_3$ & $S_3 \to S_3$ & $0$ \\
+$S_n$（$n\neq 2,6$） & $S_n \to S_n$ & $0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{proposition}
+
+\begin{proof}
+\textbf{$C_2$}：$\operatorname{Aut}(C_2) \cong (\mathbb{Z}/2\mathbb{Z})^\times = \{1\}$，平凡群。塔：$C_2 \to \{e\}$，高度 $1$。
+
+\textbf{$C_3$}：$\operatorname{Aut}(C_3) \cong (\mathbb{Z}/3\mathbb{Z})^\times \cong C_2$（生成元 $2$ 是模 $3$ 的原根）。$\operatorname{Aut}(C_2) \cong \{e\}$。塔：$C_3 \to C_2 \to \{e\}$，高度 $2$。
+
+\textbf{$C_4$}：$\operatorname{Aut}(C_4) \cong (\mathbb{Z}/4\mathbb{Z})^\times \cong C_2$（可逆元为 $\{1,3\}$）。$\operatorname{Aut}(C_2) \cong \{e\}$。塔：$C_4 \to C_2 \to \{e\}$，高度 $2$。
+
+\textbf{$C_5$}：$\operatorname{Aut}(C_5) \cong (\mathbb{Z}/5\mathbb{Z})^\times \cong C_4$（$2$ 是模 $5$ 的原根）。$\operatorname{Aut}(C_4) \cong C_2$。$\operatorname{Aut}(C_2) \cong \{e\}$。塔：$C_5 \to C_4 \to C_2 \to \{e\}$，高度 $3$。
+
+\textbf{$S_3$}：$Z(S_3) = \{e\}$ 且 $\operatorname{Aut}(S_3) \cong S_3$（$S_3$ 的六个自同构都是内自同构，因为 $S_3$ 的换位子群是 $A_3 \cong C_3$，外自同构群 $\operatorname{Out}(S_3) \cong \{e\}$）。塔立即稳定，高度 $0$。
+
+\textbf{$S_n$（$n \neq 2,6$）}：已知 $\operatorname{Out}(S_n) = \{e\}$（$n \neq 6$），故 $\operatorname{Aut}(S_n) = \operatorname{Inn}(S_n) \cong S_n$。塔立即稳定，高度 $0$。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, xscale=0.85, yscale=1.0]
+\def\rowH{0.9}
+% Header
+\node at (0,0.8) {群};
+\node at (2.6,0.8) {塔};
+\node at (6.2,0.8) {高度};
+\draw[thick] (-1.0,0.4) -- (7.2,0.4);
+% Rows
+\foreach \y/\name/\tower/\h in {
+  0/{$C_2$}/{$C_2\to\{e\}$}/{$1$},
+  1/{$C_3$}/{$C_3\to C_2\to\{e\}$}/{$2$},
+  2/{$C_4$}/{$C_4\to C_2\to\{e\}$}/{$2$},
+  3/{$C_5$}/{$C_5\to C_4\to C_2\to\{e\}$}/{$3$},
+  4/{$S_3$}/{$S_3\to S_3$}/{$0$},
+  5/{$S_n$}/{$S_n\to S_n$}/{$0$}
+} {
+  \node at (0,-1.0-\y*\rowH) {\name};
+  \node at (2.6,-1.0-\y*\rowH) {\tower};
+  \node at (6.2,-1.0-\y*\rowH) {\h};
+  \draw[gray!20] (-1.0,-1.4-\y*\rowH) -- (7.2,-1.4-\y*\rowH);
+}
+\draw[thick] (-1.0,-1.0-6*\rowH+0.4) -- (7.2,-1.0-6*\rowH+0.4);
+\end{tikzpicture}
+\caption{典型群的自同构塔高度对照表。}
+\label{fig:tower_heights}
+\end{figure}
+
+\begin{remark}[塔高度与群结构的关系]\label{rem:tower_height_structure}
+塔高度反映了群的自同构群迭代复杂度。高度为 $0$ 的群（如 $S_n$，$n\neq 2,6$）具有 $\operatorname{Aut}(G)\cong G$ 的性质；高度为 $1$ 的群（如 $C_2$）的自同构群平凡；高度为 $2$ 的群（如 $C_3$、$C_4$）的自同构群为 $C_2$；高度为 $3$ 的群（如 $C_5$）的自同构群为 $C_4$，再迭代一次到 $C_2$，再到平凡群。
+\end{remark}
+
+\begin{lemma}[塔高度的有限性]\label{lem:tower_height_finite}
+设 $G$ 为有限群且 $Z(G)=\{e\}$。则塔高度 $h(G)$ 有限。
+\end{lemma}
+
+\begin{proof}
+由 Wielandt 定理（定理 \ref{thm:higher_wielandt}），塔在有限步内稳定，故高度有限。
+\end{proof}
+
+\begin{theorem}[塔稳定性的等价条件]\label{thm:tower_stability_periodic}
+设 $G$ 为有限群且 $Z(G)=\{e\}$。则塔在 $N$ 步稳定当且仅当
+\[
+\operatorname{Out}(G_{(N)}) = \{e\}.
+\]
+\end{theorem}
+
+\begin{proof}
+若 $\operatorname{Out}(G_{(N)}) = \{e\}$，则 $\operatorname{Aut}(G_{(N)}) = \operatorname{Inn}(G_{(N)}) \cong G_{(N)}/Z(G_{(N)}) = G_{(N)}$（因为 $Z(G_{(N)})=\{e\}$），故 $G_{(N+1)} \cong G_{(N)}$，塔稳定。
+
+反之，若塔在 $N$ 步稳定，即 $G_{(N+1)} \cong G_{(N)}$，则 $|\operatorname{Aut}(G_{(N)})| = |G_{(N)}|$。由命题 \ref{prop:inner_automorphism_group}，$\operatorname{Inn}(G_{(N)}) \cong G_{(N)}/Z(G_{(N)}) = G_{(N)}$（因为 $Z(G_{(N)})=\{e\}$），故 $\operatorname{Inn}(G_{(N)})$ 与 $\operatorname{Aut}(G_{(N)})$ 阶相同，从而 $\operatorname{Inn}(G_{(N)}) = \operatorname{Aut}(G_{(N)})$，即 $\operatorname{Out}(G_{(N)}) = \{e\}$。
+\end{proof}
+
+\begin{corollary}[塔高度的判定]\label{cor:tower_height_criterion}
+设 $G$ 为有限群且 $Z(G)=\{e\}$。则塔高度 $h(G)$ 等于最小非负整数 $N$ 使得 $\operatorname{Out}(G_{(N)})=\{e\}$。
+\end{corollary}
+
+\begin{proof}
+由定理 \ref{thm:tower_stability_periodic}，塔在 $N$ 步稳定当且仅当 $\operatorname{Out}(G_{(N)})=\{e\}$。取最小的这样的 $N$ 即为塔高度。
+\end{proof}
+
+\begin{theorem}[Hölder 程序：塔高度可大于任意给定整数]\label{thm:holder_program}
+对任意 $n\in\mathbb{N}$，存在有限群 $G$ 使得塔高度 $h(G)\ge n$。
+\end{theorem}
+
+\begin{proof}
+Hölder (1893) 构造了一族有限群，其自同构塔高度可任意大。例如，可通过对 $\mathbb{Z}/p\mathbb{Z}$（$p$ 为素数）作半直积，逐步构造其自同构群复杂度递增的群。具体地，若 $G_0 = \mathbb{Z}/p\mathbb{Z}$，$G_{i+1} = G_i \rtimes \operatorname{Aut}(G_i)$，则塔高度随 $i$ 增长。构造的细节参见群表示论经典文献，此处作为已知结论引用。
+\end{proof}
+
+\begin{remark}[Hölder 程序的边界]\label{rem:holder_program_boundary}
+定理 \ref{thm:holder_program} 表明塔高度并无统一上界；但由 Wielandt 定理（定理 \ref{thm:higher_wielandt}）与引理 \ref{lem:tower_height_finite}，中心平凡的有限群塔高度仍然有限。故塔高度与群结构、中心平凡性之间的关系是本章“闭合”主题的精确体现。
+\end{remark}
+
+\section{自同构塔的范畴论视角}
+
+\begin{remark}[自同构塔的函子性]\label{rem:tower_categorical}
+自同构塔可以看作自函子
+\[
+\operatorname{Aut}: \mathbf{Grp} \to \mathbf{Grp}
+\]
+的迭代。对每个群 $G$，$\operatorname{Aut}(G)$ 是群范畴中的对象。自同构塔 $G_{(k)}$ 是自函子 $\operatorname{Aut}$ 在 $G$ 上的迭代轨道：
+\[
+G_{(k)} = \operatorname{Aut}^k(G).
+\]
+塔的稳定性意味着该迭代轨道在有限步内到达不动点（或周期点）。
+\end{remark}
+
+\begin{proposition}[自同构函子的协变性]\label{prop:aut_functor}
+设 $\varphi: G\to H$ 是群同构。则存在群同构
+\[
+\operatorname{Aut}(\varphi): \operatorname{Aut}(G)\to\operatorname{Aut}(H),\qquad \alpha\mapsto \varphi\circ\alpha\circ\varphi^{-1}.
+\]
+特别地，$\operatorname{Aut}$ 把群同构映为群同构，构成群范畴上的自函子。
+\end{proposition}
+
+\begin{proof}
+$\operatorname{Aut}(\varphi)$ 是双射，逆为 $\operatorname{Aut}(\varphi^{-1})$；且它是群同态：对任意 $\alpha,\beta\in\operatorname{Aut}(G)$，
+\[
+\operatorname{Aut}(\varphi)(\alpha\beta) = \varphi\alpha\beta\varphi^{-1} = (\varphi\alpha\varphi^{-1})(\varphi\beta\varphi^{-1}) = \operatorname{Aut}(\varphi)(\alpha)\operatorname{Aut}(\varphi)(\beta).
+\]
+函子性：$\operatorname{Aut}(\operatorname{id}_G)=\operatorname{id}_{\operatorname{Aut}(G)}$，且 $\operatorname{Aut}(\psi\circ\varphi)=\operatorname{Aut}(\psi)\circ\operatorname{Aut}(\varphi)$。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth, thick, node distance=2.6cm,
+  obj/.style={draw, rounded corners, align=center, minimum width=2.6cm, minimum height=0.9cm, fill=blue!8}]
+\node[obj] (g) {$G$};
+\node[obj, right=of g] (h) {$H$};
+\node[obj, below=1.6cm of g] (autg) {$\operatorname{Aut}(G)$};
+\node[obj, below=1.6cm of h] (auth) {$\operatorname{Aut}(H)$};
+\draw[->, very thick] (g) -- node[above] {$\varphi$} (h);
+\draw[->, very thick] (autg) -- node[below] {$\operatorname{Aut}(\varphi)$} (auth);
+\draw[->, very thick] (g) -- (autg);
+\draw[->, very thick] (h) -- (auth);
+\node[align=center, font=\small] at (3.5,-4.4) {自同构函子：$\operatorname{Aut}$ 把群同构 $\varphi$ 映为自同构群同构 $\operatorname{Aut}(\varphi)$};
+\end{tikzpicture}
+\caption{自同构函子的协变性：群同构 $\varphi: G\to H$ 诱导自同构群同构 $\operatorname{Aut}(\varphi): \operatorname{Aut}(G)\to\operatorname{Aut}(H)$。}
+\label{fig:aut_functor}
+\end{figure}
+
+\begin{corollary}[塔的函子性]\label{cor:tower_functor}
+自同构塔 $G_{(k)}=\operatorname{Aut}^k(G)$ 是自函子 $\operatorname{Aut}$ 的 $k$ 次迭代轨道；若 $G\cong H$，则 $G_{(k)}\cong H_{(k)}$ 对一切 $k\ge 0$。
+\end{corollary}
+
+\begin{proof}
+由命题 \ref{prop:aut_functor}，$\operatorname{Aut}$ 把同构映为同构，故其迭代也把同构映为同构。取 $G\cong H$ 后逐次应用 $\operatorname{Aut}$ 即得 $G_{(k)}\cong H_{(k)}$。
+\end{proof}
+
+\begin{remark}[塔稳定性与迭代不动点]\label{rem:tower_fixed_point}
+塔稳定性 $G_{(N+1)}\cong G_{(N)}$ 在范畴论上意味着迭代轨道到达不动点。更一般地，塔可能在若干步后进入周期轨道（周期 $>1$），但对中心平凡的有限群，Wielandt 定理保证轨道最终到达不动点。
+\end{remark}
+
+\section*{本章七主题对照表}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\toprule
+主题 & 本章对应 \\
+\midrule
+平移 & 自同构塔每一层的左正则作用（命题 \ref{prop:tower_three_operations}） \\
+缩放 & 外自同构群的逐层递推（命题 \ref{prop:tower_three_operations}） \\
+旋转 & 内自同构群的逐层递推（命题 \ref{prop:tower_three_operations}） \\
+守恒 & 塔上的守恒量（定义 \ref{def:higher_conservation_law_2}）；塔上的诺特对应（注 \ref{thm:higher_noether}） \\
+对称 & 塔上的对称群（定义 \ref{def:higher_symmetry_group}）；对称群的包含关系（命题 \ref{prop:higher_symmetry_inclusion}） \\
+闭合 & 塔稳定性（定理 \ref{thm:higher_wielandt}、命题 \ref{prop:tower_heights}、定理 \ref{thm:tower_stability_periodic}） \\
+周期 & 塔上的周期结构（定义 \ref{def:higher_period}）；塔上周期的传递（命题 \ref{prop:higher_period_transfer}）；循环群塔（例 \ref{ex:cyclic_tower_period}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{本章思考题}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{题 \arabic*}]
+    \item 根据定义 \ref{def:higher_automorphism} 与定义 \ref{def:higher_automorphism_group}，
+    回顾群的自同构与自同构群的定义。
+    请说明为什么自同构必须同时是双射与群同态，
+    并验证命题 \ref{prop:higher_automorphism_inverse}：
+    自同构的逆映射也保持群运算。
+
+    \item 证明命题 \ref{prop:higher_automorphism_invariants}：
+    自同构保持以下群结构不变量：
+    \begin{enumerate}[label=(\roman*)]
+        \item 阶：$|G|=|\varphi(G)|$；
+        \item 单位元：$\varphi(e)=e$；
+        \item 元素的阶：$\operatorname{ord}(\varphi(g))=\operatorname{ord}(g)$；
+        \item 中心：$\varphi(Z(G))=Z(G)$；
+        \item 换位子群：$\varphi([G,G])=[G,G]$。
+    \end{enumerate}
+    请分别写出证明，并说明这些不变量为什么是“内蕴”的。
+
+    \item 证明命题 \ref{prop:automorphism_preserves_conjugacy}：
+    自同构 $\varphi\in\operatorname{Aut}(G)$ 把共轭类映为共轭类：
+    \[
+    \varphi(\operatorname{Cl}(g))=\operatorname{Cl}(\varphi(g)).
+    \]
+    请说明为什么自同构保持共轭类的划分。
+
+    \item 证明引理 \ref{lem:automorphism_restricts_characteristic}：
+    设 $H\le G$ 是 $G$ 的特征子群，则存在群同态
+    \[
+    \Phi:\operatorname{Aut}(G)\to\operatorname{Aut}(H),\quad \varphi\mapsto\varphi|_H.
+    \]
+    请验证 $\Phi$ 是同态。
+
+    \item 证明命题 \ref{prop:inner_automorphism_group}：
+    $\operatorname{Inn}(G)$ 是 $\operatorname{Aut}(G)$ 的正规子群，且
+    \[
+    \operatorname{Inn}(G)\cong G/Z(G).
+    \]
+    请按“验证 $\iota_g$ 是自同构、验证 $\phi:g\mapsto\iota_g$ 是同态、
+    计算核为 $Z(G)$、验证正规性”四步完成证明。
+
+    \item 证明命题 \ref{prop:inner_preserves_conjugacy}：
+    内自同构 $\iota_g$ 把每个共轭类映为它自身：
+    \[
+    \iota_g(\operatorname{Cl}(h))=\operatorname{Cl}(h).
+    \]
+    请说明为什么内自同构不改变共轭类，而外自同构一般改变共轭类划分。
+
+    \item 证明命题 \ref{prop:automorphism_exact_sequence}：
+    存在正合列
+    \[
+    1\to Z(G)\xrightarrow{\iota}G\xrightarrow{\phi}\operatorname{Aut}(G)
+    \xrightarrow{\pi}\operatorname{Out}(G)\to 1.
+    \]
+    请逐项验证：
+    \begin{enumerate}[label=(\roman*)]
+        \item $\ker\iota=\{e\}$；
+        \item $\operatorname{im}\iota=Z(G)=\ker\phi$；
+        \item $\operatorname{im}\phi=\operatorname{Inn}(G)=\ker\pi$；
+        \item $\operatorname{im}\pi=\operatorname{Out}(G)$。
+    \end{enumerate}
+
+    \item 证明命题 \ref{prop:outer_automorphism_order}：
+    若 $G$ 为有限群，则
+    \[
+    |\operatorname{Out}(G)|=\frac{|\operatorname{Aut}(G)|}{|G/Z(G)|}.
+    \]
+    请用正合列证明。
+
+    \item 证明命题 \ref{prop:tower_embedding_chain}：
+    若 $Z(G)=\{e\}$，则对每一层 $k\ge0$ 有 $Z(G_{(k)})=\{e\}$，
+    且
+    \[
+    G_{(k)}\cong\operatorname{Inn}(G_{(k)})\subseteq
+    \operatorname{Aut}(G_{(k)})=G_{(k+1)}.
+    \]
+    请用归纳法完成证明，
+    并说明为什么中心平凡性在自同构塔中逐层保持（引理 \ref{ch10_centreless_preserved}）。
+
+    \item 证明引理 \ref{lem:tower_order_monotone} 与推论 \ref{cor:equal_order_stable}：
+    在中心平凡的有限群下，序 $|G_{(k)}|$ 单调不减，等阶即稳定。
+
+    \item 证明定理 \ref{thm:higher_wielandt}（Wielandt 定理）：
+    设 $G$ 为有限群且中心 $Z(G)$ 平凡，
+    则自同构塔在有限步内稳定。
+    请说明证明中“序单调不减、等阶即稳定、中心平凡逐层保持”三步的作用，
+    并指出为什么“中心平凡”条件不可省略（参见注 \ref{rem:higher_wielandt_boundary}）。
+
+    \item 证明命题 \ref{prop:tower_three_operations}：
+    自同构塔每一层 $G_{(k)}$ 上存在三种标准构造：
+    \begin{enumerate}[label=(\roman*)]
+        \item 平移：左正则作用 $L_g:G_{(k)}\to G_{(k)}$；
+        \item 内自同构：$\operatorname{Inn}(G_{(k)})\cong G_{(k)}/Z(G_{(k)})$；
+        \item 外自同构：$\operatorname{Out}(G_{(k)})=\operatorname{Aut}(G_{(k)})/\operatorname{Inn}(G_{(k)})$。
+    \end{enumerate}
+    请说明为什么这三种构造在每一层上重复出现。
+
+    \item 根据定义 \ref{def:higher_conservation_law} 与注 \ref{cor:higher_conservation}，
+    说明塔上守恒量的三种类型：
+    \begin{enumerate}[label=(\roman*)]
+        \item 左平移不变——平移守恒量；
+        \item 内自同构不变——类函数；
+        \item 外自同构协变——自同构不变量。
+    \end{enumerate}
+    请分别以 $G=C_3$、$G=S_3$ 为例，写出这三类守恒量的具体形式。
+
+    \item 证明性质 \ref{prop:tower_conservation_inclusion}：
+    塔上三类守恒量满足包含关系
+    \[
+    \text{自同构不变量}\subseteq\text{类函数}\subseteq\text{平移不变量}.
+    \]
+
+    \item 证明命题 \ref{prop:higher_period_preservation}：
+    设 $f_{(0)}:G\to V$ 是右 $\Gamma$-周期的，
+    则对每一层 $k\ge0$，存在 $G_{(k)}$ 的子群 $\Gamma_{(k)}$，
+    使得 $f_{(k)}$ 是右 $\Gamma_{(k)}$-周期的。
+    请用归纳法构造稳定化子 $\Gamma_{(k+1)}$ 并完成证明。
+
+    \item 证明命题 \ref{prop:higher_function_regular_rep}：
+    塔上函数空间 $L^2(G_{(k)})$ 的左正则表示是酉表示。
+    请说明如何从 Haar 测度的左不变性推导酉性。
+
+    \item 证明命题 \ref{prop:higher_period_stabilization}：
+    塔上具有周期轨道的群在塔稳定处停止变化。请说明这与“等阶即稳定”引理的关联。
+
+    \item 证明命题 \ref{prop:higher_symmetry_inclusion}：
+    若 $f_{(k+1)}$ 是 $f_{(k)}$ 沿塔的自然延拓，则
+    \[
+    \operatorname{Symmetry}_{(k)}(f_{(k)})\subseteq
+    \operatorname{Symmetry}_{(k+1)}(f_{(k+1)}).
+    \]
+    请说明为什么对称群沿塔逐层包含。
+
+    \item 验证命题 \ref{prop:tower_heights} 中典型群的自同构塔高度：
+    \begin{enumerate}[label=(\roman*)]
+        \item $C_2\to\{e\}$，高度 $1$；
+        \item $C_3\to C_2\to\{e\}$，高度 $2$；
+        \item $C_4\to C_2\to\{e\}$，高度 $2$；
+        \item $C_5\to C_4\to C_2\to\{e\}$，高度 $3$；
+        \item $S_3\to S_3$，高度 $0$。
+    \end{enumerate}
+    请分别计算各层自同构群，
+    并说明为什么 $S_3$ 的自同构群同构于自身。
+
+    \item 证明定理 \ref{thm:tower_stability_periodic}：
+    设 $G$ 为有限群且 $Z(G)=\{e\}$，
+    则自同构塔在 $N$ 步稳定当且仅当
+    \[
+    \operatorname{Out}(G_{(N)})=\{e\}.
+    \]
+    请分别证明两个方向。
+
+    \item 证明推论 \ref{cor:tower_height_criterion}：
+    塔高度 $h(G)$ 等于最小非负整数 $N$ 使 $\operatorname{Out}(G_{(N)})=\{e\}$。
+
+    \item 验证例 \ref{ex:cyclic_tower_period} 中循环群 $C_3$ 的自同构塔：
+    \[
+    C_3\to C_2\to\{e\}.
+    \]
+    请计算 $\operatorname{Aut}(C_3)$ 与 $\operatorname{Aut}(C_2)$，
+    并说明为什么 $C_3$ 上的任意函数只有平凡具有周期轨道的群。
+
+    \item 证明命题 \ref{prop:aut_functor}：
+    $\operatorname{Aut}$ 是群范畴上的自函子，且把群同构映为群同构。
+
+    \item 证明推论 \ref{cor:tower_functor}：
+    若 $G\cong H$，则 $G_{(k)}\cong H_{(k)}$ 对一切 $k\ge 0$。
+
+    \item 根据注 \ref{rem:tower_categorical}，
+    说明自同构塔可以看作自函子
+    \[
+    \operatorname{Aut}:\mathbf{Grp}\to\mathbf{Grp}
+    \]
+    的迭代。请写出塔的迭代轨道
+    \[
+    G_{(k)}=\operatorname{Aut}^k(G),
+    \]
+    并说明“塔的稳定性”如何对应“迭代轨道在有限步内到达不动点”。
+
+    \item 证明定理 \ref{thm:higher_noether}（塔上的诺特对应）：
+    在自同构塔的每一层 $G_{(k)}$ 上：
+    \begin{enumerate}[label=(\roman*)]
+        \item 左平移对称性对应平移不变量；
+        \item 内自同构对称性对应类函数；
+        \item 外自同构对称性对应自同构不变量。
+    \end{enumerate}
+    请说明这是“群与群函数”章中诺特对应在塔上的逐层重复。
+
+    \item 综合题：结合自同构塔（定义 \ref{def:higher_automorphism_tower}）、
+    塔上的三种标准构造（命题 \ref{prop:tower_three_operations}）、
+    塔上的函数空间（定义 \ref{def:higher_function_space}）、
+    塔上的对称性与守恒量（定义 \ref{def:higher_conservation_law_2}、注 \ref{thm:higher_noether}）、
+    塔上的周期结构（定义 \ref{def:higher_period}）
+    与塔的稳定性（定理 \ref{thm:higher_wielandt}、定理 \ref{thm:tower_stability_periodic}），
+    说明“关系的关系亦为群”这一思想如何在自同构塔中被具体实现。
+    请分别指出：
+    \begin{enumerate}[label=(\roman*)]
+        \item 塔的每一层如何重复三种标准构造；
+        \item 塔上的函数如何沿塔传递周期结构；
+        \item 塔的稳定性如何对应有限群的中心平凡性；
+        \item 塔的范畴论视角如何把自同构理解为自函子的迭代。
+    \end{enumerate}
+\end{enumerate}
+

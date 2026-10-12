@@ -1,0 +1,1102 @@
+\chapter{Periodic Structure of Astronomical Systems}
+\label{chap:astro-periodic}
+\markboth{Periodic Structure of Astronomical Systems}{Periodic Structure of Astronomical Systems}
+
+\begin{remark}[Periodicity decision for the target of this chapter (citation)]\label{rem:astro_ps_hook}
+When this chapter decides whether a research target is periodic, determines its period type, or seeks its minimal positive period, reference is always made to the `Periodic Systems' chapter:
+for the periodicity criterion see \cref{thm:ps_periodicity_decision},
+for the discrimination of period types see \cref{def:ps_period_type}, \cref{prop:ps_type_discrimination},
+for the search for the minimal positive period see \cref{def:ps_minimal_period_algorithm}, \cref{thm:ps_minimal_period_correctness},
+and for the construction of period series and epicycle groups from data see \cref{thm:ps_series_reconstruction}, \cref{def:ps_epicycle_group}.
+\end{remark}
+
+\begin{remark}[Positioning of this chapter: developed along the five-step interface of the `Periodic Systems' chapter]\label{rem:astro_chapter_positioning}
+The periodic structure of astronomical systems studies the mathematical characterisation of periodicity, quasi-periodicity and orbital resonance in celestial motion. This chapter does not establish a separate periodicity criterion; instead it connects astronomical systems to the five-step interface prescribed by the `Periodic Systems' chapter:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{Decision}: reduce planetary orbits, radial oscillations, orbital resonance and time-measurement systems to discrete dynamical systems, cite \cref{thm:ps_periodicity_decision} to decide whether they are periodic, and determine the period type;
+    \item \textbf{Construction}: from orbital elements, observed angles or time series, construct the amplitude series, the frequency series and the phase series, and assemble them into an astronomical epicycle group;
+    \item \textbf{Adjustment}: dynamically adjust the epicycle group by the resonance width, the energy and angular-momentum constraints and the observational residuals;
+    \item \textbf{Convolution}: introduce amplitude convolution, phase convolution and frequency convolution on the astronomical epicycle group, and connect them with autocorrelation, angular momentum and the resonance ratio;
+    \item \textbf{Integration}: connect to the tool chains of the three chapters `Discrete Sampling and Intercalation of Periodic Signals', `Harmonic Analysis' and `Time Series Analysis', forming an astronomical periodicity diagnostic procedure.
+\end{enumerate}
+The astronomical and mathematical knowledge used in this chapter includes: Newton's gravitational equation, the two-body problem, Kepler's three laws, Binet's formula, Bessel functions and Kepler's equation, the radial effective potential, Bertrand's theorem, orbital resonance and the resonance angle, secular resonance, KAM theory, time-measurement systems, precession and nutation, and atomic time and ephemeris time.
+\end{remark}
+
+\begin{remark}[Guide to the seven themes of this chapter]\label{rem:astro_seven_themes}
+Translation---the time translation of planets along their orbits and the orbital period (tropical year, sidereal year, mean solar time);
+Scaling---the Kepler scaling of orbital radius versus period \(T^2\propto a^3\);
+Rotation---conservation of the angular momentum of orbital motion and rotation (conservation of areal velocity);
+Conservation---conservation of angular momentum, conservation of energy, conservation of the centre-of-mass momentum and conservation of the resonance ratio;
+Symmetry---the rotational symmetry of a central force field and its Noether correspondence to conservation of angular momentum;
+Closure---the closure of elliptical orbits (Kepler's first law, Bertrand's theorem);
+Period---orbital, rotational and resonance periods (mean-motion resonance, secular resonance).
+\end{remark}
+
+\section{Periodicity decision for astronomical targets: the first step of the `Periodic Systems' chapter}
+\label{sec:astro_periodicity_decision}
+
+\subsection{Astronomical targets, decision input and decision map}
+
+\begin{definition}[Astronomical targets and decision input]\label{def:astro_target}
+An \textbf{astronomical target} is one of the following objects:
+\begin{enumerate}[label=(\roman*)]
+    \item a gravitationally interacting system of celestial bodies, whose state space is the position--velocity space \(\mathcal S=(\mathbb R^3)^N\times(\mathbb R^3)^N\);
+    \item an orbit, whose state space is a curve in phase space;
+    \item a time-measurement system, whose state space is a set of time scales;
+    \item an observed time series of angles or distances.
+\end{enumerate}
+The \textbf{decision input} of an astronomical target is the ordered pair
+\[
+\mathcal D_{\mathrm{A}}=(\mathcal S,\Phi),
+\]
+where \(\mathcal S\) is the state space or the sequence space and \(\Phi:\mathcal S\to\mathcal S\) is the evolution map (for example the Newtonian gravitational flow, an orbital translation or a time-scale transformation). If \(\mathcal S\) is a finite set, the target is called a \textbf{finite astronomical target}; if \(\mathcal S\) is an infinite set, the target is called an \textbf{infinite astronomical target}.
+\end{definition}
+
+\begin{definition}[Astronomical decision map]\label{def:astro_periodization}
+Let an astronomical target be given by the decision input \(\mathcal D_{\mathrm{A}}=(\mathcal S,\Phi)\). If the state or the output of the target is generated by \(\Phi\), that is, if there exists \(x_0\in\mathcal S\) such that
+\[
+x_t=\begin{cases}\Phi^t(x_0), & t\in\mathbb Z,\\ \Phi_t(x_0), & t\in\mathbb R,\end{cases}
+\]
+for \(t\in\mathbb Z\) the state \(x_t\) is generated by iteration of \(\Phi\); for \(t\in\mathbb R\) it is described by the one-parameter evolution family \(\{\Phi_t\}_{t\in\mathbb R}\), where each \(\Phi_t:\mathcal S\to\mathcal S\), \(\Phi_0=\operatorname{id}\), \(\Phi_{s+t}=\Phi_s\circ\Phi_t\) for all \(s,t\in\mathbb R\), and \((t,x)\mapsto\Phi_t(x)\) is continuous.
+then \(\Phi\) is called the \textbf{astronomical decision map} of the target. The astronomical target is then reduced to the discrete dynamical system \((\mathcal S,\Phi)\) when \(t\in\mathbb Z\) and to the continuous dynamical system \((\mathcal S,\{\Phi_t\}_{t\in\mathbb R})\) when \(t\in\mathbb R\); in both cases the criteria of the `Operations and Periodicity' chapter and of the `Periodic Systems' chapter may be applied directly.
+\end{definition}
+
+\begin{theorem}[Astronomical periodicity decision theorem]\label{thm:astro_periodicity_decision}
+Let the decision map of an astronomical target be \(\Phi\), and let \((\mathcal S,\Phi)\) be a discrete dynamical system. Then:
+\begin{enumerate}[label=(\Alph*)]
+    \item \textbf{Sufficient decision}: if there exists \(m\in\mathbb N^+\) such that \(\Phi^m=\mathrm{id}\), then the target is a uniformly periodic astronomical system; every orbit is closed and the length of each orbit divides \(m\).
+    \item \textbf{Equivalence of the decision}: the target is a uniformly periodic astronomical system if and only if \(\operatorname{ord}(\Phi)<\infty\).
+    \item \textbf{Pointwise criterion}: the orbit of the target at the state \(x_0\) is closed if and only if \(x_0\) is a periodic point; in that case the length of the orbit is the period at that point.
+    \item \textbf{Non-omissibility}: the conjunction of conserved quantities and the symmetry group cannot replace \(\operatorname{ord}(\Phi)<\infty\); a quasi-periodic astronomical target is not a periodic astronomical system.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:astro_periodicity_decision} of this chapter is the domain instantiation of \cref{thm:ps_periodicity_decision} in the `Periodic Systems' chapter:
+it suffices to replace the decision map $f$ and the evolution group by the $\Phi$ of this chapter, and the four parts (A) sufficient decision, (B) equivalence of the decision, (C) pointwise criterion and
+(D) non-omissibility then hold one by one. By the convention of \cref{rem:ps_applications_hook}, they are not expanded again here.
+\end{proof}
+
+\begin{corollary}[Astronomical period types]\label{cor:astro_period_type}
+After the decision by \cref{thm:astro_periodicity_decision}, an astronomical target falls into one of the following types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Trivially periodic type}: the least period is \(m_0=1\) and the state is a fixed point;
+    \item \textbf{Strictly periodic type}: \(1<m_0<\infty\) and the state is strictly periodic (for example a Keplerian elliptical orbit);
+    \item \textbf{Uniformly periodic type}: \(\operatorname{ord}(\Phi)=m<\infty\) and all orbit lengths divide \(m\);
+    \item \textbf{Quasi-periodic type}: \(\operatorname{ord}(\Phi)=\infty\); the orbit is not closed but is dense on a compact carrier structure (for example the motion of a many-body system on a KAM torus);
+    \item \textbf{Eventually periodic type}: there exists \(N\) such that the target is periodic for \(t\ge N\);
+    \item \textbf{Discretely periodic type}: the carrier structure is \(\mathbb Z\) and the normalised period ratio satisfies \(\rho=T_x/\Delta x\in\mathbb Q\).
+    \item \textbf{Asymptotically periodic (damped) type}: the orbit is not closed, but tends asymptotically to a closed orbit or to a fixed point, the residual decaying as \(e^{-\kappa t}\) (see \cref{def:ps_period_type}(vii)).
+\end{enumerate}
+Here (i)--(iii) and (vi) are periodic astronomical systems; (iv) is not a periodic astronomical system, but may be handled with bounded-approximation tools; (v) is a periodic astronomical system only in its stable stage; (vii), like (iv), is a type in the limiting sense; it is not a periodic astronomical system and can be handled with bounded-approximation tools only in its stable stage.
+\end{corollary}
+
+\begin{proof}
+Each item follows by substituting the astronomical target into \cref{thm:astro_periodicity_decision} and \cref{def:ps_period_type} of the `Periodic Systems' chapter.
+\end{proof}
+
+\begin{lemma}[Periodicity decision for Keplerian orbits]\label{lem:kepler_period}
+Let a celestial body move in an inverse-square central force field with total mechanical energy \(E<0\). Then its orbit is an ellipse, the radial motion and the angular motion are both periodic, and the radial period equals the angular period:
+\[
+T_r=T_\theta=T=\frac{2\pi a^{3/2}}{\sqrt{GM}}.
+\]
+\end{lemma}
+
+\begin{proof}
+By Kepler's first law (\cref{thm:kepler_first}), \(E<0\) corresponds to an elliptical orbit. By the effective potential (\cref{def:radial_motion}), the radial motion oscillates between \(r_{\min}\) and \(r_{\max}\), and its period is finite. By \cref{prop:radial_oscillation_period}, \(T_r=T_\theta\) in an inverse-square force field. By Kepler's third law (\cref{thm:kepler_third}),
+\[
+T^2=\frac{4\pi^2}{GM}a^3,
+\]
+hence \(T=2\pi a^{3/2}/\sqrt{GM}\).
+\end{proof}
+
+\begin{definition}[Algorithm for the least positive period of an astronomical target]\label{def:astro_minimal_period_algorithm}
+\textbf{Input}: astronomical target samples \(x_0,\dots,x_{N-1}\) and a tolerance \(\varepsilon\ge0\).
+\textbf{Output}: the least positive period \(T_0\), or the verdict `not periodic'.
+\textbf{Steps}:
+\begin{enumerate}[label=(\arabic*)]
+    \item take the candidate set \(\mathcal P=\{T\in\mathbb N^+:2T\le N\}\) and traverse it in increasing order of \(T\);
+    \item for each \(T\) compute the maximum deviation
+    \[
+    E(T)=\max_{0\le n<N-T}\|x_{n+T}-x_n\|;
+    \]
+    \item output the first \(T\) satisfying \(E(T)\le\varepsilon\) as \(T_0\); if the traversal is exhausted with no solution, output `not periodic';
+    \item commensurability check: use \(\rho=T_x/\Delta x\) (with \(T_0=p\) when \(\rho=p/q\) is in lowest terms; write \(\ell=T_0\Delta x=qT_x\) for the continuous span corresponding to \(T_0\) sampling points) together with \cref{prop:commensurability_periodicity_parallel} and \cref{cor:sampling_period_relation_parallel} of the `Discrete Sampling and Intercalation of Periodic Signals' chapter to check the conversion relation between \(T_0\) and the continuous period \(T_x\).
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[Correctness of the algorithm for the least positive period of an astronomical target]\label{thm:astro_minimal_period_correctness}
+\begin{enumerate}[label=(\roman*)]
+    \item If the samples form a strictly periodic sequence with \(\varepsilon=0\) and \(N\ge2T_0\), then the algorithm outputs the discrete fundamental period \(T_0\).
+    \item If the samples are obtained by sampling a continuous astronomical target of fundamental period \(T_x\) at the sampling interval \(\Delta x\), and the normalised period ratio \(\rho=T_x/\Delta x=p/q\) is in lowest terms, then the algorithm outputs \(T_0=p\).
+    \item If \(\rho\notin\mathbb Q\), then no true period exists: \(E(T)>0\) for every \(T\in\mathbb N^+\).
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The \cref{thm:astro_minimal_period_correctness} of this chapter follows directly from the two conclusions of the `Discrete Sampling and Intercalation of Periodic Signals' chapter:
+(i) by \cref{def:discrete_fundamental_period}, $T_0$ is the least positive period, hence $E(T_0)=0$, whilst for $T<T_0$ we have $E(T)>0$;
+the algorithm traverses in increasing order of $T$, so the first index satisfying $E(T)=0$ is $T_0$;
+(ii) and (iii) follow by substituting into \cref{prop:commensurability_periodicity_parallel}(ii)(iii). The complete argument is given in that chapter.
+\end{proof}
+
+\begin{example}[Example of a periodicity decision for a Keplerian orbit]\label{ex:astro_kepler_period}
+The Earth revolves about the Sun with \(a=1\) AU and \(M=M_\odot\). By \cref{lem:kepler_period}, \(T=2\pi a^{3/2}/\sqrt{GM}\approx1\) year. For the planets of the solar system the quantity \(T^2/a^3\) is approximately constant, which verifies Kepler's third law.
+\end{example}
+
+\begin{example}[Quasi-periodicity decision for a many-body system]\label{ex:astro_nbody_quasiperiodic}
+In the KAM framework most initial conditions of the many-body solar system lie on invariant tori and the motion is multi-frequency quasi-periodic with \(\operatorname{ord}(\Phi)=\infty\); the system is therefore not a periodic astronomical system, but it may be handled by bounded approximation and spectral analysis.
+\end{example}
+
+\begin{remark}[Conserved quantities do not guarantee periodicity]\label{rem:astro_invariant_not_period}
+Conservation of angular momentum and conservation of energy are auxiliary conditions for periodic structure, but they do not constitute sufficient conditions. For example, a hyperbolic orbit possesses both conservation of energy and conservation of angular momentum, yet the orbit is open and not closed. Astronomical periodic structure must be decided by criteria such as \cref{thm:astro_periodicity_decision} or \cref{lem:kepler_period}.
+\end{remark}
+
+\section{Construction of the astronomical period series and epicycle group: the second step of the `Periodic Systems' chapter}
+\label{sec:astro_series_construction}
+
+\begin{definition}[Astronomical amplitude series, frequency series and phase series]\label{def:astro_series}
+Let the state or output sequence of an astronomical target be \(\{z_t\}\). If it can be written as
+\[
+z_t=\sum_k A_k e^{i(\omega_k t+\phi_k)}+\varepsilon_t,
+\]
+then
+\[
+\mathcal A_z(t)=\sum_k A_k e^{ikt},\qquad
+\mathcal F_z(s)=\sum_k \omega_k s^k,\qquad
+\mathcal P_z(t)=\sum_k e^{i(kt+\phi_k)}
+\]
+are called respectively the \textbf{amplitude series}, the \textbf{frequency series} and the \textbf{phase series} of the astronomical target. The three agree with \cref{def:amplitude_series}, \cref{def:frequency_series} and \cref{def:phase_series} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{definition}[Astronomical epicycle group]\label{def:astro_epicycle_group}
+Let the period series of an astronomical target be given by the amplitude series \(\{A_k\}\), the frequency series \(\{\omega_k\}\) and the phase series \(\{\phi_k\}\). For each \(k\) define the epicycle
+\[
+E_k:\theta\mapsto A_k e^{i(\theta+\phi_k)},\qquad \theta=\omega_k t,
+\]
+and call the set
+\[
+\mathfrak E_{\mathrm{A}}=\{(A_k,\omega_k,\phi_k)\}_{k\in\mathbb Z}
+\]
+the \textbf{epicycle group} of the astronomical target. Its superposition is the astronomical period series
+\[
+z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
+\]
+\end{definition}
+
+\begin{theorem}[Construction of the period series from astronomical data]\label{thm:astro_series_reconstruction}
+Let the output of an astronomical target be a finite periodic sequence of period \(N\). Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the output can be expanded as a discrete Fourier series
+    \[
+    z_t=\sum_{k=0}^{N-1}c_k e^{i2\pi kt/N},\qquad
+    c_k=\frac1N\sum_{t=0}^{N-1}z_t e^{-i2\pi kt/N};
+    \]
+    \item the amplitude series is given by \(|c_k|\), the phase series by \(\arg c_k\) and the frequency series by \(2\pi k/N\);
+    \item if the output consists of the coordinates of a Keplerian elliptical orbit, then the harmonic amplitudes of the Fourier--Bessel expansion decay as \(e^{|n|}\) in the eccentricity.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) The discrete Fourier series of a finite periodic sequence is a standard result.
+(ii) It is read off directly from \(c_k=A_k e^{i\phi_k}\).
+(iii) This follows from \cref{prop:elliptic_epicycle_expansion}.
+\end{proof}
+
+\begin{definition}[Astronomical periodic system]\label{def:astronomical_periodic_system}
+An \textbf{astronomical periodic system} consists of \(N\) gravitationally interacting celestial bodies. The position vector of each body \(i\) is \(\mathbf r_i(t)\in\mathbb R^3\) and the masses are \(m_i\). The dynamics of the system is given by Newton's gravitational equations:
+\[
+m_i\ddot{\mathbf r}_i=-G\sum_{j\neq i}\frac{m_im_j}{|\mathbf r_i-\mathbf r_j|^3}(\mathbf r_i-\mathbf r_j).
+\]
+When \(N=2\) the system degenerates to the \textbf{two-body problem}; when \(N\ge3\) the system is a \textbf{three-body problem} or a \textbf{many-body problem}.
+\end{definition}
+
+\begin{definition}[Periodic structure of an astronomical system]\label{def:astronomical_periodic_structure}
+The \textbf{periodic structure} of an astronomical system falls into three basic types:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Rotational period}: the angular motion of a celestial body in a central force field, whose conserved quantity is angular momentum;
+    \item \textbf{Radial period}: the radial oscillation of a celestial body in a gravitational field, whose conserved quantity is energy;
+    \item \textbf{Resonance period}: orbital resonance between celestial bodies, whose characteristic parameter is the resonance ratio \(p:q\).
+\end{enumerate}
+\end{definition}
+
+\section{Dynamic adjustment of the astronomical epicycle group: the third step of the `Periodic Systems' chapter}
+\label{sec:astro_adaptive}
+
+\begin{definition}[Dynamic adjustment of the astronomical epicycle group]\label{def:astro_adaptive_adjustment}
+Let the current astronomical epicycle group be \(\mathfrak E^{(j)}\), with partial sum
+\[
+z^{(j)}(t)=\sum_{k\in\mathfrak E^{(j)}}A_k e^{i(\omega_k t+\phi_k)},
+\]
+and residual \(r^{(j)}=z-z^{(j)}\). \textbf{Dynamic adjustment} consists of two rules:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Quantity adjustment}: if the residual energy satisfies \(\|r^{(j)}\|^2>\delta\), then add one epicycle according to the peak of the residual periodogram:
+    \[
+    \mathfrak E^{(j+1)}=\mathfrak E^{(j)}\cup\{(\hat A,\hat\omega,\hat\phi)\},\qquad
+    \hat\omega=\arg\max_\omega|\widehat{z_r}(\omega)|;
+    \]
+    \item \textbf{Parameter adjustment}: update the parameters of the existing epicycles by regularised least squares or by orbital constraints:
+    \[
+    (A_k,\phi_k)\leftarrow\arg\min_{A,\phi}\sum_n\left|z(n)-\sum_kA_ke^{i(\omega_kn+\phi_k)}\right|^2.
+    \]
+\end{enumerate}
+In astronomical systems, quantity adjustment corresponds to increasing the order of the orbital harmonics, adding resonance terms or adding time-scale layers; parameter adjustment corresponds to tuning the orbital elements, the resonance width or the time-scale parameters, so that the structural index increases monotonically.
+\end{definition}
+
+\begin{proposition}[Monotonicity of quantity adjustment]\label{prop:astro_adaptive_growth}
+After the dominant-frequency component of the residual has been added as in \cref{def:astro_adaptive_adjustment}(i), the residual energy is monotonically non-increasing:
+\[
+\|r^{(j+1)}\|^2\le\|r^{(j)}\|^2,
+\]
+with equality if and only if the residual has no energy at the selected frequency.
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:astro_adaptive_growth} of this chapter agrees with the dynamic adjustment mechanism of \cref{def:ps_adaptive_adjustment} in the `Periodic Systems' chapter:
+adding an epicycle removes the component of $r^{(j)}$ along $\hat\omega$ from the residual, and the orthogonal decomposition
+$\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{the removed component}\|^2$ yields the inequality,
+with equality if and only if the norm of the removed component is zero. The complete argument is given there.
+\end{proof}
+
+\begin{theorem}[Convergence of dynamic adjustment]\label{thm:astro_adaptive_convergence}
+Let the astronomical target be a \textbf{real-valued finite periodic sequence} of length $T_0$ ($T_0\in\mathbb N$) and let $\delta=0$. Then after at most $\lfloor T_0/2\rfloor+1$ steps of dynamic adjustment the residual is zero, and the resulting astronomical epicycle group is the exact Fourier data of the target; for a \textbf{complex-valued} sequence the corresponding number of steps is at most $T_0$.
+\end{theorem}
+
+\begin{proof}
+The discrete Fourier series of a \textbf{real-valued} finite periodic sequence of length $T_0$ ($T_0\in\mathbb N$) is complete on $\lfloor T_0/2\rfloor+1$ harmonics (including the constant term); a \textbf{complex-valued} sequence requires $T_0$ components. At each step one dominant frequency component of the residual is extracted as in \cref{prop:astro_adaptive_growth} and the residual energy decreases strictly, so the residual vanishes after finitely many steps.
+\end{proof}
+
+\begin{definition}[Structural index adjustment]\label{def:astro_structure_metric_adjustment}
+Let the structural index of an astronomical target be
+\[
+\mathcal I=(\mathcal I_{\mathrm{rot}},\mathcal I_{\mathrm{rad}},\mathcal I_{\mathrm{res}})
+=(\text{angular-momentum conservation degree},\ \text{energy-constraint degree},\ \text{resonance-ratio locking degree}).
+\]
+\textbf{Structural index adjustment} is: at each step choose a neighbouring parameter $\theta$ in the parameter space $\Theta$ for which $\mathcal I(\theta)$ is \textbf{strictly decreasing} in the lexicographic order (minimisation); if no such neighbouring parameter exists, the process stops---then $\theta$ is a \textbf{locally optimal} parameter.
+\end{definition}
+
+\begin{proposition}[Finite convergence of structural index adjustment]\label{prop:astro_structure_metric_convergence}
+Let the parameter space $\Theta$ be finite and let each adjustment make $\mathcal I$ \textbf{strictly decreasing} in the lexicographic order. Then the adjustment terminates after finitely many steps at a locally optimal parameter.
+\end{proposition}
+
+\begin{proof}
+$\Theta$ is finite, so $\mathcal I$ takes finitely many values. The lexicographic order is well-founded on a finite set of values, so a strictly lexicographically decreasing sequence cannot continue indefinitely and the process terminates after finitely many steps. At termination there is no neighbouring parameter making $\mathcal I$ strictly lexicographically decreasing, that is, the parameter is locally optimal. Monotonicity must be imposed on the \textbf{whole lexicographic order}: if only `some component strictly increases or decreases' is required, cycles such as $(2,1)\to(1,2)\to(2,1)$ cannot be excluded and finite termination fails.
+\end{proof}
+
+\begin{remark}[Boundary of dynamic adjustment]\label{rem:astro_adaptive_boundary}
+\cref{thm:astro_adaptive_convergence} relies on a finite periodic sequence. For a many-body quasi-periodic astronomical target no finite epicycle group represents the target exactly, and only a bounded approximation is possible. Structural index adjustment guarantees neither global optimality nor long-term stability; long-term stability depends on the KAM conditions and on the size of the perturbation.
+\end{remark}
+
+\section{Astronomical convolution: the fourth step of the `Periodic Systems' chapter}
+\label{sec:astro_convolution}
+
+\begin{definition}[Astronomical amplitude convolution, phase convolution and frequency convolution]\label{def:astro_convolution_types}
+Let two astronomical epicycle groups be
+\[
+\mathfrak E=\{(A_n,\omega_n,\phi_n)\},\qquad
+\mathfrak E'=\{(B_m,\nu_m,\psi_m)\}.
+\]
+Define:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Amplitude convolution}: \(\mathbb A_{mn}=A_nB_m\);
+    \item \textbf{Phase convolution}: \(\mathbb P_{mn}=e^{i(\phi_n-\psi_m)}\);
+    \item \textbf{Frequency convolution}: \(\mathbb F_{mn}=\omega_n\nu_m\);
+    \item \textbf{Trend convolution}: \(\mathbb T_{mn}=A_nB_m e^{i(\phi_n-\psi_m)}=A_nB_m\mathbb P_{mn}\).
+\end{enumerate}
+This agrees with \cref{def:amplitude_convolution}, \cref{def:phase_convolution}, \cref{def:frequency_convolution} and \cref{def:tendency_convolution} of the `Series and Convolution' chapter.
+\end{definition}
+
+\begin{theorem}[Action of the three kinds of convolution on astronomical epicycle groups]\label{thm:astro_convolution_action}
+Let the epicycle groups of two astronomical targets be \(\mathfrak E\) and \(\mathfrak E'\). Then:
+\begin{enumerate}[label=(\roman*)]
+    \item amplitude convolution acts only on the radius;
+    \item phase convolution acts only on the phase;
+    \item frequency convolution acts only on the rate of rotation;
+    \item trend convolution preserves both amplitude and phase.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+This is read off directly from \cref{def:astro_convolution_types}.
+\end{proof}
+
+\begin{proposition}[Autocorrelation and trend convolution]\label{prop:astro_autocorr_phase_convolution}
+Let \(\{z_t\}\) be a periodic sequence with autocorrelation function
+\[
+R_z(h)=\sum_t z_t\overline{z_{t+h}}.
+\]
+In the language of astronomical epicycle groups, the autocorrelation function is the projection of the trend convolution onto the diagonal:
+\[
+R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}.
+\]
+\end{proposition}
+
+\begin{proof}
+The \cref{prop:astro_autocorr_phase_convolution} of this chapter is the realisation in this domain of the convolution-action conclusion of \cref{thm:ps_convolution_action} in the `Periodic Systems' chapter:
+substituting $z_t=\sum_n A_n e^{i(\omega_n t+\phi_n)}$ into the definition of the autocorrelation, cancelling all off-diagonal cross terms by orthogonality and retaining only the diagonal term of the trend convolution
+(the factorisation of the three convolutions, \cref{prop:ps_convolution_factorization}), which yields $R_z(h)=\sum_n\mathbb T_{nn}e^{-i\omega_n h}$.
+The complete expansion is given there.
+\end{proof}
+
+\begin{proposition}[Angular momentum and amplitude convolution]\label{prop:astro_angular_momentum_phase}
+The magnitude of the angular momentum of an elliptical orbit, \(L=m\sqrt{GMa(1-e^2)}\), may be regarded as the modulus of the amplitude convolution of the fundamental-frequency component of the orbit. Conservation of areal velocity
+\[
+\frac{dA}{dt}=\frac{L}{2m}
+\]
+is the invariant projection of amplitude convolution under time translation.
+\end{proposition}
+
+\begin{proof}
+From the proof of \cref{thm:kepler_third}, \(L=m\sqrt{GMa(1-e^2)}\). The areal velocity is given by \cref{ch17_lemma_areal_velocity}. Amplitude convolution preserves the amplitude of the orbital component, and its modulus corresponds to the magnitude of the angular momentum.
+\end{proof}
+
+\begin{remark}[Relation between astronomical convolution and periodic convolution]\label{rem:astro_convolution_relation}
+Astronomical convolution is not a new convolution operation, but an instance, on the astronomical epicycle group, of the periodic convolution of the `Series and Convolution' chapter. Autocorrelation is the projection of the trend convolution onto the diagonal; angular momentum and the resonance ratio are respectively the concrete manifestations in astronomy of amplitude convolution and frequency convolution.
+\end{remark}
+
+\section{Integration with discrete sampling, harmonic analysis and time series analysis: the fifth step of the `Periodic Systems' chapter}
+\label{sec:astro_integration}
+
+\begin{definition}[Astronomical periodicity diagnostic procedure]\label{def:astro_periodic_diagnosis}
+For a given astronomical system, diagnosis is carried out within the periodic-mathematics framework:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Orbital period diagnosis}: compute the autocorrelation and the power spectrum of the time series of orbital coordinates and identify the dominant frequencies;
+    \item \textbf{Radial period diagnosis}: compute the period of the radial distance \(r(t)\) and verify \(T_r=T_\theta\);
+    \item \textbf{Resonance diagnosis}: compute the libration or circulation of the resonance angle \(\phi\) and decide whether the resonance is locked;
+    \item \textbf{Time-scale diagnosis}: compute the phase difference of the time-measurement system and the leap-second alignment.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[The astronomical periodicity diagnostic procedure and its interfaces with three chapters]\label{thm:astro_diagnosis_integration}
+The four steps of \cref{def:astro_periodic_diagnosis} connect respectively to:
+\begin{enumerate}[label=(\roman*)]
+    \item the `Discrete Sampling and Intercalation of Periodic Signals' chapter: \cref{def:uniform_sampling_parallel}, \cref{thm:nyquist_shannon_parallel}, \cref{thm:intercalation_leakage_suppression};
+    \item the `Harmonic Analysis' chapter: \cref{def:fourier_series}, \cref{thm:parseval_fourier}, \cref{prop:twelve_to_six};
+    \item the `Time Series Analysis' chapter: \cref{def:ts_period_detection}, \cref{prop:ts_period_significance}, \cref{def:ts_window_validation}.
+\end{enumerate}
+Hence astronomical periodicity diagnosis is not an independent method, but an application of the unified tool chain of periodic mathematics to astronomical systems.
+\end{theorem}
+
+\begin{proof}
+The correspondence is item by item:
+(i) orbital period diagnosis requires sampling and spectral estimation;
+(ii) the frequency decomposition and the phase kernels are found in the `Harmonic Analysis' chapter;
+(iii) the periodogram peaks, the Fisher test and window-function validation are found in the `Time Series Analysis' chapter.
+Hence the diagnostic procedure is a synthesis of the tool chains of the three chapters.
+\end{proof}
+
+\begin{remark}[Operational order after integration]\label{rem:astro_integration_order}
+The recommended order for an actual diagnosis is: first decide whether the astronomical target is periodic (\cref{thm:astro_periodicity_decision}); then construct the Fourier data and the epicycle group of the orbital or observational data (\cref{thm:astro_series_reconstruction}); then optimise the parameters by structural index adjustment and dynamic adjustment (\cref{thm:astro_adaptive_convergence}, \cref{prop:astro_structure_metric_convergence}); then perform astronomical convolution and analyse autocorrelation, angular momentum and the resonance ratio (\cref{prop:astro_autocorr_phase_convolution}, \cref{prop:astro_angular_momentum_phase}); finally output the diagnosis as in \cref{def:astro_periodic_diagnosis}.
+\end{remark}
+
+\section{Rotation and orbital motion}
+\label{sec:astro_rotation}
+
+\subsection{Kepler's three laws and conservation of angular momentum}
+
+\begin{lemma}[Conservation of areal velocity in a central force field]\label{ch17_lemma_areal_velocity}
+Let a celestial body move in a central force field, the force \(\mathbf F=F(r)\hat{\mathbf e}_r\) being always directed along the radius vector. Then the angular momentum \(\mathbf L=m\mathbf r\times\dot{\mathbf r}\) of the body is a constant vector, and the areal velocity
+\[
+\frac{dA}{dt}=\frac12|\mathbf r\times\dot{\mathbf r}|=\frac{|\mathbf L|}{2m}
+\]
+is constant.
+\end{lemma}
+
+\begin{proof}
+The time derivative of the angular momentum is
+\[
+\frac{d\mathbf L}{dt}=m\frac{d}{dt}(\mathbf r\times\dot{\mathbf r})=m(\dot{\mathbf r}\times\dot{\mathbf r}+\mathbf r\times\ddot{\mathbf r})=m\mathbf r\times\ddot{\mathbf r},
+\]
+since \(\dot{\mathbf r}\times\dot{\mathbf r}=\mathbf 0\). By Newton's second law \(\ddot{\mathbf r}=\mathbf F/m=F(r)\hat{\mathbf e}_r/m\), and \(\hat{\mathbf e}_r\parallel\mathbf r\), hence \(\mathbf r\times\ddot{\mathbf r}=\mathbf 0\). Therefore \(\dot{\mathbf L}=\mathbf 0\).
+In polar coordinates \(\mathbf r=r\hat{\mathbf e}_r\) and \(\dot{\mathbf r}=\dot r\hat{\mathbf e}_r+r\dot\theta\hat{\mathbf e}_\theta\), hence \(\mathbf r\times\dot{\mathbf r}=r^2\dot\theta\hat{\mathbf e}_z\). The element of area is \(dA=\frac12r^2d\theta\), so the areal velocity
+\[
+\frac{dA}{dt}=\frac12r^2|\dot\theta|=\frac12|\mathbf r\times\dot{\mathbf r}|=\frac{|\mathbf L|}{2m}
+\]
+is constant.
+\end{proof}
+
+\begin{theorem}[Kepler's first law --- elliptical orbits]\label{thm:kepler_first}
+In an inverse-square central force field the orbit of a celestial body is a conic section. The polar equation of an elliptical orbit is
+\[
+r(\theta)=\frac{a(1-e^2)}{1+e\cos\theta},
+\]
+where \(a\) is the semi-major axis and \(e\) is the eccentricity.
+\end{theorem}
+
+\begin{proof}
+By conservation of angular momentum the motion remains in the plane perpendicular to \(\mathbf L\). In polar coordinates the substitution \(u=1/r\) gives Binet's formula
+\[
+\frac{d^2u}{d\theta^2}+u=-\frac{m}{L^2u^2}F(1/u).
+\]
+Substituting the inverse-square gravitational force \(F=-GMm/r^2=-GMm u^2\) gives
+\[
+\frac{d^2u}{d\theta^2}+u=\frac{GMm^2}{L^2}.
+\]
+The general solution is
+\[
+u(\theta)=\frac{GMm^2}{L^2}+C\cos(\theta-\theta_0),
+\]
+that is,
+\[
+r(\theta)=\frac{p}{1+e\cos(\theta-\theta_0)},
+\]
+where \(p=L^2/(GMm^2)\) and \(e=CL^2/(GMm^2)\). Here \(e<1\) gives an ellipse, \(e=1\) a parabola and \(e>1\) a hyperbola. In the elliptical case \(p=a(1-e^2)\).
+\end{proof}
+
+\begin{theorem}[Kepler's second law --- conservation of areal velocity]\label{thm:kepler_second}
+The areal velocity of a celestial body in a central force field is constant:
+\[
+\frac{dA}{dt}=\frac12|\mathbf r\times\dot{\mathbf r}|=\frac{L}{2m}.
+\]
+\end{theorem}
+
+\begin{proof}
+By \cref{ch17_lemma_areal_velocity}, \(\mathbf L=m\mathbf r\times\dot{\mathbf r}\) is a constant vector, hence the areal velocity \(dA/dt=|\mathbf L|/(2m)\) is constant.
+\end{proof}
+
+\begin{theorem}[Kepler's third law --- period--semi-major-axis relation]\label{thm:kepler_third}
+For an elliptical orbit the orbital period \(T\) and the semi-major axis \(a\) satisfy
+\[
+T^2=\frac{4\pi^2}{GM}a^3.
+\]
+\end{theorem}
+
+\begin{proof}
+By conservation of areal velocity, the ellipse of area \(\pi a^2\sqrt{1-e^2}\) is swept out in one period, hence
+\[
+\frac{dA}{dt}=\frac{\pi a^2\sqrt{1-e^2}}{T}.
+\]
+On the other hand \(dA/dt=L/(2m)\) with \(L=m\sqrt{GMa(1-e^2)}\). Therefore
+\[
+\frac{\pi a^2\sqrt{1-e^2}}{T}=\frac12\sqrt{GMa(1-e^2)}.
+\]
+Squaring both sides and cancelling \(1-e^2\) gives
+\[
+T^2=\frac{4\pi^2}{GM}a^3.
+\]
+\end{proof}
+
+\begin{lemma}[Lagrange inversion solution of Kepler's equation]\label{lem:kepler_equation_solution}
+Let the eccentric anomaly \(E\) satisfy Kepler's equation \(M=E-e\sin E\) (\(0\le e<1\)). Then
+\[
+E=M+\sum_{n=1}^{\infty}\frac2nJ_n(ne)\sin(nM),
+\]
+where \(J_n\) is the Bessel function of the first kind. For \(e\ll1\), \(E\approx M+e\sin M\).
+\end{lemma}
+
+\begin{proof}
+By the Lagrange inversion theorem, set \(E=M+w\) and \(w=e\sin(M+w)\). The coefficients of the power series of \(w\) in \(e\) are given by \(\frac{d^{n-1}}{dM^{n-1}}[\sin^n M]\). Using the Fourier expansion of \(\sin^n M\) and the integral representation of the Bessel functions yields the result.
+\end{proof}
+
+\subsection{Fourier expansion of elliptical orbits}
+
+\begin{proposition}[Fourier--Bessel expansion of elliptical orbits]\label{prop:elliptic_epicycle_expansion}
+An elliptical orbit can be expanded as a sum of infinitely many epicycles. In the complex plane \(\mathbb C\),
+\[
+z(t)=\sum_{n=-\infty}^{\infty}c_n e^{in\omega_0 t},
+\]
+where \(\omega_0=2\pi/T\). When \(e\ll1\), the amplitudes of the higher harmonics decay as \(e^{|n|}\).
+\end{proposition}
+
+\begin{proof}
+The position on an elliptical orbit is
+\[
+z=a(\cos E-e)+ia\sqrt{1-e^2}\sin E,
+\]
+where \(M=E-e\sin E\) and \(M=\omega_0t\). By \cref{lem:kepler_equation_solution}, \(E\) is expanded as a Fourier series in \(M\), with coefficients given by Bessel functions. Since \(J_n(ne)\sim(ne/2)^n/n!\) (\(e\ll1\)), the \(n\)-th harmonic coefficient is \(\sim e^n\).
+\end{proof}
+
+\subsection{Orbital and rotational period data for the solar system}
+\label{subsec:solar_system_periods}
+
+This section takes the eight planets of the solar system and the Moon as its objects and presents a schematic diagram of the orbital paths, a table of orbital period data and a table of rotation period data. These data both verify Kepler's third law of \cref{thm:kepler_third} and exhibit the multiple periodic structures of astronomical systems on different time scales.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.0,>=stealth]
+        % Sun
+        \coordinate (sun) at (0,0);
+        \shade[ball color=yellow!80!orange] (sun) circle (0.30);
+        \node[font=\footnotesize, below=0.15cm of sun] {Sun};
+
+        % Orbital radii (schematic, not to scale; compressed as a^{1/2} for legibility)
+        \def\rMer{0.9}
+        \def\rVen{1.25}
+        \def\rEar{1.65}
+        \def\rMar{2.10}
+        \def\rJup{3.00}
+        \def\rSat{3.65}
+        \def\rUra{4.25}
+        \def\rNep{4.80}
+
+        % Orbits of the eight planets
+        \draw[gray!70,thin] (0,0) circle (\rMer);
+        \draw[gray!70,thin] (0,0) circle (\rVen);
+        \draw[blue!70,thick] (0,0) circle (\rEar);
+        \draw[gray!70,thin] (0,0) circle (\rMar);
+        \draw[orange!80,thick] (0,0) circle (\rJup);
+        \draw[orange!60,thick] (0,0) circle (\rSat);
+        \draw[cyan!70,thick] (0,0) circle (\rUra);
+        \draw[blue!50,thick] (0,0) circle (\rNep);
+
+        % Planetary positions (schematic)
+        \filldraw[gray!70!black] (\rMer,0) circle (1.2pt);
+        \node[font=\scriptsize, right=1pt] at (\rMer,0) {Mercury};
+
+        \filldraw[gray!50!black] ({cos(50)*\rVen},{sin(50)*\rVen}) circle (1.4pt);
+        \node[font=\scriptsize, above right=1pt] at ({cos(50)*\rVen},{sin(50)*\rVen}) {Venus};
+
+        \filldraw[blue!80!black] ({cos(140)*\rEar},{sin(140)*\rEar}) circle (2.0pt);
+        \node[font=\scriptsize, above left=1pt] at ({cos(140)*\rEar},{sin(140)*\rEar}) {Earth};
+
+        % The Moon about the Earth
+        \def\rmoo{0.16}
+        \draw[gray!70,thin] ({cos(140)*\rEar},{sin(140)*\rEar}) circle (\rmoo);
+        \filldraw[gray!50!white] ({cos(140)*\rEar + cos(210)*\rmoo},{sin(140)*\rEar + sin(210)*\rmoo}) circle (1.0pt);
+        \node[font=\tiny, below right=0pt] at ({cos(140)*\rEar + cos(210)*\rmoo},{sin(140)*\rEar + sin(210)*\rmoo}) {Moon};
+
+        \filldraw[red!70!black] ({cos(220)*\rMar},{sin(220)*\rMar}) circle (1.6pt);
+        \node[font=\scriptsize, below left=1pt] at ({cos(220)*\rMar},{sin(220)*\rMar}) {Mars};
+
+        \filldraw[orange!90!black] ({cos(20)*\rJup},{sin(20)*\rJup}) circle (3.2pt);
+        \node[font=\scriptsize, right=2pt] at ({cos(20)*\rJup},{sin(20)*\rJup}) {Jupiter};
+
+        \filldraw[orange!70!black] ({cos(300)*\rSat},{sin(300)*\rSat}) circle (2.8pt);
+        \node[font=\scriptsize, below right=1pt] at ({cos(300)*\rSat},{sin(300)*\rSat}) {Saturn};
+
+        % Saturn's rings
+        \draw[orange!60,thin] ({cos(300)*\rSat},{sin(300)*\rSat}) ++(0,0) ellipse (0.22 and 0.08);
+
+        \filldraw[cyan!90!black] ({cos(180)*\rUra},{sin(180)*\rUra}) circle (2.2pt);
+        \node[font=\scriptsize, left=2pt] at ({cos(180)*\rUra},{sin(180)*\rUra}) {Uranus};
+
+        \filldraw[blue!70!black] ({cos(260)*\rNep},{sin(260)*\rNep}) circle (2.2pt);
+        \node[font=\scriptsize, below left=1pt] at ({cos(260)*\rNep},{sin(260)*\rNep}) {Neptune};
+
+        % Explanatory text
+        \node[font=\footnotesize, align=center] at (0,-5.6)
+            {Schematic of the orbital paths of the eight planets of the solar system (radii compressed as $a^{1/2}$, not to true scale)\\
+             The orbit of the Moon about the Earth is shown separately at an enlarged scale};
+    \end{tikzpicture}
+    \caption{Schematic diagram of the orbital paths of the eight planets of the solar system and the Moon. The orbital radii in the figure are compressed as $a^{1/2}$ so that the inner planets and the outer planets can be shown together on one page; the orbit of the Moon about the Earth is greatly enlarged for display.}
+    \label{fig:solar_system_orbits}
+\end{figure}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Orbital period data for the eight planets of the solar system and the Moon}
+    \label{tab:planetary_orbital_periods}
+    \small
+    \renewcommand{\arraystretch}{1.15}
+    \begin{tabular}{@{}l S[table-format=2.3] S[table-format=3.3] S[table-format=1.2] S[table-format=1.3] S[table-format=5.4]@{}}
+        \toprule
+        Body & \multicolumn{1}{c}{Semi-major axis $a$/AU} & \multicolumn{1}{c}{Orbital period/years} & \multicolumn{1}{c}{Eccentricity $e$} & \multicolumn{1}{c}{$T^2/a^3$} & \multicolumn{1}{c}{Orbital period/days} \\
+        \midrule
+        Mercury & 0.387  & 0.241    & 0.206 & 1.00 & 87.969  \\
+        Venus   & 0.723  & 0.615    & 0.007 & 1.00 & 224.701 \\
+        Earth   & 1.000  & 1.000    & 0.017 & 1.00 & 365.256 \\
+        Mars    & 1.524  & 1.881    & 0.093 & 1.00 & 686.980 \\
+        Jupiter & 5.203  & 11.862   & 0.048 & 1.00 & 4332.59 \\
+        Saturn  & 9.537  & 29.457   & 0.054 & 1.00 & 10759.2 \\
+        Uranus  & 19.191 & 84.011   & 0.047 & 1.00 & 30685.4 \\
+        Neptune & 30.069 & 164.79   & 0.009 & 1.00 & 60189.0 \\
+        Moon    & 0.00257 & 0.0748 & 0.055 & {--} & 27.322  \\
+        \bottomrule
+    \end{tabular}
+
+    \smallskip
+    \footnotesize Note: the \(T^2/a^3\) column is normalised to the Earth's heliocentric value (reference \(GM_\odot\)) and applies only to the eight planets orbiting the Sun. The Moon orbits the Earth, and its \(T^2/a^3=4\pi^2/(GM_\oplus)\) has \(GM_\oplus\) as its reference (about \(3.3\times10^5\) times the former), so it is not listed in that column.
+\end{table}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Rotation period data for the eight planets of the solar system and the Moon}
+    \label{tab:planetary_rotation_periods}
+    \small
+    \renewcommand{\arraystretch}{1.15}
+    \begin{tabular}{@{}l S[table-format=-3.5] l l@{}}
+        \toprule
+        Body & \multicolumn{1}{c}{Rotation period/days} & \multicolumn{1}{c}{Rotation period/h:m:s} & \multicolumn{1}{c}{Rotation direction} \\
+        \midrule
+        Mercury & 58.6462    & 1407:30:32 & prograde \\
+        Venus   & -243.025   & 5832:36:00 & retrograde \\
+        Earth   & 0.99727    & 23:56:04   & prograde \\
+        Mars    & 1.02595    & 24:37:22   & prograde \\
+        Jupiter & 0.41354    & 09:55:30   & prograde \\
+        Saturn  & 0.44401    & 10:33:38   & prograde \\
+        Uranus  & -0.71833   & 17:14:24   & retrograde \\
+        Neptune & 0.67125    & 16:06:36   & prograde \\
+        Moon    & 27.32166   & 655:43:12  & prograde (tidally locked) \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{proposition}[Verification of the orbital periods against Kepler's third law]\label{prop:astro_kepler_data}
+In \cref{tab:planetary_orbital_periods} the values of $T^2/a^3$ for the \textbf{eight planets} are all $1.00$ (normalised to the Earth), that is,
+\[
+\frac{T^2}{a^3}\Big/(\text{Earth's }T^2/a^3)\approx 1.000,
+\]
+which agrees with the assertion of \cref{thm:kepler_third}. The data for the planets of the solar system therefore constitute an experimental verification of Kepler's third law.
+\end{proposition}
+
+\begin{proof}
+By \cref{thm:kepler_third}, \(T^2=4\pi^2 a^3/(GM)\). Normalising to the Earth's \(a_\oplus\) and \(T_\oplus\) as units gives \(T^2/a^3\) as the constant \(1\). The values in the table are all given by astronomical observation, and checking them row by row yields the conclusion (the Moon row is not part of that column, its reference being \(GM_\oplus\); see the note below the table).
+\end{proof}
+
+\begin{proposition}[Separation in magnitude of the rotation and orbital periods]\label{prop:astro_rotation_scales}
+\cref{tab:planetary_rotation_periods} shows that the rotation period of a planet is usually $2$ to $4$ orders of magnitude shorter than its orbital period (for example the Earth rotates in $1$ day and orbits in $365$ days, a ratio of about $1/365$), whilst the rotation period of the Moon equals its orbital period (tidal locking). This is an intuitive example of \textbf{multi-scale periodicity} in astronomical systems.
+\end{proposition}
+
+\begin{proof}
+This follows by direct comparison of \cref{tab:planetary_rotation_periods} with \cref{tab:planetary_orbital_periods}. The ratio of rotation to orbital motion is about $1/365$ for the Earth and about $0.414/4333\approx 9.6\times 10^{-5}$ for Jupiter. For the Moon $T_{\text{rot}}=T_{\text{orb}}=27.32$ days, that is, tidal locking.
+\end{proof}
+
+\begin{remark}[Direction of rotation and conservation of angular momentum]\label{rem:astro_retrograde}
+The rotation of Venus and Uranus is retrograde (their rotation periods are given a negative sign). Retrograde rotation indicates that the rotational angular momentum of these two planets is nearly opposite in direction to their orbital angular momentum. This may be the result of collisions between bodies or of tidal evolution in the early solar system, and it shows that conservation of angular momentum holds at the \textbf{system level} (rotation + orbital motion + other bodies), and not only at the level of the rotation of a single planet.
+\end{remark}
+
+\begin{remark}[Tidal locking and phase locking]\label{rem:astro_tidal_lock}
+The rotation period of the Moon is exactly equal to its orbital period ($T_{\text{rot}}=T_{\text{orb}}=27.32$ days), a typical instance of \textbf{tidal locking}. Within the framework of periodic mathematics, tidal locking is equivalent to \textbf{phase locking}: the rotation phase and the orbital phase of the Moon keep a fixed relation (here $1:1$), which corresponds to the concrete realisation, in a rotation--orbit coupled system, of the phase locking of \cref{prop:phase-locking}. Likewise, the $4:2:1$ orbital resonance among Io, Europa and Ganymede is an instance of \textbf{many-body phase locking} (see \cref{def:orbital_resonance} and \cref{prop:resonance_structure}).
+\end{remark}
+
+\begin{example}[Numerical verification of the orbital periods of the planets of the solar system]\label{ex:astro_solar_system_data}
+The data in \cref{tab:planetary_orbital_periods} are checked row by row against \cref{thm:kepler_third}:
+\begin{enumerate}[label=(\roman*)]
+    \item Mercury: $T^2=0.241^2=0.0581$, $a^3=0.387^3=0.0580$, ratio $1.002$;
+    \item Jupiter: $T^2=11.862^2=140.71$, $a^3=5.203^3=140.85$, ratio $0.999$;
+    \item Neptune: $T^2=164.79^2=27155.8$, $a^3=30.069^3=27156.5$, ratio $1.000$.
+\end{enumerate}
+The above values agree within observational accuracy, which verifies $T^2\propto a^3$.
+\end{example}
+
+\begin{example}[Multi-scale structure of the rotation periods]\label{ex:astro_rotation_multi_scale}
+Arranging the rotation periods of \cref{tab:planetary_rotation_periods} on a logarithmic scale:
+\[
+\begin{aligned}
+&0.41\ (\text{Jupiter})<0.44\ (\text{Saturn})<0.67\ (\text{Neptune})<0.72\ (\text{Uranus})\\
+&<0.997\ (\text{Earth})<1.03\ (\text{Mars})<27.3\ (\text{Moon})<58.6\ (\text{Mercury})<243.0\ (\text{Venus}).
+\end{aligned}
+\]
+The distribution of the rotation periods spans nearly $3$ orders of magnitude. The slow rotation of Venus, the Moon and Mercury arises from tidal evolution and from the long-term coupling between rotation and orbital motion.
+\end{example}
+
+\begin{remark}[Organisation of the data in this section]\label{rem:astro_data_organisation}
+The data tables and the TikZ figure of this section are an instantiation of astronomical periodic structure:
+\begin{itemize}
+    \item \cref{fig:solar_system_orbits} gives the spatial geometry of the orbital system;
+    \item \cref{tab:planetary_orbital_periods} gives the temporal structure of the orbital periods and allows \cref{thm:kepler_third} to be verified directly;
+    \item \cref{tab:planetary_rotation_periods} gives the temporal structure of planetary rotation, including the three basic modes of prograde rotation, retrograde rotation and tidal locking.
+\end{itemize}
+What the three have in common is that every celestial body is both an \textbf{orbital period system} (a revolution about the Sun or a planet) and a \textbf{rotational period system} (its own rotation), and the separation in magnitude or the locking relation of the two periods determines the overall rhythm of the celestial system.
+\end{remark}
+
+\section{Radial motion and conservation of energy}
+
+\begin{definition}[Radial motion]\label{def:radial_motion}
+In a central force field the \textbf{radial motion} \(r(t)\) of a celestial body is described by a one-dimensional dynamical equation in the effective potential:
+\[
+\frac12m\dot r^2+U_{\text{eff}}(r)=E,
+\]
+where \(U_{\text{eff}}(r)=-GMm/r+L^2/(2mr^2)\).
+\end{definition}
+
+\begin{proposition}[Period of the radial oscillation]\label{prop:radial_oscillation_period}
+For an elliptical orbit the period of the radial motion equals the period of the angular motion: \(T_r=T_\theta=T\). Bertrand's theorem states that only the inverse-square force field and the Hooke force field can produce closed bound orbits.
+\end{proposition}
+
+\begin{proof}
+From the radial equation of motion in the effective potential, the radial period is
+\[
+T_r=2\int_{r_{\min}}^{r_{\max}}\frac{dr}{\sqrt{\frac2m(E-U_{\text{eff}}(r))}},
+\]
+and the angular period is
+\[
+T_\theta=\frac{2m}{L}\int_{r_{\min}}^{r_{\max}}\frac{r^2dr}{\sqrt{\frac2m(E-U_{\text{eff}}(r))}}.
+\]
+When \(U\propto-1/r\), the two integrals become equal under the substitution \(u=1/r\), hence \(T_r=T_\theta\).
+\end{proof}
+
+\begin{proposition}[Conservation of energy and the type of orbit]\label{prop:energy_orbital_type}
+The total mechanical energy \(E=\frac12mv^2-GMm/r\) of a celestial body determines the type of its orbit:
+\begin{enumerate}[label=(\roman*)]
+    \item \(E<0\): a bound orbit (ellipse);
+    \item \(E=0\): an escape orbit (parabola);
+    \item \(E>0\): an unbound orbit (hyperbola).
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+The effective potential \(U_{\text{eff}}(r)=-GMm/r+L^2/(2mr^2)\) attains its minimum at \(r_0=L^2/(GMm^2)\). When \(E<0\) there are two positive roots \(r_{\min}<r_{\max}\) and the radial motion is bounded; when \(E=0\) there is only one finite root and \(r_{\max}=\infty\); when \(E>0\) there is no upper bound.
+\end{proof}
+
+\section{Orbital resonance}
+\label{sec:astro_resonance}
+
+\begin{definition}[Orbital resonance]\label{def:orbital_resonance}
+The \textbf{orbital resonance} of two celestial bodies means that their orbital periods satisfy an integer-ratio relation:
+\[
+\frac{T_2}{T_1}=\frac pq,\qquad p,q\in\mathbb N^+,\ \gcd(p,q)=1.
+\]
+The ratio \(p:q\) is called the \textbf{resonance ratio}.
+\end{definition}
+
+\begin{definition}[Resonance angle]\label{def:resonance_angle}
+For a \(p:q\) orbital resonance, define the \textbf{resonance angle}
+\[
+\phi=p\lambda_2-q\lambda_1+(p-q)\varpi,
+\]
+where \(\lambda_i\) is the mean longitude and \(\varpi\) is the longitude of pericentre. If \(\phi\) oscillates about an equilibrium value (libration), then the system is in \textbf{resonance lock}.
+\end{definition}
+
+\begin{proposition}[Structural properties of resonance]\label{prop:resonance_structure}
+Orbital resonance has the following structural properties:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Period-ratio structure}: the resonance ratio \(p:q\) determines the scaling relation between the time scales of the two orbits;
+    \item \textbf{Resonance width}: the resonance width depends on the mass ratio and the eccentricity;
+    \item \textbf{Stability of resonance lock}: the resonance angle \(\phi\) is confined to the libration region; if an external perturbation drives \(\phi\) past the libration barrier, the system leaves the resonance.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) By Kepler's third law, \(T\propto a^{3/2}\), hence \(p/q=(a_2/a_1)^{3/2}\), that is, \(a_2/a_1=(p/q)^{2/3}\).
+(ii) Near a \(p:q\) resonance the resonance Hamiltonian reduces to the pendulum form
+\[
+H_{\text{res}}=\frac32p^2n^2\frac{(\Delta a)^2}{a_{\text{res}}^2}+\alpha e n^2\cos\phi.
+\]
+The energy of the pendulum separatrix gives the resonance half-width \(\Delta a_{\max}/a\approx\sqrt{\alpha e m/M}\).
+(iii) Resonance lock is equivalent to \(\phi\) undergoing a bounded oscillation; if the perturbation drives \(\phi\) beyond the separatrix, the motion enters the circulation region and the resonance ratio is no longer conserved.
+\end{proof}
+
+\begin{example}[Orbital resonances in the solar system]
+The Jupiter--Saturn \(5:2\) near-resonance; the Neptune--Pluto \(3:2\) resonance; the \(4:2:1\) Laplace resonance of the Jovian satellite system. These resonance examples are directly related to the orbital period data given in \cref{tab:planetary_orbital_periods}: for example the ratio of the periods of Neptune and Pluto is $164.79/247.94\approx 0.665\approx 2/3$, that is, a $3:2$ resonance.
+\end{example}
+
+\begin{definition}[Secular resonance]\label{def:secular_resonance}
+A \textbf{secular resonance} is a rational relation between the precession frequencies of the orbital elements:
+\[
+\frac{\dot\varpi_2}{\dot\varpi_1}=\frac pq
+\quad\text{or}\quad
+\frac{\dot\Omega_2}{\dot\Omega_1}=\frac pq.
+\]
+\end{definition}
+
+\begin{example}[Secular resonances in the solar system]
+The \(\nu_6\) secular resonance is the main cause of the Kirkwood gaps; the Mercury--Jupiter secular resonance may lead to chaotic variation.
+\end{example}
+
+\section{Periodic structure of many-body systems}
+
+\begin{theorem}[Quasi-periodic orbits of many-body systems]\label{thm:n_body_quasiperiodic}
+In an \(N\)-body gravitational system (\(N\ge3\)) the motion of the system is in general not strictly periodic but \textbf{quasi-periodic}. Within the framework of KAM theory, if the planetary masses are sufficiently small and the orbits sufficiently close to circular, then the orbits corresponding to most initial conditions lie on invariant tori, and the motion can be described by a quasi-periodic function with \(3N\) independent frequencies.
+\end{theorem}
+
+\begin{proof}
+The KAM theorem: if the unperturbed Hamiltonian \(H_0\) is integrable and the perturbation \(\varepsilon H_1\) is sufficiently small and satisfies the non-resonance condition, then there exists a set of invariant tori of positive measure on which the quasi-periodic motion is preserved under the perturbation. In the solar system the planetary mass ratio is \(\varepsilon\sim10^{-3}\) to \(10^{-6}\) and most orbital period ratios are irrational, so the KAM conditions are roughly satisfied.
+\end{proof}
+
+\begin{remark}[Long-term stability of the solar system --- an overview of perturbation theory]\label{rem:solar_system_stability}
+The perturbation-theory framework for the problem of the long-term stability of the solar system is as follows: the integrable two-body motion is taken as the unperturbed system \(H_0\) and the mutual gravitation of the planets as the perturbation \(\varepsilon H_1\). Canonical perturbation theory order by order eliminates the fast angle variables and yields the secular averaged Hamiltonian; truncation at second order gives the Laplace--Lagrange secular solution. Poincaré proved that the power-series solution of the general three-body problem does not converge. Numerical simulations indicate that the orbits of the inner planets may be chaotic. Whether the solar system is strictly stable on time scales of billions of years remains an open problem.
+\end{remark}
+
+\section{Conserved quantities of astronomical periodic systems}
+
+\begin{theorem}[The three conserved quantities of an astronomical system]\label{thm:astronomical_conservation_laws}
+The dynamics of an astronomical periodic system is constrained by three conserved quantities:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Conservation of angular momentum}: in a central force field, \(\mathbf L=m\mathbf r\times\dot{\mathbf r}\) is a constant vector;
+    \item \textbf{Conservation of energy}: in a conservative gravitational field, \(E=\frac12mv^2-GMm/r\) is constant;
+    \item \textbf{Conservation of the resonance ratio}: in an orbital resonance, the resonance ratio \(p:q\) remains unchanged in the locked state.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) The rotational symmetry of the central force field yields conservation of angular momentum by Noether's theorem.
+(ii) The gravitational potential is conservative, \(\nabla\times\mathbf F_g=\mathbf 0\), and the mechanical energy is conserved.
+(iii) Near a \(p:q\) resonance, after averaging the resonance angle satisfies the pendulum equation; when it librates, the resonance ratio is locked.
+\end{proof}
+
+\begin{proposition}[Breaking of conserved quantities and orbital instability]\label{prop:astronomical_conservation_breaking}
+The breaking of conserved quantities in an astronomical periodic system leads to orbital instability:
+\begin{enumerate}[label=(\roman*)]
+    \item breaking of angular momentum: a non-radial force makes the orbital plane precess;
+    \item breaking of energy: a non-conservative force makes the semi-major axis vary slowly;
+    \item breaking of the resonance ratio: an external perturbation drives the resonance angle past the libration barrier.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) If \(\mathbf F\) has a non-radial component, then \(\dot{\mathbf L}=\mathbf r\times\mathbf F\neq\mathbf 0\).
+(ii) Tidal friction and gravitational-wave radiation make \(\dot E<0\), and from \(E=-GMm/(2a)\) it follows that \(a\) decreases.
+(iii) When the amplitude of \(\phi\) exceeds the separatrix, the motion enters the circulation region and the resonance ratio is no longer conserved.
+\end{proof}
+
+\section{Binary and multiple star systems}
+
+\begin{definition}[Relative motion of a binary star system]\label{def:binary_episphere}
+In a binary star system,
+\[
+\mathbf r(t)=\mathbf r_2(t)-\mathbf r_1(t),\qquad
+\mathbf R_{\text{cm}}(t)=\frac{m_1\mathbf r_1+m_2\mathbf r_2}{m_1+m_2}.
+\]
+The direction of the orbital angular momentum is
+\[
+\mathbf n(t)=\frac{\mathbf r(t)\times\dot{\mathbf r}(t)}{\|\mathbf r(t)\times\dot{\mathbf r}(t)\|}.
+\]
+In the two-body problem \(\mathbf n(t)\) is a constant vector; in a many-body system it precesses slowly.
+\end{definition}
+
+\begin{proposition}[Quaternion expansion of binary star orbits]\label{prop:binary_episphere_approximation}
+The orbital motion of a binary star can be expanded in quaternions as
+\[
+\mathbf r(t)=\sum_{m=1}^{M}A_m\mathbf d_m(t),\qquad
+\mathbf d_m(t)=q_m(t)\hat{\mathbf e}_r q_m(t)^{-1},
+\]
+where \(q_m(t)=e^{\mathbf u_m\omega_mt/2}\). The truncation error is \(\sim e^{M+1}\).
+\end{proposition}
+
+\begin{proof}
+The relative motion of a binary star is equivalent, within the orbital plane, to two-dimensional elliptical motion. By \cref{prop:elliptic_epicycle_expansion}, an elliptical orbit can be expanded in periodic components. Quaternions are used to embed the two-dimensional expansion in three-dimensional space. Since the harmonic amplitudes decay as \(e^{|m|}\), the truncation error follows.
+\end{proof}
+
+\begin{definition}[Hierarchical orbital angular momentum of multiple star systems]\label{def:multiple_star_dynamic_axes}
+In a triple or \(N\)-star system, define hierarchical orbital angular momentum directions \(\mathbf n_1(t),\mathbf n_2(t),\dots\), each level evolving slowly in time, driven by the gravitational coupling between the levels (the Kozai--Lidov mechanism).
+\end{definition}
+
+\begin{proposition}[Hierarchical expansion of multiple star systems]\label{prop:multiple_star_episphere}
+A triple star system admits a hierarchical nested expansion. When \(\mathbf n_1\) and \(\mathbf n_2\) are not parallel, the system exhibits non-coplanar orbits, which is the geometric condition for Kozai--Lidov oscillations.
+\end{proposition}
+
+\begin{proof}
+Let the semi-major axis of the inner binary be \(a_1\ll a_2\). The gravitational potential of the outer body on the inner binary is expanded in \(a_1/a_2\), whose first non-zero order is the quadrupole term. Averaging over the inner orbit gives the Kozai--Lidov potential. When the mutual inclination \(I>39.2^\circ\), the inner eccentricity and inclination oscillate strongly.
+\end{proof}
+
+\begin{theorem}[Evolution equation for the orbital angular momentum directions]\label{thm:dynamic_axis_evolution}
+Let \(\mathbf n_k(t)\) be the direction of the orbital angular momentum of the \(k\)-th level. Then
+\[
+\frac{d\mathbf n_k}{dt}=\sum_{j\neq k}\Omega_{kj}(\mathbf n_k\times\mathbf n_j)
++\sum_{j\neq k}\Gamma_{kj}(\mathbf n_k\times(\mathbf n_k\times\mathbf n_j)),
+\]
+where \(\Omega_{kj}\) is the precession frequency and \(\Gamma_{kj}\) is the dissipation coefficient.
+\end{theorem}
+
+\begin{proof}
+The angular momentum of the \(k\)-th level, \(\mathbf L_k=L_k\mathbf n_k\), satisfies \(d\mathbf L_k/dt=\sum_{j\neq k}\boldsymbol\tau_{kj}\). Expanding the torque as the gradient of the gravitational potential and taking the orbital average, the conservative part yields \(\mathbf n_k\times\mathbf n_j\) and the dissipative part yields \(\mathbf n_k\times(\mathbf n_k\times\mathbf n_j)\).
+\end{proof}
+
+\begin{corollary}[Alignment of axes when dissipation dominates]\label{cor:dynamic_axis_alignment}
+If the evolution equation is dominated by the dissipation coefficients \(\Gamma_{kj}\), then the \(\mathbf n_k\) tend to become mutually parallel; if it is dominated by the precession frequencies \(\Omega_{kj}\), then the system retains a non-coplanar configuration.
+\end{corollary}
+
+\begin{proof}
+When dissipation dominates, \(\dot{\mathbf n}_k=\sum_j\Gamma_{kj}(\mathbf n_j-\mathbf n_k)\) and the \(\mathbf n_k\) converge to a common direction. When precession dominates, \(\dot{\mathbf n}_k=\sum_j\Omega_{kj}\mathbf n_j\times\mathbf n_k\), the inner products are conserved and the system remains non-coplanar.
+\end{proof}
+
+\begin{example}[The Alpha Centauri triple system]
+Alpha Centauri A and B form the inner binary, and Proxima Centauri moves about the A--B centre of mass. The angle between the orbital angular momentum directions of the two levels is about \(107^\circ\), and the system is markedly non-coplanar.
+\end{example}
+
+\section{Periodic structure of astronomical time systems}
+\label{sec:astro_time_systems}
+
+An astronomical time system is composed of several kinds of period with different physical meanings and mathematical structures.
+
+\subsection{Tropical year and sidereal year}
+
+\begin{definition}[Tropical year]\label{def:tropical_year}
+The \textbf{tropical year} is the interval between two successive passages of the Sun through the vernal equinox:
+\[
+T_{\text{trop}}=365.2421897-0.0000062T\quad\text{mean solar days}.
+\]
+\end{definition}
+
+\begin{definition}[Sidereal year]\label{def:sidereal_year}
+The \textbf{sidereal year} is the interval between two successive passages of the Sun past the same fixed stellar direction:
+\[
+T_{\text{sid}}=365.2563630\quad\text{mean solar days}.
+\]
+The difference between the sidereal year and the tropical year is caused by precession.
+\end{definition}
+
+\subsection{Synodic month and sidereal month}
+
+\begin{definition}[Synodic month]\label{def:synodic_month}
+The \textbf{synodic month} is the interval between two successive passages of the Moon through the same lunar phase:
+\[
+T_{\text{syn}}=29.5305889\quad\text{mean solar days}.
+\]
+\end{definition}
+
+\begin{definition}[Sidereal month]\label{def:sidereal_month}
+The \textbf{sidereal month} is the interval between two successive passages of the Moon past the same fixed stellar direction:
+\[
+T_{\text{sm}}=27.3216615\quad\text{mean solar days}.
+\]
+This agrees with the orbital period of the Moon, $27.322$ days, given in \cref{tab:planetary_orbital_periods}.
+\end{definition}
+
+\subsection{Anomalistic month and nodal month}
+
+\begin{definition}[Anomalistic month]\label{def:anomalistic_month}
+The \textbf{anomalistic month} is the interval between two successive passages of the Moon through the perigee of its orbit:
+\[
+T_{\text{anom}}=27.5545509\quad\text{mean solar days}.
+\]
+\end{definition}
+
+\begin{definition}[Nodal month]\label{def:nodal_month}
+The \textbf{nodal month} is the interval between two successive passages of the Moon through the same node of its orbit with the ecliptic:
+\[
+T_{\text{nod}}=27.2122208\quad\text{mean solar days}.
+\]
+\end{definition}
+
+\subsection{Synodic year}
+
+\begin{definition}[Synodic year]\label{def:synodic_year}
+The \textbf{synodic year} is the interval between two successive passages of the Sun through the same lunar-phase position:
+\[
+\frac1{T_{\text{syn-year}}}=\frac1{T_{\text{syn}}}-\frac1{T_{\text{trop}}}.
+\]
+\end{definition}
+
+\subsection{Sui and precession}
+
+\begin{definition}[Sui]\label{def:sui}
+In the astronomy and calendars of ancient China, the \textbf{year} corresponds to an integer multiple of the synodic month, whilst the \textbf{sui} corresponds to the tropical year from one winter solstice to the next. The two are reconciled by intercalation.
+\end{definition}
+
+\begin{definition}[Precession]\label{def:precession}
+\textbf{Precession} is the slow conical motion of the Earth's rotation axis, with a period of about
+\[
+T_{\text{prec}}\approx25772\quad\text{years}.
+\]
+Its equation is isomorphic to the precession equation for the orbital angular momentum directions of a multiple star system.
+\end{definition}
+
+\subsection{Nutation}
+
+\begin{definition}[Nutation]\label{def:nutation}
+\textbf{Nutation} is the short-period oscillation of the Earth's rotation axis on the precession cone, with principal period \(18.6\) years.
+\end{definition}
+
+\section{Periodic structure of time-measurement systems}
+\label{sec:astro_time_measurement}
+
+\subsection{Apparent solar time and mean solar time}
+
+\begin{definition}[Apparent solar time]\label{def:true_solar_time}
+\textbf{Apparent solar time} is based on the actual position of the Sun, noon being the instant at which the centre of the Sun crosses the meridian. Its period is non-uniform.
+\end{definition}
+
+\begin{definition}[Mean solar time]\label{def:mean_solar_time}
+\textbf{Mean solar time} is based on a fictitious mean sun moving uniformly. The equation of time is
+\[
+E(t)=T_{\text{true}}-T_{\text{mean}}.
+\]
+\end{definition}
+
+\subsection{Legal time}
+
+\begin{definition}[Legal time]\label{def:legal_time}
+\textbf{Legal time} is the unified time prescribed by a state in legal form.
+\end{definition}
+
+\begin{definition}[Beijing time]\label{def:beijing_time}
+\textbf{Beijing time} is the standard time of the eighth eastern time zone, its reference point being Shanghai (longitude \(121.43^\circ\) east).
+\end{definition}
+
+\subsection{Sidereal time}
+
+\begin{definition}[Sidereal time]\label{def:sidereal_time}
+\textbf{Sidereal time} is based on the position of the vernal equinox, the sidereal day being
+\[
+T_{\text{sid-day}}=23^{\text{h}}56^{\text{m}}04.0905^{\text{s}}\quad\text{mean solar time}.
+\]
+\end{definition}
+
+\subsection{Ephemeris time and atomic time}
+
+\begin{definition}[Ephemeris time]\label{def:ephemeris_time}
+\textbf{Ephemeris time} takes the orbital motion of the Earth as its reference, the second being defined as \(1/31556925.9747\) of the length of the tropical year of \(1900\).
+\end{definition}
+
+\begin{definition}[Atomic time]\label{def:atomic_time}
+\textbf{Atomic time} takes the frequency of the hyperfine level transition of the ground state of the caesium \(133\) atom as its reference, the second being defined as \(9192631770\) periods.
+\end{definition}
+
+\section{The three-tier structure of time-measurement systems}
+
+\begin{theorem}[The three-tier structure of time-measurement systems]\label{thm:time_system_grammar_unity}
+Astronomical time-measurement systems form a three-tier nested structure:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Rotation layer}: apparent solar time, sidereal time---based on the true rotation of a celestial body;
+    \item \textbf{Translation layer}: mean solar time, ephemeris time---obtained by uniformisation;
+    \item \textbf{Scaling layer}: legal time, atomic time---unified by a scale transformation.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) Apparent solar time is defined by the apparent ecliptic longitude of the Sun, and its non-uniformity arises from the ellipticity of the orbit and the obliquity of the ecliptic.
+(ii) Mean solar time takes the long-term average of the apparent ecliptic longitude of the true Sun, and the equation of time satisfies \(|E(t)|\le16\) minutes.
+(iii) Legal time unifies local time differences into integer hours of a time zone; atomic time transfers the time scale to a quantum frequency.
+\end{proof}
+
+\begin{corollary}[Leap seconds and periodic alignment]\label{cor:leap_second_periodic_alignment}
+A leap second is an operation of phase locking between two incommensurable periods, keeping the difference in day length between UTC and mean solar time within \(0.9\) seconds.
+\end{corollary}
+
+\section{Conserved quantities of time-measurement systems}
+
+\begin{proposition}[Scale conservation in time measurement]\label{prop:time_scale_charge_conservation}
+The core conserved quantity of a time-measurement system is the \textbf{time scale}:
+\begin{enumerate}[label=(\roman*)]
+    \item rotation-layer scale: the lengths of the apparent solar day and the sidereal day;
+    \item translation-layer scale: the length of the mean solar day;
+    \item scaling-layer scale: the length of the atomic second.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) The rotation-layer scale is determined by the Earth's rotation, and tidal friction decelerates the Earth's rotation.
+(ii) The translation-layer scale inherits the rotation layer and smooths out the periodic fluctuations.
+(iii) The length of the atomic second is determined by constants of quantum mechanics, with a measured accuracy of \(10^{-16}\).
+\end{proof}
+
+\begin{remark}[Connection with the rest of the book]
+The theory of the periodic structure of astronomical systems established in this chapter is an application of periodic mathematics to celestial mechanics and time measurement. It applies the constraints of conserved quantities, the expansion of periodic components, multi-level periodic structures and phase locking in a unified way to the analysis of astronomical systems. Kepler's three laws are derived from Newton's law of gravitation in a central force field; orbital resonance is a period-ratio relation between periods of different scales; many-body quasi-periodic systems are the celestial-mechanical realisation of the theory of periodic structure; and the three-tier structure of time-measurement systems is the comprehensive embodiment of the periodic-mathematics framework in the cognition and measurement of time.
+\end{remark}
+
+\section*{Seven-theme comparison table for this chapter}
+\begin{center}
+\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{9.5cm}}
+\toprule
+Theme & Corresponding content in this chapter \\
+\midrule
+Translation & The time translation of planets along their orbits and the orbital period (\cref{tab:planetary_orbital_periods}); the to-and-fro translation of the radial oscillation between periapsis and apoapsis (tropical year/sidereal year, mean solar time) \\
+Scaling & The Kepler scaling of orbital radius versus period \(T^2\propto a^3\) (\cref{thm:kepler_third}, \cref{tab:planetary_orbital_periods}); the semi-major-axis scaling \((p/q)^{2/3}\) induced by the resonance ratio \(p:q\) (\cref{prop:resonance_structure}) \\
+Rotation & Conservation of the angular momentum of orbital motion and rotation: conservation of areal velocity (\cref{ch17_lemma_areal_velocity}), rotation periods and directions (\cref{tab:planetary_rotation_periods}), precession of the orbital angular momentum directions \(\mathbf n_k\) (\cref{thm:dynamic_axis_evolution}) \\
+Conservation & Conservation of angular momentum, conservation of energy, conservation of the centre-of-mass momentum and conservation of the resonance ratio (\cref{thm:astronomical_conservation_laws}) \\
+Symmetry & The rotational symmetry of a central force field and its Noether correspondence to conservation of angular momentum (\cref{thm:astronomical_conservation_laws}); the phase symmetry of the tidal locking of the Moon (\cref{rem:astro_tidal_lock}) \\
+Closure & The closure of elliptical orbits: Kepler's first law (\cref{thm:kepler_first}), Bertrand's theorem (\cref{prop:radial_oscillation_period}) \\
+Period & Decomposition of the orbital and rotation periods (\cref{prop:elliptic_epicycle_expansion}, \cref{tab:planetary_orbital_periods}, \cref{tab:planetary_rotation_periods}), mean-motion resonance (\cref{def:orbital_resonance}), secular resonance (\cref{def:secular_resonance}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Exercises}
+
+\begin{enumerate}[leftmargin=3em, label=\textbf{Exercise \arabic*}]
+    \item Prove the \textbf{astronomical periodicity decision theorem} of this chapter (\ref{thm:astro_periodicity_decision}). Hint: first write down the decision map and the evolution group of this chapter's target, then apply the proof structure of the general criterion of the `Periodic Systems' chapter.
+
+    \item Verify that the hypotheses of \textbf{monotonicity of quantity adjustment} (\ref{prop:astro_adaptive_growth}) hold for the domain objects of this chapter, and give a counterexample in which the hypotheses fail.
+
+    \item Examine the behaviour of the \textbf{Fourier--Bessel expansion of elliptical orbits} (\ref{prop:elliptic_epicycle_expansion}) under degeneracy of the parameters, and explain how the conclusion degenerates accordingly.
+
+    \item Explain the relation between the \textbf{astronomical periodicity diagnostic procedure and its interfaces with three chapters} (\ref{thm:astro_diagnosis_integration}) and the corresponding general conclusion of the `Periodic Systems' chapter (whether they agree, whether it is a special case, or whether additional conditions are required).
+
+    \item Using the seven-theme comparison table of this chapter, identify the concrete carriers in this chapter of the three themes \textbf{translation}, \textbf{scaling} and \textbf{rotation}, and give one example of domain data for each.
+
+    \item Synthesis: restate the diagnostic procedure of this chapter using the five-step standard interface of the `Periodic Systems' chapter (Table \ref{tab:ps_five_steps}), noting for each step the theorem of this chapter on which it depends: \ref{thm:astro_periodicity_decision}, \ref{prop:astro_adaptive_growth}, \ref{prop:elliptic_epicycle_expansion}, \ref{thm:astro_diagnosis_integration}.
+\end{enumerate}
+
+

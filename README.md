@@ -6,12 +6,13 @@
 作者 / Author: **Eloy Kim**（独立研究者 · Independent Researcher）
 联系方式 / Contact: `eloy.kim@outlook.com`
 
-[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Fonts: SIL OFL 1.1](https://img.shields.io/badge/Fonts-SIL%20OFL%201.1-blue.svg)](https://scripts.sil.org/OFL)
 
-> ⚠️ **本作品禁止商业使用。商业使用需获得作者的书面许可。**
-> **This work is NOT licensed for commercial use. Commercial use requires a
-> separate written licence from the author.** — 详见 [许可](#许可--license)。
+> **以 Apache License 2.0 授权** —— 允许商业使用、修改与再分发，只需保留版权与
+> 许可声明、标注修改，并附带 `NOTICE`。
+> **Released under the Apache License 2.0** — commercial use, modification and
+> redistribution are permitted. 详见 [许可](#许可--license)。
 
 ---
 
@@ -34,8 +35,7 @@
 | British English | 英式英语 | 46 | 1454 | [`Periodicity Mathematics British English/`](<Periodicity Mathematics British English/>) | [PDF](<Periodicity Mathematics British English/Periodicity Mathematics British English.pdf>) |
 | Chinese Simplified | 简体中文 | 46 | 1270 | [`Periodicity Mathematics Chinese Simplified/`](<Periodicity Mathematics Chinese Simplified/>) | [PDF](<Periodicity Mathematics Chinese Simplified/Periodicity Mathematics Chinese Simplified.pdf>) |
 
-两个版本共用同一套 46 章的目录结构；中文版另附英文摘要。全书 LaTeX 源码约
-95,000 行。
+两个版本共用同一套 46 章的目录结构；中文版另附英文摘要。全书 LaTeX 源码约 95,000 行。
 
 ### 内容结构 · Structure
 
@@ -67,7 +67,8 @@
 ├── 周期数学·核心理念与应用前景.docx              # 核心理念概述
 ├── 个人简历-周期数学独立研究者.docx              # 作者简历
 ├── CITATION.cff                                # 引用信息
-├── LICENSE                                     # CC BY-NC-SA 4.0 法律文本
+├── LICENSE                                     # Apache License 2.0 法律文本
+├── NOTICE                                      # 署名声明（Apache 2.0 第 4(d) 节）
 └── LICENSE-SCOPE.md                            # 适用范围与字体例外说明
 ```
 
@@ -100,20 +101,28 @@ clean.bat            :: 清除 .aux/.log/.out/.toc/.lof/.lot/.synctex.gz 等中�
 
 | 内容 | 许可 | 商业使用 |
 |---|---|---|
-| 书稿源码、PDF、配套文档、本文档 | [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) | ❌ **禁止**，需另行获得书面许可 |
+| 书稿源码、PDF、配套文档、构建脚本、本文档 | [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) | ✅ **允许**，免费且无需另行授权 |
 | `fonts/` 目录下的 LXGW WenKai 字体 | [SIL OFL 1.1](https://scripts.sil.org/OFL) | ✅ 允许（OFL 授权不可被覆盖） |
 
-**在 CC BY-NC-SA 4.0 下**，您可以出于**非商业**目的复制、传播和改编本作品，但必须：
-**署名**（注明作者、附许可说明）、**非商业使用**、**相同方式共享**（改编作品须以同一许可发布）。
+**在 Apache License 2.0 下**，您可以自由地**商业使用**、修改、分发和再授权本作品
+（包括纳入付费产品或服务）。唯一需要遵守的条件是：
 
-**商业使用**——包括但不限于出版、转售、纳入付费产品或服务、付费培训或咨询，
-或在营利实体的商业业务中使用——**必须事先取得作者的书面授权**。
+1. **附上许可副本** —— 向任何接收者提供一份 [`LICENSE`](LICENSE)；
+2. **标注修改** —— 被修改的文件需带有醒目的"已更改"说明；
+3. **保留声明** —— 保留版权、专利、商标与署名声明；
+4. **保留 NOTICE** —— 分发衍生作品时须一并包含 [`NOTICE`](NOTICE) 中的署名信息。
 
-📧 商业授权洽谈 / Commercial licensing enquiries: **`eloy.kim@outlook.com`**
+Apache 2.0 **不要求**衍生作品采用相同许可（无 copyleft），也**不限制**商业使用
+—— 因此**无需**为商业用途向作者取得额外授权或支付任何费用。
+
+Copyright 2026 Eloy Kim
 
 完整法律文本见 [`LICENSE`](LICENSE)；**适用范围与字体例外的详细说明见
-[`LICENSE-SCOPE.md`](LICENSE-SCOPE.md)**（第 A 节：作品；第 B 节：商业使用；
-第 C 节：字体例外；第 D 节：无担保）。
+[`LICENSE-SCOPE.md`](LICENSE-SCOPE.md)**（第 A 节：作品；第 B 节：字体例外；
+第 C 节：无担保；第 D 节：变更说明）。
+
+> **历史说明**：本仓库早期修订曾以 CC BY-NC-SA 4.0（禁止商业使用）发布，
+> 该非商业限制自改用 Apache License 2.0 起**不再适用**。
 
 ---
 
@@ -132,7 +141,7 @@ BibTeX：
   note         = {British English and Chinese Simplified editions},
   publisher    = {Manuscript},
   url          = {https://github.com/eloyhere/periodicity},
-  license      = {CC BY-NC-SA 4.0}
+  license      = {Apache-2.0}
 }
 ```
 

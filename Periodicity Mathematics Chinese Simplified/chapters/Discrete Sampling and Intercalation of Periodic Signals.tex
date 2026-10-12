@@ -225,7 +225,7 @@ T_0\Delta x=q\,T_x,\qquad \rho=\frac{T_x}{\Delta x}=\frac{p}{q}=\frac{T_0}{q},
 \end{corollary}
 
 \begin{example}[数字信号]\label{ex:digital_signal_modelling}
-采样率 $\nu_s=48$ kHz 的音频接口，采样间隔 $\Delta x=1/48000$ s。对 $A$ 音（$\nu_0=440$ Hz）有 $\rho=\nu_s/\nu_0=109.0909\ldots\notin\mathbb{Q}$：单音在任意有限记录内都不可能包含整数个周期，泄露不可避免（第 \ref{sec:window_dirichlet} 节）。而 $\nu_0=480$ Hz 时 $\rho=100\in\mathbb{N}^+$，若取 $M=100k$（$k\in\mathbb{N}^+$）则窗内恰含整数个周期，泄露为零。
+采样率 $\nu_s=48$ kHz 的音频接口，采样间隔 $\Delta x=1/48000$ s。对 $A$ 音（$\nu_0=440$ Hz）有 $\rho=\nu_s/\nu_0=1200/11\in\mathbb{Q}$：泄露可以避免，但要求窗长为 $1200$ 个样本的整数倍——取 $M=1200k$ 时窗内恰含 $11k$ 个周期，泄露为零。取 $M=1024$ 这类「整数」窗长则不行，此时泄露不可避免（第 \ref{sec:window_dirichlet} 节）。而 $\nu_0=480$ Hz 时 $\rho=100\in\mathbb{N}^+$，若取 $M=100k$（$k\in\mathbb{N}^+$）则窗内恰含整数个周期，泄露为零。
 \end{example}
 
 \begin{example}[离散时钟]\label{ex:discrete_clock_modelling}
@@ -983,13 +983,13 @@ N_M=\sum_{n=1}^{M}\big(\lfloor(n+1)\rho\rfloor-\lfloor n\rho\rfloor\big)=\lfloor
 \[
 \rho=\frac{T_x}{T_{\mathrm{syn}}}\approx12.368266 .
 \]
-连分数展开为 $[12;2,1,2,1,1,16,\dots]$，收敛子依次为
+连分数展开为 $[12;2,1,2,1,1,17,\dots]$，收敛子依次为
 \[
-\frac{12}{1},\ \frac{25}{2},\ \frac{37}{3},\ \frac{99}{8},\ \frac{136}{11},\ \frac{235}{19},\ \frac{3896}{315}.
+\frac{12}{1},\ \frac{25}{2},\ \frac{37}{3},\ \frac{99}{8},\ \frac{136}{11},\ \frac{235}{19},\ \frac{4131}{334}.
 \]
 取 $q_5=19$、$p_5=235$：$19$ 个回归年含 $235$ 个朔望月，即\textbf{十九年七闰}。其偏移
 \[
-\delta_{19}=|19\rho-235|\approx0.00295<\frac1{q_6}=\frac1{315}\approx0.00317,
+\delta_{19}=|19\rho-235|\approx0.00295<\frac1{q_6}=\frac1{334}\approx0.00299,
 \]
 与定理 \ref{thm:continued_fraction_best_approx_parallel}(iii) 的界吻合。相应地，若把“年”视为采样窗、把“月”视为信号周期，则由定理 \ref{thm:leakage_envelope_parallel}(iv) 泄露占比
 \[
@@ -1404,7 +1404,7 @@ f^{\mathrm{int}}=w^{\mathrm{int}}_M\circledast f,
 \begin{example}[置闰窗与普通窗的对比]\label{ex:intercalation_vs_normal_window}
 设 $\rho=\sqrt2=1.41421356\ldots$（非公度）。其连分数为 $[1;2,2,2,\dots]$，分母序列 $q_k=1,2,5,12,29,70,\dots$。
 \begin{enumerate}[label=(\roman*)]
-    \item 取任意普通窗口 $M=100$：$\|100\sqrt2\|=0.0050$，$\eta\approx8.2\times10^{-5}$；
+    \item 取任意普通窗口 $M=100$：$\|100\sqrt2\|=0.421$，$\eta\approx0.58$；
     \item 取 $M=71$：$\|71\sqrt2\|=0.409$，$\eta\approx0.55$——泄露达 $55\%$；
     \item 取连分数分母 $M=70$：$\|70\sqrt2\|=0.0051$，与 $q_5=70$ 对应的界 $1/q_6=1/169=0.0059$ 吻合。
 \end{enumerate}
@@ -1879,7 +1879,7 @@ O\!\Big(\sum_i T_i\log T_i\Big)\ll O(N\log N).
 \end{remark}
 
 \begin{remark}[与“历法系统之周期结构”章的接口]\label{rem:interface_calendar_congruence}
-历法中的年—月—日—节气是多周期系统，对应子周期组 $T_1,\dots,T_k$。置闰规则（十九年七闰、$315$ 年 $3896$ 月）是同余角置闰在多周期下的最优解。历法的“章岁误差”就是同余角不闭合量 $\delta_{T_i}$，“历法漂移”就是多周期联合泄露 $\eta$。
+历法中的年—月—日—节气是多周期系统，对应子周期组 $T_1,\dots,T_k$。置闰规则（十九年七闰、$334$ 年 $4131$ 月）是同余角置闰在多周期下的最优解。历法的“章岁误差”就是同余角不闭合量 $\delta_{T_i}$，“历法漂移”就是多周期联合泄露 $\eta$。
 \end{remark}
 
 \section{算法与实现}\label{sec:intercalation_algorithms}
@@ -1924,7 +1924,7 @@ O\!\Big(\sum_i T_i\log T_i\Big)\ll O(N\log N).
 \begin{enumerate}[label=(\roman*)]
     \item “在 $q$ 个短周期中插入 $p$ 个额外单元”的置闰规则，与“在长度为 $q$ 的窗口中按平衡方案取 $p$ 个闰位置”的置闰窗（定义 \ref{def:intercalation_sequence_parallel}）是同一个数学对象；
     \item 置闰后历法的累积偏差恰为 $\delta_q=q\,\big|\frac{T_1}{T_2}\big|_{\mathbb{Z}}$，与采样窗口的偏移 $\delta_M$ 完全相同；
-    \item 因此历法的置闰周期表（如十九年七闰、$315$ 年 $3896$ 月）就是 $\rho=T_1/T_2$ 的连分数分母序列（例 \ref{ex:metonic_parallel}）。
+    \item 因此历法的置闰周期表（如十九年七闰、$334$ 年 $4131$ 月）就是 $\rho=T_1/T_2$ 的连分数分母序列（例 \ref{ex:metonic_parallel}）。
 \end{enumerate}
 \end{theorem}
 

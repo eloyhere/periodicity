@@ -225,7 +225,7 @@ that is, `$p$ sampling points cover $q$ signal periods'. This is precisely the p
 \end{corollary}
 
 \begin{example}[Digital signals]\label{ex:digital_signal_modelling}
-For an audio interface with sampling rate $\nu_s=48$ kHz, the sampling interval is $\Delta x=1/48000$ s. For the note $A$ ($\nu_0=440$ Hz) we have $\rho=\nu_s/\nu_0=109.0909\ldots\notin\mathbb{Q}$: a single tone can never contain an integral number of periods within any finite record, and leakage is inevitable (Section \ref{sec:window_dirichlet}). For $\nu_0=480$ Hz, however, $\rho=100\in\mathbb{N}^+$, and if $M=100k$ ($k\in\mathbb{N}^+$) then the window contains exactly an integral number of periods and the leakage is zero.
+For an audio interface with sampling rate $\nu_s=48$ kHz, the sampling interval is $\Delta x=1/48000$ s. For the note $A$ ($\nu_0=440$ Hz) we have $\rho=\nu_s/\nu_0=1200/11\in\mathbb{Q}$: leakage is avoidable, but only if the window length is a multiple of $1200$ samples---$M=1200k$ contains exactly $11k$ periods and the leakage is zero. A ``round'' window such as $M=1024$ does not, and then leakage is inevitable (Section \ref{sec:window_dirichlet}). For $\nu_0=480$ Hz, however, $\rho=100\in\mathbb{N}^+$, and if $M=100k$ ($k\in\mathbb{N}^+$) then the window contains exactly an integral number of periods and the leakage is zero.
 \end{example}
 
 \begin{example}[Discrete clock]\label{ex:discrete_clock_modelling}
@@ -983,13 +983,13 @@ Take the tropical year $T_x=365.2422$ days and the synodic month $T_{\mathrm{syn
 \[
 \rho=\frac{T_x}{T_{\mathrm{syn}}}\approx12.368266 .
 \]
-Its continued-fraction expansion is $[12;2,1,2,1,1,16,\dots]$, with convergents
+Its continued-fraction expansion is $[12;2,1,2,1,1,17,\dots]$, with convergents
 \[
-\frac{12}{1},\ \frac{25}{2},\ \frac{37}{3},\ \frac{99}{8},\ \frac{136}{11},\ \frac{235}{19},\ \frac{3896}{315}.
+\frac{12}{1},\ \frac{25}{2},\ \frac{37}{3},\ \frac{99}{8},\ \frac{136}{11},\ \frac{235}{19},\ \frac{4131}{334}.
 \]
 Taking $q_5=19$ and $p_5=235$: $19$ tropical years contain $235$ synodic months, that is, \textbf{seven intercalations in nineteen years}. Its offset is
 \[
-\delta_{19}=|19\rho-235|\approx0.00295<\frac1{q_6}=\frac1{315}\approx0.00317,
+\delta_{19}=|19\rho-235|\approx0.00295<\frac1{q_6}=\frac1{334}\approx0.00299,
 \]
 in agreement with the bound of Theorem \ref{thm:continued_fraction_best_approx_parallel}(iii). Correspondingly, if the `year' is regarded as the sampling window and the `month' as the signal period, then by Theorem \ref{thm:leakage_envelope_parallel}(iv) the leakage proportion is
 \[
@@ -1404,7 +1404,7 @@ Stringing the above results together, the mechanism by which intercalation suppr
 \begin{example}[Comparison of an intercalation window with an ordinary window]\label{ex:intercalation_vs_normal_window}
 Let $\rho=\sqrt2=1.41421356\ldots$ (incommensurable). Its continued fraction is $[1;2,2,2,\dots]$, with denominator sequence $q_k=1,2,5,12,29,70,\dots$.
 \begin{enumerate}[label=(\roman*)]
-    \item Take an arbitrary ordinary window $M=100$: $\|100\sqrt2\|=0.0050$, $\eta\approx8.2\times10^{-5}$;
+    \item Take an arbitrary ordinary window $M=100$: $\|100\sqrt2\|=0.421$, $\eta\approx0.58$;
     \item take $M=71$: $\|71\sqrt2\|=0.409$, $\eta\approx0.55$---the leakage reaches $55\%$;
     \item take the continued-fraction denominator $M=70$: $\|70\sqrt2\|=0.0051$, in agreement with the bound $1/q_6=1/169=0.0059$ corresponding to $q_5=70$.
 \end{enumerate}
@@ -1879,7 +1879,7 @@ The deviation of the periodogram for a multi-period signal is determined by the 
 \end{remark}
 
 \begin{remark}[Interface with the `Periodic Structure of Calendar Systems' chapter]\label{rem:interface_calendar_congruence}
-The year--month--day--solar-term system of the calendar is a multi-period system, corresponding to the subperiod group $T_1,\dots,T_k$. The intercalation rules (seven intercalations in nineteen years, $3896$ months in $315$ years) are the optimal solution of congruence-angle intercalation in the multi-period case. The `chapter-year error' of the calendar is precisely the congruence-angle non-closure $\delta_{T_i}$, and `calendar drift' is precisely the multi-period joint leakage $\eta$.
+The year--month--day--solar-term system of the calendar is a multi-period system, corresponding to the subperiod group $T_1,\dots,T_k$. The intercalation rules (seven intercalations in nineteen years, $4131$ months in $334$ years) are the optimal solution of congruence-angle intercalation in the multi-period case. The `chapter-year error' of the calendar is precisely the congruence-angle non-closure $\delta_{T_i}$, and `calendar drift' is precisely the multi-period joint leakage $\eta$.
 \end{remark}
 
 \section{Algorithms and implementation}\label{sec:intercalation_algorithms}
@@ -1924,7 +1924,7 @@ Let the calendar system consist of two astronomical periods: a long period $T_1$
 \begin{enumerate}[label=(\roman*)]
     \item the intercalation rule `insert $p$ extra units among $q$ short periods' and the intercalation window `take $p$ intercalation positions in a window of length $q$ according to the balanced scheme' (Definition \ref{def:intercalation_sequence_parallel}) are one and the same mathematical object;
     \item the cumulative deviation of the calendar after intercalation is exactly $\delta_q=q\,\big|\frac{T_1}{T_2}\big|_{\mathbb{Z}}$, completely identical with the offset $\delta_M$ of the sampling window;
-    \item hence the intercalation cycle table of the calendar (such as seven intercalations in nineteen years, $3896$ months in $315$ years) is precisely the sequence of continued-fraction denominators of $\rho=T_1/T_2$ (Example \ref{ex:metonic_parallel}).
+    \item hence the intercalation cycle table of the calendar (such as seven intercalations in nineteen years, $4131$ months in $334$ years) is precisely the sequence of continued-fraction denominators of $\rho=T_1/T_2$ (Example \ref{ex:metonic_parallel}).
 \end{enumerate}
 \end{theorem}
 

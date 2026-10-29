@@ -9,7 +9,7 @@
 \]
 \textbf{约定}：本章全部模型都采用“先合成、后投影”的顺序。即，首先把时间组与空间组合成为一个合成对象（复情形取加法 $T+S$，四元数情形取加法 $q_T+q_S$），然后把这个合成对象投影到观察者组上。观察者本身可以随时间变化，也可以按自身周转圆独立旋转。
 
-\textbf{七主题导引}：平移——观察者向量的动态调节与频率平移；缩放——观察者模长引入的权重；旋转——三平面与三球组的独立旋转；平衡——合成与投影的线性性；对称——投影的对称性与交换性；闭合——同步旋转的不变量；周期——动态投影的瞬时频率与拍频。
+\textbf{七主题导引}：平移——观察者向量的动态调节与频率平移；缩放——观察者模长引入的权重与包络对振幅的慢变调制；旋转——三平面与三球组的独立旋转；平衡——合成与投影的线性性；对称——投影的对称性与交换性；闭合——同步旋转的不变量；周期——动态投影的瞬时频率、拍频与包络周期。
 \end{remark}
 
 \begin{figure}[htbp]
@@ -543,6 +543,327 @@ $\mathcal E(t)\overline{u(t)}=A e^{i\omega t}\cdot e^{-i\omega_0 t}=A e^{i(\omeg
 
 \begin{remark}[$K$ 跳变的情形]\label{rem:dyn_K_jump}
 允许 $K$ 在有限个时刻跳变时，$\mathcal E$ 在跳变时刻一般不连续。此时 $\mathcal O$ 只能在 $C^1$ 分段意义下定义。若要求 $\mathcal O$ 全局连续，可附加跳变前后总和不变的条件，或在跳变处用插值平滑。此类条件属于工程约定，本章默认 $K$ 恒定。
+\end{remark}
+
+\section{包络与瞬时相位}
+\label{sec:dyn_envelope}
+
+前两节把周转圆组的\emph{合成}与\emph{投影}分开处理：$\mathcal E(t)$ 是合成对象，$\mathcal O(t)=\operatorname{Re}[\mathcal E(t)\overline{u(t)}]$ 是观察结果。本节补上二者之间的一个中间对象——\textbf{包络}。直观上，包络是快振荡外面那层慢变的振幅轮廓；数学上，它是合成对象在共同相位旋转下的不变量，也是所有观察者读数的上确界。拍频、调幅、波包与慢–快系统都以它为共同语言。
+
+\subsection{定义与三种入口}
+
+\begin{definition}[包络与瞬时相位]\label{def:dyn_envelope}
+设 $\mathcal E:\mathbb R\to\mathbb C$ 为 \cref{def:dyn_epicycle_group} 的动态周转圆组，且 $\mathcal E(t)\neq0$。将其写成极坐标形式
+\[
+\mathcal E(t)=\varrho(t)\,e^{i\Theta(t)},\qquad \varrho(t)=|\mathcal E(t)|\ge0,
+\]
+其中 $\Theta(t)$ 为 $\arg\mathcal E(t)$ 的连续分支。称 $\varrho$ 为 $\mathcal E$ 的\textbf{包络}，$\Theta$ 为\textbf{瞬时相位}，$\dot\Theta$ 为\textbf{瞬时频率}。若存在载波频率 $\bar\omega>0$ 使
+\[
+\varepsilon:=\frac{\sup_{t}|\dot\varrho(t)|}{\bar\omega\inf_{t}\varrho(t)}\ll1,
+\]
+则称 $\mathcal E$ 为\textbf{慢包络信号}，$\varrho$ 为\textbf{慢包络}，$\varepsilon$ 为\textbf{调制小参数}。
+\end{definition}
+
+\begin{remark}[包络的三种入口]\label{rem:dyn_envelope_three_entries}
+包络可以从三个角度进入：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{模长入口}：$\varrho=|\mathcal E|$，即复振幅的模；
+    \item \textbf{观察者入口}：$\varrho(t)=\sup_{\theta}\operatorname{Re}[\mathcal E(t)e^{-i\theta}]$，即所有观察者方向下读数的上确界（\cref{prop:dyn_envelope_sup}）；
+    \item \textbf{解析信号入口}：对实信号 $s$，$\varrho=|s+i\mathcal H\{s\}|$，其中 $\mathcal H$ 为希尔伯特变换（\cref{prop:analytic_signal}）。
+\end{enumerate}
+当 $\mathcal E$ 只含正频率时，$\mathcal E$ 本身即 $\operatorname{Re}\mathcal E$ 的解析信号，三者一致；若 $\mathcal E$ 含负频率分量，则模长入口给出的 $\varrho$ 一般不再是通常意义上的包络，这正是下文要求 $\varepsilon\ll1$ 的原因。
+\end{remark}
+
+\subsection{包络是观察者读数的上确界}
+
+\begin{proposition}[上确界与不变性]\label{prop:dyn_envelope_sup}
+固定 $t$，记 $\mathcal O_\theta(t)=\operatorname{Re}[\mathcal E(t)e^{-i\theta}]$。则
+\[
+\varrho(t)=\sup_{\theta\in[0,2\pi)}\mathcal O_\theta(t),
+\]
+且上确界在 $\theta\equiv\Theta(t)\pmod{2\pi}$ 处取到。进一步，对任意常数 $\psi$，
+\[
+\bigl|e^{i\psi}\mathcal E(t)\bigr|=|\mathcal E(t)|,
+\]
+即包络是共同相位旋转 $U(1)$ 作用的不变量。
+\end{proposition}
+
+\begin{proof}
+由 $\mathcal E=\varrho e^{i\Theta}$ 得 $\mathcal O_\theta=\varrho\cos(\Theta-\theta)$。固定 $t$，$\cos(\Theta-\theta)$ 在 $\theta=\Theta$ 处取最大值 $1$，故上确界为 $\varrho$。不变性由 $|e^{i\psi}\mathcal E|=|e^{i\psi}|\,|\mathcal E|=|\mathcal E|$ 得到。
+\end{proof}
+
+\begin{remark}[包络与投影的关系]\label{rem:dyn_envelope_vs_projection}
+\cref{prop:dyn_projection_properties}(ii) 给出 $|\mathcal O(t)|\le|\mathcal E(t)|$。\cref{prop:dyn_envelope_sup} 把它加强为：$\varrho(t)$ 不但是 $\mathcal O$ 的上界，而且是\emph{可达}上界——总存在一个观察者方向恰好读到 $\varrho(t)$。因此包络是观察者无关的量，而观察结果依赖于观察者方向；二者的差别正是“快相位”被投影掉的部分。
+\end{remark}
+
+\subsection{单分量与双近频}
+
+\begin{proposition}[单分量与拍]\label{prop:dyn_envelope_beat}
+\begin{enumerate}[label=(\roman*)]
+    \item 若 $\mathcal E(t)=Ae^{i(\omega t+\phi)}$（$A>0$），则 $\varrho\equiv A$，$\Theta=\omega t+\phi$。
+    \item 若 $\mathcal E(t)=Ae^{i(\omega_1t+\phi_1)}+Ae^{i(\omega_2t+\phi_2)}$（$A>0$，$\omega_1\neq\omega_2$），记
+    \[
+    \Delta\omega=|\omega_1-\omega_2|,\qquad \bar\omega=\frac{\omega_1+\omega_2}{2},\qquad \Delta\phi=\phi_1-\phi_2,\qquad \bar\phi=\frac{\phi_1+\phi_2}{2},
+    \]
+    则
+    \[
+    \mathcal E(t)=2A\cos\Bigl(\frac{\Delta\omega\,t+\Delta\phi}{2}\Bigr)e^{i(\bar\omega t+\bar\phi)},
+    \]
+    \[
+    \varrho(t)=2A\Bigl|\cos\Bigl(\frac{\Delta\omega\,t+\Delta\phi}{2}\Bigr)\Bigr|,
+    \]
+    其最小正周期为 $T_{\text{env}}=2\pi/\Delta\omega=T_{\text{beat}}$；带符号慢变因子 $\cos\bigl((\Delta\omega t+\Delta\phi)/2\bigr)$ 的周期为 $4\pi/\Delta\omega$，是 $T_{\text{env}}$ 的两倍。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由 \cref{def:dyn_envelope} 直接得到。(ii) 由和差化积，
+\[
+Ae^{i(\omega_1t+\phi_1)}+Ae^{i(\omega_2t+\phi_2)}
+=2A\cos\Bigl(\frac{(\omega_1-\omega_2)t+(\phi_1-\phi_2)}{2}\Bigr)e^{i\bigl(\frac{\omega_1+\omega_2}{2}t+\frac{\phi_1+\phi_2}{2}\bigr)}.
+\]
+取模即得 $\varrho$ 的表达式；$|\cos|$ 的周期为 $\pi$，故 $\varrho$ 的周期为 $2\pi/\Delta\omega$。
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.86\textwidth, height=5.2cm,
+  axis lines=middle,
+  xlabel={$t$},
+  xmin=-0.4, xmax=12.8, ymin=-2.5, ymax=2.5,
+  xtick=\empty, ytick={-2,0,2},
+  samples=600, domain=-0.4:12.8,
+  legend style={at={(0.5,1.03)},anchor=south,legend columns=3,draw=none,font=\footnotesize}
+]
+\addplot[blue,thick] {2*cos(deg(0.5*x))*cos(deg(5*x))};
+\addplot[red,dashed,thick] {2*abs(cos(deg(0.5*x)))};
+\addplot[red,dashed,thick] {-2*abs(cos(deg(0.5*x)))};
+\legend{$\operatorname{Re}\mathcal E(t)$,$\varrho(t)$,$-\varrho(t)$}
+\end{axis}
+\end{tikzpicture}
+\caption{双近频信号的包络：快载波被慢包络 $2A|\cos(\Delta\omega t/2)|$ 调制。此处 $A=1$，$\Delta\omega=1$，$\bar\omega=5$。}
+\label{fig:dyn_envelope_beat}
+\end{figure}
+
+\begin{remark}[与音频、机械两章的口径]\label{rem:dyn_envelope_beat_convention}
+「音频系统之周期结构」章与「机械系统之周期结构」章把“包络周期”记为 $4\pi/\Delta\omega$（\cref{lem:beat_periodic}、\cref{prop:beat_phenomenon}）。按 \cref{def:dyn_envelope}，那是\emph{带符号}慢变因子的周期；\emph{模}包络的周期是 $2\pi/\Delta\omega$，与拍周期 $T_{\text{beat}}=1/\Delta f$ 相等。引入本定义后，两处应统一为：拍周期等于模包络周期，带符号因子每两个拍周期才重复一次。
+\end{remark}
+
+\subsection{差频结构与包络的周期性}
+
+\begin{theorem}[差频展开]\label{thm:dyn_envelope_difference}
+设 $\mathcal E(t)=\sum_{k=1}^{K}A_ke^{i(\omega_kt+\phi_k)}$，其中 $K\ge2$，$A_k>0$ 为常数，$\omega_1,\dots,\omega_K$ 互不相同。则
+\[
+\varrho^2(t)=\sum_{k=1}^{K}A_k^2+2\sum_{1\le j<k\le K}A_jA_k\cos\bigl((\omega_j-\omega_k)t+(\phi_j-\phi_k)\bigr).
+\]
+记 $D$ 为上式右端系数非零的差频 $\omega_j-\omega_k$ 所生成的加法子群。则：
+\begin{enumerate}[label=(\roman*)]
+    \item $\varrho^2$ 的频谱只含差频；等价地，$\varrho^2$ 的频谱是载波频谱的自相关（离散维纳--辛钦关系）。
+    \item 若 $D$ 离散且 $D=\omega_D\mathbb Z$（$\omega_D>0$），则 $\varrho$ 的最小正周期为 $T_{\text{env}}=2\pi/\omega_D$；若 $D$ 非离散，则 $\varrho$ 不是周期函数。
+    \item 若全部 $\omega_k\in\omega_0\mathbb Z$，则 $T_{\text{env}}$ 整除载波周期 $T_c=2\pi/\omega_0$。
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+由 $\varrho^2=\mathcal E\overline{\mathcal E}$ 展开：
+\[
+\mathcal E\overline{\mathcal E}=\sum_{j,k=1}^{K}A_jA_k e^{i((\omega_j-\omega_k)t+(\phi_j-\phi_k))}.
+\]
+把 $j=k$ 的 $K$ 项（每项 $A_k^2$）与 $j\ne k$ 的项分开，后者按 $(j,k)$ 与 $(k,j)$ 配对，利用 $e^{i\theta}+e^{-i\theta}=2\cos\theta$ 即得展开式。
+
+(i) 由展开式直接读出。(ii) 展开式是有限三角多项式，其非零频率集合生成 $D$；三角多项式以 $T$ 为周期当且仅当每个非零频率 $\nu$ 满足 $\nu T\in2\pi\mathbb Z$（三角多项式频率的线性无关性）。故 $\varrho^2$ 的周期群为 $(2\pi/\omega_D)\mathbb Z$。又因 $\varrho=\sqrt{\varrho^2}\ge0$，$T$ 是 $\varrho^2$ 的周期当且仅当它是 $\varrho$ 的周期，故 $\varrho$ 与 $\varrho^2$ 的周期群相同，最小正周期为 $2\pi/\omega_D$。(iii) 若 $\omega_k\in\omega_0\mathbb Z$，则 $D\subseteq\omega_0\mathbb Z$，故 $\omega_D$ 是 $\omega_0$ 的正整数倍，$T_{\text{env}}=2\pi/\omega_D$ 整除 $2\pi/\omega_0$。
+\end{proof}
+
+\begin{corollary}[准周期载波可以有周期包络]\label{cor:dyn_envelope_quasiperiodic}
+设 $\mathcal E(t)=Ae^{i\omega_1t}+Ae^{i\omega_2t}$，$A>0$，且 $\omega_1/\omega_2\notin\mathbb Q$。则 $\mathcal E$ 不是周期函数（它是玻尔准周期函数），但 $\varrho$ 以 $2\pi/|\omega_1-\omega_2|$ 为最小正周期。
+\end{corollary}
+
+\begin{proof}
+两个不可公度频率的指数和没有非零周期：若 $T$ 是 $\mathcal E$ 的周期，则由三角多项式的频率独立性，$e^{i\omega_1T}=e^{i\omega_2T}=1$，故 $\omega_1T,\omega_2T\in2\pi\mathbb Z$，与 $\omega_1/\omega_2\notin\mathbb Q$ 矛盾。包络的周期性由 \cref{thm:dyn_envelope_difference}(ii) 给出，此时 $D=|\omega_1-\omega_2|\mathbb Z$。
+\end{proof}
+
+\begin{remark}[包络的周期性严格弱于载波的周期性]\label{rem:dyn_envelope_weaker}
+\cref{cor:dyn_envelope_quasiperiodic} 说明：$\mathcal E$ 周期 $\Rightarrow$ $\varrho$ 周期（因 $\varrho=|\mathcal E|$），但反之不成立。群论上的原因很清楚：包络是共同相位旋转 $U(1)$ 的不变量（\cref{prop:dyn_envelope_sup}），它只看见\emph{相对相位} $\Theta_j-\Theta_k$，把共同的快相位商掉了。因此包络的周期是“相对相位的闭合周期”，它可以比载波周期更粗，也可以在载波根本没有周期时仍然存在。
+\end{remark}
+
+\subsection{周期差密度}
+\label{subsec:dyn_period_difference_density}
+
+本节把“两个周期函数的周期差”写成一个可积的密度。目标有两条：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{逐点}：给定 \(f,g\) 与点 \(x\)，返回 \(x\) 处的周期差密度；
+    \item \textbf{积分}：在区间 \([a,b]\) 上积分，返回该区间的周期差。
+\end{enumerate}
+这两条要求决定了逐点值不能是“周期”本身，而必须是无量纲的密度，并且依赖区间归一化。
+
+\begin{remark}[为什么逐点值不能是周期]
+\label{rem:dyn_period_density_no_go}
+如果 \(D(x)\) 是周期（量纲为时间），那么 \(\int_a^b D(x)\,dx\) 的量纲是时间\(^2\)，不可能等于周期差（时间）。更严格地说，若固定 \(D(x)\) 且对任意区间 \([a,b]\) 都有
+\[
+\int_a^b D(x)\,dx=T_f-T_g,
+\]
+则对任意子区间积分都等于同一个常数；对 \(b\) 求导得 \(D(b)=0\) 对几乎所有 \(b\) 成立，矛盾。因此逐点值必须是无量纲密度，区间归一化不可避免；“区间上的周期差”应理解为区间平均周期之差，或“每过一个拍累积一个周期差”。
+\end{remark}
+
+\textbf{一般区间版。}
+
+设 \(f,g\) 的全局最小正周期为 \(T_f,T_g\)，约定 \(T_f>T_g\)（否则交换 \(f,g\)）。解析相位为 \(\Theta_f,\Theta_g\)，局部频率为
+\[
+f_f(x)=\frac{\dot\Theta_f(x)}{2\pi},\qquad
+f_g(x)=\frac{\dot\Theta_g(x)}{2\pi}.
+\]
+在区间 \([a,b]\) 上定义周期数
+\[
+N_f=\int_a^b f_f(x)\,dx,\qquad
+N_g=\int_a^b f_g(x)\,dx,
+\]
+以及区间平均周期
+\[
+T_f^{[a,b]}=\frac{b-a}{N_f},\qquad
+T_g^{[a,b]}=\frac{b-a}{N_g}.
+\]
+
+\begin{definition}[频率差密度与区间周期差密度]
+\label{def:dyn_period_difference_density}
+称
+\[
+\Delta_{f,g}(x)=f_g(x)-f_f(x)
+\]
+为 \(f,g\) 的\textbf{频率差密度}；称
+\[
+D_{f,g}(x;a,b)=\frac{b-a}{N_fN_g}\Delta_{f,g}(x)
+\]
+为 \(f,g\) 在区间 \([a,b]\) 上的\textbf{周期差密度}。
+\end{definition}
+
+\begin{proposition}[区间积分]
+\label{prop:dyn_period_difference_integral}
+对任意区间 \([a,b]\)，
+\[
+\int_a^b D_{f,g}(x;a,b)\,dx
+=(b-a)\left(\frac1{N_f}-\frac1{N_g}\right)
+=T_f^{[a,b]}-T_g^{[a,b]}.
+\]
+\end{proposition}
+
+\begin{proof}
+由 \(D_{f,g}\) 的定义，
+\[
+\int_a^b D_{f,g}(x;a,b)\,dx
+=\frac{b-a}{N_fN_g}\int_a^b\Delta_{f,g}(x)\,dx
+=\frac{b-a}{N_fN_g}(N_g-N_f),
+\]
+整理即得 \((b-a)(1/N_f-1/N_g)=T_f^{[a,b]}-T_g^{[a,b]}\)。
+\end{proof}
+
+\textbf{拍周期特例。}
+
+取共同区间为一个拍周期
+\[
+T_{\rm env}=\frac{T_fT_g}{T_f-T_g},
+\]
+则 \(N_f=T_{\rm env}/T_f\)、\(N_g=T_{\rm env}/T_g\)，且 \(N_g-N_f=1\)。归一化因子化为
+\[
+\frac{T_{\rm env}}{N_fN_g}=T_f-T_g,
+\]
+密度变成
+\[
+D_{f,g}(x)=(T_f-T_g)\bigl(f_g(x)-f_f(x)\bigr),
+\]
+并且
+\[
+\int_0^{T_{\rm env}}D_{f,g}(x)\,dx
+=(T_f-T_g)(N_g-N_f)=T_f-T_g.
+\]
+更一般地，区间含 \(m\) 个拍周期时，积分是 \(m(T_f-T_g)\)。这就是“每过一个拍，累积一个周期差”。
+
+\textbf{包络的角色。}窄带/双单频时，包络 \(|z_f+z_g|\) 的周期正是 \(T_{\rm env}\)，它标记“相位差走完 \(2\pi\)”的区间（\cref{def:dyn_envelope}、\cref{prop:dyn_envelope_beat}）。包络给出积分域/时钟；局部频率（相位）给出逐点密度。只靠包络得不到 \(D_{f,g}(x)\)，只靠相位也得不到简洁的拍尺度，但可由 \(T_f,T_g\) 算出 \(T_{\rm env}\)。
+
+\begin{example}[纯音检验]
+\label{ex:dyn_period_difference_pure_tone}
+对 \(f=\cos(2\pi x/T_f)\)、\(g=\cos(2\pi x/T_g)\)，有 \(f_f=1/T_f\)、\(f_g=1/T_g\)，所以
+\[
+D_{f,g}(x)=\frac{(T_f-T_g)^2}{T_fT_g}
+\]
+为常数；在 \(T_{\rm env}=T_fT_g/(T_f-T_g)\) 上积分：
+\[
+\frac{(T_f-T_g)^2}{T_fT_g}\cdot\frac{T_fT_g}{T_f-T_g}=T_f-T_g,
+\]
+与直接相减一致。
+\end{example}
+
+\begin{remark}[任意周期函数的校准]
+\label{rem:dyn_period_density_calibration}
+对谐波丰富或零点奇异的信号，解析相位的绕数可能不是 \(1\)。此时把 \(\dot\Theta/(2\pi)\) 换成\textbf{校准局部频率} \(f_f(x)\)，满足
+\[
+\int_0^{T_f} f_f(x)\,dx=1.
+\]
+可用 STFT 脊、自相关或“瞬时频率除以其在一个周期上的积分/绕数”得到。校准后，上面的积分恒等式不依赖解析相位的局部细节，只依赖总周期数。
+\end{remark}
+
+\begin{remark}[两种密度的分工]
+\label{rem:dyn_two_densities}
+\(\Delta_{f,g}\) 计数“多出的周期数”，是无量纲的频率差；\(D_{f,g}\) 把它乘以区间归一化因子 \((b-a)/(N_fN_g)\)，使其在 \([a,b]\) 上的积分成为区间周期差（在拍周期上该因子化为 \(T_f-T_g\)）。包络给出拍时钟 \(T_{\rm env}\)，相位差给出密度。历法章中的 \(D(t)=1/L_m-1/L_z\) 是 \(\Delta_{f,g}\) 的历法实例（用于计数闰余）；乘以相应的区间归一化因子即得 \(D_{f,g}\)，用于解释时间差。因此，周期差密度不是历法章特有的构造，而是解析信号的一般对象。
+\end{remark}
+
+\subsection{调制阶与公度}
+
+\begin{definition}[调制阶]\label{def:dyn_modulation_order}
+对 \cref{prop:dyn_envelope_beat}(ii) 的双分量信号，称
+\[
+N:=\frac{T_{\text{env}}}{T_c}=\frac{\bar\omega}{\Delta\omega}
+\]
+为\textbf{调制阶}，其中 $T_c=2\pi/\bar\omega$ 为载波周期。
+\end{definition}
+
+\begin{proposition}[调制阶与公度]\label{prop:dyn_modulation_order}
+对 \cref{prop:dyn_envelope_beat}(ii) 的双分量信号：
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathcal E$ 是周期函数当且仅当 $N\in\mathbb Q$；
+    \item 若 $N=p/q$（$p,q$ 互素），则 $\mathcal E$ 的最小正周期为 $mT_{\text{env}}$，其中 $m$ 为正整数且 $m\mid 2q$。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\mathcal E$ 是两个指数函数之和，其频率比为
+\[
+\frac{\omega_2}{\omega_1}=\frac{2N+1}{2N-1}.
+\]
+两个指数函数之和以 $T>0$ 为周期当且仅当 $\omega_1T,\omega_2T\in2\pi\mathbb Z$，这要求 $\omega_1/\omega_2\in\mathbb Q$；反之若 $\omega_1/\omega_2=r\in\mathbb Q$，取 $T=2\pi/\gcd(\omega_1,\omega_2)$ 即得周期。而 $(2N+1)/(2N-1)\in\mathbb Q$ 当且仅当 $N\in\mathbb Q$。
+
+(ii) 取 $T_0=qT_{\text{env}}=2\pi q/\Delta\omega$。则 $\bar\omega T_0=2\pi qN=2\pi p$，$\Delta\omega T_0/2=\pi q$，故由 \cref{prop:dyn_envelope_beat}(ii) 的表达式，
+\[
+\mathcal E(t+T_0)=(-1)^q\mathcal E(t).
+\]
+于是 $2T_0=2qT_{\text{env}}$ 是 $\mathcal E$ 的周期。设 $\mathcal E$ 的最小正周期为 $P$。因 $P$ 也是 $\varrho$ 的周期，而 $\varrho$ 的最小正周期为 $T_{\text{env}}$，故 $P=mT_{\text{env}}$（$m\in\mathbb N^+$）。又 $P\mid 2qT_{\text{env}}$，故 $m\mid 2q$。
+\end{proof}
+
+\begin{remark}[与置闰、连分数的接口]\label{rem:dyn_envelope_intercalation}
+\cref{prop:dyn_modulation_order} 把“双分量信号是否周期”化归为调制阶 $N$ 是否有理。$N$ 的无理程度可用其连分数收敛子 $p_j/q_j$ 度量：取 $N\approx p_j/q_j$ 时，信号在 $q_j$ 个包络周期内近似闭合，残余相位误差为 $2\pi q_j|N-p_j/q_j|$，由连分数理论不超过 $2\pi/q_{j+1}$。这与「离散采样逼近、同余角与置闰」章用连分数逼近周期比 $\varrho$（\cref{thm:continued_fraction_best_approx_parallel}）是同一类问题——前者逼近载波与包络之比，后者逼近采样窗与信号之比。
+\end{remark}
+
+\subsection{接口与开放问题}
+
+\begin{remark}[与其他章的接口]\label{rem:dyn_envelope_interfaces}
+包络在后续章节中以不同名义反复出现：
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{拍}（\cref{lem:beat_periodic}、\cref{prop:beat_phenomenon}）：双近频的模包络；
+    \item \textbf{泄露包络}（\cref{thm:leakage_envelope_parallel}）：窗核旁瓣的衰减轮廓，是频域中的包络；
+    \item \textbf{解析信号}（\cref{prop:analytic_signal}）：实信号的希尔伯特包络；
+    \item \textbf{波包}（\cref{ex:dispersive_pulse}）：高斯脉冲的包络以群速度传播，色散作用于包络而非载波；
+    \item \textbf{慢–快系统}（\cref{prop:pdo_enso_separation}）：慢变量对快振动振幅的调制，即包络动力学；
+    \item \textbf{经济周期}：朱格拉周期对基钦周期振幅的调制（「经济系统之周期结构」章）。
+\end{enumerate}
+\end{remark}
+
+\begin{remark}[开放问题]\label{rem:dyn_envelope_open}
+\begin{enumerate}[label=(\alph*)]
+    \item \textbf{多分量包络的唯一性}：当 $\mathcal E$ 含多个不可公度差频时，$\varrho$ 是准周期函数，如何定义其“包络的包络”？是否存在唯一的双尺度分解？
+    \item \textbf{包络提取的误差界}：希尔伯特包络、峰值包络与 \cref{def:dyn_envelope} 的模长包络在有限采样下的误差如何定量刻画？
+    \item \textbf{包络的范畴刻画}：包络作为 $U(1)$ 不变量的函子，能否纳入「周期范畴」章的框架？
+\end{enumerate}
 \end{remark}
 
 \section{三组动态周转圆}
@@ -1757,6 +2078,8 @@ $r^2+\sigma\sim r^2$（$r\gg\sqrt\sigma$），代入得 $\mathcal I\sim N_0\sigm
     \item \textbf{投影}：观察者函子 $\Pi_O$ 把合成向量投影为可观测标量 $\mathcal O=\Pi_O(X)$。
     \item \textbf{重构}：重构函子 $\Pi_O^\ast$ 把可观测标量反投影为源空间的估计 $\widehat X=\Pi_O^\ast(\mathcal O)$。由伴随性，$\Pi_O\dashv\Pi_O^\ast$ 且余单位为恒等、单位不是同构——这形式化了“观察即信息损失”这一核心事实。
 \end{enumerate}
+包络 $\varrho=|\mathcal E|$ 是合成对象在共同相位旋转下的不变量（\cref{def:dyn_envelope}、\cref{prop:dyn_envelope_sup}）：它把“快相位”与“慢振幅”分开，是投影之前的一个中间对象。
+
 离散幺正动态投影提供了时间离散化下的接口；尺度相关采样理论给出了空间分辨率与距离的关系；信息随距离损失则是二者在观察者投影框架下的自然推论。
 \end{remark}
 
@@ -1769,12 +2092,12 @@ $r^2+\sigma\sim r^2$（$r\gg\sqrt\sigma$），代入得 $\mathcal I\sim N_0\sigm
 主题 & 本章对应 \\
 \midrule
 平移 & 观察者向量的动态调节（\cref{def:dyn_observer}）；三平面与三球组的旋转角平移（\cref{def:dyn_rotating_planes}、\cref{def:dyn_rotating_quaternion_groups}） \\
-缩放 & 观察者模长引入的权重（\cref{lem:dyn_triple_weight}）；四元数范数保持（\cref{prop:dyn_quaternion_rotation_norm}）；采样函数的尺度协变性（\cref{prop:dyn_sampling_properties}） \\
+缩放 & 观察者模长引入的权重（\cref{lem:dyn_triple_weight}）；包络对振幅的慢变调制（\cref{def:dyn_envelope}、\cref{prop:dyn_envelope_beat}）；四元数范数保持（\cref{prop:dyn_quaternion_rotation_norm}）；采样函数的尺度协变性（\cref{prop:dyn_sampling_properties}） \\
 旋转 & 三平面独立旋转（\cref{def:dyn_rotating_planes}）；三球组独立旋转（\cref{def:dyn_rotating_quaternion_groups}）；四元数非交换旋转（\cref{thm:dyn_quaternion_noncommutative}） \\
 平衡 & 投影的线性性（\cref{prop:dyn_projection_linearity}）；合成—投影的可加性（\cref{prop:dyn_triple_additivity}）；采样时长的尺度不变性（\cref{prop:dyn_sampling_duration_invariance}） \\
 对称 & 投影的对称性（\cref{prop:dyn_projection_symmetry}）；四元数内积的对称性（\cref{lem:dyn_quaternion_inner_symmetry}）；加法约定的交换性（\cref{cor:dyn_quaternion_additive_commutative}） \\
 闭合 & 三平面同步旋转的不变性（\cref{thm:dyn_sync_invariance}）；三球组同步旋转的不变性（\cref{thm:dyn_quaternion_sync_invariance}）；观察者函子的伴随闭合（\cref{thm:dyn_observer_adjunction}） \\
-周期 & 动态投影的瞬时频率（\cref{thm:dyn_projection_continuity}）；单频频率平移（\cref{cor:dyn_doppler}）；三组拍频（\cref{cor:dyn_triple_beat}）；离散周期条件（\cref{thm:dyn_discrete_period_condition}）；采样轨道的分辨率（\cref{thm:dyn_sampling_resolution}） \\
+周期 & 动态投影的瞬时频率（\cref{thm:dyn_projection_continuity}）；单频频率平移（\cref{cor:dyn_doppler}）；三组拍频（\cref{cor:dyn_triple_beat}）；包络周期与调制阶（\cref{thm:dyn_envelope_difference}、\cref{prop:dyn_modulation_order}）；离散周期条件（\cref{thm:dyn_discrete_period_condition}）；采样轨道的分辨率（\cref{thm:dyn_sampling_resolution}） \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1999,5 +2322,11 @@ $r^2+\sigma\sim r^2$（$r\gg\sqrt\sigma$），代入得 $\mathcal I\sim N_0\sigm
         \item 投影 $\Pi_O(X)=\operatorname{Re}[X\overline{O}]$ 给出什么观察结果；
         \item 重构函子 $\Pi_O^\ast$ 如何从观察结果反投影。
     \end{enumerate}
+
+    \item 证明定理 \ref{thm:dyn_envelope_difference} 的差频展开，
+    并对 $K=3$、$\omega_k=k\omega_0$、$A_k=1$、$\phi_k=0$ 的情形
+    计算包络 $\varrho$ 的最小正周期 $T_{\text{env}}$，说明它等于载波周期 $2\pi/\omega_0$。
+    再对双分量情形 $\omega_1=\omega_0$、$\omega_2=2\omega_0$ 计算调制阶 $N$，
+    并用命题 \ref{prop:dyn_modulation_order} 验证合成信号的最小正周期为 $T_{\text{env}}$。
 \end{enumerate}
 

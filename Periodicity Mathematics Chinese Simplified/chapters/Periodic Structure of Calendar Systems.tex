@@ -218,14 +218,14 @@ z_t=\sum_k E_k(\omega_k t)=\sum_k A_k e^{i(\omega_k t+\phi_k)}.
 (iii) 对节气序列 \(N=24\)，基频对应年周期，\(k=2\) 谐波对应半年周期，\(k=4\) 谐波对应季周期，\(k=12\) 谐波对应月周期。
 \end{proof}
 
-\begin{definition}[轩辕历法的象征建元与甲寅建元年]\label{def:xuanyuan_epoch}
-轩辕历法以黄帝纪元为纪年原点。设\textbf{象征建元年}为公元前 \(2697\) 年，该年为甲子岁（干支序数 \(10\)）。统一使用天文纪年：
+\begin{definition}[轩辕历法的名义建元与实际建元年]\label{def:xuanyuan_epoch}
+轩辕历法以黄帝纪元为纪年原点。设\textbf{名义建元年}为公元前 \(2697\) 年，该年为甲子岁（干支序数 \(10\)）。统一使用天文纪年：
 \[
-Y_0=-2697.
+Y_0=-2696.
 \]
-甲寅的干支序数为 \(0\)，故\textbf{甲寅建元年}为
+甲寅的干支序数为 \(0\)，故\textbf{实际建元年}为
 \[
--2697+50=-2647\quad(\text{天文纪年}),
+-2696+50=-2646\quad(\text{天文纪年}),
 \]
 对应公元前 \(2647\) 年（甲寅年）。
 \end{definition}
@@ -484,7 +484,7 @@ S_M^{\mathrm{floor}}=\sum_{m=0}^{M-1}(\lfloor (m+1)\rho\rfloor-\lfloor m\rho\rfl
 \subsection{绝对序列与相对序列}
 
 \begin{definition}[绝对序列]\label{def:absolute_sequence}
-\textbf{绝对序列}是历法单位从轩辕历法建元年起算的连续序号。设建元年的天文纪年为 \(Y_0=-2697\)（历史纪年公元前 \(2697\) 年，甲子岁）。对于任意历法单位 \(U\)，其\textbf{绝对序列} \(S_{\text{abs}}(U)\) 定义为该单位从建元年起算的连续编号。
+\textbf{绝对序列}是历法单位从轩辕历法建元年起算的连续序号。设名义建元年的天文纪年为 \(Y_0=-2696\)（历史纪年公元前 \(2697\) 年，甲子岁）。对于任意历法单位 \(U\)，其\textbf{绝对序列} \(S_{\text{abs}}(U)\) 定义为该单位从建元年起算的连续编号。
 
 绝对序列具有以下性质：
 \begin{enumerate}[label=(\roman*)]
@@ -977,6 +977,224 @@ S_M^{\mathrm{floor}}=\sum_{m=0}^{M-1}(\lfloor (m+1)\rho\rfloor-\lfloor m\rho\rfl
 第一句即 \cref{prop:wuzhongqi_run} 的闰月判定条件，其成立机制已在该命题的证明中给出（中气间隔超过朔望月定长时出现无中气之月）。第二句说明置闰的目的：按 \cref{def:jieqi_zhongqi_dingyue}，含立春与雨水的朔望月为正月（寅月）；无中气置闰保证正月始终含有立春，从而岁首与立春的偏离不超过一个朔望月的量级，故岁首始终在立春前后。
 \end{proof}
 
+\subsection{算法 1：连分数置闰}
+\label{subsec:continued_fraction_intercalation_algorithm}
+
+算法 1 是\textbf{数论/平均}路线：只使用回归年与朔望月的平均周期比
+\[
+\rho=\frac{T_{\text{trop}}}{T_{\text{syn}}},
+\]
+不读取任何具体的朔日或中气时刻。它的输入是 \(\rho\) 与一个窗口/容差，输出是一个置闰序列（或每个窗口的闰数），而不是“具体闰哪个月”。
+
+\begin{enumerate}[label=\textbf{步骤 \arabic*.}, leftmargin=*]
+    \item 计算 \(\rho\) 的连分数收敛子 \(p_j/q_j\)（\cref{thm:calendar_continued_fraction_best}）。
+    \item 按容差 \(\varepsilon\) 选最小窗口 \(q_j\)，使 \(1/q_{j+1}<\varepsilon\)；或直接取给定窗口 \(M\)。
+    \item 生成平衡置闰序列
+    \[
+    N_m=\operatorname{round}((m+1)\rho)-\operatorname{round}(m\rho),
+    \qquad m=0,\dots,M-1,
+    \]
+    或取上置闰/下置闰（\cref{thm:calendar_intercalation_error_bound}）。
+    \item 输出置闰位置/闰数与累计误差
+    \[
+    E_M=\sum_{m=0}^{M-1}N_m-M\rho.
+    \]
+\end{enumerate}
+
+\textbf{保证}：在收敛子窗口 \(M=q_j\) 上，\(|E_M|<1/q_{j+1}\)（\cref{thm:calendar_continued_fraction_best}）；平衡置闰对任意 \(M\) 有 \(|E_M|\le1/2\)（\cref{thm:calendar_intercalation_error_bound}）。以 \(\rho=12.36827\) 为例，\(q=19,p=235\)，十九年七闰，\(\delta_{19}=0.00295\)。
+
+\textbf{复杂度}：连分数 \(O(\log M)\)，序列生成 \(O(M)\)。
+
+\textbf{边界}：算法 1 只给“闰数/平均节奏”，不指定具体月份；要落到具体月份，还需一个把置闰序列映射到月序的约定。算法 2 解决的正是这个问题，但算法 2 不是算法 1 的离散化，而是独立的第二条路线。
+
+\subsection{算法 2：精确事件置闰}
+\label{subsec:exact_intercalation_algorithm}
+
+算法 2 是\textbf{事件/天文}路线，与算法 1 独立：它不使用 \(\rho\)、连分数收敛子或平均周期，只使用精确的朔日 \(n_i\) 与中气 \(z_j\) 事件序列。它的输入是两条事件序列，输出是具体的闰月。下面的定义、命题与验证表给出算法 2 的完整规格。
+
+\textbf{精确月区间与中气计数。}
+
+\begin{definition}[精确月区间与中气计数]
+\label{def:exact_month_term_count}
+设 \(n_i\) 为第 \(i\) 个朔的儒略日数，\(z_j\) 为第 \(j\) 个中气的儒略日数。取朔日所在日的日界（即 \(\lfloor n_i\rfloor\)）为月首：
+\[
+s_i=\lfloor n_i\rfloor,\qquad I_i=[s_i,s_{i+1}).
+\]
+称
+\[
+c_i=\#\{j: s_i\le z_j<s_{i+1}\}
+\]
+为第 \(i\) 个朔望月的\textbf{中气计数}。
+\end{definition}
+
+\begin{remark}[日界约定]
+\label{rem:exact_day_boundary}
+传统历法以朔所在的那一日为月首，而不是以朔的精确时刻为月首。若用精确时刻 \(n_i\) 作月界，中气落在朔前后数小时内的月份会被分到相邻月，产生大量边界误判；改用 \(s_i=\lfloor n_i\rfloor\) 后，判定与历法标签一致。表 \ref{tab:exact_intercalation_comparison} 给出定量对比：在同一 sheet 上，精确时刻逐月判定有 \(272\) 个月不符，日界逐月判定降到 \(48\) 个，而日界加年界规则降到 \(0\) 个。
+\end{remark}
+
+\textbf{冬至年。}
+
+\begin{definition}[冬至年与中气计数]
+\label{def:winter_solstice_year}
+设 \(w_y\) 为第 \(y\) 个冬至的儒略日数，\(m_y\) 为包含 \(w_y\) 的朔望月下标：
+\[
+s_{m_y}\le w_y<s_{m_y+1}.
+\]
+称
+\[
+Y_y=\{m_y,m_y+1,\dots,m_{y+1}-1\}
+\]
+为第 \(y\) 个\textbf{冬至年}，并记
+\[
+C_y=\#\{j: w_y\le z_j<w_{y+1}\}.
+\]
+\end{definition}
+
+\textbf{精确判定。}
+
+\begin{definition}[精确无中气置闰判定]
+\label{def:exact_wuzhongqi_decision}
+对第 \(y\) 个冬至年：
+\begin{enumerate}[label=(\roman*)]
+    \item 若 \(|Y_y|=12\)，该年不闰；
+    \item 若 \(|Y_y|=13\)，则 \(Y_y\) 中第一个满足 \(c_i=0\) 的月为闰月；
+    \item 若 \(|Y_y|\notin\{12,13\}\) 或 \(C_y\ne12\)，标记该年为\textbf{待核查}，不直接判定。
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[精确判定的结构]
+\label{prop:exact_wuzhongqi_consistency}
+在日界约定下，若 \(C_y=12\)，则：
+\begin{enumerate}[label=(\roman*)]
+    \item 若 \(|Y_y|=13\)，则至少有一个月满足 \(c_i=0\)；
+    \item 若 \(|Y_y|=12\)，则该年不闰；
+    \item 因而“\(13\) 月年取第一个无中气月、\(12\) 月年不闰”与无中气规则一致。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) 由抽屉原理，\(12\) 个中气放入 \(13\) 个月，至少有一个月不含中气。(ii) 闰月只在 \(13\) 月年出现，这是“无中气置闰”对年长的约定；\(12\) 月年没有闰月。(iii) 由 (i)(ii) 直接得到。
+\end{proof}
+
+\begin{remark}[主中气与副节中气：一个必须补齐的数据列]
+\label{rem:main_secondary_terms}
+《寿星数据整录》的每个月记录含三列节气信息：\textbf{主节气}、\textbf{主中气}、\textbf{副节中气}。当一个朔望月内含两个节气或中气时，第二个记在\textbf{副节中气}列。若解析时只读\textbf{主中气}列，含两个中气的月份会丢掉一个中气，使该冬至年的中气数变为 \(11\) 或 \(10\)，进而把正常月误判为闰月。把\textbf{副节中气}列一并读入、并只保留 \(12\) 个中气名，可使每个冬至年恰含 \(12\) 个中气；此时全部 \(290{,}654\) 个月的判定与标签零不符。这不是数据误差，而是数据模型必须完整读取的问题。
+\end{remark}
+
+\textbf{算法。}
+
+\begin{enumerate}[label=\textbf{步骤 \arabic*.}, leftmargin=*]
+    \item 读入全部 sheet 的朔日 \(n_i\)、月名标签、\textbf{主中气}（第 \(9/10\) 列）与\textbf{副节中气}（第 \(11/12\) 列）；只保留 \(12\) 个中气名，按儒略日数去重。
+    \item 取 \(s_i=\lfloor n_i\rfloor\)，用二分查找把每个中气分配到月：
+    \[
+    k_j=\max\{k: s_k\le z_j\},
+    \]
+    得到 \(c_i=\#\{j:k_j=i\}\)。
+    \item 取冬至事件 \(w_y\)，定位 \(m_y\)，构造冬至年 \(Y_y\)。
+    \item 若 \(|Y_y|=13\)，把 \(Y_y\) 中第一个 \(c_i=0\) 的月标为闰月；若 \(|Y_y|=12\)，不标。
+    \item 与月名中的“闰”标签比对；输出不符月份与待核查年。
+\end{enumerate}
+
+复杂度：排序 \(O(N\log N)\)，分配 \(O((N+M)\log N)\)，年界 \(O(N)\)；\(N=290{,}654\)，\(M=282{,}000\)，普通机器秒级（解析表格除外）。
+
+\begin{table}[htbp]
+\centering
+\caption{精确置闰算法在《寿星数据整录》上的验证（24 个 sheet）。}
+\label{tab:exact_intercalation_validation}
+\begin{tabular}{lr}
+\toprule
+项目 & 数值 \\
+\midrule
+朔望月总数 & \(290{,}654\) \\
+主/副中气记录（含边界重复） & \(282{,}000\) \\
+闰月标签 & \(8{,}654\) \\
+冬至年总数 & \(23{,}499\) \\
+其中 \(12\) 月年 & \(14{,}845\) \\
+其中 \(13\) 月年 & \(8{,}654\) \\
+\(13\) 月年中的无中气月 & \(8{,}654\)（每年 \(1\) 个） \\
+预测闰月 & \(8{,}654\) \\
+不符 & \(0\) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{在第 \(1\) 个 sheet（\(12{,}368\) 月）上的逐步改进；三行均只读主中气。全表补读副节中气后的结果见表 \ref{tab:exact_intercalation_validation}。}
+\label{tab:exact_intercalation_comparison}
+\begin{tabular}{lccr}
+\toprule
+方法 & 月界 & 年界 & 不符 \\
+\midrule
+精确时刻 \(+\) 逐月无中气 & 精确时刻 & 无 & \(272\) \\
+日界 \(+\) 逐月无中气 & \(\lfloor n_i\rfloor\) & 无 & \(48\) \\
+日界 \(+\) 冬至年 \(+\) 第一个无中气月 & \(\lfloor n_i\rfloor\) & 冬至年 & \(0\) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+在全表上，日界 \(+\) 冬至年但只读主中气仍有 \(160\) 个误报；补读副节中气后降为 \(0\)。这 \(160\) 个误报全部来自“含两个中气、第二个记在副节中气列”的月份；把该列读入后，每个冬至年恢复为 \(12\) 个中气，误报消失。
+
+\begin{remark}[与平均周期密度的关系]
+\label{rem:exact_vs_mean_density}
+平均模型把月长与中气间隔替换为 \(T_{\text{syn}}\) 与 \(T_{\text{trop}}/12\)，给出的是平均每 \(2.715\) 年一闰、十九年七闰的\textbf{平均节奏}。精确数据下，局部密度应写成
+\[
+D(t)=\frac{1}{L_m(t)}-\frac{1}{L_z(t)},
+\]
+其中 \(L_m^{(i)}=n_{i+1}-n_i\)、\(L_z^{(j)}=z_{j+1}-z_j\) 是精确的局部间隔。这就是 \cref{def:dyn_period_difference_density} 中频率差密度 \(\Delta_{f,g}\) 的历法实例（取 \(f\) 为中气间隔、\(g\) 为朔望月）；乘以区间归一化因子 \((b-a)/(N_fN_g)\)（在拍周期上化为 \(T_f-T_g\)）即得周期差密度 \(D_{f,g}\)，后者在一个拍上的积分给时间差。于是
+\[
+\int_{s_i}^{s_{i+1}}D(t)\,dt
+=1-\frac{L_m^{(i)}}{L_z^{(i)}}.
+\]
+\(D(t)\) 是解释量：它说明某个月为何会“吞掉”或“丢掉”一个中气；但闰月的\textbf{判定}用事件计数 \(c_i\)，不用密度阈值。平均密度只保留为长期平均与预测工具。
+\end{remark}
+
+\begin{remark}[与离散采样章的关系]
+\label{rem:exact_intercalation_sampling}
+十九年七闰是 \(\rho=T_{\text{trop}}/T_{\text{syn}}\) 的连分数逼近（\cref{ch18_metonic_cycle}、\cref{thm:calendar_continued_fraction_best}），但算法 2 不是这一逼近的离散化：它直接执行“无中气置闰”的事件规则，不经过 \(\rho\) 或连分数。\cref{thm:calendar_sampling_unification_parallel} 把历法置闰与采样置闰识别为同一数学对象；算法 2 是该同构在“朔日—中气”事件层面的独立落地：闰月判定等价于同余角闭合的离散检查。
+\end{remark}
+
+\begin{remark}[验证范围]
+\label{rem:exact_intercalation_scope}
+本节的零不符是《寿星数据整录》这一数据集上的\textbf{经验验证}，不是对一切历法的定理。历史历法改革、时区约定、历表精度、日界定义都可能改变个别月份的归属；换数据时应先校准日界与中气表，再运行算法。算法本身只依赖“事件序列 \(+\) 冬至年 \(+\) 中气计数”，不依赖平均周期。
+\end{remark}
+
+\subsection{两种算法的独立性与比较}
+\label{subsec:two_intercalation_algorithms_comparison}
+
+算法 1 与算法 2 是两条独立的路线，不是彼此的近似或特例：
+
+\begin{itemize}
+    \item 算法 1 的输入是平均周期比 \(\rho\)，核心是连分数收敛子与平衡序列，输出是闰数/平均节奏；它不知道具体的朔日与中气。
+    \item 算法 2 的输入是精确事件序列，核心是冬至年与中气计数，输出是具体闰月；它不使用 \(\rho\) 或连分数。
+\end{itemize}
+
+二者可以互相校验：算法 1 给出长期闰数（如十九年七闰），算法 2 给出具体闰月；在数据完整时，算法 1 的平均节奏应与算法 2 的统计一致。十九年七闰是二者的\textbf{一致性检验}，不是算法 2 的推导前提。
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{两种置闰算法的比较。}
+\label{tab:two_intercalation_algorithms}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}p{4.8cm}>{\raggedright\arraybackslash}p{4.8cm}@{}}
+\toprule
+项目 & 算法 1：连分数 & 算法 2：精确事件 \\
+\midrule
+输入 & \(\rho=T_{\text{trop}}/T_{\text{syn}}\)，窗口/容差 & 朔日 \(n_i\)、中气 \(z_j\) 事件序列 \\
+核心 & 连分数收敛子、平衡序列 & 冬至年、第一个无中气月 \\
+输出 & 置闰序列/闰数 & 具体闰月 \\
+依赖 & 平均周期比 & 精确事件、日界 \\
+精度 & \(|E_M|<1/q_{j+1}\)（收敛子窗口） & 数据完整时零不符 \\
+复杂度 & \(O(\log M+M)\) & \(O((N+M)\log N)\) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{remark}[独立性]
+\label{rem:two_algorithms_independent}
+算法 2 不是算法 1 在有限数据上的“实现”：算法 1 的连分数收敛子、窗口 \(q_j\) 和周期比 \(\rho\) 都不出现在算法 2 的输入或步骤中；算法 2 的冬至年、中气计数和日界也不出现在算法 1 中。二者只在“无中气置闰”这一历法规则上相交：算法 1 用平均周期比近似这条规则，算法 2 用事件计数精确执行这条规则。因此，算法 2 可以作为独立于连分数置闰的第二算法，用于精确数据；算法 1 继续用于平均节奏、窗口选择和预测。
+\end{remark}
+
 \section{阴阳合历的周期结构}
 \label{sec:lunisolar_structure}
 
@@ -1048,7 +1266,7 @@ P-m+1, & P\ge m.
 \end{definition}
 
 \begin{theorem}[一部的干支推移定理]\label{thm:yibu_ganzhi_shift}
-经过 \(k\) 部后，干支序数 \(S_k=S_0+20k\pmod{60}\)。\(k=3\) 时干支复原。一部内干支按 \(+20\) 推进，甲寅、甲戌、甲午三柱循环；建元序列中出现的甲柱为甲子（象征建元起点）、甲寅、甲戌、甲午。
+经过 \(k\) 部后，干支序数 \(S_k=S_0+20k\pmod{60}\)。\(k=3\) 时干支复原。一部内干支按 \(+20\) 推进，甲寅、甲戌、甲午三柱循环；建元序列中出现的甲柱为甲子（名义建元起点）、甲寅、甲戌、甲午。
 \end{theorem}
 
 \begin{proof}
@@ -1059,27 +1277,27 @@ P-m+1, & P\ge m.
 \label{sec:xuanyuan_epoch}
 
 \begin{proposition}[第一部终的干支确定]\label{prop:first_yibu_ganzhi}
-从甲寅建元年（\(-2647\)）出发，经过一部到达第一终：\(-2647+1520=-1127\)。干支序数 \(0+20=20\)（甲戌）。公元前 \(1127\) 年（甲戌年）。
+从实际建元年（\(-2646\)）出发，经过一部到达第一终：\(-2646+1520=-1126\)。干支序数 \(0+20=20\)（甲戌）。公元前 \(1127\) 年（甲戌年）。
 \end{proposition}
 
 \begin{proof}
-由 \cref{def:xuanyuan_epoch}，甲寅建元年为 \(-2647\)（干支序数 \(0\)）；由 \cref{def:yibu}，一部为 \(1520\) 年且每历一部干支前移 \(20\) 位（\(1520\bmod 60=20\)，见 \cref{thm:yibu_ganzhi_shift}）。故第一终天文纪年为 \(-2647+1520=-1127\)，干支序数为 \(0+20=20\pmod{60}\)。由六十甲子序（甲寅 \(=0\)），序数 \(20\) 对应甲戌。
+由 \cref{def:xuanyuan_epoch}，实际建元年为 \(-2646\)（干支序数 \(0\)）；由 \cref{def:yibu}，一部为 \(1520\) 年且每历一部干支前移 \(20\) 位（\(1520\bmod 60=20\)，见 \cref{thm:yibu_ganzhi_shift}）。故第一终天文纪年为 \(-2646+1520=-1126\)，干支序数为 \(0+20=20\pmod{60}\)。由六十甲子序（甲寅 \(=0\)），序数 \(20\) 对应甲戌。
 \end{proof}
 
-\begin{proposition}[第二部终的干支确定与公元修正]\label{prop:second_yibu_correction}
-天文纪年终点：\(-1127+1520=393\)。历史纪年：\(393+1=394\)。干支序数 \(20+20=40\)（甲午）。公元 \(394\) 年（甲午年）。
+\begin{proposition}[第二部终的干支确定]\label{prop:second_yibu_correction}
+天文纪年终点：\(-1126+1520=394\)。历史纪年：\(394\)。干支序数 \(20+20=40\)（甲午）。公元 \(394\) 年（甲午年）。
 \end{proposition}
 
 \begin{proof}
-第一终为 \(-1127\)（\cref{prop:first_yibu_ganzhi}），再历一部得第二终天文纪年 \(-1127+1520=393\)。因 \(393\ge 1\) 且跨越了公元分界线，由 \cref{thm:cross_era_correction}（取 \(P\ge m\) 情形），历史纪年需 \(+1\) 修正，得 \(393+1=394\)，即公元 \(394\) 年。干支序数由 \cref{thm:yibu_ganzhi_shift} 再前移 \(20\) 位：\(20+20=40\)，对应甲午。
+第一终为 \(-1126\)（\cref{prop:first_yibu_ganzhi}），再历一部得第二终天文纪年 \(-1126+1520=394\)。天文纪年 \(394\ge 1\) 即公元 \(394\) 年，不再另加 \(+1\)：无公元 \(0\) 年的换算已包含在天文纪年 \(-(m-1)\) 的定义中（\cref{def:astronomical_year_numbering}），重复 \(+1\) 会多算一年。干支序数由 \cref{thm:yibu_ganzhi_shift} 再前移 \(20\) 位：\(20+20=40\)，对应甲午。
 \end{proof}
 
 \begin{proposition}[第三部终的干支确定]\label{prop:third_yibu_ganzhi}
-天文纪年终点：\(393+1520=1913\)。历史纪年：\(1913+1=1914\)。干支序数 \(40+20=60\equiv 0\)（甲寅）。公元 \(1914\) 年（甲寅年，民国三年）。
+天文纪年终点：\(394+1520=1914\)。历史纪年：\(1914\)。干支序数 \(40+20=60\equiv 0\)（甲寅）。公元 \(1914\) 年（甲寅年，民国三年）。
 \end{proposition}
 
 \begin{proof}
-第二终为天文纪年 \(393\)（\cref{prop:second_yibu_correction}），再历一部得第三终天文纪年 \(393+1520=1913\)；由 \cref{thm:cross_era_correction} 的 \(+1\) 修正，历史纪年为 \(1913+1=1914\)。干支序数再前移 \(20\) 位：\(40+20=60\equiv 0\pmod{60}\)，对应甲寅（甲寅 \(=0\)、甲子 \(=10\)）。
+第二终为天文纪年 \(394\)（\cref{prop:second_yibu_correction}），再历一部得第三终天文纪年 \(394+1520=1914\)；天文纪年 \(1914\) 即历史纪年 \(1914\)，不再另加 \(+1\)。干支序数再前移 \(20\) 位：\(40+20=60\equiv 0\pmod{60}\)，对应甲寅（甲寅 \(=0\)、甲子 \(=10\)）。
 \end{proof}
 
 \begin{theorem}[轩辕历法建元序列的完整性]\label{thm:xuanyuan_complete_sequence}
@@ -1088,11 +1306,11 @@ P-m+1, & P\ge m.
 \toprule
 建元次序 & 天文纪年 & 历史纪年 & 干支 & 备注 \\
 \midrule
-起点 & \(-2697\) & 前 \(2697\) & 甲子 & 黄帝纪元假设 \\
-甲寅建元 & \(-2647\) & 前 \(2647\) & 甲寅 & 甲子后第 50 年 \\
-第一终 & \(-1127\) & 前 \(1127\) & 甲戌 & 未跨公元 \\
-第二终 & \(393\) & \(394\) & 甲午 & 跨公元 \(+1\) 修正 \\
-第三终 & \(1913\) & \(1914\) & 甲寅 & 民国三年 \\
+名义建元 & \(-2696\) & 前 \(2697\) & 甲子 & 黄帝纪元假设 \\
+实际建元 & \(-2646\) & 前 \(2647\) & 甲寅 & 名义建元后第 50 年 \\
+第一终 & \(-1126\) & 前 \(1127\) & 甲戌 & 未跨公元 \\
+第二终 & \(394\) & \(394\) & 甲午 & 无 \(+1\) 修正 \\
+第三终 & \(1914\) & \(1914\) & 甲寅 & 民国三年 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1104,7 +1322,7 @@ P-m+1, & P\ge m.
 \end{proof}
 
 \begin{remark}[天文纪年与历史纪年的差异]\label{rem:calendar_year_difference}
-从第二终开始，天文纪年与历史纪年相差 \(1\)：天文纪年 \(393\) 对应历史纪年 \(394\)。这一差异源于天文纪年包含 \(0\) 年，而历史纪年没有 \(0\) 年。
+天文纪年与历史纪年的差异只出现在公元前：天文纪年 \(a\le 0\) 对应公元前 \(1-a\) 年，而 \(a\ge 1\) 即公元 \(a\) 年。原稿在第二、第三终处另加 \(+1\)，是把“无公元 \(0\) 年”的换算重复计算了一次；本版已删去该额外修正。
 \end{remark}
 
 \section{《皇极经世》的嵌套周期体系}

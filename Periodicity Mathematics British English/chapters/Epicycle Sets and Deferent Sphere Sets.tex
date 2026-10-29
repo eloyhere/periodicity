@@ -9,7 +9,7 @@ This chapter follows directly on the `Vector Analysis' chapter: it generalises t
 \]
 \textbf{Convention}: every model in this chapter adopts the order `compose first, project afterwards'. That is, the time group and the space group are first combined into a composite object (in the complex case the sum $T+S$, in the quaternion case the sum $q_T+q_S$), and this composite object is then projected onto the observer group. The observer itself may vary with time, and may also rotate independently according to its own epicycle.
 
-\textbf{Guide to the seven themes}: Translation---the dynamic adjustment of the observer vector and frequency translation; Scaling---the weight introduced by the observer's modulus; Rotation---the independent rotation of the three planes and of the three episphere groups; Balance---the linearity of composition and projection; Symmetry---the symmetry and commutativity of projection; Closure---the invariants of synchronous rotation; Period---the instantaneous frequency and beat frequency of the dynamic projection.
+\textbf{Guide to the seven themes}: Translation---the dynamic adjustment of the observer vector and frequency translation; Scaling---the weight introduced by the observer's modulus and the slow amplitude modulation of the envelope; Rotation---the independent rotation of the three planes and of the three episphere groups; Balance---the linearity of composition and projection; Symmetry---the symmetry and commutativity of projection; Closure---the invariants of synchronous rotation; Period---the instantaneous frequency, the beat frequency and the envelope period of the dynamic projection.
 \end{remark}
 
 \begin{figure}[htbp]
@@ -543,6 +543,327 @@ Take $\mathcal E(t)=2e^{i3t}$ and observer $u(t)=e^{it}$. By \cref{lem:dyn_singl
 
 \begin{remark}[The case of jumps in $K$]\label{rem:dyn_K_jump}
 When $K$ is allowed to jump at finitely many instants, $\mathcal E$ is in general discontinuous at the jump instants. In that case $\mathcal O$ can only be defined in the piecewise $C^1$ sense. If $\mathcal O$ is required to be globally continuous, one may impose the condition that the total sum is unchanged across the jump, or smooth the jump by interpolation. Such conditions belong to engineering convention; this chapter assumes $K$ constant by default.
+\end{remark}
+
+\section{Envelope and instantaneous phase}
+\label{sec:dyn_envelope}
+
+The preceding two sections treated the \emph{composition} and the \emph{projection} of epicycle groups separately: $\mathcal E(t)$ is the composite object, and $\mathcal O(t)=\operatorname{Re}[\mathcal E(t)\overline{u(t)}]$ is the observation. This section inserts an intermediate object between them---the \textbf{envelope}. Intuitively, the envelope is the slowly varying amplitude profile surrounding a fast oscillation; mathematically, it is the invariant of the composite object under common phase rotation, and the supremum of the readings of all observers. Beats, amplitude modulation, wave packets and slow--fast systems all speak this common language.
+
+\subsection{Definition and three entries}
+
+\begin{definition}[Envelope and instantaneous phase]\label{def:dyn_envelope}
+Let $\mathcal E:\mathbb R\to\mathbb C$ be the dynamic epicycle group of \cref{def:dyn_epicycle_group}, with $\mathcal E(t)\neq0$. Write it in polar form
+\[
+\mathcal E(t)=\varrho(t)\,e^{i\Theta(t)},\qquad \varrho(t)=|\mathcal E(t)|\ge0,
+\]
+where $\Theta(t)$ is a continuous branch of $\arg\mathcal E(t)$. Call $\varrho$ the \textbf{envelope} of $\mathcal E$, $\Theta$ the \textbf{instantaneous phase}, and $\dot\Theta$ the \textbf{instantaneous frequency}. If there is a carrier frequency $\bar\omega>0$ such that
+\[
+\varepsilon:=\frac{\sup_{t}|\dot\varrho(t)|}{\bar\omega\inf_{t}\varrho(t)}\ll1,
+\]
+then $\mathcal E$ is called a \textbf{slow-envelope signal}, $\varrho$ a \textbf{slow envelope}, and $\varepsilon$ the \textbf{modulation parameter}.
+\end{definition}
+
+\begin{remark}[Three entries to the envelope]\label{rem:dyn_envelope_three_entries}
+The envelope may be approached from three angles:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Modulus entry}: $\varrho=|\mathcal E|$, the modulus of the complex amplitude;
+    \item \textbf{Observer entry}: $\varrho(t)=\sup_{\theta}\operatorname{Re}[\mathcal E(t)e^{-i\theta}]$, the supremum of the readings over all observer directions (\cref{prop:dyn_envelope_sup});
+    \item \textbf{Analytic-signal entry}: for a real signal $s$, $\varrho=|s+i\mathcal H\{s\}|$, where $\mathcal H$ is the Hilbert transform (\cref{prop:analytic_signal}).
+\end{enumerate}
+When $\mathcal E$ contains only positive frequencies, $\mathcal E$ is itself the analytic signal of $\operatorname{Re}\mathcal E$ and the three entries agree; if $\mathcal E$ contains negative-frequency components, the modulus entry no longer gives an envelope in the usual sense---which is precisely why $\varepsilon\ll1$ is required below.
+\end{remark}
+
+\subsection{The envelope as the supremum of observer readings}
+
+\begin{proposition}[Supremum and invariance]\label{prop:dyn_envelope_sup}
+Fix $t$ and write $\mathcal O_\theta(t)=\operatorname{Re}[\mathcal E(t)e^{-i\theta}]$. Then
+\[
+\varrho(t)=\sup_{\theta\in[0,2\pi)}\mathcal O_\theta(t),
+\]
+and the supremum is attained at $\theta\equiv\Theta(t)\pmod{2\pi}$. Moreover, for every constant $\psi$,
+\[
+\bigl|e^{i\psi}\mathcal E(t)\bigr|=|\mathcal E(t)|,
+\]
+that is, the envelope is invariant under the common phase rotation, i.e.\ under the $U(1)$ action.
+\end{proposition}
+
+\begin{proof}
+From $\mathcal E=\varrho e^{i\Theta}$ we have $\mathcal O_\theta=\varrho\cos(\Theta-\theta)$. For fixed $t$, $\cos(\Theta-\theta)$ attains its maximum $1$ at $\theta=\Theta$, so the supremum is $\varrho$. The invariance follows from $|e^{i\psi}\mathcal E|=|e^{i\psi}|\,|\mathcal E|=|\mathcal E|$.
+\end{proof}
+
+\begin{remark}[The envelope and the projection]\label{rem:dyn_envelope_vs_projection}
+\cref{prop:dyn_projection_properties}(ii) gives $|\mathcal O(t)|\le|\mathcal E(t)|$. \cref{prop:dyn_envelope_sup} strengthens this: $\varrho(t)$ is not merely an upper bound for $\mathcal O$, but an \emph{attainable} one---there is always an observer direction that reads exactly $\varrho(t)$. The envelope is therefore observer-independent, whereas the observation depends on the observer direction; the difference between the two is precisely the `fast phase' that has been projected out.
+\end{remark}
+
+\subsection{Single component and two close frequencies}
+
+\begin{proposition}[Single component and beats]\label{prop:dyn_envelope_beat}
+\begin{enumerate}[label=(\roman*)]
+    \item If $\mathcal E(t)=Ae^{i(\omega t+\phi)}$ ($A>0$), then $\varrho\equiv A$ and $\Theta=\omega t+\phi$.
+    \item If $\mathcal E(t)=Ae^{i(\omega_1t+\phi_1)}+Ae^{i(\omega_2t+\phi_2)}$ ($A>0$, $\omega_1\neq\omega_2$), write
+    \[
+    \Delta\omega=|\omega_1-\omega_2|,\qquad \bar\omega=\frac{\omega_1+\omega_2}{2},\qquad \Delta\phi=\phi_1-\phi_2,\qquad \bar\phi=\frac{\phi_1+\phi_2}{2}.
+    \]
+    Then
+    \[
+    \mathcal E(t)=2A\cos\Bigl(\frac{\Delta\omega\,t+\Delta\phi}{2}\Bigr)e^{i(\bar\omega t+\bar\phi)},
+    \]
+    \[
+    \varrho(t)=2A\Bigl|\cos\Bigl(\frac{\Delta\omega\,t+\Delta\phi}{2}\Bigr)\Bigr|,
+    \]
+    whose least positive period is $T_{\text{env}}=2\pi/\Delta\omega=T_{\text{beat}}$; the signed slowly varying factor $\cos\bigl((\Delta\omega t+\Delta\phi)/2\bigr)$ has period $4\pi/\Delta\omega$, twice $T_{\text{env}}$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) follows directly from \cref{def:dyn_envelope}. (ii) By the product-to-sum formula,
+\[
+Ae^{i(\omega_1t+\phi_1)}+Ae^{i(\omega_2t+\phi_2)}
+=2A\cos\Bigl(\frac{(\omega_1-\omega_2)t+(\phi_1-\phi_2)}{2}\Bigr)e^{i\bigl(\frac{\omega_1+\omega_2}{2}t+\frac{\phi_1+\phi_2}{2}\bigr)}.
+\]
+Taking moduli gives the expression for $\varrho$; since $|\cos|$ has period $\pi$, $\varrho$ has period $2\pi/\Delta\omega$.
+\end{proof}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.86\textwidth, height=5.2cm,
+  axis lines=middle,
+  xlabel={$t$},
+  xmin=-0.4, xmax=12.8, ymin=-2.5, ymax=2.5,
+  xtick=\empty, ytick={-2,0,2},
+  samples=600, domain=-0.4:12.8,
+  legend style={at={(0.5,1.03)},anchor=south,legend columns=3,draw=none,font=\footnotesize}
+]
+\addplot[blue,thick] {2*cos(deg(0.5*x))*cos(deg(5*x))};
+\addplot[red,dashed,thick] {2*abs(cos(deg(0.5*x)))};
+\addplot[red,dashed,thick] {-2*abs(cos(deg(0.5*x)))};
+\legend{$\operatorname{Re}\mathcal E(t)$,$\varrho(t)$,$-\varrho(t)$}
+\end{axis}
+\end{tikzpicture}
+\caption{The envelope of a two-component beat: a fast carrier modulated by the slow envelope $2A|\cos(\Delta\omega t/2)|$. Here $A=1$, $\Delta\omega=1$ and $\bar\omega=5$.}
+\label{fig:dyn_envelope_beat}
+\end{figure}
+
+\begin{remark}[Reconciliation with the audio and mechanical chapters]\label{rem:dyn_envelope_beat_convention}
+The chapters `Periodic Structure of Audio Systems' and `Periodic Structure of Mechanical Systems' record the `envelope period' as $4\pi/\Delta\omega$ (\cref{lem:beat_periodic}, \cref{prop:beat_phenomenon}). Under \cref{def:dyn_envelope} that is the period of the \emph{signed} slowly varying factor; the period of the \emph{modulus} envelope is $2\pi/\Delta\omega$, equal to the beat period $T_{\text{beat}}=1/\Delta f$. With the present definition the two statements should be reconciled as follows: the beat period equals the modulus-envelope period, whilst the signed factor repeats only every two beat periods.
+\end{remark}
+
+\subsection{Difference frequencies and the periodicity of the envelope}
+
+\begin{theorem}[Difference-frequency expansion]\label{thm:dyn_envelope_difference}
+Let $\mathcal E(t)=\sum_{k=1}^{K}A_ke^{i(\omega_kt+\phi_k)}$, where $K\ge2$, $A_k>0$ are constants and $\omega_1,\dots,\omega_K$ are pairwise distinct. Then
+\[
+\varrho^2(t)=\sum_{k=1}^{K}A_k^2+2\sum_{1\le j<k\le K}A_jA_k\cos\bigl((\omega_j-\omega_k)t+(\phi_j-\phi_k)\bigr).
+\]
+Let $D$ be the additive subgroup generated by the difference frequencies $\omega_j-\omega_k$ whose coefficients on the right-hand side do not vanish. Then:
+\begin{enumerate}[label=(\roman*)]
+    \item the spectrum of $\varrho^2$ contains difference frequencies only; equivalently, the spectrum of $\varrho^2$ is the autocorrelation of the carrier spectrum (the discrete Wiener--Khinchin relation);
+    \item if $D$ is discrete with $D=\omega_D\mathbb Z$ ($\omega_D>0$), then the least positive period of $\varrho$ is $T_{\text{env}}=2\pi/\omega_D$; if $D$ is not discrete, $\varrho$ is not periodic;
+    \item if every $\omega_k\in\omega_0\mathbb Z$, then $T_{\text{env}}$ divides the carrier period $T_c=2\pi/\omega_0$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+Expanding $\varrho^2=\mathcal E\overline{\mathcal E}$ gives
+\[
+\mathcal E\overline{\mathcal E}=\sum_{j,k=1}^{K}A_jA_k e^{i((\omega_j-\omega_k)t+(\phi_j-\phi_k))}.
+\]
+Separating the $K$ terms with $j=k$ (each equal to $A_k^2$) from those with $j\ne k$, and pairing the latter as $(j,k)$ and $(k,j)$, the identity $e^{i\theta}+e^{-i\theta}=2\cos\theta$ yields the expansion.
+
+(i) is read off from the expansion. (ii) The expansion is a finite trigonometric polynomial whose non-zero frequencies generate $D$; a trigonometric polynomial has period $T$ if and only if $\nu T\in2\pi\mathbb Z$ for every non-zero frequency $\nu$ (by the linear independence of the characters). Hence the period group of $\varrho^2$ is $(2\pi/\omega_D)\mathbb Z$. Since $\varrho=\sqrt{\varrho^2}\ge0$, $T$ is a period of $\varrho^2$ if and only if it is a period of $\varrho$; the two therefore have the same period group, and the least positive period is $2\pi/\omega_D$. (iii) If $\omega_k\in\omega_0\mathbb Z$, then $D\subseteq\omega_0\mathbb Z$, so $\omega_D$ is a positive integer multiple of $\omega_0$ and $T_{\text{env}}=2\pi/\omega_D$ divides $2\pi/\omega_0$.
+\end{proof}
+
+\begin{corollary}[A quasi-periodic carrier may have a periodic envelope]\label{cor:dyn_envelope_quasiperiodic}
+Let $\mathcal E(t)=Ae^{i\omega_1t}+Ae^{i\omega_2t}$ with $A>0$ and $\omega_1/\omega_2\notin\mathbb Q$. Then $\mathcal E$ is not periodic (it is a Bohr quasi-periodic function), yet $\varrho$ has least positive period $2\pi/|\omega_1-\omega_2|$.
+\end{corollary}
+
+\begin{proof}
+A sum of two exponentials with incommensurate frequencies has no non-zero period: if $T$ were a period of $\mathcal E$, the linear independence of the characters would give $e^{i\omega_1T}=e^{i\omega_2T}=1$, hence $\omega_1T,\omega_2T\in2\pi\mathbb Z$, contradicting $\omega_1/\omega_2\notin\mathbb Q$. The periodicity of the envelope is given by \cref{thm:dyn_envelope_difference}(ii), with $D=|\omega_1-\omega_2|\mathbb Z$.
+\end{proof}
+
+\begin{remark}[Envelope periodicity is strictly weaker than carrier periodicity]\label{rem:dyn_envelope_weaker}
+\cref{cor:dyn_envelope_quasiperiodic} shows that $\mathcal E$ periodic $\Rightarrow$ $\varrho$ periodic (since $\varrho=|\mathcal E|$), but not conversely. The group-theoretic reason is clear: the envelope is invariant under the common phase rotation $U(1)$ (\cref{prop:dyn_envelope_sup}) and sees only the \emph{relative} phases $\Theta_j-\Theta_k$, the common fast phase having been quotiented out. The period of the envelope is thus the `closure period of the relative phases'; it may be coarser than the carrier period, and it may exist even when the carrier has no period at all.
+\end{remark}
+
+\subsection{The period-difference density}
+\label{subsec:dyn_period_difference_density}
+
+This subsection writes the `period difference of two periodic functions' as an integrable density. There are two requirements:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{pointwise}: given \(f,g\) and a point \(x\), return the period-difference density at \(x\);
+    \item \textbf{integral}: integrated over an interval \([a,b]\), return the period difference over that interval.
+\end{enumerate}
+These two requirements force the pointwise value to be a dimensionless density rather than a period, and make an interval normalisation unavoidable.
+
+\begin{remark}[Why the pointwise value cannot be a period]
+\label{rem:dyn_period_density_no_go}
+If \(D(x)\) were a period (with the dimension of time), then \(\int_a^b D(x)\,dx\) would have the dimension of time\(^2\) and could not equal a period difference (time). More strictly, if \(D(x)\) were fixed and
+\[
+\int_a^b D(x)\,dx=T_f-T_g
+\]
+for every interval \([a,b]\), then the integral over every subinterval would be the same constant; differentiating with respect to \(b\) gives \(D(b)=0\) for almost every \(b\), a contradiction. Hence the pointwise value must be a dimensionless density, and interval normalisation is unavoidable; `the period difference over an interval' should be read as the difference of the interval-averaged periods, or as `one period difference accumulated per beat'.
+\end{remark}
+
+\textbf{The general interval version.}
+
+Let \(f,g\) have global least positive periods \(T_f,T_g\), with \(T_f>T_g\) (otherwise interchange \(f,g\)). Let their analytic phases be \(\Theta_f,\Theta_g\) and their local frequencies
+\[
+f_f(x)=\frac{\dot\Theta_f(x)}{2\pi},\qquad
+f_g(x)=\frac{\dot\Theta_g(x)}{2\pi}.
+\]
+On the interval \([a,b]\) define the cycle counts
+\[
+N_f=\int_a^b f_f(x)\,dx,\qquad
+N_g=\int_a^b f_g(x)\,dx,
+\]
+and the interval-averaged periods
+\[
+T_f^{[a,b]}=\frac{b-a}{N_f},\qquad
+T_g^{[a,b]}=\frac{b-a}{N_g}.
+\]
+
+\begin{definition}[Frequency-difference and interval period-difference densities]
+\label{def:dyn_period_difference_density}
+Call
+\[
+\Delta_{f,g}(x)=f_g(x)-f_f(x)
+\]
+the \textbf{frequency-difference density} of \(f,g\), and
+\[
+D_{f,g}(x;a,b)=\frac{b-a}{N_fN_g}\Delta_{f,g}(x)
+\]
+the \textbf{period-difference density} of \(f,g\) on the interval \([a,b]\).
+\end{definition}
+
+\begin{proposition}[Integral over an interval]
+\label{prop:dyn_period_difference_integral}
+For any interval \([a,b]\),
+\[
+\int_a^b D_{f,g}(x;a,b)\,dx
+=(b-a)\left(\frac1{N_f}-\frac1{N_g}\right)
+=T_f^{[a,b]}-T_g^{[a,b]}.
+\]
+\end{proposition}
+
+\begin{proof}
+By the definition of \(D_{f,g}\),
+\[
+\int_a^b D_{f,g}(x;a,b)\,dx
+=\frac{b-a}{N_fN_g}\int_a^b\Delta_{f,g}(x)\,dx
+=\frac{b-a}{N_fN_g}(N_g-N_f),
+\]
+which rearranges to \((b-a)(1/N_f-1/N_g)=T_f^{[a,b]}-T_g^{[a,b]}\).
+\end{proof}
+
+\textbf{The beat-period special case.}
+
+Take the common interval to be one beat period
+\[
+T_{\rm env}=\frac{T_fT_g}{T_f-T_g}.
+\]
+Then \(N_f=T_{\rm env}/T_f\), \(N_g=T_{\rm env}/T_g\) and \(N_g-N_f=1\). The normalisation factor becomes
+\[
+\frac{T_{\rm env}}{N_fN_g}=T_f-T_g,
+\]
+the density becomes
+\[
+D_{f,g}(x)=(T_f-T_g)\bigl(f_g(x)-f_f(x)\bigr),
+\]
+and
+\[
+\int_0^{T_{\rm env}}D_{f,g}(x)\,dx
+=(T_f-T_g)(N_g-N_f)=T_f-T_g.
+\]
+More generally, an interval containing \(m\) beat periods gives \(m(T_f-T_g)\); this is `one period difference accumulated per beat'.
+
+\textbf{The role of the envelope.} In the narrowband/two-tone case the envelope \(|z_f+z_g|\) has period exactly \(T_{\rm env}\), marking the interval over which the phase difference completes \(2\pi\) (\cref{def:dyn_envelope}, \cref{prop:dyn_envelope_beat}). The envelope supplies the integration domain/clock; the local frequency (phase) supplies the pointwise density. The envelope alone does not give \(D_{f,g}(x)\), and the phase alone does not give the simple beat scale, but \(T_{\rm env}\) can be computed from \(T_f,T_g\).
+
+\begin{example}[Pure-tone check]
+\label{ex:dyn_period_difference_pure_tone}
+For \(f=\cos(2\pi x/T_f)\) and \(g=\cos(2\pi x/T_g)\), \(f_f=1/T_f\) and \(f_g=1/T_g\), so
+\[
+D_{f,g}(x)=\frac{(T_f-T_g)^2}{T_fT_g}
+\]
+is constant; over \(T_{\rm env}=T_fT_g/(T_f-T_g)\),
+\[
+\frac{(T_f-T_g)^2}{T_fT_g}\cdot\frac{T_fT_g}{T_f-T_g}=T_f-T_g,
+\]
+in agreement with direct subtraction.
+\end{example}
+
+\begin{remark}[Calibration for arbitrary periodic functions]
+\label{rem:dyn_period_density_calibration}
+For signals with rich harmonics or zeros, the winding number of the analytic phase may not be \(1\). In that case replace \(\dot\Theta/(2\pi)\) by a \textbf{calibrated local frequency} \(f_f(x)\) satisfying
+\[
+\int_0^{T_f} f_f(x)\,dx=1.
+\]
+It may be obtained from an STFT ridge, an autocorrelation, or the instantaneous frequency divided by its integral/winding number over one period. After calibration, the integral identities above do not depend on the local details of the analytic phase, only on the total cycle counts.
+\end{remark}
+
+\begin{remark}[Division of labour between the two densities]
+\label{rem:dyn_two_densities}
+\(\Delta_{f,g}\) counts the `extra cycles' and is a dimensionless frequency difference; \(D_{f,g}\) multiplies it by the interval normalisation factor \((b-a)/(N_fN_g)\), so that its integral over \([a,b]\) becomes the interval period difference (on the beat period this factor becomes \(T_f-T_g\)). The envelope supplies the beat clock \(T_{\rm env}\); the phase difference supplies the density. The density \(D(t)=1/L_m-1/L_z\) in the calendar chapter is a calendar instance of \(\Delta_{f,g}\) (used to count intercalary excess); multiplying it by the corresponding interval normalisation factor gives \(D_{f,g}\), which explains the time difference. The period-difference density is therefore not a calendar-specific construction but a general object of the analytic signal.
+\end{remark}
+
+\subsection{Modulation order and commensurability}
+
+\begin{definition}[Modulation order]\label{def:dyn_modulation_order}
+For the two-component signal of \cref{prop:dyn_envelope_beat}(ii), the \textbf{modulation order} is
+\[
+N:=\frac{T_{\text{env}}}{T_c}=\frac{\bar\omega}{\Delta\omega},
+\]
+where $T_c=2\pi/\bar\omega$ is the carrier period.
+\end{definition}
+
+\begin{proposition}[Modulation order and commensurability]\label{prop:dyn_modulation_order}
+For the two-component signal of \cref{prop:dyn_envelope_beat}(ii):
+\begin{enumerate}[label=(\roman*)]
+    \item $\mathcal E$ is periodic if and only if $N\in\mathbb Q$;
+    \item if $N=p/q$ with $p,q$ coprime, then the least positive period of $\mathcal E$ is $mT_{\text{env}}$, where $m$ is a positive integer with $m\mid 2q$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $\mathcal E$ is a sum of two exponentials whose frequency ratio is
+\[
+\frac{\omega_2}{\omega_1}=\frac{2N+1}{2N-1}.
+\]
+Such a sum has period $T>0$ if and only if $\omega_1T,\omega_2T\in2\pi\mathbb Z$, which requires $\omega_1/\omega_2\in\mathbb Q$; conversely, if $\omega_1/\omega_2=r\in\mathbb Q$, then $T=2\pi/\gcd(\omega_1,\omega_2)$ is a period. And $(2N+1)/(2N-1)\in\mathbb Q$ if and only if $N\in\mathbb Q$.
+
+(ii) Take $T_0=qT_{\text{env}}=2\pi q/\Delta\omega$. Then $\bar\omega T_0=2\pi qN=2\pi p$ and $\Delta\omega T_0/2=\pi q$, so by \cref{prop:dyn_envelope_beat}(ii),
+\[
+\mathcal E(t+T_0)=(-1)^q\mathcal E(t).
+\]
+Hence $2T_0=2qT_{\text{env}}$ is a period of $\mathcal E$. Let $P$ be the least positive period of $\mathcal E$. Since $P$ is also a period of $\varrho$, whose least positive period is $T_{\text{env}}$, we have $P=mT_{\text{env}}$ with $m\in\mathbb N^+$. Since $P\mid 2qT_{\text{env}}$, it follows that $m\mid 2q$.
+\end{proof}
+
+\begin{remark}[Interface with intercalation and continued fractions]\label{rem:dyn_envelope_intercalation}
+\cref{prop:dyn_modulation_order} reduces the question `is the two-component signal periodic?' to `is the modulation order $N$ rational?'. The irrationality of $N$ is measured by its continued-fraction convergents $p_j/q_j$: for $N\approx p_j/q_j$ the signal closes approximately after $q_j$ envelope periods, with residual phase error $2\pi q_j|N-p_j/q_j|$, which by the theory of continued fractions does not exceed $2\pi/q_{j+1}$. This is the same type of problem as the approximation of the period ratio $\varrho$ by continued fractions in the chapter `Discrete Sampling, Congruence Angles and Intercalation' (\cref{thm:continued_fraction_best_approx_parallel})---there the ratio of sampling window to signal is approximated, here the ratio of carrier to envelope.
+\end{remark}
+
+\subsection{Interfaces and open problems}
+
+\begin{remark}[Interfaces with other chapters]\label{rem:dyn_envelope_interfaces}
+The envelope recurs under different names in later chapters:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{beats} (\cref{lem:beat_periodic}, \cref{prop:beat_phenomenon}): the modulus envelope of two close frequencies;
+    \item \textbf{leakage envelope} (\cref{thm:leakage_envelope_parallel}): the decay profile of the sidelobes of a window kernel, an envelope in the frequency domain;
+    \item \textbf{analytic signal} (\cref{prop:analytic_signal}): the Hilbert envelope of a real signal;
+    \item \textbf{wave packet} (\cref{ex:dispersive_pulse}): the envelope of a Gaussian pulse travels at the group velocity, and dispersion acts on the envelope rather than on the carrier;
+    \item \textbf{slow--fast systems} (\cref{prop:pdo_enso_separation}): the modulation of the amplitude of a fast oscillation by a slow variable, i.e.\ envelope dynamics;
+    \item \textbf{business cycles}: the modulation of Kitchin-cycle amplitude by the Juglar cycle (chapter `Periodic Structure of Economic Systems').
+\end{enumerate}
+\end{remark}
+
+\begin{remark}[Open problems]\label{rem:dyn_envelope_open}
+\begin{enumerate}[label=(\alph*)]
+    \item \textbf{Uniqueness of the multi-component envelope}: when $\mathcal E$ contains several incommensurate difference frequencies, $\varrho$ is quasi-periodic; how should its `envelope of the envelope' be defined, and is there a unique two-scale decomposition?
+    \item \textbf{Error bounds for envelope extraction}: how can the discrepancy between the Hilbert envelope, the peak envelope and the modulus envelope of \cref{def:dyn_envelope} be quantified under finite sampling?
+    \item \textbf{Categorical description}: can the envelope, as a functor of $U(1)$-invariants, be incorporated into the framework of the chapter `Periodic Category'?
+\end{enumerate}
 \end{remark}
 
 \section{Three dynamic epicycle groups}
@@ -1757,6 +2078,8 @@ The core logic of this chapter may be summarised in the following three steps:
     \item \textbf{Projection}: the observer functor $\Pi_O$ projects the composite vector to the observable scalar $\mathcal O=\Pi_O(X)$.
     \item \textbf{Reconstruction}: the reconstruction functor $\Pi_O^\ast$ back-projects the observable scalar to an estimate $\widehat X=\Pi_O^\ast(\mathcal O)$ in the source space. By the adjunction, $\Pi_O\dashv\Pi_O^\ast$, with the counit the identity and the unit not an isomorphism---this formalises the core fact that `observation is information loss'.
 \end{enumerate}
+The envelope $\varrho=|\mathcal E|$ is the invariant of the composite object under the common phase rotation (\cref{def:dyn_envelope}, \cref{prop:dyn_envelope_sup}): it separates the `fast phase' from the `slow amplitude' and is an intermediate object lying before the projection.
+
 The discrete unitary dynamic projection provides the interface under time discretisation; scale-dependent sampling theory gives the relation between spatial resolution and distance; and information loss with distance is the natural corollary of the two within the observer projection framework.
 \end{remark}
 
@@ -1769,12 +2092,12 @@ The discrete unitary dynamic projection provides the interface under time discre
 Theme & Corresponding content in this chapter \\
 \midrule
 Translation & Dynamic adjustment of the observer vector (\cref{def:dyn_observer}); translation of the rotation angles of the three planes and the three sphere groups (\cref{def:dyn_rotating_planes}, \cref{def:dyn_rotating_quaternion_groups}) \\
-Scaling & The weight introduced by the observer modulus (\cref{lem:dyn_triple_weight}); preservation of the quaternion norm (\cref{prop:dyn_quaternion_rotation_norm}); scale covariance of the sampling functions (\cref{prop:dyn_sampling_properties}) \\
+Scaling & The weight introduced by the observer modulus (\cref{lem:dyn_triple_weight}); slow amplitude modulation of the envelope (\cref{def:dyn_envelope}, \cref{prop:dyn_envelope_beat}); preservation of the quaternion norm (\cref{prop:dyn_quaternion_rotation_norm}); scale covariance of the sampling functions (\cref{prop:dyn_sampling_properties}) \\
 Rotation & Independent rotation of the three planes (\cref{def:dyn_rotating_planes}); independent rotation of the three sphere groups (\cref{def:dyn_rotating_quaternion_groups}); non-commutative quaternion rotation (\cref{thm:dyn_quaternion_noncommutative}) \\
 Balance & Linearity of the projection (\cref{prop:dyn_projection_linearity}); additivity of synthesis--projection (\cref{prop:dyn_triple_additivity}); scale invariance of the sampling duration (\cref{prop:dyn_sampling_duration_invariance}) \\
 Symmetry & Symmetry of the projection (\cref{prop:dyn_projection_symmetry}); symmetry of the quaternion inner product (\cref{lem:dyn_quaternion_inner_symmetry}); commutativity under the additive convention (\cref{cor:dyn_quaternion_additive_commutative}) \\
 Closure & Invariance under synchronous rotation of the three planes (\cref{thm:dyn_sync_invariance}); invariance under synchronous rotation of the three sphere groups (\cref{thm:dyn_quaternion_sync_invariance}); adjunction closure of the observer functor (\cref{thm:dyn_observer_adjunction}) \\
-Period & Instantaneous frequency of the dynamic projection (\cref{thm:dyn_projection_continuity}); single-frequency frequency shift (\cref{cor:dyn_doppler}); three-group beat frequency (\cref{cor:dyn_triple_beat}); discrete periodicity condition (\cref{thm:dyn_discrete_period_condition}); resolution of the sampling orbit (\cref{thm:dyn_sampling_resolution}) \\
+Period & Instantaneous frequency of the dynamic projection (\cref{thm:dyn_projection_continuity}); single-frequency frequency shift (\cref{cor:dyn_doppler}); three-group beat frequency (\cref{cor:dyn_triple_beat}); envelope period and modulation order (\cref{thm:dyn_envelope_difference}, \cref{prop:dyn_modulation_order}); discrete periodicity condition (\cref{thm:dyn_discrete_period_condition}); resolution of the sampling orbit (\cref{thm:dyn_sampling_resolution}) \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1999,5 +2322,11 @@ Period & Instantaneous frequency of the dynamic projection (\cref{thm:dyn_projec
         \item what observation result the projection $\Pi_O(X)=\operatorname{Re}[X\overline{O}]$ gives;
         \item how the reconstruction functor $\Pi_O^\ast$ back-projects from the observation result.
     \end{enumerate}
+
+    \item Prove the difference-frequency expansion of Theorem \ref{thm:dyn_envelope_difference},
+    and for $K=3$, $\omega_k=k\omega_0$, $A_k=1$, $\phi_k=0$ compute the least positive period $T_{\text{env}}$ of the envelope $\varrho$,
+    showing that it equals the carrier period $2\pi/\omega_0$.
+    Then, for the two-component case $\omega_1=\omega_0$, $\omega_2=2\omega_0$, compute the modulation order $N$
+    and use Proposition \ref{prop:dyn_modulation_order} to verify that the least positive period of the composite signal is $T_{\text{env}}$.
 \end{enumerate}
 

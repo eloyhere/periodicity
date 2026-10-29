@@ -218,14 +218,14 @@ Let the output of a calendar target be a finite periodic sequence of period \(N\
 (iii) For the solar-term sequence \(N=24\), the fundamental frequency corresponds to the annual period, the harmonic \(k=2\) to the semi-annual period, the harmonic \(k=4\) to the seasonal period and the harmonic \(k=12\) to the monthly period.
 \end{proof}
 
-\begin{definition}[Symbolic epoch year and Jiayin epoch year of the Xuanyuan calendar]\label{def:xuanyuan_epoch}
-The Xuanyuan calendar takes the Yellow Emperor era as the origin of its year count. Let the \textbf{symbolic epoch year} be the year \(2697\) BCE, which is a Jiazi year (sexagenary index \(10\)). Throughout, astronomical year numbering is used:
+\begin{definition}[Nominal epoch year and actual epoch year of the Xuanyuan calendar]\label{def:xuanyuan_epoch}
+The Xuanyuan calendar takes the Yellow Emperor era as the origin of its year count. Let the \textbf{nominal epoch year} be the year \(2697\) BCE, which is a Jiazi year (sexagenary index \(10\)). Throughout, astronomical year numbering is used:
 \[
-Y_0=-2697.
+Y_0=-2696.
 \]
-The sexagenary index of Jiayin is \(0\), so the \textbf{Jiayin epoch year} is
+The sexagenary index of Jiayin is \(0\), so the \textbf{actual epoch year} is
 \[
--2697+50=-2647\quad(\text{astronomical year numbering}),
+-2696+50=-2646\quad(\text{astronomical year numbering}),
 \]
 corresponding to the year \(2647\) BCE (a Jiayin year).
 \end{definition}
@@ -484,7 +484,7 @@ The recommended order for an actual diagnosis is: first decide whether the calen
 \subsection{Absolute sequence and relative sequence}
 
 \begin{definition}[Absolute sequence]\label{def:absolute_sequence}
-An \textbf{absolute sequence} is the continuous index of a calendar unit counted from the epoch year of the Xuanyuan calendar. Let the astronomical year number of the epoch year be \(Y_0=-2697\) (the historical year \(2697\) BCE, a Jiazi year). For any calendar unit \(U\), its \textbf{absolute sequence} \(S_{\text{abs}}(U)\) is defined as the continuous numbering of that unit counted from the epoch year.
+An \textbf{absolute sequence} is the continuous index of a calendar unit counted from the epoch year of the Xuanyuan calendar. Let the astronomical year number of the nominal epoch year be \(Y_0=-2696\) (the historical year \(2697\) BCE, a Jiazi year). For any calendar unit \(U\), its \textbf{absolute sequence} \(S_{\text{abs}}(U)\) is defined as the continuous numbering of that unit counted from the epoch year.
 
 The absolute sequence has the following properties:
 \begin{enumerate}[label=(\roman*)]
@@ -977,6 +977,224 @@ If within a synodic month there is only a solar term and no mid-qi, then that mo
 The first sentence is the criterion for an intercalary month of \cref{prop:wuzhongqi_run}, whose mechanism was given in the proof of that proposition (a month without a mid-qi occurs when the interval between adjacent mid-qi exceeds the fixed length of the synodic month). The second sentence explains the purpose of intercalation: by \cref{def:jieqi_zhongqi_dingyue}, the synodic month containing Lichun and Yushui is the first month (the Tiger month); intercalation by absence of a mid-term guarantees that the first month always contains Lichun, so that the deviation of the beginning of the year from Lichun does not exceed the order of one synodic month, and the beginning of the year therefore always lies around Lichun.
 \end{proof}
 
+\subsection{Algorithm 1: continued-fraction intercalation}
+\label{subsec:continued_fraction_intercalation_algorithm}
+
+Algorithm 1 is the \textbf{number-theoretic/mean} route: it uses only the mean period ratio
+\[
+\rho=\frac{T_{\text{trop}}}{T_{\text{syn}}},
+\]
+and reads no specific new-moon or mid-qi instant. Its input is \(\rho\) together with a window or tolerance; its output is an intercalation sequence (or a count per window), not `which specific month is intercalary'.
+
+\begin{enumerate}[label=\textbf{Step \arabic*.}, leftmargin=*]
+    \item Compute the continued-fraction convergents \(p_j/q_j\) of \(\rho\) (\cref{thm:calendar_continued_fraction_best}).
+    \item Choose the smallest window \(q_j\) with \(1/q_{j+1}<\varepsilon\), or take a prescribed window \(M\).
+    \item Generate the balanced intercalation sequence
+    \[
+    N_m=\operatorname{round}((m+1)\rho)-\operatorname{round}(m\rho),
+    \qquad m=0,\dots,M-1,
+    \]
+    or use upper/lower intercalation (\cref{thm:calendar_intercalation_error_bound}).
+    \item Output the intercalary positions/count and the cumulative error
+    \[
+    E_M=\sum_{m=0}^{M-1}N_m-M\rho.
+    \]
+\end{enumerate}
+
+\textbf{Guarantee}: at a convergent window \(M=q_j\), \(|E_M|<1/q_{j+1}\) (\cref{thm:calendar_continued_fraction_best}); balanced intercalation has \(|E_M|\le1/2\) for every \(M\) (\cref{thm:calendar_intercalation_error_bound}). For \(\rho=12.36827\), \(q=19,p=235\): seven intercalary months in nineteen years, \(\delta_{19}=0.00295\).
+
+\textbf{Complexity}: \(O(\log M)\) for the continued fraction and \(O(M)\) for the sequence.
+
+\textbf{Limitation}: Algorithm 1 gives a count/mean rhythm, not a specific month; to obtain a month one still needs a convention mapping the sequence to month positions. Algorithm 2 solves that problem, but it is not a discretisation of Algorithm 1: it is an independent second route.
+
+\subsection{Algorithm 2: exact event-driven intercalation}
+\label{subsec:exact_intercalation_algorithm}
+
+Algorithm 2 is the \textbf{event/astronomical} route, independent of Algorithm 1: it uses neither \(\rho\), nor continued-fraction convergents, nor mean periods; it uses only the exact new-moon sequence \(n_i\) and mid-qi sequence \(z_j\). Its input is the two event sequences and its output is the specific intercalary month. The definitions, proposition and validation tables below give the full specification of Algorithm 2.
+
+\textbf{Exact month intervals and mid-qi counts.}
+
+\begin{definition}[Exact month intervals and mid-qi counts]
+\label{def:exact_month_term_count}
+Let \(n_i\) be the Julian day number of the \(i\)-th new moon and \(z_j\) that of the \(j\)-th mid-qi. Take the day boundary of the new-moon day, \(s_i=\lfloor n_i\rfloor\), as the beginning of the month:
+\[
+s_i=\lfloor n_i\rfloor,\qquad I_i=[s_i,s_{i+1}).
+\]
+Call
+\[
+c_i=\#\{j: s_i\le z_j<s_{i+1}\}
+\]
+the \textbf{mid-qi count} of the \(i\)-th synodic month.
+\end{definition}
+
+\begin{remark}[The day-boundary convention]
+\label{rem:exact_day_boundary}
+A traditional calendar begins the month on the day of the new moon, not at the exact instant of the new moon. If the exact instant \(n_i\) is used as the month boundary, a mid-qi falling within a few hours of the new moon is assigned to the neighbouring month, which produces many boundary errors. With \(s_i=\lfloor n_i\rfloor\) the decision agrees with the calendar labels. Table \ref{tab:exact_intercalation_comparison} gives the quantitative comparison: on the same worksheet, the exact-instant per-month rule has \(272\) mismatches, the day-boundary per-month rule \(48\), and the day-boundary plus year-boundary rule \(0\).
+\end{remark}
+
+\textbf{Winter-solstice years.}
+
+\begin{definition}[Winter-solstice year and mid-qi count]
+\label{def:winter_solstice_year}
+Let \(w_y\) be the Julian day number of the \(y\)-th winter solstice and \(m_y\) the index of the synodic month containing \(w_y\):
+\[
+s_{m_y}\le w_y<s_{m_y+1}.
+\]
+Call
+\[
+Y_y=\{m_y,m_y+1,\dots,m_{y+1}-1\}
+\]
+the \(y\)-th \textbf{winter-solstice year}, and write
+\[
+C_y=\#\{j: w_y\le z_j<w_{y+1}\}.
+\]
+\end{definition}
+
+\textbf{The exact decision.}
+
+\begin{definition}[Exact intercalation by absence of a mid-term]
+\label{def:exact_wuzhongqi_decision}
+For the \(y\)-th winter-solstice year:
+\begin{enumerate}[label=(\roman*)]
+    \item if \(|Y_y|=12\), the year has no intercalary month;
+    \item if \(|Y_y|=13\), the first month in \(Y_y\) with \(c_i=0\) is intercalary;
+    \item if \(|Y_y|\notin\{12,13\}\) or \(C_y\ne12\), flag the year for review and do not decide.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Structure of the exact decision]
+\label{prop:exact_wuzhongqi_consistency}
+Under the day-boundary convention, if \(C_y=12\), then:
+\begin{enumerate}[label=(\roman*)]
+    \item if \(|Y_y|=13\), at least one month satisfies \(c_i=0\);
+    \item if \(|Y_y|=12\), the year has no intercalary month;
+    \item hence `a 13-month year takes the first month without a mid-qi, while a 12-month year has none' is consistent with the rule of intercalation by absence of a mid-term.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) By the pigeonhole principle, \(12\) mid-qi placed in \(13\) months leave at least one month without a mid-qi. (ii) An intercalary month occurs only in a 13-month year; this is the year-length convention of intercalation by absence of a mid-term, and a 12-month year has no intercalary month. (iii) follows directly from (i) and (ii).
+\end{proof}
+
+\begin{remark}[Principal mid-qi and secondary solar-term/mid-qi: a column that must be read]
+\label{rem:main_secondary_terms}
+Each monthly record of the \textit{Shouxing} compilation contains three solar-term columns: \textbf{principal solar term}, \textbf{principal mid-qi} and \textbf{secondary solar-term/mid-qi}. When a synodic month contains two solar terms or two mid-qi, the second is recorded in the secondary column. If only the principal mid-qi column is read, a month containing two mid-qi loses one, so the winter-solstice year has only \(11\) or \(10\) mid-qi and a normal month is misclassified as intercalary. Reading the secondary column as well, and retaining only the twelve mid-qi names, restores \(12\) mid-qi per winter-solstice year; all \(290{,}654\) months then agree with the labels. This is not a data error but a question of completeness of the data model.
+\end{remark}
+
+\textbf{The algorithm.}
+
+\begin{enumerate}[label=\textbf{Step \arabic*.}, leftmargin=*]
+    \item Read the new moons \(n_i\), the month-name labels, the principal mid-qi (columns \(9/10\)) and the secondary solar-term/mid-qi (columns \(11/12\)) from every worksheet; keep only the twelve mid-qi names and deduplicate by Julian day number.
+    \item Set \(s_i=\lfloor n_i\rfloor\) and assign each mid-qi to its month by binary search:
+    \[
+    k_j=\max\{k: s_k\le z_j\},
+    \]
+    obtaining \(c_i=\#\{j:k_j=i\}\).
+    \item Take the winter solstices \(w_y\), locate \(m_y\), and form the winter-solstice years \(Y_y\).
+    \item If \(|Y_y|=13\), mark the first month in \(Y_y\) with \(c_i=0\) as intercalary; if \(|Y_y|=12\), mark none.
+    \item Compare with the `run' (intercalary) label in the month name; output mismatching months and years flagged for review.
+\end{enumerate}
+
+Complexity: sorting \(O(N\log N)\), assignment \(O((N+M)\log N)\), year boundaries \(O(N)\); with \(N=290{,}654\) and \(M=282{,}000\), this takes seconds on an ordinary machine (apart from parsing the workbook).
+
+\begin{table}[htbp]
+\centering
+\caption{Validation of the exact intercalation algorithm on the \textit{Shouxing} compilation (24 worksheets).}
+\label{tab:exact_intercalation_validation}
+\begin{tabular}{lr}
+\toprule
+Item & Value \\
+\midrule
+Synodic months & \(290{,}654\) \\
+Principal/secondary mid-qi records (including boundary duplicates) & \(282{,}000\) \\
+Intercalary-month labels & \(8{,}654\) \\
+Winter-solstice years & \(23{,}499\) \\
+of which 12-month years & \(14{,}845\) \\
+of which 13-month years & \(8{,}654\) \\
+Months without mid-qi in 13-month years & \(8{,}654\) (one per year) \\
+Predicted intercalary months & \(8{,}654\) \\
+Mismatches & \(0\) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Stepwise improvement on the first worksheet (\(12{,}368\) months); all three rows read the principal mid-qi column only. The first two rows use no year boundary; the third uses the winter-solstice year. The all-table result after also reading the secondary column is Table \ref{tab:exact_intercalation_validation}.}
+\label{tab:exact_intercalation_comparison}
+\begin{tabular}{@{}p{9.6cm}r@{}}
+\toprule
+Method & Mismatches \\
+\midrule
+Exact instants, per-month absence of a mid-qi & \(272\) \\
+Day boundary, per-month absence of a mid-qi & \(48\) \\
+Day boundary \(+\) winter-solstice year, first month without a mid-qi & \(0\) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+On the full table, the day-boundary plus winter-solstice-year rule with the principal mid-qi column alone still has \(160\) false positives; reading the secondary column reduces this to \(0\). All \(160\) false positives come from months that contain two mid-qi, the second recorded in the secondary column; once that column is read, every winter-solstice year is restored to \(12\) mid-qi and the false positives disappear.
+
+\begin{remark}[Relation to the mean period density]
+\label{rem:exact_vs_mean_density}
+The mean model replaces the month length and the mid-qi interval by \(T_{\text{syn}}\) and \(T_{\text{trop}}/12\), and gives the \textbf{mean rhythm} of one intercalary month every \(2.715\) years, or seven in nineteen years. With exact data the local density should be written as
+\[
+D(t)=\frac{1}{L_m(t)}-\frac{1}{L_z(t)},
+\]
+where \(L_m^{(i)}=n_{i+1}-n_i\) and \(L_z^{(j)}=z_{j+1}-z_j\) are the exact local intervals. This is a calendar instance of the frequency-difference density \(\Delta_{f,g}\) in \cref{def:dyn_period_difference_density} (with \(f\) the mid-qi interval and \(g\) the synodic month); multiplying it by the interval normalisation factor \((b-a)/(N_fN_g)\) (which becomes \(T_f-T_g\) on the beat period) gives the period-difference density \(D_{f,g}\), whose integral over one beat is the time difference. Hence
+\[
+\int_{s_i}^{s_{i+1}}D(t)\,dt
+=1-\frac{L_m^{(i)}}{L_z^{(i)}}.
+\]
+\(D(t)\) is an explanatory quantity: it shows why a month `swallows' or `loses' a mid-qi; but the \textbf{decision} for an intercalary month uses the event count \(c_i\), not a density threshold. The mean density remains a tool for the long-term average and for prediction.
+\end{remark}
+
+\begin{remark}[Relation to the discrete-sampling chapter]
+\label{rem:exact_intercalation_sampling}
+Seven intercalary months in nineteen years is the continued-fraction approximation to \(\rho=T_{\text{trop}}/T_{\text{syn}}\) (\cref{ch18_metonic_cycle}, \cref{thm:calendar_continued_fraction_best}), but Algorithm 2 is not a discretisation of that approximation: it executes the event rule of intercalation by absence of a mid-term directly, without passing through \(\rho\) or continued fractions. \cref{thm:calendar_sampling_unification_parallel} identifies calendar intercalation and sampling intercalation as the same mathematical object; Algorithm 2 is the independent realisation of that isomorphism at the level of new-moon and mid-qi events: the intercalary-month decision is equivalent to a discrete check of congruence-angle closure.
+\end{remark}
+
+\begin{remark}[Scope of the validation]
+\label{rem:exact_intercalation_scope}
+The zero mismatch is an \textbf{empirical validation} on the \textit{Shouxing} compilation, not a theorem about every calendar. Historical calendar reforms, time-zone conventions, ephemeris accuracy and the definition of the day boundary may change the attribution of individual months; when changing the data set, calibrate the day boundary and the mid-qi table before running the algorithm. The algorithm itself depends only on `event sequence \(+\) winter-solstice year \(+\) mid-qi count', not on mean periods.
+\end{remark}
+
+\subsection{Independence and comparison of the two algorithms}
+\label{subsec:two_intercalation_algorithms_comparison}
+
+Algorithms 1 and 2 are two independent routes, not approximations or special cases of one another:
+
+\begin{itemize}
+    \item Algorithm 1 takes the mean period ratio \(\rho\) as input, uses continued-fraction convergents and a balanced sequence, and outputs a count/mean rhythm; it knows nothing about specific new moons or mid-qi.
+    \item Algorithm 2 takes the exact event sequences as input, uses the winter-solstice year and mid-qi counts, and outputs the specific intercalary month; it uses neither \(\rho\) nor continued fractions.
+\end{itemize}
+
+They can cross-check each other: Algorithm 1 gives the long-term count (for example seven in nineteen years), Algorithm 2 gives the specific month; with complete data, the mean rhythm of Algorithm 1 should agree with the statistics of Algorithm 2. The Metonic example is a \textbf{consistency check} of the two, not a derivation of Algorithm 2.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Comparison of the two intercalation algorithms.}
+\label{tab:two_intercalation_algorithms}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{4.9cm}>{\raggedright\arraybackslash}p{4.9cm}@{}}
+\toprule
+Item & Algorithm 1: continued fraction & Algorithm 2: exact events \\
+\midrule
+Input & \(\rho=T_{\text{trop}}/T_{\text{syn}}\), window/tolerance & new-moon \(n_i\) and mid-qi \(z_j\) event sequences \\
+Core & continued-fraction convergents, balanced sequence & winter-solstice year, first month without mid-qi \\
+Output & intercalation sequence/count & specific intercalary month \\
+Dependence & mean period ratio & exact events, day boundary \\
+Accuracy & \(|E_M|<1/q_{j+1}\) (convergent window) & zero mismatch for complete data \\
+Complexity & \(O(\log M+M)\) & \(O((N+M)\log N)\) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{remark}[Independence]
+\label{rem:two_algorithms_independent}
+Algorithm 2 is not an `implementation' of Algorithm 1 on finite data: the continued-fraction convergents, the windows \(q_j\) and the period ratio \(\rho\) of Algorithm 1 appear neither in the input nor in the steps of Algorithm 2; the winter-solstice year, the mid-qi counts and the day boundary of Algorithm 2 appear nowhere in Algorithm 1. The two meet only at the calendar rule of `intercalation by absence of a mid-term': Algorithm 1 approximates that rule through the mean period ratio, while Algorithm 2 executes it exactly through event counts. Algorithm 2 can therefore stand as a second algorithm independent of continued-fraction intercalation, for exact data; Algorithm 1 remains the tool for mean rhythm, window selection and prediction.
+\end{remark}
+
 \section{The periodic structure of the lunisolar calendar}
 \label{sec:lunisolar_structure}
 
@@ -1048,7 +1266,7 @@ One Bu is \(1520\) years \(=76\times 20\). \(1520\bmod 60=20\)---on passing thro
 \end{definition}
 
 \begin{theorem}[Theorem on the sexagenary shift over one Bu]\label{thm:yibu_ganzhi_shift}
-After \(k\) Bu the sexagenary index is \(S_k=S_0+20k\pmod{60}\). For \(k=3\) the sexagenary sign is restored. Within one Bu the sexagenary sign advances by \(+20\), cycling through the three pillars Jiayin, Jiaxu and Jiawu; the Jia pillars appearing in the epoch sequence are Jiazi (symbolising the epoch starting point), Jiayin, Jiaxu and Jiawu.
+After \(k\) Bu the sexagenary index is \(S_k=S_0+20k\pmod{60}\). For \(k=3\) the sexagenary sign is restored. Within one Bu the sexagenary sign advances by \(+20\), cycling through the three pillars Jiayin, Jiaxu and Jiawu; the Jia pillars appearing in the epoch sequence are Jiazi (the nominal epoch starting point), Jiayin, Jiaxu and Jiawu.
 \end{theorem}
 
 \begin{proof}
@@ -1059,27 +1277,27 @@ After \(k\) Bu the sexagenary index is \(S_k=S_0+20k\pmod{60}\). For \(k=3\) the
 \label{sec:xuanyuan_epoch}
 
 \begin{proposition}[Determination of the sexagenary sign at the end of the first Bu]\label{prop:first_yibu_ganzhi}
-Starting from the Jiayin epoch year (\(-2647\)) and passing through one Bu, we reach the first conclusion: \(-2647+1520=-1127\). The sexagenary index is \(0+20=20\) (Jiaxu). The year \(1127\) BCE (a Jiaxu year).
+Starting from the actual epoch year (\(-2646\)) and passing through one Bu, we reach the first conclusion: \(-2646+1520=-1126\). The sexagenary index is \(0+20=20\) (Jiaxu). The year \(1127\) BCE (a Jiaxu year).
 \end{proposition}
 
 \begin{proof}
-By \cref{def:xuanyuan_epoch}, the Jiayin epoch year is \(-2647\) (sexagenary index \(0\)); by \cref{def:yibu}, one Bu is \(1520\) years and the sexagenary sign advances by \(20\) places per Bu (\(1520\bmod 60=20\), see \cref{thm:yibu_ganzhi_shift}). Hence the astronomical year number of the first conclusion is \(-2647+1520=-1127\), and its sexagenary index is \(0+20=20\pmod{60}\). By the order of the sexagenary cycle (Jiayin \(=0\)), index \(20\) corresponds to Jiaxu.
+By \cref{def:xuanyuan_epoch}, the actual epoch year is \(-2646\) (sexagenary index \(0\)); by \cref{def:yibu}, one Bu is \(1520\) years and the sexagenary sign advances by \(20\) places per Bu (\(1520\bmod 60=20\), see \cref{thm:yibu_ganzhi_shift}). Hence the astronomical year number of the first conclusion is \(-2646+1520=-1126\), and its sexagenary index is \(0+20=20\pmod{60}\). By the order of the sexagenary cycle (Jiayin \(=0\)), index \(20\) corresponds to Jiaxu.
 \end{proof}
 
-\begin{proposition}[Determination of the sexagenary sign at the end of the second Bu and the Common Era correction]\label{prop:second_yibu_correction}
-Astronomical year number of the end point: \(-1127+1520=393\). Historical year number: \(393+1=394\). Sexagenary index \(20+20=40\) (Jiawu). The year \(394\) CE (a Jiawu year).
+\begin{proposition}[Determination of the sexagenary sign at the end of the second Bu]\label{prop:second_yibu_correction}
+Astronomical year number of the end point: \(-1126+1520=394\). Historical year number: \(394\). Sexagenary index \(20+20=40\) (Jiawu). The year \(394\) CE (a Jiawu year).
 \end{proposition}
 
 \begin{proof}
-The first conclusion is \(-1127\) (\cref{prop:first_yibu_ganzhi}); passing through one more Bu gives the astronomical year number of the second conclusion, \(-1127+1520=393\). Since \(393\ge 1\) and the Common Era boundary has been crossed, by \cref{thm:cross_era_correction} (taking the case \(P\ge m\)) the historical year number requires a \(+1\) correction, giving \(393+1=394\), that is, the year \(394\) CE. By \cref{thm:yibu_ganzhi_shift} the sexagenary index advances a further \(20\) places: \(20+20=40\), corresponding to Jiawu.
+The first conclusion is \(-1126\) (\cref{prop:first_yibu_ganzhi}); passing through one more Bu gives the astronomical year number of the second conclusion, \(-1126+1520=394\). Astronomical year \(394\ge 1\) is the year \(394\) CE; no further \(+1\) is applied, because the conversion for the absence of a year \(0\) is already contained in the definition \(Y_{\text{ast}}=-(m-1)\) (\cref{def:astronomical_year_numbering}), and a second \(+1\) would add one year. By \cref{thm:yibu_ganzhi_shift} the sexagenary index advances a further \(20\) places: \(20+20=40\), corresponding to Jiawu.
 \end{proof}
 
 \begin{proposition}[Determination of the sexagenary sign at the end of the third Bu]\label{prop:third_yibu_ganzhi}
-Astronomical year number of the end point: \(393+1520=1913\). Historical year number: \(1913+1=1914\). Sexagenary index \(40+20=60\equiv 0\) (Jiayin). The year \(1914\) CE (a Jiayin year, the third year of the Republic).
+Astronomical year number of the end point: \(394+1520=1914\). Historical year number: \(1914\). Sexagenary index \(40+20=60\equiv 0\) (Jiayin). The year \(1914\) CE (a Jiayin year, the third year of the Republic).
 \end{proposition}
 
 \begin{proof}
-The second conclusion is the astronomical year \(393\) (\cref{prop:second_yibu_correction}); passing through one more Bu gives the astronomical year number of the third conclusion, \(393+1520=1913\); by the \(+1\) correction of \cref{thm:cross_era_correction}, the historical year is \(1913+1=1914\). The sexagenary index advances a further \(20\) places: \(40+20=60\equiv 0\pmod{60}\), corresponding to Jiayin (Jiayin \(=0\), Jiazi \(=10\)).
+The second conclusion is the astronomical year \(394\) (\cref{prop:second_yibu_correction}); passing through one more Bu gives the astronomical year number of the third conclusion, \(394+1520=1914\); astronomical year \(1914\) is the historical year \(1914\), with no further \(+1\). The sexagenary index advances a further \(20\) places: \(40+20=60\equiv 0\pmod{60}\), corresponding to Jiayin (Jiayin \(=0\), Jiazi \(=10\)).
 \end{proof}
 
 \begin{theorem}[Completeness of the epoch sequence of the Xuanyuan calendar]\label{thm:xuanyuan_complete_sequence}
@@ -1088,11 +1306,11 @@ The second conclusion is the astronomical year \(393\) (\cref{prop:second_yibu_c
 \toprule
 Epoch order & Astronomical year & Historical year & Sexagenary sign & Remark \\
 \midrule
-Starting point & \(-2697\) & \(2697\) BCE & Jiazi & Yellow Emperor era hypothesis \\
-Jiayin epoch & \(-2647\) & \(2647\) BCE & Jiayin & the 50th year after Jiazi \\
-First conclusion & \(-1127\) & \(1127\) BCE & Jiaxu & does not cross the Common Era \\
-Second conclusion & \(393\) & \(394\) & Jiawu & crosses the Common Era, \(+1\) correction \\
-Third conclusion & \(1913\) & \(1914\) & Jiayin & third year of the Republic \\
+Nominal epoch & \(-2696\) & \(2697\) BCE & Jiazi & Yellow Emperor era hypothesis \\
+Actual epoch & \(-2646\) & \(2647\) BCE & Jiayin & the 50th year after the nominal epoch \\
+First conclusion & \(-1126\) & \(1127\) BCE & Jiaxu & does not cross the Common Era \\
+Second conclusion & \(394\) & \(394\) & Jiawu & no \(+1\) correction \\
+Third conclusion & \(1914\) & \(1914\) & Jiayin & third year of the Republic \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1104,7 +1322,7 @@ By \cref{prop:first_yibu_ganzhi}, \cref{prop:second_yibu_correction} and \cref{p
 \end{proof}
 
 \begin{remark}[Difference between astronomical and historical year numbering]\label{rem:calendar_year_difference}
-From the second conclusion onwards, astronomical and historical year numbering differ by \(1\): the astronomical year \(393\) corresponds to the historical year \(394\). This difference arises because astronomical year numbering includes the year \(0\), whilst historical year numbering has no year \(0\).
+Astronomical and historical year numbering differ only for BCE: an astronomical year \(a\le 0\) corresponds to the year \(1-a\) BCE, whilst \(a\ge 1\) is the year \(a\) CE. The earlier \(+1\) at the second and third conclusions counted the absence of a year \(0\) twice; this edition removes that extra correction.
 \end{remark}
 
 \section{The nested periodic system of the *Huangji Jingshi*}

@@ -62,7 +62,7 @@
 │   ├── compile.bat  clean.bat                  # 编译 / 清理脚本
 │   └── Periodicity Mathematics British English.pdf
 ├── Periodicity Mathematics Chinese Simplified/ # 简体中文版（结构同上）
-├── calendar.xlsx                               # 历法数据
+├── 寿星数据整录——原版.xlsx                   # 历法数据
 ├── 周期数学宣讲.pptx                            # 宣讲幻灯片
 ├── 周期数学·核心理念与应用前景.docx              # 核心理念概述
 ├── 个人简历-周期数学独立研究者.docx              # 作者简历

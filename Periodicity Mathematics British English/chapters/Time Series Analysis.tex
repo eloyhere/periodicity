@@ -13,14 +13,14 @@ This chapter is organised around the following themes: translation---the lag ope
 \begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth, thick, node distance=1.0cm and 0.4cm,
-  stage/.style={draw, rounded corners, align=center, minimum width=2.3cm, minimum height=0.75cm, font=\small, fill=blue!8},
+  stage/.style={draw, rounded corners, align=center, text width=2.4cm, minimum height=0.75cm, font=\small, fill=blue!8},
   arr/.style={-{Stealth[length=2.2mm]}, very thick}]
 \node[stage, fill=blue!12]  (s0) {Original series\\$\{X_t\}$};
 \node[stage, fill=cyan!12, right=of s0] (s1) {Window-function\\smoothing};
-\node[stage, fill=green!12, right=of s1] (s2) {Instantaneous\\limit angle};
+\node[stage, fill=green!12, right=of s1] (s2) {Instan\-taneous\\limit angle};
 \node[stage, fill=teal!12, right=of s2] (s3) {Turning-point\\detection};
 \node[stage, fill=orange!12, right=of s3] (s4) {Refraction rate};
-\node[stage, fill=yellow!16, below=of s0] (s5) {Period determination\\(periodogram)};
+\node[stage, fill=yellow!16, text width=2.8cm, below=of s0] (s5) {Period\\determination\\(periodogram)};
 \node[stage, fill=orange!8, right=of s5] (s6) {Finite harmonic\\regression};
 \node[stage, fill=purple!12, right=of s6] (s7) {Bayesian\\updating};
 \node[stage, fill=red!12, right=of s7] (s8) {Window-function\\validation};
@@ -29,13 +29,15 @@ This chapter is organised around the following themes: translation---the lag ope
 \draw[arr] (s1) -- (s2);
 \draw[arr] (s2) -- (s3);
 \draw[arr] (s3) -- (s4);
-\draw[arr] (s4.south) |- (s5.east);
+\draw[arr] (s4.south) -- ++(0,-0.95cm) -| (s5.north);
 \draw[arr] (s5) -- (s6);
 \draw[arr] (s6) -- (s7);
 \draw[arr] (s7) -- (s8);
 \draw[arr] (s8) -- (s9);
-\draw[arr, dashed, red] (s8.north) to[out=90, in=90] (s1.north);
-\node[align=center, font=\small, text width=0.8\textwidth] at (5,-3.0) {Closed-loop feedback: the result of window-function validation is fed back to the window-function selection of the first step};
+\draw[arr, dashed, red] (s8.north east) -- ++(0.4cm,0) |- ([yshift=0.8cm]s1.north) -| (s1.north);
+\node[align=center, font=\small, text width=0.8\textwidth, anchor=north]
+  at ($(s5.south)!0.5!(s9.south)+(0,-0.45cm)$)
+  {Closed-loop feedback: the result of window-function validation is fed back to the window-function selection of the first step};
 \end{tikzpicture}
 \caption{The complete pipeline of time series analysis: starting from the original series, through smoothing, instantaneous limit angle, turning-point detection, refraction rate, period determination, finite harmonic regression, Bayesian updating and window-function validation to residual diagnosis, where window-function validation feeds back to the first step.}
 \label{fig:ts_workflow}
@@ -726,7 +728,7 @@ The complete algorithmic pipeline is:
 \begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth, thick, node distance=0.9cm and 0.9cm,
-  tstep/.style={draw, rounded corners, align=center, minimum width=2.2cm, minimum height=0.8cm, font=\small, fill=blue!8}]
+  tstep/.style={draw, rounded corners, align=center, text width=2.8cm, minimum height=0.8cm, font=\small, fill=blue!8}]
 \node[tstep, fill=blue!12]  (a) {1. Window-function\\smoothing};
 \node[tstep, fill=cyan!12, right=of a] (b) {2. Instantaneous\\limit angle};
 \node[tstep, fill=green!12, right=of b] (c) {3. Turning-point\\detection};
@@ -792,7 +794,7 @@ where $K_t$ is the Kalman gain. ARMA models can be brought into the Kalman frame
 
 \begin{center}
 \renewcommand{\arraystretch}{1.3}
-\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash\hspace{0pt}}p{2.8cm} >{\raggedright\arraybackslash\hspace{0pt}}X@{}}
 \toprule
 Theme & Corresponding content in this chapter \\
 \midrule
@@ -804,7 +806,7 @@ Symmetry & Cosine symmetry (Lemma \ref{lem:ts_turning_equivalence}); direction r
 Closure & Closed loop of the algorithmic pipeline (Definition \ref{def:ts_algorithm}); white-noise residuals $\mathcal{D}\to 0$ (Proposition \ref{prop:ts_residual_diagnosis}) \\
 Period & Dominant period (Definition \ref{def:ts_period_detection}); Fisher test (Proposition \ref{prop:ts_period_significance}) \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{center}
 
 \section*{Exercises}

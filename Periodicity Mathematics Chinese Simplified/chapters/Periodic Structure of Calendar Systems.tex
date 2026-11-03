@@ -474,6 +474,121 @@ S_M^{\mathrm{floor}}=\sum_{m=0}^{M-1}(\lfloor (m+1)\rho\rfloor-\lfloor m\rho\rfl
 故诊断流程由三章工具链合成。
 \end{proof}
 
+\subsection{基于连分数窗口的自适应频谱估计}
+\label{sec:calendar_leap_spectral}
+
+\texttt{leap.cpp} 的实现把选窗思想落实为从采样数据到周转圆参数的具体流程。其中的历法类比在于协调多个近似整数的周期计数：\texttt{Leap} 选择记录长度，\texttt{Spectral} 估计振荡分量。输入对象为实值信号，而非历法日期序列。该方法为 \cref{thm:calendar_series_reconstruction} 提供频谱数据；应用于天文观测时，还需明确观测量、时间单位及其采样时刻。
+
+\begin{definition}[估计器的输入与周转圆表示]\label{def:calendar_leap_input}
+设 \(x_n=x(n/f_s)\)，\(0\le n<N\)，为均匀采样的实值数据，采样率 \(f_s>0\)。对这一实现，取 \(N\ge64\)、请求分量数 \(K\ge1\)，并要求信号能量为正。一次估计的拟合模型为
+\[
+\widehat x_n=\operatorname{Re}\sum_{j=1}^{\widehat K}
+ A_j e^{i(2\pi f_j n/f_s+\phi_j)},\qquad
+0<f_j<f_s/2,\quad \widehat K\le K;
+\]
+可选的重试允许请求 \(K+1\) 个分量。每个输出 \texttt{Epicycle} 保存 \((A_j,\omega_j,\phi_j)\)，其中 \(\omega_j=2\pi f_j\)，\texttt{Waveform} 计算这些周转圆的复数叠加。结果还记录分析长度、相对残差能量与通过标志。默认选项为 \(\beta=8\) 的 Kaiser 窗、残差阈值 \(10^{-3}\)，并允许一次重试。
+\end{definition}
+
+\paragraph{粗谱分析与插值。}
+先构造对称 Hann 窗并计算
+\[
+h_n=\frac12\left(1-\cos\frac{2\pi n}{N-1}\right),\qquad
+X_k=\sum_{n=0}^{N-1}x_nh_n e^{-2\pi i kn/N}.
+\]
+在正频率半谱中，按幅值递减选取至多 \(K\) 个严格局部极大值，频点间隔至少为 \(\max(2,\lfloor N/100\rfloor)\)。峰值搜索排除直流项及半谱的末端频点。对于选中的频点 \(k\)，记 \(\ell_r=\log(|X_{k+r}|+10^{-300})\)，并取
+\[
+\delta_k=\operatorname{clip}_{[-1/2,1/2]}
+ \frac{\ell_{-1}-\ell_{1}}{2(\ell_{-1}-2\ell_0+\ell_1)},
+\qquad
+\widetilde f_j=(k+\delta_k)\frac{f_s}{N},\qquad w_j=|X_k|.
+\]
+当抛物线拟合的分母在数值上过小时，代码把偏移量设为零。此插值给出 DFT 频点之间的局部估计，并不增加信号本身的分辨能力。
+
+\paragraph{连分数候选与窗口目标函数。}
+令 \(M_{\min}=\max(64,\lfloor N/2\rfloor)\)、\(M_{\max}=N\)。对每个归一化粗估频率 \(\nu_j=\widetilde f_j/f_s\in(0,1/2)\)，\texttt{continuedFraction} 按下式生成收敛子 \(p_r/q_r\)：
+\[
+p_r=a_rp_{r-1}+p_{r-2},\qquad
+q_r=a_rq_{r-1}+q_{r-2},\qquad
+(p_{-2},p_{-1})=(0,1),\quad(q_{-2},q_{-1})=(1,0).
+\]
+其中 \(a_r\) 是当前完全商的整数部分。函数在下一个分母超过 \(N\) 前返回最后接受的收敛子，也可能因迭代达到 \(64\) 次或小数部分低于 \(10^{-12}\) 而停止；它不搜索中间收敛分数。记分量 \(j\) 返回的分母为 \(q_j\)。候选集包含每个 \(q_j\) 在 \([M_{\min},N]\) 内的全部倍数，另加入末尾至多 \(32\) 个严格大于 \(M_{\min}\) 的长度 \(N,N-1,\ldots\)。若 \(M_{\min}=N\)，实现直接返回 \(N\)。
+
+对于候选集 \(\mathcal C\)，实际选择准则为
+\begin{equation}\label{eq:calendar_leap_window_cost}
+\begin{aligned}
+J(M)&=\frac{\sum_j w_j\,d(M\nu_j,\mathbb Z)}{\sum_j w_j},
+& d(u,\mathbb Z)&=\min(\{u\},1-\{u\}),\\
+M_*&\in\underset{M\in\mathcal C}{\operatorname{arg\,min}}J(M).
+\end{aligned}
+\end{equation}
+候选长度按递增顺序遍历，仅当代价严格下降时才替换当前选择，因此精确同分时保留较小长度。这是在有限候选集上对多个频率作加权折中的搜索。单个频率的连分数收敛子不保证全部分量的联合最优性，该搜索也不一定在所有允许的整数长度中最小化 \(J\)。
+
+\begin{proposition}[窗口代价的相位解释]\label{prop:calendar_leap_phase_cost}
+权重为正时，\(0\le J(M)\le1/2\)。对估计复振荡 \(z_j[n]=e^{2\pi i\nu_j n}\)，经过 \(M\) 个采样间隔后，约化到 \([-\pi,\pi]\) 的相位偏差绝对值为 \(2\pi d(M\nu_j,\mathbb Z)\)。因此 \(2\pi J(M)\) 为这些绝对值的加权平均，且 \(J(M)=0\) 当且仅当所有正权重估计分量在该时长内都完成整数个周期。
+\end{proposition}
+\begin{proof}
+写成 \(M\nu_j=m_j+\epsilon_j\)，其中 \(m_j\) 为最近整数，\(|\epsilon_j|\le1/2\)。于是 \(z_j[M]/z_j[0]=e^{2\pi i\epsilon_j}\)，且 \(|\epsilon_j|=d(M\nu_j,\mathbb Z)\)。取加权平均即得各结论。
+\end{proof}
+这里的时长是 \(M/f_s\)，对应 \(M\) 点 DFT 的周期延拓；最后一个记录样本的时刻为 \((M-1)/f_s\)。命题针对估计频率成立，估计误差、噪声及其他振荡仍可能产生泄漏。在 \cref{def:normalised_ratio_parallel} 的周期比记号下，\(\rho_j=f_s/\widetilde f_j=1/\nu_j\)：频率比收敛子的分母充当采样点数，对应于逼近其倒数周期比时的分子。
+
+\paragraph{加窗与逐分量精修。}
+对前 \(M_*\) 个观测施加所选窗函数，重新计算 FFT 与插值峰值。默认 Kaiser 窗为
+\[
+g_n=\frac{I_0\!\left(\beta\sqrt{1-(2n/(M_*-1)-1)^2}\right)}{I_0(\beta)},
+\qquad 0\le n<M_*.
+\]
+\texttt{Window} 类还提供矩形窗、Hann 窗、Hamming 窗、Blackman 窗与平顶窗。窗口长度控制近似周期对齐，窗形控制频谱核，二者的配合见 \cref{subsec:intercalation_vs_window}。
+
+将新峰值按幅值排序，在完整的 \(N\) 点记录上初始化残差 \(r_n=x_n\)。对每个峰值中心 \(f_c\)，在区间
+\[
+\left[f_c-\frac{f_s}{2M_*},\ f_c+\frac{f_s}{2M_*}\right]
+\cap\left[10^{-9},\frac{f_s}{2}-10^{-9}\right]
+\]
+内进行 \(50\) 次黄金分割迭代，极大化
+\[
+Q(f)=\left|\sum_{n=0}^{N-1}r_n e^{-2\pi i f n/f_s}\right|.
+\]
+在所得 \(\widehat f\) 处计算
+\begin{equation}\label{eq:calendar_leap_parameters}
+\begin{gathered}
+C(\widehat f)=\sum_{n=0}^{N-1}r_n e^{-2\pi i\widehat f n/f_s},\\
+\widehat A=\frac{2|C(\widehat f)|}{N},\qquad
+\widehat\phi=\arg C(\widehat f),\qquad
+\widehat\omega=2\pi\widehat f.
+\end{gathered}
+\end{equation}
+保存该周转圆，并更新 \(r_n\leftarrow r_n-\widehat A\cos(\widehat\omega n/f_s+\widehat\phi)\)。低于 \(10^{-4}\max(A_{\mathrm{first}},10^{-12})\) 的分量被舍弃，其中 \(A_{\mathrm{first}}\) 为首个提取分量的振幅。所选窗口用于峰值定位；相关计算、参数提取和分量扣除均使用完整的未加窗记录。因此 \cref{eq:calendar_leap_parameters} 中除以的是与该记录对应的 \(N\)，而非窗函数权重之和。
+
+\paragraph{残差验收与完整流程。}
+计算
+\begin{equation}\label{eq:calendar_leap_residual}
+R=\frac{\sum_{n=0}^{N-1}(x_n-\widehat x_n)^2}
+        {\sum_{n=0}^{N-1}x_n^2+10^{-300}}.
+\end{equation}
+通过标志为 \(R\le\tau\)。若未通过且启用了验证，则以请求分量数 \(K+1\)、\(\beta'=\min(14,\beta+3)\) 完整重试一次，禁止继续重试，仅在残差比更小时保留重试结果。改变 \(\beta\) 只在选用 Kaiser 窗时影响重试的窗形；在比较残差前不预设误差必然下降。
+
+\begin{enumerate}[label=(\arabic*)]
+    \item 调用者须确保均匀采样、\(f_s>0\)、\(N\ge64\)、\(K\ge1\) 及信号能量为正；必要时单独处理均值或趋势。这些是使用前提，估计器并未逐项执行检查。
+    \item 加 Hann 窗计算粗 FFT，搜索分离峰值，插值得到频率与权重。
+    \item 生成连分数候选，按 \cref{eq:calendar_leap_window_cost} 选择 \(M_*\)。
+    \item 对前 \(M_*\) 个样本加窗，重新搜索峰值并按幅值排序。
+    \item 针对当前完整记录残差逐个精修频率，提取 \((A,\omega,\phi)\)，扣除该分量的实部。
+    \item 计算 \cref{eq:calendar_leap_residual}，可选地重试一次，返回周转圆组、窗口长度、残差比及通过标志。
+\end{enumerate}
+
+\paragraph{变换支持与计算量。}
+\texttt{Sampler} 的变换分派器对二的幂长度使用迭代基二 FFT，对素因子属于 \(\{2,3,5,7\}\) 的长度使用混合基 FFT，其余长度使用 Bluestein 啁啾卷积。对长度 \(L\) 的变换，Bluestein 方法把卷积补零到至少为 \(2L-1\) 的二的幂长度。正变换取负指数且不缩放，逆变换取正指数并乘 \(1/L\)。直接 \(O(L^2)\) DFT 用于小规模变换及混合基例程内部的回退。自动 FFT 路径的算术复杂度为 \(O(L\log L)\)；窗口代价计算量为 \(O(K|\mathcal C|)\)，每次估计中固定 \(50\) 次迭代的相关搜索计算量为 \(O(50KN)\)。单层 Haar 和差变换及名为 \texttt{laplacianTransform} 的离散二阶差分算子是辅助方法，不属于本估计器的执行步骤。
+
+\begin{example}[整数周期窗口]\label{ex:calendar_leap_window}
+设 \(f_s=1000\) Hz，精确粗估频率为 \(125\) Hz 与 \(187.5\) Hz，权重相等。其归一化频率比为 \(1/8\)、\(3/16\)。在 \(64\le M\le128\) 中，候选 \(M=64\) 分别包含 \(8\)、\(12\) 个周期，故 \(J(64)=0\)；递增遍历在多个零代价选择中保留 \(64\)。相比之下，\(J(65)=(1/8+3/16)/2=5/32\)。此例验证的是相位对齐准则，并未断言含噪数据上的估计精度。
+\end{example}
+
+\begin{remark}[实现的采样与估计限制]\label{rem:calendar_leap_limits}
+\texttt{leap.cpp} 的演示把 \(0.5\) 秒内的 \(500\) 个样本与 \(1.5\) 秒内的 \(3000\) 个样本拼接，采样率分别为 \(1000\)、\(2000\) Hz，却以 \(f_s=1000\) Hz 把完整记录传给 \texttt{Spectral::estimate}，其时间网格不满足 \cref{def:calendar_leap_input}。可复现的均匀采样示例可只取前 \(500\) 个样本，以 \(1000\) Hz 分析；合并两段则需重采样到共同网格，或使用接收实际时间戳的估计器。已知输入分量 \((A,f,\phi)=(1,123.4,0.30)\)、\((0.55,251.7,1.10)\)、\((0.30,302.3,-0.70)\) 及噪声标准差 \(0.001\) 规定的是测试信号，并非已测得的精度结果。
+
+即使时间网格均匀，\cref{eq:calendar_leap_parameters} 仍是有限记录上的相关估计。实正弦的负频镜像不一定消失，其他分量也未必正交，因此振幅与相位可能有偏差。若把参数提取改为使用加窗数据，还须同步调整相干增益校准。在精修频率处联合拟合正弦、余弦的最小二乘法可作进一步改进，但本代码未执行这一操作。间距过近的峰可能被分离规则舍弃，黄金分割区间未必只有一个极大值，贪心扣除也可能传播先前误差。直流、趋势、混叠和非平稳频率需要额外处理。代码对少于八个样本或零请求分量提前返回，而上述更强的输入条件避免了短记录的窗口范围不一致问题。较小的 \(R\) 表示在所给记录上拟合较好，既不构成统计显著性检验，也不证明严格周期性；周期判定仍采用 \cref{thm:calendar_periodicity_decision}。
+\end{remark}
+
 \begin{remark}[整合后的操作顺序]\label{rem:calendar_integration_order}
 实际诊断建议顺序为：先判定历法目标是否周期（\cref{thm:calendar_periodicity_decision}）；再构建节气、朔望、干支数据的傅里叶数据与周转圆组（\cref{thm:calendar_series_reconstruction}）；再用置闰窗口与动态调节优化参数（\cref{thm:calendar_adaptive_convergence}、\cref{thm:calendar_continued_fraction_best}）；再作历法卷积与相位关系分析（\cref{prop:ganzhi_periodic_convolution}、\cref{prop:jieqi_synodic_phase_convolution}）；最后按 \cref{def:calendar_periodic_diagnosis} 输出诊断。
 \end{remark}

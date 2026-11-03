@@ -140,7 +140,7 @@ If there exist integers \(p,q\) such that \(p\,T_{\text{trop}}=q\,T_{\text{syn}}
 \end{enumerate}
 \end{definition}
 
-\begin{theorem}[Correctness of the algorithm for the least positive period of a calendar target]\label{thm:calendar_minimal_period_correctness}
+\begin{theorem}[\parbox{0.70\linewidth}{Correctness of the algorithm for the least positive period of a calendar target}]\label{thm:calendar_minimal_period_correctness}
 \begin{enumerate}[label=(\roman*)]
     \item If the samples form a strictly periodic sequence with \(\varepsilon=0\) and \(N\ge2T_0\), then the algorithm outputs the discrete fundamental period \(T_0\).
     \item If the samples are obtained by sampling a continuous calendar target of fundamental period \(T_x\) at the sampling interval \(\Delta x\), and the normalised period ratio \(\rho=T_x/\Delta x=p/q\) is in lowest terms, then the algorithm outputs \(T_0=p\).
@@ -305,7 +305,11 @@ After the dominant-frequency component of the residual has been added as in \cre
 \end{proposition}
 
 \begin{proof}
-By the orthogonal decomposition \(\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{the removed component}\|^2\), the inequality holds.
+By the orthogonal decomposition
+\[
+\|r^{(j)}\|^2=\|r^{(j+1)}\|^2+\|\text{the removed component}\|^2,
+\]
+the inequality holds.
 \end{proof}
 
 \begin{theorem}[Convergence of dynamic adjustment]\label{thm:calendar_adaptive_convergence}
@@ -474,6 +478,121 @@ The correspondence is item by item:
 Hence the diagnostic procedure is a synthesis of the tool chains of the three chapters.
 \end{proof}
 
+\subsection{Adaptive spectral estimation with a continued-fraction window}
+\label{sec:calendar_leap_spectral}
+
+The implementation in \texttt{leap.cpp} turns the window-selection idea into a concrete route from sampled data to epicycle parameters. Its calendrical analogy is the coordination of several approximately integral cycle counts: \texttt{Leap} chooses a record length, whilst \texttt{Spectral} estimates the oscillatory components. The input is a real signal, rather than a sequence of calendar dates. The method supplies spectral data for \cref{thm:calendar_series_reconstruction}; an application to astronomical observations must additionally specify the observable, its time units and its sampling times.
+
+\begin{definition}[Input and epicycle representation of the estimator]\label{def:calendar_leap_input}
+Let \(x_n=x(n/f_s)\), \(0\le n<N\), be uniformly sampled real data, with sampling rate \(f_s>0\). For this implementation take \(N\ge64\), a requested component count \(K\ge1\), and positive signal energy. The fitted model is
+\[
+\widehat x_n=\operatorname{Re}\sum_{j=1}^{\widehat K}
+ A_j e^{i(2\pi f_j n/f_s+\phi_j)},\qquad
+0<f_j<f_s/2,\quad \widehat K\le K,
+\]
+for one estimation pass; the optional retry may request \(K+1\) components. Each output \texttt{Epicycle} stores \((A_j,\omega_j,\phi_j)\), where \(\omega_j=2\pi f_j\), and \texttt{Waveform} evaluates their complex sum. The result also records the analysis length, the relative residual energy and an acceptance flag. The default options are a Kaiser window with \(\beta=8\), residual threshold \(10^{-3}\), and one optional retry.
+\end{definition}
+
+\paragraph{Coarse spectrum and interpolation.}
+First form the symmetric Hann window
+\[
+h_n=\frac12\left(1-\cos\frac{2\pi n}{N-1}\right),\qquad
+X_k=\sum_{n=0}^{N-1}x_nh_n e^{-2\pi i kn/N}.
+\]
+Select at most \(K\) strict local maxima in the positive half-spectrum, in descending order of magnitude, with bin separation at least \(\max(2,\lfloor N/100\rfloor)\). DC and the end bin of the half-spectrum are excluded by the peak search. At a selected bin \(k\), write \(\ell_r=\log(|X_{k+r}|+10^{-300})\) and use
+\[
+\delta_k=\operatorname{clip}_{[-1/2,1/2]}
+ \frac{\ell_{-1}-\ell_{1}}{2(\ell_{-1}-2\ell_0+\ell_1)},
+\qquad
+\widetilde f_j=(k+\delta_k)\frac{f_s}{N},\qquad w_j=|X_k|.
+\]
+The code sets the offset to zero when the denominator of the fitted parabola is numerically negligible. This interpolation gives a local estimate between DFT bins; it does not create additional resolving power.
+
+\paragraph{Continued-fraction candidates and the window objective.}
+Set \(M_{\min}=\max(64,\lfloor N/2\rfloor)\) and \(M_{\max}=N\). For each normalised coarse frequency \(\nu_j=\widetilde f_j/f_s\in(0,1/2)\), \texttt{continuedFraction} generates convergents \(p_r/q_r\) by
+\[
+p_r=a_rp_{r-1}+p_{r-2},\qquad
+q_r=a_rq_{r-1}+q_{r-2},\qquad
+(p_{-2},p_{-1})=(0,1),\quad(q_{-2},q_{-1})=(1,0).
+\]
+Here \(a_r\) is the integer part of the current complete quotient. It returns the last accepted convergent before the next denominator exceeds \(N\), or stops after at most \(64\) iterations or a fractional part below \(10^{-12}\). It does not search the intermediate convergents. Let \(q_j\) denote the denominator returned for component \(j\). The candidate set contains every multiple of each \(q_j\) in \([M_{\min},N]\), together with the last at most \(32\) lengths \(N,N-1,\ldots\) that are strictly greater than \(M_{\min}\). If \(M_{\min}=N\), the implementation returns \(N\) directly.
+
+For the candidate set \(\mathcal C\), the actual selection criterion is
+\begin{equation}\label{eq:calendar_leap_window_cost}
+\begin{aligned}
+J(M)&=\frac{\sum_j w_j\,d(M\nu_j,\mathbb Z)}{\sum_j w_j},
+& d(u,\mathbb Z)&=\min(\{u\},1-\{u\}),\\
+M_*&\in\underset{M\in\mathcal C}{\operatorname{arg\,min}}J(M).
+\end{aligned}
+\end{equation}
+Candidates are visited in increasing order, and the current choice is replaced only on a strict decrease of cost, so an exact tie retains the smaller length. This is a finite candidate search for a weighted compromise among frequencies. A convergent of one frequency does not establish simultaneous optimality for all components, and this search need not minimise \(J\) over every allowed integer length.
+
+\begin{proposition}[Phase interpretation of the window cost]\label{prop:calendar_leap_phase_cost}
+For positive weights, \(0\le J(M)\le1/2\). For the estimated complex tone \(z_j[n]=e^{2\pi i\nu_j n}\), the phase discrepancy after \(M\) sample intervals, reduced to \([-\pi,\pi]\), has magnitude \(2\pi d(M\nu_j,\mathbb Z)\). Consequently \(2\pi J(M)\) is the weighted mean of these magnitudes, and \(J(M)=0\) if and only if every positively weighted estimated tone makes an integral number of cycles in that span.
+\end{proposition}
+\begin{proof}
+Write \(M\nu_j=m_j+\epsilon_j\), where \(m_j\) is a nearest integer and \(|\epsilon_j|\le1/2\). Then \(z_j[M]/z_j[0]=e^{2\pi i\epsilon_j}\) and \(|\epsilon_j|=d(M\nu_j,\mathbb Z)\). Taking the weighted mean proves the assertions.
+\end{proof}
+The span here is \(M/f_s\), as required by the periodic extension of an \(M\)-point DFT; the last recorded sample is at \((M-1)/f_s\). The proposition concerns the estimated frequencies. Estimation error, noise and other tones can still produce leakage. In the period-ratio notation of \cref{def:normalised_ratio_parallel}, \(\rho_j=f_s/\widetilde f_j=1/\nu_j\): a denominator of a frequency-ratio convergent plays the role of a sample count, corresponding to a numerator when the reciprocal period ratio is approximated.
+
+\paragraph{Tapering and successive component refinement.}
+Apply the selected taper to the first \(M_*\) observations and recompute the FFT and interpolated peaks. For the default Kaiser choice,
+\[
+g_n=\frac{I_0\!\left(\beta\sqrt{1-(2n/(M_*-1)-1)^2}\right)}{I_0(\beta)},
+\qquad 0\le n<M_*.
+\]
+The \texttt{Window} class also provides rectangular, Hann, Hamming, Blackman and flat-top windows. Window length controls approximate cycle alignment; taper shape controls the spectral kernel, as discussed in \cref{subsec:intercalation_vs_window}.
+
+Order the new peaks by magnitude and initialise the residual \(r_n=x_n\) on the full \(N\)-point record. For each peak centre \(f_c\), maximise
+\[
+Q(f)=\left|\sum_{n=0}^{N-1}r_n e^{-2\pi i f n/f_s}\right|
+\]
+by \(50\) golden-section iterations in
+\[
+\left[f_c-\frac{f_s}{2M_*},\ f_c+\frac{f_s}{2M_*}\right]
+\cap\left[10^{-9},\frac{f_s}{2}-10^{-9}\right].
+\]
+At the resulting \(\widehat f\), form
+\begin{equation}\label{eq:calendar_leap_parameters}
+\begin{gathered}
+C(\widehat f)=\sum_{n=0}^{N-1}r_n e^{-2\pi i\widehat f n/f_s},\\
+\widehat A=\frac{2|C(\widehat f)|}{N},\qquad
+\widehat\phi=\arg C(\widehat f),\qquad
+\widehat\omega=2\pi\widehat f.
+\end{gathered}
+\end{equation}
+Store the epicycle and update \(r_n\leftarrow r_n-\widehat A\cos(\widehat\omega n/f_s+\widehat\phi)\). Components below \(10^{-4}\max(A_{\mathrm{first}},10^{-12})\) are discarded, where \(A_{\mathrm{first}}\) is the amplitude of the first extracted component. The selected window is used for peak localisation; correlation, parameter extraction and subtraction use the full untapered record. Thus the divisor \(N\) in \cref{eq:calendar_leap_parameters} matches that record, rather than the sum of the taper weights.
+
+\paragraph{Residual acceptance and the complete procedure.}
+Compute
+\begin{equation}\label{eq:calendar_leap_residual}
+R=\frac{\sum_{n=0}^{N-1}(x_n-\widehat x_n)^2}
+        {\sum_{n=0}^{N-1}x_n^2+10^{-300}}.
+\end{equation}
+The acceptance flag is \(R\le\tau\). If this fails and verification is enabled, repeat the complete estimation once with \(K+1\) requested components and \(\beta'=\min(14,\beta+3)\), disable further retries, and retain the result only if its residual ratio is smaller. Changing \(\beta\) affects this retry's taper only when the Kaiser window is selected. No monotone improvement is assumed before comparing the residuals.
+
+\begin{enumerate}[label=(\arabic*)]
+    \item The caller must ensure uniform sampling, \(f_s>0\), \(N\ge64\), \(K\ge1\) and positive signal energy; handle the mean or trend separately when needed. These are usage preconditions, not checks all performed by the estimator.
+    \item Compute a Hann-windowed coarse FFT, separated peaks and interpolated frequencies and weights.
+    \item Generate continued-fraction candidates and choose \(M_*\) by \cref{eq:calendar_leap_window_cost}.
+    \item Taper the first \(M_*\) samples, recompute the peaks and order them by magnitude.
+    \item Refine each frequency against the current full-record residual, extract \((A,\omega,\phi)\), and subtract its real component.
+    \item Evaluate \cref{eq:calendar_leap_residual}; optionally perform the single retry and return the epicycles, window length, residual ratio and acceptance flag.
+\end{enumerate}
+
+\paragraph{Transform support and computational work.}
+The \texttt{Sampler} transform dispatcher uses an iterative radix-2 FFT for powers of two, a mixed-radix FFT for lengths whose prime factors belong to \(\{2,3,5,7\}\), and Bluestein's chirp convolution for other lengths. Bluestein's method pads its convolution to a power of two at least \(2L-1\) for a transform of length \(L\). The forward DFT has a negative exponential and no scale factor; the inverse has a positive exponential and the factor \(1/L\). The direct \(O(L^2)\) DFT supplies small transforms and a fallback within the mixed-radix routine. The automatic FFT route has \(O(L\log L)\) arithmetic cost. Evaluating the window objective costs \(O(K|\mathcal C|)\); the fixed \(50\)-iteration correlation searches cost \(O(50KN)\) per pass. The one-level Haar sum/difference transform and the discrete second-difference operator named \texttt{laplacianTransform} are auxiliary methods, and are not steps of this estimator.
+
+\begin{example}[An integral-cycle window]\label{ex:calendar_leap_window}
+Take \(f_s=1000\) Hz and exact coarse frequencies \(125\) Hz and \(187.5\) Hz with equal weights. Their normalised ratios are \(1/8\) and \(3/16\). For \(64\le M\le128\), the candidates include \(M=64\), containing respectively \(8\) and \(12\) cycles, so \(J(64)=0\); the increasing traversal retains \(64\) among the zero-cost choices. By comparison, \(J(65)=(1/8+3/16)/2=5/32\). This example verifies the phase-alignment criterion, without asserting an estimation accuracy for noisy data.
+\end{example}
+
+\begin{remark}[Sampling and estimation limits of the implementation]\label{rem:calendar_leap_limits}
+The demonstration in \texttt{leap.cpp} concatenates \(500\) samples over \(0.5\) seconds with \(3000\) samples over \(1.5\) seconds, giving rates of \(1000\) and \(2000\) Hz, but passes the entire record to \texttt{Spectral::estimate} with \(f_s=1000\) Hz. Its time grid therefore violates \cref{def:calendar_leap_input}. A reproducible uniform-grid example can instead analyse only the first \(500\) samples at \(1000\) Hz; combining the segments requires resampling to a common grid, or an estimator that uses the actual time stamps. The known input components \((A,f,\phi)=(1,123.4,0.30)\), \((0.55,251.7,1.10)\), \((0.30,302.3,-0.70)\) and the noise standard deviation \(0.001\) specify a test signal, rather than a measured accuracy result.
+
+Even on a uniform grid, \cref{eq:calendar_leap_parameters} is a finite-record correlation estimate. For a real sinusoid the negative-frequency image need not vanish, and other components need not be orthogonal; amplitude and phase may therefore be biased. If parameter extraction is changed to use tapered data, its coherent-gain calibration must also change. Joint sine/cosine least squares at the refined frequencies is a possible further refinement, but is not performed by this code. Close peaks may be rejected by the separation rule, the golden-section interval need not contain a unique maximum, and a greedy subtraction can propagate earlier errors. DC, trends, aliasing and non-stationary frequencies require additional treatment. The code returns early for fewer than eight samples or zero requested components, but the stronger input conditions above avoid its short-record window-range inconsistency. A small \(R\) indicates a good fit on the supplied record; it is neither a statistical significance test nor a proof of strict periodicity. Periodicity decisions still use \cref{thm:calendar_periodicity_decision}.
+\end{remark}
+
 \begin{remark}[Operational order after integration]\label{rem:calendar_integration_order}
 The recommended order for an actual diagnosis is: first decide whether the calendar target is periodic (\cref{thm:calendar_periodicity_decision}); then construct the Fourier data and the epicycle group of the solar-term, synodic and sexagenary data (\cref{thm:calendar_series_reconstruction}); then optimise the parameters by the intercalation window and dynamic adjustment (\cref{thm:calendar_adaptive_convergence}, \cref{thm:calendar_continued_fraction_best}); then perform calendar convolution and analyse the phase relations (\cref{prop:ganzhi_periodic_convolution}, \cref{prop:jieqi_synodic_phase_convolution}); finally output the diagnosis as in \cref{def:calendar_periodic_diagnosis}.
 \end{remark}
@@ -523,14 +642,26 @@ The \textbf{empirical observation / research programme} of \cref{prop:length_inc
 The twenty-four solar terms fall into two groups: the \(12\) \textbf{solar terms} (jie) mark the beginning of each month, and the \(12\) \textbf{mid-qi} (mid-terms) mark the midpoint of each month. Solar terms and mid-qi alternate: Lichun$\to$Yushui$\to$Jingzhe$\to$Chunfen$\to\dots\to$Xiaohan$\to$Dahan.
 \end{definition}
 
-\begin{table}[htbp]
-    \centering
+\begingroup
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{2.3cm}>{\centering\arraybackslash}p{1.8cm}>{\centering\arraybackslash}p{1.8cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}}
     \caption{The ordering and fixed length of the twenty-four solar terms}
-    \label{tab:jieqi_sequence}
-    \begin{tabular}{>{\centering\arraybackslash}p{1.2cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{1.8cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2.5cm}}
-        \toprule
-        Relative index & Name & Type & Phase angle & Solar ecliptic longitude & Month order \\
-        \midrule
+    \label{tab:jieqi_sequence}\\
+    \toprule
+    Relative index & Name & Type & Phase angle & Solar ecliptic longitude & Month order \\
+    \midrule
+    \endfirsthead
+    \multicolumn{6}{c}{\tablename\ \thetable{} (continued)}\\
+    \toprule
+    Relative index & Name & Type & Phase angle & Solar ecliptic longitude & Month order \\
+    \midrule
+    \endhead
+    \midrule
+    \multicolumn{6}{r}{Continued on next page}\\
+    \endfoot
+    \bottomrule
+    \endlastfoot
         \(1\) & Lichun & Solar term & \(0\) & \(315^\circ\) & Beginning of the Tiger month \\
         \(2\) & Yushui & Mid-qi & \(\pi/12\) & \(330^\circ\) & Middle of the Tiger month \\
         \(3\) & Jingzhe & Solar term & \(\pi/6\) & \(345^\circ\) & Beginning of the Rabbit month \\
@@ -555,9 +686,8 @@ The twenty-four solar terms fall into two groups: the \(12\) \textbf{solar terms
         \(22\) & Dongzhi & Mid-qi & \(7\pi/4\) & \(270^\circ\) & Middle of the Rat month \\
         \(23\) & Xiaohan & Solar term & \(11\pi/6\) & \(285^\circ\) & Beginning of the Ox month \\
         \(24\) & Dahan & Mid-qi & \(23\pi/12\) & \(300^\circ\) & Middle of the Ox month \\
-        \bottomrule
-    \end{tabular}
-\end{table}
+\end{longtable}
+\endgroup
 
 \section{Ordering months by solar terms and mid-qi}
 \label{sec:dingyue}
@@ -566,7 +696,7 @@ The twenty-four solar terms fall into two groups: the \(12\) \textbf{solar terms
 \textbf{The month order of a synodic month is determined jointly by the solar term and the mid-qi it contains}: a synodic month containing Lichun (a solar term) and Yushui (a mid-qi) is the first month (the Tiger month); a synodic month containing Jingzhe and Chunfen is the second month (the Rabbit month); a synodic month containing Qingming and Guyu is the third month (the Dragon month); a synodic month containing Lixia and Xiaoman is the fourth month (the Snake month); a synodic month containing Mangzhong and Xiazhi is the fifth month (the Horse month); a synodic month containing Xiaoshu and Dashu is the sixth month (the Goat month); a synodic month containing Liqiu and Chushu is the seventh month (the Monkey month); a synodic month containing Bailu and Qiufen is the eighth month (the Rooster month); a synodic month containing Hanlu and Shuangjiang is the ninth month (the Dog month); a synodic month containing Lidong and Xiaoxue is the tenth month (the Pig month); a synodic month containing Daxue and Dongzhi is the eleventh month (the Rat month); a synodic month containing Xiaohan and Dahan is the twelfth month (the Ox month).
 \end{definition}
 
-\begin{theorem}[Lichun is always in the Tiger month and Dongzhi always in the Rat month]\label{thm:lichun_yinyue_dongzhi_haiyue}
+\begin{theorem}[\parbox{0.66\linewidth}{Lichun is always in the Tiger month and Dongzhi always in the Rat month}]\label{thm:lichun_yinyue_dongzhi_haiyue}
 \begin{enumerate}[label=(\roman*)]
     \item \textbf{Lichun is always in the Tiger month}: Lichun is the solar term of the Tiger month and Yushui is its mid-qi. The synodic month containing Lichun and Yushui is the first month (the Tiger month), so Lichun must fall within the Tiger month.
     \item \textbf{Dongzhi is always in the Rat month}: Dongzhi is the mid-qi of the Rat month and Daxue is its solar term. The synodic month containing Daxue and Dongzhi is the eleventh month (the Rat month), so Dongzhi must fall within the Rat month.
@@ -1101,12 +1231,13 @@ Complexity: sorting \(O(N\log N)\), assignment \(O((N+M)\log N)\), year boundari
 \centering
 \caption{Validation of the exact intercalation algorithm on the \textit{Shouxing} compilation (24 worksheets).}
 \label{tab:exact_intercalation_validation}
+\begin{adjustbox}{max width=\linewidth,center}
 \begin{tabular}{lr}
 \toprule
 Item & Value \\
 \midrule
 Synodic months & \(290{,}654\) \\
-Principal/secondary mid-qi records (including boundary duplicates) & \(282{,}000\) \\
+Principal/\allowbreak secondary mid-qi records (including boundary duplicates) & \(282{,}000\) \\
 Intercalary-month labels & \(8{,}654\) \\
 Winter-solstice years & \(23{,}499\) \\
 of which 12-month years & \(14{,}845\) \\
@@ -1116,6 +1247,7 @@ Predicted intercalary months & \(8{,}654\) \\
 Mismatches & \(0\) \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 \begin{table}[htbp]
@@ -1300,11 +1432,13 @@ Astronomical year number of the end point: \(394+1520=1914\). Historical year nu
 The second conclusion is the astronomical year \(394\) (\cref{prop:second_yibu_correction}); passing through one more Bu gives the astronomical year number of the third conclusion, \(394+1520=1914\); astronomical year \(1914\) is the historical year \(1914\), with no further \(+1\). The sexagenary index advances a further \(20\) places: \(40+20=60\equiv 0\pmod{60}\), corresponding to Jiayin (Jiayin \(=0\), Jiazi \(=10\)).
 \end{proof}
 
-\begin{theorem}[Completeness of the epoch sequence of the Xuanyuan calendar]\label{thm:xuanyuan_complete_sequence}
+\begin{theorem}[\parbox{0.66\linewidth}{Completeness of the epoch sequence of the Xuanyuan calendar}]\label{thm:xuanyuan_complete_sequence}
 \begin{center}
+\setlength{\tabcolsep}{3pt}
+\begin{adjustbox}{max width=\linewidth,center}
 \begin{tabular}{>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{2.5cm}>{\centering\arraybackslash}p{3cm}}
 \toprule
-Epoch order & Astronomical year & Historical year & Sexagenary sign & Remark \\
+Epoch order & Astro\-nomical year & Historical year & Sexagenary sign & Remark \\
 \midrule
 Nominal epoch & \(-2696\) & \(2697\) BCE & Jiazi & Yellow Emperor era hypothesis \\
 Actual epoch & \(-2646\) & \(2647\) BCE & Jiayin & the 50th year after the nominal epoch \\
@@ -1313,6 +1447,7 @@ Second conclusion & \(394\) & \(394\) & Jiawu & no \(+1\) correction \\
 Third conclusion & \(1914\) & \(1914\) & Jiayin & third year of the Republic \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{center}
 The three Bu total \(4560\) years; the sexagenary sign returns from Jiayin to Jiayin, completing the full \(60\)-step sexagenary cycle.
 \end{theorem}
@@ -1449,7 +1584,7 @@ The system of ordering and fixed length established in this chapter is an applic
 
 \begin{center}
 \renewcommand{\arraystretch}{1.3}
-\begin{tabular}{>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{10.5cm}}
+\begin{tabular}{>{\centering\arraybackslash}p{2.8cm}>{\centering\arraybackslash}p{9.9cm}}
 \toprule
 Theme & Corresponding content in this chapter \\
 \midrule
